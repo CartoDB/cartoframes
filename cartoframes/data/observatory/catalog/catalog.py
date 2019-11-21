@@ -18,21 +18,21 @@ class Catalog(object):
     The catalog contains metadata that helps to discover and understand the
     data available in the Data Observatory for download and enrichment purposes.
 
-    You can get more information about the Data Observatory catalog in the
+    You can get more information about the Data Observatory catalog from the
     `CARTO website <https://carto.com/platform/location-data-streams/>`__ and in your CARTO user account dashboard.
 
     The Catalog has three main purposes:
       - Explore and discover the datasets available in the repository (both public and premium datasets).
-      - Subscribe to premium datasets and manage your datasets licenses.
+      - Subscribe to some premium datasets and manage your datasets licenses.
       - Download data and use your licensed datasets and variables to enrich your own data.
 
     The Catalog is public and you can explore it without the need of a CARTO account. Once you discover a
     dataset of your interest and want to acquire a license to use it, then you'll need a CARTO account to
-    subsribe to it.
+    subscribe to it.
 
-    The Catalog is composed by three main entities:
+    The Catalog is composed of three main entities:
       - :obj:`CatalogDataset`: It is the main :obj:`CatalogEntity`. It contains metadata of the actual data
-        you can use to download or enrichment purposes.
+        you can use to download or for enrichment purposes.
       - :obj:`Geography`: Datasets in the Data Observatory are aggregated by different geographic boundaries.
         The `Geography` entity contains metadata to understand the boundaries of a :obj:`CatalogDataset`.
       - :obj:`Variable`: Variables contain metadata about the columns available in each dataset for enrichment.
@@ -97,8 +97,8 @@ class Catalog(object):
             catalog = Catalog()
             catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
 
-        Once you have applied a filter over the datasets in the catalog, to do a new hierarchical search with the
-        same catalog instance you have to `clear_filters` like this:
+        If a filter is already applied to a Catalog instance and you want to do a new hierarchical search,
+        clear the previous filters with the `Catalog().clear_filters()` method:
 
         .. code::
 
@@ -147,7 +147,7 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
-        :raises DiscoveryException: When no datasets found.
+        :raises DiscoveryException: When no datasets are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
@@ -160,7 +160,7 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
-        :raises DiscoveryException: When no datasets found.
+        :raises DiscoveryException: When no datasets are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
@@ -173,7 +173,7 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
-        :raises DiscoveryException: When no datasets found.
+        :raises DiscoveryException: When no datasets are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
@@ -186,7 +186,7 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
-        :raises DiscoveryException: When no datasets found.
+        :raises DiscoveryException: When no datasets are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
 

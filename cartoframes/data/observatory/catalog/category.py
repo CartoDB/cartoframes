@@ -45,7 +45,7 @@ class Category(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of CatalogDataset instances.
 
-        :raises DiscoveryException: When no datasets found.
+        :raises DiscoveryException: When no datasets are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
 
         Examples:
@@ -69,8 +69,8 @@ class Category(CatalogEntity):
                 catalog = Catalog()
                 datasets = catalog.category('demographics').datasets
 
-            Being in both examples `datasets` a
-            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` you can perform more operations:
+            You can perform other operations with a
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`:
 
             .. code::
 
@@ -117,8 +117,8 @@ class Category(CatalogEntity):
                 catalog = Catalog()
                 geographies = catalog.category('demographics').geographies
 
-            Being in both examples `geographies` a
-            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` you can perform more operations:
+            You can perform these other operations with a
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`:
 
             .. code::
 

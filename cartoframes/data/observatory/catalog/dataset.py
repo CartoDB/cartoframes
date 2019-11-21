@@ -78,7 +78,7 @@ class CatalogDataset(CatalogEntity):
 
     @property
     def variables(self):
-        """Get the list of :obj:`Variable` that correspond to this dataset.
+        """Get the list of :obj:`Variable`s that correspond to this dataset.
 
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Variable instances.
@@ -114,16 +114,6 @@ class CatalogDataset(CatalogEntity):
     @property
     def provider(self):
         """Id of the :obj:`Provider` of this dataset.
-
-        Examples:
-            You can list datasets by provider in this way:
-
-            .. code::
-
-                from cartoframes.data.observatory import Catalog
-
-                catalog = Catalog()
-                datasets = catalog.provider(PROVIDER_ID).datasets
         """
 
         return self.data['provider_id']
@@ -136,17 +126,7 @@ class CatalogDataset(CatalogEntity):
 
     @property
     def category(self):
-        """Id of the :obj:`Category` assigned to this dataset.
-
-        Examples:
-            You can list datasets by category in this way:
-
-            .. code::
-
-                from cartoframes.data.observatory import Catalog
-
-                catalog = Catalog()
-                datasets = catalog.category('demographics').datasets
+        """Get the :obj:`Category` ID assigned to this dataset.sets
         """
 
         return self.data['category_id']
@@ -165,25 +145,27 @@ class CatalogDataset(CatalogEntity):
 
     @property
     def country(self):
-        """Code (ISO 3166-1 alpha-3) of the :obj:`Country` of this dataset."""
+        """Code (`ISO 3166-1 alpha-3 <https://en.wikipedia.org/wiki/ISO_3166-1>`__) of the :obj:`Country`
+        of this dataset."""
 
         return self.data['country_id']
 
     @property
     def language(self):
-        """Code (ISO 639-3) of the language that corresponds to the data of this dataset. """
+        """Code (`ISO 639-3 <https://en.wikipedia.org/wiki/ISO_639-3>`__) of the language that corresponds to the data
+        of this dataset. """
 
         return self.data['lang']
 
     @property
     def geography(self):
-        """Id of the :obj:`Geography` associated to this dataset."""
+        """Get the :obj:`Geography` ID associated to this dataset."""
 
         return self.data['geography_id']
 
     @property
     def geography_name(self):
-        """Name of the :obj:`Geography` associated to this dataset."""
+        """Get the name of the :obj:`Geography` associated to this dataset."""
 
         return self.data['geography_name']
 
@@ -206,6 +188,8 @@ class CatalogDataset(CatalogEntity):
     def time_coverage(self):
         """Time range that covers the data of this dataset.
 
+        Returns: List of str
+
         Example: [2015-01-01,2016-01-01)
 
         """
@@ -216,6 +200,8 @@ class CatalogDataset(CatalogEntity):
     def update_frequency(self):
         """Frequency in which the dataset is updated.
 
+        Returns: str
+
         Example: monthly, yearly, etc.
         """
 
@@ -223,7 +209,10 @@ class CatalogDataset(CatalogEntity):
 
     @property
     def version(self):
-        """Internal version info of this dataset."""
+        """Internal version info of this dataset.
+
+        Returns: str
+        """
 
         return self.data['version']
 
@@ -231,6 +220,8 @@ class CatalogDataset(CatalogEntity):
     def is_public_data(self):
         """True if the content of this dataset can be accessed with public credentials.
         False if it needs a subscription (AKA premium datasets).
+
+        Returns: bool
         """
 
         return self.data['is_public_data']
@@ -244,8 +235,9 @@ class CatalogDataset(CatalogEntity):
     def head(self):
         """Returns a sample of the 10 first rows of the dataset data.
 
-        For the cases of datasets with a content fewer than 10 rows
-        (i.e. zip codes of small countries), this method won't return anything
+        If a dataset has fewer than 10 rows (e.g., zip codes of small countries), this method will return None
+
+        Returns: pandas.DataFrame
         """
 
         data = self.data['summary_json']
@@ -254,8 +246,9 @@ class CatalogDataset(CatalogEntity):
     def tail(self):
         """Returns a sample of the 10 last rows of the dataset data.
 
-        For the cases of datasets with a content fewer than 10 rows
-        (i.e. zip codes of small countries), this method won't return anything
+        If a dataset has fewer than 10 rows (e.g., zip codes of small countries), this method will return None
+
+        Returns: pandas.DataFrame
         """
         data = self.data['summary_json']
         return tail(self.__class__, data)
@@ -263,13 +256,15 @@ class CatalogDataset(CatalogEntity):
     def counts(self):
         """Returns a summary of different counts over the actual dataset data.
 
+        Returns: pandas.Series
+
         Example:
 
             .. code::
 
-                # rows                    217182
-                # cells                 23672838
-                # null_cells                   0
+                # rows:         number of rows in the dataset
+                # cells:        number of cells in the dataset (rows * columns)
+                # null_cells:   number of cells with null value in the dataset
         """
 
         data = self.data['summary_json']
@@ -278,19 +273,23 @@ class CatalogDataset(CatalogEntity):
     def fields_by_type(self):
         """Returns a summary of the number of columns per data type in the dataset.
 
+        Returns: pandas.Series
+
         Example:
 
             .. code::
 
-                # float        5
-                # string       2
-                # integer    102
+                # float        number of columns with type float in the dataset
+                # string       number of columns with type string in the dataset
+                # integer      number of columns with type integer in the dataset
         """
         data = self.data['summary_json']
         return fields_by_type(data)
 
     def geom_coverage(self):
         """Shows a map to visualize the geographical coverage of the dataset.
+
+        Returns: cartoframes.viz.Map
         """
         return geom_coverage(self.geography)
 
@@ -298,6 +297,8 @@ class CatalogDataset(CatalogEntity):
         """Shows a summary of the actual stats of the variables (columns) of the dataset.
         Some of the stats provided per variable are: avg, max, min, sum, range,
         stdev, q1, q3, median and interquartile_range
+
+        Returns: pandas.DataFrame
         """
         return dataset_describe(self.variables)
 
@@ -318,7 +319,7 @@ class CatalogDataset(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of CatalogDataset instances.
 
-        :raises DiscoveryException: When no datasets found.
+        :raises DiscoveryException: When no datasets are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
@@ -335,7 +336,7 @@ class CatalogDataset(CatalogEntity):
                 <cartoframes.auth.set_default_credentials>`) will be used.
 
         Returns:
-            A string with the local file path with the file downloaded
+            os.path with the local file path with the file downloaded
 
         :raises CartoException: If you have not a valid license for the dataset being downloaded.
         :raises ValueError: If the credentials argument is not valud.

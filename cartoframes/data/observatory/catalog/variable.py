@@ -39,7 +39,7 @@ class Variable(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
-        :raises DiscoveryException: When no datasets found.
+        :raises DiscoveryException: When no datasets are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
