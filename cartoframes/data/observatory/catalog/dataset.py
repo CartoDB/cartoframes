@@ -78,7 +78,7 @@ class CatalogDataset(CatalogEntity):
 
     @property
     def variables(self):
-        """Get the list of :obj:`Variable`s that correspond to this dataset.
+        """Get the list of :obj:`Variable` that correspond to this dataset.
 
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Variable instances.

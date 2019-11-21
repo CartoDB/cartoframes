@@ -66,6 +66,9 @@ class Variable(CatalogEntity):
     def db_type(self):
         """Type in the database.
 
+        Returns:
+            str
+
         Examples: INTEGER, STRING, FLOAT, GEOGRAPHY, JSON, BOOL, etc.
         """
         return self.data['db_type']
