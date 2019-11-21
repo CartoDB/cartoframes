@@ -168,9 +168,9 @@ class Variable(CatalogEntity):
                 # all               total number of valiues
                 # null              total number of null values
                 # zero              number of zero-valued entries
-                # extreme
+                # extreme           number of values 3stdev outside the interquartile range
                 # distinct          number of distinct (unique) entries
-                # outliers          number of outliers (outside of +/- 2sigma range)
+                # outliers          number of outliers (outside 1.5stdev the interquartile range
                 # zero_percent      percent of values that are zero
                 # distinct_percent  percent of values that are distinct
         """
