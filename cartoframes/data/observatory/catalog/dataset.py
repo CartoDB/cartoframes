@@ -145,15 +145,17 @@ class CatalogDataset(CatalogEntity):
 
     @property
     def country(self):
-        """Code (`ISO 3166-1 alpha-3 <https://en.wikipedia.org/wiki/ISO_3166-1>`__) of the :obj:`Country`
-        of this dataset."""
+        """ISO 3166-1 alpha-3 code of the :obj:`Country`
+        of this dataset.
+        """
 
         return self.data['country_id']
 
     @property
     def language(self):
-        """Code (`ISO 639-3 <https://en.wikipedia.org/wiki/ISO_639-3>`__) of the language that corresponds to the data
-        of this dataset. """
+        """ISO 639-3 code of the language that corresponds to the data
+        of this dataset.
+        """
 
         return self.data['lang']
 
@@ -188,7 +190,8 @@ class CatalogDataset(CatalogEntity):
     def time_coverage(self):
         """Time range that covers the data of this dataset.
 
-        Returns: List of str
+        Returns:
+            List of str
 
         Example: [2015-01-01,2016-01-01)
 
@@ -200,7 +203,8 @@ class CatalogDataset(CatalogEntity):
     def update_frequency(self):
         """Frequency in which the dataset is updated.
 
-        Returns: str
+        Returns:
+            str
 
         Example: monthly, yearly, etc.
         """
@@ -211,7 +215,8 @@ class CatalogDataset(CatalogEntity):
     def version(self):
         """Internal version info of this dataset.
 
-        Returns: str
+        Returns:
+            str
         """
 
         return self.data['version']
@@ -221,7 +226,8 @@ class CatalogDataset(CatalogEntity):
         """True if the content of this dataset can be accessed with public credentials.
         False if it needs a subscription (AKA premium datasets).
 
-        Returns: bool
+        Returns:
+            bool
         """
 
         return self.data['is_public_data']
@@ -237,7 +243,8 @@ class CatalogDataset(CatalogEntity):
 
         If a dataset has fewer than 10 rows (e.g., zip codes of small countries), this method will return None
 
-        Returns: pandas.DataFrame
+        Returns:
+            pandas.DataFrame
         """
 
         data = self.data['summary_json']
@@ -248,7 +255,8 @@ class CatalogDataset(CatalogEntity):
 
         If a dataset has fewer than 10 rows (e.g., zip codes of small countries), this method will return None
 
-        Returns: pandas.DataFrame
+        Returns:
+            pandas.DataFrame
         """
         data = self.data['summary_json']
         return tail(self.__class__, data)
@@ -256,7 +264,8 @@ class CatalogDataset(CatalogEntity):
     def counts(self):
         """Returns a summary of different counts over the actual dataset data.
 
-        Returns: pandas.Series
+        Returns:
+            pandas.Series
 
         Example:
 
@@ -273,7 +282,8 @@ class CatalogDataset(CatalogEntity):
     def fields_by_type(self):
         """Returns a summary of the number of columns per data type in the dataset.
 
-        Returns: pandas.Series
+        Returns:
+            pandas.Series
 
         Example:
 
@@ -289,7 +299,8 @@ class CatalogDataset(CatalogEntity):
     def geom_coverage(self):
         """Shows a map to visualize the geographical coverage of the dataset.
 
-        Returns: cartoframes.viz.Map
+        Returns:
+            cartoframes.viz.Map
         """
         return geom_coverage(self.geography)
 
@@ -298,7 +309,8 @@ class CatalogDataset(CatalogEntity):
         Some of the stats provided per variable are: avg, max, min, sum, range,
         stdev, q1, q3, median and interquartile_range
 
-        Returns: pandas.DataFrame
+        Returns:
+            pandas.DataFrame
         """
         return dataset_describe(self.variables)
 
