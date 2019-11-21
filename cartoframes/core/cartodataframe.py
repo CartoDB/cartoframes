@@ -34,8 +34,6 @@ class CartoDataFrame(GeoDataFrame):
         generate_geometry(self, geom_column, lnglat_columns, drop_geom, drop_lnglat)
         return self
 
-    def visualize(self, *args, **kwargs):
+    def viz(self, *args, **kwargs):
         from ..viz import Map, Layer
         return Map(Layer(self, *args, **kwargs))
-
-    viz = visualize
