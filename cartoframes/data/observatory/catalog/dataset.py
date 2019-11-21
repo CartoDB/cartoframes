@@ -251,7 +251,7 @@ class CatalogDataset(CatalogEntity):
         return head(self.__class__, data)
 
     def tail(self):
-        """Returns a sample of the 10 last rows of the dataset data.
+        """"Returns the last ten rows of the dataset"
 
         If a dataset has fewer than 10 rows (e.g., zip codes of small countries), this method will return None
 
