@@ -10,7 +10,7 @@ class QuadGrid():
     def polyfill(self, input_gdf, zoom_level):
         tiler = WebMercator()
         gdf = input_gdf.copy()
-        if not gdf.crs or not 'init' in gdf.crs:
+        if not gdf.crs or 'init' not in gdf.crs:
             # assuming 4326 if not specified
             gdf.crs = {'init': 'epsg:4326'}
         gdf = gdf.to_crs({'init': 'epsg:3857'})
