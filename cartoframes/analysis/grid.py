@@ -7,6 +7,7 @@ from cartoframes import CartoDataFrame
 
 class QuadGrid():
 
+
     def polyfill(self, input_gdf, zoom_level):
         tiler = WebMercator()
         gdf = input_gdf.copy()
