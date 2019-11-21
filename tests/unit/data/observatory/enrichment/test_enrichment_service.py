@@ -93,6 +93,41 @@ class TestEnrichmentService(object):
 
         BigQueryClient.upload_dataframe = original
 
+    def test_upload_data_null_geometries(self):
+        geom_column = 'the_geom'
+        expected_project = 'carto-do-customers'
+        user_dataset = 'test_dataset'
+
+        point = Point(1, 1)
+        input_cdf = CartoDataFrame(
+            [[point, 0], [None, 1]],
+            columns=['geometry', 'enrichment_id']
+        )
+
+        enrichment_service = EnrichmentService(credentials=self.credentials)
+        input_cdf = enrichment_service._prepare_data(input_cdf, geom_column)
+
+        expected_schema = {'enrichment_id': 'INTEGER', '__geojson_geom': 'GEOGRAPHY'}
+        expected_cdf = CartoDataFrame(
+            [[0, to_geojson(point)], [1, None]],
+            columns=['enrichment_id', '__geojson_geom'])
+
+        # mock
+        def assert_upload_data(_, dataframe, schema, tablename, project, dataset):
+            assert dataframe.equals(expected_cdf)
+            assert schema == expected_schema
+            assert isinstance(tablename, str) and len(tablename) > 0
+            assert project == expected_project
+            assert tablename == user_dataset
+            assert dataset == 'username'
+
+        enrichment_service = EnrichmentService(credentials=self.credentials)
+        original = BigQueryClient.upload_dataframe
+        BigQueryClient.upload_dataframe = assert_upload_data
+        enrichment_service._upload_data(user_dataset, input_cdf)
+
+        BigQueryClient.upload_dataframe = original
+
     def test_execute_enrichment(self):
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
