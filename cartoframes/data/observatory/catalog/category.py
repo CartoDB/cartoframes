@@ -10,7 +10,7 @@ from .repository.geography_repo import get_geography_repo
 class Category(CatalogEntity):
     """This class represents a :py:class:`Category <cartoframes.data.observatory.Category>`
     in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`. Catalog datasets
-    (:py:class:`CatalogDataset <cartoframes.data.observatory.CatalogDataset>` class)
+    (:py:class:` <cartoframes.data.observatory.Dataset>` class)
     are grouped by `categories`, so you can filter available `datasets` and
     `geographies` that belong (or are related) to a given `Category`.
 
@@ -40,16 +40,16 @@ class Category(CatalogEntity):
 
     @property
     def datasets(self):
-        """Get the list of :obj:`CatalogDataset` related to this category.
+        """Get the list of :obj:`Dataset` related to this category.
 
         Returns:
-            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of CatalogDataset instances.
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
         :raises DiscoveryException: When no datasets are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
 
         Examples:
-            Get all the `datasets` :py:class:`CatalogDataset <cartoframes.data.observatory.CatalogDataset>` available
+            Get all the `datasets` :py:class:`Dataset <cartoframes.data.observatory.Dataset>` available
             in the `catalog` for a :py:class:`Category <cartoframes.data.observatory.Category>` instance
 
             .. code::
@@ -97,7 +97,7 @@ class Category(CatalogEntity):
         :raises CartoException: If there's a problem when connecting to the catalog.
 
         Examples:
-            Get all the `geographies` :py:class:`CatalogDataset <cartoframes.data.observatory.CatalogDataset>` available
+            Get all the `geographies` :py:class:`Dataset <cartoframes.data.observatory.Dataset>` available
             in the `catalog` for a :py:class:`Category <cartoframes.data.observatory.Category>` instance
 
             .. code::

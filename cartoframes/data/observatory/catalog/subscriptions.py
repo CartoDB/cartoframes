@@ -21,7 +21,7 @@ class Subscriptions(object):
 
     @property
     def datasets(self):
-        """List of :obj:`CatalogDataset` you have a subscription for.
+        """List of :obj:`Dataset` you have a subscription for.
 
         :raises CartoException: If there's a problem when connecting to the catalog.
         """

@@ -16,6 +16,9 @@ import numpy as np
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
 
+from .geom_utils import GEO_COLUMN_NAME
+from ..auth.credentials import Credentials
+
 try:
     basestring
 except NameError:
@@ -211,37 +214,6 @@ def debug_print(verbose=0, **kwargs):
         print('{key}: {value}'.format(key=key, value=str_value))
 
 
-def get_query_geom_type(context, query):
-    """Fetch geom type of a remote table"""
-    distict_query = '''
-        SELECT distinct ST_GeometryType(the_geom) AS geom_type
-        FROM ({}) q
-        LIMIT 5
-    '''.format(query)
-    response = context.execute_query(distict_query, do_post=False)
-    if response and response.get('rows') and len(response.get('rows')) > 0:
-        st_geom_type = response.get('rows')[0].get('geom_type')
-        if st_geom_type:
-            return map_geom_type(st_geom_type[3:])
-    return None
-
-
-def get_query_bounds(context, query):
-    extent_query = '''
-        SELECT ARRAY[
-            ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
-            ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
-        ] bounds FROM (
-            SELECT ST_Extent(the_geom) geom_env
-            FROM ({}) q
-        ) q;
-    '''.format(query)
-    response = context.execute_query(extent_query, do_post=False)
-    if response and response.get('rows') and len(response.get('rows')) > 0:
-        return response.get('rows')[0].get('bounds')
-    return None
-
-
 def load_geojson(input_data):
     if isinstance(input_data, str):
         # File name
@@ -279,11 +251,27 @@ def load_geojson(input_data):
     return data
 
 
-def get_geodataframe_bounds(data):
-    filtered_geometries = _filter_null_geometries(data)
+def get_geodataframe_bounds(gdf):
+    filtered_geometries = _filter_null_geometries(gdf)
     xmin, ymin, xmax, ymax = filtered_geometries.total_bounds
 
     return [[xmin, ymin], [xmax, ymax]]
+
+
+def get_geodataframe_geom_type(gdf):
+    if not gdf.empty and hasattr(gdf, 'geometry') and len(gdf.geometry) > 0:
+        geometry = _first_value(gdf.geometry)
+        if geometry and geometry.geom_type:
+            return map_geom_type(geometry.geom_type)
+    return None
+
+
+# Dup
+def _first_value(series):
+    series = series.loc[~series.isnull()]  # Remove null values
+    if len(series) > 0:
+        return series.iloc[0]
+    return None
 
 
 class CustomJSONEncoder(json.JSONEncoder):
@@ -336,7 +324,7 @@ def is_table_name(data):
 
 
 def check_credentials(credentials):
-    if credentials is None:
+    if not isinstance(credentials, Credentials):
         raise AttributeError('Credentials attribute is required. '
                              'Please pass a `Credentials` instance '
                              'or use the `set_default_credentials` function.')
@@ -382,3 +370,25 @@ def encode_row(row):
         row = '"{}"'.format(row.replace('"', '""'))
 
     return '{}'.format(row).encode('utf-8')
+
+
+def extract_viz_columns(viz):
+    """Extract columns ($name) in viz"""
+    columns = [GEO_COLUMN_NAME]
+    viz_nocomments = remove_comments(viz)
+    viz_columns = re.findall(r'\$([A-Za-z0-9_]+)', viz_nocomments)
+    if viz_columns is not None:
+        columns += viz_columns
+    return list(set(columns))
+
+
+def remove_comments(text):
+    """Remove C-style comments"""
+    def replacer(match):
+        s = match.group(0)
+        return ' ' if s.startswith('/') else s
+    pattern = re.compile(
+        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
+        re.DOTALL | re.MULTILINE
+    )
+    return re.sub(pattern, replacer, text).strip()

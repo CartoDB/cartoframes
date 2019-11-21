@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .dataset import CatalogDataset
+from .dataset import Dataset
 from .entity import is_slug_value
 from .category import Category
 from .country import Country
@@ -31,23 +31,23 @@ class Catalog(object):
     subscribe to it.
 
     The Catalog is composed of three main entities:
-      - :obj:`CatalogDataset`: It is the main :obj:`CatalogEntity`. It contains metadata of the actual data
+      - :obj:`Dataset`: It is the main :obj:`CatalogEntity`. It contains metadata of the actual data
         you can use to download or for enrichment purposes.
       - :obj:`Geography`: Datasets in the Data Observatory are aggregated by different geographic boundaries.
-        The `Geography` entity contains metadata to understand the boundaries of a :obj:`CatalogDataset`.
+        The `Geography` entity contains metadata to understand the boundaries of a :obj:`Dataset`.
       - :obj:`Variable`: Variables contain metadata about the columns available in each dataset for enrichment.
         Let's say you explore a `dataset` with demographic data for the whole US at the Census tract level.
         The variables give you information about the actual columns you have available, such as: total_population,
         total_males, etc.
         On the other hand, you use `Variable` instances or IDs to enrich your own data.
 
-    Every `CatalogDataset` is related to a `Geography`. You can have for example, demographics data at the Census
+    Every `Dataset` is related to a `Geography`. You can have for example, demographics data at the Census
     tract, block groups or blocks levels.
 
-    When subscribing to a premium dataset, you should subscribe both to the `CatalogDataset` and the `Geography`
+    When subscribing to a premium dataset, you should subscribe both to the `Dataset` and the `Geography`
     to be able to access both tables to enrich your own data.
 
-    The two main entities of the Catalog (`CatalogDataset` and `Geography`) are related to other entities, that
+    The two main entities of the Catalog (`Dataset` and `Geography`) are related to other entities, that
     are useful for a hierarchical categorization and discovery of available data in the Data Observatory:
       - :obj:`Category`: Groups datasets of the same topic, for example, `demographics`, `financial`, etc.
       - :obj:`Country`: Groups datasets available by country
@@ -177,7 +177,7 @@ class Catalog(object):
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
-        return CatalogDataset.get_all(self.filters)
+        return Dataset.get_all(self.filters)
 
     @property
     def geographies(self):
@@ -274,7 +274,6 @@ class Catalog(object):
 
         Returns:
             :py:class:`Subscriptions <cartoframes.data.observatory.Subscriptions>`
-
         """
 
         _no_filters = {}
@@ -284,7 +283,7 @@ class Catalog(object):
             raise ValueError('`credentials` must be a Credentials class instance')
 
         return Subscriptions(
-            CatalogDataset.get_all(_no_filters, _credentials),
+            Dataset.get_all(_no_filters, _credentials),
             Geography.get_all(_no_filters, _credentials)
         )
 
@@ -294,4 +293,4 @@ class Catalog(object):
             :py:class:`Dataset <cartoframes.data.observatory.Dataset>`
         """
 
-        return CatalogDataset.get_datasets_spatial_filtered(filter_dataset)
+        return Dataset.get_datasets_spatial_filtered(filter_dataset)

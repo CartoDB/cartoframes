@@ -1,8 +1,8 @@
 import pandas as pd
 from shapely.geometry.point import Point
 
+from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
-from cartoframes.data import Dataset
 from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables
 from cartoframes.data.observatory import Variable
@@ -23,32 +23,32 @@ class TestEnrichmentService(object):
         self.credentials = None
         BigQueryClient._init_client = self.original_init_client
 
-    def test_prepare_data(self):
+    def test_prepare_data(self, mocker):
         geom_column = 'the_geom'
-        df = pd.DataFrame([[1, 'POINT (1 1)']], columns=['cartodb_id', geom_column])
-        ds = Dataset(df)
         enrichment_service = EnrichmentService(credentials=self.credentials)
-        expected_df = pd.DataFrame([[1, '{"coordinates": [1.0, 1.0], "type": "Point"}', 0]],
-                                   columns=['cartodb_id', geom_column, 'enrichment_id'])
+        df = pd.DataFrame([[1, 'POINT (1 1)']], columns=['cartodb_id', geom_column])
+        expected_cdf = CartoDataFrame(
+            [[Point(1, 1), 0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
+            columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
 
-        result = enrichment_service._prepare_data(ds, geom_column)
-        assert result.equals(expected_df) is True
         result = enrichment_service._prepare_data(df, geom_column)
-        assert result.equals(expected_df) is True
+        assert result.equals(expected_cdf)
 
-    def test_upload_dataframe(self):
+    def test_upload_data(self):
         expected_project = 'carto-do-customers'
         user_dataset = 'test_dataset'
-        geom_column = 'the_geom'
-        data_copy = pd.DataFrame([[1, '{"coordinates": [1.0, 1.0], "type": "Point"}', 0]],
-                                 columns=['cartodb_id', geom_column, 'enrichment_id'])
-        expected_schema = {'enrichment_id': 'INTEGER', 'the_geom': 'GEOGRAPHY'}
-        expected_data_copy = pd.DataFrame([['{"coordinates": [1.0, 1.0], "type": "Point"}', 0]],
-                                          columns=[geom_column, 'enrichment_id'])
+        input_cdf = CartoDataFrame(
+            [[Point(1, 1), 0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
+            columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
+
+        expected_schema = {'enrichment_id': 'INTEGER', '__geojson_geom': 'GEOGRAPHY'}
+        expected_cdf = CartoDataFrame(
+            [[0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
+            columns=['enrichment_id', '__geojson_geom'], index=[1])
 
         # mock
-        def assert_upload_dataframe(_, dataframe, schema, tablename, project, dataset):
-            assert dataframe.equals(expected_data_copy)
+        def assert_upload_data(_, dataframe, schema, tablename, project, dataset):
+            assert dataframe.equals(expected_cdf)
             assert schema == expected_schema
             assert isinstance(tablename, str) and len(tablename) > 0
             assert project == expected_project
@@ -57,16 +57,18 @@ class TestEnrichmentService(object):
 
         enrichment_service = EnrichmentService(credentials=self.credentials)
         original = BigQueryClient.upload_dataframe
-        BigQueryClient.upload_dataframe = assert_upload_dataframe
-        enrichment_service._upload_dataframe(user_dataset, data_copy, geom_column)
+        BigQueryClient.upload_dataframe = assert_upload_data
+        enrichment_service._upload_data(user_dataset, input_cdf)
 
         BigQueryClient.upload_dataframe = original
 
     def test_execute_enrichment(self):
-        geom_column = 'the_geom'
-        df = pd.DataFrame([['{"coordinates": [1.0, 1.0], "type": "Point"}', 0]],
-                          columns=[geom_column, 'enrichment_id'])
-        df_final = pd.DataFrame([[Point(1, 1), 'new data']], columns=[geom_column, 'var1'])
+        input_cdf = CartoDataFrame(
+            [[Point(1, 1), 0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
+            columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
+        expected_cdf = CartoDataFrame(
+            [[Point(1, 1), 'new data']],
+            columns=['geometry', 'var1'])
 
         class EnrichMock():
             def to_dataframe(self):
@@ -76,9 +78,9 @@ class TestEnrichmentService(object):
         BigQueryClient.query = Mock(return_value=EnrichMock())
         enrichment_service = EnrichmentService(credentials=self.credentials)
 
-        result = enrichment_service._execute_enrichment(['fake_query'], df, geom_column)
+        result = enrichment_service._execute_enrichment(['fake_query'], input_cdf)
 
-        assert result.equals(df_final)
+        assert result.equals(expected_cdf)
 
         BigQueryClient._init_client = original
 

@@ -15,10 +15,10 @@ class Variable(CatalogEntity):
     of datasets in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`.
 
     Variables contain column names, description, data type, aggregation method and some other metadata that is
-    useful to understand the underlying data inside a :obj:`CatalogDataset`
+    useful to understand the underlying data inside a :obj:`Dataset`
 
     Examples:
-        List the variables of a :py:class:`CatalogDataset <cartoframes.data.observatory.CatalogDataset>`
+        List the variables of a :py:class:`Dataset <cartoframes.data.observatory.Dataset>`
         in combination with nested filters (categories, countries, etc.)
 
         .. code::
@@ -59,7 +59,7 @@ class Variable(CatalogEntity):
 
     @property
     def column_name(self):
-        """Column name of the actual table related to the variable in the :obj:`CatalogDataset`."""
+        """Column name of the actual table related to the variable in the :obj:`Dataset`."""
         return self.data['column_name']
 
     @property
@@ -75,7 +75,7 @@ class Variable(CatalogEntity):
 
     @property
     def dataset(self):
-        """ID of the :obj:`CatalogDataset` to which this variable belongs."""
+        """ID of the :obj:`Dataset` to which this variable belongs."""
 
         return self.data['dataset_id']
 

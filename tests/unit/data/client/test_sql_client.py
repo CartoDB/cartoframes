@@ -1,8 +1,8 @@
 """Unit tests for cartoframes.client.SQLClient"""
 
 from cartoframes.auth import Credentials
+from cartoframes.core.managers.context_manager import ContextManager
 from cartoframes.data.clients import SQLClient
-from tests.unit.mocks import mock_create_context
 
 SQL_SELECT_RESPONSE = {
     'rows': [{
@@ -71,65 +71,70 @@ SQL_BATCH_RESPONSE = {
 }
 
 
-def sql_client(mocker, response=''):
-    context_mock = mock_create_context(mocker, response)
-    credentials = Credentials('user_name', '1234567890')
-    return SQLClient(credentials), context_mock
-
-
 class TestSQLClient(object):
+
+    def setup_method(self):
+        self.credentials = Credentials('user_name', '1234567890')
+
     def test_query(self, mocker):
         """client.SQLClient.query"""
-        client, _ = sql_client(mocker, SQL_SELECT_RESPONSE)
-        output = client.query('')
+        mock = mocker.patch.object(ContextManager, 'execute_query', return_value=SQL_SELECT_RESPONSE)
+        output = SQLClient(self.credentials).query('query')
 
         assert output == [{
             'column_a': 'A',
             'column_b': 123,
             'column_c': '0123456789ABCDEF'
         }]
+        mock.assert_called_once_with('query')
 
     def test_query_verbose(self, mocker):
         """client.SQLClient.query verbose"""
-        client, _ = sql_client(mocker, SQL_SELECT_RESPONSE)
-        output = client.query('', verbose=True)
+        mock = mocker.patch.object(ContextManager, 'execute_query', return_value=SQL_SELECT_RESPONSE)
+        output = SQLClient(self.credentials).query('query', verbose=True)
 
         assert output == SQL_SELECT_RESPONSE
+        mock.assert_called_once_with('query')
 
     def test_execute(self, mocker):
         """client.SQLClient.execute"""
-        client, _ = sql_client(mocker, SQL_BATCH_RESPONSE)
-        output = client.execute('')
+        mock = mocker.patch.object(ContextManager, 'execute_long_running_query', return_value=SQL_BATCH_RESPONSE)
+        output = SQLClient(self.credentials).execute('query')
 
         assert output == SQL_BATCH_RESPONSE
+        mock.assert_called_once_with('query')
 
     def test_distinct(self, mocker):
         """client.SQLClient.distinct"""
-        client, context_mock = sql_client(mocker, SQL_DISTINCT_RESPONSE)
-        output = client.distinct('table_name', 'column_name')
+        mock = mocker.patch.object(ContextManager, 'execute_query', return_value=SQL_DISTINCT_RESPONSE)
+        output = SQLClient(self.credentials).distinct('table_name', 'column_name')
 
-        assert context_mock.query.strip() == '''
+        assert output == [('A', 1234), ('B', 5678)]
+        mock.assert_called_once_with('''
             SELECT column_name, COUNT(*) FROM table_name
             GROUP BY 1 ORDER BY 2 DESC
-        '''.strip()
-        assert output == [('A', 1234), ('B', 5678)]
+        '''.strip())
 
     def test_count(self, mocker):
         """client.SQLClient.count"""
-        client, context_mock = sql_client(mocker, SQL_COUNT_RESPONSE)
-        output = client.count('table_name')
+        mock = mocker.patch.object(ContextManager, 'execute_query', return_value=SQL_COUNT_RESPONSE)
+        output = SQLClient(self.credentials).count('table_name')
 
-        assert context_mock.query.strip() == '''
-            SELECT COUNT(*) FROM table_name;
-        '''.strip()
         assert output == 12345
+        mock.assert_called_once_with('''
+            SELECT COUNT(*) FROM table_name;
+        '''.strip())
 
     def test_bounds(self, mocker):
         """client.SQLClient.bounds"""
-        client, context_mock = sql_client(mocker, SQL_BOUNDS_RESPONSE)
-        output = client.bounds('query')
+        mock = mocker.patch.object(ContextManager, 'execute_query', return_value=SQL_BOUNDS_RESPONSE)
+        output = SQLClient(self.credentials).bounds('query')
 
-        assert context_mock.query.strip() == '''
+        assert output == [
+            [-16.2500006525, 28.0999760122],
+            [2.65424597028, 43.530016092]
+        ]
+        mock.assert_called_once_with('''
             SELECT ARRAY[
                 ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
                 ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
@@ -137,123 +142,123 @@ class TestSQLClient(object):
                 SELECT ST_Extent(the_geom) geom_env
                 FROM (query) q
             ) q;
-        '''.strip()
-        assert output == [
-            [-16.2500006525, 28.0999760122],
-            [2.65424597028, 43.530016092]
-        ]
+        '''.strip())
 
     def test_schema(self, mocker):
         """client.SQLClient.schema"""
-        client, context_mock = sql_client(mocker, SQL_SCHEMA_RESPONSE)
-        output = client.schema('table_name', raw=True)
+        mock = mocker.patch.object(ContextManager, 'execute_query', return_value=SQL_SCHEMA_RESPONSE)
+        output = SQLClient(self.credentials).schema('table_name', raw=True)
 
-        assert context_mock.query.strip() == '''
-            SELECT * FROM table_name LIMIT 0;
-        '''.strip()
         assert output == {
             'column_a': 'string',
             'column_b': 'number',
             'column_c': 'geometry'
         }
+        mock.assert_called_once_with('''
+            SELECT * FROM table_name LIMIT 0;
+        '''.strip())
 
     def test_describe_type_string(self, mocker):
         """client.SQLClient.describe type: string"""
-        client, context_mock = sql_client(mocker, SQL_DESCRIBE_NUMBER)
+        mock = mocker.patch.object(ContextManager, 'execute_query', return_value=SQL_DESCRIBE_NUMBER)
+        client = SQLClient(self.credentials)
         client._get_column_type = lambda t, c: 'string'
         client.describe('table_name', 'column_name')
 
-        assert context_mock.query.strip() == '''
+        mock.assert_called_once_with('''
             SELECT COUNT(*)
             FROM table_name;
-        '''.strip()
+        '''.strip())
 
     def test_describe_type_number(self, mocker):
         """client.SQLClient.describe type: number"""
-        client, context_mock = sql_client(mocker, SQL_DESCRIBE_NUMBER)
+        mock = mocker.patch.object(ContextManager, 'execute_query', return_value=SQL_DESCRIBE_NUMBER)
+        client = SQLClient(self.credentials)
         client._get_column_type = lambda t, c: 'number'
         client.describe('table_name', 'column_name')
 
-        assert context_mock.query.strip() == '''
+        mock.assert_called_once_with('''
             SELECT COUNT(*),AVG(column_name),MIN(column_name),MAX(column_name)
             FROM table_name;
-        '''.strip()
+        '''.strip())
 
     def test_create_table_no_cartodbfy(self, mocker):
         """client.SQLClient.create_table"""
-        client, context_mock = sql_client(mocker)
-        client.create_table(
+        mocker.patch.object(ContextManager, 'get_schema')
+        mock = mocker.patch.object(ContextManager, 'execute_long_running_query')
+        SQLClient(self.credentials).create_table(
             'table_name', [('id', 'INT'), ('name', 'TEXT')], cartodbfy=False)
 
-        assert context_mock.query.strip() == '''
+        mock.assert_called_once_with('''
             BEGIN;
             DROP TABLE IF EXISTS table_name;
             CREATE TABLE table_name (id INT,name TEXT);
             ;
             COMMIT;
-        '''.strip()
+        '''.strip())
 
     def test_create_table_cartodbfy_org_user(self, mocker):
         """client.SQLClient.create_table cartodbfy: organization user"""
-        client, context_mock = sql_client(mocker)
-        client._context.get_schema = lambda: 'user_name'
-        client.create_table(
+        mocker.patch.object(ContextManager, 'get_schema', return_value='user_name')
+        mock = mocker.patch.object(ContextManager, 'execute_long_running_query')
+        SQLClient(self.credentials).create_table(
             'table_name', [('id', 'INT'), ('name', 'TEXT')])
 
-        assert context_mock.query.strip() == '''
+        mock.assert_called_once_with('''
             BEGIN;
             DROP TABLE IF EXISTS table_name;
             CREATE TABLE table_name (id INT,name TEXT);
             SELECT CDB_CartoDBFyTable('user_name', 'table_name');
             COMMIT;
-        '''.strip()
+        '''.strip())
 
     def test_create_table_cartodbfy_public_user(self, mocker):
         """client.SQLClient.create_table cartodbfy: public user"""
-        client, context_mock = sql_client(mocker)
-        client.create_table(
+        mocker.patch.object(ContextManager, 'get_schema', return_value='public')
+        mock = mocker.patch.object(ContextManager, 'execute_long_running_query')
+        SQLClient(self.credentials).create_table(
             'table_name', [('id', 'INT'), ('name', 'TEXT')])
 
-        assert context_mock.query.strip() == '''
+        mock.assert_called_once_with('''
             BEGIN;
             DROP TABLE IF EXISTS table_name;
             CREATE TABLE table_name (id INT,name TEXT);
             SELECT CDB_CartoDBFyTable('public', 'table_name');
             COMMIT;
-        '''.strip()
+        '''.strip())
 
     def test_insert_table(self, mocker):
         """client.SQLClient.insert_table"""
-        client, context_mock = sql_client(mocker)
-        client.insert_table('table_name', ['id', 'name'], [0, 'a'])
+        mock = mocker.patch.object(ContextManager, 'execute_long_running_query')
+        SQLClient(self.credentials).insert_table('table_name', ['id', 'name'], [0, 'a'])
 
-        assert context_mock.query.strip() == '''
+        mock.assert_called_once_with('''
             INSERT INTO table_name (id,name) VALUES(0,'a');
-        '''.strip()
+        '''.strip())
 
     def test_update_table(self, mocker):
         """client.SQLClient.update_table"""
-        client, context_mock = sql_client(mocker)
-        client.update_table('table_name', 'name', 'b', 'id = 0')
+        mock = mocker.patch.object(ContextManager, 'execute_long_running_query')
+        SQLClient(self.credentials).update_table('table_name', 'name', 'b', 'id = 0')
 
-        assert context_mock.query.strip() == '''
+        mock.assert_called_once_with('''
             UPDATE table_name SET name='b' WHERE id = 0;
-        '''.strip()
+        '''.strip())
 
     def test_rename_table(self, mocker):
         """client.SQLClient.rename_table"""
-        client, context_mock = sql_client(mocker)
-        client.rename_table('table_name', 'new_table_name')
+        mock = mocker.patch.object(ContextManager, 'execute_long_running_query')
+        SQLClient(self.credentials).rename_table('table_name', 'new_table_name')
 
-        assert context_mock.query.strip() == '''
+        mock.assert_called_once_with('''
             ALTER TABLE table_name RENAME TO new_table_name;
-        '''.strip()
+        '''.strip())
 
     def test_drop_table(self, mocker):
         """client.SQLClient.drop_table"""
-        client, context_mock = sql_client(mocker)
-        client.drop_table('table_name')
+        mock = mocker.patch.object(ContextManager, 'execute_long_running_query')
+        SQLClient(self.credentials).drop_table('table_name')
 
-        assert context_mock.query.strip() == '''
+        mock.assert_called_once_with('''
             DROP TABLE IF EXISTS table_name;
-        '''.strip()
+        '''.strip())

@@ -2,8 +2,8 @@ from __future__ import absolute_import
 
 import pandas as pd
 import geopandas as gpd
+
 from shapely import wkt
-from cartoframes.data import Dataset as CFDataset
 
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
@@ -19,8 +19,8 @@ from . import utils
 DATASET_TYPE = 'dataset'
 
 
-class CatalogDataset(CatalogEntity):
-    """A CatalogDataset represents the metadata of a particular dataset in the catalog.
+class Dataset(CatalogEntity):
+    """A Dataset represents the metadata of a particular dataset in the catalog.
 
     If you have Data Observatory enabled in your CARTO account you can:
 
@@ -332,7 +332,7 @@ class CatalogDataset(CatalogEntity):
 
     @classmethod
     def get_all(cls, filters=None, credentials=None):
-        """Get all the CatalogDataset instances that comply with the indicated filters (or all of them if no filters
+        """Get all the Dataset instances that comply with the indicated filters (or all of them if no filters
         are passed). If credentials are given, only the datasets granted for those credentials are returned.
 
         Args:
@@ -345,7 +345,7 @@ class CatalogDataset(CatalogEntity):
                 datasets. If none is provided, no filters will be applied to the query.
 
         Returns:
-            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of CatalogDataset instances.
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
         :raises DiscoveryException: When no datasets are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
@@ -391,11 +391,6 @@ class CatalogDataset(CatalogEntity):
             # Geopandas dataframe
             return filter_dataset
 
-        if isinstance(filter_dataset, CFDataset):
-            # CARTOFrames Dataset
-            user_df = filter_dataset.download(decode_geom=True)
-            return gpd.GeoDataFrame(user_df, geometry='geometry')
-
         if isinstance(filter_dataset, str):
             # String WKT
             df = pd.DataFrame([{'geometry': filter_dataset}])
@@ -414,7 +409,7 @@ class CatalogDataset(CatalogEntity):
         Datasets with `is_public_data` set to False do need a license (i.e., a subscription) to be used. You'll get a
         license to use this `dataset` depending on the `estimated_delivery_days` set for this specific dataset.
 
-        See :py:meth:`subscription_info <cartoframes.data.observatory.CatalogDataset.subscription_info>` for more
+        See :py:meth:`subscription_info <cartoframes.data.observatory.Dataset.subscription_info>` for more
         info
 
         Once you subscribe to a dataset, you can `download` its data and use the enrichment functions. See the

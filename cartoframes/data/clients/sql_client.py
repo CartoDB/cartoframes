@@ -1,13 +1,10 @@
 from __future__ import absolute_import
 
-from ...auth import get_default_credentials
-from ...lib import context
+from ...core.managers.context_manager import ContextManager
 
 
 class SQLClient(object):
     """SQLClient class is a client to run SQL queries in a CARTO account.
-    Note: for long running SELECT queries affected by database timeouts it's
-    recommended to use the :py:class:`Dataset <cartoframes.data.Dataset>` class.
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
@@ -33,8 +30,7 @@ class SQLClient(object):
     """
 
     def __init__(self, credentials=None):
-        self._credentials = credentials or get_default_credentials()
-        self._context = context.create_context(self._credentials)
+        self._context_manager = ContextManager(credentials)
 
     def query(self, query, verbose=False):
         """Run a SQL query. It returns a `list` with content of the response.
@@ -42,7 +38,7 @@ class SQLClient(object):
         For more information check the `SQL API
         documentation
         <https://carto.com/developers/sql-api/reference/#tag/Single-SQL-Statement>`."""
-        response = self._context.execute_query(query)
+        response = self._context_manager.execute_query(query.strip())
         if not verbose:
             return response.get('rows')
         else:
@@ -53,7 +49,7 @@ class SQLClient(object):
         status and information of the job. For more information check the `Batch API
         documentation
         <https://carto.com/developers/sql-api/reference/#tag/Batch-Queries>`."""
-        return self._context.execute_long_running_query(query)
+        return self._context_manager.execute_long_running_query(query.strip())
 
     def distinct(self, table_name, column_name):
         """Get the distict values and their count in a table
@@ -123,7 +119,7 @@ class SQLClient(object):
         To disable this pass `cartodbfy=False`.
         """
         columns = ','.join(' '.join(x) for x in columns)
-        schema = self._context.get_schema()
+        schema = self._context_manager.get_schema()
         query = '''
             BEGIN;
             {drop};

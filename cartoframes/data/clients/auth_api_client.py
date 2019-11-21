@@ -20,12 +20,12 @@ class AuthAPIClient(object):
         credentials = credentials or get_default_credentials()
         self._api_key_manager = _get_api_key_manager(credentials)
 
-    def create_api_key(self, datasets, name, apis=['sql', 'maps'], permissions=['select']):
+    def create_api_key(self, sources, name, apis=['sql', 'maps'], permissions=['select']):
         tables = []
-        for dataset in datasets:
-            table_names = dataset.get_table_names()
+        for source in sources:
+            table_names = source.get_table_names()
             for table_name in table_names:
-                tables.append(_get_table_dict(dataset.schema, table_name, permissions))
+                tables.append(_get_table_dict(source.schema(), table_name, permissions))
 
         api_key = self._api_key_manager.create(
             name=name,

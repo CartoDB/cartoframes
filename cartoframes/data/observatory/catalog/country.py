@@ -11,7 +11,7 @@ from .repository.constants import COUNTRY_FILTER
 class Country(CatalogEntity):
     """This class represents a :py:class:`Country <cartoframes.data.observatory.Country>`
     in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`. Catalog datasets
-    (:py:class:`CatalogDataset <cartoframes.data.observatory.CatalogDataset>` class)
+    (:py:class:`Dataset <cartoframes.data.observatory.Dataset>` class)
     belong to a country, so you can filter available `datasets` and
     `geographies` that belong (or are related) to a given `Country`.
 
@@ -41,16 +41,16 @@ class Country(CatalogEntity):
 
     @property
     def datasets(self):
-        """Get the list of :obj:`CatalogDataset` covering data for this country.
+        """Get the list of :obj:`Dataset` covering data for this country.
 
         Returns:
-            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of CatalogDataset instances.
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
         :raises DiscoveryException: When no datasets are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
 
         Examples:
-            Get all the `datasets` :py:class:`CatalogDataset <cartoframes.data.observatory.CatalogDataset>` available
+            Get all the `datasets` :py:class:`Dataset <cartoframes.data.observatory.Dataset>` available
             in the `catalog` for a :py:class:`Country <cartoframes.data.observatory.Country>` instance
 
             .. code::
@@ -137,7 +137,7 @@ class Country(CatalogEntity):
 
     @property
     def categories(self):
-        """Get the list of :obj:`Category` that are assigned to :obj:`CatalogDataset` that cover data for this country.
+        """Get the list of :obj:`Category` that are assigned to :obj:`Dataset` that cover data for this country.
 
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Category instances.
