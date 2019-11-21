@@ -427,7 +427,7 @@ class CatalogDataset(CatalogEntity):
 
     def subscription_info(self, credentials=None):
         """Get the subscription information of a Dataset, which includes the license, TOS, rights, prize and
-        estimated_time_of_delivery, among other metadata of interest during the subscription process.
+        estimated time of delivery, among other metadata of interest during the subscription process.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
