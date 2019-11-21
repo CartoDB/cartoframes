@@ -192,12 +192,3 @@ class Variable(CatalogEntity):
         """Plots an histogram with the variable data."""
         data = self.data['summary_json']
         return histogram(data)
-
-    def __repr__(self):
-        descr = self.description
-
-        if descr and len(descr) > _DESCRIPTION_LENGTH_LIMIT:
-            descr = descr[0:_DESCRIPTION_LENGTH_LIMIT] + '...'
-
-        return "<{classname}('{entity_id}','{descr}')>"\
-               .format(classname=self.__class__.__name__, entity_id=self._get_print_id(), descr=descr)
