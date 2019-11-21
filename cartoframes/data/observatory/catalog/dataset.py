@@ -401,7 +401,7 @@ class CatalogDataset(CatalogEntity):
         See :py:meth:`subscription_info <cartoframes.data.observatory.CatalogDataset.subscription_info>` for more
         info
 
-        Once you subscribe to a dataset you can `download` its data and use the enrichment functions. See the
+        Once you subscribe to a dataset, you can `download` its data and use the enrichment functions. See the
         enrichment guides for more info.
 
         You can check the status of your subscriptions by calling the
