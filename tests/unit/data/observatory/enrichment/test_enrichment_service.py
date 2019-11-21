@@ -1,11 +1,13 @@
 import pandas as pd
 from shapely.geometry.point import Point
+from shapely.geometry.polygon import Polygon
 
 from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables
 from cartoframes.data.observatory import Variable
+from cartoframes.utils.geom_utils import to_geojson
 
 try:
     from unittest.mock import Mock, patch
@@ -23,27 +25,56 @@ class TestEnrichmentService(object):
         self.credentials = None
         BigQueryClient._init_client = self.original_init_client
 
-    def test_prepare_data(self, mocker):
+    def test_prepare_data(self):
         geom_column = 'the_geom'
         enrichment_service = EnrichmentService(credentials=self.credentials)
-        df = pd.DataFrame([[1, 'POINT (1 1)']], columns=['cartodb_id', geom_column])
+        point = Point(1, 1)
+        df = pd.DataFrame([[1, point]], columns=['cartodb_id', geom_column])
         expected_cdf = CartoDataFrame(
-            [[Point(1, 1), 0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
+            [[point, 0, to_geojson(point)]],
             columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
 
         result = enrichment_service._prepare_data(df, geom_column)
         assert result.equals(expected_cdf)
 
+    def test_prepare_data_polygon_with_close_vertex(self):
+        geom_column = 'the_geom'
+        enrichment_service = EnrichmentService(credentials=self.credentials)
+
+        polygon = Polygon([(10, 2), (1.12345688, 1), (1.12345677, 1), (10, 2)])
+        df = pd.DataFrame(
+            [
+                [1, polygon]
+            ],
+            columns=['cartodb_id', geom_column])
+
+        expected_cdf = CartoDataFrame(
+            [
+                [
+                    polygon,
+                    0,
+                    to_geojson(polygon)
+                ]
+            ],
+            columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
+
+        result = enrichment_service._prepare_data(df, geom_column)
+
+        assert result['enrichment_id'].equals(expected_cdf['enrichment_id'])
+        assert result['__geojson_geom'].equals(expected_cdf['__geojson_geom'])
+
     def test_upload_data(self):
         expected_project = 'carto-do-customers'
         user_dataset = 'test_dataset'
+
+        point = Point(1, 1)
         input_cdf = CartoDataFrame(
-            [[Point(1, 1), 0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
+            [[point, 0, to_geojson(point)]],
             columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
 
         expected_schema = {'enrichment_id': 'INTEGER', '__geojson_geom': 'GEOGRAPHY'}
         expected_cdf = CartoDataFrame(
-            [[0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
+            [[0, to_geojson(point)]],
             columns=['enrichment_id', '__geojson_geom'], index=[1])
 
         # mock
@@ -63,11 +94,12 @@ class TestEnrichmentService(object):
         BigQueryClient.upload_dataframe = original
 
     def test_execute_enrichment(self):
+        point = Point(1, 1)
         input_cdf = CartoDataFrame(
-            [[Point(1, 1), 0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
+            [[point, 0, to_geojson(point)]],
             columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
         expected_cdf = CartoDataFrame(
-            [[Point(1, 1), 'new data']],
+            [[point, 'new data']],
             columns=['geometry', 'var1'])
 
         class EnrichMock():
