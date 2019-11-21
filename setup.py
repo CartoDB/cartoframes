@@ -32,6 +32,7 @@ REQUIRES = [
     'unidecode>=1.1.0,<2.0',
     'pyarrow>=0.14.1,<1.0',
     'google-cloud-bigquery>=1.19.0,<2.0',
+    'tiletanic>=1.0.0,<2.0'
     # 'Rtree>=0.8.3,<1.0'
 ]
 
