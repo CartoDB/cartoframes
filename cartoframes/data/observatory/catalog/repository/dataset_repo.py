@@ -28,8 +28,8 @@ class DatasetRepository(EntityRepository):
 
     @classmethod
     def _get_entity_class(cls):
-        from cartoframes.data.observatory.catalog.dataset import CatalogDataset
-        return CatalogDataset
+        from cartoframes.data.observatory.catalog.dataset import Dataset
+        return Dataset
 
     def _get_rows(self, filters=None):
         return self.client.get_datasets(filters)

@@ -19,7 +19,7 @@ from . import utils
 DATASET_TYPE = 'dataset'
 
 
-class CatalogDataset(CatalogEntity):
+class Dataset(CatalogEntity):
     entity_repo = get_dataset_repo()
 
     @property

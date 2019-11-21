@@ -1,6 +1,6 @@
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
-from cartoframes.data.observatory import Enrichment, Variable, CatalogDataset, VariableFilter
+from cartoframes.data.observatory import Enrichment, Variable, Dataset, VariableFilter
 
 try:
     from unittest.mock import Mock, patch
@@ -27,7 +27,7 @@ class TestPointsEnrichment(object):
         self.username = None
         BigQueryClient._init_client = self.original_init_client
 
-    @patch.object(CatalogDataset, 'get')
+    @patch.object(Dataset, 'get')
     def test_enrichment_query_by_points_one_variable(self, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
@@ -65,7 +65,7 @@ class TestPointsEnrichment(object):
 
         assert actual == expected
 
-    @patch.object(CatalogDataset, 'get')
+    @patch.object(Dataset, 'get')
     def test_enrichment_query_by_points_two_variables(self, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
@@ -110,7 +110,7 @@ class TestPointsEnrichment(object):
 
         assert actual == expected
 
-    @patch.object(CatalogDataset, 'get')
+    @patch.object(Dataset, 'get')
     def test_enrichment_query_by_points_two_variables_different_tables(self, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
@@ -159,7 +159,7 @@ class TestPointsEnrichment(object):
 
         assert actual == expected
 
-    @patch.object(CatalogDataset, 'get')
+    @patch.object(Dataset, 'get')
     def test_enrichment_query_by_points_two_variables_different_datasets(self, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
@@ -209,7 +209,7 @@ class TestPointsEnrichment(object):
 
         assert actual == expected
 
-    @patch.object(CatalogDataset, 'get')
+    @patch.object(Dataset, 'get')
     def test_enrichment_query_by_points_with_filters(self, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 

@@ -23,12 +23,12 @@ class TestEnrichmentService(object):
         self.credentials = None
         BigQueryClient._init_client = self.original_init_client
 
-    def test_prepare_data(self):
+    def test_prepare_data(self, mocker):
         geom_column = 'the_geom'
         enrichment_service = EnrichmentService(credentials=self.credentials)
         df = pd.DataFrame([[1, 'POINT (1 1)']], columns=['cartodb_id', geom_column])
         expected_cdf = CartoDataFrame(
-            [[Point(1, 1), 0, '{"type": "Point", "coordinates": [1.0, 1.0]}']],
+            [[Point(1, 1), 0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
             columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
 
         result = enrichment_service._prepare_data(df, geom_column)
@@ -38,12 +38,12 @@ class TestEnrichmentService(object):
         expected_project = 'carto-do-customers'
         user_dataset = 'test_dataset'
         input_cdf = CartoDataFrame(
-            [[Point(1, 1), 0, '{"type": "Point", "coordinates": [1.0, 1.0]}']],
+            [[Point(1, 1), 0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
             columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
 
         expected_schema = {'enrichment_id': 'INTEGER', '__geojson_geom': 'GEOGRAPHY'}
         expected_cdf = CartoDataFrame(
-            [[0, '{"type": "Point", "coordinates": [1.0, 1.0]}']],
+            [[0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
             columns=['enrichment_id', '__geojson_geom'], index=[1])
 
         # mock
@@ -64,7 +64,7 @@ class TestEnrichmentService(object):
 
     def test_execute_enrichment(self):
         input_cdf = CartoDataFrame(
-            [[Point(1, 1), 0, '{"type": "Point", "coordinates": [1.0, 1.0]}']],
+            [[Point(1, 1), 0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
             columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
         expected_cdf = CartoDataFrame(
             [[Point(1, 1), 'new data']],

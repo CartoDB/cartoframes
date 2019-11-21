@@ -1,7 +1,7 @@
 import pytest
 
 from cartoframes.auth import Credentials
-from cartoframes.data.observatory.catalog.dataset import CatalogDataset
+from cartoframes.data.observatory.catalog.dataset import Dataset
 from cartoframes.data.observatory.catalog.geography import Geography
 from cartoframes.data.observatory.catalog.country import Country
 from cartoframes.data.observatory.catalog.category import Category
@@ -45,7 +45,7 @@ class TestCatalog(object):
         # Then
         assert categories == expected_categories
 
-    @patch.object(CatalogDataset, 'get_all')
+    @patch.object(Dataset, 'get_all')
     def test_datasets(self, mocked_datasets):
         # Given
         expected_datasets = [test_dataset1, test_dataset2]
@@ -84,7 +84,7 @@ class TestCatalog(object):
         mocked_categories.called_once_with({'country_id': 'usa'})
         assert categories == test_categories
 
-    @patch.object(CatalogDataset, 'get_all')
+    @patch.object(Dataset, 'get_all')
     def test_filters_on_datasets(self, mocked_datasets):
         # Given
         mocked_datasets.return_value = test_datasets
@@ -110,7 +110,7 @@ class TestCatalog(object):
         mocked_geographies.called_once_with({'country_id': 'usa', 'category_id': 'demographics'})
         assert geographies == test_geographies
 
-    @patch.object(CatalogDataset, 'get_all')
+    @patch.object(Dataset, 'get_all')
     def test_all_filters(self, mocked_datasets):
         # Given
         mocked_datasets.return_value = test_datasets
@@ -128,7 +128,7 @@ class TestCatalog(object):
 
         assert datasets == test_datasets
 
-    @patch.object(CatalogDataset, 'get_all')
+    @patch.object(Dataset, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     def test_geography_filter_by_slug(self, mocked_repo, mocked_datasets):
         # Given
@@ -145,7 +145,7 @@ class TestCatalog(object):
         mocked_datasets.assert_called_once_with({'geography_id': test_geography1.id})
         assert datasets == test_datasets
 
-    @patch.object(CatalogDataset, 'get_all')
+    @patch.object(Dataset, 'get_all')
     @patch.object(Geography, 'get_all')
     def test_subscriptions(self, mocked_geographies, mocked_datasets):
         # Given
@@ -166,7 +166,7 @@ class TestCatalog(object):
         assert subscriptions.datasets == expected_datasets
         assert subscriptions.geographies == expected_geographies
 
-    @patch.object(CatalogDataset, 'get_all')
+    @patch.object(Dataset, 'get_all')
     @patch.object(Geography, 'get_all')
     @patch('cartoframes.auth.defaults.get_default_credentials')
     def test_subscriptions_default_credentials(self, mocked_credentials, mocked_geographies, mocked_datasets):
@@ -189,7 +189,7 @@ class TestCatalog(object):
         assert subscriptions.datasets == expected_datasets
         assert subscriptions.geographies == expected_geographies
 
-    @patch.object(CatalogDataset, 'get_all')
+    @patch.object(Dataset, 'get_all')
     @patch.object(Geography, 'get_all')
     def test_subscriptions_wrong_credentials(self, mocked_geographies, mocked_datasets):
         # Given

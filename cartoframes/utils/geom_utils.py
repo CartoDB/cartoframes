@@ -214,4 +214,4 @@ def _extract_srid(egeom):
 
 
 def to_geojson(geom):
-    return json.dumps(shapely.geometry.mapping(geom))
+    return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)
