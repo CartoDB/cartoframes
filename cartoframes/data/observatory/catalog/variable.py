@@ -126,16 +126,16 @@ class Variable(CatalogEntity):
 
             .. code::
 
-                # avg                    6.781847e+01
-                # max                    4.138516e+04
-                # min                    0.000000e+00
-                # sum                    3.272149e+08
-                # range                  4.138516e+04
-                # stdev                  1.654868e+02
-                # q1                     8.090000e+00
-                # q3                     3.882000e+01
-                # median                 2.042000e+01
-                # interquartile_range    3.073000e+01
+                # avg                    average value
+                # max                    max value
+                # min                    min value
+                # sum                    sum of all values
+                # range
+                # stdev                  standard deviation
+                # q1                     first quantile
+                # q3                     third quantile
+                # median                 median value
+                # interquartile_range
         """
         data = self.data['summary_json']
         return variable_describe(data)
@@ -165,20 +165,20 @@ class Variable(CatalogEntity):
 
             .. code::
 
-                # all                 4.854239e+06
-                # null                2.937500e+04
-                # zero                4.820100e+05
-                # extreme             6.329720e+05
-                # distinct            8.473600e+04
-                # outliers            1.009540e+06
-                # zero_percent        9.929672e+00
-                # distinct_percent    1.745608e+00
+                # all               total number of valiues
+                # null              total number of null values
+                # zero              number of zero-valued entries
+                # extreme
+                # distinct          number of distinct (unique) entries
+                # outliers          number of outliers (outside of +/- 2sigma range)
+                # zero_percent      percent of values that are zero
+                # distinct_percent  percent of values that are distinct
         """
         data = self.data['summary_json']
         return counts(data)
 
     def quantiles(self):
-        """Returns information about the quantiles of the variable data.
+        """Returns the quantiles of the variable data.
         """
         data = self.data['summary_json']
         return quantiles(data)

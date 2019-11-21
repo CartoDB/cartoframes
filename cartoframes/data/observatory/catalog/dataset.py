@@ -274,6 +274,7 @@ class CatalogDataset(CatalogEntity):
                 # rows:         number of rows in the dataset
                 # cells:        number of cells in the dataset (rows * columns)
                 # null_cells:   number of cells with null value in the dataset
+                # null_cells_percent:   percent of cells with null value in the dataset
         """
 
         data = self.data['summary_json']
@@ -311,6 +312,21 @@ class CatalogDataset(CatalogEntity):
 
         Returns:
             pandas.DataFrame
+
+        Example:
+
+            .. code::
+
+                # avg                    average value
+                # max                    max value
+                # min                    min value
+                # sum                    sum of all values
+                # range
+                # stdev                  standard deviation
+                # q1                     first quantile
+                # q3                     third quantile
+                # median                 median value
+                # interquartile_range
         """
         return dataset_describe(self.variables)
 
