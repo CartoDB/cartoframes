@@ -395,7 +395,7 @@ class CatalogDataset(CatalogEntity):
         """Subscribe to a dataset. You need Data Observatory enabled in your CARTO account.
 
         Datasets with `is_public_data` set to True do not need a license (i.e., a subscription) to be used.
-        Datasets with `is_public_data` set to False, do need a license (i.e. a subscription) to be used. You'll get a
+        Datasets with `is_public_data` set to False do need a license (i.e., a subscription) to be used. You'll get a
         license to use this `dataset` depending on the `estimated_delivery_days` set for this specific dataset.
 
         See :py:meth:`subscription_info <cartoframes.data.observatory.CatalogDataset.subscription_info>` for more
