@@ -426,7 +426,7 @@ class CatalogDataset(CatalogEntity):
             utils.display_subscription_form(self.id, DATASET_TYPE, _credentials)
 
     def subscription_info(self, credentials=None):
-        """Get the subscription information of a Dataset, which includes the license, TOS, rights, prize and
+        """Get the subscription information of a Dataset, which includes the license, Terms of Service, rights, price, and
         estimated time of delivery, among other metadata of interest during the subscription process.
 
         Args:
