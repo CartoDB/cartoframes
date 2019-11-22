@@ -91,7 +91,7 @@ class CatalogEntity(ABC):
 
         return file_path
 
-    def _is_available_in(self, platform='bq'):
+    def _is_available_in(self, platform):
         return self.data['available_in'] and platform in self.data['available_in']
 
     def _get_credentials(self, credentials=None):

@@ -9,6 +9,7 @@ from . import subscriptions
 from . import utils
 
 GEOGRAPHY_TYPE = 'geography'
+PLATFORM_BQ = 'bq'
 
 
 class Geography(CatalogEntity):
@@ -64,6 +65,12 @@ class Geography(CatalogEntity):
         """Info about the geometric coverage of this geography."""
 
         return self.data['geom_coverage']
+
+    @property
+    def geom_type(self):
+        """Info about the type of geometry of this geography."""
+
+        return self.data['geom_type']
 
     @property
     def update_frequency(self):
@@ -155,5 +162,5 @@ class Geography(CatalogEntity):
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))
 
-    def is_available_in(self, platform='bq'):
+    def is_available_in(self, platform=PLATFORM_BQ):
         return self._is_available_in(platform)

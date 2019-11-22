@@ -143,7 +143,8 @@ class TestDataset(object):
     def test_dataset_is_exported_as_dict(self):
         # Given
         dataset = Dataset(db_dataset1)
-        expected_dict = {key: value for key, value in db_dataset1.items() if key != 'summary_json'}
+        excluded_fields = ['summary_json', 'available_in']
+        expected_dict = {key: value for key, value in db_dataset1.items() if key not in excluded_fields}
 
         # When
         dataset_dict = dataset.to_dict()
