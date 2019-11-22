@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from ..catalog.variable import Variable
 from ..catalog.dataset import Dataset
+from ..catalog.geography import Geography
 from ...clients import bigquery_client
 from ....auth import get_default_credentials
 from ....exceptions import EnrichmentException
@@ -184,13 +185,26 @@ def _prepare_variable(variable):
     if isinstance(variable, str):
         variable = Variable.get(variable)
 
+    __validate_variable(variable)
+
+    return variable
+
+
+def __validate_variable(variable):
     if not isinstance(variable, Variable):
         raise EnrichmentException("""
             variable should be a `<cartoframes.data.observatory> Variable` instance,
             Variable `id` property or Variable `slug` property
         """)
 
-    return variable
+    dataset = Dataset.get(variable.dataset)
+    geography = Geography.get(dataset.geography)
+
+    if not (dataset.is_available_in('bq') and geography.is_available_in('bq')):
+        raise EnrichmentException("""
+            The Dataset or the Geography of the Variable '{}' is not ready for Enrichment.
+            Please, contact us for more information.
+        """.format(variable.slug))
 
 
 def get_variable_aggregations(variables, aggregation):

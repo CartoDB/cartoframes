@@ -74,6 +74,9 @@ class CatalogEntity(ABC):
         return self.id
 
     def _download(self, credentials=None):
+        if not self._is_available_in('bq'):
+            raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
+
         credentials = self._get_credentials(credentials)
         user_dataset = credentials.get_do_user_dataset()
         bq_client = _get_bigquery_client(_WORKING_PROJECT, credentials)
