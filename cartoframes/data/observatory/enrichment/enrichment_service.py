@@ -185,18 +185,18 @@ def _prepare_variable(variable):
     if isinstance(variable, str):
         variable = Variable.get(variable)
 
-    __validate_variable(variable)
-
-    return variable
-
-
-def __validate_variable(variable):
     if not isinstance(variable, Variable):
         raise EnrichmentException("""
             variable should be a `<cartoframes.data.observatory> Variable` instance,
             Variable `id` property or Variable `slug` property
         """)
 
+    _is_available_in_bq(variable)
+
+    return variable
+
+
+def _is_available_in_bq(variable):
     dataset = Dataset.get(variable.dataset)
     geography = Geography.get(dataset.geography)
 

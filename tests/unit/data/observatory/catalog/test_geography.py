@@ -246,6 +246,28 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
+    def test_geography_not_available_in_bq_download_fails(self, mocked_bq_client, mocked_repo):
+        # mock geography
+        mocked_repo.return_value = test_geography2
+
+        # mock big query client
+        file_path = 'fake_path'
+        mocked_bq_client.return_value = BigQueryClientMock(file_path)
+
+        # test
+        username = 'fake_user'
+        credentials = Credentials(username, '1234')
+
+        geography = Geography.get(test_geography2.id)
+
+        with pytest.raises(CartoException) as e:
+            geography.download(credentials)
+
+        error = '{} is not ready for Download. Please, contact us for more information.'.format(geography)
+        assert str(e.value) == error
+
+    @patch.object(GeographyRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_geography_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
         # mock geography
         mocked_repo.return_value = test_geography1

@@ -269,6 +269,28 @@ class TestDataset(object):
 
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
+    def test_dataset_not_available_in_bq_download_fails(self, mocked_bq_client, mocked_repo):
+        # mock dataset
+        mocked_repo.return_value = test_dataset2
+
+        # mock big query client
+        file_path = 'fake_path'
+        mocked_bq_client.return_value = BigQueryClientMock(file_path)
+
+        # test
+        username = 'fake_user'
+        credentials = Credentials(username, '1234')
+
+        dataset = Dataset.get(test_dataset2.id)
+
+        with pytest.raises(CartoException) as e:
+            dataset.download(credentials)
+
+        error = ''.format(dataset)
+        assert str(e.value) == error
+
+    @patch.object(DatasetRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_dataset_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
         # mock dataset
         mocked_repo.return_value = test_dataset1
