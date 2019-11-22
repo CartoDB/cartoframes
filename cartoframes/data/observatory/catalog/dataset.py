@@ -2,8 +2,8 @@ from __future__ import absolute_import
 
 import pandas as pd
 import geopandas as gpd
+
 from shapely import wkt
-from cartoframes.data import Dataset as CFDataset
 
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
@@ -19,8 +19,8 @@ from . import utils
 DATASET_TYPE = 'dataset'
 
 
-class CatalogDataset(CatalogEntity):
-    """A CatalogDataset represents the metadata of a particular dataset in the Data Observatory platform."""
+class Dataset(CatalogEntity):
+    """A Dataset represents the metadata of a particular dataset in the Data Observatory platform."""
 
     entity_repo = get_dataset_repo()
 
@@ -169,7 +169,7 @@ class CatalogDataset(CatalogEntity):
 
     @classmethod
     def get_all(cls, filters=None, credentials=None):
-        """Get all the CatalogDataset instances that comply with the indicated filters (or all of them if no filters
+        """Get all the Dataset instances that comply with the indicated filters (or all of them if no filters
         are passed. If credentials are given, only the datasets granted for those credentials are returned.
 
         Args:
@@ -182,7 +182,7 @@ class CatalogDataset(CatalogEntity):
                 datasets. If none is provided, no filters will be applied to the query.
 
         Returns:
-            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of CatalogDataset instances.
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
         """
 
@@ -218,11 +218,6 @@ class CatalogDataset(CatalogEntity):
         if isinstance(filter_dataset, gpd.GeoDataFrame):
             # Geopandas dataframe
             return filter_dataset
-
-        if isinstance(filter_dataset, CFDataset):
-            # CARTOFrames Dataset
-            user_df = filter_dataset.download(decode_geom=True)
-            return gpd.GeoDataFrame(user_df, geometry='geometry')
 
         if isinstance(filter_dataset, str):
             # String WKT

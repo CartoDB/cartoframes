@@ -7,9 +7,9 @@ from collections import OrderedDict
 import requests
 import numpy as np
 
-from cartoframes.utils.utils import (camel_dictionary, cssify, debug_print,
-                                     dict_items, importify_params, snake_to_camel,
-                                     dtypes2pg, pg2dtypes, encode_row)
+from cartoframes.utils.utils import (camel_dictionary, cssify, debug_print, dict_items,
+                                     importify_params, snake_to_camel, dtypes2pg, pg2dtypes,
+                                     encode_row, extract_viz_columns, remove_comments)
 
 
 class TestUtils(unittest.TestCase):
@@ -209,3 +209,16 @@ class TestUtils(unittest.TestCase):
         assert encode_row(np.inf) == b'Infinity'
         assert encode_row(-np.inf) == b'-Infinity'
         assert encode_row(np.nan) == b'NaN'
+
+    def test_extract_viz_columns(self):
+        viz = 'color: $hello + $A_0123'
+        assert 'hello' in extract_viz_columns(viz)
+        assert 'A_0123' in extract_viz_columns(viz)
+
+    def test_remove_comments(self):
+        viz = """
+        color: blue // This is a line comment
+        /* This is a
+           multiline comment */
+        """
+        assert remove_comments(viz) == 'color: blue'

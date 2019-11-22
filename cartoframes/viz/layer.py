@@ -1,9 +1,7 @@
 from __future__ import absolute_import
 
 import pandas
-import geopandas
 
-from ..data import Dataset
 from ..utils.utils import merge_dicts
 from .legend import Legend
 from .legend_list import LegendList
@@ -12,7 +10,7 @@ from .source import Source
 from .style import Style
 from .widget_list import WidgetList
 
-from ..utils.geom_utils import extract_viz_columns
+from ..utils.utils import extract_viz_columns
 
 
 class Layer(object):
@@ -21,7 +19,8 @@ class Layer(object):
     notebook to get a preview of a Layer.
 
     Args:
-        source (str, :py:class:`Dataset <cartoframes.data.Dataset>`, or pandas.DataFrame):
+        source (str, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`,
+                pandas.DataFrame, geopandas.GeoDataFrame):
           The source data.
         style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
           The style of the visualization: `CARTO VL styling
@@ -167,7 +166,7 @@ class Layer(object):
 
 def _set_source(source, credentials):
     """Set a Source class from the input"""
-    if isinstance(source, (str, list, dict, Dataset, pandas.DataFrame, geopandas.GeoDataFrame)):
+    if isinstance(source, (str, pandas.DataFrame)):
         return Source(source, credentials)
     elif isinstance(source, Source):
         return source

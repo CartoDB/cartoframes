@@ -9,7 +9,7 @@ from .repository.constants import COUNTRY_FILTER
 
 
 class Country(CatalogEntity):
-    """Every CatalogDataset has a country associated to it. A Country instance can be used to query datasets (or other
+    """Every Dataset has a country associated to it. A Country instance can be used to query datasets (or other
     entities related to datasets) that belong to that country.
     """
 
@@ -20,7 +20,7 @@ class Country(CatalogEntity):
         """Get the list of datasets covering data for this country.
 
         Returns:
-            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of CatalogDataset instances.
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
         """
         return get_dataset_repo().get_all({COUNTRY_FILTER: self.id})

@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
-from ....clients import SQLClient
-from .....auth import Credentials
 from ..subscriptions import get_subscription_ids
+from .....auth import Credentials
+from .....core.managers.context_manager import ContextManager
 
 
 class RepoClient(object):
@@ -12,7 +12,7 @@ class RepoClient(object):
     def __init__(self):
         self._user_credentials = None
         self._do_credentials = Credentials('do-metadata', 'default_public')
-        self.client = SQLClient(self._do_credentials)
+        self._context_manager = ContextManager(self._do_credentials)
 
     def set_user_credentials(self, credentials):
         self._user_credentials = credentials
@@ -78,7 +78,7 @@ class RepoClient(object):
             where_clause = ' AND '.join(conditions)
             query += ' WHERE {}'.format(where_clause)
 
-        return self.client.query(query)
+        return self._context_manager.execute_query(query).get('rows')
 
     def _compute_conditions(self, filters, extra_conditions):
         conditions = extra_conditions or []

@@ -8,8 +8,7 @@ from .repository.geography_repo import get_geography_repo
 
 
 class Category(CatalogEntity):
-
-    """A CatalogDataset can be assigned to a particular categories as part of its metadata info. A Category instance
+    """A Dataset can be assigned to a particular categories as part of its metadata info. A Category instance
     can be used to query datasets or geographies that belong (or are related to) that category.
     """
 
@@ -20,7 +19,7 @@ class Category(CatalogEntity):
         """Get the list of datasets related to this category.
 
         Returns:
-            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of CatalogDataset instances.
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
         """
         return get_dataset_repo().get_all({CATEGORY_FILTER: self.id})

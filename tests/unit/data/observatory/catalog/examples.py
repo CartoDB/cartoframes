@@ -1,5 +1,5 @@
 from cartoframes.data.observatory.catalog.variable import Variable
-from cartoframes.data.observatory.catalog.dataset import CatalogDataset
+from cartoframes.data.observatory.catalog.dataset import Dataset
 from cartoframes.data.observatory.catalog.category import Category
 from cartoframes.data.observatory.catalog.geography import Geography
 from cartoframes.data.observatory.catalog.country import Country
@@ -103,8 +103,8 @@ db_dataset2 = {
     'is_public_data': False,
     'summary_json': {}
 }
-test_dataset1 = CatalogDataset(db_dataset1)
-test_dataset2 = CatalogDataset(db_dataset2)
+test_dataset1 = Dataset(db_dataset1)
+test_dataset2 = Dataset(db_dataset2)
 test_datasets = CatalogList([test_dataset1, test_dataset2])
 
 db_variable1 = {

@@ -3,8 +3,7 @@ from __future__ import absolute_import
 import uuid
 from collections import namedtuple
 
-from ...auth import get_default_credentials
-from ...lib import context
+from ...core.managers.context_manager import ContextManager
 
 SERVICE_KEYS = ('hires_geocoder', 'isolines')
 QUOTA_INFO_KEYS = ('monthly_quota', 'used_quota', 'soft_limit', 'provider')
@@ -16,8 +15,8 @@ Result = namedtuple('Result', ['data', 'metadata'])
 class Service(object):
 
     def __init__(self, credentials=None, quota_service=None):
-        self._credentials = credentials or get_default_credentials()
-        self._context = context.create_context(self._credentials)
+        self._context_manager = ContextManager(credentials)
+        self._credentials = self._context_manager.credentials
         self._quota_service = quota_service
         if self._quota_service not in SERVICE_KEYS:
             raise ValueError('Invalid service "{}" valid services are: {}'.format(
@@ -47,7 +46,7 @@ class Service(object):
         return (base or 'table') + '_' + uuid.uuid4().hex[:10]
 
     def _execute_query(self, query):
-        return self._context.execute_query(query)
+        return self._context_manager.execute_query(query)
 
     def _execute_long_running_query(self, query):
-        return self._context.execute_long_running_query(query)
+        return self._context_manager.execute_long_running_query(query)

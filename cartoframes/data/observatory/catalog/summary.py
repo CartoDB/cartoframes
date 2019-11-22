@@ -27,7 +27,7 @@ def dataset_describe(variables):
 
 
 def head(cls, data):
-    from .dataset import CatalogDataset
+    from .dataset import Dataset
     from .variable import Variable
 
     if not data:
@@ -35,14 +35,14 @@ def head(cls, data):
 
     if cls == Variable:
         head = pd.Series(data['head'])
-    elif cls == CatalogDataset:
+    elif cls == Dataset:
         head = pd.DataFrame(data['glimpses']['head'])
 
     return head
 
 
 def tail(cls, data):
-    from .dataset import CatalogDataset
+    from .dataset import Dataset
     from .variable import Variable
 
     if not data:
@@ -50,7 +50,7 @@ def tail(cls, data):
 
     if cls == Variable:
         tail = pd.Series(data['tail'])
-    elif cls == CatalogDataset:
+    elif cls == Dataset:
         tail = pd.DataFrame(data['glimpses']['tail'])
 
     return tail
