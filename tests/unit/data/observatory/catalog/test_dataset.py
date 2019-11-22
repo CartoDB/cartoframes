@@ -400,3 +400,16 @@ class TestDataset(object):
 
         # Then
         assert str(e.value) == '`credentials` must be a Credentials class instance'
+
+    def test_dataset_is_available_in(self):
+        dataset_in_bq = Dataset(db_dataset1)
+        dataset_not_in_bq = Dataset(db_dataset2)
+
+        assert dataset_in_bq.is_available_in('bq')
+        assert not dataset_not_in_bq.is_available_in('bq')
+
+    def test_dataset_is_available_in_with_empty_field(self):
+        db_dataset = dict(db_dataset1)
+        db_dataset['available_in'] = None
+        dataset_null = Dataset(db_dataset)
+        assert not dataset_null.is_available_in('bq')

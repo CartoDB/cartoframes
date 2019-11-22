@@ -378,3 +378,16 @@ class TestGeography(object):
 
         # Then
         assert str(e.value) == '`credentials` must be a Credentials class instance'
+
+    def test_geography_is_available_in(self):
+        geography_in_bq = Geography(db_geography1)
+        geography_not_in_bq = Geography(db_geography2)
+
+        assert geography_in_bq.is_available_in('bq')
+        assert not geography_not_in_bq.is_available_in('bq')
+
+    def test_geography_is_available_in_with_empty_field(self):
+        db_geography = dict(db_geography1)
+        db_geography['available_in'] = None
+        geography_null = Geography(db_geography)
+        assert not geography_null.is_available_in('bq')
