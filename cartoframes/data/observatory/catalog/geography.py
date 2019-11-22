@@ -154,3 +154,6 @@ class Geography(CatalogEntity):
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))
+
+    def is_available_in(self, platform='bq'):
+        return self._is_available_in(platform)

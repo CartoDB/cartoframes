@@ -21,7 +21,7 @@ class CatalogEntity(ABC):
 
     id_field = 'id'
     entity_repo = None
-    export_excluded_fields = ['summary_json']
+    export_excluded_fields = ['summary_json', 'available_in']
 
     def __init__(self, data):
         self.data = data
@@ -90,6 +90,9 @@ class CatalogEntity(ABC):
         warn("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
 
         return file_path
+
+    def _is_available_in(self, platform='bq'):
+        return self.data['available_in'] and platform in self.data['available_in']
 
     def _get_credentials(self, credentials=None):
         _credentials = credentials or defaults.get_default_credentials()
