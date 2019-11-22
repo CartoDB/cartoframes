@@ -286,7 +286,7 @@ class TestDataset(object):
         with pytest.raises(CartoException) as e:
             dataset.download(credentials)
 
-        error = ''.format(dataset)
+        error = '{} is not ready for Download. Please, contact us for more information.'.format(dataset)
         assert str(e.value) == error
 
     @patch.object(DatasetRepository, 'get_by_id')
