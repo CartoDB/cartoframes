@@ -5,16 +5,17 @@ import geopandas as gpd
 import pandas as pd
 from cartoframes import CartoDataFrame
 
-class QuadGrid():
 
+class QuadGrid():
 
     def polyfill(self, input_gdf, zoom_level):
         tiler = WebMercator()
+        # Transform input to 3857
         gdf = input_gdf.copy()
-        if not gdf.crs or 'init' not in gdf.crs:
+        if not gdf.crs:
             # assuming 4326 if not specified
-            gdf.crs = {'init': 'epsg:4326'}
-        gdf = gdf.to_crs({'init': 'epsg:3857'})
+            gdf.crs = 'epsg:4326'
+        gdf = gdf.to_crs('epsg:3857')
 
         dfs = []
 
@@ -29,7 +30,12 @@ class QuadGrid():
 
             dfs.append(pd.DataFrame(resp))
 
-        r_gdf = gpd.GeoDataFrame(pd.concat(dfs).reset_index(drop=True))
-        r_gdf.crs = {'init': 'epsg:3857'}
-        r_gdf = r_gdf.to_crs({'init': 'epsg:4326'})
-        return CartoDataFrame(r_gdf)
+        r_gdf = CartoDataFrame(pd.concat(dfs).reset_index(drop=True))
+        r_gdf.crs = 'epsg:3857'
+        # Transforme to 4326
+        r_gdf = r_gdf.to_crs('epsg:4326')
+
+        # TODO: Fix it at CartoDataFrame class needs to reconvert to don't lose subclass.
+        r_gdf = CartoDataFrame(r_gdf)
+        r_gdf.crs = 'epsg:4326'
+        return r_gdf
