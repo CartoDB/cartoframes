@@ -62,7 +62,6 @@ class TestGrid(object):
     def test_quadgrid_polyfill_box(self, mocker):
         """cartoframes.analysis.grid.QuadGrid.polyfill"""
         cdf = QuadGrid().polyfill(GDF_BOX, 12)
-        assert isinstance(cdf, gpd.GeoDataFrame)
         assert isinstance(cdf, CartoDataFrame)
         assert cdf.shape == (288, 3)
         assert cdf.crs == 'epsg:4326'
@@ -70,7 +69,6 @@ class TestGrid(object):
     def test_quadgrid_polyfill_pol(self, mocker):
         """cartoframes.analysis.grid.QuadGrid.polyfill"""
         cdf = QuadGrid().polyfill(GDF_IRREGULAR, 12)
-        assert isinstance(cdf, gpd.GeoDataFrame)
         assert isinstance(cdf, CartoDataFrame)
         assert cdf.shape == (98, 3)
         assert cdf.crs == 'epsg:4326'
