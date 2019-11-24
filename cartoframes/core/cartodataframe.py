@@ -21,7 +21,7 @@ class CartoDataFrame(GeoDataFrame):
     @property
     def _constructor(self):
         return CartoDataFrame
-        
+
     @classmethod
     def from_features(cls, features, **kwargs):
         gdf = GeoDataFrame.from_features(features, **kwargs)
