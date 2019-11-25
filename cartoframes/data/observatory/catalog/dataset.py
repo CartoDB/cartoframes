@@ -24,9 +24,10 @@ class Dataset(CatalogEntity):
 
     If you have Data Observatory enabled in your CARTO account you can:
 
-      - Use any public dataset to enrich your data with the variables in it.
-      - Subscribe to any premium dataset, to get a license, that grants you
-        the right to enrich your data with the variables in it.
+      - Use any public dataset to enrich your data with the variables in it by means of the :obj:`Enrichment`
+        functions.
+      - Subscribe (:py:attr:`Dataset.subscribe`) to any premium dataset, to get a license, that grants you
+        the right to enrich your data with the variables (:obj:`Variable`) in it.
 
     See the enrichment guides for more information about datasets, variables and
     enrichment functions.
@@ -78,7 +79,9 @@ class Dataset(CatalogEntity):
 
     @property
     def variables(self):
-        """Get the list of :obj:`Variable` that correspond to this dataset.
+        """Get the list of :obj:`Variable` that corresponds to this dataset. Variables are used in the
+        :obj:`Enrichment` functions to augment your local `DataFrames` with columns from a `Dataset` in the
+        Data Observatory.
 
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Variable instances.
@@ -223,11 +226,15 @@ class Dataset(CatalogEntity):
 
     @property
     def is_public_data(self):
-        """True if the content of this dataset can be accessed with public credentials.
-        False if it needs a subscription (AKA premium datasets).
+        """Allows to check if the content of this dataset can be accessed with
+        public credentials or if it is a premium dataset that needs a
+        subscription.
 
         Returns:
-            bool
+            A boolean value:
+                * ``True`` if the dataset is public
+                * ``False`` if the dataset is premium
+                    (it requires to :py:attr:`Dataset.subscribe`)
         """
 
         return self.data['is_public_data']
@@ -355,7 +362,10 @@ class Dataset(CatalogEntity):
 
     def download(self, credentials=None):
         """Download dataset data as a local file. You need Data Observatory enabled in your CARTO
-        account.
+        account, please contact us at support@carto.com for more information.
+
+        For premium geographies (those with `is_public_data` set to False), you need a subscription to the geography.
+        Check the subscription guides for more information.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
@@ -403,7 +413,8 @@ class Dataset(CatalogEntity):
         return join_gdf['id'].unique()
 
     def subscribe(self, credentials=None):
-        """Subscribe to a dataset. You need Data Observatory enabled in your CARTO account.
+        """Subscribe to a dataset. You need Data Observatory enabled in your CARTO account, please contact us at
+        support@carto.com for more information.
 
         Datasets with `is_public_data` set to True do not need a license (i.e., a subscription) to be used.
         Datasets with `is_public_data` set to False do need a license (i.e., a subscription) to be used. You'll get a
@@ -412,12 +423,12 @@ class Dataset(CatalogEntity):
         See :py:meth:`subscription_info <cartoframes.data.observatory.Dataset.subscription_info>` for more
         info
 
-        Once you subscribe to a dataset, you can `download` its data and use the enrichment functions. See the
-        enrichment guides for more info.
+        Once you subscribe to a dataset, you can :py:attr:`Dataset.download` its data and use the
+        :obj:`Enrichment` functions. See the enrichment guides for more info.
 
         You can check the status of your subscriptions by calling the
         :py:meth:`subscriptions <cartoframes.data.observatory.Catalog.subscriptions>` method in the :obj:`Catalog` with
-        your CARTO credentials.
+        your CARTO :obj:`Credentials`.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
@@ -438,7 +449,7 @@ class Dataset(CatalogEntity):
 
     def subscription_info(self, credentials=None):
         """Get the subscription information of a Dataset, which includes the license, Terms of Service, rights, price, and
-        estimated time of delivery, among other metadata of interest during the subscription process.
+        estimated time of delivery, among other metadata of interest during the :py:attr:`Dataset.subscription` process.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
