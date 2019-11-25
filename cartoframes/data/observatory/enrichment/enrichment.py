@@ -163,7 +163,10 @@ class Enrichment(EnrichmentService):
                     aggregation methods from your selected variables, you can do it using a list of
                     :obj:`VariableAggregation`. Example: `[VariableAggregation(variable, 'SUM')]`
                     - str: if you want to overwrite every default aggregation method, you can pass a string with the
-                    aggregation method to use. See
+                    aggregation method to use. A BigQuery standard SQL aggregation function
+                    (such as 'AVG', 'COUNT', 'MAX', 'MIN', 'ARRAY_AGG', 'SUM', ...). If not provided, the default
+                    :py:attr:`Variable.agg_method` for each variable will be used, when available. Otherwise, an error
+                    will be raised. See
                     `this <https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions>`__
                     for a complete list of aggregate functions
 
