@@ -194,6 +194,7 @@ class TestGeographyRepo(object):
             'name': None,
             'description': None,
             'provider_id': None,
+            'provider_name': None,
             'country_id': None,
             'lang': None,
             'geom_coverage': None,

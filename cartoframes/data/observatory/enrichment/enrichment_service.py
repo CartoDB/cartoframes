@@ -3,7 +3,7 @@ import uuid
 from collections import defaultdict
 
 from ..catalog.variable import Variable
-from ..catalog.dataset import CatalogDataset
+from ..catalog.dataset import Dataset
 from ...clients import bigquery_client
 from ....auth import get_default_credentials
 from ....exceptions import EnrichmentException
@@ -147,7 +147,7 @@ class EnrichmentService(object):
             return variable.dataset
 
     def __get_geo_table(self, variable):
-        geography_id = CatalogDataset.get(variable.dataset).geography
+        geography_id = Dataset.get(variable.dataset).geography
         _, dataset_geo_table, geo_table = geography_id.split('.')
 
         if variable.project_name != self.public_project:

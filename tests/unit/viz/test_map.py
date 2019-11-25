@@ -3,9 +3,9 @@ import pytest
 from carto.exceptions import CartoException
 
 from cartoframes.auth import Credentials
-from cartoframes.io.context import ContextManager
 from cartoframes.viz import Map, Layer, Source, constants
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
+from cartoframes.core.managers.context_manager import ContextManager
 
 from .utils import build_geodataframe
 

@@ -2,54 +2,50 @@
 
 from __future__ import absolute_import
 
+import re
 import hashlib
 import logging
-import re
 
-import pandas as pd
-
-from ...data import Dataset
-from ...utils.geom_utils import geodataframe_from_dataframe
 from .service import Service
-from ...data.clients import SQLClient
+from ...core.managers.source_manager import SourceManager
+from ...io.carto import read_carto, to_carto, has_table, delete_table, update_table, copy_table, create_table_from_query
 
 HASH_COLUMN = 'carto_geocode_hash'
 BATCH_SIZE = 200
 DEFAULT_STATUS = {'gc_status_rel': 'relevance'}
 
-
 QUOTA_SERVICE = 'hires_geocoder'
 
 
-def _lock(context, lock_id):
+def _lock(execute_query, lock_id):
     sql = 'select pg_try_advisory_lock({id})'.format(id=lock_id)
-    result = context.execute_query(sql)
+    result = execute_query(sql)
     locked = result and result.get('rows', [])[0].get('pg_try_advisory_lock')
     logging.debug('LOCK %s : %s', lock_id, locked)
     return locked
 
 
-def _unlock(context, lock_id):
+def _unlock(execute_query, lock_id):
     logging.debug('UNLOCK %s', lock_id)
     sql = 'select pg_advisory_unlock({id})'.format(id=lock_id)
-    result = context.execute_query(sql)
+    result = execute_query(sql)
     return result and result.get('rows', [])[0].get('pg_advisory_unlock')
 
 
 class TableGeocodingLock:
-    def __init__(self, context, table_name):
-        self._context = context
+    def __init__(self, execute_query, table_name):
+        self._execute_query = execute_query
         text_id = 'carto-geocoder-{table_name}'.format(table_name=table_name)
         self.lock_id = _hash_as_big_int(text_id)
         self.locked = False
 
     def __enter__(self):
-        self.locked = _lock(self._context, self.lock_id)
+        self.locked = _lock(self._execute_query, self.lock_id)
         return self.locked
 
     def __exit__(self, type, value, traceback):
         if self.locked:
-            _unlock(self._context, self.lock_id)
+            _unlock(self._execute_query, self.lock_id)
 
 
 def _column_name(col):
@@ -259,17 +255,6 @@ def _set_post_summary_info(summary, result, output):
         output['failed_geocodings'] = output['required_quota'] - output['successfully_geocoded']
 
 
-def _dup_dataset(dataset):
-    # When uploading datasets to temporary tables we don't want to leave the dataset
-    # with a `table_name` attribute (of the temporary table, that will be deleted),
-    # so we'll use duplicates of the datasets for temporary uploads`
-    if dataset.get_query():
-        return Dataset(dataset.get_query(), credentials=dataset.credentials)
-    elif dataset.table_name:
-        return Dataset(dataset.table_name, credentials=dataset.credentials)
-    return Dataset(dataset.dataframe)
-
-
 GEOCODE_COLUMN_KEY = 'column'
 GEOCODE_VALUE_KEY = 'value'
 VALID_GEOCODE_KEYS = [GEOCODE_COLUMN_KEY, GEOCODE_VALUE_KEY]
@@ -381,15 +366,16 @@ class Geocoding(Service):
     def __init__(self, credentials=None):
         super(Geocoding, self).__init__(credentials=credentials, quota_service=QUOTA_SERVICE)
 
-    def geocode(self, input_data, street,
+    def geocode(self, source, street,
                 city=None, state=None, country=None,
                 status=DEFAULT_STATUS,
-                table_name=None, if_exists=Dataset.IF_EXISTS_FAIL,
+                table_name=None, if_exists='fail',
                 dry_run=False, cached=None):
         """Geocode a dataset
 
         Args:
-            input_data (Dataset, DataFrame): a Dataset or DataFrame object to be geocoded.
+            source (str, DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
+                table, SQL query or DataFrame object to be geocoded.
             street (str): name of the column containing postal addresses
             city (dict, optional): dictionary with either a `column` key
                 with the name of a column containing the addresses' city names or
@@ -422,90 +408,69 @@ class Geocoding(Service):
                 check the needed quota)
 
         Returns:
-            A named-tuple ``(data, metadata)`` containing  either a ``data`` Dataset or DataFrame
-            (same type as the input) and a ``metadata`` dictionary with global information
-            about the geocoding process
+            A named-tuple ``(data, metadata)`` containing  either a ``data`` CartoDataFrame and
+            a ``metadata`` dictionary with global information about the geocoding process.
 
-            The data contains a ``the_geom`` column with point locations for the geocoded addresses
+            The data contains a ``geometry`` column with point locations for the geocoded addresses
             and also a ``carto_geocode_hash`` that, if preserved, can avoid re-geocoding
             unchanged data in future calls to geocode.
         """
 
-        is_dataframe = False
-        if isinstance(input_data, pd.DataFrame):
-            is_dataframe = True
-            dataset = Dataset(input_data)
-        elif isinstance(input_data, Dataset):
-            dataset = input_data
-        else:
-            raise ValueError('Invalid input data type')
+        self._source_manager = SourceManager(source, self._credentials)
 
-        self.columns = dataset.get_column_names()
+        self.columns = self._source_manager.get_column_names()
 
         if cached:
             if table_name:
                 raise ValueError('tablecached geocoding is not compatible with parameters "table_name"')
             return self._cached_geocode(
-                input_data, cached, street, city=city, state=state, country=country, dry_run=dry_run)
+                source, cached, street, city=city, state=state, country=country, dry_run=dry_run)
 
         city, state, country = [_column_or_value_arg(arg, self.columns) for arg in [city, state, country]]
 
-        if dry_run:
-            table_name = None
+        input_table_name, is_temporary = self._table_for_geocoding(source, table_name, if_exists)
 
-        input_table_name, is_temporary = self._table_for_geocoding(dataset, table_name, if_exists)
-
-        result_info = self._geocode(input_table_name, street, city, state, country, status, dry_run)
+        metadata = self._geocode(input_table_name, street, city, state, country, status, dry_run)
 
         if dry_run:
-            result_dataset = dataset
-        else:
-            result_dataset = self._fetch_geocoded_table_dataset(input_table_name, is_temporary)
+            return self.result(data=None, metadata=metadata)
 
-        self._cleanup_geocoded_table(input_table_name, is_temporary)
+        cdf = read_carto(input_table_name, self._credentials)
 
-        result = result_dataset
-        if is_dataframe:
-            # Note that we return a dataframe whenever the input is dataframe,
-            # even if we have uploaded it to a table (table_name is not None).
-            if dry_run:
-                result = input_data
-            else:
-                result = result_dataset.dataframe  # if temporary it should have been downloaded
-                if result is None:
-                    # but if not temporary we need to download it now
-                    result = result_dataset.download()
-                result = geodataframe_from_dataframe(result)
+        if is_temporary:
+            delete_table(input_table_name, self._credentials)
 
-        return self.result(result, metadata=result_info)
+        result = self.result(data=cdf, metadata=metadata)
 
-    def _cached_geocode(self, input_data, table_name, street, city=None, state=None, country=None, dry_run=False):
+        print('Success! Data geocoded correctly')
+
+        return result
+
+    def _cached_geocode(self, source, table_name, street, city, state, country, dry_run, columns):
         """
         Geocode a dataframe caching results into a table.
         If the same dataframe if geocoded repeatedly no credits will be spent.
         But note there is a time overhead related to uploading the dataframe to a
         temporary table for checking for changes.
         """
-        dataset_cache = Dataset(table_name, credentials=self._credentials)
+        has_cache = has_table(table_name, self._credentials)
 
-        if dataset_cache.exists():
-            if HASH_COLUMN not in dataset_cache.get_column_names():
+        if has_cache:
+            cache_source_manager = SourceManager(table_name, self._credentials)
+            cache_columns = cache_source_manager.get_column_names()
+            if HASH_COLUMN not in cache_columns:
                 raise ValueError('Cache table {} exists but is not a valid geocode table'.format(table_name))
 
-        if HASH_COLUMN in self.columns or not dataset_cache.exists():
+        if HASH_COLUMN in self.columns or not has_cache:
             return self.geocode(
-                input_data, street=street, city=city, state=state,
-                country=country, table_name=table_name, dry_run=dry_run, if_exists=Dataset.IF_EXISTS_REPLACE)
+                source, street=street, city=city, state=state,
+                country=country, table_name=table_name, dry_run=dry_run, if_exists='replace')
 
         tmp_table_name = self._new_temporary_table_name()
-        input_dataframe = False
-        if isinstance(input_data, pd.DataFrame):
-            input_dataframe = True
-            input_data = Dataset(input_data)
-        else:
-            if input_data.is_remote() and input_data.table_name:
-                raise ValueError('cached geocoding cannot be used with tables')
-        input_data.upload(table_name=tmp_table_name, credentials=self._credentials)
+        if self._source_manager.is_table():
+            raise ValueError('cached geocoding cannot be used with tables')
+
+        to_carto(source, tmp_table_name, self._credentials)
 
         self._execute_query(
             """
@@ -520,53 +485,35 @@ class Geocoding(Service):
             FROM {table} WHERE {hash_expr}={table}.{hash}
             """.format(tmp_table=tmp_table_name, table=table_name, hash=HASH_COLUMN, hash_expr=hash_expr))
 
-        sql_client = SQLClient(self._credentials)
-        sql_client.drop_table(table_name)
-        sql_client.rename_table(tmp_table_name, table_name)
+        delete_table(table_name)
+        update_table(tmp_table_name, table_name)
         # TODO: should remove the cartodb_id column from the result
         # TODO: refactor to share code with geocode() and call self._geocode() here instead
         # actually to keep hashing knowledge encapsulated (AFW) this should be handled by
         # _geocode using an additional parameter for an input table
-        dataset = Dataset(table_name, credentials=self._credentials)
-        result, meta = self.geocode(dataset, street=street, city=city, state=state, country=country, dry_run=dry_run)
-        if input_dataframe:
-            result = geodataframe_from_dataframe(result.download())
-        return self.result(result, metadata=meta)
+        cdf, metadata = self.geocode(table_name, street=street, city=city,
+                                     state=state, country=country, dry_run=dry_run)
+        return self.result(data=cdf, metadata=metadata)
 
-    def _table_for_geocoding(self, dataset, table_name, if_exists):
-        temporary_table = False
-        input_dataset = dataset
-        if input_dataset.is_remote() and input_dataset.table_name:
-            # input dataset is a table
+    def _table_for_geocoding(self, source, table_name, if_exists):
+        is_temporary = False
+        input_table_name = table_name
+        if self._source_manager.is_table():
             if table_name:
-                # Copy input dataset into a new table
-                # TODO: select only needed columns
-                query = 'SELECT * FROM {table}'.format(table=input_dataset.table_name)
-                input_table_name = table_name
-                input_dataset = Dataset(query, credentials=self._credentials)
-                input_dataset.upload(table_name=input_table_name, credentials=self._credentials, if_exists=if_exists)
+                copy_table(source, input_table_name, self._credentials, if_exists)
             else:
-                input_table_name = input_dataset.table_name
-        else:
-            # input dataset is a query or a dataframe
-            if table_name:
-                input_table_name = table_name
-            else:
-                temporary_table = True
+                input_table_name = source
+        elif self._source_manager.is_query():
+            if not input_table_name:
                 input_table_name = self._new_temporary_table_name()
-                input_dataset = _dup_dataset(input_dataset)
-            input_dataset.upload(table_name=input_table_name, credentials=self._credentials, if_exists=if_exists)
-        return (input_table_name, temporary_table)
-
-    def _fetch_geocoded_table_dataset(self, input_table_name, is_temporary):
-        dataset = Dataset(input_table_name, credentials=self._credentials)
-        if is_temporary:
-            dataset = Dataset(dataset.download())
-        return dataset
-
-    def _cleanup_geocoded_table(self, input_table_name, is_temporary):
-        if is_temporary:
-            Dataset(input_table_name, credentials=self._credentials).delete()
+                is_temporary = True
+            create_table_from_query(source, input_table_name, self._credentials, if_exists)
+        elif self._source_manager.is_dataframe():
+            if not input_table_name:
+                input_table_name = self._new_temporary_table_name()
+                is_temporary = True
+            to_carto(source, input_table_name, self._credentials, if_exists)
+        return (input_table_name, is_temporary)
 
     # Note that this can be optimized for non in-place cases (table_name is not None), e.g.
     # injecting the input query in the geocoding expression,
@@ -611,7 +558,7 @@ class Geocoding(Service):
         aborted = False
 
         if output['required_quota'] > 0 and not dry_run:
-            with TableGeocodingLock(self._context, table_name) as locked:
+            with TableGeocodingLock(self._execute_query, table_name) as locked:
                 if not locked:
                     output['error'] = 'The table is already being geocoded'
                     output['aborted'] = aborted = True
@@ -658,7 +605,7 @@ class Geocoding(Service):
             if not aborted:
                 sql = _posterior_summary_query(table_name)
                 logging.debug("Executing result summary query: %s", sql)
-                result = self._context.execute_query(sql)
+                result = self._execute_query(sql)
                 _set_post_summary_info(summary, result, output)
 
         if not aborted:

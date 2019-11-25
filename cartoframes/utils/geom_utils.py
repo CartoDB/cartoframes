@@ -67,8 +67,6 @@ def generate_geometry(dataframe, geom_column=None, lnglat_columns=None, drop_geo
                 if drop_lnglat:
                     del dataframe[lng_column.name]
                     del dataframe[lat_column.name]
-            else:
-                print('Debug: no geographic data found.')
 
     if GEO_COLUMN_NAME in dataframe:
         dataframe.set_geometry(GEO_COLUMN_NAME, inplace=True)
@@ -216,4 +214,5 @@ def _extract_srid(egeom):
 
 
 def to_geojson(geom):
-    return json.dumps(shapely.geometry.mapping(geom))
+    if geom:
+        return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)

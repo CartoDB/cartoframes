@@ -1,18 +1,15 @@
 from __future__ import absolute_import
 
-from pandas import DataFrame
-
 from . import color_category_layer
-from ...data.dataset.dataset import Dataset
+from ...data.services.isolines import RANGE_LABEL_KEY
 
 
-def isolines_layer(source, value='data_range', **kwargs):
+def isolines_layer(source, value=RANGE_LABEL_KEY, **kwargs):
     """Helper function for quickly creating an isolines color map.
 
     Args:
-        source (:py:class:`cartoframes.data.Dataset>`, DataFrame or str): Dataset
-          or text representing a table or query associated with user account.
-        value (str): Column to symbolize by. By default is "data_range".
+        source (str, DataFrame):
+        value (str, optional): Column to symbolize by. By default is "range_label".
         title (str, optional): Title of legend.
         top (int, optional): Number of category for map. Default is 11. Values
           can range from 1 to 16.
@@ -45,31 +42,14 @@ def isolines_layer(source, value='data_range', **kwargs):
 
             [...]
 
-            isodistances = Isolines().isodistances(df, [1200, 2400, 3600], exclusive=True)
+            data, metadata = Isolines().isodistances(df, [1200, 2400, 3600], exclusive=True)
 
-            isolines_layer(isodistances, palette='purpor')
+            isolines_layer(data, palette='purpor')
 
     Returns:
         :py:class:`cartoframes.viz.Layer`: Layer styled by `value`.
         Includes a legend, popup and widget on `value`.
     """
-
-    if isinstance(source, DataFrame):
-        df = source
-    elif isinstance(source, Dataset):
-        df = source.dataframe
-    elif isinstance(source, tuple) and hasattr(source, 'data'):
-        df = source.data
-    else:
-        raise ValueError('Invalid input source. It must be a DataFrame, Dataset or a namedtuple with data.')
-
-    df = df.copy()
-    if value not in df:
-        raise ValueError('Input DataFrame source must contain a "{}" column'.format(value))
-
-    RANGE_LABEL_KEY = 'range_label'
-    df[RANGE_LABEL_KEY] = df.apply(
-        lambda r: '%.0f min.' % (r[value]/60), axis=1)
 
     if 'palette' not in kwargs:
         kwargs['palette'] = 'pinkyl'
@@ -83,4 +63,4 @@ def isolines_layer(source, value='data_range', **kwargs):
     if 'title' not in kwargs:
         kwargs['title'] = 'Isolines Areas'
 
-    return color_category_layer(df, RANGE_LABEL_KEY, **kwargs)
+    return color_category_layer(source, value, **kwargs)

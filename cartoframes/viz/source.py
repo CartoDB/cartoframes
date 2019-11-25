@@ -2,8 +2,8 @@ from __future__ import absolute_import
 
 import pandas
 
-from ..io.context import ContextManager
 from ..core.cartodataframe import CartoDataFrame
+from ..core.managers.context_manager import ContextManager
 from ..utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type
 
 

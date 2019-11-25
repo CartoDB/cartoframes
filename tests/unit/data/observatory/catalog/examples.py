@@ -1,5 +1,5 @@
 from cartoframes.data.observatory.catalog.variable import Variable
-from cartoframes.data.observatory.catalog.dataset import CatalogDataset
+from cartoframes.data.observatory.catalog.dataset import Dataset
 from cartoframes.data.observatory.catalog.category import Category
 from cartoframes.data.observatory.catalog.geography import Geography
 from cartoframes.data.observatory.catalog.country import Country
@@ -31,6 +31,7 @@ db_geography1 = {
     'name': 'ESP - Census',
     'description': 'Geography data for Spanish census',
     'provider_id': 'bbva',
+    'provider_name': 'bbva',
     'country_id': 'esp',
     'lang': 'esp',
     'geom_coverage': '',
@@ -45,6 +46,7 @@ db_geography2 = {
     'name': 'ESP - Municipalities',
     'description': 'Geography data for Spanish municipalities',
     'provider_id': 'bbva',
+    'provider_name': 'bbva',
     'country_id': 'esp',
     'lang': 'esp',
     'geom_coverage': '',
@@ -63,11 +65,15 @@ db_dataset1 = {
     'name': 'Basic Stats - Census',
     'description': 'Basic stats on 2019 Spanish census',
     'provider_id': 'bbva',
+    'provider_name': 'bbva',
     'category_id': 'demographics',
+    'category_name': 'demographics',
     'data_source_id': 'basicstats',
     'country_id': 'esp',
     'lang': 'esp',
     'geography_id': 'carto-do-public-data.tiger.geography_esp_census_2019',
+    'geography_name': 'Tiger municipalities from Spain',
+    'geography_description': 'Points',
     'temporal_aggregation': '5yrs',
     'time_coverage': ['2006-01-01', '2010-01-01'],
     'update_frequency': 'monthly',
@@ -81,11 +87,15 @@ db_dataset2 = {
     'name': 'Basic Stats - Municipalities',
     'description': 'Basic stats on 2019 Spanish municipalities',
     'provider_id': 'bbva',
+    'provider_name': 'bbva',
     'category_id': 'demographics',
+    'category_name': 'demographics',
     'data_source_id': 'basicstats',
     'country_id': 'esp',
     'lang': 'esp',
     'geography_id': 'carto-do-public-data.tiger.geography_esp_municipalities_2019',
+    'geography_name': 'Tiger municipalities from Spain',
+    'geography_description': 'Points',
     'temporal_aggregation': '5yrs',
     'time_coverage': ['2006-01-01', '2010-01-01'],
     'update_frequency': 'monthly',
@@ -93,8 +103,8 @@ db_dataset2 = {
     'is_public_data': False,
     'summary_json': {}
 }
-test_dataset1 = CatalogDataset(db_dataset1)
-test_dataset2 = CatalogDataset(db_dataset2)
+test_dataset1 = Dataset(db_dataset1)
+test_dataset2 = Dataset(db_dataset2)
 test_datasets = CatalogList([test_dataset1, test_dataset2])
 
 db_variable1 = {

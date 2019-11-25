@@ -28,8 +28,8 @@ class DatasetRepository(EntityRepository):
 
     @classmethod
     def _get_entity_class(cls):
-        from cartoframes.data.observatory.catalog.dataset import CatalogDataset
-        return CatalogDataset
+        from cartoframes.data.observatory.catalog.dataset import Dataset
+        return Dataset
 
     def _get_rows(self, filters=None):
         return self.client.get_datasets(filters)
@@ -40,12 +40,16 @@ class DatasetRepository(EntityRepository):
             'slug': self._normalize_field(row, 'slug'),
             'name': self._normalize_field(row, 'name'),
             'description': self._normalize_field(row, 'description'),
-            'provider_id': self._normalize_field(row, 'provider_id'),
-            'category_id': self._normalize_field(row, 'category_id'),
-            'data_source_id': self._normalize_field(row, 'data_source_id'),
             'country_id': self._normalize_field(row, 'country_id'),
-            'lang': self._normalize_field(row, 'lang'),
             'geography_id': self._normalize_field(row, 'geography_id'),
+            'geography_name': self._normalize_field(row, 'geography_name'),
+            'geography_description': self._normalize_field(row, 'geography_description'),
+            'category_id': self._normalize_field(row, 'category_id'),
+            'category_name': self._normalize_field(row, 'category_name'),
+            'provider_id': self._normalize_field(row, 'provider_id'),
+            'provider_name': self._normalize_field(row, 'provider_name'),
+            'data_source_id': self._normalize_field(row, 'data_source_id'),
+            'lang': self._normalize_field(row, 'lang'),
             'temporal_aggregation': self._normalize_field(row, 'temporal_aggregation'),
             'time_coverage': self._normalize_field(row, 'time_coverage'),
             'update_frequency': self._normalize_field(row, 'update_frequency'),
