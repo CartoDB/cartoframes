@@ -32,12 +32,13 @@ class Enrichment(EnrichmentService):
         purposes.
 
         Args:
-            dataframe (pandas `DataFrame`, geopandas `GeoDataFrame` or :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
-                a `DataFrame` instance to be enriched.
+            dataframe (pandas `DataFrame`, geopandas `GeoDataFrame`
+                or :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
-            geom_column (str): string indicating the 4326 geometry column name in the source `DataFrame`. Defaults to `geometry`.
+            geom_column (str): string indicating the 4326 geometry column name in the
+                source `DataFrame`. Defaults to `geometry`.
             filters (list, optional): list of :obj:`VariableFilter` to filter rows from
                 the enrichment data. Example: `[VariableFilter(variable1, "= 'a string'")]`
 
@@ -140,27 +141,30 @@ class Enrichment(EnrichmentService):
         with the operator provided by `agg_operators` argument. See :obj:`VariableAggregation` for more info.
 
         Args:
-            dataframe (pandas `DataFrame`, geopandas `GeoDataFrame` or :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
-                a `DataFrame` instance to be enriched.
+            dataframe (pandas `DataFrame`, geopandas `GeoDataFrame`
+                or :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
-            geom_column (str): string indicating the 4326 geometry column name in the source `DataFrame`. Defaults to `geometry`.
+            geom_column (str): string indicating the 4326 geometry column name in the source `DataFrame`.
+                Defaults to `geometry`.
             filters (list, optional): list of :obj:`VariableFilter` to filter rows from
                 the enrichment data. Example: `[VariableFilter(variable1, "= 'a string'")]`
             aggregation (str, list, optional): sets the data aggregation. The polygons in the source `DataFrame` can
                 intersect with one or more polygons from the Data Observatory. With this method you can select how to
                 aggregate the resulting data. Options are:
-                    - :py:attr:`Enrichment.AGGREGATION_DEFAULT` (default): Every `<cartoframes.data.observatory> Variable`
-                    has an aggregation method in the Variable `agg_method` property and it will be used to aggregate the
-                    data. In case it is not defined, `array_agg` function will be used.
+                    - :py:attr:`Enrichment.AGGREGATION_DEFAULT` (default): Every
+                    `<cartoframes.data.observatory> Variable` has an aggregation method in the
+                    Variable `agg_method` property and it will be used to aggregate the data. In case it is not
+                    defined, `array_agg` function will be used.
                     - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
                     you will receive an array with all the data from each polygon instersected.
                     - list of :obj:`VariableAggregation`: if you want to overwrite some default
                     aggregation methods from your selected variables, you can do it using a list of
                     :obj:`VariableAggregation`. Example: `[VariableAggregation(variable, 'SUM')]`
                     - str: if you want to overwrite every default aggregation method, you can pass a string with the
-                    aggregation method to use. See `this <https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions>`__
+                    aggregation method to use. See
+                    `this <https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions>`__
                     for a complete list of aggregate functions
 
         Returns:
