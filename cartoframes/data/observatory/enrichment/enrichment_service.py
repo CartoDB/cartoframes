@@ -200,7 +200,7 @@ def _is_available_in_bq(variable):
     dataset = Dataset.get(variable.dataset)
     geography = Geography.get(dataset.geography)
 
-    if not (dataset.is_available_in('bq') and geography.is_available_in('bq')):
+    if not (dataset._is_available_in('bq') and geography._is_available_in('bq')):
         raise EnrichmentException("""
             The Dataset or the Geography of the Variable '{}' is not ready for Enrichment.
             Please, contact us for more information.

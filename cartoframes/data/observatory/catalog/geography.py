@@ -9,7 +9,6 @@ from . import subscriptions
 from . import utils
 
 GEOGRAPHY_TYPE = 'geography'
-PLATFORM_BQ = 'bq'
 
 
 class Geography(CatalogEntity):
@@ -161,6 +160,3 @@ class Geography(CatalogEntity):
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))
-
-    def is_available_in(self, platform=PLATFORM_BQ):
-        return self._is_available_in(platform)

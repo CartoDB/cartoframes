@@ -17,7 +17,6 @@ from . import subscriptions
 from . import utils
 
 DATASET_TYPE = 'dataset'
-PLATFORM_BQ = 'bq'
 
 
 class Dataset(CatalogEntity):
@@ -263,6 +262,3 @@ class Dataset(CatalogEntity):
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, DATASET_TYPE, _credentials))
-
-    def is_available_in(self, platform=PLATFORM_BQ):
-        return self._is_available_in(platform)

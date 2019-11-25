@@ -15,6 +15,7 @@ except ImportError:
     ABC = ABCMeta('ABC', (object,), {'__slots__': ()})
 
 _WORKING_PROJECT = 'carto-do-customers'
+_PLATFORM_BQ = 'bq'
 
 
 class CatalogEntity(ABC):
@@ -94,7 +95,7 @@ class CatalogEntity(ABC):
 
         return file_path
 
-    def _is_available_in(self, platform):
+    def _is_available_in(self, platform=_PLATFORM_BQ):
         return self.data['available_in'] and platform in self.data['available_in']
 
     def _get_credentials(self, credentials=None):
