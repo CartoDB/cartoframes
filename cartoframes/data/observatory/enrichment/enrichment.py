@@ -19,7 +19,7 @@ class Enrichment(EnrichmentService):
         super(Enrichment, self).__init__(credentials)
 
     def enrich_points(self, dataframe, variables, geom_column='geometry', filters={}):
-        """Enrich youar dataframe with columns from our data, intersecting the points with our
+        """Enrich your dataframe with columns from our data, intersecting the points with our
         geographies. Extra columns as area and population will be provided with the aims of normalize
         these columns.
 

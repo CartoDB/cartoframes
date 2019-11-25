@@ -6,6 +6,17 @@ from ..core.cartodataframe import CartoDataFrame
 from ..core.managers.context_manager import ContextManager
 from ..utils.utils import is_sql_query
 
+__all__ = [
+    'read_carto',
+    'to_carto',
+    'has_table',
+    'delete_table',
+    'describe_table',
+    'update_table',
+    'copy_table',
+    'create_table_from_query'
+]
+
 
 def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
                drop_cartodb_id=True, drop_the_geom=True, drop_the_geom_webmercator=True):
