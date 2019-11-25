@@ -14,7 +14,6 @@ def set_default_credentials(
     against a CARTO account. CARTOframes methods
     :py:class:`cartoframes.viz.Layer` (and helper layers in
     :py:mod:`cartoframes.viz.helpers`),
-    :py:class:`cartoframes.data.Dataset`,
     :py:class:`cartoframes.data.clients.SQLClient`, and others.
 
     Args:
