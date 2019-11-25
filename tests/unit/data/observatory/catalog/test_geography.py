@@ -120,7 +120,8 @@ class TestGeography(object):
     def test_geography_is_exported_as_dict(self):
         # Given
         geography = Geography(db_geography1)
-        expected_dict = {key: value for key, value in db_geography1.items() if key != 'summary_json'}
+        excluded_fields = ['summary_json', 'available_in']
+        expected_dict = {key: value for key, value in db_geography1.items() if key not in excluded_fields}
 
         # When
         geography_dict = geography.to_dict()
@@ -242,6 +243,28 @@ class TestGeography(object):
         response = dataset.download(credentials)
 
         assert response == file_path
+
+    @patch.object(GeographyRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
+    def test_geography_not_available_in_bq_download_fails(self, mocked_bq_client, mocked_repo):
+        # mock geography
+        mocked_repo.return_value = test_geography2
+
+        # mock big query client
+        file_path = 'fake_path'
+        mocked_bq_client.return_value = BigQueryClientMock(file_path)
+
+        # test
+        username = 'fake_user'
+        credentials = Credentials(username, '1234')
+
+        geography = Geography.get(test_geography2.id)
+
+        with pytest.raises(CartoException) as e:
+            geography.download(credentials)
+
+        error = '{} is not ready for Download. Please, contact us for more information.'.format(geography)
+        assert str(e.value) == error
 
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
@@ -377,3 +400,16 @@ class TestGeography(object):
 
         # Then
         assert str(e.value) == '`credentials` must be a Credentials class instance'
+
+    def test_geography_is_available_in(self):
+        geography_in_bq = Geography(db_geography1)
+        geography_not_in_bq = Geography(db_geography2)
+
+        assert geography_in_bq._is_available_in('bq')
+        assert not geography_not_in_bq._is_available_in('bq')
+
+    def test_geography_is_available_in_with_empty_field(self):
+        db_geography = dict(db_geography1)
+        db_geography['available_in'] = None
+        geography_null = Geography(db_geography)
+        assert not geography_null._is_available_in('bq')

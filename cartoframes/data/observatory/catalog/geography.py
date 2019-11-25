@@ -66,6 +66,12 @@ class Geography(CatalogEntity):
         return self.data['geom_coverage']
 
     @property
+    def geom_type(self):
+        """Info about the type of geometry of this geography."""
+
+        return self.data['geom_type']
+
+    @property
     def update_frequency(self):
         """Frequency in which the geography is updated."""
 
