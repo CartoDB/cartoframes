@@ -1,4 +1,4 @@
-import geocoding_utils
+from . import geocoding_utils
 
 
 class TableGeocodingLock:

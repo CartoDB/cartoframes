@@ -1,7 +1,7 @@
 
 import logging
 import hashlib
-import geocoding_constants
+from . import geocoding_constants
 
 __all__ = [
     'lock',
@@ -16,7 +16,7 @@ __all__ = [
     'geocode_query',
     'status_column',
     'column_assignment',
-    'status_assignment',
+    'status_assignment_columns',
     'hash_as_big_int',
     'set_pre_summary_info',
     'set_post_summary_info',
@@ -155,13 +155,13 @@ def geocode_query(table, street, city, state, country, status):
         batch_size=geocoding_constants.BATCH_SIZE
     )
 
-    assignment, columns = status_assignment(status)
+    status_assignment, status_columns = status_assignment_columns(status)
 
     query = """
         UPDATE {table}
         SET
             the_geom = _g.the_geom,
-            {assignment}
+            {status_assignment}
             {hash_column} = {hash_expression}
         FROM (SELECT * FROM {geocode_expression}) _g
         WHERE _g.cartodb_id = {table}.cartodb_id
@@ -170,10 +170,10 @@ def geocode_query(table, street, city, state, country, status):
         hash_column=geocoding_constants.HASH_COLUMN,
         hash_expression=hash_expression,
         geocode_expression=geocode_expression,
-        status_assignment=assignment
+        status_assignment=status_assignment
     )
 
-    return (query, columns)
+    return (query, status_columns)
 
 
 def status_column(column_name, field):
@@ -185,7 +185,7 @@ def column_assignment(column_name, value):
     return '{} = {},'.format(column_name, value)
 
 
-def status_assignment(status):
+def status_assignment_columns(status):
     status_assignment = ''
     status_columns = []
     if isinstance(status, dict):
