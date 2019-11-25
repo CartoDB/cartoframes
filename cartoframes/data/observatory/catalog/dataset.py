@@ -79,7 +79,7 @@ class Dataset(CatalogEntity):
 
     @property
     def variables(self):
-        """Get the list of :obj:`Variable` that correspond to this dataset. Variables are used in the
+        """Get the list of :obj:`Variable` that corresponds to this dataset. Variables are used in the
         :obj:`Enrichment` functions to augment your local `DataFrames` with columns from a `Dataset` in the
         Data Observatory.
 
@@ -226,11 +226,15 @@ class Dataset(CatalogEntity):
 
     @property
     def is_public_data(self):
-        """True if the content of this dataset can be accessed with public credentials.
-        False if it needs a subscription (:py:attr:`Dataset.subscription`) (AKA premium datasets).
+        """Allows to check if the content of this dataset can be accessed with
+        public credentials or if it is a premium dataset that needs a
+        subscription.
 
         Returns:
-            bool
+            A boolean value:
+                * ``True`` if the dataset is public
+                * ``False`` if the dataset is premium
+                    (it requires to :py:attr:`Dataset.subscribe`)
         """
 
         return self.data['is_public_data']

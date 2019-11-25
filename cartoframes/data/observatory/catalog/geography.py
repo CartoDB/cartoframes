@@ -149,10 +149,15 @@ class Geography(CatalogEntity):
 
     @property
     def is_public_data(self):
-        """True if the content of this geography can be accessed with public credentials.
-        False if it needs a subscription (:py:attr:`Geography.subscribe)` (AKA premium geographies).
+        """Allows to check if the content of this geography can be accessed
+        with public credentials or if it is a premium geography that needs
+        a subscription.
 
-        See the subscription guide for more details about accessing premium datasets and geographies.
+        Returns:
+            A boolean value:
+                * ``True`` if the geography is public
+                * ``False`` if the geography is premium
+                    (it requires to :py:attr:`Geography.subscribe`)
         """
 
         return self.data['is_public_data']
