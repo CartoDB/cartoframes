@@ -143,7 +143,8 @@ class TestDataset(object):
     def test_dataset_is_exported_as_dict(self):
         # Given
         dataset = Dataset(db_dataset1)
-        expected_dict = {key: value for key, value in db_dataset1.items() if key != 'summary_json'}
+        excluded_fields = ['summary_json', 'available_in']
+        expected_dict = {key: value for key, value in db_dataset1.items() if key not in excluded_fields}
 
         # When
         dataset_dict = dataset.to_dict()
@@ -265,6 +266,28 @@ class TestDataset(object):
         response = dataset.download(credentials)
 
         assert response == file_path
+
+    @patch.object(DatasetRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
+    def test_dataset_not_available_in_bq_download_fails(self, mocked_bq_client, mocked_repo):
+        # mock dataset
+        mocked_repo.return_value = test_dataset2
+
+        # mock big query client
+        file_path = 'fake_path'
+        mocked_bq_client.return_value = BigQueryClientMock(file_path)
+
+        # test
+        username = 'fake_user'
+        credentials = Credentials(username, '1234')
+
+        dataset = Dataset.get(test_dataset2.id)
+
+        with pytest.raises(CartoException) as e:
+            dataset.download(credentials)
+
+        error = '{} is not ready for Download. Please, contact us for more information.'.format(dataset)
+        assert str(e.value) == error
 
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
@@ -399,3 +422,16 @@ class TestDataset(object):
 
         # Then
         assert str(e.value) == '`credentials` must be a Credentials class instance'
+
+    def test_dataset_is_available_in(self):
+        dataset_in_bq = Dataset(db_dataset1)
+        dataset_not_in_bq = Dataset(db_dataset2)
+
+        assert dataset_in_bq._is_available_in('bq')
+        assert not dataset_not_in_bq._is_available_in('bq')
+
+    def test_dataset_is_available_in_with_empty_field(self):
+        db_dataset = dict(db_dataset1)
+        db_dataset['available_in'] = None
+        dataset_null = Dataset(db_dataset)
+        assert not dataset_null._is_available_in('bq')

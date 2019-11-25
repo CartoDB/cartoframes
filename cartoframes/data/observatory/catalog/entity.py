@@ -15,6 +15,7 @@ except ImportError:
     ABC = ABCMeta('ABC', (object,), {'__slots__': ()})
 
 _WORKING_PROJECT = 'carto-do-customers'
+_PLATFORM_BQ = 'bq'
 
 
 class CatalogEntity(ABC):
@@ -32,7 +33,7 @@ class CatalogEntity(ABC):
 
     id_field = 'id'
     _entity_repo = None
-    export_excluded_fields = ['summary_json']
+    export_excluded_fields = ['summary_json', 'available_in']
 
     def __init__(self, data):
         self.data = data
@@ -115,6 +116,9 @@ class CatalogEntity(ABC):
         return self.id
 
     def _download(self, credentials=None):
+        if not self._is_available_in('bq'):
+            raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
+
         credentials = self._get_credentials(credentials)
         user_dataset = credentials.get_do_user_dataset()
         bq_client = _get_bigquery_client(_WORKING_PROJECT, credentials)
@@ -131,6 +135,9 @@ class CatalogEntity(ABC):
         warn("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
 
         return file_path
+
+    def _is_available_in(self, platform=_PLATFORM_BQ):
+        return self.data['available_in'] and platform in self.data['available_in']
 
     def _get_credentials(self, credentials=None):
         _credentials = credentials or defaults.get_default_credentials()

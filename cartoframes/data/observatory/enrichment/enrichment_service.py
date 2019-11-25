@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from ..catalog.variable import Variable
 from ..catalog.dataset import Dataset
+from ..catalog.geography import Geography
 from ...clients import bigquery_client
 from ....auth import get_default_credentials
 from ....exceptions import EnrichmentException
@@ -239,7 +240,20 @@ def _prepare_variable(variable):
             Variable `id` property or Variable `slug` property
         """)
 
+    _is_available_in_bq(variable)
+
     return variable
+
+
+def _is_available_in_bq(variable):
+    dataset = Dataset.get(variable.dataset)
+    geography = Geography.get(dataset.geography)
+
+    if not (dataset._is_available_in('bq') and geography._is_available_in('bq')):
+        raise EnrichmentException("""
+            The Dataset or the Geography of the Variable '{}' is not ready for Enrichment.
+            Please, contact us for more information.
+        """.format(variable.slug))
 
 
 def get_variable_aggregations(variables, aggregation):

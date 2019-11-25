@@ -393,7 +393,7 @@ class Dataset(CatalogEntity):
         matched_geographies_ids = cls._join_geographies_geodataframes(catalog_geographies_gdf, user_gdf)
 
         # Get Dataset objects
-        return get_dataset_repo().get_all({'geography_id': matched_geographies_ids})
+        return get_dataset_repo().get_all({'geography_id': list(matched_geographies_ids)})
 
     @staticmethod
     def _get_user_geodataframe(filter_dataset):

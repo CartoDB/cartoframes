@@ -18,6 +18,10 @@ class CartoDataFrame(GeoDataFrame):
         gdf = GeoDataFrame.from_file(filename, **kwargs)
         return cls(gdf)
 
+    @property
+    def _constructor(self):
+        return CartoDataFrame
+
     @classmethod
     def from_features(cls, features, **kwargs):
         gdf = GeoDataFrame.from_features(features, **kwargs)

@@ -35,10 +35,12 @@ db_geography1 = {
     'country_id': 'esp',
     'lang': 'esp',
     'geom_coverage': '',
+    'geom_type': '',
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': True,
-    'summary_json': {}
+    'summary_json': {},
+    'available_in': ['bq']
 }
 db_geography2 = {
     'id': 'carto-do-public.tiger.geography_esp_municipalities_2019',
@@ -50,10 +52,12 @@ db_geography2 = {
     'country_id': 'esp',
     'lang': 'esp',
     'geom_coverage': '',
+    'geom_type': '',
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'summary_json': {}
+    'summary_json': {},
+    'available_in': []
 }
 test_geography1 = Geography(db_geography1)
 test_geography2 = Geography(db_geography2)
@@ -79,7 +83,8 @@ db_dataset1 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': True,
-    'summary_json': {}
+    'summary_json': {},
+    'available_in': ['bq']
 }
 db_dataset2 = {
     'id': 'carto-do-public.project.basicstats-municipalities',
@@ -101,7 +106,8 @@ db_dataset2 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'summary_json': {}
+    'summary_json': {},
+    'available_in': []
 }
 test_dataset1 = Dataset(db_dataset1)
 test_dataset2 = Dataset(db_dataset2)
