@@ -1,18 +1,29 @@
+from pandas import Series
 from geopandas import GeoDataFrame
 
 from ..utils.geom_utils import generate_index, generate_geometry
 
 
 class CartoDataFrame(GeoDataFrame):
-    def __init__(self, *args, **kwargs):
-        """
-        The CartoDataFrame class is an extension of the `geopandas.GeoDataFrame
-        <http://geopandas.org/reference/geopandas.GeoDataFrame.html>`_ class. It provides
-        powerful cartographic visualizations, geometry detection and decoding, and read / write
-        access to the CARTO platform.
-        """
+    """
+    The CartoDataFrame class is an extension of the `geopandas.GeoDataFrame
+    <http://geopandas.org/reference/geopandas.GeoDataFrame.html>`_ class. It provides
+    powerful cartographic visualizations, geometry detection and decoding, and read / write
+    access to the CARTO platform.
+    """
 
+    def __init__(self, *args, **kwargs):
         super(CartoDataFrame, self).__init__(*args, **kwargs)
+
+    def __getitem__(self, key):
+        result = GeoDataFrame.__getitem__(self, key)
+        if isinstance(key, Series):
+            result.__class__ = CartoDataFrame
+        return result
+
+    @property
+    def _constructor(self):
+        return CartoDataFrame
 
     @staticmethod
     def from_carto(*args, **kwargs):
@@ -45,7 +56,6 @@ class CartoDataFrame(GeoDataFrame):
 
                 cdf = CartoDataFrame.from_carto('SELECT * FROM table_name WHERE value > 100')
         """
-
         from ..io.carto import read_carto
         return read_carto(*args, **kwargs)
 
@@ -63,13 +73,9 @@ class CartoDataFrame(GeoDataFrame):
 
                 cdf = CartoDataFrame.from_file('nybb.shp')
         """
-
-        gdf = GeoDataFrame.from_file(filename, **kwargs)
-        return cls(gdf)
-
-    @property
-    def _constructor(self):
-        return CartoDataFrame
+        result = GeoDataFrame.from_file(filename, **kwargs)
+        result.__class__ = cls
+        return result
 
     @classmethod
     def from_features(cls, features, **kwargs):
@@ -85,9 +91,9 @@ class CartoDataFrame(GeoDataFrame):
 
                 cdf = CartoDataFrame.from_features('nybb.shp')
         """
-
-        gdf = GeoDataFrame.from_features(features, **kwargs)
-        return cls(gdf)
+        result = GeoDataFrame.from_features(features, **kwargs)
+        result.__class__ = cls
+        return result
 
     def to_carto(self, *args, **kwargs):
         """
@@ -106,7 +112,6 @@ class CartoDataFrame(GeoDataFrame):
                 cdf = CartoDataFrame.from_file('nybb.shp')
                 cdf.to_carto('table_name', if_exists='replace')
         """
-
         from ..io.carto import to_carto
         return to_carto(self, *args, **kwargs)
 
@@ -173,7 +178,6 @@ class CartoDataFrame(GeoDataFrame):
                 cdf.convert(index_column='my_index')
 
         """
-
         generate_index(self, index_column, drop_index)
         generate_geometry(self, geom_column, lnglat_columns, drop_geom, drop_lnglat)
         return self
@@ -182,6 +186,5 @@ class CartoDataFrame(GeoDataFrame):
         """
         Creates a :py:class:`Map <cartoframes.viz.Map>` visualization
         """
-
         from ..viz import Map, Layer
         return Map(Layer(self, *args, **kwargs))
