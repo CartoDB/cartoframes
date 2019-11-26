@@ -154,9 +154,9 @@ class Enrichment(EnrichmentService):
                 intersect with one or more polygons from the Data Observatory. With this method you can select how to
                 aggregate the resulting data. Options are:
                     - :py:attr:`Enrichment.AGGREGATION_DEFAULT` (default): Every
-                    :obj:`Variable` has an aggregation method in the
-                    Variable `agg_method` property and it will be used to aggregate the data. In case it is not
-                    defined, `array_agg` function will be used.
+                    :obj:`Variable` has an aggregation method in the Variable `agg_method` property and it will be
+                    used to aggregate the data (some variables does not have `agg_method` defined and in this cases,
+                    the variable will be skipped).
                     - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
                     you will receive an array with all the data from each polygon instersected.
                     - list of :obj:`VariableAggregation`: if you want to overwrite some default
@@ -257,7 +257,7 @@ class Enrichment(EnrichmentService):
 
                 catalog = Catalog()
                 variable = catalog.country('usa').category('demographics').datasets[0].variables[0]
-                filter = VariableFilter(variable, '=', '2019-09-01')
+                filter = VariableFilter(variable, "= '2019-09-01'")
 
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_polygons(df, variables=[variable], filters=[filter])

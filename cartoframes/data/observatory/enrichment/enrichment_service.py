@@ -272,11 +272,11 @@ def __get_aggregation(variable, aggregation):
     if aggregation == AGGREGATION_NONE:
         return None
     elif aggregation == AGGREGATION_DEFAULT:
-        return variable.agg_method or 'array_agg'
+        return variable.agg_method
     elif isinstance(aggregation, str):
         return aggregation
     elif isinstance(aggregation, list):
-        agg = variable.agg_method or 'array_agg'
+        agg = variable.agg_method
         for variable_aggregation in aggregation:
             if variable_aggregation.variable == variable:
                 agg = variable_aggregation.aggregation
