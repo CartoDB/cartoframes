@@ -6,10 +6,10 @@ from ..utils.geom_utils import generate_index, generate_geometry
 class CartoDataFrame(GeoDataFrame):
     def __init__(self, *args, **kwargs):
         """
-        A CartoDataFrame object is a
-        `geopandas.GeoDataFrame <http://geopandas.org/reference/geopandas.GeoDataFrame.html>`_
-        that has a column with geometry. It extends the GeoDataFrame object to read and
-        write data from CARTO, adding wrappers when necessary.
+        The CartoDataFrame class is an extension of the `geopandas.GeoDataFrame
+        <http://geopandas.org/reference/geopandas.GeoDataFrame.html>`_ class. It provides
+        powerful cartographic visualizations, geometry detection and decoding, and read / write
+        access to the CARTO platform.
         """
 
         super(CartoDataFrame, self).__init__(*args, **kwargs)
@@ -18,6 +18,7 @@ class CartoDataFrame(GeoDataFrame):
     def from_carto(*args, **kwargs):
         """
         Alternate constructor to create a CartoDataFrame from a table or SQL query in CARTO.
+        It is needed to set up the :py:class:`cartoframes.auth.Credentials`.
         Equivalent to :py:meth:`read_carto <cartoframes.io.read_carto>`.
 
         Examples:
@@ -27,6 +28,9 @@ class CartoDataFrame(GeoDataFrame):
             .. code::
 
                 from cartoframes import CartoDataFrame
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials('your_user_name', 'your api key')
 
                 cdf = CartoDataFrame.from_carto('table_name')
 
@@ -35,6 +39,9 @@ class CartoDataFrame(GeoDataFrame):
             .. code::
 
                 from cartoframes import CartoDataFrame
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials('your_user_name', 'your api key')
 
                 cdf = CartoDataFrame.from_carto('SELECT * FROM table_name WHERE value > 100')
         """
@@ -80,16 +87,20 @@ class CartoDataFrame(GeoDataFrame):
 
     def to_carto(self, *args, **kwargs):
         """
-        Upload a CartoDataFrame to CARTO.
+        Upload a CartoDataFrame to CARTO. It is needed to set up the
+        :py:class:`cartoframes.auth.Credentials`.
         Equivalent to :py:meth:`to_carto <cartoframes.io.to_carto>`.
 
         Examples:
 
             .. code::
                 from cartoframes import CartoDataFrame
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials('your_user_name', 'your api key')
 
                 cdf = CartoDataFrame.from_file('nybb.shp')
-                cdf.to_carto(if_exists='replace')
+                cdf.to_carto('table_name', if_exists='replace')
         """
 
         from ..io.carto import to_carto
@@ -165,7 +176,7 @@ class CartoDataFrame(GeoDataFrame):
 
     def viz(self, *args, **kwargs):
         """
-        Creates a :py:class:`Map <cartoframes.viz.Map>`. visualization
+        Creates a :py:class:`Map <cartoframes.viz.Map>` visualization
         """
 
         from ..viz import Map, Layer

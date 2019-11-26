@@ -116,8 +116,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.skip(if_no_credits=True, if_no_credentials=True)
         iso = Isolines(credentials=self.credentials)
 
-        df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
-        cdf = CartoDataFrame(df, credentials=self.credentials)
+        cdf = CartoDataFrame(self.points, columns=['name', 'the_geom'])
 
         quota = self.used_quota(iso)
 
@@ -141,15 +140,14 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('cartodb_id' in result.dataframe)
         self.assertTrue('source_id' in result_columns)
         self.assertTrue('source_id' in result.dataframe)
-        self.assertEqual(result.dataframe['source_id'].min(), df.index.min())
-        self.assertEqual(result.dataframe['source_id'].max(), df.index.max())
+        self.assertEqual(result.dataframe['source_id'].min(), cdf.index.min())
+        self.assertEqual(result.dataframe['source_id'].max(), cdf.index.max())
 
     def test_isochrones_from_dataframe_dataset_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
         iso = Isolines(credentials=self.credentials)
 
-        df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
-        cdf = CartoDataFrame(df, credentials=self.credentials)
+        cdf = CartoDataFrame(self.points, columns=['name', 'the_geom'])
 
         quota = self.used_quota(iso)
 
@@ -223,7 +221,8 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('data_range' in result)
         self.assertEqual(len(result.index), 6)
 
-        cdf = CartoDataFrame.from_carto(table_name, credentials=self.credentials)
+        cdf = CartoDataFrame.from_carto(table_name)
+
         result_columns = cdf.columns
         self.assertTrue('the_geom' in result_columns)
         self.assertTrue('data_range' in result_columns)
@@ -236,7 +235,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
         table_name = self.get_test_table_name('isotb')
-        cdf = CartoDataFrame.to_carto(df, table_name=table_name, credentials=self.credentials)
+        cdf = CartoDataFrame.to_carto(df, table_name=table_name)
 
         quota = self.used_quota(iso)
 
@@ -266,7 +265,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
         table_name = self.get_test_table_name('isotb')
-        cdf = CartoDataFrame.to_carto(df, table_name=table_name, credentials=self.credentials)
+        cdf = CartoDataFrame.to_carto(df, table_name=table_name)
 
         result_table_name = self.get_test_table_name('isotbr')
 
@@ -321,7 +320,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.skip(if_no_credits=True, if_no_credentials=True)
         iso = Isolines(credentials=self.credentials)
 
-        cdf = CartoDataFrame.from_carto(self.points_query(), credentials=self.credentials)
+        cdf = CartoDataFrame.from_carto(self.points_query())
 
         quota = self.used_quota(iso)
 
@@ -349,7 +348,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.skip(if_no_credits=True, if_no_credentials=True)
         iso = Isolines(credentials=self.credentials)
 
-        cdf = CartoDataFrame.from_carto(self.points_query(), credentials=self.credentials)
+        cdf = CartoDataFrame.from_carto(self.points_query())
 
         result_table_name = self.get_test_table_name('isotbr')
 
@@ -399,8 +398,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.skip(if_no_credits=True, if_no_credentials=True)
         iso = Isolines(credentials=self.credentials)
 
-        df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
-        cdf = CartoDataFrame(df, credentials=self.credentials)
+        cdf = CartoDataFrame(self.points, columns=['name', 'the_geom'])
 
         quota = self.used_quota(iso)
 
