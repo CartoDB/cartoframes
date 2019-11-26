@@ -71,7 +71,7 @@ class CartoDataFrame(GeoDataFrame):
             .. code::
                 cdf = CartoDataFrame(data).convert()
 
-            Passing the geometry column explititely:
+            Passing the geometry column explicitly:
 
             .. code::
                 cdf = CartoDataFrame(data)
