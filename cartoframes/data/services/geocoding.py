@@ -38,8 +38,8 @@ class Geocoding(Service):
         dataframe.to_csv('my_data')
 
     As an alternative you can use the ``cached`` option to store geocoding results in a CARTO table
-    and reuse them in later geocodings. The parameter is the name of the table used to cache the results,
-    and can be used with dataframe or query datasets.
+    and reuse them in later geocodings. It is needed to use the ``table_name`` parameter with the name
+    of the table used to cache the results.
 
     If the same dataframe if geocoded repeatedly no credits will be spent, but note there is a time overhead
     related to uploading the dataframe to a temporary table for checking for changes.
@@ -47,7 +47,7 @@ class Geocoding(Service):
     .. code:: python
 
         dataframe = pandas.read_csv('my_data')
-        dataframe = Geocoding().geocode(dataframe, 'address', cached='my_data').data
+        dataframe = Geocoding().geocode(dataframe, 'address', table_name='my_data', cached=True).data
 
     If you execute the previous code multiple times it will only spend credits on the first geocoding;
     later ones will reuse the results stored in the ``my_data`` table. This will require extra processing
@@ -93,8 +93,8 @@ class Geocoding(Service):
             if_exists (str, optional): Behavior for creating new datasets, only applicable
                 if table_name isn't None;
                 Options are 'fail', 'replace', or 'append'. Defaults to 'fail'.
-            cached (str, optional): name of a table used cache geocoding results.
-                This parameter is not compatbile with table_name.
+            cached (bool, optional): Use cache geocoding results, saving the results in a
+                table. This parameter should be used along with ``table_name``.
             dry_run (bool, optional): no actual geocoding will be performed (useful to
                 check the needed quota)
 
@@ -222,9 +222,9 @@ class Geocoding(Service):
         self.columns = self._source_manager.get_column_names()
 
         if cached:
-            if table_name:
-                raise ValueError('tablecached geocoding is not compatible with parameters "table_name"')
-            return self._cached_geocode(source, cached, street, city=city, state=state, country=country,
+            if not table_name:
+                raise ValueError('There is no "table_name" to cache the data')
+            return self._cached_geocode(source, table_name, street, city=city, state=state, country=country,
                                         dry_run=dry_run)
 
         city, state, country = [
