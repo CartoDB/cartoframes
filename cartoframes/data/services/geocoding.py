@@ -51,7 +51,7 @@ class Geocoding(Service):
 
     If you execute the previous code multiple times it will only spend credits on the first geocoding;
     later ones will reuse the results stored in the ``my_data`` table. This will require extra processing
-    time. If the csv file should ever change, cached results will only be applied to unmodified
+    time. If the CSV file should ever change, cached results will only be applied to unmodified
     records, and new geocoding will be performed only on new or changed records.
     """
 
