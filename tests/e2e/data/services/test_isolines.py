@@ -221,7 +221,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('data_range' in result)
         self.assertEqual(len(result.index), 6)
 
-        cdf = CartoDataFrame.from_carto(table_name)
+        cdf = CartoDataFrame.from_carto(table_name, credentials=self.credentials)
 
         result_columns = cdf.columns
         self.assertTrue('the_geom' in result_columns)
@@ -235,7 +235,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
         table_name = self.get_test_table_name('isotb')
-        cdf = CartoDataFrame.to_carto(df, table_name=table_name)
+        cdf = CartoDataFrame.to_carto(df, table_name=table_name, credentials=self.credentials)
 
         quota = self.used_quota(iso)
 
@@ -320,7 +320,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.skip(if_no_credits=True, if_no_credentials=True)
         iso = Isolines(credentials=self.credentials)
 
-        cdf = CartoDataFrame.from_carto(self.points_query())
+        cdf = CartoDataFrame.from_carto(self.points_query(), credentials=self.credentials)
 
         quota = self.used_quota(iso)
 
