@@ -97,7 +97,7 @@ class CartoDataFrame(GeoDataFrame):
 
     def convert(self, index_column=None, geom_column=None, lnglat_columns=None,
                 drop_index=True, drop_geom=True, drop_lnglat=True):
-        """
+        """ For internal usage only.
         Tries to decode the geometry automatically as a `shapely https://pypi.org/project/Shapely/_.`
         object by looking for coordinates in columns.
 
