@@ -32,6 +32,7 @@ class CartoDataFrame(GeoDataFrame):
         Examples:
 
             .. code::
+
                 from cartoframes import CartoDataFrame
 
                 cdf = CartoDataFrame.from_file('nybb.shp')
@@ -53,6 +54,7 @@ class CartoDataFrame(GeoDataFrame):
         Examples:
 
             .. code::
+
                 cdf.to_carto(if_exists='replace')
         """
 
@@ -69,11 +71,13 @@ class CartoDataFrame(GeoDataFrame):
             Decode the geometry automatically:
 
             .. code::
+
                 cdf = CartoDataFrame(data).convert()
 
             Passing the geometry column explititely:
 
             .. code::
+
                 cdf = CartoDataFrame(data)
                 cdf.convert(geom_column='my_geom_column')
         """
