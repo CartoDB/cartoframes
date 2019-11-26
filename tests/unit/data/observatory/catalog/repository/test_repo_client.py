@@ -1,4 +1,4 @@
-from cartoframes.data.clients import SQLClient
+from cartoframes.core.managers.context_manager import ContextManager
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 
 from ..examples import db_dataset1, db_dataset2
@@ -11,10 +11,10 @@ except ImportError:
 
 class TestRepoClient(object):
 
-    @patch.object(SQLClient, 'query')
+    @patch.object(ContextManager, 'execute_query')
     def test_run_query_with_one_filter(self, mocked_client):
         # Given
-        mocked_client.return_value = [db_dataset1, db_dataset2]
+        mocked_client.return_value = {'rows': [db_dataset1, db_dataset2]}
         repo = RepoClient()
         query = 'SELECT t.* FROM datasets t'
         filters = {'category_id': 'demographics'}
@@ -27,10 +27,10 @@ class TestRepoClient(object):
         mocked_client.assert_called_once_with(expected_query)
         assert categories == [db_dataset1, db_dataset2]
 
-    @patch.object(SQLClient, 'query')
+    @patch.object(ContextManager, 'execute_query')
     def test_run_query_with_multiple_filter(self, mocked_client):
         # Given
-        mocked_client.return_value = [db_dataset1, db_dataset2]
+        mocked_client.return_value = {'rows': [db_dataset1, db_dataset2]}
         repo = RepoClient()
         query = 'SELECT t.* FROM datasets t'
         filters = {
@@ -50,10 +50,10 @@ class TestRepoClient(object):
         assert expected_filter_country in actual_query
         assert datasets == [db_dataset1, db_dataset2]
 
-    @patch.object(SQLClient, 'query')
+    @patch.object(ContextManager, 'execute_query')
     def test_run_query_with_id_list(self, mocked_client):
         # Given
-        mocked_client.return_value = [db_dataset1, db_dataset2]
+        mocked_client.return_value = {'rows': [db_dataset1, db_dataset2]}
         repo = RepoClient()
         query = 'SELECT t.* FROM datasets t'
         filters = {'id': ['carto-do.dataset.census', 'carto-do.dataset.municipalities']}

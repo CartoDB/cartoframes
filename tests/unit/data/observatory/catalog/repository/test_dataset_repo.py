@@ -4,7 +4,7 @@ from cartoframes.auth import Credentials
 
 from cartoframes.exceptions import DiscoveryException
 from cartoframes.data.observatory.catalog.entity import CatalogList
-from cartoframes.data.observatory.catalog.dataset import CatalogDataset
+from cartoframes.data.observatory.catalog.dataset import Dataset
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 from ..examples import test_dataset1, test_datasets, db_dataset1, db_dataset2
@@ -176,7 +176,7 @@ class TestDatasetRepo(object):
         mocked_repo.return_value = [{'id': 'dataset1'}]
         repo = DatasetRepository()
 
-        expected_datasets = CatalogList([CatalogDataset({
+        expected_datasets = CatalogList([Dataset({
             'id': 'dataset1',
             'slug': None,
             'name': None,
@@ -196,7 +196,8 @@ class TestDatasetRepo(object):
             'update_frequency': None,
             'version': None,
             'is_public_data': None,
-            'summary_json': None
+            'summary_json': None,
+            'available_in': None
         })])
 
         # When

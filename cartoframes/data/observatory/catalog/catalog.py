@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .dataset import CatalogDataset
+from .dataset import Dataset
 from .entity import is_slug_value
 from .category import Category
 from .country import Country
@@ -48,7 +48,7 @@ class Catalog(object):
 
         """
 
-        return CatalogDataset.get_all(self.filters)
+        return Dataset.get_all(self.filters)
 
     @property
     def geographies(self):
@@ -142,7 +142,7 @@ class Catalog(object):
                 <cartoframes.auth.set_default_credentials>`) will be used.
 
         Returns:
-            :py:class:`CatalogDatasets <cartoframes.data.observatory.CatalogDatasets>`
+            :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
 
         """
 
@@ -153,7 +153,7 @@ class Catalog(object):
             raise ValueError('`credentials` must be a Credentials class instance')
 
         return Subscriptions(
-            CatalogDataset.get_all(_no_filters, _credentials),
+            Dataset.get_all(_no_filters, _credentials),
             Geography.get_all(_no_filters, _credentials)
         )
 
@@ -163,4 +163,4 @@ class Catalog(object):
             :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
         """
 
-        return CatalogDataset.get_datasets_spatial_filtered(filter_dataset)
+        return Dataset.get_datasets_spatial_filtered(filter_dataset)

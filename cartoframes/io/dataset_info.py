@@ -6,11 +6,12 @@ from warnings import warn
 from carto.datasets import DatasetManager
 from carto.exceptions import CartoException
 
-from ...utils.columns import normalize_name
-from ...utils.geom_utils import setting_value_exception
+from ..utils.columns import normalize_name
 
 from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
+
+# TODO: refactor
 
 
 class DatasetInfo(object):
@@ -23,8 +24,8 @@ class DatasetInfo(object):
     PRIVACY_LINK = 'LINK'
     """Dataset privacy for datasets that are accessible by link"""
 
-    def __init__(self, context, table_name):
-        self._metadata = self._get_metadata(context, table_name)
+    def __init__(self, auth_client, table_name):
+        self._metadata = self._get_metadata(auth_client, table_name)
         self._privacy = self._metadata.privacy
         self._table_name = self._metadata.name
 
@@ -63,8 +64,8 @@ class DatasetInfo(object):
         if modified:
             self._save_metadata()
 
-    def _get_metadata(self, context, table_name, retries=6, retry_wait_time=1):
-        ds_manager = DatasetManager(context.auth_client)
+    def _get_metadata(self, auth_client, table_name, retries=6, retry_wait_time=1):
+        ds_manager = DatasetManager(auth_client)
         try:
             return ds_manager.get(table_name)
         except Exception as e:
@@ -72,7 +73,7 @@ class DatasetInfo(object):
                 # if retry_wait_time > 7: # it should be after more than 15 seconds
                 # warn('We are still procesing the CARTO table. Sorry for the delay.')
                 time.sleep(retry_wait_time)
-                self._get_metadata(context=context, table_name=table_name,
+                self._get_metadata(auth_client=auth_client, table_name=table_name,
                                    retries=retries-1, retry_wait_time=retry_wait_time*2)
             else:
                 raise CartoException('We could not get the table metadata. '
@@ -99,3 +100,8 @@ class DatasetInfo(object):
             return True
 
         return False
+
+
+def setting_value_exception(prop, value):
+    return CartoException(("Error setting {prop}. You must use the `update` method: "
+                           "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))

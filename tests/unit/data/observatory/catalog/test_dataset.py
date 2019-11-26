@@ -7,7 +7,7 @@ from carto.exceptions import CartoException
 
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory.catalog.entity import CatalogList
-from cartoframes.data.observatory.catalog.dataset import CatalogDataset
+from cartoframes.data.observatory.catalog.dataset import Dataset
 from cartoframes.data.observatory.catalog.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.catalog.repository.variable_group_repo import VariableGroupRepository
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
@@ -30,11 +30,11 @@ class TestDataset(object):
         mocked_repo.return_value = test_dataset1
 
         # When
-        dataset = CatalogDataset.get(test_dataset1.id)
+        dataset = Dataset.get(test_dataset1.id)
 
         # Then
         assert isinstance(dataset, object)
-        assert isinstance(dataset, CatalogDataset)
+        assert isinstance(dataset, Dataset)
         assert dataset == test_dataset1
 
     def test_get_dataset_by_id_from_datasets_list(self):
@@ -46,7 +46,7 @@ class TestDataset(object):
 
         # Then
         assert isinstance(dataset, object)
-        assert isinstance(dataset, CatalogDataset)
+        assert isinstance(dataset, Dataset)
         assert dataset == test_dataset1
 
     def test_get_dataset_by_slug_from_datasets_list(self):
@@ -58,7 +58,7 @@ class TestDataset(object):
 
         # Then
         assert isinstance(dataset, object)
-        assert isinstance(dataset, CatalogDataset)
+        assert isinstance(dataset, Dataset)
         assert dataset == test_dataset1
 
     @patch.object(VariableRepository, 'get_all')
@@ -91,7 +91,7 @@ class TestDataset(object):
 
     def test_dataset_properties(self):
         # Given
-        dataset = CatalogDataset(db_dataset1)
+        dataset = Dataset(db_dataset1)
 
         # When
         dataset_id = dataset.id
@@ -142,8 +142,9 @@ class TestDataset(object):
 
     def test_dataset_is_exported_as_dict(self):
         # Given
-        dataset = CatalogDataset(db_dataset1)
-        expected_dict = {key: value for key, value in db_dataset1.items() if key != 'summary_json'}
+        dataset = Dataset(db_dataset1)
+        excluded_fields = ['summary_json', 'available_in']
+        expected_dict = {key: value for key, value in db_dataset1.items() if key not in excluded_fields}
 
         # When
         dataset_dict = dataset.to_dict()
@@ -154,23 +155,23 @@ class TestDataset(object):
 
     def test_dataset_is_represented_with_classname_and_slug(self):
         # Given
-        dataset = CatalogDataset(db_dataset1)
+        dataset = Dataset(db_dataset1)
 
         # When
         dataset_repr = repr(dataset)
 
         # Then
-        assert dataset_repr == "<CatalogDataset('{id}')>".format(id=db_dataset1['slug'])
+        assert dataset_repr == "<Dataset('{id}')>".format(id=db_dataset1['slug'])
 
     def test_dataset_is_printed_with_classname(self):
         # Given
-        dataset = CatalogDataset(db_dataset1)
+        dataset = Dataset(db_dataset1)
 
         # When
         dataset_str = str(dataset)
 
         # Then
-        assert dataset_str == 'CatalogDataset({dict_str})'.format(dict_str=str(db_dataset1))
+        assert dataset_str == 'Dataset({dict_str})'.format(dict_str=str(db_dataset1))
 
     @patch.object(DatasetRepository, 'get_all')
     def test_get_all_datasets(self, mocked_repo):
@@ -178,7 +179,7 @@ class TestDataset(object):
         mocked_repo.return_value = test_datasets
 
         # When
-        datasets = CatalogDataset.get_all()
+        datasets = Dataset.get_all()
 
         # Then
         assert isinstance(datasets, list)
@@ -192,7 +193,7 @@ class TestDataset(object):
         credentials = Credentials('user', '1234')
 
         # When
-        datasets = CatalogDataset.get_all(credentials=credentials)
+        datasets = Dataset.get_all(credentials=credentials)
 
         # Then
         mocked_repo.assert_called_once_with(None, credentials)
@@ -208,7 +209,7 @@ class TestDataset(object):
         datasets_str = str(datasets)
 
         # Then
-        assert datasets_str == "[<CatalogDataset('{id1}')>, <CatalogDataset('{id2}')>]"\
+        assert datasets_str == "[<Dataset('{id1}')>, <Dataset('{id2}')>]"\
                                .format(id1=db_dataset1['slug'], id2=db_dataset2['slug'])
 
     def test_dataset_list_is_represented_with_classname_and_slugs(self):
@@ -219,7 +220,7 @@ class TestDataset(object):
         datasets_repr = repr(datasets)
 
         # Then
-        assert datasets_repr == "[<CatalogDataset('{id1}')>, <CatalogDataset('{id2}')>]"\
+        assert datasets_repr == "[<Dataset('{id1}')>, <Dataset('{id2}')>]"\
                                 .format(id1=db_dataset1['slug'], id2=db_dataset2['slug'])
 
     def test_datasets_items_are_obtained_as_dataset(self):
@@ -230,7 +231,7 @@ class TestDataset(object):
         dataset = datasets[0]
 
         # Then
-        assert isinstance(dataset, CatalogDataset)
+        assert isinstance(dataset, Dataset)
         assert dataset == test_dataset1
 
     def test_datasets_are_exported_as_dataframe(self):
@@ -261,10 +262,32 @@ class TestDataset(object):
         username = 'fake_user'
         credentials = Credentials(username, '1234')
 
-        dataset = CatalogDataset.get(test_dataset1.id)
+        dataset = Dataset.get(test_dataset1.id)
         response = dataset.download(credentials)
 
         assert response == file_path
+
+    @patch.object(DatasetRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
+    def test_dataset_not_available_in_bq_download_fails(self, mocked_bq_client, mocked_repo):
+        # mock dataset
+        mocked_repo.return_value = test_dataset2
+
+        # mock big query client
+        file_path = 'fake_path'
+        mocked_bq_client.return_value = BigQueryClientMock(file_path)
+
+        # test
+        username = 'fake_user'
+        credentials = Credentials(username, '1234')
+
+        dataset = Dataset.get(test_dataset2.id)
+
+        with pytest.raises(CartoException) as e:
+            dataset.download(credentials)
+
+        error = '{} is not ready for Download. Please, contact us for more information.'.format(dataset)
+        assert str(e.value) == error
 
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
@@ -279,7 +302,7 @@ class TestDataset(object):
         username = 'fake_user'
         credentials = Credentials(username, '1234')
 
-        dataset = CatalogDataset.get(test_dataset1.id)
+        dataset = Dataset.get(test_dataset1.id)
         with pytest.raises(CartoException):
             dataset.download(credentials)
 
@@ -292,7 +315,7 @@ class TestDataset(object):
         expected_subscribed_ids = []
         mock_subscription_ids.return_value = expected_subscribed_ids
         credentials = Credentials('user', '1234')
-        dataset = CatalogDataset(db_dataset1)
+        dataset = Dataset(db_dataset1)
 
         # When
         dataset.subscribe(credentials)
@@ -311,7 +334,7 @@ class TestDataset(object):
         expected_subscribed_ids = [expected_id]
         mock_subscription_ids.return_value = expected_subscribed_ids
         credentials = Credentials('user', '1234')
-        dataset = CatalogDataset(db_dataset1)
+        dataset = Dataset(db_dataset1)
 
         # When
         dataset.subscribe(credentials)
@@ -328,7 +351,7 @@ class TestDataset(object):
         # Given
         expected_credentials = Credentials('user', '1234')
         mocked_credentials.return_value = expected_credentials
-        dataset = CatalogDataset(db_dataset1)
+        dataset = Dataset(db_dataset1)
 
         # When
         dataset.subscribe()
@@ -340,7 +363,7 @@ class TestDataset(object):
     def test_dataset_subscribe_wrong_credentials(self):
         # Given
         wrong_credentials = 1234
-        dataset = CatalogDataset(db_dataset1)
+        dataset = Dataset(db_dataset1)
 
         # When
         with pytest.raises(ValueError) as e:
@@ -354,7 +377,7 @@ class TestDataset(object):
         # Given
         mock_fetch.return_value = test_subscription_info
         credentials = Credentials('user', '1234')
-        dataset = CatalogDataset(db_dataset1)
+        dataset = Dataset(db_dataset1)
 
         # When
         info = dataset.subscription_info(credentials)
@@ -380,7 +403,7 @@ class TestDataset(object):
         # Given
         expected_credentials = Credentials('user', '1234')
         mocked_credentials.return_value = expected_credentials
-        dataset = CatalogDataset(db_dataset1)
+        dataset = Dataset(db_dataset1)
 
         # When
         dataset.subscription_info()
@@ -391,7 +414,7 @@ class TestDataset(object):
     def test_dataset_subscription_info_wrong_credentials(self):
         # Given
         wrong_credentials = 1234
-        dataset = CatalogDataset(db_dataset1)
+        dataset = Dataset(db_dataset1)
 
         # When
         with pytest.raises(ValueError) as e:
@@ -399,3 +422,16 @@ class TestDataset(object):
 
         # Then
         assert str(e.value) == '`credentials` must be a Credentials class instance'
+
+    def test_dataset_is_available_in(self):
+        dataset_in_bq = Dataset(db_dataset1)
+        dataset_not_in_bq = Dataset(db_dataset2)
+
+        assert dataset_in_bq._is_available_in('bq')
+        assert not dataset_not_in_bq._is_available_in('bq')
+
+    def test_dataset_is_available_in_with_empty_field(self):
+        db_dataset = dict(db_dataset1)
+        db_dataset['available_in'] = None
+        dataset_null = Dataset(db_dataset)
+        assert not dataset_null._is_available_in('bq')

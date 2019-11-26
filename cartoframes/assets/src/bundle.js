@@ -11,7 +11,7 @@ var init = (function () {
     compact: false
   });
 
-  const FIT_BOUNDS_SETTINGS = { animate: false, padding: 50, maxZoom: 14 };
+  const FIT_BOUNDS_SETTINGS = { animate: false, padding: 50, maxZoom: 16 };
 
   function format(value) {
     if (Array.isArray(value)) {

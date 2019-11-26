@@ -1,12 +1,11 @@
 from __future__ import absolute_import
 
-import geopandas as gpd
-
-from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
 
 from .constants import COUNTRY_FILTER, CATEGORY_FILTER
 from .entity_repo import EntityRepository
+
+from .....io.carto import read_carto
 
 
 _GEOGRAPHY_ID_FIELD = 'id'
@@ -53,17 +52,17 @@ class GeographyRepository(EntityRepository):
             'provider_name': self._normalize_field(row, 'provider_name'),
             'lang': self._normalize_field(row, 'lang'),
             'geom_coverage': self._normalize_field(row, 'geom_coverage'),
+            'geom_type': self._normalize_field(row, 'geom_type'),
             'update_frequency': self._normalize_field(row, 'update_frequency'),
             'version': self._normalize_field(row, 'version'),
             'is_public_data': self._normalize_field(row, 'is_public_data'),
-            'summary_json': self._normalize_field(row, 'summary_json')
+            'summary_json': self._normalize_field(row, 'summary_json'),
+            'available_in': self._normalize_field(row, 'available_in')
         }
 
     def get_geographies_gdf(self):
         query = 'select id, geom_coverage as the_geom from geographies_public where geom_coverage is not null'
-        df = Dataset(query, credentials=_DO_CREDENTIALS).download(decode_geom=True)
-
-        return gpd.GeoDataFrame(df, geometry='geometry')
+        return read_carto(query, _DO_CREDENTIALS)
 
 
 _REPO = GeographyRepository()

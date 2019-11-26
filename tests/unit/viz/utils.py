@@ -1,6 +1,6 @@
 from pandas import DataFrame
 
-from cartoframes.utils.geom_utils import geodataframe_from_dataframe
+from cartoframes import CartoDataFrame
 
 
 def build_geodataframe(lats, lngs, extra_columns=[]):
@@ -11,9 +11,7 @@ def build_geodataframe(lats, lngs, extra_columns=[]):
     for extra_column in extra_columns:
         columns[extra_column] = lats
 
-    dataframe = DataFrame(columns)
-
-    return geodataframe_from_dataframe(dataframe)
+    return CartoDataFrame(columns).convert()
 
 
 def simple_dataframe(extra_columns=[]):

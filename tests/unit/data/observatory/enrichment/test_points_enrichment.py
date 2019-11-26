@@ -1,6 +1,6 @@
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
-from cartoframes.data.observatory import Enrichment, Variable, CatalogDataset, VariableFilter
+from cartoframes.data.observatory import Enrichment, Variable, Dataset, VariableFilter
 
 try:
     from unittest.mock import Mock, patch
@@ -27,12 +27,11 @@ class TestPointsEnrichment(object):
         self.username = None
         BigQueryClient._init_client = self.original_init_client
 
-    @patch.object(CatalogDataset, 'get')
+    @patch.object(Dataset, 'get')
     def test_enrichment_query_by_points_one_variable(self, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
-        data_geom_column = 'the_geom'
         project = 'project'
         dataset = 'dataset'
         table = 'table'
@@ -54,11 +53,11 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, []
+            temp_table_name, variables, []
         )
 
         expected_queries = [
-            get_query([column], self.username, view, geo_view, temp_table_name, data_geom_column, area_name)
+            get_query([column], self.username, view, geo_view, temp_table_name, area_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -66,12 +65,11 @@ class TestPointsEnrichment(object):
 
         assert actual == expected
 
-    @patch.object(CatalogDataset, 'get')
+    @patch.object(Dataset, 'get')
     def test_enrichment_query_by_points_two_variables(self, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
-        data_geom_column = 'the_geom'
         project = 'project'
         dataset = 'dataset'
         table = 'table'
@@ -100,11 +98,11 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, []
+            temp_table_name, variables, []
         )
 
         expected_queries = [
-            get_query([column1, column2], self.username, view, geo_view, temp_table_name, data_geom_column, area_name)
+            get_query([column1, column2], self.username, view, geo_view, temp_table_name, area_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -112,12 +110,11 @@ class TestPointsEnrichment(object):
 
         assert actual == expected
 
-    @patch.object(CatalogDataset, 'get')
+    @patch.object(Dataset, 'get')
     def test_enrichment_query_by_points_two_variables_different_tables(self, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
-        data_geom_column = 'the_geom'
         project = 'project'
         dataset = 'dataset'
         table1 = 'table1'
@@ -149,12 +146,12 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, []
+            temp_table_name, variables, []
         )
 
         expected_queries = [
-            get_query([column1], self.username, view1, geo_view, temp_table_name, data_geom_column, area_name1),
-            get_query([column2], self.username, view2, geo_view, temp_table_name, data_geom_column, area_name2)
+            get_query([column1], self.username, view1, geo_view, temp_table_name, area_name1),
+            get_query([column2], self.username, view2, geo_view, temp_table_name, area_name2)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -162,12 +159,11 @@ class TestPointsEnrichment(object):
 
         assert actual == expected
 
-    @patch.object(CatalogDataset, 'get')
+    @patch.object(Dataset, 'get')
     def test_enrichment_query_by_points_two_variables_different_datasets(self, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
-        data_geom_column = 'the_geom'
         project = 'project'
         dataset1 = 'dataset1'
         dataset2 = 'dataset2'
@@ -200,12 +196,12 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, []
+            temp_table_name, variables, []
         )
 
         expected_queries = [
-            get_query([column1], self.username, view1, geo_view, temp_table_name, data_geom_column, area_name1),
-            get_query([column2], self.username, view2, geo_view, temp_table_name, data_geom_column, area_name2)
+            get_query([column1], self.username, view1, geo_view, temp_table_name, area_name1),
+            get_query([column2], self.username, view2, geo_view, temp_table_name, area_name2)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -213,12 +209,14 @@ class TestPointsEnrichment(object):
 
         assert actual == expected
 
-    @patch.object(CatalogDataset, 'get')
-    def test_enrichment_query_by_points_with_filters(self, dataset_get_mock):
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch.object(Dataset, 'get')
+    def test_enrichment_query_by_points_with_filters(self, dataset_get_mock, _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
-        data_geom_column = 'the_geom'
         project = 'project'
         dataset = 'dataset'
         table = 'table'
@@ -243,11 +241,11 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters
+            temp_table_name, variables, filters
         )
 
         expected_queries = [
-            get_query([column], self.username, view, geo_view, temp_table_name, data_geom_column, area_name, filters)
+            get_query([column], self.username, view, geo_view, temp_table_name, area_name, filters)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -264,7 +262,7 @@ def _clean_query(query):
     return query.replace('\n', '').replace(' ', '').lower()
 
 
-def get_query(columns, username, view, geo_table, temp_table_name, data_geom_column, area_name, filters=[]):
+def get_query(columns, username, view, geo_table, temp_table_name, area_name, filters=[]):
     columns = ', '.join(get_column_sql(column) for column in columns)
 
     return '''
@@ -282,7 +280,7 @@ def get_query(columns, username, view, geo_table, temp_table_name, data_geom_col
             view=view,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column=data_geom_column,
+            data_geom_column='__geojson_geom',
             where=_get_where(filters))
 
 
