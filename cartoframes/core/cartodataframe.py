@@ -84,7 +84,7 @@ class CartoDataFrame(GeoDataFrame):
 
     def viz(self, *args, **kwargs):
         """
-        Create a :py:class:`Map <cartoframes.viz.Map>`. visualization
+        Creates a :py:class:`Map <cartoframes.viz.Map>`. visualization
         """
         from ..viz import Map, Layer
         return Map(Layer(self, *args, **kwargs))
