@@ -73,7 +73,7 @@ def cluster_size_layer(
             }
         },
         popup=popup and not animate and get_popup(
-          popup, title, cluster_operation_title, cluster_operation),
+          popup, title, cluster_operation_title, None, cluster_operation),
         legend=legend and {
             'type': {
                 'point': 'size-continuous-point'

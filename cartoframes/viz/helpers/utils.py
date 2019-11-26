@@ -15,13 +15,13 @@ def get_value(value, geom_type, prop):
     return value
 
 
-def get_popup(popup, title, alt_title, value):
+def get_popup(popup, title=None, alt_title=None, value=None, alt_value=None):
     if isinstance(popup, Popup):
         return popup
 
     return {
         'hover': {
             'title': title or alt_title,
-            'value': '$' + value
+            'value': alt_value or '$' + value
         }
     }
