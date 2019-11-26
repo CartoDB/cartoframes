@@ -55,8 +55,9 @@ class TestCartoDataFrame(object):
         mock.assert_called_once_with(cdf, 'table_name')
 
     def test_viz(self, mocker):
-        # mock_map = mocker.patch('cartoframes.viz.Map')
+        mocker.patch('cartoframes.viz.Map', return_value='__map__')
         mock_layer = mocker.patch('cartoframes.viz.Layer')
         cdf = CartoDataFrame(GDF_BOX)
-        cdf.viz('__style__')
+        viz = cdf.viz('__style__')
         mock_layer.assert_called_once_with(cdf, '__style__')
+        assert viz == '__map__'
