@@ -21,6 +21,7 @@ _PUBLIC_PROJECT = 'carto-do-public-data'
 
 AGGREGATION_DEFAULT = 'default'
 AGGREGATION_NONE = 'none'
+NUMERIC_FIELDS = ['INTEGER', 'FLOAT']
 
 
 class VariableAggregation(object):
@@ -243,7 +244,7 @@ def _prepare_variable(variable, only_with_agg=False):
             Variable `id` property or Variable `slug` property
         """)
 
-    if only_with_agg and (not variable.agg_method or variable.agg_method == ''):
+    if only_with_agg and (variable.db_type not in NUMERIC_FIELDS or not variable.agg_method):
         warnings.warn('{} skipped because it does not have aggregation method'.format(variable))
         return None
 
