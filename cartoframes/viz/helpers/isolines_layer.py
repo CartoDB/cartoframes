@@ -42,7 +42,7 @@ def isolines_layer(source, value=RANGE_LABEL_KEY, **kwargs):
 
             [...]
 
-            data, metadata = Isolines().isodistances(df, [1200, 2400, 3600], exclusive=True)
+            data, metadata = Isolines().isodistances(df, [1200, 2400, 3600])
 
             isolines_layer(data, palette='purpor')
 
