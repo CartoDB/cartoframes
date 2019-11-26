@@ -292,7 +292,7 @@ class Enrichment(EnrichmentService):
                 cdf_enrich = enrichment.enrich_polygons(df, variables, aggregations=aggregations)
         """
 
-        variables = prepare_variables(variables)
+        variables = prepare_variables(variables, only_with_agg=True)
         cartodataframe = self._prepare_data(dataframe, geom_column)
 
         temp_table_name = self._get_temp_table_name()
