@@ -11,10 +11,9 @@ class AuthAPIClient(object):
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-              credentials of user account to send Dataset to. If not provided,
-              a default credentials (if set with :py:meth:`set_default_credentials
-              <cartoframes.auth.set_default_credentials>`) will attempted to be
-              used.
+              credentials of user account. If not provided, a default credentials
+              (if set with :py:meth:`set_default_credentials <cartoframes.auth.set_default_credentials>`)
+              will attempted to be used.
     """
     def __init__(self, credentials=None):
         credentials = credentials or get_default_credentials()
