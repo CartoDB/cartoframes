@@ -143,24 +143,24 @@ class Enrichment(EnrichmentService):
             aggregation (str, str, list, optional): set the data aggregation. Your polygons can intersect with one or
             more polygons from the DO. With this method you can select how to aggregate the variables data from the
             intersected polygons. Options are:
-                - :py:attr:`Enrichment.AGGREGATION_DEFAULT` (default): Every `<cartoframes.data.observatory> Variable`
+                :py:attr:`Enrichment.AGGREGATION_DEFAULT` (default): Every `<cartoframes.data.observatory> Variable`
                 has an aggregation method in the Variable `agg_method` property and it will be used to aggregate the
                 data. In case it is not defined, `array_agg` function will be used.
-                - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
+                :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
                 you will receive an array with all the data from each polygon instersected.
-                - list of `<cartoframes.data.observatory> VariableAggregation`: if you want to overwrite some default
+                list of `<cartoframes.data.observatory> VariableAggregation`: if you want to overwrite some default
                 aggregation methods from your selected variables, you can do it using a list of
                 `<cartoframes.data.observatory> VariableAggregation`. Example: [VariableAggregation(variable, 'SUM')]
-                - str: if you want to overwrite every default aggregation method, you can pass a string with the
+                str: if you want to overwrite every default aggregation method, you can pass a string with the
                 aggregation method to use.
 
         Returns:
+
             A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with the variables to enrich appended to it.
 
             Note that if the geometry of the `data` you provide intersects with more than one geometry
             in the enrichment dataframe, the number of rows of the returned CartoDataFrame could be different
             than the `data` argument number of rows.
-
 
         Examples:
 
