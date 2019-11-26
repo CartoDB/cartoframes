@@ -10,7 +10,7 @@ from .repository.geography_repo import get_geography_repo
 class Category(CatalogEntity):
     """This class represents a :py:class:`Category <cartoframes.data.observatory.Category>`
     in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`. Catalog datasets
-    (:py:class:` <cartoframes.data.observatory.Dataset>` class)
+    (:py:class:`Dataset <cartoframes.data.observatory.Dataset>` class)
     are grouped by `categories`, so you can filter available `datasets` and
     `geographies` that belong (or are related) to a given `Category`.
 

@@ -154,7 +154,7 @@ class Enrichment(EnrichmentService):
                 intersect with one or more polygons from the Data Observatory. With this method you can select how to
                 aggregate the resulting data. Options are:
                     - :py:attr:`Enrichment.AGGREGATION_DEFAULT` (default): Every
-                    `<cartoframes.data.observatory> Variable` has an aggregation method in the
+                    :obj:`Variable` has an aggregation method in the
                     Variable `agg_method` property and it will be used to aggregate the data. In case it is not
                     defined, `array_agg` function will be used.
                     - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.

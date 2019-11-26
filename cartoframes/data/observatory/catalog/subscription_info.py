@@ -25,7 +25,7 @@ class SubscriptionInfo(object):
 
     @property
     def estimated_delivery_days(self):
-        """Estimated days in which, once you :py:attr`Dataset.subscribe` or :py:attr:`Geography.subscribe`,
+        """Estimated days in which, once you :py:attr:`Dataset.subscribe` or :py:attr:`Geography.subscribe`,
         you'll get a license.
 
         Your licensed datasets and geographies will be returned by the
@@ -33,7 +33,7 @@ class SubscriptionInfo(object):
 
         For the datasets and geographies listed in the
         :py:meth:`catalog.subscriptions <cartoframes.data.observatory.Catalog.subscriptions>` method you can:
-        - :py:attr`Dataset.download` or :py:attr`Geography.download`
+        - :py:attr:`Dataset.download` or :py:attr:`Geography.download`
         - Use their `Dataset.variables` in the :obj:`Enrichment` functions
         """
         return self._raw_data.get('estimated_delivery_days')
