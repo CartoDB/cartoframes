@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .utils import serialize_palette, get_value
+from .utils import serialize_palette, get_value, get_popup
 
 from ..layer import Layer
 
@@ -33,7 +33,7 @@ def color_continuous_layer(
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
           Set to "True" by default.
-        popup (bool, optional): Display popups on hover and click: "True" or "False".
+        popup (bool, Popup, optional): Display popups on hover and click: "True" or "False".
           Set to "True" by default.
         widget (bool, optional): Display a widget for mapped data.
           Set to "False" by default.
@@ -92,12 +92,8 @@ def color_continuous_layer(
                 'filter': animation_filter
             }
         },
-        popup=popup and not animate and {
-            'hover': {
-                'title': title or value,
-                'value': '$' + value
-            }
-        },
+        popup=popup and not animate and get_popup(
+          popup, title, value, value),
         legend=legend and {
             'type': {
                 'point': 'color-continuous-point',

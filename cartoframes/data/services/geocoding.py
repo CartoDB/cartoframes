@@ -224,8 +224,8 @@ class Geocoding(Service):
         if cached:
             if table_name:
                 raise ValueError('tablecached geocoding is not compatible with parameters "table_name"')
-            return self._cached_geocode(
-                source, cached, street, city=city, state=state, country=country, dry_run=dry_run)
+            return self._cached_geocode(source, cached, street, city=city, state=state, country=country,
+                                        dry_run=dry_run)
 
         city, state, country = [
             geocoding_utils.column_or_value_arg(arg, self.columns) for arg in [city, state, country]
@@ -249,7 +249,7 @@ class Geocoding(Service):
 
         return result
 
-    def _cached_geocode(self, source, table_name, street, city, state, country, dry_run, columns):
+    def _cached_geocode(self, source, table_name, street, city, state, country, dry_run):
         """
         Geocode a dataframe caching results into a table.
         If the same dataframe if geocoded repeatedly no credits will be spent.
@@ -297,7 +297,7 @@ class Geocoding(Service):
             ))
 
         delete_table(table_name)
-        update_table(tmp_table_name, table_name)
+        update_table(tmp_table_name, table_name, privacy='private')
         # TODO: should remove the cartodb_id column from the result
         # TODO: refactor to share code with geocode() and call self._geocode() here instead
         # actually to keep hashing knowledge encapsulated (AFW) this should be handled by

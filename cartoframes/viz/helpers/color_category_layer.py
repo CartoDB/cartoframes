@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .utils import serialize_palette, get_value
+from .utils import serialize_palette, get_value, get_popup
 
 from ..layer import Layer
 
@@ -85,12 +85,8 @@ def color_category_layer(
                 'filter': animation_filter
             }
         },
-        popup=popup and not animate and {
-            'hover': {
-                'title': title or value,
-                'value': '$' + value
-            }
-        },
+        popup=popup and not animate and get_popup(
+          popup, title, value, value),
         legend=legend and {
             'type': {
                 'point': 'color-category-point',
