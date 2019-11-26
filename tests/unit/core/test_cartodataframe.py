@@ -1,26 +1,24 @@
 """Unit tests for cartoframes.data."""
 
-import geopandas as gpd
-
 from shapely.geometry import box
+from geopandas import GeoDataFrame
 
 from cartoframes import CartoDataFrame
 
 # DATA FRAME SRC BBOX
 pol_1 = box(1, 1, 2, 2)
 pol_2 = box(3, 3, 4, 4)
-GDF_BOX = gpd.GeoDataFrame({'id': [1, 2], 'geometry': [pol_1, pol_2]}, columns=['id', 'geometry'])
+GDF_BOX = GeoDataFrame({'id': [1, 2], 'geometry': [pol_1, pol_2]}, columns=['id', 'geometry'])
 
 
 class TestCartoDataFrame(object):
 
     def test_basic_inheritance(self):
-        """Test basic inheritance"""
         cdf = CartoDataFrame(GDF_BOX)
         assert isinstance(cdf, CartoDataFrame)
+        assert cdf._constructor == CartoDataFrame
 
     def test_crs_inheritance(self):
-        """Test crs inheritance"""
         cdf = CartoDataFrame(GDF_BOX)
         cdf.crs = 'epsg:4326'
         cdf = cdf.to_crs('epsg:3857')
@@ -28,8 +26,37 @@ class TestCartoDataFrame(object):
         assert cdf.crs == 'epsg:3857'
 
     def test_filter_inheritance(self):
-        """Test filter inheritance"""
         cdf = CartoDataFrame(GDF_BOX)
         cdf = cdf[cdf.id > 1]
         assert isinstance(cdf, CartoDataFrame)
         assert len(cdf) == 1
+
+    def test_from_carto(self, mocker):
+        mock = mocker.patch('cartoframes.io.carto.read_carto')
+        CartoDataFrame.from_carto('table_name')
+        mock.assert_called_once_with('table_name')
+
+    def test_from_file(self, mocker):
+        mock = mocker.patch.object(GeoDataFrame, 'from_file')
+        cdf = CartoDataFrame.from_file('file_name.geojson')
+        mock.assert_called_once_with('file_name.geojson')
+        assert isinstance(cdf, CartoDataFrame)
+
+    def test_from_features(self, mocker):
+        mock = mocker.patch.object(GeoDataFrame, 'from_features')
+        cdf = CartoDataFrame.from_features('__features__')
+        mock.assert_called_once_with('__features__')
+        assert isinstance(cdf, CartoDataFrame)
+
+    def test_to_carto(self, mocker):
+        mock = mocker.patch('cartoframes.io.carto.to_carto')
+        cdf = CartoDataFrame(GDF_BOX)
+        cdf.to_carto('table_name')
+        mock.assert_called_once_with(cdf, 'table_name')
+
+    def test_viz(self, mocker):
+        # mock_map = mocker.patch('cartoframes.viz.Map')
+        mock_layer = mocker.patch('cartoframes.viz.Layer')
+        cdf = CartoDataFrame(GDF_BOX)
+        cdf.viz('__style__')
+        mock_layer.assert_called_once_with(cdf, '__style__')
