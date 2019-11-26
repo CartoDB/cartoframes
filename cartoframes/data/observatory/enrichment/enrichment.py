@@ -386,13 +386,13 @@ class Enrichment(EnrichmentService):
 
     def _build_polygons_query_variables_with_aggregation(self, variable_aggregations):
         return ', '.join(["""
-            {operator}(enrichment_table.{variable} *
-            (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geojson_column}))
-            / ST_area(data_table.{geojson_column}))) AS {variable}
+            {aggregation}(enrichment_table.{column} *
+            (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+            / ST_area(data_table.{geo_column}))) AS {aggregation}_{column}
             """.format(
-                variable=variable_aggregation.variable.column_name,
-                geojson_column=self.geojson_column,
-                operator=variable_aggregation.aggregation) for variable_aggregation in variable_aggregations])
+                column=variable_aggregation.variable.column_name,
+                geo_column=self.geojson_column,
+                aggregation=variable_aggregation.aggregation) for variable_aggregation in variable_aggregations])
 
     def _build_polygons_query_variables_without_aggregation(self, variable_aggregations):
         variables = ['enrichment_table.{}'.format(variable_aggregation.variable.column_name)
