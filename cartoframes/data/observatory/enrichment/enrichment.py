@@ -283,13 +283,13 @@ class Enrichment(EnrichmentService):
 
                 variables = [variable1, variable2, variable3]
 
-                aggregations = [
+                aggregation = [
                     VariableAggregation(variable1, 'SUM'),
                     VariableAggregation(variable3, 'AVG')
                 ]
 
                 enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregations=aggregations)
+                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=aggregation)
         """
 
         variables = prepare_variables(variables, only_with_agg=True)
@@ -392,14 +392,30 @@ class Enrichment(EnrichmentService):
             ) for variable_aggregation in variable_aggregations])
 
     def _build_polygons_query_variable_with_aggregation(self, column, aggregation):
-        return """
-            {aggregation}(enrichment_table.{column} *
-            (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
-            / ST_area(data_table.{geo_column}))) AS {aggregation}_{column}
-            """.format(
-                column=column,
-                geo_column=self.geojson_column,
-                aggregation=aggregation)
+        if (aggregation == 'SUM'):
+            return """
+                {aggregation}(
+                    enrichment_table.{column} * (
+                        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                        /
+                        ST_area(data_table.{geo_column})
+                    )
+                ) AS {aggregation}_{column}
+                """.format(
+                    column=column,
+                    geo_column=self.geojson_column,
+                    aggregation=aggregation)
+        else:
+            return """
+                {aggregation}(
+                    enrichment_table.{column} * (
+                        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                    )
+                ) AS {aggregation}_{column}
+                """.format(
+                    column=column,
+                    geo_column=self.geojson_column,
+                    aggregation=aggregation)
 
     def _build_polygons_query_variables_without_aggregation(self, variable_aggregations):
         variables = ['enrichment_table.{}'.format(variable_aggregation.variable.column_name)
