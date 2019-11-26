@@ -27,7 +27,7 @@ class RepoClient(object):
 
     def get_categories_joined_datasets(self, filters=None):
         query = 'SELECT DISTINCT c.* FROM categories_public c, datasets_public t'
-        return self._run_query(query,  filters, ['c.id = t.category_id'])
+        return self._run_query(query, filters, ['c.id = t.category_id'])
 
     def get_providers(self, filters=None):
         query = 'SELECT t.* FROM providers_public t'

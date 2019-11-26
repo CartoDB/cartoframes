@@ -16,8 +16,9 @@ class Geography(CatalogEntity):
 
     If you have Data Observatory enabled in your CARTO account you can:
 
-      - Use any public geography to enrich your data with the variables in it.
-      - Subscribe to any premium geography, to get a license, that grants you
+      - Use any public geography to enrich your data with the variables in it by means of the :obj:`Enrichment`
+        functions.
+      - Subscribe (:py:attr:`Geography.subscribe`) to any premium geography, to get a license, that grants you
         the right to enrich your data with the variables in it.
 
     See the enrichment guides for more information about geographies, variables and
@@ -132,6 +133,12 @@ class Geography(CatalogEntity):
         return self.data['geom_coverage']
 
     @property
+    def geom_type(self):
+        """Info about the type of geometry of this geography."""
+
+        return self.data['geom_type']
+
+    @property
     def update_frequency(self):
         """Frequency in which the geography data is updated.
 
@@ -148,10 +155,15 @@ class Geography(CatalogEntity):
 
     @property
     def is_public_data(self):
-        """True if the content of this geography can be accessed with public credentials.
-        False if it needs a subscription (AKA premium geographies).
+        """Allows to check if the content of this geography can be accessed
+        with public credentials or if it is a premium geography that needs
+        a subscription.
 
-        See the subscription guide for more details about accessing premium datasets and geographies.
+        Returns:
+            A boolean value:
+                * ``True`` if the geography is public
+                * ``False`` if the geography is premium
+                    (it requires to :py:attr:`Geography.subscribe`)
         """
 
         return self.data['is_public_data']
@@ -187,7 +199,7 @@ class Geography(CatalogEntity):
 
     def download(self, credentials=None):
         """Download Geography data as a pandas DataFrame locally. You need Data Observatory enabled in your CARTO
-        account.
+        account, please contact us at support@carto.com for more information.
 
         For premium geographies (those with `is_public_data` set to False), you need a subscription to the geography.
         Check the subscription guides for more information.
@@ -208,7 +220,8 @@ class Geography(CatalogEntity):
         return self._download(credentials)
 
     def subscribe(self, credentials=None):
-        """Subscribe to a Geography. You need Data Observatory enabled in your CARTO account.
+        """Subscribe to a Geography. You need Data Observatory enabled in your CARTO account, please contact us at
+        support@carto.com for more information.
 
         Geographies with `is_public_data` set to True, do not need a license (i.e. a subscription) to be used.
         Geographies with `is_public_data` set to False, do need a license (i.e. a subscription) to be used. You'll get a
@@ -217,8 +230,8 @@ class Geography(CatalogEntity):
         See :py:meth:`subscription_info <cartoframes.data.observatory.Geography.subscription_info>` for more
         info
 
-        Once you subscribe to a geography you can `download` its data and use the enrichment functions. See the
-        enrichment guides for more info.
+        Once you :py:attr:`Geography.subscribe` to a geography you can :py:attr:`Geography.download` its data and
+        use the enrichment functions. See the enrichment guides for more info.
 
         You can check the status of your subscriptions by calling the
         :py:meth:`subscriptions <cartoframes.data.observatory.Catalog.subscriptions>` method in the :obj:`Catalog` with

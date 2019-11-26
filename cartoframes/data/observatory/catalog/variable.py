@@ -7,7 +7,7 @@ from .repository.constants import VARIABLE_FILTER
 from .summary import variable_describe, head, tail, counts, quantiles, top_values, histogram
 
 
-_DESCRIPTION_LENGTH_LIMIT = 30
+_DESCRIPTION_LENGTH_LIMIT = 50
 
 
 class Variable(CatalogEntity):
@@ -192,3 +192,12 @@ class Variable(CatalogEntity):
         """Plots an histogram with the variable data."""
         data = self.data['summary_json']
         return histogram(data)
+
+    def __repr__(self):
+        descr = self.description
+
+        if descr and len(descr) > _DESCRIPTION_LENGTH_LIMIT:
+            descr = descr[0:_DESCRIPTION_LENGTH_LIMIT] + '...'
+
+        return "<{classname}.get('{entity_id}')> #'{descr}'" \
+               .format(classname=self.__class__.__name__, entity_id=self._get_print_id(), descr=descr)

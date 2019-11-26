@@ -1,11 +1,16 @@
+import pytest
 import pandas as pd
 from shapely.geometry.point import Point
+from shapely.geometry.polygon import Polygon
 
 from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
+from cartoframes.data.observatory import Variable, Dataset
+from cartoframes.data.observatory.catalog.repository.entity_repo import EntityRepository
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables
-from cartoframes.data.observatory import Variable
+from cartoframes.exceptions import EnrichmentException
+from cartoframes.utils.geom_utils import to_geojson
 
 try:
     from unittest.mock import Mock, patch
@@ -23,27 +28,56 @@ class TestEnrichmentService(object):
         self.credentials = None
         BigQueryClient._init_client = self.original_init_client
 
-    def test_prepare_data(self, mocker):
+    def test_prepare_data(self):
         geom_column = 'the_geom'
         enrichment_service = EnrichmentService(credentials=self.credentials)
-        df = pd.DataFrame([[1, 'POINT (1 1)']], columns=['cartodb_id', geom_column])
+        point = Point(1, 1)
+        df = pd.DataFrame([[1, point]], columns=['cartodb_id', geom_column])
         expected_cdf = CartoDataFrame(
-            [[Point(1, 1), 0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
+            [[point, 0, to_geojson(point)]],
             columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
 
         result = enrichment_service._prepare_data(df, geom_column)
         assert result.equals(expected_cdf)
 
+    def test_prepare_data_polygon_with_close_vertex(self):
+        geom_column = 'the_geom'
+        enrichment_service = EnrichmentService(credentials=self.credentials)
+
+        polygon = Polygon([(10, 2), (1.12345688, 1), (1.12345677, 1), (10, 2)])
+        df = pd.DataFrame(
+            [
+                [1, polygon]
+            ],
+            columns=['cartodb_id', geom_column])
+
+        expected_cdf = CartoDataFrame(
+            [
+                [
+                    polygon,
+                    0,
+                    to_geojson(polygon)
+                ]
+            ],
+            columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
+
+        result = enrichment_service._prepare_data(df, geom_column)
+
+        assert result['enrichment_id'].equals(expected_cdf['enrichment_id'])
+        assert result['__geojson_geom'].equals(expected_cdf['__geojson_geom'])
+
     def test_upload_data(self):
         expected_project = 'carto-do-customers'
         user_dataset = 'test_dataset'
+
+        point = Point(1, 1)
         input_cdf = CartoDataFrame(
-            [[Point(1, 1), 0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
+            [[point, 0, to_geojson(point)]],
             columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
 
         expected_schema = {'enrichment_id': 'INTEGER', '__geojson_geom': 'GEOGRAPHY'}
         expected_cdf = CartoDataFrame(
-            [[0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
+            [[0, to_geojson(point)]],
             columns=['enrichment_id', '__geojson_geom'], index=[1])
 
         # mock
@@ -62,12 +96,48 @@ class TestEnrichmentService(object):
 
         BigQueryClient.upload_dataframe = original
 
-    def test_execute_enrichment(self):
+    def test_upload_data_null_geometries(self):
+        geom_column = 'the_geom'
+        expected_project = 'carto-do-customers'
+        user_dataset = 'test_dataset'
+
+        point = Point(1, 1)
         input_cdf = CartoDataFrame(
-            [[Point(1, 1), 0, '{"coordinates": [1.0, 1.0], "type": "Point"}']],
+            [[point, 0], [None, 1]],
+            columns=['geometry', 'enrichment_id']
+        )
+
+        enrichment_service = EnrichmentService(credentials=self.credentials)
+        input_cdf = enrichment_service._prepare_data(input_cdf, geom_column)
+
+        expected_schema = {'enrichment_id': 'INTEGER', '__geojson_geom': 'GEOGRAPHY'}
+        expected_cdf = CartoDataFrame(
+            [[0, to_geojson(point)], [1, None]],
+            columns=['enrichment_id', '__geojson_geom'])
+
+        # mock
+        def assert_upload_data(_, dataframe, schema, tablename, project, dataset):
+            assert dataframe.equals(expected_cdf)
+            assert schema == expected_schema
+            assert isinstance(tablename, str) and len(tablename) > 0
+            assert project == expected_project
+            assert tablename == user_dataset
+            assert dataset == 'username'
+
+        enrichment_service = EnrichmentService(credentials=self.credentials)
+        original = BigQueryClient.upload_dataframe
+        BigQueryClient.upload_dataframe = assert_upload_data
+        enrichment_service._upload_data(user_dataset, input_cdf)
+
+        BigQueryClient.upload_dataframe = original
+
+    def test_execute_enrichment(self):
+        point = Point(1, 1)
+        input_cdf = CartoDataFrame(
+            [[point, 0, to_geojson(point)]],
             columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
         expected_cdf = CartoDataFrame(
-            [[Point(1, 1), 'new data']],
+            [[point, 'new data']],
             columns=['geometry', 'var1'])
 
         class EnrichMock():
@@ -84,8 +154,11 @@ class TestEnrichmentService(object):
 
         BigQueryClient._init_client = original
 
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Variable, 'get')
-    def test_prepare_variables(self, get_mock):
+    def test_prepare_variables(self, get_mock, _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
         variable_id = 'project.dataset.table.variable'
         variable = Variable({
             'id': variable_id,
@@ -115,3 +188,34 @@ class TestEnrichmentService(object):
             result = prepare_variables(case)
 
             assert result == [variable, variable]
+
+    @patch.object(EntityRepository, 'get_by_id')
+    @patch.object(Variable, 'get')
+    def test_prepare_variables_raises_if_not_available_in_bq(self, get_mock, entity_repo):
+        # mock dataset
+        entity_repo.return_value = Dataset({
+            'id': 'id',
+            'slug': 'slug',
+            'name': 'name',
+            'description': 'description',
+            'available_in': [],
+            'geography_id': 'geography'
+        })
+
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'slug': 'slug'
+        })
+
+        get_mock.return_value = variable
+
+        with pytest.raises(EnrichmentException) as e:
+            prepare_variables(variable)
+
+        error = """
+            The Dataset or the Geography of the Variable '{}' is not ready for Enrichment.
+            Please, contact us for more information.
+        """.format(variable.slug)
+        assert str(e.value) == error

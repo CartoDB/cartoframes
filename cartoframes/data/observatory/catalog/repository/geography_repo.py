@@ -52,10 +52,12 @@ class GeographyRepository(EntityRepository):
             'provider_name': self._normalize_field(row, 'provider_name'),
             'lang': self._normalize_field(row, 'lang'),
             'geom_coverage': self._normalize_field(row, 'geom_coverage'),
+            'geom_type': self._normalize_field(row, 'geom_type'),
             'update_frequency': self._normalize_field(row, 'update_frequency'),
             'version': self._normalize_field(row, 'version'),
             'is_public_data': self._normalize_field(row, 'is_public_data'),
-            'summary_json': self._normalize_field(row, 'summary_json')
+            'summary_json': self._normalize_field(row, 'summary_json'),
+            'available_in': self._normalize_field(row, 'available_in')
         }
 
     def get_geographies_gdf(self):
