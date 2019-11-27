@@ -1,6 +1,8 @@
 from .enrichment_service import EnrichmentService, prepare_variables, get_variable_aggregations, \
     AGGREGATION_DEFAULT, AGGREGATION_NONE
 
+import time
+
 
 class Enrichment(EnrichmentService):
     """This is the main class to enrich your own data with data from the
@@ -114,15 +116,34 @@ class Enrichment(EnrichmentService):
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_points(df, variables=[variable], filters=[filter])
         """
+        print('Preparing variables')
+        start_time = time.time() 
         variables = prepare_variables(variables)
+        elapsed_time = time.time() - start_time
+        print(elapsed_time)
+
+        print('Preparing data')
+        start_time = time.time()
         cartodataframe = self._prepare_data(dataframe, geom_column)
-
         temp_table_name = self._get_temp_table_name()
+        elapsed_time = time.time() - start_time
+        print(elapsed_time)
+
+        print('Upload')
+        start_time = time.time()
+        # return None
         self._upload_data(temp_table_name, cartodataframe)
-
+        elapsed_time = time.time() - start_time
+        print(elapsed_time)
+        
+        print('Enrichment')
+        start_time = time.time() 
         queries = self._get_points_enrichment_sql(temp_table_name, variables, filters)
+        r = self._execute_enrichment(queries, cartodataframe)
+        elapsed_time = time.time() - start_time
+        print(elapsed_time)
 
-        return self._execute_enrichment(queries, cartodataframe)
+        return r
 
     AGGREGATION_DEFAULT = AGGREGATION_DEFAULT
     """Use default aggregation method for polygons enrichment. More info in :py:attr:`Enrichment.enrich_polygons`"""
@@ -291,19 +312,35 @@ class Enrichment(EnrichmentService):
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_polygons(df, variables, aggregations=aggregations)
         """
-
+        print('Preparing variables')
+        start_time = time.time()
         variables = prepare_variables(variables)
+        elapsed_time = time.time() - start_time
+        print(elapsed_time)
+
+        print('Preparing data')
+        start_time = time.time()
         cartodataframe = self._prepare_data(dataframe, geom_column)
-
         temp_table_name = self._get_temp_table_name()
+        elapsed_time = time.time() - start_time
+        print(elapsed_time)
+        
+        print('Upload')
+        start_time = time.time()
         self._upload_data(temp_table_name, cartodataframe)
-
+        elapsed_time = time.time() - start_time
+        print(elapsed_time)
+        
+        print('Enrichment')
+        start_time = time.time()
         queries = self._get_polygon_enrichment_sql(
             temp_table_name, variables, filters, aggregation
         )
-
-        return self._execute_enrichment(queries, cartodataframe)
-
+        r = self._execute_enrichment(queries, cartodataframe)
+        elapsed_time = time.time() - start_time
+        print(elapsed_time)
+        return r
+        
     def _get_points_enrichment_sql(self, temp_table_name, variables, filters):
         tables_metadata = self._get_tables_metadata(variables).items()
 

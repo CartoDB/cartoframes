@@ -4,9 +4,10 @@ import os
 import appdirs
 import csv
 import tqdm
+import time
 
 from google.auth.exceptions import RefreshError
-from google.cloud import bigquery
+from google.cloud import bigquery, storage
 from google.oauth2.credentials import Credentials as GoogleCredentials
 
 from carto.exceptions import CartoException
@@ -45,16 +46,50 @@ class BigQueryClient(object):
 
     @refresh_client
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
+        # dataset_ref = self.client.dataset(dataset, project=project)
+        # table_ref = dataset_ref.table(tablename)
+
+        # schema_wrapped = [bigquery.SchemaField(column, dtype) for column, dtype in schema.items()]
+
+        # job_config = bigquery.LoadJobConfig()
+        # job_config.schema = schema_wrapped
+
+        # job = self.client.load_table_from_dataframe(dataframe, table_ref, job_config=job_config)
+        # job.result()
+
+        # return
+      
+        print('Uploading GCS')
+        start_time = time.time()
+        client = storage.Client('cartodb-on-gcp-poc')
+        bucket = client.bucket('alasarr-poc')
+        blob = bucket.blob(tablename)
+        dataframe.to_csv(tablename, index=False, header=False)
+        blob.upload_from_filename(tablename)
+        elapsed_time = time.time() - start_time
+        print(elapsed_time)
+
+        print('Uploading BQ')
+        start_time = time.time()
         dataset_ref = self.client.dataset(dataset, project=project)
         table_ref = dataset_ref.table(tablename)
-
         schema_wrapped = [bigquery.SchemaField(column, dtype) for column, dtype in schema.items()]
 
         job_config = bigquery.LoadJobConfig()
         job_config.schema = schema_wrapped
+        # The source format defaults to CSV, so the line below is optional.
+        job_config.source_format = bigquery.SourceFormat.CSV
+        uri = f'gs://alasarr-poc/{tablename}'
 
-        job = self.client.load_table_from_dataframe(dataframe, table_ref, job_config=job_config)
-        job.result()
+        job = self.client.load_table_from_uri(
+            uri, table_ref, job_config=job_config
+        )  # API request
+  
+
+        job.result()  # Waits for table load to complete.
+        elapsed_time = time.time() - start_time
+        print(elapsed_time)
+        print(tablename)
 
     @refresh_client
     def query(self, query, **kwargs):

@@ -10,7 +10,7 @@ from ....auth import get_default_credentials
 from ....exceptions import EnrichmentException
 from ....core.cartodataframe import CartoDataFrame
 from ....utils.geom_utils import to_geojson
-
+from google.cloud import storage
 
 _ENRICHMENT_ID = 'enrichment_id'
 _GEOJSON_COLUMN = '__geojson_geom'
@@ -96,6 +96,7 @@ class VariableFilter(object):
     """
     def __init__(self, variable, query):
         self.variable = _prepare_variable(variable)
+        print(self.variable)
         self.query = query
 
 
@@ -143,7 +144,9 @@ class EnrichmentService(object):
 
     def _upload_data(self, tablename, cartodataframe):
         bq_dataframe = cartodataframe[[self.enrichment_id, self.geojson_column]]
+        #bq_dataframe = cartodataframe[[self.enrichment_id]]
         schema = {self.enrichment_id: 'INTEGER', self.geojson_column: 'GEOGRAPHY'}
+        #schema = {self.enrichment_id: 'INTEGER'}
 
         self.bq_client.upload_dataframe(
             dataframe=bq_dataframe,
