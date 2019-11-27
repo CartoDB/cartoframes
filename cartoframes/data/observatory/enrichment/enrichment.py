@@ -138,7 +138,7 @@ class Enrichment(EnrichmentService):
         to interpolate the quantity of the polygon value intersected, aggregating them. Most of :obj:`Variable` instances
         have a :py:attr:`Variable.agg_method` property what is used by default as aggregation function, but you can overwrite it
         using the `aggregation` parameter (not even doing the aggregation). If a variable does not have the
-        `agg_operator` property set and you do not overwrite it either (with the `aggregation` parameter), the
+        `agg_method` property set and you do not overwrite it either (with the `aggregation` parameter), the
         variable column will be skipped from the enrichment.
 
         Args:
