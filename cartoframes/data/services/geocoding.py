@@ -296,7 +296,7 @@ class Geocoding(Service):
                 hash_expr=hash_expr
             ))
 
-        delete_table(table_name)
+        delete_table(table_name, self._credentials)
 
         update_table(
             table_name=tmp_table_name,
@@ -330,7 +330,8 @@ class Geocoding(Service):
             if not input_table_name:
                 input_table_name = self._new_temporary_table_name()
                 is_temporary = True
-            to_carto(source, input_table_name, self._credentials, if_exists, dry_run)
+            log_enabled = not dry_run
+            to_carto(source, input_table_name, self._credentials, if_exists, log_enabled)
         return (input_table_name, is_temporary)
 
     # Note that this can be optimized for non in-place cases (table_name is not None), e.g.

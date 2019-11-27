@@ -136,7 +136,8 @@ class Isolines(Service):
         else:
             # upload to temporary table
             temporary_table_name = self._new_temporary_table_name()
-            to_carto(source, temporary_table_name, self._credentials, dry_run)
+            log_enabled = not dry_run
+            to_carto(source, temporary_table_name, self._credentials, log_enabled)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
 
         source_columns = source_manager.get_column_names()
