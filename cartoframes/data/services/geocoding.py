@@ -231,7 +231,7 @@ class Geocoding(Service):
             geocoding_utils.column_or_value_arg(arg, self.columns) for arg in [city, state, country]
         ]
 
-        input_table_name, is_temporary = self._table_for_geocoding(source, table_name, if_exists)
+        input_table_name, is_temporary = self._table_for_geocoding(source, table_name, if_exists, dry_run)
 
         metadata = self._geocode(input_table_name, street, city, state, country, status, dry_run)
 
@@ -273,7 +273,7 @@ class Geocoding(Service):
         if self._source_manager.is_table():
             raise ValueError('cached geocoding cannot be used with tables')
 
-        to_carto(source, tmp_table_name, self._credentials)
+        to_carto(source, tmp_table_name, self._credentials, dry_run)
 
         self._execute_query(
             """
@@ -297,7 +297,14 @@ class Geocoding(Service):
             ))
 
         delete_table(table_name)
-        update_table(tmp_table_name, table_name, privacy='private')
+
+        update_table(
+            table_name=tmp_table_name,
+            credentials=self._credentials,
+            new_table_name=table_name,
+            privacy='private'
+        )
+
         # TODO: should remove the cartodb_id column from the result
         # TODO: refactor to share code with geocode() and call self._geocode() here instead
         # actually to keep hashing knowledge encapsulated (AFW) this should be handled by
@@ -306,7 +313,7 @@ class Geocoding(Service):
                                      state=state, country=country, dry_run=dry_run)
         return self.result(data=cdf, metadata=metadata)
 
-    def _table_for_geocoding(self, source, table_name, if_exists):
+    def _table_for_geocoding(self, source, table_name, if_exists, dry_run):
         is_temporary = False
         input_table_name = table_name
         if self._source_manager.is_table():
@@ -323,7 +330,7 @@ class Geocoding(Service):
             if not input_table_name:
                 input_table_name = self._new_temporary_table_name()
                 is_temporary = True
-            to_carto(source, input_table_name, self._credentials, if_exists)
+            to_carto(source, input_table_name, self._credentials, if_exists, dry_run)
         return (input_table_name, is_temporary)
 
     # Note that this can be optimized for non in-place cases (table_name is not None), e.g.

@@ -136,7 +136,7 @@ class Isolines(Service):
         else:
             # upload to temporary table
             temporary_table_name = self._new_temporary_table_name()
-            to_carto(source, temporary_table_name, self._credentials)
+            to_carto(source, temporary_table_name, self._credentials, dry_run)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
 
         source_columns = source_manager.get_column_names()
@@ -170,7 +170,7 @@ class Isolines(Service):
 
         if table_name:
             # save result in a table
-            to_carto(cdf, table_name, self._credentials, if_exists)
+            to_carto(cdf, table_name, self._credentials, if_exists, dry_run)
 
         if temporary_table_name:
             delete_table(temporary_table_name, self._credentials)
