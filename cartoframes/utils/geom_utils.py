@@ -47,6 +47,10 @@ def decode_geometry_column(col):
     return _compute_geometry_from_geom(col)
 
 
+def compose_geometry_column_from_lnglat(lng, lat):
+    return _compute_geometry_from_lnglat(lng, lat)
+
+
 def generate_index(dataframe, index_column, drop_index):
     index_column = _get_column(dataframe, index_column, INDEX_COL_NAMES)
     if index_column is not None:

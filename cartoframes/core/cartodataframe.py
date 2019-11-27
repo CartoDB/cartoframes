@@ -1,7 +1,7 @@
 from pandas import Series
 from geopandas import GeoDataFrame
 
-from ..utils.geom_utils import decode_geometry_column
+from ..utils.geom_utils import decode_geometry_column, compose_geometry_column_from_lnglat
 
 
 class CartoDataFrame(GeoDataFrame):
@@ -95,25 +95,6 @@ class CartoDataFrame(GeoDataFrame):
         result.__class__ = cls
         return result
 
-    def set_geometry(self, col, drop=False, inplace=False, crs=None):
-        if inplace:
-            frame = self
-        else:
-            frame = self.copy()
-
-        # Decode geometry:
-        #   WKB, EWKB, WKB_HEX, EWKB_HEX, WKB_BHEX, EWKB_BHEX, WKT, EWKT
-        if isinstance(col, str) and col in frame:
-            frame[col] = decode_geometry_column(frame[col])
-        else:
-            col = decode_geometry_column(col)
-
-        # Call super set_geometry with decoded_column
-        super(CartoDataFrame, frame).set_geometry(col, drop=drop, crs=crs, inplace=True)
-
-        if not inplace:
-            return frame
-
     def to_carto(self, *args, **kwargs):
         """
         Upload a CartoDataFrame to CARTO. It is needed to set up the
@@ -140,3 +121,40 @@ class CartoDataFrame(GeoDataFrame):
         """
         from ..viz import Map, Layer
         return Map(Layer(self, *args, **kwargs))
+
+    def set_geometry(self, col, drop=False, inplace=False, crs=None):
+        if inplace:
+            frame = self
+        else:
+            frame = self.copy()
+
+        # Decode geometry:
+        #   WKB, EWKB, WKB_HEX, EWKB_HEX, WKB_BHEX, EWKB_BHEX, WKT, EWKT
+        if isinstance(col, str) and col in frame:
+            frame[col] = decode_geometry_column(frame[col])
+        else:
+            col = decode_geometry_column(col)
+
+        # Call super set_geometry with decoded column
+        super(CartoDataFrame, frame).set_geometry(col, drop=drop, inplace=True, crs=crs)
+
+        if not inplace:
+            return frame
+
+    def set_geometry_from_lnglat(self, lnglat, drop=False, inplace=False, crs=None):
+        lng_col = self[lnglat[0]]
+        lat_col = self[lnglat[1]]
+
+        # Generate geometry:
+        geom_col = compose_geometry_column_from_lnglat(lng_col, lat_col)
+
+        # Call super set_geometry with generated column
+        frame = super(CartoDataFrame, self).set_geometry(geom_col, drop=False, inplace=inplace, crs=crs)
+
+        if drop:
+            if frame is None:
+                frame = self
+            del frame[lnglat[0]]
+            del frame[lnglat[1]]
+
+        return frame
