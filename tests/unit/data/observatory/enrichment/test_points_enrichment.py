@@ -1,6 +1,7 @@
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory import Enrichment, Variable, Dataset, VariableFilter
+from cartoframes.data.observatory.enrichment.enrichment_service import _GEOJSON_COLUMN
 
 try:
     from unittest.mock import Mock, patch
@@ -280,7 +281,7 @@ def get_query(columns, username, view, geo_table, temp_table_name, area_name, fi
             view=view,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column='__geojson_geom',
+            data_geom_column=_GEOJSON_COLUMN,
             where=_get_where(filters))
 
 

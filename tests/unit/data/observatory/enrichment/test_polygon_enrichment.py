@@ -2,7 +2,7 @@ from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory import Enrichment, Variable, Dataset, VariableFilter
 from cartoframes.data.observatory.enrichment.enrichment_service import _PUBLIC_PROJECT, _WORKING_PROJECT, \
-    AGGREGATION_DEFAULT, AGGREGATION_NONE, prepare_variables
+    AGGREGATION_DEFAULT, AGGREGATION_NONE, prepare_variables, _GEOJSON_COLUMN
 
 try:
     from unittest.mock import Mock, patch
@@ -685,7 +685,7 @@ def _get_query(agg, columns, username, view, geo_table, temp_table_name, filters
             view=view,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column='__geojson_geom',
+            data_geom_column=_GEOJSON_COLUMN,
             where=_get_where(filters),
             group=group)
 
@@ -711,7 +711,7 @@ def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_ta
             table=table,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column='__geojson_geom',
+            data_geom_column=_GEOJSON_COLUMN,
             where=_get_where(filters))
 
 
@@ -727,7 +727,7 @@ def _get_column_sql(agg, column):
             ) AS {aggregation}_{column}
             """.format(
                 column=column,
-                geo_column='__geojson_geom',
+                geo_column=_GEOJSON_COLUMN,
                 aggregation=agg)
     else:
         return """
@@ -738,7 +738,7 @@ def _get_column_sql(agg, column):
             ) AS {aggregation}_{column}
             """.format(
                 column=column,
-                geo_column='__geojson_geom',
+                geo_column=_GEOJSON_COLUMN,
                 aggregation=agg)
 
 
@@ -751,7 +751,7 @@ def _get_column_sql_without_agg(columns):
         ST_area(data_table.{data_geom_column}) AS measures_proportion
         '''.format(
             columns=', '.join(columns),
-            data_geom_column='__geojson_geom')
+            data_geom_column=_GEOJSON_COLUMN)
 
 
 def _get_where(filters):
