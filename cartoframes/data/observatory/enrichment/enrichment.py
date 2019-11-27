@@ -1,5 +1,5 @@
-from .enrichment_service import EnrichmentService, prepare_variables, get_variable_aggregations, \
-    AGGREGATION_DEFAULT, AGGREGATION_NONE
+from .enrichment_service import EnrichmentService, prepare_variables, \
+    AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation
 
 
 class Enrichment(EnrichmentService):
@@ -121,7 +121,6 @@ class Enrichment(EnrichmentService):
         self._upload_data(temp_table_name, cartodataframe)
 
         queries = self._get_points_enrichment_sql(temp_table_name, variables, filters)
-
         return self._execute_enrichment(queries, cartodataframe)
 
     AGGREGATION_DEFAULT = AGGREGATION_DEFAULT
@@ -171,8 +170,9 @@ class Enrichment(EnrichmentService):
                     - str: if you want to overwrite every default aggregation method, you can pass a string with the
                     aggregation method to use.
                     - dictionary: if you want to overwrite some default aggregation methods from your selected
-                    variables, use a dict as :py:class:`Variable <cartoframes.data.observatory.Variable>`: aggregation
-                    method pairs, for example: `{variable1: 'SUM', variable3: 'AVG'}`.
+                    variables, use a dict as
+                    :py:class:`Variable <cartoframes.data.observatory.Variable>`.id: aggregation method pairs,
+                    for example: `{variable1.id: 'SUM', variable3.id: 'AVG'}`.
 
         Returns:
             A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` enriched with the variables passed as argument.
@@ -311,24 +311,21 @@ class Enrichment(EnrichmentService):
                 variables = [variable1, variable2, variable3]
 
                 aggregation = {
-                    variable1: 'SUM',
-                    variable3: 'AVG'
+                    variable1.id: 'SUM',
+                    variable3.id: 'AVG'
                 }
 
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=aggregation)
         """
 
-        variables = prepare_variables(variables, only_with_agg=True)
+        variables = prepare_variables(variables, aggregation)
         cartodataframe = self._prepare_data(dataframe, geom_column)
 
         temp_table_name = self._get_temp_table_name()
         self._upload_data(temp_table_name, cartodataframe)
 
-        queries = self._get_polygon_enrichment_sql(
-            temp_table_name, variables, filters, aggregation
-        )
-
+        queries = self._get_polygon_enrichment_sql(temp_table_name, variables, filters, aggregation)
         return self._execute_enrichment(queries, cartodataframe)
 
     def _get_points_enrichment_sql(self, temp_table_name, variables, filters):
@@ -368,14 +365,13 @@ class Enrichment(EnrichmentService):
         )
 
     def _get_polygon_enrichment_sql(self, temp_table_name, variables, filters, aggregation):
-        variable_aggregations = get_variable_aggregations(variables, aggregation)
-        tables_metadata = self._get_tables_metadata(variable_aggregations).items()
+        tables_metadata = self._get_tables_metadata(variables).items()
 
         return [self._build_polygons_query(table, metadata, temp_table_name, filters, aggregation)
                 for table, metadata in tables_metadata]
 
     def _build_polygons_query(self, table, metadata, temp_table_name, filters, aggregation):
-        variable_aggregations = metadata['variables']
+        variables = metadata['variables']
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
@@ -386,10 +382,10 @@ class Enrichment(EnrichmentService):
 
         if aggregation == AGGREGATION_NONE:
             grouper = ''
-            variables = self._build_polygons_query_variables_without_aggregation(variable_aggregations)
+            variables = self._build_polygons_query_variables_without_aggregation(variables)
         else:
             grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=self.enrichment_id)
-            variables = self._build_polygons_query_variables_with_aggregation(variable_aggregations)
+            variables = self._build_polygons_query_variables_with_aggregation(variables, aggregation)
 
         return '''
             SELECT data_table.{enrichment_id}, {variables}
@@ -411,15 +407,17 @@ class Enrichment(EnrichmentService):
                 variables=variables
             )
 
-    def _build_polygons_query_variables_with_aggregation(self, variable_aggregations):
+    def _build_polygons_query_variables_with_aggregation(self, variables, aggregation):
         return ', '.join([
             self._build_polygons_query_variable_with_aggregation(
-                variable_aggregation.variable.column_name,
-                variable_aggregation.aggregation
-            ) for variable_aggregation in variable_aggregations])
+                variable,
+                aggregation
+            ) for variable in variables])
 
-    def _build_polygons_query_variable_with_aggregation(self, column, aggregation):
-        if (aggregation == 'SUM'):
+    def _build_polygons_query_variable_with_aggregation(self, variable, aggregation):
+        variable_agg = _get_aggregation(variable, aggregation)
+
+        if (variable_agg == 'SUM'):
             return """
                 {aggregation}(
                     enrichment_table.{column} * (
@@ -429,9 +427,9 @@ class Enrichment(EnrichmentService):
                     )
                 ) AS {aggregation}_{column}
                 """.format(
-                    column=column,
+                    column=variable.column_name,
                     geo_column=self.geojson_column,
-                    aggregation=aggregation)
+                    aggregation=variable_agg)
         else:
             return """
                 {aggregation}(
@@ -440,13 +438,12 @@ class Enrichment(EnrichmentService):
                     )
                 ) AS {aggregation}_{column}
                 """.format(
-                    column=column,
+                    column=variable.column_name,
                     geo_column=self.geojson_column,
-                    aggregation=aggregation)
+                    aggregation=variable_agg)
 
-    def _build_polygons_query_variables_without_aggregation(self, variable_aggregations):
-        variables = ['enrichment_table.{}'.format(variable_aggregation.variable.column_name)
-                     for variable_aggregation in variable_aggregations]
+    def _build_polygons_query_variables_without_aggregation(self, variables):
+        variables = ['enrichment_table.{}'.format(variable.column_name) for variable in variables]
 
         return """
             {variables},

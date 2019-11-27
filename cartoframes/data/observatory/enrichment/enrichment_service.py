@@ -120,14 +120,8 @@ class EnrichmentService(object):
         tables_metadata = defaultdict(lambda: defaultdict(list))
 
         for variable in variables:
-            if isinstance(variable, VariableAggregation):
-                variable_aggregation = variable
-                table_name = self.__get_enrichment_table(variable_aggregation.variable)
-                tables_metadata[table_name]['variables'].append(variable_aggregation)
-                variable = variable_aggregation.variable
-            else:
-                table_name = self.__get_enrichment_table(variable)
-                tables_metadata[table_name]['variables'].append(variable)
+            table_name = self.__get_enrichment_table(variable)
+            tables_metadata[table_name]['variables'].append(variable)
 
             if 'dataset' not in tables_metadata[table_name].keys():
                 tables_metadata[table_name]['dataset'] = self.__get_dataset(variable, table_name)
@@ -186,16 +180,16 @@ class EnrichmentService(object):
         return project
 
 
-def prepare_variables(variables, only_with_agg=False):
+def prepare_variables(variables, aggregation=None):
     if isinstance(variables, list):
-        variables = [_prepare_variable(var, only_with_agg) for var in variables]
+        variables = [_prepare_variable(var, aggregation) for var in variables]
     else:
-        variables = [_prepare_variable(variables, only_with_agg)]
+        variables = [_prepare_variable(variables, aggregation)]
 
     return list(filter(None, variables))
 
 
-def _prepare_variable(variable, only_with_agg=False):
+def _prepare_variable(variable, aggregation=None):
     if isinstance(variable, str):
         variable = Variable.get(variable)
 
@@ -205,9 +199,11 @@ def _prepare_variable(variable, only_with_agg=False):
             Variable `id` property or Variable `slug` property
         """)
 
-    if only_with_agg and not variable.agg_method:
-        warnings.warn('{} skipped because it does not have aggregation method'.format(variable))
-        return None
+    if aggregation:
+        variable_agg = _get_aggregation(variable, aggregation)
+        if not variable_agg and aggregation is not AGGREGATION_NONE:
+            warnings.warn('{} skipped because it does not have aggregation method'.format(variable))
+            return None
 
     _is_available_in_bq(variable)
 
@@ -225,22 +221,15 @@ def _is_available_in_bq(variable):
         """.format(variable.slug))
 
 
-def get_variable_aggregations(variables, aggregation):
-    return [VariableAggregation(variable, __get_aggregation(variable, aggregation)) for variable in variables]
-
-
-def __get_aggregation(variable, aggregation):
+def _get_aggregation(variable, aggregation):
     if aggregation == AGGREGATION_NONE:
         return None
     elif aggregation == AGGREGATION_DEFAULT:
         return variable.agg_method
     elif isinstance(aggregation, str):
         return aggregation
-    elif isinstance(aggregation, list):
-        agg = variable.agg_method
-        for variable_aggregation in aggregation:
-            if variable_aggregation.variable == variable:
-                agg = variable_aggregation.aggregation
-                break
-
-        return agg
+    elif isinstance(aggregation, dict):
+        if variable.id in aggregation:
+            return aggregation[variable.id]
+        else:
+            return variable.agg_method

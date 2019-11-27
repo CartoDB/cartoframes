@@ -1,8 +1,8 @@
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
-from cartoframes.data.observatory import Enrichment, Variable, Dataset, VariableAggregation, VariableFilter
+from cartoframes.data.observatory import Enrichment, Variable, Dataset, VariableFilter
 from cartoframes.data.observatory.enrichment.enrichment_service import _PUBLIC_PROJECT, _WORKING_PROJECT, \
-    AGGREGATION_DEFAULT, AGGREGATION_NONE
+    AGGREGATION_DEFAULT, AGGREGATION_NONE, prepare_variables
 
 try:
     from unittest.mock import Mock, patch
@@ -390,8 +390,7 @@ class TestPolygonEnrichment(object):
             'dataset_id': 'fake_name'
         })
         variables = [variable1, variable2]
-
-        aggregation = [VariableAggregation(variable2, agg2)]
+        aggregation = {variable2.id: agg2}
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset1, geo_table))
         dataset_get_mock.return_value = catalog
@@ -559,11 +558,30 @@ def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_ta
 
 
 def _get_column_sql(agg, column):
-    return '''
-        {agg}(enrichment_table.{column} *
-        (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column})) /
-        ST_area(data_table.{data_geom_column}))) AS {agg}_{column}
-            '''.format(agg=agg, column=column, data_geom_column='__geojson_geom')
+    if (agg == 'SUM'):
+        return """
+            {aggregation}(
+                enrichment_table.{column} * (
+                    ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                    /
+                    ST_area(data_table.{geo_column})
+                )
+            ) AS {aggregation}_{column}
+            """.format(
+                column=column,
+                geo_column='__geojson_geom',
+                aggregation=agg)
+    else:
+        return """
+            {aggregation}(
+                enrichment_table.{column} * (
+                    ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                )
+            ) AS {aggregation}_{column}
+            """.format(
+                column=column,
+                geo_column='__geojson_geom',
+                aggregation=agg)
 
 
 def _get_column_sql_without_agg(columns):

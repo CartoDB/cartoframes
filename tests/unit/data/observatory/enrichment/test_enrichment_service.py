@@ -246,7 +246,7 @@ class TestEnrichmentService(object):
             assert result == [variable]
 
         for case in one_variable_cases:
-            result = prepare_variables(case, only_with_agg=True)
+            result = prepare_variables(case, aggregation='SUM')
 
             assert result == [variable]
 
@@ -276,6 +276,6 @@ class TestEnrichmentService(object):
             assert result == [variable]
 
         for case in one_variable_cases:
-            result = prepare_variables(case, only_with_agg=True)
+            result = prepare_variables(case, aggregation='SUM')
 
-            assert result == []
+            assert result == [variable]
