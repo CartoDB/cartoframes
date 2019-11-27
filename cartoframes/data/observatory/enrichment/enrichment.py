@@ -135,10 +135,10 @@ class Enrichment(EnrichmentService):
         Data Observatory.
 
         When a polygon intersects with multiple geographies, the proportional part of the intersection will be used
-        to interpolate the quantity of the polygon value intersected, aggregating them. Most of :obj:`Variable` instances
-        have a :py:attr:`Variable.agg_method` property what is used by default as aggregation function, but you can overwrite it
-        using the `aggregation` parameter (not even doing the aggregation). If a variable does not have the
-        `agg_method` property set and you do not overwrite it either (with the `aggregation` parameter), the
+        to interpolate the quantity of the polygon value intersected, aggregating them. Most of :obj:`Variable`
+        instances have a :py:attr:`Variable.agg_method` property what is used by default as aggregation function, but
+        you can overwrite it using the `aggregation` parameter (not even doing the aggregation). If a variable does not
+        have the `agg_method` property set and you do not overwrite it either (with the `aggregation` parameter), the
         variable column will be skipped from the enrichment.
 
         Args:
@@ -162,8 +162,9 @@ class Enrichment(EnrichmentService):
 
                 The options are:
                     - :py:attr:`Enrichment.AGGREGATION_DEFAULT` (default): Every :obj:`Variable` has a default
-                    aggregation method in the :py:attr:`Variable.agg_method` property and it will be used to aggregate the data
-                    (a variable could not have `agg_method` defined and in this case, the variables will be skipped).
+                    aggregation method in the :py:attr:`Variable.agg_method` property and it will be used to aggregate
+                    the data (a variable could not have `agg_method` defined and in this case, the variables will be
+                    skipped).
                     - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
                     you will receive an array with all the data from each polygon instersected.
                     - str: if you want to overwrite every default aggregation method, you can pass a string with the
