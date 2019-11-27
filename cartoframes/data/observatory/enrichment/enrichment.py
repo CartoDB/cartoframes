@@ -162,7 +162,7 @@ class Enrichment(EnrichmentService):
 
                 The options are:
                     - :py:attr:`Enrichment.AGGREGATION_DEFAULT` (default): Every :obj:`Variable` has a default
-                    aggregation method in the Variable `agg_method` property and it will be used to aggregate the data
+                    aggregation method in the :py:attr:`Variable.agg_method` property and it will be used to aggregate the data
                     (a variable could not have `agg_method` defined and in this case, the variables will be skipped).
                     - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
                     you will receive an array with all the data from each polygon instersected.
