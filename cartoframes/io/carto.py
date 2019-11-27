@@ -40,7 +40,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
     if index_col in cdf:
         cdf.set_index(index_col, drop=True, inplace=True)
 
-    if decode_geom:
+    if 'the_geom' in cdf and decode_geom:
         cdf.set_geometry('the_geom', drop=False, inplace=True)
 
     return cdf
