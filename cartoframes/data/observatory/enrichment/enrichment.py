@@ -158,7 +158,7 @@ class Enrichment(EnrichmentService):
                     used to aggregate the data (some variables does not have `agg_method` defined and in this cases,
                     the variable will be skipped).
                     - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
-                    you will receive an array with all the data from each polygon instersected.
+                    You will receive a row of data from each polygon instersected.
                     - list of :obj:`VariableAggregation`: if you want to overwrite some default
                     aggregation methods from your selected variables, you can do it using a list of
                     :obj:`VariableAggregation`. Example: `[VariableAggregation(variable, 'SUM')]`
