@@ -375,19 +375,6 @@ geo_cdf.head()
 ```
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table>
   <thead>
     <tr style="text-align: right;">
@@ -449,6 +436,15 @@ geo_cdf.head()
   </tbody>
 </table>
 </div>
+
+```python
+geo_cdf.gc_status_rel.unique()
+```
+
+```
+array([0.97, 0.99, 0.98])
+```
+
 
 ## Visualize the results
 
