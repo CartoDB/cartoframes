@@ -155,7 +155,7 @@ class Enrichment(EnrichmentService):
                 intersect with one or more polygons from the Data Observatory. With this method you can select how to
                 aggregate the resulting data.
 
-                A aggregation method can be one of these values: 'MIN', 'MAX', 'SUM', 'AVG', 'COUNT',
+                An aggregation method can be one of these values: 'MIN', 'MAX', 'SUM', 'AVG', 'COUNT',
                 'ARRAY_AGG', 'ARRAY_CONCAT_AGG', 'STRING_AGG' but check this
                 `documentation <https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions>`__
                 for a complete list of aggregate functions.
