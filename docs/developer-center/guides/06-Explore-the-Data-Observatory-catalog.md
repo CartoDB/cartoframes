@@ -92,19 +92,6 @@ df[df['id'].str.contains('blockgroup', case=False, na=False)]
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
@@ -216,19 +203,6 @@ datasets.to_dataframe()
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
@@ -545,19 +519,6 @@ vdf
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
@@ -1448,19 +1409,6 @@ vdf[vdf['description'].str.contains('pop', case=False, na=False)]
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
@@ -2074,19 +2022,6 @@ dataset.head()
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
@@ -3325,19 +3260,6 @@ dataset.describe()
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
@@ -4073,19 +3995,6 @@ df[df['is_public_data'] == True]
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
