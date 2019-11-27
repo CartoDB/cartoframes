@@ -1,6 +1,7 @@
 import uuid
 
 from collections import defaultdict
+import warnings
 
 from ..catalog.variable import Variable
 from ..catalog.dataset import Dataset
@@ -223,14 +224,16 @@ class EnrichmentService(object):
         return project
 
 
-def prepare_variables(variables):
+def prepare_variables(variables, only_with_agg=False):
     if isinstance(variables, list):
-        return [_prepare_variable(var) for var in variables]
+        variables = [_prepare_variable(var, only_with_agg) for var in variables]
     else:
-        return [_prepare_variable(variables)]
+        variables = [_prepare_variable(variables, only_with_agg)]
+
+    return list(filter(None, variables))
 
 
-def _prepare_variable(variable):
+def _prepare_variable(variable, only_with_agg=False):
     if isinstance(variable, str):
         variable = Variable.get(variable)
 
@@ -239,6 +242,10 @@ def _prepare_variable(variable):
             variable should be a `<cartoframes.data.observatory> Variable` instance,
             Variable `id` property or Variable `slug` property
         """)
+
+    if only_with_agg and not variable.agg_method:
+        warnings.warn('{} skipped because it does not have aggregation method'.format(variable))
+        return None
 
     _is_available_in_bq(variable)
 
@@ -264,11 +271,11 @@ def __get_aggregation(variable, aggregation):
     if aggregation == AGGREGATION_NONE:
         return None
     elif aggregation == AGGREGATION_DEFAULT:
-        return variable.agg_method or 'array_agg'
+        return variable.agg_method
     elif isinstance(aggregation, str):
         return aggregation
     elif isinstance(aggregation, list):
-        agg = variable.agg_method or 'array_agg'
+        agg = variable.agg_method
         for variable_aggregation in aggregation:
             if variable_aggregation.variable == variable:
                 agg = variable_aggregation.aggregation
