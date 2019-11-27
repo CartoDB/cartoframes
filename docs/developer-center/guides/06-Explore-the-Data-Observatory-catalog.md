@@ -105,7 +105,7 @@ df[df['id'].str.contains('blockgroup', case=False, na=False)]
         text-align: right;
     }
 </style>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -229,7 +229,7 @@ datasets.to_dataframe()
         text-align: right;
     }
 </style>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -558,7 +558,7 @@ vdf
         text-align: right;
     }
 </style>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -1461,7 +1461,7 @@ vdf[vdf['description'].str.contains('pop', case=False, na=False)]
         text-align: right;
     }
 </style>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -2087,7 +2087,7 @@ dataset.head()
         text-align: right;
     }
 </style>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -3338,7 +3338,7 @@ dataset.describe()
         text-align: right;
     }
 </style>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -3786,7 +3786,7 @@ variable.histogram()
 ```
 
 
-![png](../img/guides/explore_data_observatory_catalog_files/explore_data_observatory_catalog_37_0.png)
+![png](../../img/guides/explore_data_observatory_catalog_files/explore_data_observatory_catalog_37_0.png)
 
 
 
@@ -3868,11 +3868,7 @@ dataset.subscribe()
 ```
 
 
-    HTML(value='\n    <h3>Subscription contract</h3>\n    You are about to subscribe to <b>carto-do.ags.demographi…
-
-
-
-    GridspecLayout(children=(Button(button_style='info', description='Yes', layout=Layout(grid_area='widget001', h…
+![png](../../img/guides/explore_data_observatory_catalog_files/sub_dat.png)
 
 
 
@@ -3881,11 +3877,7 @@ geography.subscribe()
 ```
 
 
-    HTML(value='\n    <h3>Subscription contract</h3>\n    You are about to subscribe to <b>carto-do.ags.geography_…
-
-
-
-    GridspecLayout(children=(Button(button_style='info', description='Yes', layout=Layout(grid_area='widget001', h…
+![png](../../img/guides/explore_data_observatory_catalog_files/sub_geo.png)
 
 
 **Licenses to data in the Data Observatory grant you the right to use the data subscribed for the period of one year. Every dataset or geography you want to use to enrich your own data, as lons as they are not public data, require a valid license.**
@@ -4096,7 +4088,7 @@ df[df['is_public_data'] == True]
         text-align: right;
     }
 </style>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
       <th></th>
