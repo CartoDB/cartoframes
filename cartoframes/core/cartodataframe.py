@@ -95,14 +95,24 @@ class CartoDataFrame(GeoDataFrame):
         result.__class__ = cls
         return result
 
-    def set_geometry(self, col, **kwargs):
-        # Decode geometry first:
+    def set_geometry(self, col, drop=False, inplace=False, crs=None):
+        if inplace:
+            frame = self
+        else:
+            frame = self.copy()
+
+        # Decode geometry:
         #   WKB, EWKB, WKB_HEX, EWKB_HEX, WKB_BHEX, EWKB_BHEX, WKT, EWKT
-        if isinstance(col, str) and col in self:
-            self[col] = decode_geometry_column(self[col])
+        if isinstance(col, str) and col in frame:
+            frame[col] = decode_geometry_column(frame[col])
         else:
             col = decode_geometry_column(col)
-        return super(CartoDataFrame, self).set_geometry(col, **kwargs)
+
+        # Call super set_geometry with decoded_column
+        super(CartoDataFrame, frame).set_geometry(col, drop=drop, crs=crs, inplace=True)
+
+        if not inplace:
+            return frame
 
     def to_carto(self, *args, **kwargs):
         """
