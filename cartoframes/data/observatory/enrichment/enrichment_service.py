@@ -199,7 +199,7 @@ def _prepare_variable(variable, aggregation=None):
             Variable `id` property or Variable `slug` property
         """)
 
-    if aggregation:
+    if aggregation is not None:
         variable_agg = _get_aggregation(variable, aggregation)
         if not variable_agg and aggregation is not AGGREGATION_NONE:
             warnings.warn('{} skipped because it does not have aggregation method'.format(variable))

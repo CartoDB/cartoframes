@@ -279,3 +279,38 @@ class TestEnrichmentService(object):
             result = prepare_variables(case, aggregation='SUM')
 
             assert result == [variable]
+
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch.object(Variable, 'get')
+    def test_prepare_variables_without_agg_method_and_custom_agg(self, get_mock, _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
+        variable_id = 'project.dataset.table.variable'
+        variable = Variable({
+            'id': variable_id,
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': None
+        })
+
+        get_mock.return_value = variable
+
+        one_variable_cases = [
+            variable_id,
+            variable
+        ]
+
+        for case in one_variable_cases:
+            result = prepare_variables(case)
+
+            assert result == [variable]
+
+        for case in one_variable_cases:
+            result = prepare_variables(case, aggregation={})
+
+            assert result == []
+
+        for case in one_variable_cases:
+            result = prepare_variables(case, aggregation={variable_id: 'SUM'})
+
+            assert result == [variable]
