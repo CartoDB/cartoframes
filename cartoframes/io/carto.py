@@ -7,8 +7,7 @@ from ..core.managers.context_manager import ContextManager
 from ..utils.utils import is_sql_query
 
 
-def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
-               drop_cartodb_id=True, drop_the_geom=True, drop_the_geom_webmercator=True):
+def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True):
     """
     Read a table or a SQL query from the CARTO account.
 
@@ -20,11 +19,10 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
             The number of rows to download. Default is to download all rows.
         retry_times (int, optional):
             Number of time to retry the download in case it fails. Default is 3.
-        schema (str, optional):prefix of the table. By default, it gets the
+        schema (str, optional): prefix of the table. By default, it gets the
             `current_schema()` using the credentials.
-        drop_cartodb_id (bool, optional): drop the "cartodb_id" column used as index.
-        drop_the_geom (bool, optional): drop the "the_geom" column used as geometry.
-        drop_the_geom_webmercator (bool, optional): drop the "the_geom_webmercator" column.
+        index_col (str, optional): name of the column to be loaded as index.
+        decode_geom (bool, optional): convert the "the_geom" column into a valid geometry column.
 
     Returns:
         :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`
@@ -35,14 +33,17 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
     context_manager = ContextManager(credentials)
 
-    df = context_manager.copy_to(source, schema, limit, retry_times, drop_the_geom_webmercator)
+    df = context_manager.copy_to(source, schema, limit, retry_times)
 
-    return CartoDataFrame(df).convert(
-        index_column='cartodb_id',
-        geom_column='the_geom',
-        drop_index=drop_cartodb_id,
-        drop_geom=drop_the_geom
-    )
+    cdf = CartoDataFrame(df, crs='epsg:4326')
+
+    if index_col in cdf:
+        cdf.set_index(index_col, drop=True, inplace=True)
+
+    if decode_geom:
+        cdf.set_geometry('the_geom', drop=False, inplace=True)
+
+    return cdf
 
 
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
@@ -66,7 +67,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
 
     context_manager = ContextManager(credentials)
 
-    cdf = CartoDataFrame(dataframe, copy=True).convert()
+    cdf = CartoDataFrame(dataframe, copy=True)
 
     context_manager.copy_from(cdf, table_name, if_exists)
 
