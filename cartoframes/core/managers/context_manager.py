@@ -12,8 +12,7 @@ from ...io.dataset_info import DatasetInfo
 from ...auth.defaults import get_default_credentials
 
 from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
-from ...utils.columns import Column, DataframeColumnsInfo, obtain_index_col, obtain_converters, \
-                            date_columns_names, normalize_name
+from ...utils.columns import Column, DataframeColumnsInfo, obtain_converters, date_columns_names, normalize_name
 
 from ... import __version__
 
@@ -45,8 +44,8 @@ class ContextManager(object):
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
-    def copy_from(self, cdf, table_name, if_exists, index, index_label=None, cartodbfy=True):
-        dataframe_columns_info = DataframeColumnsInfo(cdf, index, index_label)
+    def copy_from(self, cdf, table_name, if_exists, cartodbfy=True):
+        dataframe_columns_info = DataframeColumnsInfo(cdf)
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
 
@@ -239,18 +238,13 @@ class ContextManager(object):
                       'This usually happens when there are multiple queries being read at the same time.'))
                 raise err
 
-        index_col = obtain_index_col(columns)
-        converters = obtain_converters(columns, decode_geom=True)
+        converters = obtain_converters(columns)
         parse_dates = date_columns_names(columns)
 
         df = pd.read_csv(
             raw_result,
             converters=converters,
             parse_dates=parse_dates)
-
-        if index_col:
-            df.index = df[index_col]
-            df.index.name = None
 
         return df
 
@@ -279,11 +273,11 @@ def _drop_table_query(table_name, if_exists=True):
 
 
 def _create_table_from_columns_query(table_name, columns):
-    cols = ['{name} {type}'.format(name=column.name, type=column.type) for column in columns]
+    columns = ['{name} {type}'.format(name=column.name, type=column.type) for column in columns]
 
-    return 'CREATE TABLE {table_name} ({cols})'.format(
+    return 'CREATE TABLE {table_name} ({columns})'.format(
         table_name=table_name,
-        cols=', '.join(cols))
+        columns=', '.join(columns))
 
 
 def _create_table_from_query_query(table_name, query):
@@ -320,6 +314,3 @@ def _compute_copy_data(df, dataframe_columns_info):
         csv_row += b'\n'
 
         yield csv_row
-
-# def _is_valid_index_for_cartodb_id(index):
-#     return index.name is None and index.nlevels == 1 and index.dtype == 'int' and index.is_unique

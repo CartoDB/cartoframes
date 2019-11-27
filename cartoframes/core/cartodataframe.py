@@ -12,8 +12,14 @@ class CartoDataFrame(GeoDataFrame):
     access to the CARTO platform.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(CartoDataFrame, self).__init__(*args, **kwargs)
+    def __init__(self, data, *args, **kwargs):
+        geometry = kwargs.pop('geometry', None)
+        if geometry is None:
+            if hasattr(data, 'geometry'):
+                # Load geometry from data if no specified in kwargs
+                kwargs['geometry'] = data.geometry.name
+
+        super(CartoDataFrame, self).__init__(data, *args, **kwargs)
 
     def __getitem__(self, key):
         result = GeoDataFrame.__getitem__(self, key)

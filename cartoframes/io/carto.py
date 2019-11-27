@@ -37,8 +37,12 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
     cdf = CartoDataFrame(df, crs='epsg:4326')
 
-    if index_col in cdf:
-        cdf.set_index(index_col, drop=True, inplace=True)
+    if index_col:
+        if index_col in cdf:
+            cdf.set_index(index_col, drop=True, inplace=True)
+            cdf.index.name = None
+        else:
+            print('Debug: column "{}" does not exist'.format(index_col))
 
     if decode_geom and 'the_geom' in cdf:
         cdf.set_geometry('the_geom', drop=False, inplace=True)
@@ -46,7 +50,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
     return cdf
 
 
-def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=True, index_label=None):
+def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None):
     """
     Upload a Dataframe to CARTO.
 
@@ -58,7 +62,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             instance of Credentials (username, api_key, etc).
         if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
         geom_col (str, optional): name of the geometry column of the dataframe.
-        index (bool, optional): write the index in the table. Default is True.
+        index (bool, optional): write the index in the table. Default is False.
         index_label (str, optional): name of the index column in the table. By default it
             uses the name of the index from the dataframe.
 
@@ -73,6 +77,14 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     cdf = CartoDataFrame(dataframe, copy=True)
 
+    if index:
+        index_name = index_label or cdf.index.name
+        if index_name is not None and index_name != '':
+            # Append the index as a column
+            cdf[index_name] = cdf.index
+        else:
+            raise ValueError('Wrong index name. You should provide a valid index label.')
+
     if geom_col in cdf:
         cdf.set_geometry(geom_col, drop=True, inplace=True)
 
@@ -80,9 +92,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     if has_geometry:
         cdf.rename_geometry('the_geom', inplace=True)
 
-    cartodbfy = has_geometry
-
-    context_manager.copy_from(cdf, table_name, if_exists, index, index_label, cartodbfy)
+    context_manager.copy_from(cdf, table_name, if_exists, has_geometry)
 
     print('Success! Data uploaded correctly')
 

@@ -6,7 +6,7 @@ import sys
 from unidecode import unidecode
 
 from .utils import dtypes2pg, pg2dtypes, PG_NULL
-from .geom_utils import decode_geometry, detect_encoding_type, ENC_WKB_BHEX
+from .geom_utils import decode_geometry, detect_encoding_type
 
 
 class Column(object):
@@ -116,10 +116,10 @@ class DataframeColumnInfo(object):
 
 
 class DataframeColumnsInfo(object):
-    def __init__(self, df, index, index_label):
+    def __init__(self, df):
         geom_column = self._get_geom_col_name(df)
         geom_type = self._get_geometry_type(df, geom_column)
-        self.columns = self._get_columns_info(df, geom_column, geom_type, index, index_label)
+        self.columns = self._get_columns_info(df, geom_column, geom_type)
 
     def __repr__(self):
         return str(self.columns)
@@ -130,17 +130,9 @@ class DataframeColumnsInfo(object):
             raise Exception('No geometry found.')
         return geom_col
 
-    def _get_columns_info(self, df, geom_column, geom_type, index, index_label):
-        df_columns = [(name, df.dtypes[name]) for name in df.columns]
-
-        if index_label is None:
-            index_label = df.index.name
-
-        # Append index if possible
-        if index_label is not None and index_label not in df:
-            df_columns.append((index_label, df.index.dtype))
-
+    def _get_columns_info(self, df, geom_column, geom_type):
         columns = []
+        df_columns = [(name, df.dtypes[name]) for name in df.columns]
 
         for name, dtype in df_columns:
             if self._is_valid_column(name, geom_column):
@@ -149,15 +141,7 @@ class DataframeColumnsInfo(object):
         return columns
 
     def _is_valid_column(self, name, geom_column):
-        return not (
-            name.lower() in Column.FORBIDDEN_COLUMN_NAMES
-            or (
-                # Exclude duplicated geom columns when the geometry column (normalized)
-                # collides when another column named as the normalized geometry.
-                name == Column.NORMALIZED_GEOM_COL_NAME and geom_column
-                and geom_column != Column.NORMALIZED_GEOM_COL_NAME
-            )
-        )
+        return name.lower() not in Column.FORBIDDEN_COLUMN_NAMES
 
     def _get_geometry_type(self, df, geom_column):
         if geom_column in df:
@@ -211,15 +195,8 @@ def normalize_name(column_name):
     return normalize_names([column_name])[0]
 
 
-def obtain_index_col(columns):
-    for column in columns:
-        if column.name == Column.INDEX_COLUMN_NAME:
-            return Column.INDEX_COLUMN_NAME
-    return False
-
-
-def obtain_converters(columns, decode_geom):
-    converters = {'the_geom': lambda x: decode_geometry(x, ENC_WKB_BHEX) if decode_geom else x}
+def obtain_converters(columns):
+    converters = {}
 
     for int_column_name in int_columns_names(columns):
         converters[int_column_name] = _convert_int
