@@ -158,3 +158,6 @@ class CartoDataFrame(GeoDataFrame):
             del frame[lnglat[1]]
 
         return frame
+
+    def has_geometry(self):
+        return self._geometry_column_name in self

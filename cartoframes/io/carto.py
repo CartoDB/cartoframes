@@ -46,7 +46,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
     return cdf
 
 
-def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
+def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=True, index_label=None):
     """
     Upload a Dataframe to CARTO.
 
@@ -57,6 +57,10 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
         if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
+        geom_col (str, optional): name of the geometry column of the dataframe.
+        index (bool, optional): write the index in the table. Default is True.
+        index_label (str, optional): name of the index column in the table. By default it
+            uses the name of the index from the dataframe.
 
     """
     if not isinstance(dataframe, pd.DataFrame):
@@ -69,7 +73,16 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
 
     cdf = CartoDataFrame(dataframe, copy=True)
 
-    context_manager.copy_from(cdf, table_name, if_exists)
+    if geom_col in cdf:
+        cdf.set_geometry(geom_col, drop=True, inplace=True)
+
+    has_geometry = cdf.has_geometry()
+    if has_geometry:
+        cdf.rename_geometry('the_geom', inplace=True)
+
+    cartodbfy = has_geometry
+
+    context_manager.copy_from(cdf, table_name, if_exists, index, index_label, cartodbfy)
 
     print('Success! Data uploaded correctly')
 

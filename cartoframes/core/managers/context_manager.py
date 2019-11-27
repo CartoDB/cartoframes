@@ -11,7 +11,6 @@ from ...io.dataset_info import DatasetInfo
 
 from ...auth.defaults import get_default_credentials
 
-from ...utils.geom_utils import decode_geometry
 from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
 from ...utils.columns import Column, DataframeColumnsInfo, obtain_index_col, obtain_converters, \
                             date_columns_names, normalize_name
@@ -46,14 +45,14 @@ class ContextManager(object):
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
-    def copy_from(self, cdf, table_name, if_exists):
-        dataframe_columns_info = DataframeColumnsInfo(cdf)
+    def copy_from(self, cdf, table_name, if_exists, index, index_label=None, cartodbfy=True):
+        dataframe_columns_info = DataframeColumnsInfo(cdf, index, index_label)
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
             print('Debug: creating table "{}"'.format(table_name))
-            self._create_table_from_columns(table_name, dataframe_columns_info.columns, schema)
+            self._create_table_from_columns(table_name, dataframe_columns_info.columns, schema, cartodbfy)
         elif if_exists == 'fail':
             raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
                             'Please choose a different `table_name` or use '
@@ -62,13 +61,13 @@ class ContextManager(object):
 
         return self._copy_from(cdf, table_name, dataframe_columns_info)
 
-    def create_table_from_query(self, table_name, query, if_exists):
+    def create_table_from_query(self, table_name, query, if_exists, cartodbfy=True):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
             print('Debug: creating table "{}"'.format(table_name))
-            self._create_table_from_query(table_name, query, schema)
+            self._create_table_from_query(table_name, query, schema, cartodbfy)
         elif if_exists == 'fail':
             raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
                             'Please choose a different `table_name` or use '
@@ -166,18 +165,20 @@ class ContextManager(object):
             tables = [table.split('.')[1] if '.' in table else table for table in result['rows'][0]['tables']]
         return tables
 
-    def _create_table_from_query(self, table_name, query, schema):
+    def _create_table_from_query(self, table_name, query, schema, cartodbfy=True):
         query = 'BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'.format(
             drop=_drop_table_query(table_name),
             create=_create_table_from_query_query(table_name, query),
-            cartodbfy=_cartodbfy_query(table_name, schema))
+            cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else ''
+        )
         self.execute_long_running_query(query)
 
-    def _create_table_from_columns(self, table_name, columns, schema):
+    def _create_table_from_columns(self, table_name, columns, schema, cartodbfy=True):
         query = 'BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'.format(
             drop=_drop_table_query(table_name),
             create=_create_table_from_columns_query(table_name, columns),
-            cartodbfy=_cartodbfy_query(table_name, schema))
+            cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else ''
+        )
         self.execute_long_running_query(query)
 
     def compute_query(self, source, schema=None):
@@ -258,11 +259,11 @@ class ContextManager(object):
             COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '{null}');
         """.format(
             table_name=table_name, null=PG_NULL,
-            columns=','.join(c.database for c in dataframe_columns_info.columns)).strip()
+            columns=','.join(column.name for column in dataframe_columns_info.columns)).strip()
 
-        data = _rows(dataframe, dataframe_columns_info)
+        data = _compute_copy_data(dataframe, dataframe_columns_info)
 
-        self.copy_client.copyfrom(query.strip(), data)
+        self.copy_client.copyfrom(query, data)
 
     def normalize_table_name(self, table_name):
         norm_table_name = normalize_name(table_name)
@@ -278,7 +279,7 @@ def _drop_table_query(table_name, if_exists=True):
 
 
 def _create_table_from_columns_query(table_name, columns):
-    cols = ['{column} {type}'.format(column=c.database, type=c.database_type) for c in columns]
+    cols = ['{name} {type}'.format(name=column.name, type=column.type) for column in columns]
 
     return 'CREATE TABLE {table_name} ({cols})'.format(
         table_name=table_name,
@@ -304,25 +305,14 @@ def _create_auth_client(credentials, public=False):
     )
 
 
-def _rows(df, dataframe_columns_info):
+def _compute_copy_data(df, dataframe_columns_info):
     for index, _ in df.iterrows():
         row_data = []
-        for c in dataframe_columns_info.columns:
-            col = c.dataframe
-            if col not in df.columns:
-                if df.index.name and col == df.index.name:
-                    val = index
-                else:  # we could have filtered columns in the df. See DataframeColumnsInfo
-                    continue
-            else:
-                val = df.at[index, col]
+        for column in dataframe_columns_info.columns:
+            val = df.at[index, column.name]
 
-            if dataframe_columns_info.geom_column and col == dataframe_columns_info.geom_column:
-                geom = decode_geometry(val, dataframe_columns_info.enc_type)
-                if geom:
-                    val = 'SRID=4326;{}'.format(geom.wkt)
-                else:
-                    val = ''
+            if column.is_geom and hasattr(val, 'wkt'):
+                val = 'SRID=4326;{}'.format(val.wkt)
 
             row_data.append(encode_row(val))
 
@@ -330,19 +320,6 @@ def _rows(df, dataframe_columns_info):
         csv_row += b'\n'
 
         yield csv_row
-
-
-# def _rename_index_for_upload(self):
-#     if self._df.index.name != 'cartodb_id':
-#         if 'cartodb_id' not in self._df:
-#             if _is_valid_index_for_cartodb_id(self._df.index):
-#                 # rename a integer unnamed index to cartodb_id
-#                 self._df.index.rename('cartodb_id', inplace=True)
-#         else:
-#             if self._df.index.name is None:
-#                 # replace an unnamed index by a cartodb_id column
-#                 self._df.set_index('cartodb_id')
-
 
 # def _is_valid_index_for_cartodb_id(index):
 #     return index.name is None and index.nlevels == 1 and index.dtype == 'int' and index.is_unique
