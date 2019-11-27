@@ -170,7 +170,7 @@ class Enrichment(EnrichmentService):
                     aggregation method to use.
                     - dictionary: if you want to overwrite some default aggregation methods from your selected
                     variables, use a dict as
-                    :py:class:`Variable <cartoframes.data.observatory.Variable>`.id: aggregation method pairs,
+                    :py:attr:`Variable.id`: aggregation method pairs,
                     for example: `{variable1.id: 'SUM', variable3.id: 'AVG'}`.
 
         Returns:
