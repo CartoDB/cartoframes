@@ -3861,8 +3861,8 @@ Both `dataset` and `geography` are not public data, that means you need a subscr
 
 ```python
 from cartoframes.auth import set_default_credentials
-YOUR_CARTO_USER_NAME = 'cartoframes-testing'
-YOUR_CARTO_API_KEY = '931150443b7aa3bb05d47c8e86b88ce8cbca3954'
+YOUR_CARTO_USER_NAME = ''
+YOUR_CARTO_API_KEY = ''
 set_default_credentials(username=YOUR_CARTO_USER_NAME, api_key=YOUR_CARTO_API_KEY)
 dataset.subscribe()
 ```
