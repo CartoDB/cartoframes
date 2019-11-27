@@ -1,6 +1,6 @@
-# Use Location Data Services
+## Use Location Data Services
 
-## Introduction
+### Introduction
 
 CARTOframes provides the functionality of using the [CARTO Data Services API](https://carto.com/developers/data-services-api/). This API consists of a set of location based functions that can be applied to your data in order to perform geospatial analyses without leaving the context of your notebook.
 
@@ -10,11 +10,11 @@ In this guide we go through the use case of, given a set of ten Starbucks store 
 
 > Based on your account plan, some of these location data services are subject to different [quota limitations](https://carto.com/developers/data-services-api/support/quota-information/)
 
-## Data
+### Data
 
 We will be using the same dataset of fake locations used along these guides [starbucks_brooklyn.csv]()
 
-## Authentication
+### Authentication
 
 Using Location Data Services requires to be authenticated. For more information about how to authenticate, please read the [Login to CARTO Platform guide](/developers/cartoframes/guides/Login-to-CARTO-Platform/)
 
@@ -26,7 +26,7 @@ credentials = Credentials.from_file()
 set_default_credentials(credentials)
 ```
 
-## Geocoding
+### Geocoding
 
 The first step is to read and understand the data we have. Once we've the Starbucks store data in a DataFrame, we can see we've two columns that can be used in the **geocoding** service: `name` and `address`. There's also a third column that reflects the anual revenue of the store.
 
@@ -127,8 +127,7 @@ df
 </table>
 </div>
 
-
-### Quota consumption
+#### Quota consumption
 
 Each time you run a Location Data Service, you're consuming quota. For this reason, we provide the hability to check in advance the **amount of credits** this operation will consume by using the `dry_run` parameter when running the service function.
 
@@ -279,7 +278,7 @@ geo_cdf.head()
 </table>
 </div>
 
-### Precision
+#### Precision
 
 The `address` column is more complete than the `name` column, and therefore, the resulting coordinates calculated by the service will be more accurate. If we check this, the accuracy values using the `name` column (`0.95, 0.93, 0.96, 0.83, 0.78, 0.9`) are lower than the ones we get by using the `address` column for geocoding (`0.97, 0.99, 0.98`)
 
@@ -445,8 +444,7 @@ geo_cdf.gc_status_rel.unique()
 array([0.97, 0.99, 0.98])
 ```
 
-
-## Visualize the results
+#### Visualize the results
 
 Finally, we can visualize through CARTOframes helpers the geocoding results by precision.
 
@@ -483,7 +481,7 @@ color_bins_layer(
     </iframe>
 </div>
 
-## Isolines
+### Isolines
 
 The Isolines service generates contoured lines that display equally calculated levels over a given surface area. Isoline functions are calculated as the intersection areas from the origin point, measured by:
 
@@ -492,7 +490,7 @@ The Isolines service generates contoured lines that display equally calculated l
 
 In this guide we're using the `Isochrones` to know the walking area by time for each Starbucks store, and the `Isodistances` to discover the walking area by distance.
 
-### Isochrones
+### Isolines: Isochrones
 
 We're going to use these values to set the ranges: 5, 15 and 30 min. These ranges are in `seconds`, so they will be **300**, **900**, and **1800** respectively.
 
@@ -595,9 +593,7 @@ isochrones_cdf.head()
 </table>
 </div>
 
-
-
-### The isolines helper
+#### The isolines helper
 
 The most straight forward way of visualizing the the resulting geometries is by using the `isolines_layer` helper. It will use the `range_label` column added automatically by the service to classify each polygon by category.
 
@@ -619,7 +615,7 @@ isolines_layer(isochrones_cdf)
     </iframe>
 </div>
 
-### Isodistances
+### Isolines: Isodistances
 
 The isoline services accepts several options to manually change the `resolution` or the `quality` of the polygons. There's more information about these settings in the [Isolines Reference](/developers/cartoframes/reference/#heading-Isolines)
 
@@ -750,7 +746,7 @@ isolines_layer(isodistances_cdf)
     </iframe>
 </div>
 
-## All together
+### All together
 
 
 ```python
@@ -869,7 +865,7 @@ Map([
     </iframe>
 </div>
 
-## Conclusion
+### Conclusion
 
 In this example we've explained how to use the Location Data Services to perform trade areas analysis easily using CARTOframes built-in functionality without leaving the notebook.
 
