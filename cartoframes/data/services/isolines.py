@@ -225,7 +225,7 @@ def _rings_query(areas_query, with_source_id):
     if with_source_id:
         select_source_id = 'source_id,'
     else:
-        select_source_id = ''
+        select_source_id = 'row_number() OVER () AS source_id,'
 
     return """
         SELECT
