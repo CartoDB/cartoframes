@@ -23,44 +23,6 @@ AGGREGATION_DEFAULT = 'default'
 AGGREGATION_NONE = 'none'
 
 
-class VariableAggregation(object):
-    """This class overwrites a :py:class:`Variable <cartoframes.data.observatory.Variable>` default aggregation method in
-        :py:class:`Enrichment <cartoframes.data.observatory.Enrichment>` functions
-
-        Args:
-            variable (str or :obj:`Variable`):
-                The variable name or :obj:`Variable` instance
-
-            aggregation (str):
-                The aggregation method, it can be one of these values: 'MIN', 'MAX', 'SUM', 'AVG', 'COUNT',
-                'ARRAY_AGG', 'ARRAY_CONCAT_AGG', 'STRING_AGG' but check this
-                `documentation <https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions>`__
-                for a complete list of aggregate functions
-
-        Returns:
-            :py:class:`VariableAggregation <cartoframes.data.observatory.entity.VariableAggregation>`
-
-        Example:
-
-            Next example uses a `VariableAggregation` instance to calculate the `SUM` of car-free households
-            :obj:`Variable` of the :obj:`Catalog` for each polygon of `my_local_dataframe` pandas `DataFrame`
-
-            .. code::
-
-                from cartoframes.data.observatory import Enrichment, Variable, VariableAggregation
-
-                variable = Variable.get('no_cars_d19dfd10')
-                enriched_dataset_cdf = Enrichment().enrich_polygons(
-                    my_local_dataframe,
-                    variables=[variable],
-                    aggregation=[VariableAggregation(variable, 'SUM')]
-                )
-    """
-    def __init__(self, variable, aggregation=None):
-        self.variable = _prepare_variable(variable)
-        self.aggregation = aggregation
-
-
 class VariableFilter(object):
     """This class can be used for filtering the results of
     :py:class:`Enrichment <cartoframes.data.observatory.Enrichment>` functions. It works by appending the

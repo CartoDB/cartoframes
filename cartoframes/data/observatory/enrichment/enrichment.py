@@ -137,8 +137,11 @@ class Enrichment(EnrichmentService):
         Data Observatory.
 
         When a polygon intersects with multiple geographies, the proportional part of the intersection will be used
-        to interpolate the quantity of the polygon value intersected, aggregating them
-        with the operator provided by `agg_operators` argument. See :obj:`VariableAggregation` for more info.
+        to interpolate the quantity of the polygon value intersected, aggregating them. Most of `Variable` instances
+        have a `agg_operator` property what is used by default as aggregation function, but you can overwrite it
+        using the `aggregation` parameter (not even doing the aggregation). If a variable do not have the
+        `agg_operator` property set and you do not overwrite it either (with the `aggregation` parameter), the
+        variable column will be skipped from the enrichment.
 
         Args:
             dataframe (pandas `DataFrame`, geopandas `GeoDataFrame`
@@ -152,23 +155,24 @@ class Enrichment(EnrichmentService):
                 the enrichment data. Example: `[VariableFilter(variable1, "= 'a string'")]`
             aggregation (str, list, optional): sets the data aggregation. The polygons in the source `DataFrame` can
                 intersect with one or more polygons from the Data Observatory. With this method you can select how to
-                aggregate the resulting data. Options are:
-                    - :py:attr:`Enrichment.AGGREGATION_DEFAULT` (default): Every
-                    :obj:`Variable` has an aggregation method in the Variable `agg_method` property and it will be
-                    used to aggregate the data (some variables does not have `agg_method` defined and in this cases,
-                    the variable will be skipped).
+                aggregate the resulting data.
+
+                A aggregation method can be one of these values: 'MIN', 'MAX', 'SUM', 'AVG', 'COUNT',
+                'ARRAY_AGG', 'ARRAY_CONCAT_AGG', 'STRING_AGG' but check this
+                `documentation <https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions>`__
+                for a complete list of aggregate functions.
+
+                The options are:
+                    - :py:attr:`Enrichment.AGGREGATION_DEFAULT` (default): Every :obj:`Variable` has a default
+                    aggregation method in the Variable `agg_method` property and it will be used to aggregate the data
+                    (a variable could not have `agg_method` defined and in this case, the variables will be skipped).
                     - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
                     you will receive an array with all the data from each polygon instersected.
-                    - list of :obj:`VariableAggregation`: if you want to overwrite some default
-                    aggregation methods from your selected variables, you can do it using a list of
-                    :obj:`VariableAggregation`. Example: `[VariableAggregation(variable, 'SUM')]`
                     - str: if you want to overwrite every default aggregation method, you can pass a string with the
-                    aggregation method to use. A BigQuery standard SQL aggregation function
-                    (such as 'AVG', 'COUNT', 'MAX', 'MIN', 'ARRAY_AGG', 'SUM', ...). If not provided, the default
-                    :py:attr:`Variable.agg_method` for each variable will be used, when available. Otherwise, an error
-                    will be raised. See
-                    `this <https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions>`__
-                    for a complete list of aggregate functions
+                    aggregation method to use.
+                    - dictionary: if you want to overwrite some default aggregation methods from your selected
+                    variables, use a dict as :py:class:`Variable <cartoframes.data.observatory.Variable>`: aggregation
+                    method pairs, for example: `{variable1: 'SUM', variable3: 'AVG'}`.
 
         Returns:
             A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` enriched with the variables passed as argument.
@@ -263,12 +267,12 @@ class Enrichment(EnrichmentService):
                 cdf_enrich = enrichment.enrich_polygons(df, variables=[variable], filters=[filter])
 
 
-            Enrich a polygons dataframe overwriting some of the variables aggregation methods:
+            Enrich a polygons dataframe overwriting every variables aggregation methods to use `SUM` function:
 
             .. code::
 
                 import pandas
-                from cartoframes.data.observatory import Enrichment, Catalog, VariableAggregation
+                from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials, Credentials
 
                 set_default_credentials()
@@ -283,10 +287,33 @@ class Enrichment(EnrichmentService):
 
                 variables = [variable1, variable2, variable3]
 
-                aggregation = [
-                    VariableAggregation(variable1, 'SUM'),
-                    VariableAggregation(variable3, 'AVG')
-                ]
+                enrichment = Enrichment()
+                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation='SUM')
+
+            Enrich a polygons dataframe overwriting some of the variables aggregation methods:
+
+            .. code::
+
+                import pandas
+                from cartoframes.data.observatory import Enrichment, Catalog
+                from cartoframes.auth import set_default_credentials, Credentials
+
+                set_default_credentials()
+
+                df = pandas.read_csv('...')
+
+                catalog = Catalog()
+                all_variables = catalog.country('usa').category('demographics').datasets[0].variables
+                variable1 = all_variables[0] // variable1.agg_method is 'AVG' but you want 'SUM'
+                variable2 = all_variables[1] // variable2.agg_method is 'AVG' and it is what you want
+                variable3 = all_variables[2] // variable3.agg_method is 'SUM' but you want 'AVG'
+
+                variables = [variable1, variable2, variable3]
+
+                aggregation = {
+                    variable1: 'SUM',
+                    variable3: 'AVG'
+                }
 
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=aggregation)
