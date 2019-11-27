@@ -5609,6 +5609,6 @@ We've learnt:
 We recommend you to check also these resources if you want to know more about the Data Observatory catalog:
 
 - The CARTOframes Enrichment guides and examples
-- [our public website](https://carto.com/platform/location-data-streams/)
+- [Our public website](https://carto.com/platform/location-data-streams/)
 - Your user dashboard: Under the data section
-- The CARTOframes catalog reference
+- The CARTOframes catalog [API reference](https://carto.com/developers/cartoframes/reference/#heading-Data-Observatory)
