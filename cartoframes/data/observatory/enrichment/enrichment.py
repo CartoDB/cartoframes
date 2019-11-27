@@ -135,7 +135,7 @@ class Enrichment(EnrichmentService):
         Data Observatory.
 
         When a polygon intersects with multiple geographies, the proportional part of the intersection will be used
-        to interpolate the quantity of the polygon value intersected, aggregating them. Most of `Variable` instances
+        to interpolate the quantity of the polygon value intersected, aggregating them. Most of :obj:`Variable` instances
         have a `agg_operator` property what is used by default as aggregation function, but you can overwrite it
         using the `aggregation` parameter (not even doing the aggregation). If a variable do not have the
         `agg_operator` property set and you do not overwrite it either (with the `aggregation` parameter), the
