@@ -382,16 +382,8 @@ class Dataset(CatalogEntity):
         :raises CartoException: If you have not a valid license for the dataset being downloaded.
         :raises ValueError: If the credentials argument is not valud.
         """
-
-        _credentials = credentials or defaults.get_default_credentials()
-
-        if not isinstance(_credentials, Credentials):
-            raise ValueError('`credentials` must be a Credentials class instance')
-
-        datasets = Dataset.get_all({}, _credentials)
-
-        if self not in datasets:
-            raise CartoException('You are not subscribed this Dataset yet. Please, use the subscribe method first.')
+        if not self._is_subscribed(credentials):
+            raise CartoException('You are not subscribed to this Dataset yet. Please, use the subscribe method first.')
 
         return self._download(credentials)
 
@@ -480,3 +472,16 @@ class Dataset(CatalogEntity):
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, DATASET_TYPE, _credentials))
+
+    def _is_subscribed(self, credentials=None):
+        _credentials = credentials or defaults.get_default_credentials()
+
+        if not isinstance(_credentials, Credentials):
+            raise ValueError('`credentials` must be a Credentials class instance')
+
+        datasets = Dataset.get_all({}, _credentials)
+
+        if self in datasets:
+            return True
+
+        return False
