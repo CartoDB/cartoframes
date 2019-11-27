@@ -4,31 +4,6 @@ import json
 import shapely
 import binascii as ba
 
-INDEX_COL_NAMES = [
-    'cartodb_id'
-]
-
-GEOM_COLUMN_NAMES = [
-    'geometry',
-    'the_geom',
-    'wkt_geometry',
-    'wkb_geometry',
-    'geom',
-    'wkt',
-    'wkb'
-]
-
-LAT_COLUMN_NAMES = [
-    'latitude',
-    'lat'
-]
-
-LNG_COLUMN_NAMES = [
-    'longitude',
-    'lng',
-    'lon',
-    'long'
-]
 
 ENC_SHAPELY = 'shapely'
 ENC_WKB = 'wkb'
@@ -49,35 +24,6 @@ def decode_geometry_column(col):
 
 def compose_geometry_column_from_lnglat(lng, lat):
     return _compute_geometry_from_lnglat(lng, lat)
-
-
-def generate_index(dataframe, index_column, drop_index):
-    index_column = _get_column(dataframe, index_column, INDEX_COL_NAMES)
-    if index_column is not None:
-        dataframe.set_index(index_column, inplace=True)
-        if drop_index:
-            del dataframe[index_column.name]
-        dataframe.index.name = None
-
-
-def generate_geometry(dataframe, geom_column=None, lnglat_columns=None, drop_geom=True, drop_lnglat=True):
-    if GEO_COLUMN_NAME not in dataframe:
-        geom_column = _get_column(dataframe, geom_column, GEOM_COLUMN_NAMES)
-        if geom_column is not None:
-            dataframe[GEO_COLUMN_NAME] = _compute_geometry_from_geom(geom_column)
-            if drop_geom:
-                del dataframe[geom_column.name]
-        else:
-            lng_column = _get_column(dataframe, lnglat_columns and lnglat_columns[0], LNG_COLUMN_NAMES)
-            lat_column = _get_column(dataframe, lnglat_columns and lnglat_columns[1], LAT_COLUMN_NAMES)
-            if lng_column is not None and lat_column is not None:
-                dataframe[GEO_COLUMN_NAME] = _compute_geometry_from_lnglat(lng_column, lat_column)
-                if drop_lnglat:
-                    del dataframe[lng_column.name]
-                    del dataframe[lat_column.name]
-
-    if GEO_COLUMN_NAME in dataframe:
-        dataframe.set_geometry(GEO_COLUMN_NAME, inplace=True)
 
 
 def _compute_geometry_from_geom(geom_column):
