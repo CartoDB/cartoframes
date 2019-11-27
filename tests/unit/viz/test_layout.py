@@ -3,9 +3,9 @@ from carto.exceptions import CartoException
 
 from cartoframes.viz import Layer, Layout, Map, Source
 
-from .utils import build_geodataframe
+from .utils import build_cartodataframe
 
-SOURCE = build_geodataframe([-10, 0], [-10, 0])
+SOURCE = build_cartodataframe([-10, 0], [-10, 0])
 
 
 class TestLayout(object):

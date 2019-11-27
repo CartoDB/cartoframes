@@ -130,7 +130,7 @@ class EnrichmentService(object):
 
     def _prepare_data(self, dataframe, geom_column):
         cartodataframe = CartoDataFrame(dataframe, copy=True)
-        cartodataframe.convert(geom_column=geom_column)  # Decode geom
+        cartodataframe.set_geometry(geom_column)  # Decode geom
 
         # Add extra columns for the enrichment
         cartodataframe[self.enrichment_id] = range(cartodataframe.shape[0])
@@ -280,5 +280,4 @@ def __get_aggregation(variable, aggregation):
             if variable_aggregation.variable == variable:
                 agg = variable_aggregation.aggregation
                 break
-
         return agg

@@ -4,12 +4,12 @@ from cartoframes.viz import helpers
 from cartoframes.auth import Credentials
 
 from . import setup_mocks
-from ..utils import simple_dataframe
+from ..utils import build_cartodataframe
 
 
 class TestSizeBinsLayerHelper(object):
     def setup_method(self):
-        self.source = simple_dataframe(['name', 'time'])
+        self.source = build_cartodataframe([0], [0], ['name', 'time'])
 
     def test_helpers(self):
         "should be defined"

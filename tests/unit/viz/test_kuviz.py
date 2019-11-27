@@ -12,7 +12,7 @@ from cartoframes.core.managers.context_manager import ContextManager
 from ..mocks.kuviz_mock import CartoKuvizMock
 from ..mocks.api_key_mock import APIKeyManagerMock
 
-from .utils import build_geodataframe
+from .utils import build_cartodataframe
 
 
 def setup_mocks(mocker, credentials, is_public=True, token=None):
@@ -54,8 +54,8 @@ class TestKuvizPublisher(object):
     def test_kuviz_publisher_set_layers(self, mocker):
         setup_mocks(mocker, self.credentials)
 
-        source_1 = Source(build_geodataframe([-10, 0], [-10, 0]))
-        source_2 = Source(build_geodataframe([0, 10], [10, 0]))
+        source_1 = Source(build_cartodataframe([-10, 0], [-10, 0]))
+        source_2 = Source(build_cartodataframe([0, 10], [10, 0]))
         layer_1 = Layer(source_1)
         layer_2 = Layer(source_2)
         vmap = Map([
