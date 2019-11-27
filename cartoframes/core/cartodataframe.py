@@ -1,7 +1,7 @@
 from pandas import Series
 from geopandas import GeoDataFrame
 
-from ..utils.geom_utils import generate_index, generate_geometry
+from ..utils.geom_utils import decode_geometry_column
 
 
 class CartoDataFrame(GeoDataFrame):
@@ -95,6 +95,15 @@ class CartoDataFrame(GeoDataFrame):
         result.__class__ = cls
         return result
 
+    def set_geometry(self, col, **kwargs):
+        # Decode geometry first:
+        #   WKB, EWKB, WKB_HEX, EWKB_HEX, WKB_BHEX, EWKB_BHEX, WKT, EWKT
+        if isinstance(col, str) and col in self:
+            self[col] = decode_geometry_column(self[col])
+        else:
+            col = decode_geometry_column(col)
+        return super(CartoDataFrame, self).set_geometry(col, **kwargs)
+
     def to_carto(self, *args, **kwargs):
         """
         Upload a CartoDataFrame to CARTO. It is needed to set up the
@@ -114,73 +123,6 @@ class CartoDataFrame(GeoDataFrame):
         """
         from ..io.carto import to_carto
         return to_carto(self, *args, **kwargs)
-
-    def convert(self, index_column=None, geom_column=None, lnglat_columns=None,
-                drop_index=True, drop_geom=True, drop_lnglat=True):
-        """ For internal usage only.
-        Tries to decode the geometry automatically as a `shapely https://pypi.org/project/Shapely/_.`
-        object by looking for coordinates in columns.
-
-        Args:
-            index_column (str, optional):
-                Name of the index column. If it is `None`, it is generated automatically.
-            geom_column (str, optional):
-                Name of the geometry column to be used to generate the decoded geometry.
-                If it is None, it tries to find common geometry column names, but if there is
-                no geometry column it will leave it empty.
-            lnglat_columns ([str, str], optional):
-                Tuple with the longitude and latitude column names to be used to generate
-                the decoded geometry.
-            drop_index (bool, optional):
-                Defaults to True. Removes the index column.
-            drop_geom (bool, optional):
-                Defaults to True. Removes the geometry column.
-            drop_lnglat (bool, optional):
-                Defaults to True. Removes the lnglat column.
-
-        Returns:
-            The CartoDataFrame itself
-
-        Examples:
-
-            Decode the geometry automatically:
-
-            .. code::
-                from cartoframes import CartoDataFrame
-
-                cdf = CartoDataFrame.from_file('filename.csv').convert()
-
-            Passing the geometry column explicitly:
-
-            .. code::
-
-                from cartoframes import CartoDataFrame
-
-                cdf = CartoDataFrame.from_file('filename.csv')
-                cdf.convert(geom_column='my_geom_column')
-
-            Passing lnglat_columns explicitly:
-
-            .. code::
-
-                from cartoframes import CartoDataFrame
-
-                cdf = CartoDataFrame.from_file('filename.csv')
-                cdf.convert(lnglat_columns=['longitude', 'latitude'])
-
-            Passing the index column explicitly:
-
-            .. code::
-
-                from cartoframes import CartoDataFrame
-
-                cdf = CartoDataFrame.from_file('filename.csv')
-                cdf.convert(index_column='my_index')
-
-        """
-        generate_index(self, index_column, drop_index)
-        generate_geometry(self, geom_column, lnglat_columns, drop_geom, drop_lnglat)
-        return self
 
     def viz(self, *args, **kwargs):
         """

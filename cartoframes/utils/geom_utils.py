@@ -43,6 +43,10 @@ if sys.version_info < (3, 0):
 GEO_COLUMN_NAME = 'geometry'
 
 
+def decode_geometry_column(col):
+    return _compute_geometry_from_geom(col)
+
+
 def generate_index(dataframe, index_column, drop_index):
     index_column = _get_column(dataframe, index_column, INDEX_COL_NAMES)
     if index_column is not None:
