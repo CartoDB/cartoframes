@@ -1,6 +1,6 @@
-# Explore the Data Observatory catalog
+## Explore the Data Observatory catalog
 
-## Introduction
+### Introduction
 
 The Data Observatory is a a spatial data platform that enables Data Scientists to augment their data and broaden their analysis. It offers a wide range of datasets from around the globe in a spatial data repository.
 
@@ -8,7 +8,7 @@ This guide is intended for those who are going to start augmenting their own dat
 
 **Note: The catalog is public and you don't need a CARTO account to search for available datasets**
 
-## Looking for population data in the US in the catalog
+### Looking for population data in the US in the catalog
 
 In this guide we are going to filter the Data Observatory catalog looking for population data in the US.
 
@@ -1993,7 +1993,7 @@ vdf[vdf['description'].str.contains('pop', case=False, na=False)]
 
 
 
-## Dataset and variables metadata
+### Dataset and variables metadata
 
 The Data Observatory catalog is not only a repository of curated spatial datasets, it also contains valuable information that helps on understanding better the underlying data for every dataset, so you can take an informed decision on what data best fits your problem.
 
@@ -3733,7 +3733,7 @@ variable.describe()
 
 
 
-## Subscribe to a Dataset in the catalog
+### Subscribe to a Dataset in the catalog
 
 Once you have explored the catalog and have detected a dataset with the variables you need for your analysis and the right spatial resolution, you have to look at the `is_public_data` to know if you can just use it from CARTOframes or you first need to subscribe for a license.
 
@@ -3817,7 +3817,7 @@ Catalog().subscriptions()
 
 
 
-## About nested filters in the Catalog instance
+### About nested filters in the Catalog instance
 
 **Note that every time you search the catalog you create a new instance of the `Catalog` class. Alternatively, when applying `country`, `category` and `geography` filters a catalog instance, you can reuse the same instance of the `catalog` by using the `catalog.clean_filters()` method.**
 
@@ -5494,7 +5494,7 @@ df[df['is_public_data'] == True]
 
 
 
-## Conclusion
+### Conclusion
 
 In this guide we've presented how to explore the Data Observatory catalog on the seek for variables of datasets that we can use to enrich our own data.
 
