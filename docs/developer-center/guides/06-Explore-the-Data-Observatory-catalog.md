@@ -3786,7 +3786,7 @@ variable.histogram()
 ```
 
 
-![png](explore_data_observatory_catalog_files/explore_data_observatory_catalog_37_0.png)
+![png](../img/guides/explore_data_observatory_catalog_files/explore_data_observatory_catalog_37_0.png)
 
 
 
