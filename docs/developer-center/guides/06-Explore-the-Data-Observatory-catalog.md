@@ -5601,7 +5601,7 @@ In this guide we've presented how to explore the Data Observatory catalog on the
 
 We've learnt:
 
-- How to discovery the catalog using nested hierarchical filters.
+- How to discover the catalog using nested hierarchical filters.
 - Describe the three main entities in the catalog: `Geography`, `Dataset` and their `Variables`
 - Get a glimpse of the data and stats taken from the actual repository, for a better informed decision on what variables choose.
 - Subscribe to the choosen datasets to get a license that grants the right to enrich your own data.
