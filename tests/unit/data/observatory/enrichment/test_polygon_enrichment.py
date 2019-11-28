@@ -734,7 +734,6 @@ def _get_column_sql(agg, column):
             {aggregation}(enrichment_table.{column}) AS {aggregation}_{column}
             """.format(
                 column=column,
-                geo_column=_GEOJSON_COLUMN,
                 aggregation=agg)
 
 

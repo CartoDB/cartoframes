@@ -285,7 +285,6 @@ class EnrichmentService(object):
                 {aggregation}(enrichment_table.{column}) AS {aggregation}_{column}
                 """.format(
                     column=variable.column_name,
-                    geo_column=self.geojson_column,
                     aggregation=variable_agg)
 
     def _build_polygons_query_variables_without_aggregation(self, variables):
