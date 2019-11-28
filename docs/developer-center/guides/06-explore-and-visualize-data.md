@@ -505,7 +505,7 @@ Layout([
         id="viz_guide_layout"
         src="https://cartoframes.carto.com/kuviz/312ce7b0-d5c1-4cc7-9a79-584cfea598a2"
         width="100%"
-        height="500"
+        height="800"
         style="margin: 20px auto !important"
         frameBorder="0">
     </iframe>
