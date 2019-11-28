@@ -1963,13 +1963,13 @@ Catalog().country('usa').category('financial').geographies
 
 
 
-    <pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Geography.get('mc_block_9ebc626c')>,
-     <Geography.get('mc_blockgroup_c4b8da4c')>,
-     <Geography.get('mc_county_31cde2d')>,
-     <Geography.get('mc_state_cc31b9d1')>,
-     <Geography.get('mc_tract_3704a85c')>,
-     <Geography.get('mc_zipcode_263079e3')>]
-     </code></pre>
+<pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Geography.get('mc_block_9ebc626c')>,
+  <Geography.get('mc_blockgroup_c4b8da4c')>,
+  <Geography.get('mc_county_31cde2d')>,
+  <Geography.get('mc_state_cc31b9d1')>,
+  <Geography.get('mc_tract_3704a85c')>,
+  <Geography.get('mc_zipcode_263079e3')>]
+  </code></pre>
 
 
 
@@ -1981,19 +1981,19 @@ from cartoframes.data.observatory import Geography
 Geography.get('mc_blockgroup_c4b8da4c').to_dict()
 ```
 
-    <pre class="u-vertical-scroll u-topbottom-Margin"><code>{'id': 'carto-do.mastercard.geography_usa_blockgroup_2019',
-     'slug': 'mc_blockgroup_c4b8da4c',
-     'name': 'USA Census Block Groups',
-     'description': None,
-     'country_id': 'usa',
-     'provider_id': 'mastercard',
-     'provider_name': 'Mastercard',
-     'lang': 'eng',
-     'geom_type': 'MULTIPOLYGON',
-     'update_frequency': None,
-     'version': '2019',
-     'is_public_data': False}
-     </code></pre>
+<pre class="u-vertical-scroll u-topbottom-Margin"><code>{'id': 'carto-do.mastercard.geography_usa_blockgroup_2019',
+  'slug': 'mc_blockgroup_c4b8da4c',
+  'name': 'USA Census Block Groups',
+  'description': None,
+  'country_id': 'usa',
+  'provider_id': 'mastercard',
+  'provider_name': 'Mastercard',
+  'lang': 'eng',
+  'geom_type': 'MULTIPOLYGON',
+  'update_frequency': None,
+  'version': '2019',
+  'is_public_data': False}
+  </code></pre>
 
 
 
@@ -2073,26 +2073,26 @@ Dataset.get('mc_mrli_35402a9d').variables
 
 
 
-    <pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Variable.get('transactions_st_d22b3489')> #'Same as transactions_score, but only comparing ran...',
-     <Variable.get('region_id_3c7d0d92')> #'Region identifier (construction varies depending o...',
-     <Variable.get('category_8c84b3a7')> #'Industry/sector categories (Total Retail, Retail e...',
-     <Variable.get('month_57cd6f80')> #'Name of the month the data refers to',
-     <Variable.get('region_type_d875e9e7')> #'Administrative boundary type (block, block group, ...',
-     <Variable.get('stability_state_8af6b92')> #'Same as stability_score, but only comparing rankin...',
-     <Variable.get('sales_score_49d02f1e')> #'Rank based on the average monthly sales for the pr...',
-     <Variable.get('stability_score_6756cb72')> #'Rank based on the change in merchants between the ...',
-     <Variable.get('ticket_size_sta_3bfd5114')> #'Same as ticket_size_score, but only comparing rank...',
-     <Variable.get('sales_metro_sco_e088134d')> #'Same as sales_score, but only comparing ranking wi...',
-     <Variable.get('transactions_me_628f6065')> #'Same as transactions_score, but only comparing ran...',
-     <Variable.get('growth_score_68b3f9ac')> #'Rank based on the percent change in sales between ...',
-     <Variable.get('ticket_size_met_8b5905f8')> #'Same as ticket_size_score, but only comparing rank...',
-     <Variable.get('ticket_size_sco_21f7820a')> #'Rank based on the average monthly sales for the pr...',
-     <Variable.get('growth_state_sc_11870b1c')> #'Same as growth_score, but only comparing ranking w...',
-     <Variable.get('stability_metro_b80b3f7e')> #'Same as stability_score, but only comparing rankin...',
-     <Variable.get('growth_metro_sc_a1235ff0')> #'Same as growth_score, but only comparing ranking w...',
-     <Variable.get('sales_state_sco_502c47a1')> #'Same as sales_score, but only comparing ranking wi...',
-     <Variable.get('transactions_sc_ee976f1e')> #'Rank based on the average number of transactions f...']
-    </code></pre>
+<pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Variable.get('transactions_st_d22b3489')> #'Same as transactions_score, but only comparing ran...',
+  <Variable.get('region_id_3c7d0d92')> #'Region identifier (construction varies depending o...',
+  <Variable.get('category_8c84b3a7')> #'Industry/sector categories (Total Retail, Retail e...',
+  <Variable.get('month_57cd6f80')> #'Name of the month the data refers to',
+  <Variable.get('region_type_d875e9e7')> #'Administrative boundary type (block, block group, ...',
+  <Variable.get('stability_state_8af6b92')> #'Same as stability_score, but only comparing rankin...',
+  <Variable.get('sales_score_49d02f1e')> #'Rank based on the average monthly sales for the pr...',
+  <Variable.get('stability_score_6756cb72')> #'Rank based on the change in merchants between the ...',
+  <Variable.get('ticket_size_sta_3bfd5114')> #'Same as ticket_size_score, but only comparing rank...',
+  <Variable.get('sales_metro_sco_e088134d')> #'Same as sales_score, but only comparing ranking wi...',
+  <Variable.get('transactions_me_628f6065')> #'Same as transactions_score, but only comparing ran...',
+  <Variable.get('growth_score_68b3f9ac')> #'Rank based on the percent change in sales between ...',
+  <Variable.get('ticket_size_met_8b5905f8')> #'Same as ticket_size_score, but only comparing rank...',
+  <Variable.get('ticket_size_sco_21f7820a')> #'Rank based on the average monthly sales for the pr...',
+  <Variable.get('growth_state_sc_11870b1c')> #'Same as growth_score, but only comparing ranking w...',
+  <Variable.get('stability_metro_b80b3f7e')> #'Same as stability_score, but only comparing rankin...',
+  <Variable.get('growth_metro_sc_a1235ff0')> #'Same as growth_score, but only comparing ranking w...',
+  <Variable.get('sales_state_sco_502c47a1')> #'Same as sales_score, but only comparing ranking wi...',
+  <Variable.get('transactions_sc_ee976f1e')> #'Rank based on the average number of transactions f...']
+</code></pre>
 
 ### Dataset and variables metadata
 
