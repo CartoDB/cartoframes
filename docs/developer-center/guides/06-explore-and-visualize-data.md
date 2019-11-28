@@ -36,6 +36,7 @@ Map([
     Layer(df_stores)
 ])
 ```
+
 The resulting map draws each dataset with default symbology on top of CARTO's Positron basemap with the zoom and center set to the extent of both datasets:
 
 <div class="example-map">
@@ -333,6 +334,7 @@ Map([
     )
 ])
 ```
+
 Now you have a proportional symbol map where points are sized by revenue. You will also notice that an appropriate legend has been added to the map and when you hover over the points, you will see each store's revenue value.
 
 Next, let's take a look at how to modify some of the defaults.
@@ -354,6 +356,7 @@ size_continuous_layer(
     widget=True
 )
 ```
+
 And now you have a map to visually and interactively explore the relationship between revenue and demographic variables for each store:
 
 <div class="example-map">
@@ -495,4 +498,14 @@ Layout([
     ]),
 ],2,2,viewport={'zoom': 10, 'lat': 40.64, 'lng': -73.92}, map_height=400)
 ```
-![Layout for Comparison](../../img/guides/visualize/layout.png)
+
+<div class="example-map">
+    <iframe
+        id="viz_guide_layout"
+        src="https://cartoframes.carto.com/kuviz/312ce7b0-d5c1-4cc7-9a79-584cfea598a2"
+        width="100%"
+        height="500"
+        style="margin: 20px auto !important"
+        frameBorder="0">
+    </iframe>
+</div>
