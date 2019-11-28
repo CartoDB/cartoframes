@@ -731,11 +731,7 @@ def _get_column_sql(agg, column):
                 aggregation=agg)
     else:
         return """
-            {aggregation}(
-                enrichment_table.{column} * (
-                    ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
-                )
-            ) AS {aggregation}_{column}
+            {aggregation}(enrichment_table.{column}) AS {aggregation}_{column}
             """.format(
                 column=column,
                 geo_column=_GEOJSON_COLUMN,
