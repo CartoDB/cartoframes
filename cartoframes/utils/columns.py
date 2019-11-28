@@ -121,28 +121,25 @@ class DataframeColumnsInfo(object):
     def __init__(self, df):
         geom_column = self._get_geom_col_name(df)
         geom_type = self._get_geometry_type(df, geom_column)
-        self.columns = self._get_columns_info(df, geom_column, geom_type)
+        self.columns = self._get_columns_info(df, geom_type)
 
     def __repr__(self):
         return str(self.columns)
 
     def _get_geom_col_name(self, df):
-        geom_col = getattr(df, '_geometry_column_name', None)
-        if geom_col is None:
-            raise Exception('No geometry found.')
-        return geom_col
+        return getattr(df, '_geometry_column_name', None)
 
-    def _get_columns_info(self, df, geom_column, geom_type):
+    def _get_columns_info(self, df, geom_type):
         columns = []
         df_columns = [(name, df.dtypes[name]) for name in df.columns]
 
         for name, dtype in df_columns:
-            if self._is_valid_column(name, geom_column):
+            if self._is_valid_column(name):
                 columns.append(DataframeColumnInfo(name, dtype, geom_type))
 
         return columns
 
-    def _is_valid_column(self, name, geom_column):
+    def _is_valid_column(self, name):
         return name.lower() not in Column.FORBIDDEN_COLUMN_NAMES
 
     def _get_geometry_type(self, df, geom_column):
