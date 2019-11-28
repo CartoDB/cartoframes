@@ -362,7 +362,4 @@ def _get_aggregation(variable, aggregation):
     elif isinstance(aggregation, str):
         return aggregation
     elif isinstance(aggregation, dict):
-        if variable.id in aggregation:
-            return aggregation[variable.id]
-        else:
-            return variable.agg_method
+        return aggregation.get(variable.id, variable.agg_method)
