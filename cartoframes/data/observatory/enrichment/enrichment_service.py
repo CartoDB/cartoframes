@@ -90,8 +90,14 @@ class EnrichmentService(object):
 
         return cartodataframe
 
-    def _prepare_data(self, dataframe, geom_column):
-        cartodataframe = CartoDataFrame(dataframe, copy=True, geometry=geom_column)
+    def _prepare_data(self, dataframe, geom_col):
+        cartodataframe = CartoDataFrame(dataframe, copy=True)
+        if geom_col:
+            cartodataframe.set_geometry(geom_col)
+
+        if not cartodataframe.has_geometry():
+            raise Exception('No valid geometry found. Please provide an input source with ' +
+                            'a valid geometry or specify the "geom_col" param with a geometry column.')
 
         # Add extra columns for the enrichment
         cartodataframe[self.enrichment_id] = range(cartodataframe.shape[0])
