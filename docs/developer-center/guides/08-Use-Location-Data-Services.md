@@ -38,7 +38,7 @@ df
 ```
 
 <div>
-<table>
+<table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -206,7 +206,7 @@ geo_cdf.head()
 ```
 
 <div>
-<table>
+<table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -311,7 +311,7 @@ geo_name_cdf.head()
 ```
 
 <div>
-<table>
+<table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -387,7 +387,7 @@ geo_cdf.head()
 ```
 
 <div>
-<table>
+<table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -537,7 +537,7 @@ isochrones_cdf.head()
 ```
 
 <div>
-<table>
+<table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -660,7 +660,7 @@ isodistances_cdf.head()
 ```
 
 <div>
-<table>
+<table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
