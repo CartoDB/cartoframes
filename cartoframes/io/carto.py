@@ -49,7 +49,8 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
     return cdf
 
 
-def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None):
+def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
+             log_enabled=True):
     """
     Upload a Dataframe to CARTO.
 
@@ -91,9 +92,10 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     if has_geometry:
         cdf.rename_geometry('the_geom', inplace=True)
 
-    context_manager.copy_from(cdf, table_name, if_exists, has_geometry)
+    context_manager.copy_from(cdf, table_name, if_exists, has_geometry, log_enabled)
 
-    print('Success! Data uploaded correctly')
+    if log_enabled:
+        print('Success! Data uploaded correctly')
 
 
 def has_table(table_name, credentials=None, schema=None):

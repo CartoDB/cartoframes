@@ -44,13 +44,14 @@ class ContextManager(object):
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
-    def copy_from(self, cdf, table_name, if_exists, cartodbfy=True):
+    def copy_from(self, cdf, table_name, if_exists, cartodbfy=True, log_enabled=True):
         dataframe_columns_info = DataframeColumnsInfo(cdf)
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
-            print('Debug: creating table "{}"'.format(table_name))
+            if log_enabled:
+                print('Debug: creating table "{}"'.format(table_name))
             self._create_table_from_columns(table_name, dataframe_columns_info.columns, schema, cartodbfy)
         elif if_exists == 'fail':
             raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
@@ -60,12 +61,13 @@ class ContextManager(object):
 
         return self._copy_from(cdf, table_name, dataframe_columns_info)
 
-    def create_table_from_query(self, table_name, query, if_exists, cartodbfy=True):
+    def create_table_from_query(self, table_name, query, if_exists, cartodbfy=True, log_enabled=True):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
-            print('Debug: creating table "{}"'.format(table_name))
+            if log_enabled:
+                print('Debug: creating table "{}"'.format(table_name))
             self._create_table_from_query(table_name, query, schema, cartodbfy)
         elif if_exists == 'fail':
             raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
