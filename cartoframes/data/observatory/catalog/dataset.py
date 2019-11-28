@@ -484,7 +484,4 @@ class Dataset(CatalogEntity):
 
         datasets = Dataset.get_all({}, _credentials)
 
-        if self in datasets:
-            return True
-
-        return False
+        return self in datasets

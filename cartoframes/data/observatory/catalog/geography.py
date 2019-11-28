@@ -290,9 +290,6 @@ class Geography(CatalogEntity):
         if not isinstance(_credentials, Credentials):
             raise ValueError('`credentials` must be a Credentials class instance')
 
-        geograpies = Geography.get_all({}, _credentials)
+        geographies = Geography.get_all({}, _credentials)
 
-        if self not in geograpies:
-            return True
-
-        return False
+        return self in geographies

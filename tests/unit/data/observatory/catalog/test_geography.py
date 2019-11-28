@@ -225,11 +225,16 @@ class TestGeography(object):
         assert isinstance(sliced_geography, pd.Series)
         assert sliced_geography.equals(geography.to_series())
 
+    @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download(self, mocked_bq_client, mocked_repo):
+    def test_geography_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # mock geography
-        mocked_repo.return_value = test_geography1
+        get_by_id_mock.return_value = test_geography1
+        geography = Geography.get(test_geography1.id)
+
+        # mock subscriptions
+        get_all_mock.return_value = [geography]
 
         # mock big query client
         file_path = 'fake_path'
@@ -239,16 +244,20 @@ class TestGeography(object):
         username = 'fake_user'
         credentials = Credentials(username, '1234')
 
-        dataset = Geography.get(test_geography1.id)
-        response = dataset.download(credentials)
+        response = geography.download(credentials)
 
         assert response == file_path
 
+    @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_not_available_in_bq_download_fails(self, mocked_bq_client, mocked_repo):
+    def test_geography_not_available_in_bq_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # mock geography
-        mocked_repo.return_value = test_geography2
+        get_by_id_mock.return_value = test_geography2
+        geography = Geography.get(test_geography2.id)
+
+        # mock subscriptions
+        get_all_mock.return_value = [geography]
 
         # mock big query client
         file_path = 'fake_path'
@@ -257,8 +266,6 @@ class TestGeography(object):
         # test
         username = 'fake_user'
         credentials = Credentials(username, '1234')
-
-        geography = Geography.get(test_geography2.id)
 
         with pytest.raises(CartoException) as e:
             geography.download(credentials)
@@ -266,9 +273,57 @@ class TestGeography(object):
         error = '{} is not ready for Download. Please, contact us for more information.'.format(geography)
         assert str(e.value) == error
 
+    @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
+    def test_geography_not_subscribed_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+        # mock dataset
+        get_by_id_mock.return_value = test_geography2
+        geography = Geography.get(test_geography2.id)
+
+        # mock subscriptions
+        get_all_mock.return_value = []
+
+        # mock big query client
+        file_path = 'fake_path'
+        mocked_bq_client.return_value = BigQueryClientMock(file_path)
+
+        # test
+        username = 'fake_user'
+        credentials = Credentials(username, '1234')
+
+        with pytest.raises(CartoException) as e:
+            geography.download(credentials)
+
+        error = 'You are not subscribed to this Geography yet. Please, use the subscribe method first.'
+        assert str(e.value) == error
+
+    @patch.object(GeographyRepository, 'get_all')
+    @patch.object(GeographyRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
+    def test_geography_not_subscribed_but_public_download_works(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+        # mock dataset
+        get_by_id_mock.return_value = test_geography1  # is public
+        geography = Geography.get(test_geography1.id)
+
+        # mock subscriptions
+        get_all_mock.return_value = []
+
+        # mock big query client
+        file_path = 'fake_path'
+        mocked_bq_client.return_value = BigQueryClientMock(file_path)
+
+        # test
+        username = 'fake_user'
+        credentials = Credentials(username, '1234')
+
+        response = geography.download(credentials)
+
+        assert response == file_path
+
+    @patch.object(GeographyRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
+    def test_geography_download_raises_without_do_active(self, mocked_bq_client, mocked_repo):
         # mock geography
         mocked_repo.return_value = test_geography1
 
