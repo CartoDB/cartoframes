@@ -8,9 +8,9 @@ This guide is intended for those who are going to start augmenting their own dat
 
 **Note: The catalog is public and you don't need a CARTO account to search for available datasets**
 
-### Looking for population data in the US in the catalog
+### Looking for demographics and financial data in the US in the catalog
 
-In this guide we are going to filter the Data Observatory catalog looking for population data in the US.
+In this guide we are going to filter the Data Observatory catalog looking for demographics and financial data in the US.
 
 The catalog is comprised of thousands of curated spatial datasets, so when searching for
 data the easiest way to find out what you are looking for is make use of a feceted search. A faceted (or hierarchical) search allows you to narrow down search results by applying multiple filters based on faceted classification of the catalog datasets.
@@ -21,7 +21,7 @@ Datasets are organized in three main hirearchies:
 - Category
 - Geography (or spatial resolution)
 
-For our analysis we are looking for a demographics dataset in the US with a spatial resolution at the level of block groups. 
+For our analysis we are looking for demographics and financial datasets in the US with a spatial resolution at the level of block groups. 
 
 First we can start for discovering which available geographies (orspatial resolutions) we have for demographics data in the US, by filtering the `catalog` by `country` and `category` and listing the available `geographies`.
 
@@ -1954,6 +1954,144 @@ vdf[vdf['description'].str.contains('pop', case=False, na=False)]
 </div>
 
 
+We can follow the very same process to discover `financial` datasets, let's see how it works by first listing the geographies available for the category `financial` in the US:
+
+
+```python
+Catalog().country('usa').category('financial').geographies
+```
+
+
+
+
+    [<Geography.get('mc_block_9ebc626c')>,
+     <Geography.get('mc_blockgroup_c4b8da4c')>,
+     <Geography.get('mc_county_31cde2d')>,
+     <Geography.get('mc_state_cc31b9d1')>,
+     <Geography.get('mc_tract_3704a85c')>,
+     <Geography.get('mc_zipcode_263079e3')>]
+
+
+
+We can clearly identify a geography at the blockgroup resolution, provided by Mastercard:
+
+
+```python
+from cartoframes.data.observatory import Geography
+Geography.get('mc_blockgroup_c4b8da4c').to_dict()
+```
+
+    {'id': 'carto-do.mastercard.geography_usa_blockgroup_2019',
+     'slug': 'mc_blockgroup_c4b8da4c',
+     'name': 'USA Census Block Groups',
+     'description': None,
+     'country_id': 'usa',
+     'provider_id': 'mastercard',
+     'provider_name': 'Mastercard',
+     'lang': 'eng',
+     'geom_type': 'MULTIPOLYGON',
+     'update_frequency': None,
+     'version': '2019',
+     'is_public_data': False}
+
+
+
+Now we can list the available datasets provided by Mastercard for the US Census blockgroups spatial resolution:
+
+
+```python
+Catalog().country('usa').category('financial').geography('mc_blockgroup_c4b8da4c').datasets.to_dataframe()
+```
+
+<div>
+<table border="1" class="dataframe u-vertical-scroll">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>available_in</th>
+      <th>category_id</th>
+      <th>category_name</th>
+      <th>country_id</th>
+      <th>data_source_id</th>
+      <th>description</th>
+      <th>geography_description</th>
+      <th>geography_id</th>
+      <th>geography_name</th>
+      <th>id</th>
+      <th>...</th>
+      <th>lang</th>
+      <th>name</th>
+      <th>provider_id</th>
+      <th>provider_name</th>
+      <th>slug</th>
+      <th>summary_json</th>
+      <th>temporal_aggregation</th>
+      <th>time_coverage</th>
+      <th>update_frequency</th>
+      <th>version</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>None</td>
+      <td>financial</td>
+      <td>Financial</td>
+      <td>usa</td>
+      <td>mrli</td>
+      <td>MRLI scores validate, evaluate and benchmark t...</td>
+      <td>None</td>
+      <td>carto-do.mastercard.geography_usa_blockgroup_2019</td>
+      <td>USA Census Block Groups</td>
+      <td>carto-do.mastercard.financial_mrli_usa_blockgr...</td>
+      <td>...</td>
+      <td>eng</td>
+      <td>MRLI Data for Census Block Groups</td>
+      <td>mastercard</td>
+      <td>Mastercard</td>
+      <td>mc_mrli_35402a9d</td>
+      <td>{'counts': {'rows': 1072383, 'cells': 22520043...</td>
+      <td>monthly</td>
+      <td>None</td>
+      <td>monthly</td>
+      <td>2019</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 21 columns</p>
+</div>
+
+
+
+Let's finally inspect the variables available in the dataset:
+
+
+```python
+Dataset.get('mc_mrli_35402a9d').variables
+```
+
+
+
+  <pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Variable.get('transactions_st_d22b3489')> #'Same as transactions_score, but only comparing ran...',
+     <Variable.get('region_id_3c7d0d92')> #'Region identifier (construction varies depending o...',
+     <Variable.get('category_8c84b3a7')> #'Industry/sector categories (Total Retail, Retail e...',
+     <Variable.get('month_57cd6f80')> #'Name of the month the data refers to',
+     <Variable.get('region_type_d875e9e7')> #'Administrative boundary type (block, block group, ...',
+     <Variable.get('stability_state_8af6b92')> #'Same as stability_score, but only comparing rankin...',
+     <Variable.get('sales_score_49d02f1e')> #'Rank based on the average monthly sales for the pr...',
+     <Variable.get('stability_score_6756cb72')> #'Rank based on the change in merchants between the ...',
+     <Variable.get('ticket_size_sta_3bfd5114')> #'Same as ticket_size_score, but only comparing rank...',
+     <Variable.get('sales_metro_sco_e088134d')> #'Same as sales_score, but only comparing ranking wi...',
+     <Variable.get('transactions_me_628f6065')> #'Same as transactions_score, but only comparing ran...',
+     <Variable.get('growth_score_68b3f9ac')> #'Rank based on the percent change in sales between ...',
+     <Variable.get('ticket_size_met_8b5905f8')> #'Same as ticket_size_score, but only comparing rank...',
+     <Variable.get('ticket_size_sco_21f7820a')> #'Rank based on the average monthly sales for the pr...',
+     <Variable.get('growth_state_sc_11870b1c')> #'Same as growth_score, but only comparing ranking w...',
+     <Variable.get('stability_metro_b80b3f7e')> #'Same as stability_score, but only comparing rankin...',
+     <Variable.get('growth_metro_sc_a1235ff0')> #'Same as growth_score, but only comparing ranking w...',
+     <Variable.get('sales_state_sco_502c47a1')> #'Same as sales_score, but only comparing ranking wi...',
+     <Variable.get('transactions_sc_ee976f1e')> #'Rank based on the average number of transactions f...']
+    </code></pre>
 
 ### Dataset and variables metadata
 
