@@ -103,7 +103,7 @@ def test_read_carto_schema(mocker):
     cm_mock.assert_called_once_with('__source__', '__schema__', None, 3)
 
 
-def test_read_carto_index_col(mocker):
+def test_read_carto_index_col_exists(mocker):
     # Given
     cm_mock = mocker.patch.object(ContextManager, 'copy_to')
     cm_mock.return_value = GeoDataFrame({
@@ -124,6 +124,33 @@ def test_read_carto_index_col(mocker):
 
     # When
     cdf = read_carto('__source__', CREDENTIALS, index_col='cartodb_id')
+
+    # Then
+    assert expected.equals(cdf)
+
+
+def test_read_carto_index_col_not_exists(mocker):
+    # Given
+    cm_mock = mocker.patch.object(ContextManager, 'copy_to')
+    cm_mock.return_value = GeoDataFrame({
+        'cartodb_id': [1, 2, 3],
+        'the_geom': [
+            '010100000000000000000000000000000000000000',
+            '010100000000000000000024400000000000002e40',
+            '010100000000000000000034400000000000003e40'
+        ]
+    })
+    expected = GeoDataFrame({
+        'cartodb_id': [1, 2, 3],
+        'the_geom': [
+            Point([0, 0]),
+            Point([10, 15]),
+            Point([20, 30])
+        ]
+    }, geometry='the_geom', index=Index([0, 1, 2], 'rename_index'))
+
+    # When
+    cdf = read_carto('__source__', CREDENTIALS, index_col='rename_index')
 
     # Then
     assert expected.equals(cdf)

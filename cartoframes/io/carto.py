@@ -21,7 +21,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
             Number of time to retry the download in case it fails. Default is 3.
         schema (str, optional): prefix of the table. By default, it gets the
             `current_schema()` using the credentials.
-        index_col (str, optional): name of the column to be loaded as index.
+        index_col (str, optional): name of the column to be loaded as index. It can be used also to set the index name.
         decode_geom (bool, optional): convert the "the_geom" column into a valid geometry column.
 
     Returns:
@@ -41,7 +41,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
         if index_col in cdf:
             cdf.set_index(index_col, inplace=True)
         else:
-            print('Debug: column "{}" does not exist'.format(index_col))
+            cdf.index.name = index_col
 
     if decode_geom and 'the_geom' in cdf:
         cdf.set_geometry('the_geom', inplace=True)
