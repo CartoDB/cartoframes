@@ -82,7 +82,6 @@ starbucks_df.head()
 </table>
 </div>
 
-
 To be able to display your stores as points on a map, you first have to convert the `address` column into geometries. This process is called geocoding and CARTO provides a straightforward way to do it (you can learn more about it in the [location data services guide]()).
 
 In order to geocode, you have to set your CARTO credentials. If you don't know your API key yet, check the [authentication guide]() to learn how to get it. In case you want to see the result of the geocoding without being logged in, here it is the [geocoded dataset]().
@@ -108,19 +107,6 @@ starbucks_df.head()
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -265,7 +251,6 @@ Map([
 There they are! To learn more about creating isochrones and isodistances check out the [location data services guide]().
 
 
-
 ## Enrich your data with demographic data
 
 Now that you have the area of influence calculated for each store, let's augment the result with population information to help better understand a store's average revenue per person.
@@ -279,47 +264,39 @@ Catalog().country('usa').category('demographics').geographies
 ```
 
 
-
-
-    [<Geography('ags_blockgroup_1c63771c')>,
-     <Geography('ags_q17_4739be4f')>,
-     <Geography('mbi_blockgroups_1ab060a')>,
-     <Geography('mbi_counties_141b61cd')>,
-     <Geography('mbi_county_subd_e8e6ea23')>,
-     <Geography('mbi_pc_5_digit_4b1682a6')>,
-     <Geography('usct_blockgroup_f45b6b49')>,
-     <Geography('usct_cbsa_6c8b51ef')>,
-     <Geography('usct_censustract_bc698c5a')>,
-     <Geography('usct_congression_b6336b2c')>,
-     <Geography('usct_county_ec40c962')>,
-     <Geography('usct_place_12d6699f')>,
-     <Geography('usct_puma_b859f0fa')>,
-     <Geography('usct_schooldistr_515af763')>,
-     <Geography('usct_schooldistr_da72a4cb')>,
-     <Geography('usct_schooldistr_287be4f7')>,
-     <Geography('usct_state_4c8090b5')>,
-     <Geography('usct_zcta5_75071016')>]
-
-
+<pre class="u-topbottom-Margin"><code>[<Geography('ags_blockgroup_1c63771c')>,
+<Geography('ags_q17_4739be4f')>,
+<Geography('mbi_blockgroups_1ab060a')>,
+<Geography('mbi_counties_141b61cd')>,
+<Geography('mbi_county_subd_e8e6ea23')>,
+<Geography('mbi_pc_5_digit_4b1682a6')>,
+<Geography('usct_blockgroup_f45b6b49')>,
+<Geography('usct_cbsa_6c8b51ef')>,
+<Geography('usct_censustract_bc698c5a')>,
+<Geography('usct_congression_b6336b2c')>,
+<Geography('usct_county_ec40c962')>,
+<Geography('usct_place_12d6699f')>,
+<Geography('usct_puma_b859f0fa')>,
+<Geography('usct_schooldistr_515af763')>,
+<Geography('usct_schooldistr_da72a4cb')>,
+<Geography('usct_schooldistr_287be4f7')>,
+<Geography('usct_state_4c8090b5')>,
+<Geography('usct_zcta5_75071016')>]
+</code></pre>
 
 This time, let's choose the block groups from AGS and check which datasets are available.
-
 
 ```python
 Catalog().country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
 ```
 
-
-
-
-    [<Dataset('ags_sociodemogr_e92b1637')>,
-     <Dataset('ags_consumerspe_fe5d060a')>,
-     <Dataset('ags_retailpoten_ddf56a1a')>,
-     <Dataset('ags_consumerpro_e8344e2e')>,
-     <Dataset('ags_businesscou_a8310a11')>,
-     <Dataset('ags_crimerisk_9ec89442')>]
-
-
+<pre class="u-topbottom-Margin"><code>[<Dataset('ags_sociodemogr_e92b1637')>,
+<Dataset('ags_consumerspe_fe5d060a')>,
+<Dataset('ags_retailpoten_ddf56a1a')>,
+<Dataset('ags_consumerpro_e8344e2e')>,
+<Dataset('ags_businesscou_a8310a11')>,
+<Dataset('ags_crimerisk_9ec89442')>]
+</code></pre>
 
 Nice! The population variables are inside of the sociodemographic category, let take a look at what options are available and the associated descriptions.
 
@@ -332,23 +309,7 @@ variables_df = dataset.variables.to_dataframe()
 variables_df[variables_df['description'].str.contains('population', case=False)]
 ```
 
-
-
-
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -778,9 +739,7 @@ variables_df[variables_df['description'].str.contains('population', case=False)]
 </div>
 
 
-
 We can see the variable that contains the population for 2019 is the one with the slug `POPCY_f5800f44`. Now we are ready to enrich our areas of influence with that variable.
-
 
 ```python
 from cartoframes.data.observatory import Variable
@@ -792,23 +751,7 @@ isochrones_df = Enrichment().enrich_polygons(isochrones_df, [variable])
 isochrones_df.head()
 ```
 
-
-
-
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -853,8 +796,6 @@ isochrones_df.head()
 </table>
 </div>
 
-
-
 Great! Let's see the result on a map:
 
 
@@ -875,9 +816,7 @@ Map(color_continuous_layer(isochrones_df, 'POPCY', 'Population'))
     </iframe>
 </div>
 
-
 We can see that the area of influence of the store on the right, is the one with the highest population. Let's go a bit further and calculate and visualize the average revenue per person.
-
 
 ```python
 starbucks_df = starbucks_df.reset_index(drop=True)
@@ -906,7 +845,6 @@ The final step in the workflow is to share this interactive map with your collea
 
 First, let's add widgets so people are able to see some graphs of the information and filter it. To do this, we only have to add `widget=True` to the visualization layers. Remember to check the [visualization guide]() to learn more.
 
-
 ```python
 result_map = Map([
     color_continuous_layer(isochrones_df, 'POPCY', 'Population', stroke_width=0, opacity=0.7),
@@ -933,13 +871,11 @@ Cool! Now that you have a small dashboard to play with, let's publish it on CART
 result_map.publish('startbucks_analysis')
 ```
 
-```
-{'id': '3c900d1f-d3ef-472f-9bc0-a2005a08df27',
+<pre class="u-topbottom-Margin"><code>{'id': '3c900d1f-d3ef-472f-9bc0-a2005a08df27',
  'url': 'https://cartoframes.carto.com/kuviz/3c900d1f-d3ef-472f-9bc0-a2005a08df27',
  'name': 'startbucks_analysis',
  'privacy': 'public'}
-
-```
+</code></pre>
 
 ## Conclusion
 
