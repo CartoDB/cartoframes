@@ -33,20 +33,16 @@ from cartoframes.data.observatory import Catalog
 Catalog().country('usa').categories
 ```
 
-
-
-
-    [<Category.get('road_traffic')>,
-     <Category.get('points_of_interest')>,
-     <Category.get('human_mobility')>,
-     <Category.get('financial')>,
-     <Category.get('environmental')>,
-     <Category.get('demographics')>]
-
-
+```
+  [<Category.get('road_traffic')>,
+    <Category.get('points_of_interest')>,
+    <Category.get('human_mobility')>,
+    <Category.get('financial')>,
+    <Category.get('environmental')>,
+    <Category.get('demographics')>]
+```
 
 For the case of the US, the Data Observatory provides six different categories of datasets. Let's discover the available spatial resolutions for the demographics category (which at a first sight will contain the population data we need).
-
 
 ```python
 from cartoframes.data.observatory import Catalog
@@ -54,9 +50,8 @@ geographies = Catalog().country('usa').category('demographics').geographies
 geographies
 ```
 
-
-
-
+<div class="u-vertical-scroll">
+```
     [<Geography.get('ags_blockgroup_1c63771c')>,
      <Geography.get('ags_q17_4739be4f')>,
      <Geography.get('mbi_blockgroups_1ab060a')>,
@@ -77,7 +72,8 @@ geographies
      <Geography.get('od_stateclippe_8d79f5be')>,
      <Geography.get('od_zcta5clippe_6b6ff33c')>,
      <Geography.get('usct_censustract_784cc2ed')>]
-
+```
+</div>
 
 
 Let's filter the geographies by those that contain information at the level of blockgroup. For that purpose we are converting the geographies to a pandas `DataFrame` and search for the string `blockgroup` in the `id` of the geographies:
@@ -87,9 +83,6 @@ Let's filter the geographies by those that contain information at the level of b
 df = geographies.to_dataframe()
 df[df['id'].str.contains('blockgroup', case=False, na=False)]
 ```
-
-
-
 
 <div>
 <table border="1" class="dataframe u-vertical-scroll">
@@ -172,35 +165,27 @@ df[df['id'].str.contains('blockgroup', case=False, na=False)]
 </table>
 </div>
 
-
-
 We have three available datasets, from three different providers: Michael Bauer International, Open Data and AGS. For this example, we are going to look for demographic datasets for the AGS blockgroups geography `ags_blockgroup_1c63771c`:
-
 
 ```python
 datasets = Catalog().country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
 datasets
 ```
 
-
-
-
-    [<Dataset.get('ags_sociodemogr_e92b1637')>,
-     <Dataset.get('ags_consumerspe_fe5d060a')>,
-     <Dataset.get('ags_retailpoten_ddf56a1a')>,
-     <Dataset.get('ags_consumerpro_e8344e2e')>,
-     <Dataset.get('ags_businesscou_a8310a11')>,
-     <Dataset.get('ags_crimerisk_9ec89442')>]
-
+```
+  [<Dataset.get('ags_sociodemogr_e92b1637')>,
+    <Dataset.get('ags_consumerspe_fe5d060a')>,
+    <Dataset.get('ags_retailpoten_ddf56a1a')>,
+    <Dataset.get('ags_consumerpro_e8344e2e')>,
+    <Dataset.get('ags_businesscou_a8310a11')>,
+    <Dataset.get('ags_crimerisk_9ec89442')>]
+```
 
 Let's continue with the data discovery. We have 6 datasets in the US with demographics information at the level of AGS blockgroups:
 
 ```python
 datasets.to_dataframe()
 ```
-
-
-
 
 <div>
 <table border="1" class="dataframe u-vertical-scroll">
@@ -380,12 +365,9 @@ datasets.to_dataframe()
 <p>6 rows × 21 columns</p>
 </div>
 
-
-
 They comprise different information: consumer spending, retail potential, consumer profiles, etc.
 
 At a first sight, it looks the dataset with `data_source_id: sociodemographic` might contain the population information we are looking for. Let's try to understand a little bit better what data this dataset contains by looking at its variables:
-
 
 ```python
 from cartoframes.data.observatory import Dataset
@@ -394,9 +376,8 @@ variables = dataset.variables
 variables
 ```
 
-
-
-
+<div class="u-vertical-scroll">
+```
     [<Variable.get('HINCYMED65_310bc888')> #'Median Household Income: Age 65-74 (2019A)',
      <Variable.get('HINCYMED55_1a269b4b')> #'Median Household Income: Age 55-64 (2019A)',
      <Variable.get('HINCYMED45_33daa0a')> #'Median Household Income: Age 45-54 (2019A)',
@@ -505,18 +486,14 @@ variables
      <Variable.get('HINCY10025_665c9060')> #'Household Income $100000-$124999 (2019A)',
      <Variable.get('HINCY75100_9d5c69c8')> #'Household Income $75000-$99999 (2019A)',
      <Variable.get('AGECY6569_b47bae06')> #'Population age 65-69 (2019A)']
-
-
-
+```
+</div>
 
 ```python
 from cartoframes.data.observatory import Dataset
 vdf = variables.to_dataframe()
 vdf
 ```
-
-
-
 
 <div>
 <table border="1" class="dataframe u-vertical-scroll">
@@ -2295,8 +2272,6 @@ dataset.head()
 <p>10 rows × 101 columns</p>
 </div>
 
-
-
 Alternatively, you can get the last ten ones with `dataset.tail()`
 
 An overview of the coverage of the dataset
@@ -2305,9 +2280,6 @@ An overview of the coverage of the dataset
 ```python
 dataset.geom_coverage()
 ```
-
-
-
 
 <iframe
   frameborder="0"
@@ -3216,48 +3188,34 @@ dataset.geom_coverage()
 
 </iframe>
 
-
-
 Some stats about the dataset:
-
 
 ```python
 dataset.counts()
 ```
 
-
-
-
-    rows                    217182
-    cells                 22369746
-    null_cells                   0
-    null_cells_percent           0
-    dtype: int64
-
-
-
+```
+  rows                    217182
+  cells                 22369746
+  null_cells                   0
+  null_cells_percent           0
+  dtype: int64
+```
 
 ```python
 dataset.fields_by_type()
 ```
 
-
-
-
+```
     float       4
     string      1
     integer    96
     dtype: int64
-
-
-
+```
 
 ```python
 dataset.describe()
 ```
-
-
-
 
 <div>
 <table border="1" class="dataframe u-vertical-scroll">
@@ -3556,9 +3514,8 @@ Every `Dataset` instance in the catalog contains other useful metadata:
 dataset.to_dict()
 ```
 
-
-
-
+<div class="u-vertical-scroll">
+```json
     {'id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019',
      'slug': 'ags_sociodemogr_e92b1637',
      'name': 'Sociodemographic',
@@ -3578,8 +3535,8 @@ dataset.to_dict()
      'update_frequency': None,
      'version': '2019',
      'is_public_data': False}
-
-
+```
+</div>
 
 There's also some intersting metadata, for each variable in the dataset:
 
@@ -3611,44 +3568,35 @@ variable = Variable.get('POPPY_946f4ed6')
 variable
 ```
 
-
-
-
-    <Variable.get('POPPY_946f4ed6')> #'Population (2024A)'
-
-
-
+```
+  <Variable.get('POPPY_946f4ed6')> #'Population (2024A)'
+```
 
 ```python
 variable.to_dict()
 ```
 
 
-
-
-    {'id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019.POPPY',
-     'slug': 'POPPY_946f4ed6',
-     'name': 'POPPY',
-     'description': 'Population (2024A)',
-     'column_name': 'POPPY',
-     'db_type': 'FLOAT',
-     'dataset_id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019',
-     'agg_method': 'SUM',
-     'variable_group_id': None,
-     'starred': False}
-
-
+```json
+  {'id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019.POPPY',
+    'slug': 'POPPY_946f4ed6',
+    'name': 'POPPY',
+    'description': 'Population (2024A)',
+    'column_name': 'POPPY',
+    'db_type': 'FLOAT',
+    'dataset_id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019',
+    'agg_method': 'SUM',
+    'variable_group_id': None,
+    'starred': False}
+```
 
 There's also some utility methods ot understand the underlying data for each variable:
-
 
 ```python
 variable.head()
 ```
 
-
-
-
+```
     0     0
     1     0
     2     8
@@ -3660,17 +3608,13 @@ variable.head()
     8     2
     9    59
     dtype: int64
-
-
-
+```
 
 ```python
 variable.counts()
 ```
 
-
-
-
+```
     all                 217182.000000
     null                     0.000000
     zero                   303.000000
@@ -3683,42 +3627,31 @@ variable.counts()
     distinct_percent         3.198700
     outliers_percent         0.126949
     dtype: float64
-
-
-
+```
 
 ```python
 variable.quantiles()
 ```
 
-
-
-
+```
     q1                      867
     q3                     1490
     median                 1149
     interquartile_range     623
     dtype: int64
-
-
-
+```
 
 ```python
 variable.histogram()
 ```
 
-
 ![png](../../img/guides/explore_data_observatory_catalog_files/explore_data_observatory_catalog_37_0.png)
-
-
 
 ```python
 variable.describe()
 ```
 
-
-
-
+```
     avg                    1.564793e+03
     max                    7.127400e+04
     min                    0.000000e+00
@@ -3730,8 +3663,7 @@ variable.describe()
     median                 1.149000e+03
     interquartile_range    6.230000e+02
     dtype: float64
-
-
+```
 
 ### Subscribe to a Dataset in the catalog
 
@@ -3741,40 +3673,30 @@ Subscriptions to datasets allow you to use them from CARTOframes to enrich your 
 
 Let's see the dataset and geography in our previous example:
 
-
 ```python
 dataset = Dataset.get('ags_sociodemogr_e92b1637')
 ```
-
 
 ```python
 dataset.is_public_data
 ```
 
-
-
-
+```
     False
-
-
-
+```
 
 ```python
 from cartoframes.data.observatory import Geography
 geography = Geography.get(dataset.geography)
 ```
 
-
 ```python
 geography.is_public_data
 ```
 
-
-
-
+```
     False
-
-
+```
 
 Both `dataset` and `geography` are not public data, that means you need a subscription to be able to use them to enrich your own data.
 
@@ -3787,15 +3709,12 @@ set_default_credentials('creds.json')
 dataset.subscribe()
 ```
 
-
 ![png](../../img/guides/explore_data_observatory_catalog_files/sub_dat.png)
-
 
 
 ```python
 geography.subscribe()
 ```
-
 
 ![png](../../img/guides/explore_data_observatory_catalog_files/sub_geo.png)
 
@@ -3804,17 +3723,14 @@ geography.subscribe()
 
 You can check the actual status of your subscriptions directly from the catalog.
 
-
 ```python
 Catalog().subscriptions()
 ```
 
-
-
-
+```
     Datasets: None
     Geographies: None
-
+```
 
 
 ### About nested filters in the Catalog instance
@@ -3829,9 +3745,8 @@ catalog = Catalog()
 catalog.country('usa').category('demographics').datasets
 ```
 
-
-
-
+<div class="u-vertical-scroll">
+```
     [<Dataset.get('od_acs_181619a3')>,
      <Dataset.get('od_acs_38016c42')>,
      <Dataset.get('od_acs_1f614ee8')>,
@@ -3971,8 +3886,8 @@ catalog.country('usa').category('demographics').datasets
      <Dataset.get('mbi_sociodemogr_975ca724')>,
      <Dataset.get('mbi_consumer_sp_9a1ba82')>,
      <Dataset.get('mbi_households__be0ba1d4')>]
-
-
+```
+</div>
 
 And now you want to take the `financial` datasets for the use, you should:
 
@@ -3985,13 +3900,10 @@ Alternatively, you can just list all the datasets in the `US` or list all the da
 
 Let's see an example of that, in which we filter public data for the `demographics` category world wide:
 
-
 ```python
 df = Catalog().category('demographics').datasets.to_dataframe()
 df[df['is_public_data'] == True]
 ```
-
-
 
 
 <div>
@@ -5491,7 +5403,6 @@ df[df['is_public_data'] == True]
 </table>
 <p>92 rows × 21 columns</p>
 </div>
-
 
 
 ### Conclusion
