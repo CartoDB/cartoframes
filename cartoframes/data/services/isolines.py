@@ -27,10 +27,10 @@ class Isolines(Service):
                 source points are computed to determine areas within specified travel times.
             ranges (list): travel time values in seconds; for each range value and source point a result polygon
                 will be produced enclosing the area within range of the source.
-            exclusive (bool, optional): when False (the default), inclusive range areas are generated, each one
+            exclusive (bool, optional): when False, inclusive range areas are generated, each one
                 containing the areas for smaller time values (so the area is reachable from the source
-                whithin the given time). When True, areas are exclusive, each one corresponding time values
-                between the immediately smaller range value (or zero) and the area range value,
+                whithin the given time). When True (the default), areas are exclusive, each one corresponding
+                time values between the immediately smaller range value (or zero) and the area range value.
             table_name (str, optional): the resulting areas will be saved in a new
                 CARTO table with this name.
             if_exists (str, optional): Behavior for creating new datasets, only applicable
@@ -72,10 +72,10 @@ class Isolines(Service):
                 source points are computed to determine areas within specified travel distances.
             ranges (list): travel distance values in meters; for each range value and source point a result polygon
                 will be produced enclosing the area within range of the source.
-            exclusive (bool, optional): when False (the default), inclusive range areas are generated, each one
+            exclusive (bool, optional): when False, inclusive range areas are generated, each one
                 containing the areas for smaller distance values (so the area is reachable from the source
-                whithin the given distance). When True, areas are exclusive, each one corresponding distance values
-                between the immediately smaller range value (or zero) and the area range value,
+                whithin the given distance). When True, areas are exclusive (the default), each one corresponding
+                distance values between the immediately smaller range value (or zero) and the area range value.
             table_name (str, optional): the resulting areas will be saved in a new
                 CARTO table with this name.
             if_exists (str, optional): Behavior for creating new datasets, only applicable
@@ -118,7 +118,7 @@ class Isolines(Service):
                    resolution=None,
                    maxpoints=None,
                    quality=None,
-                   exclusive=False,
+                   exclusive=True,
                    function=None):
         metadata = {}
 
@@ -136,7 +136,8 @@ class Isolines(Service):
         else:
             # upload to temporary table
             temporary_table_name = self._new_temporary_table_name()
-            to_carto(source, temporary_table_name, self._credentials)
+            log_enabled = not dry_run
+            to_carto(source, temporary_table_name, self._credentials, log_enabled)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
 
         source_columns = source_manager.get_column_names()
@@ -170,7 +171,7 @@ class Isolines(Service):
 
         if table_name:
             # save result in a table
-            to_carto(cdf, table_name, self._credentials, if_exists)
+            to_carto(cdf, table_name, self._credentials, if_exists, dry_run)
 
         if temporary_table_name:
             delete_table(temporary_table_name, self._credentials)
@@ -225,7 +226,7 @@ def _rings_query(areas_query, with_source_id):
     if with_source_id:
         select_source_id = 'source_id,'
     else:
-        select_source_id = ''
+        select_source_id = 'row_number() OVER () AS source_id,'
 
     return """
         SELECT

@@ -45,7 +45,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
     )
 
 
-def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
+def to_carto(dataframe, table_name, credentials=None, if_exists='fail', log_enabled=True):
     """
     Upload a Dataframe to CARTO.
 
@@ -68,9 +68,10 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
 
     cdf = CartoDataFrame(dataframe, copy=True).convert()
 
-    context_manager.copy_from(cdf, table_name, if_exists)
+    context_manager.copy_from(cdf, table_name, if_exists, log_enabled)
 
-    print('Success! Data uploaded correctly')
+    if log_enabled:
+        print('Success! Data uploaded correctly')
 
 
 def has_table(table_name, credentials=None, schema=None):
