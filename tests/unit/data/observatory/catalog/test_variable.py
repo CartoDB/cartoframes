@@ -126,7 +126,7 @@ class TestVariable(object):
         variable_repr = repr(variable)
 
         # Then
-        assert variable_repr == "<Variable('{slug}','{descr}')>"\
+        assert variable_repr == "<Variable.get('{slug}')> #'{descr}'"\
                                 .format(slug=db_variable1['slug'], descr=db_variable1['description'])
 
     def test_variable_is_printed_with_classname(self):
@@ -155,26 +155,26 @@ class TestVariable(object):
     def test_variable_list_is_printed_correctly(self):
         # Given
         variables = CatalogList([test_variable1, test_variable2])
-        shorten_description = test_variable2.description[0:30] + '...'
+        shorten_description = test_variable2.description[0:50] + '...'
 
         # When
         variables_str = str(variables)
 
         # Then
-        assert variables_str == "[<Variable('{id1}','{descr1}')>, <Variable('{id2}','{descr2}')>]" \
+        assert variables_str == "[<Variable.get('{id1}')> #'{descr1}', <Variable.get('{id2}')> #'{descr2}']" \
                                 .format(id1=db_variable1['slug'], descr1=db_variable1['description'],
                                         id2=db_variable2['slug'], descr2=shorten_description)
 
     def test_variable_list_is_represented_correctly(self):
         # Given
         variables = CatalogList([test_variable1, test_variable2])
-        shorten_description = test_variable2.description[0:30] + '...'
+        shorten_description = test_variable2.description[0:50] + '...'
 
         # When
         variables_repr = repr(variables)
 
         # Then
-        assert variables_repr == "[<Variable('{id1}','{descr1}')>, <Variable('{id2}','{descr2}')>]" \
+        assert variables_repr == "[<Variable.get('{id1}')> #'{descr1}', <Variable.get('{id2}')> #'{descr2}']" \
                                  .format(id1=db_variable1['slug'], descr1=db_variable1['description'],
                                          id2=db_variable2['slug'], descr2=shorten_description)
 

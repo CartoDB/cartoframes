@@ -219,3 +219,63 @@ class TestEnrichmentService(object):
             Please, contact us for more information.
         """.format(variable.slug)
         assert str(e.value) == error
+
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch.object(Variable, 'get')
+    def test_prepare_variables_with_agg_method(self, get_mock, _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
+        variable_id = 'project.dataset.table.variable'
+        variable = Variable({
+            'id': variable_id,
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': 'SUM'
+        })
+
+        get_mock.return_value = variable
+
+        one_variable_cases = [
+            variable_id,
+            variable
+        ]
+
+        for case in one_variable_cases:
+            result = prepare_variables(case)
+
+            assert result == [variable]
+
+        for case in one_variable_cases:
+            result = prepare_variables(case, only_with_agg=True)
+
+            assert result == [variable]
+
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch.object(Variable, 'get')
+    def test_prepare_variables_without_agg_method(self, get_mock, _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
+        variable_id = 'project.dataset.table.variable'
+        variable = Variable({
+            'id': variable_id,
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': None
+        })
+
+        get_mock.return_value = variable
+
+        one_variable_cases = [
+            variable_id,
+            variable
+        ]
+
+        for case in one_variable_cases:
+            result = prepare_variables(case)
+
+            assert result == [variable]
+
+        for case in one_variable_cases:
+            result = prepare_variables(case, only_with_agg=True)
+
+            assert result == []

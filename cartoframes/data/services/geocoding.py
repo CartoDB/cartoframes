@@ -3,375 +3,67 @@
 from __future__ import absolute_import
 
 import re
-import hashlib
 import logging
+
+from .utils import geocoding_utils
+from .utils import geocoding_constants
+from .utils import TableGeocodingLock
 
 from .service import Service
 from ...core.managers.source_manager import SourceManager
 from ...io.carto import read_carto, to_carto, has_table, delete_table, update_table, copy_table, create_table_from_query
 
-HASH_COLUMN = 'carto_geocode_hash'
-BATCH_SIZE = 200
-DEFAULT_STATUS = {'gc_status_rel': 'relevance'}
-
-QUOTA_SERVICE = 'hires_geocoder'
-
-
-def _lock(execute_query, lock_id):
-    sql = 'select pg_try_advisory_lock({id})'.format(id=lock_id)
-    result = execute_query(sql)
-    locked = result and result.get('rows', [])[0].get('pg_try_advisory_lock')
-    logging.debug('LOCK %s : %s', lock_id, locked)
-    return locked
-
-
-def _unlock(execute_query, lock_id):
-    logging.debug('UNLOCK %s', lock_id)
-    sql = 'select pg_advisory_unlock({id})'.format(id=lock_id)
-    result = execute_query(sql)
-    return result and result.get('rows', [])[0].get('pg_advisory_unlock')
-
-
-class TableGeocodingLock:
-    def __init__(self, execute_query, table_name):
-        self._execute_query = execute_query
-        text_id = 'carto-geocoder-{table_name}'.format(table_name=table_name)
-        self.lock_id = _hash_as_big_int(text_id)
-        self.locked = False
-
-    def __enter__(self):
-        self.locked = _lock(self._execute_query, self.lock_id)
-        return self.locked
-
-    def __exit__(self, type, value, traceback):
-        if self.locked:
-            _unlock(self._execute_query, self.lock_id)
-
-
-def _column_name(col):
-    if col:
-        return "$gcparam${col}$gcparam$".format(col=col)
-    else:
-        return 'NULL'
-
-
-def _prefixed_column_or_value(attr, prefix):
-    if prefix and attr is not None and attr[0] != "'":
-        return "{}.{}".format(prefix, attr)
-    return attr
-
-
-def _hash_expr(street, city, state, country, table_prefix=None):
-    street, city, state, country = (_prefixed_column_or_value(v, table_prefix) for v in (street, city, state, country))
-    hashed_expr = " || '<>' || ".join([street, city or "''", state or "''", country or "''"])
-    return "md5({hashed_expr})".format(hashed_expr=hashed_expr)
-
-
-def _needs_geocoding_expr(hash_expr):
-    return "({hash_column} IS NULL OR {hash_column} <> {hash_expr})".format(
-        hash_column=HASH_COLUMN,
-        hash_expr=hash_expr
-    )
-
-
-def _exists_column_query(table, column):
-    return """
-      SELECT TRUE FROM pg_catalog.pg_attribute a
-      WHERE
-        a.attname = '{column}'
-        AND a.attnum > 0
-        AND NOT a.attisdropped
-        AND a.attrelid = (
-            SELECT c.oid
-            FROM pg_catalog.pg_class c
-            LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-            WHERE c.oid = '{table}'::regclass::oid
-                AND pg_catalog.pg_table_is_visible(c.oid)
-        );
-    """.format(
-        table=table,
-        column=column
-    )
-
-
-def _prior_summary_query(table, street, city, state, country):
-    hash_expression = _hash_expr(street, city, state, country)
-    return """
-      SELECT
-        CASE WHEN {hash_column} IS NULL THEN
-          CASE WHEN the_geom IS NULL THEN 'new_nongeocoded' ELSE 'new_geocoded' END
-        WHEN {hash_column} <> {hash_expression} THEN
-          CASE WHEN the_geom IS NULL THEN 'changed_nongeocoded' ELSE 'changed_geocoded' END
-        ELSE
-          CASE WHEN the_geom IS NULL THEN 'previously_nongeocoded' ELSE 'previously_geocoded' END
-        END AS gc_state,
-        COUNT(*) AS count
-      FROM {table}
-      GROUP BY gc_state
-    """.format(
-        table=table,
-        hash_expression=hash_expression,
-        hash_column=HASH_COLUMN
-    )
-
-
-def _first_time_summary_query(table, street, city, state, country):
-    return """
-      SELECT
-        CASE WHEN the_geom IS NULL THEN 'new_nongeocoded' ELSE 'new_geocoded' END AS gc_state,
-        COUNT(*) AS count
-      FROM {table}
-      GROUP BY gc_state
-    """.format(
-        table=table
-    )
-
-
-def _posterior_summary_query(table):
-    return """
-    SELECT COUNT(*) AS count
-    FROM {table}
-    WHERE the_geom IS NULL
-    """.format(
-        table=table
-    )
-
-
-def _geocode_query(table, street, city, state, country, status):
-    hash_expression = _hash_expr(street, city, state, country)
-    query = """
-        SELECT * FROM {table} WHERE {needs_geocoding}
-    """.format(
-        table=table,
-        needs_geocoding=_needs_geocoding_expr(hash_expression)
-    )
-    geocode_expression = """
-        cdb_dataservices_client.cdb_bulk_geocode_street_point(
-            $gcquery${query}$gcquery$,
-            {street},
-            {city},
-            {state},
-            {country},
-            {batch_size}
-        )
-    """.format(
-        query=query,
-        street=_column_name(street),
-        city=_column_name(city),
-        state=_column_name(state),
-        country=_column_name(country),
-        batch_size=BATCH_SIZE
-    )
-
-    status_assignment, status_columns = _status_assignment(status)
-
-    query = """
-        UPDATE {table}
-        SET
-            the_geom = _g.the_geom,
-            {status_assignment}
-            {hash_column} = {hash_expression}
-        FROM (SELECT * FROM {geocode_expression}) _g
-        WHERE _g.cartodb_id = {table}.cartodb_id
-    """.format(
-        table=table,
-        hash_column=HASH_COLUMN,
-        hash_expression=hash_expression,
-        geocode_expression=geocode_expression,
-        status_assignment=status_assignment
-    )
-
-    return (query, status_columns)
-
-
-STATUS_FIELDS = {
-    'relevance': ('numeric', "(_g.metadata->>'relevance')::numeric"),
-    'precision': ('text', "_g.metadata->>'precision'"),
-    'match_types': ('text', "cdb_dataservices_client.cdb_jsonb_array_casttext(_g.metadata->>'match_types')"),
-    '*': ('jsonb', "_g.metadata")
-}
-STATUS_FIELDS_KEYS = sorted(STATUS_FIELDS.keys())
-
-
-def _status_column(column_name, field):
-    column_type, value = STATUS_FIELDS[field]
-    return (column_name, column_type, value)
-
-
-def _column_assignment(column_name, value):
-    return '{} = {},'.format(column_name, value)
-
-
-def _status_assignment(status):
-    status_assignment = ''
-    status_columns = []
-    if isinstance(status, dict):
-        # new style: define status assignments with dictionary
-        # {'column_name': 'status_field', ...}
-        # allows to assign individual status attributes to columns
-        invalid_fields = _list_difference(status.values(), STATUS_FIELDS_KEYS)
-        if any(invalid_fields):
-            raise ValueError("Invalid status fields {} valid keys are: {}".format(
-                invalid_fields,
-                STATUS_FIELDS_KEYS))
-        columns = [_status_column(name, field) for name, field in list(status.items())]
-        status_assignments = [_column_assignment(name, value) for name, _, value in columns]
-        status_columns = [(name, type_) for name, type_, _ in columns]
-        status_assignment = ''.join(status_assignments)
-    elif status:
-        # old style: column name
-        # stores all status as json in a single column
-        name, type_, value = _status_column(status, '*')
-        status_columns = [(name, type_)]
-        status_assignment = _column_assignment(name, value)
-    return (status_assignment, status_columns)
-
-
-def _hash_as_big_int(text):
-    # Calculate a positive bigint hash, hence the 63-bit mask.
-    return int(hashlib.sha1(text.encode()).hexdigest(), 16) & ((2**63)-1)
-
-
-def _set_pre_summary_info(summary, output):
-    logging.debug(summary)
-    output['total_rows'] = sum(summary.values())
-    output['required_quota'] = sum(
-        [summary[s] for s in ['new_geocoded', 'new_nongeocoded', 'changed_geocoded', 'changed_nongeocoded']])
-    output['previously_geocoded'] = summary.get('previously_geocoded', 0)
-    output['previously_failed'] = summary.get('previously_nongeocoded', 0)
-    output['records_with_geometry'] = sum(
-        summary[s] for s in ['new_geocoded', 'changed_geocoded', 'previously_geocoded'])
-
-
-def _set_post_summary_info(summary, result, output):
-    if result and result.get('total_rows', 0) == 1:
-        null_geom_count = result.get('rows')[0].get('count')
-        geom_count = output['total_rows'] - null_geom_count
-        output['final_records_with_geometry'] = geom_count
-        # output['final_records_without_geometry'] = null_geom_count
-        output['geocoded_increment'] = output['final_records_with_geometry'] - output['records_with_geometry']
-        new_or_changed = sum([summary[s] for s in ['new_geocoded', 'changed_geocoded']])
-        output['successfully_geocoded'] = output['geocoded_increment'] + new_or_changed
-        output['failed_geocodings'] = output['required_quota'] - output['successfully_geocoded']
-
-
-GEOCODE_COLUMN_KEY = 'column'
-GEOCODE_VALUE_KEY = 'value'
-VALID_GEOCODE_KEYS = [GEOCODE_COLUMN_KEY, GEOCODE_VALUE_KEY]
-
-
-def _list_difference(l1, l2):
-    """list substraction compatible with Python2"""
-    # return l1 - l2
-    return list(set(l1) - set(l2))
-
-
-def _column_or_value_arg(arg, valid_columns=None):
-    if arg is None:
-        return None
-    is_column = False
-    if isinstance(arg, dict):
-        invalid_keys = _list_difference(arg.keys(), VALID_GEOCODE_KEYS)
-        if any(invalid_keys):
-            invalid_keys_list = ', '.join(list(invalid_keys))
-            valid_keys_list = ', '.join(VALID_GEOCODE_KEYS)
-            raise ValueError("Invalid key for argument {} valid keys are: {}".format(
-                invalid_keys_list,
-                valid_keys_list)
-            )
-        if len(arg.keys()) != 1:
-            valid_keys_list = ', '.join(VALID_GEOCODE_KEYS)
-            raise ValueError("Exactly one key of {} must be present in argument".format(valid_keys_list))
-        key = list(arg.keys())[0]
-        if key == GEOCODE_COLUMN_KEY:
-            arg = arg[GEOCODE_COLUMN_KEY]
-            is_column = True
-        else:
-            arg = "'{}'".format(arg[GEOCODE_VALUE_KEY])
-    else:
-        is_column = True
-    if is_column and valid_columns:
-        if arg not in valid_columns:
-            raise ValueError("Argument is not a valid column name: {}".format(arg))
-    return arg
-
 
 class Geocoding(Service):
     """Geocoding using CARTO data services.
+
     This requires a CARTO account with and API key that allows for using geocoding services;
     (through explicit argument in constructor or via the default credentials).
-    Use of these methods will incur in geocoding credit consumption for the provided account.
 
-    Examples:
+    To prevent having to geocode records that have been previously geocoded, and thus spend quota unnecessarily,
+    you should always preserve the ``the_geom`` and ``carto_geocode_hash`` columns generated by the
+    geocoding process. This will happen automatically if your input is a table from CARTO processed in place
+    (i.e. without a ``table_name`` parameter) or if you save your results in a CARTO table using the ``table_name``
+    parameter, and only use the resulting table for any further geocoding.
 
-        Obtain the number of credits needed to geocode a dataset:
+    In case you're geocoding local data from a ``DataFrame`` that you plan to re-geocode again, (e.g. because
+    you're making your work reproducible by saving all the data preparation steps in a notebook),
+    we advise to save the geocoding results immediately to the same store from when the data is originally taken,
+    for example:
 
-        .. code::
+    .. code:: python
 
-            from data.services import Geocoding
-            from cartoframes.auth import set_default_credentials
-            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-            gc = Geocoding()
-            _, info = gc.geocode(dataset, street='address', dry_run=True)
-            print(info['required_quota'])
+        dataframe = pandas.read_csv('my_data')
+        dataframe = Geocoding().geocode(dataframe, 'address').data
+        dataframe.to_csv('my_data')
 
-        Geocode a dataframe:
+    As an alternative you can use the ``cached`` option to store geocoding results in a CARTO table
+    and reuse them in later geocodings. The parameter is the name of the table used to cache the results,
+    and can be used with dataframe or query datasets.
 
-        .. code::
+    If the same dataframe if geocoded repeatedly no credits will be spent, but note there is a time overhead
+    related to uploading the dataframe to a temporary table for checking for changes.
 
-            import pandas
-            from data.services import Geocoding
-            from cartoframes.data import Dataset
-            from cartoframes.auth import set_default_credentials
-            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+    .. code:: python
 
-            dataframe = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
-            gc = Geocoding()
-            geocoded_dataframe, info = gc.geocode(dataframe, street='address', city='city', country={'value': 'Spain'})
-            print(geocoded_dataframe)
+        dataframe = pandas.read_csv('my_data')
+        dataframe = Geocoding().geocode(dataframe, 'address', cached='my_data').data
 
-        Geocode a table:
-
-        .. code::
-
-            import pandas
-            from data.services import Geocoding
-            from cartoframes.data import Dataset
-            from cartoframes.auth import set_default_credentials
-            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-
-            dataset = Dataset('YOUR_TABLE_NAME')
-            gc = Geocoding()
-            geocoded_dataset, info = gc.geocode(dataset, street='address', city='city', country={'value': 'Spain'})
-            print(geocoded_dataset.download())
-
-        Filter results by relevance:
-
-        .. code::
-
-            import pandas
-            from data.services import Geocoding
-            from cartoframes.data import Dataset
-            from cartoframes.auth import set_default_credentials
-            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-
-            df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
-            gc = Geocoding()
-            df = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status=['relevance']).data
-            # show rows with relevance greater than 0.7:
-            print(df[df['carto_geocode_relevance']>0.7, axis=1)])
-
+    If you execute the previous code multiple times it will only spend credits on the first geocoding;
+    later ones will reuse the results stored in the ``my_data`` table. This will require extra processing
+    time. If the CSV file should ever change, cached results will only be applied to unmodified
+    records, and new geocoding will be performed only on new or changed records.
     """
 
     def __init__(self, credentials=None):
-        super(Geocoding, self).__init__(credentials=credentials, quota_service=QUOTA_SERVICE)
+        super(Geocoding, self).__init__(credentials=credentials, quota_service=geocoding_constants.QUOTA_SERVICE)
 
     def geocode(self, source, street,
                 city=None, state=None, country=None,
-                status=DEFAULT_STATUS,
+                status=geocoding_constants.DEFAULT_STATUS,
                 table_name=None, if_exists='fail',
                 dry_run=False, cached=None):
-        """Geocode a dataset
+        """Geocode method
 
         Args:
             source (str, DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
@@ -401,19 +93,128 @@ class Geocoding(Service):
             if_exists (str, optional): Behavior for creating new datasets, only applicable
                 if table_name isn't None;
                 Options are 'fail', 'replace', or 'append'. Defaults to 'fail'.
-            cached (str, optional): name of a table used cache geocoding results. Can only
-                be used with DataFrames or queries. This parameter is not compatbile
-                with table_name.
+            cached (str, optional): name of a table used cache geocoding results.
+                This parameter is not compatbile with table_name.
             dry_run (bool, optional): no actual geocoding will be performed (useful to
                 check the needed quota)
 
         Returns:
-            A named-tuple ``(data, metadata)`` containing  either a ``data`` CartoDataFrame and
-            a ``metadata`` dictionary with global information about the geocoding process.
+            A named-tuple ``(data, metadata)`` containing  either a ``data`` :py:class:`CartoDataFrame
+            <cartoframes.CartoDataFrame>` and a ``metadata`` dictionary with global information about
+            the geocoding process.
 
-            The data contains a ``geometry`` column with point locations for the geocoded addresses
+            The ``data`` contains a ``geometry`` column with point locations for the geocoded addresses
             and also a ``carto_geocode_hash`` that, if preserved, can avoid re-geocoding
             unchanged data in future calls to geocode.
+
+            The ``metadata``, as described in https://carto.com/developers/data-services-api/reference/,
+            contains the following information:
+
+            +-------------+--------+------------------------------------------------------------+
+            | Name        | Type   | Description                                                |
+            +=============+========+============================================================+
+            | precision   | text   | precise or interpolated                                    |
+            +-------------+--------+------------------------------------------------------------+
+            | relevance   | number | 0 to 1, higher being more relevant                         |
+            +-------------+--------+------------------------------------------------------------+
+            | match_types | array  | list of match type strings                                 |
+            |             |        | point_of_interest, country, state, county, locality,       |
+            |             |        | district, street, intersection, street_number, postal_code |
+            +-------------+--------+------------------------------------------------------------+
+
+            By default the ``relevance`` is stored in an output column named ``gc_status_rel``. The name of the
+            column and in general what attributes are added as columns can be configured by using a ``status``
+            dictionary associating column names to status attribute.
+
+        Examples:
+
+            Geocode a DataFrame:
+
+            .. code::
+
+                import pandas
+                from data.services import Geocoding
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
+                df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
+                gc = Geocoding()
+                geocoded_cdf, metadata = gc.geocode(df, street='address', city='city', country={'value': 'Spain'})
+
+                geocoded_cdf.head()
+
+            Geocode a table from CARTO:
+
+            .. code::
+
+                from data.services import Geocoding
+                from cartoframes import CartoDataFrame
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
+                cdf = CartoDataFrame.from_carto('table_name')
+                gc = Geocoding()
+                geocoded_cdf, metadata = gc.geocode(cdf, street='address')
+
+                geocoded_cdf.head()
+
+            Geocode a query against a table from CARTO:
+
+            .. code::
+
+                from data.services import Geocoding
+                from cartoframes import CartoDataFrame
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
+                cdf = CartoDataFrame.from_carto('SELECT * FROM table_name WHERE value > 1000')
+                gc = Geocoding()
+                geocoded_cdf, metadata = gc.geocode(cdf, street='address')
+
+                geocoded_cdf.head()
+
+            Obtain the number of credits needed to geocode a CARTO table:
+
+            .. code::
+
+                from data.services import Geocoding
+                from cartoframes import CartoDataFrame
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
+                cdf = CartoDataFrame.from_carto('table_name')
+                gc = Geocoding()
+                geocoded_cdf, metadata = gc.geocode(cdf, street='address', dry_run=True)
+
+                print(metadata['required_quota'])
+
+
+            Filter results by relevance:
+
+            .. code::
+
+                import pandas
+                from data.services import Geocoding
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
+                df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
+                gc = Geocoding()
+                geocoded_cdf, metadata = gc.geocode(
+                    df,
+                    street='address',
+                    city='city',
+                    country={'value': 'Spain'},
+                    status=['relevance']
+                )
+
+                # show rows with relevance greater than 0.7:
+                print(geocoded_cdf[geocoded_cdf['carto_geocode_relevance'] > 0.7, axis=1)])
         """
 
         self._source_manager = SourceManager(source, self._credentials)
@@ -426,7 +227,9 @@ class Geocoding(Service):
             return self._cached_geocode(
                 source, cached, street, city=city, state=state, country=country, dry_run=dry_run)
 
-        city, state, country = [_column_or_value_arg(arg, self.columns) for arg in [city, state, country]]
+        city, state, country = [
+            geocoding_utils.column_or_value_arg(arg, self.columns) for arg in [city, state, country]
+        ]
 
         input_table_name, is_temporary = self._table_for_geocoding(source, table_name, if_exists)
 
@@ -458,10 +261,10 @@ class Geocoding(Service):
         if has_cache:
             cache_source_manager = SourceManager(table_name, self._credentials)
             cache_columns = cache_source_manager.get_column_names()
-            if HASH_COLUMN not in cache_columns:
+            if geocoding_constants.HASH_COLUMN not in cache_columns:
                 raise ValueError('Cache table {} exists but is not a valid geocode table'.format(table_name))
 
-        if HASH_COLUMN in self.columns or not has_cache:
+        if geocoding_constants.HASH_COLUMN in self.columns or not has_cache:
             return self.geocode(
                 source, street=street, city=city, state=state,
                 country=country, table_name=table_name, dry_run=dry_run, if_exists='replace')
@@ -475,15 +278,23 @@ class Geocoding(Service):
         self._execute_query(
             """
             ALTER TABLE {tmp_table} ADD COLUMN IF NOT EXISTS {hash} text
-            """.format(tmp_table=tmp_table_name, hash=HASH_COLUMN))
+            """.format(tmp_table=tmp_table_name, hash=geocoding_constants.HASH_COLUMN))
 
-        hcity, hstate, hcountry = [_column_or_value_arg(arg, self.columns) for arg in [city, state, country]]
-        hash_expr = _hash_expr(street, hcity, hstate, hcountry, table_prefix=tmp_table_name)
+        hcity, hstate, hcountry = [
+            geocoding_utils.column_or_value_arg(arg, self.columns) for arg in [city, state, country]
+        ]
+
+        hash_expr = geocoding_utils.hash_expr(street, hcity, hstate, hcountry, table_prefix=tmp_table_name)
         self._execute_query(
             """
             UPDATE {tmp_table} SET {hash}={table}.{hash}, the_geom={table}.the_geom
             FROM {table} WHERE {hash_expr}={table}.{hash}
-            """.format(tmp_table=tmp_table_name, table=table_name, hash=HASH_COLUMN, hash_expr=hash_expr))
+            """.format(
+                tmp_table=tmp_table_name,
+                table=table_name,
+                hash=geocoding_constants.HASH_COLUMN,
+                hash_expr=hash_expr
+            ))
 
         delete_table(table_name)
         update_table(tmp_table_name, table_name)
@@ -553,7 +364,7 @@ class Geocoding(Service):
                 count = row.get('count')
                 summary[gc_state] = count
 
-        _set_pre_summary_info(summary, output)
+        geocoding_utils.set_pre_summary_info(summary, output)
 
         aborted = False
 
@@ -563,9 +374,9 @@ class Geocoding(Service):
                     output['error'] = 'The table is already being geocoded'
                     output['aborted'] = aborted = True
                 else:
-                    sql, add_columns = _geocode_query(table_name, street, city, state, country, status)
+                    sql, add_columns = geocoding_utils.geocode_query(table_name, street, city, state, country, status)
 
-                    add_columns += [(HASH_COLUMN, 'text')]
+                    add_columns += [(geocoding_constants.HASH_COLUMN, 'text')]
 
                     logging.info("Adding columns %s if needed", ', '.join([c[0] for c in add_columns]))
                     alter_sql = "ALTER TABLE {table} {add_columns};".format(
@@ -603,10 +414,10 @@ class Geocoding(Service):
                         pass
 
             if not aborted:
-                sql = _posterior_summary_query(table_name)
+                sql = geocoding_utils.posterior_summary_query(table_name)
                 logging.debug("Executing result summary query: %s", sql)
                 result = self._execute_query(sql)
-                _set_post_summary_info(summary, result, output)
+                geocoding_utils.set_post_summary_info(summary, result, output)
 
         if not aborted:
             # TODO
@@ -616,13 +427,13 @@ class Geocoding(Service):
         return output  # TODO: GeocodeResult object
 
     def _execute_prior_summary(self, dataset_name, street, city, state, country):
-        sql = _exists_column_query(dataset_name, HASH_COLUMN)
+        sql = geocoding_utils.exists_column_query(dataset_name, geocoding_constants.HASH_COLUMN)
         logging.debug("Executing check first time query: %s", sql)
         result = self._execute_query(sql)
         if not result or result.get('total_rows', 0) == 0:
-            sql = _first_time_summary_query(dataset_name, street, city, state, country)
+            sql = geocoding_utils.first_time_summary_query(dataset_name, street, city, state, country)
             logging.debug("Executing first time summary query: %s", sql)
         else:
-            sql = _prior_summary_query(dataset_name, street, city, state, country)
+            sql = geocoding_utils.prior_summary_query(dataset_name, street, city, state, country)
             logging.debug("Executing summary query: %s", sql)
         return self._execute_query(sql)

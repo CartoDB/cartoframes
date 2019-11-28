@@ -56,11 +56,11 @@ class Source(object):
         .. code::
 
             from cartoframes.viz import Source
-            from cartoframes.data import CartoDataFrame
+            from cartoframes import CartoDataFrame
 
             set_default_credentials('your_user_name', 'your api key')
 
-            cdf = CartoDataFrame('table_name')
+            cdf = CartoDataFrame.from_carto('table_name')
 
             Source(cdf)
 

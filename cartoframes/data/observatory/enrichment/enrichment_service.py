@@ -1,6 +1,7 @@
 import uuid
 
 from collections import defaultdict
+import warnings
 
 from ..catalog.variable import Variable
 from ..catalog.dataset import Dataset
@@ -23,11 +24,37 @@ AGGREGATION_NONE = 'none'
 
 
 class VariableAggregation(object):
-    """Class to overwrite a `<cartoframes.data.observatory> Variable` default aggregation method in
-        enrichment funcitons
+    """This class overwrites a :py:class:`Variable <cartoframes.data.observatory.Variable>` default aggregation method in
+        :py:class:`Enrichment <cartoframes.data.observatory.Enrichment>` functions
+
+        Args:
+            variable (str or :obj:`Variable`):
+                The variable name or :obj:`Variable` instance
+
+            aggregation (str):
+                The aggregation method, it can be one of these values: 'MIN', 'MAX', 'SUM', 'AVG', 'COUNT',
+                'ARRAY_AGG', 'ARRAY_CONCAT_AGG', 'STRING_AGG' but check this
+                `documentation <https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions>`__
+                for a complete list of aggregate functions
+
+        Returns:
+            :py:class:`VariableAggregation <cartoframes.data.observatory.entity.VariableAggregation>`
 
         Example:
-            VariableAggregation(variable, 'SUM')
+
+            Next example uses a `VariableAggregation` instance to calculate the `SUM` of car-free households
+            :obj:`Variable` of the :obj:`Catalog` for each polygon of `my_local_dataframe` pandas `DataFrame`
+
+            .. code::
+
+                from cartoframes.data.observatory import Enrichment, Variable, VariableAggregation
+
+                variable = Variable.get('no_cars_d19dfd10')
+                enriched_dataset_cdf = Enrichment().enrich_polygons(
+                    my_local_dataframe,
+                    variables=[variable],
+                    aggregation=[VariableAggregation(variable, 'SUM')]
+                )
     """
     def __init__(self, variable, aggregation=None):
         self.variable = _prepare_variable(variable)
@@ -35,15 +62,38 @@ class VariableAggregation(object):
 
 
 class VariableFilter(object):
-    """Class for filtering in enrichment. It receives 3 parameters: variable: a
-        `<cartoframes.data.observatory> Variable` instance,
-        operator: the operation to do over the variable column in SQL syntax and
-        value: the value to be used in the SQL operation
+    """This class can be used for filtering the results of
+    :py:class:`Enrichment <cartoframes.data.observatory.Enrichment>` functions. It works by appending the
+    `VariableFilter` SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND` operator.
+
+        Args:
+            variable (str or :obj:`Variable`):
+                The variable name or :obj:`Variable` instance
+
+            query (str):
+                The SQL query filter to be appended to the enrichment SQL query.
 
         Examples:
-            Equal to number: VariableFilter(variable, '= 3')
-            Equal to string: VariableFilter(variable, "= 'the string'")
-            Greater that 3: VariableFilter(variable, '> 3')
+
+            - Equal to number: `VariableFilter(variable, '= 3')`
+            - Equal to string: `VariableFilter(variable, "= 'the string'")`
+            - Greater that 3: `VariableFilter(variable, '> 3')`
+
+            Next example uses a `VariableFilter` instance to calculate the `SUM` of car-free households
+            :obj:`Variable` of the :obj:`Catalog` for each polygon of `my_local_dataframe` pandas `DataFrame` only for
+            areas with more than 100 free car-free households
+
+            .. code::
+
+                from cartoframes.data.observatory import Enrichment, Variable, VariableFilter
+
+                variable = Variable.get('no_cars_d19dfd10')
+                enriched_dataset_cdf = Enrichment().enrich_polygons(
+                    my_local_dataframe,
+                    variables=[variable],
+                    aggregation=[VariableAggregation(variable, 'SUM')]
+                    filters=[VariableFilter(variable, '> 100')]
+                )
     """
     def __init__(self, variable, query):
         self.variable = _prepare_variable(variable)
@@ -174,14 +224,16 @@ class EnrichmentService(object):
         return project
 
 
-def prepare_variables(variables):
+def prepare_variables(variables, only_with_agg=False):
     if isinstance(variables, list):
-        return [_prepare_variable(var) for var in variables]
+        variables = [_prepare_variable(var, only_with_agg) for var in variables]
     else:
-        return [_prepare_variable(variables)]
+        variables = [_prepare_variable(variables, only_with_agg)]
+
+    return list(filter(None, variables))
 
 
-def _prepare_variable(variable):
+def _prepare_variable(variable, only_with_agg=False):
     if isinstance(variable, str):
         variable = Variable.get(variable)
 
@@ -190,6 +242,10 @@ def _prepare_variable(variable):
             variable should be a `<cartoframes.data.observatory> Variable` instance,
             Variable `id` property or Variable `slug` property
         """)
+
+    if only_with_agg and not variable.agg_method:
+        warnings.warn('{} skipped because it does not have aggregation method'.format(variable))
+        return None
 
     _is_available_in_bq(variable)
 
@@ -215,11 +271,11 @@ def __get_aggregation(variable, aggregation):
     if aggregation == AGGREGATION_NONE:
         return None
     elif aggregation == AGGREGATION_DEFAULT:
-        return variable.agg_method or 'array_agg'
+        return variable.agg_method
     elif isinstance(aggregation, str):
         return aggregation
     elif isinstance(aggregation, list):
-        agg = variable.agg_method or 'array_agg'
+        agg = variable.agg_method
         for variable_aggregation in aggregation:
             if variable_aggregation.variable == variable:
                 agg = variable_aggregation.aggregation

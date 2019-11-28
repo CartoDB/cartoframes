@@ -24,7 +24,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
             `current_schema()` using the credentials.
         drop_cartodb_id (bool, optional): drop the "cartodb_id" column used as index.
         drop_the_geom (bool, optional): drop the "the_geom" column used as geometry.
-        drop_the_goem_webmercator (bool, optional): drop the "the_geom_webmercator" column.
+        drop_the_geom_webmercator (bool, optional): drop the "the_geom_webmercator" column.
 
     Returns:
         :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`
@@ -47,10 +47,11 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
     """
-    Read a table or a SQL query from the CARTO account.
+    Upload a Dataframe to CARTO.
 
     Args:
-        dataframe (DataFrame): data frame to upload.
+        dataframe (DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
+            data to be uploaded.
         table_name (str): name of the table to upload the data.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
@@ -118,7 +119,15 @@ def describe_table(table_name, credentials=None, schema=None):
             instance of Credentials (username, api_key, etc).
         schema (str, optional):prefix of the table. By default, it gets the
             `current_schema()` using the credentials.
+
+    Returns:
+        A dict with the `privacy`, `num_rows` and `geom_type` of the table.
+
+    Raises:
+        ValueError:
+            If the table name is not a string.
     """
+
     if not isinstance(table_name, str):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
@@ -141,13 +150,20 @@ def update_table(table_name, credentials=None, new_table_name=None, privacy=None
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
         new_table_name(str, optional): new name for the table.
-        privacy (str, optional): privacy of the table: 'PRIVATE', 'PUBLIC', 'LINK'.
+        privacy (str, optional): privacy of the table: 'private', 'public', 'link'.
+
+    Raises:
+        ValueError:
+            If the table name is not a string.
+        ValueError:
+            If the privacy name is not 'private', 'public', or 'link'.
     """
+
     if not isinstance(table_name, str):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
     valid_privacy_values = ['PRIVATE', 'PUBLIC', 'LINK']
-    if privacy not in valid_privacy_values:
+    if privacy.upper() not in valid_privacy_values:
         raise ValueError('Wrong privacy. Valid names are {}'.format(', '.join(valid_privacy_values)))
 
     context_manager = ContextManager(credentials)

@@ -51,8 +51,8 @@ class Isolines(Service):
                 Admitted values: 1/2/3.
 
         Returns:
-            A named-tuple ``(data, metadata)`` containing a ``data`` CartoDataFrame and
-            a ``metadata`` dictionary. For dry runs the data will be ``None``.
+            A named-tuple ``(data, metadata)`` containing a ``data`` :py:class:`CartoDataFrame
+            <cartoframes.CartoDataFrame>` and a ``metadata`` dictionary. For dry runs the data will be ``None``.
             The data contains a ``range_data`` column with a numeric value and a ``the_geom``
             geometry with the corresponding area. It will also contain a ``source_id`` column
             that identifies the source point corresponding to each area if the source has a
@@ -96,8 +96,8 @@ class Isolines(Service):
                 Admitted values: 1/2/3.
 
         Returns:
-            A named-tuple ``(data, metadata)`` containing a ``data`` CartoDataFrame and
-            a ``metadata`` dictionary. For dry runs the data will be ``None``.
+            A named-tuple ``(data, metadata)`` containing a ``data`` :py:class:`CartoDataFrame
+            <cartoframes.CartoDataFrame>` and a ``metadata`` dictionary. For dry runs the data will be ``None``.
             The data contains a ``range_data`` column with a numeric value and a ``the_geom``
             geometry with the corresponding area. It will also contain a ``source_id`` column
             that identifies the source point corresponding to each area if the source has a

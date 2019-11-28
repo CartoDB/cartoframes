@@ -95,7 +95,7 @@ class TestProvider(object):
         provider_repr = repr(provider)
 
         # Then
-        assert provider_repr == "<Provider('{id}')>".format(id=db_provider1['id'])
+        assert provider_repr == "<Provider.get('{id}')>".format(id=db_provider1['id'])
 
     def test_provider_is_printed_with_classname(self):
         # Given
@@ -128,7 +128,7 @@ class TestProvider(object):
         providers_str = str(providers)
 
         # Then
-        assert providers_str == "[<Provider('{id1}')>, <Provider('{id2}')>]" \
+        assert providers_str == "[<Provider.get('{id1}')>, <Provider.get('{id2}')>]" \
                                 .format(id1=db_provider1['id'], id2=db_provider2['id'])
 
     def test_provider_list_is_represented_with_classname_and_ids(self):
@@ -139,7 +139,7 @@ class TestProvider(object):
         providers_repr = repr(providers)
 
         # Then
-        assert providers_repr == "[<Provider('{id1}')>, <Provider('{id2}')>]"\
+        assert providers_repr == "[<Provider.get('{id1}')>, <Provider.get('{id2}')>]"\
                                  .format(id1=db_provider1['id'], id2=db_provider2['id'])
 
     def test_providers_items_are_obtained_as_provider(self):

@@ -8,7 +8,7 @@ from .repository.constants import VARIABLE_GROUP_FILTER
 
 class VariableGroup(CatalogEntity):
 
-    entity_repo = get_variable_group_repo()
+    _entity_repo = get_variable_group_repo()
 
     @property
     def variables(self):

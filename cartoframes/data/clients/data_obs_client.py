@@ -20,7 +20,7 @@ class DataObsClient(object):
     <https://carto.com/developers/data-observatory/>`__.
 
     This class provides the following methods to interact with Data Observatory:
-        - boundary: returns a :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with
+        - boundaries: returns a :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with
             the geographic boundaries (geometries) or their metadata.
         - discovery: returns a pandas.DataFrame with the measures found.
         - augment: returns a :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with the augmented data.

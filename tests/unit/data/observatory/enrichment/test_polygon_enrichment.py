@@ -562,7 +562,7 @@ def _get_column_sql(agg, column):
     return '''
         {agg}(enrichment_table.{column} *
         (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column})) /
-        ST_area(data_table.{data_geom_column}))) AS {column}
+        ST_area(data_table.{data_geom_column}))) AS {agg}_{column}
             '''.format(agg=agg, column=column, data_geom_column='__geojson_geom')
 
 
