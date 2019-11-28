@@ -8,7 +8,8 @@ from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory import Variable, Dataset
 from cartoframes.data.observatory.catalog.repository.entity_repo import EntityRepository
-from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables
+from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables, \
+    _ENRICHMENT_ID, _GEOJSON_COLUMN
 from cartoframes.exceptions import EnrichmentException
 from cartoframes.utils.geom_utils import to_geojson
 
@@ -37,7 +38,7 @@ class TestEnrichmentService(object):
             columns=['cartodb_id', geom_column])
         expected_cdf = CartoDataFrame(
             [[1, point, 0, to_geojson(point)]],
-            columns=['cartodb_id', geom_column, 'enrichment_id', '__geojson_geom'],
+            columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOJSON_COLUMN],
             geometry=geom_column
         )
 
@@ -56,7 +57,7 @@ class TestEnrichmentService(object):
 
         expected_cdf = CartoDataFrame(
             [[1, polygon, 0, to_geojson(polygon)]],
-            columns=['cartodb_id', geom_column, 'enrichment_id', '__geojson_geom'],
+            columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOJSON_COLUMN],
             geometry=geom_column
         )
 
@@ -72,14 +73,14 @@ class TestEnrichmentService(object):
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
             [[1, point, 0, to_geojson(point)]],
-            columns=['cartodb_id', geom_column, 'enrichment_id', '__geojson_geom'],
+            columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOJSON_COLUMN],
             geometry=geom_column
         )
 
-        expected_schema = {'enrichment_id': 'INTEGER', '__geojson_geom': 'GEOGRAPHY'}
+        expected_schema = {_ENRICHMENT_ID: 'INTEGER', _GEOJSON_COLUMN: 'GEOGRAPHY'}
         expected_cdf = CartoDataFrame(
             [[0, to_geojson(point)]],
-            columns=['enrichment_id', '__geojson_geom'])
+            columns=[_ENRICHMENT_ID, _GEOJSON_COLUMN])
 
         # mock
         def assert_upload_data(_, dataframe, schema, tablename, project, dataset):
@@ -105,17 +106,17 @@ class TestEnrichmentService(object):
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
             [[1, point, 0], [2, None, 1]],
-            columns=['cartodb_id', geom_column, 'enrichment_id'],
+            columns=['cartodb_id', geom_column, _ENRICHMENT_ID],
             geometry=geom_column
         )
 
         enrichment_service = EnrichmentService(credentials=self.credentials)
         input_cdf = enrichment_service._prepare_data(input_cdf, geom_column)
 
-        expected_schema = {'enrichment_id': 'INTEGER', '__geojson_geom': 'GEOGRAPHY'}
+        expected_schema = {_ENRICHMENT_ID: 'INTEGER', _GEOJSON_COLUMN: 'GEOGRAPHY'}
         expected_cdf = CartoDataFrame(
             [[0, to_geojson(point)], [1, None]],
-            columns=['enrichment_id', '__geojson_geom'])
+            columns=[_ENRICHMENT_ID, _GEOJSON_COLUMN])
 
         # mock
         def assert_upload_data(_, dataframe, schema, tablename, project, dataset):
@@ -138,14 +139,14 @@ class TestEnrichmentService(object):
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
             [[point, 0, to_geojson(point)]],
-            columns=[geom_column, 'enrichment_id', '__geojson_geom'], index=[1])
+            columns=[geom_column, _ENRICHMENT_ID, _GEOJSON_COLUMN])
         expected_cdf = CartoDataFrame(
             [[point, 'new data']],
             columns=[geom_column, 'var1'])
 
         class EnrichMock():
             def to_dataframe(self):
-                return pd.DataFrame([[0, 'new data']], columns=['enrichment_id', 'var1'])
+                return pd.DataFrame([[0, 'new data']], columns=[_ENRICHMENT_ID, 'var1'])
 
         original = BigQueryClient.query
         BigQueryClient.query = Mock(return_value=EnrichMock())
@@ -249,7 +250,7 @@ class TestEnrichmentService(object):
             assert result == [variable]
 
         for case in one_variable_cases:
-            result = prepare_variables(case, only_with_agg=True)
+            result = prepare_variables(case, aggregation='SUM')
 
             assert result == [variable]
 
@@ -279,6 +280,41 @@ class TestEnrichmentService(object):
             assert result == [variable]
 
         for case in one_variable_cases:
-            result = prepare_variables(case, only_with_agg=True)
+            result = prepare_variables(case, aggregation='SUM')
+
+            assert result == [variable]
+
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch.object(Variable, 'get')
+    def test_prepare_variables_without_agg_method_and_custom_agg(self, get_mock, _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
+        variable_id = 'project.dataset.table.variable'
+        variable = Variable({
+            'id': variable_id,
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': None
+        })
+
+        get_mock.return_value = variable
+
+        one_variable_cases = [
+            variable_id,
+            variable
+        ]
+
+        for case in one_variable_cases:
+            result = prepare_variables(case)
+
+            assert result == [variable]
+
+        for case in one_variable_cases:
+            result = prepare_variables(case, aggregation={})
 
             assert result == []
+
+        for case in one_variable_cases:
+            result = prepare_variables(case, aggregation={variable_id: 'SUM'})
+
+            assert result == [variable]

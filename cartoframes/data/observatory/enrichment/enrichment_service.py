@@ -23,44 +23,6 @@ AGGREGATION_DEFAULT = 'default'
 AGGREGATION_NONE = 'none'
 
 
-class VariableAggregation(object):
-    """This class overwrites a :py:class:`Variable <cartoframes.data.observatory.Variable>` default aggregation method in
-        :py:class:`Enrichment <cartoframes.data.observatory.Enrichment>` functions
-
-        Args:
-            variable (str or :obj:`Variable`):
-                The variable name or :obj:`Variable` instance
-
-            aggregation (str):
-                The aggregation method, it can be one of these values: 'MIN', 'MAX', 'SUM', 'AVG', 'COUNT',
-                'ARRAY_AGG', 'ARRAY_CONCAT_AGG', 'STRING_AGG' but check this
-                `documentation <https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions>`__
-                for a complete list of aggregate functions
-
-        Returns:
-            :py:class:`VariableAggregation <cartoframes.data.observatory.entity.VariableAggregation>`
-
-        Example:
-
-            Next example uses a `VariableAggregation` instance to calculate the `SUM` of car-free households
-            :obj:`Variable` of the :obj:`Catalog` for each polygon of `my_local_dataframe` pandas `DataFrame`
-
-            .. code::
-
-                from cartoframes.data.observatory import Enrichment, Variable, VariableAggregation
-
-                variable = Variable.get('no_cars_d19dfd10')
-                enriched_dataset_cdf = Enrichment().enrich_polygons(
-                    my_local_dataframe,
-                    variables=[variable],
-                    aggregation=[VariableAggregation(variable, 'SUM')]
-                )
-    """
-    def __init__(self, variable, aggregation=None):
-        self.variable = _prepare_variable(variable)
-        self.aggregation = aggregation
-
-
 class VariableFilter(object):
     """This class can be used for filtering the results of
     :py:class:`Enrichment <cartoframes.data.observatory.Enrichment>` functions. It works by appending the
@@ -157,14 +119,8 @@ class EnrichmentService(object):
         tables_metadata = defaultdict(lambda: defaultdict(list))
 
         for variable in variables:
-            if isinstance(variable, VariableAggregation):
-                variable_aggregation = variable
-                table_name = self.__get_enrichment_table(variable_aggregation.variable)
-                tables_metadata[table_name]['variables'].append(variable_aggregation)
-                variable = variable_aggregation.variable
-            else:
-                table_name = self.__get_enrichment_table(variable)
-                tables_metadata[table_name]['variables'].append(variable)
+            table_name = self.__get_enrichment_table(variable)
+            tables_metadata[table_name]['variables'].append(variable)
 
             if 'dataset' not in tables_metadata[table_name].keys():
                 tables_metadata[table_name]['dataset'] = self.__get_dataset(variable, table_name)
@@ -222,17 +178,150 @@ class EnrichmentService(object):
 
         return project
 
+    def _get_points_enrichment_sql(self, temp_table_name, variables, filters):
+        tables_metadata = self._get_tables_metadata(variables).items()
 
-def prepare_variables(variables, only_with_agg=False):
+        return [self._build_points_query(table, metadata, temp_table_name, filters)
+                for table, metadata in tables_metadata]
+
+    def _build_points_query(self, table, metadata, temp_table_name, filters):
+        variables = ['enrichment_table.{}'.format(variable.column_name) for variable in metadata['variables']]
+        enrichment_dataset = metadata['dataset']
+        enrichment_geo_table = metadata['geo_table']
+        data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
+            project=self.working_project,
+            user_dataset=self.user_dataset,
+            temp_table_name=temp_table_name
+        )
+
+        return '''
+            SELECT data_table.{enrichment_id}, {variables},
+                ST_Area(enrichment_geo_table.geom) AS {table}_area
+            FROM `{enrichment_dataset}` enrichment_table
+                JOIN `{enrichment_geo_table}` enrichment_geo_table
+                    ON enrichment_table.geoid = enrichment_geo_table.geoid
+                JOIN `{data_table}` data_table
+                    ON ST_Within(data_table.{geojson_column}, enrichment_geo_table.geom)
+            {where};
+        '''.format(
+            variables=', '.join(variables),
+            geojson_column=self.geojson_column,
+            enrichment_dataset=enrichment_dataset,
+            enrichment_geo_table=enrichment_geo_table,
+            enrichment_id=self.enrichment_id,
+            where=self._build_where_clausule(filters),
+            data_table=data_table,
+            table=table
+        )
+
+    def _get_polygon_enrichment_sql(self, temp_table_name, variables, filters, aggregation):
+        tables_metadata = self._get_tables_metadata(variables).items()
+
+        return [self._build_polygons_query(table, metadata, temp_table_name, filters, aggregation)
+                for table, metadata in tables_metadata]
+
+    def _build_polygons_query(self, table, metadata, temp_table_name, filters, aggregation):
+        variables = metadata['variables']
+        enrichment_dataset = metadata['dataset']
+        enrichment_geo_table = metadata['geo_table']
+        data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
+            project=self.working_project,
+            user_dataset=self.user_dataset,
+            temp_table_name=temp_table_name
+        )
+
+        if aggregation == AGGREGATION_NONE:
+            grouper = ''
+            variables = self._build_polygons_query_variables_without_aggregation(variables)
+        else:
+            grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=self.enrichment_id)
+            variables = self._build_polygons_query_variables_with_aggregation(variables, aggregation)
+
+        return '''
+            SELECT data_table.{enrichment_id}, {variables}
+            FROM `{enrichment_dataset}` enrichment_table
+                JOIN `{enrichment_geo_table}` enrichment_geo_table
+                    ON enrichment_table.geoid = enrichment_geo_table.geoid
+                JOIN `{data_table}` data_table
+                    ON ST_Intersects(data_table.{geojson_column}, enrichment_geo_table.geom)
+            {where}
+            {grouper};
+        '''.format(
+                geojson_column=self.geojson_column,
+                enrichment_dataset=enrichment_dataset,
+                enrichment_geo_table=enrichment_geo_table,
+                enrichment_id=self.enrichment_id,
+                where=self._build_where_clausule(filters),
+                data_table=data_table,
+                grouper=grouper or '',
+                variables=variables
+            )
+
+    def _build_polygons_query_variables_with_aggregation(self, variables, aggregation):
+        return ', '.join([
+            self._build_polygons_query_variable_with_aggregation(
+                variable,
+                aggregation
+            ) for variable in variables])
+
+    def _build_polygons_query_variable_with_aggregation(self, variable, aggregation):
+        variable_agg = _get_aggregation(variable, aggregation)
+
+        if (variable_agg == 'SUM'):
+            return """
+                {aggregation}(
+                    enrichment_table.{column} * (
+                        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                        /
+                        ST_area(data_table.{geo_column})
+                    )
+                ) AS {aggregation}_{column}
+                """.format(
+                    column=variable.column_name,
+                    geo_column=self.geojson_column,
+                    aggregation=variable_agg)
+        else:
+            return """
+                {aggregation}(
+                    enrichment_table.{column} * (
+                        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                    )
+                ) AS {aggregation}_{column}
+                """.format(
+                    column=variable.column_name,
+                    geo_column=self.geojson_column,
+                    aggregation=variable_agg)
+
+    def _build_polygons_query_variables_without_aggregation(self, variables):
+        variables = ['enrichment_table.{}'.format(variable.column_name) for variable in variables]
+
+        return """
+            {variables},
+            ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geojson_column})) /
+            ST_area(data_table.{geojson_column}) AS measures_proportion
+            """.format(
+                variables=', '.join(variables),
+                geojson_column=self.geojson_column)
+
+    def _build_where_clausule(self, filters):
+        where = ''
+        if len(filters) > 0:
+            where_clausules = ["enrichment_table.{} {}".format(f.variable.column_name, f.query) for f in filters]
+            where = 'WHERE {}'.format('AND '.join(where_clausules))
+
+        return where
+
+
+def prepare_variables(variables, aggregation=None):
     if isinstance(variables, list):
-        variables = [_prepare_variable(var, only_with_agg) for var in variables]
+        variables = [_prepare_variable(var, aggregation) for var in variables]
     else:
-        variables = [_prepare_variable(variables, only_with_agg)]
+        variables = [_prepare_variable(variables, aggregation)]
 
     return list(filter(None, variables))
 
 
-def _prepare_variable(variable, only_with_agg=False):
+def _prepare_variable(variable, aggregation=None):
     if isinstance(variable, str):
         variable = Variable.get(variable)
 
@@ -242,9 +331,11 @@ def _prepare_variable(variable, only_with_agg=False):
             Variable `id` property or Variable `slug` property
         """)
 
-    if only_with_agg and not variable.agg_method:
-        warnings.warn('{} skipped because it does not have aggregation method'.format(variable))
-        return None
+    if aggregation is not None:
+        variable_agg = _get_aggregation(variable, aggregation)
+        if not variable_agg and aggregation is not AGGREGATION_NONE:
+            warnings.warn('{} skipped because it does not have aggregation method'.format(variable))
+            return None
 
     _is_available_in_bq(variable)
 
@@ -262,21 +353,12 @@ def _is_available_in_bq(variable):
         """.format(variable.slug))
 
 
-def get_variable_aggregations(variables, aggregation):
-    return [VariableAggregation(variable, __get_aggregation(variable, aggregation)) for variable in variables]
-
-
-def __get_aggregation(variable, aggregation):
+def _get_aggregation(variable, aggregation):
     if aggregation == AGGREGATION_NONE:
         return None
     elif aggregation == AGGREGATION_DEFAULT:
         return variable.agg_method
     elif isinstance(aggregation, str):
         return aggregation
-    elif isinstance(aggregation, list):
-        agg = variable.agg_method
-        for variable_aggregation in aggregation:
-            if variable_aggregation.variable == variable:
-                agg = variable_aggregation.aggregation
-                break
-        return agg
+    elif isinstance(aggregation, dict):
+        return aggregation.get(variable.id, variable.agg_method)
