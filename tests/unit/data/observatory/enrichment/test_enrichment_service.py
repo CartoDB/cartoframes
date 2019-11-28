@@ -37,8 +37,9 @@ class TestEnrichmentService(object):
             columns=['cartodb_id', geom_column])
         expected_cdf = CartoDataFrame(
             [[1, point, 0, to_geojson(point)]],
-            columns=['cartodb_id', geom_column, 'enrichment_id', '__geojson_geom'])
-        expected_cdf.set_geometry(geom_column, inplace=True)
+            columns=['cartodb_id', geom_column, 'enrichment_id', '__geojson_geom'],
+            geometry=geom_column
+        )
 
         result = enrichment_service._prepare_data(df, geom_column)
 
@@ -55,8 +56,9 @@ class TestEnrichmentService(object):
 
         expected_cdf = CartoDataFrame(
             [[1, polygon, 0, to_geojson(polygon)]],
-            columns=['cartodb_id', geom_column, 'enrichment_id', '__geojson_geom'])
-        expected_cdf.set_geometry(geom_column, inplace=True)
+            columns=['cartodb_id', geom_column, 'enrichment_id', '__geojson_geom'],
+            geometry=geom_column
+        )
 
         result = enrichment_service._prepare_data(df, geom_column)
 
@@ -70,8 +72,9 @@ class TestEnrichmentService(object):
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
             [[1, point, 0, to_geojson(point)]],
-            columns=['cartodb_id', geom_column, 'enrichment_id', '__geojson_geom'])
-        input_cdf.set_geometry(geom_column, inplace=True)
+            columns=['cartodb_id', geom_column, 'enrichment_id', '__geojson_geom'],
+            geometry=geom_column
+        )
 
         expected_schema = {'enrichment_id': 'INTEGER', '__geojson_geom': 'GEOGRAPHY'}
         expected_cdf = CartoDataFrame(
@@ -102,9 +105,9 @@ class TestEnrichmentService(object):
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
             [[1, point, 0], [2, None, 1]],
-            columns=['cartodb_id', geom_column, 'enrichment_id']
+            columns=['cartodb_id', geom_column, 'enrichment_id'],
+            geometry=geom_column
         )
-        input_cdf.set_geometry(geom_column, inplace=True)
 
         enrichment_service = EnrichmentService(credentials=self.credentials)
         input_cdf = enrichment_service._prepare_data(input_cdf, geom_column)

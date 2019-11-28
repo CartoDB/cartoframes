@@ -1,6 +1,6 @@
 """Unit tests for cartoframes.data."""
 
-from shapely.geometry import box, Point
+from shapely.geometry import box
 from geopandas import GeoDataFrame
 
 from cartoframes import CartoDataFrame
@@ -13,7 +13,7 @@ class TestCartoDataFrame(object):
             {
                 'id': [1, 2],
                 'my_geometry': [box(1, 1, 2, 2), box(3, 3, 4, 4)],
-                'other_geometry': [Point(0, 0), Point(1, 1)]
+                'other_geometry': ['Point(0 0)', 'Point(1 1)']
             },
             geometry='my_geometry',
             crs='epsg:4326'

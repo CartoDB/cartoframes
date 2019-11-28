@@ -81,9 +81,9 @@ class TestColumns(object):
     def test_column_info_with_geom(self):
         cdf = CartoDataFrame(
             [['Gran Vía 46', 'Madrid', 'POINT (0 0)'], ['Ebro 1', 'Sevilla', 'POINT (1 1)']],
-            columns=['address', 'city', 'the_geom']
+            columns=['address', 'city', 'the_geom'],
+            geometry='the_geom'
         )
-        cdf.set_geometry('the_geom', inplace=True)
 
         expected_columns = [
             {'name': 'address', 'type': 'text'},
@@ -123,9 +123,9 @@ class TestColumns(object):
     def test_column_info_basic_troubled_names(self):
         cdf = CartoDataFrame(
             [[1, 'POINT (1 1)', 'fake_geom']],
-            columns=['cartodb_id', 'the_geom', 'the_geom_webmercator']
+            columns=['cartodb_id', 'the_geom', 'the_geom_webmercator'],
+            geometry='the_geom'
         )
-        cdf.set_geometry('the_geom', inplace=True)
 
         expected_columns = [
             {'name': 'cartodb_id', 'type': 'bigint'},
@@ -143,9 +143,9 @@ class TestColumns(object):
     def test_column_info_geometry_troubled_names(self):
         cdf = CartoDataFrame(
             [['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']],
-            columns=['geom', 'the_geom', 'geometry']
+            columns=['geom', 'the_geom', 'geometry'],
+            geometry='the_geom'
         )
-        cdf.set_geometry('the_geom', inplace=True)
 
         expected_columns = [
             {'name': 'geom', 'type': 'text'},
