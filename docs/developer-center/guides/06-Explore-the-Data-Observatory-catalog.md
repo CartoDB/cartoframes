@@ -1981,8 +1981,6 @@ dataset.head()
 ```
 
 
-
-
 <div>
 <table border="1" class="dataframe u-vertical-scroll">
   <thead>
@@ -3179,24 +3177,22 @@ Some stats about the dataset:
 dataset.counts()
 ```
 
-```
-  rows                    217182
-  cells                 22369746
-  null_cells                   0
-  null_cells_percent           0
-  dtype: int64
-```
+<pre class="u-topbottom-Margin"><code>rows                    217182
+cells                 22369746
+null_cells                   0
+null_cells_percent           0
+dtype: int64
+</code></pre>
 
 ```python
 dataset.fields_by_type()
 ```
 
-```
-    float       4
-    string      1
-    integer    96
-    dtype: int64
-```
+<pre class="u-topbottom-Margin"><code>float       4
+string      1
+integer    96
+dtype: int64
+</code></pre>
 
 ```python
 dataset.describe()
@@ -3551,17 +3547,15 @@ variable = Variable.get('POPPY_946f4ed6')
 variable
 ```
 
-```
+<pre class="u-topbottom-Margin"><code>
   <Variable.get('POPPY_946f4ed6')> #'Population (2024A)'
-```
+</code></pre>
 
 ```python
 variable.to_dict()
 ```
 
-
-```json
-  {'id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019.POPPY',
+<pre class="u-topbottom-Margin"><code>{'id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019.POPPY',
     'slug': 'POPPY_946f4ed6',
     'name': 'POPPY',
     'description': 'Population (2024A)',
@@ -3571,7 +3565,7 @@ variable.to_dict()
     'agg_method': 'SUM',
     'variable_group_id': None,
     'starred': False}
-```
+</code></pre>
 
 There's also some utility methods ot understand the underlying data for each variable:
 
@@ -3579,50 +3573,48 @@ There's also some utility methods ot understand the underlying data for each var
 variable.head()
 ```
 
-```
-    0     0
-    1     0
-    2     8
-    3     0
-    4     0
-    5     0
-    6     4
-    7     0
-    8     2
-    9    59
-    dtype: int64
-```
+<pre class="u-topbottom-Margin"><code>0     0
+1     0
+2     8
+3     0
+4     0
+5     0
+6     4
+7     0
+8     2
+9    59
+dtype: int64
+</code></pre>
 
 ```python
 variable.counts()
 ```
 
-```
-    all                 217182.000000
-    null                     0.000000
-    zero                   303.000000
-    extreme               9380.000000
-    distinct              6947.000000
-    outliers             27571.000000
-    null_percent             0.000000
-    zero_percent             0.139514
-    extreme_percent          0.043190
-    distinct_percent         3.198700
-    outliers_percent         0.126949
-    dtype: float64
-```
+<pre class="u-topbottom-Margin"><code>all                 217182.000000
+null                     0.000000
+zero                   303.000000
+extreme               9380.000000
+distinct              6947.000000
+outliers             27571.000000
+null_percent             0.000000
+zero_percent             0.139514
+extreme_percent          0.043190
+distinct_percent         3.198700
+outliers_percent         0.126949
+dtype: float64
+</code></pre>
 
 ```python
 variable.quantiles()
 ```
 
-```
-    q1                      867
-    q3                     1490
-    median                 1149
-    interquartile_range     623
-    dtype: int64
-```
+<pre class="u-topbottom-Margin"><code>
+q1                      867
+q3                     1490
+median                 1149
+interquartile_range     623
+dtype: int64
+</code></pre>
 
 ```python
 variable.histogram()
@@ -3634,8 +3626,7 @@ variable.histogram()
 variable.describe()
 ```
 
-```
-    avg                    1.564793e+03
+<pre class="u-topbottom-Margin"><code>avg                    1.564793e+03
     max                    7.127400e+04
     min                    0.000000e+00
     sum                    3.398448e+08
@@ -3646,7 +3637,7 @@ variable.describe()
     median                 1.149000e+03
     interquartile_range    6.230000e+02
     dtype: float64
-```
+</code></pre>
 
 ### Subscribe to a Dataset in the catalog
 
@@ -3664,9 +3655,8 @@ dataset = Dataset.get('ags_sociodemogr_e92b1637')
 dataset.is_public_data
 ```
 
-```
-    False
-```
+<pre class="u-topbottom-Margin"><code>False
+</code></pre>
 
 ```python
 from cartoframes.data.observatory import Geography
@@ -3677,9 +3667,8 @@ geography = Geography.get(dataset.geography)
 geography.is_public_data
 ```
 
-```
-    False
-```
+<pre class="u-topbottom-Margin"><code>False
+</code></pre>
 
 Both `dataset` and `geography` are not public data, that means you need a subscription to be able to use them to enrich your own data.
 
@@ -3710,10 +3699,9 @@ You can check the actual status of your subscriptions directly from the catalog.
 Catalog().subscriptions()
 ```
 
-```
-    Datasets: None
-    Geographies: None
-```
+<pre class="u-topbottom-Margin"><code>Datasets: None
+Geographies: None
+</code></pre>
 
 
 ### About nested filters in the Catalog instance
