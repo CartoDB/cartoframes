@@ -788,16 +788,10 @@ Now, let's calculate the **centroid** of three different stores that we've ident
 from shapely import geometry
 import geopandas as gpd
 
-new_store_location = [
-    geo_cdf.iloc[6].geometry,
-    geo_cdf.iloc[9].geometry,
-    geo_cdf.iloc[1].geometry
-]
-
-polygon = geometry.Polygon([[p.x, p.y] for p in new_store_location])
+# Create a polygon using three points from the geo_cdf
+polygon = geometry.Polygon([[p.x, p.y] for p in geo_cdf.iloc[[1, 6, 9]])
 
 new_store_gdf = gpd.GeoDataFrame(geometry=gpd.GeoSeries(polygon.centroid))
-new_store_gdf
 ```
 
 ```python
