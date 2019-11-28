@@ -9,56 +9,56 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 <div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Quickstart/">Quickstart Guide</a>
+      <a href="/developers/cartoframes/guides/Quickstart/">Quickstart</a>
     </span>
-    <p class="doc-guides__description">Import, analyze, visualize, and share your results.</p>
+    <p class="doc-guides__description">Complete a real project that walks through the library step by step</p>
   </div>
 
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
       <a href="/developers/cartoframes/guides/Install-CARTOframes-in-your-Notebooks/">Installation</a>
     </span>
-    <p class="doc-guides__description">This guide walks you through the process of installing CARTOframes in a Jupyter Notebook</p>
+    <p class="doc-guides__description">Install the library and configure your environment</p>
   </div>
 </div>
 
 <div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Login-to-CARTO-Platform/">Login into CARTO</a>
+      <a href="/developers/cartoframes/guides/Login-to-CARTO-Platform/">Authentication</a>
     </span>
-    <p class="doc-guides__description">Learn how to authenticate against CARTO</p>
+    <p class="doc-guides__description">Login into CARTO to unlock the power of spatial anlysis (data management, data enrichment, location data services, etc)</p>
   </div>
 
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Explore-the-Data-Observatory/">Explore the Data Observatory Catalog</a>
+      <a href="/developers/cartoframes/guides/Login-to-CARTO-Platform/">Visualization</a>
     </span>
-    <p class="doc-guides__description">Description</p>
-  </div>
-</div>
-
-<div class="doc-guides__cartoframes-row">
-  <div class="doc-guides__cartoframes-block">
-    <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Login-to-CARTO-Platform/">Explore and Visualize Data</a>
-    </span>
-    <p class="doc-guides__description">Description</p>
-  </div>
-
-  <div class="doc-guides__cartoframes-block">
-    <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Enrich-your-Data/">Enrich your Data</a>
-    </span>
-    <p class="doc-guides__description">Description</p>
+    <p class="doc-guides__description">Explore and visualize your spatial data with interactive maps</p>
   </div>
 </div>
 
 <div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Use-Location-Data-Services/">Use Location Data Services</a>
+      <a href="/developers/cartoframes/guides/Explore-the-Data-Observatory/">Data discovery</a>
     </span>
-    <p class="doc-guides__description">Learn how to use Geocoding and Isolines services with your data</p>
+    <p class="doc-guides__description">Discover the spatial data you need searching the data catalog</p>
+  </div>
+
+  <div class="doc-guides__cartoframes-block">
+    <span class="doc-guides__title">
+      <a href="/developers/cartoframes/guides/Enrich-your-Data/">Data enrichment</a>
+    </span>
+    <p class="doc-guides__description">Enrich your data with data from the data catalog</p>
+  </div>
+</div>
+
+<div class="doc-guides__cartoframes-row">
+  <div class="doc-guides__cartoframes-block">
+    <span class="doc-guides__title">
+      <a href="/developers/cartoframes/guides/Use-Location-Data-Services/">Location Data Services</a>
+    </span>
+    <p class="doc-guides__description">Geocode and discover areas of influence with Isolines</p>
   </div>
 </div>
