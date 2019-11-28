@@ -1,4 +1,4 @@
-## Explore the Data Observatory catalog
+## Data discovery
 
 ### Introduction
 

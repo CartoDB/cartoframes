@@ -16,7 +16,7 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Install-CARTOframes-in-your-Notebooks/">Installation</a>
+      <a href="/developers/cartoframes/guides/Installation/">Installation</a>
     </span>
     <p class="doc-guides__description">Install the library and configure your environment</p>
   </div>
@@ -25,14 +25,14 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 <div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Login-to-CARTO-Platform/">Authentication</a>
+      <a href="/developers/cartoframes/guides/Authentication/">Authentication</a>
     </span>
     <p class="doc-guides__description">Login into CARTO to unlock the power of spatial anlysis (data management, data enrichment, location data services, etc)</p>
   </div>
 
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Login-to-CARTO-Platform/">Visualization</a>
+      <a href="/developers/cartoframes/guides/Visualization/">Visualization</a>
     </span>
     <p class="doc-guides__description">Explore and visualize your spatial data with interactive maps</p>
   </div>
@@ -41,14 +41,14 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 <div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Explore-the-Data-Observatory/">Data discovery</a>
+      <a href="/developers/cartoframes/guides/Data-discovery/">Data discovery</a>
     </span>
     <p class="doc-guides__description">Discover the spatial data you need searching the data catalog</p>
   </div>
 
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Enrich-your-Data/">Data enrichment</a>
+      <a href="/developers/cartoframes/guides/Data-enrichment/">Data enrichment</a>
     </span>
     <p class="doc-guides__description">Enrich your data with data from the data catalog</p>
   </div>
@@ -57,7 +57,7 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 <div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Use-Location-Data-Services/">Location Data Services</a>
+      <a href="/developers/cartoframes/guides/Location-Data-Services/">Location Data Services</a>
     </span>
     <p class="doc-guides__description">Geocode and discover areas of influence with Isolines</p>
   </div>

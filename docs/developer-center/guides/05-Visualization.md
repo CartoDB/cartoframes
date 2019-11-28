@@ -1,4 +1,4 @@
-## Explore and Visualize Data
+## Visualization
 
 ### Introduction
 

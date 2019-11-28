@@ -1,4 +1,4 @@
-## Use Location Data Services
+## Location Data Services
 
 ### Introduction
 

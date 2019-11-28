@@ -1,4 +1,4 @@
-## Install CARTOframes in your Notebooks
+## Installation
 
 This guide is intended for those who are going to start using CARTOframes and gives some instructions to install CARTOframes **locally**, in a **Jupyter Notebook** and using a **Virtual Environment**.
 
