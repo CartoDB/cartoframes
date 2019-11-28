@@ -40,7 +40,6 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
     if index_col:
         if index_col in cdf:
             cdf.set_index(index_col, inplace=True)
-            cdf.index.name = None
         else:
             print('Debug: column "{}" does not exist'.format(index_col))
 
