@@ -13,11 +13,17 @@ class CartoDataFrame(GeoDataFrame):
     """
 
     def __init__(self, data, *args, **kwargs):
-        geometry = kwargs.pop('geometry', None)
+        geometry = kwargs.get('geometry', None)
         if geometry is None:
+            # Load geometry from data if not specified in kwargs
             if hasattr(data, 'geometry'):
-                # Load geometry from data if no specified in kwargs
                 kwargs['geometry'] = data.geometry.name
+
+        crs = kwargs.get('crs', None)
+        if crs is None:
+            # Load crs from data if not specified in kwargs
+            if hasattr(data, 'crs'):
+                kwargs['crs'] = data.crs
 
         super(CartoDataFrame, self).__init__(data, *args, **kwargs)
 
