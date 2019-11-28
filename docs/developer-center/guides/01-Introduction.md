@@ -25,15 +25,40 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 <div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Quickstart-Part-1/">Quickstart Part 1</a>
+      <a href="/developers/cartoframes/guides/Quickstart/">Quickstart Part 1</a>
     </span>
-    <p class="doc-guides__description">From import to first visualization</p>
+    <p class="doc-guides__description">Import, analyze, visualize, and share your results.</p>
+  </div>
+</div>
+
+<div class="doc-guides__cartoframes-row">
+  <div class="doc-guides__cartoframes-block">
+    <span class="doc-guides__title">
+      <a href="/developers/cartoframes/guides/explore-the-data-observatory-catalog/">Explore the Data Observatory Catalog</a>
+    </span>
+    <p class="doc-guides__description">Description</p>
   </div>
 
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Quickstart-Part-2/">Quickstart Part 2</a>
+      <a href="/developers/cartoframes/guides/Login-to-CARTO-Platform/">Explore and Visualize Data</a>
     </span>
-    <p class="doc-guides__description">From analysis to share a visualization</p>
+    <p class="doc-guides__description">Description</p>
+  </div>
+</div>
+
+<div class="doc-guides__cartoframes-row">
+  <div class="doc-guides__cartoframes-block">
+    <span class="doc-guides__title">
+      <a href="/developers/cartoframes/guides/enrich-your-data/">Enrich your Data</a>
+    </span>
+    <p class="doc-guides__description">Description</p>
+  </div>
+
+  <div class="doc-guides__cartoframes-block">
+    <span class="doc-guides__title">
+      <a href="/developers/cartoframes/guides/use-location-data-services/">Use Location Data Services</a>
+    </span>
+    <p class="doc-guides__description">Learn how to use Geocoding and Isolines services with your data</p>
   </div>
 </div>
