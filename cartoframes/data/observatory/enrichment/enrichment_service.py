@@ -196,7 +196,7 @@ class EnrichmentService(object):
 
         return '''
             SELECT data_table.{enrichment_id}, {variables},
-                ST_Area(enrichment_geo_table.geom) AS {table}_area
+                ST_Area(enrichment_geo_table.geom) AS do_geom_area
             FROM `{enrichment_dataset}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
@@ -279,7 +279,7 @@ class EnrichmentService(object):
                 """.format(
                     column=variable.column_name,
                     geo_column=self.geojson_column,
-                    aggregation=variable_agg)
+                    aggregation=variable_agg.lower())
         else:
             return """
                 {aggregation}(
@@ -290,7 +290,7 @@ class EnrichmentService(object):
                 """.format(
                     column=variable.column_name,
                     geo_column=self.geojson_column,
-                    aggregation=variable_agg)
+                    aggregation=variable_agg.lower())
 
     def _build_polygons_query_variables_without_aggregation(self, variables):
         variables = ['enrichment_table.{}'.format(variable.column_name) for variable in variables]
