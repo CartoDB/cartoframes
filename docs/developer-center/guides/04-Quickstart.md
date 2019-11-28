@@ -1,7 +1,6 @@
+## Quickstart
 
-# Quickstart
-
-## Introduction
+### Introduction
 Hi! Glad to see you made it to the Quickstart guide! In this guide you are introduced to how CARTOframes can be used by data scientists in spatial analysis workflows. Using fake Starbucks revenue data, this guide walks through some common steps a data scientist takes to answer the following question: which stores are performing better than others?
 
 Before you get started, we encourage you to have CARTOframes installed so you can get a feel for the library by using it:
@@ -12,7 +11,7 @@ pip install --pre cartoframes
 
 If you want to know more about this, check out the [installation guide](/developers/cartoframes/guides/Install-CARTOframes-in-your-Notebooks) first.
 
-### Spatial analysis scenario
+#### Spatial analysis scenario
 
 Let's say you are a data scientist working for Starbucks and you want to better understand why some stores in Brooklyn, New York, perform better than others.
 
@@ -25,7 +24,7 @@ To begin, let's outline a workflow:
 
 Let's get started!
 
-## Get and explore your company's data
+### Get and explore your company's data
 
 [This dataset](../files/starbucks_brooklyn.csv) is the one you have to start your exploration. It contains information about the location of Starbucks and each store's annual revenue. As a first exploratory step, you read it into a Jupyter Notebook using pandas.
 
@@ -218,7 +217,7 @@ Map(size_continuous_layer(starbucks_df, 'revenue', 'Revenue in $'))
 
 Good job! By using the [size continuous visualization layer](link to example) you can see right away where the stores with higher revenue are. By default, visualization layers also provide a popup with the mapped value and an appropriate legend.
 
-## Create your areas of influence
+### Create your areas of influence
 
 Similar to geocoding, there is a straightforward method for creating isochrones to define your areas of influence. Isochrones are concentric polygons that display equally calculated levels over a given surface area measured by time.
 
@@ -251,7 +250,7 @@ Map([
 There they are! To learn more about creating isochrones and isodistances check out the [location data services guide]().
 
 
-## Enrich your data with demographic data
+### Enrich your data with demographic data
 
 Now that you have the area of influence calculated for each store, let's augment the result with population information to help better understand a store's average revenue per person.
 
@@ -877,6 +876,6 @@ result_map.publish('startbucks_analysis')
  'privacy': 'public'}
 </code></pre>
 
-## Conclusion
+### Conclusion
 
 Congratulations! You have finished this guide and have a sense about how CARTOframes can speed up your workflow. To continue learning, you can check the specific [guides](), check the [reference]() to know everything about a class or a method or check the [examples]().
