@@ -165,7 +165,7 @@ class CartoDataFrame(GeoDataFrame):
         geom_col = points_from_xy(x_col, y_col)
 
         # Call super set_geometry with generated column
-        frame = super(CartoDataFrame, self).set_geometry(geom_col, drop=False, inplace=inplace, crs=crs)
+        frame = super(CartoDataFrame, self).set_geometry(geom_col, inplace=inplace, crs=crs)
 
         if drop:
             if frame is None:

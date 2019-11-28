@@ -7,6 +7,9 @@ from ..core.managers.context_manager import ContextManager
 from ..utils.utils import is_sql_query
 
 
+GEOM_COLUMN_NAME = 'the_geom'
+
+
 def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True):
     """
     Read a table or a SQL query from the CARTO account.
@@ -43,8 +46,9 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
         else:
             cdf.index.name = index_col
 
-    if decode_geom and 'the_geom' in cdf:
-        cdf.set_geometry('the_geom', inplace=True)
+    if decode_geom and GEOM_COLUMN_NAME in cdf:
+        # Decode geometry column
+        cdf.set_geometry(GEOM_COLUMN_NAME, inplace=True)
 
     return cdf
 
@@ -86,11 +90,13 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             raise ValueError('Wrong index name. You should provide a valid index label.')
 
     if geom_col in cdf:
+        # Decode geometry column
         cdf.set_geometry(geom_col, inplace=True)
 
     has_geometry = cdf.has_geometry()
     if has_geometry:
-        cdf.rename_geometry('the_geom', inplace=True)
+        # Prepare geometry column for the upload
+        cdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
 
     context_manager.copy_from(cdf, table_name, if_exists, has_geometry, log_enabled)
 
