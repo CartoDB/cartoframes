@@ -264,8 +264,7 @@ class TestDataset(object):
         mocked_bq_client.return_value = BigQueryClientMock(file_path)
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
+        credentials = Credentials('fake_user', '1234')
 
         response = dataset.download(credentials)
 
@@ -287,8 +286,7 @@ class TestDataset(object):
         mocked_bq_client.return_value = BigQueryClientMock(file_path)
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
+        credentials = Credentials('fake_user', '1234')
 
         with pytest.raises(CartoException) as e:
             dataset.download(credentials)
@@ -312,8 +310,7 @@ class TestDataset(object):
         mocked_bq_client.return_value = BigQueryClientMock(file_path)
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
+        credentials = Credentials('fake_user', '1234')
 
         with pytest.raises(CartoException) as e:
             dataset.download(credentials)
@@ -337,8 +334,7 @@ class TestDataset(object):
         mocked_bq_client.return_value = BigQueryClientMock(file_path)
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
+        credentials = Credentials('fake_user', '1234')
 
         response = dataset.download(credentials)
 
@@ -359,8 +355,7 @@ class TestDataset(object):
         mocked_bq_client.return_value = BigQueryClientMock(NotFound('Fake error'))
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
+        credentials = Credentials('fake_user', '1234')
 
         with pytest.raises(CartoException):
             dataset.download(credentials)

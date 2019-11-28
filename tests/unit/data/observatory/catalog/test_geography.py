@@ -241,8 +241,7 @@ class TestGeography(object):
         mocked_bq_client.return_value = BigQueryClientMock(file_path)
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
+        credentials = Credentials('fake_user', '1234')
 
         response = geography.download(credentials)
 
@@ -264,8 +263,7 @@ class TestGeography(object):
         mocked_bq_client.return_value = BigQueryClientMock(file_path)
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
+        credentials = Credentials('fake_user', '1234')
 
         with pytest.raises(CartoException) as e:
             geography.download(credentials)
@@ -289,8 +287,7 @@ class TestGeography(object):
         mocked_bq_client.return_value = BigQueryClientMock(file_path)
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
+        credentials = Credentials('fake_user', '1234')
 
         with pytest.raises(CartoException) as e:
             geography.download(credentials)
@@ -314,8 +311,7 @@ class TestGeography(object):
         mocked_bq_client.return_value = BigQueryClientMock(file_path)
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
+        credentials = Credentials('fake_user', '1234')
 
         response = geography.download(credentials)
 
@@ -331,8 +327,7 @@ class TestGeography(object):
         mocked_bq_client.return_value = BigQueryClientMock(NotFound('Fake error'))
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
+        credentials = Credentials('fake_user', '1234')
 
         geography = Geography.get(test_geography1.id)
         with pytest.raises(CartoException):
