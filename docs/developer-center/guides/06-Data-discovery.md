@@ -481,7 +481,6 @@ variables
 </code></pre>
 
 ```python
-from cartoframes.data.observatory import Dataset
 vdf = variables.to_dataframe()
 vdf
 ```
