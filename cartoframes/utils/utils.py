@@ -16,7 +16,6 @@ import numpy as np
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
 
-from .geom_utils import GEO_COLUMN_NAME
 from ..auth.credentials import Credentials
 
 try:
@@ -36,6 +35,8 @@ if sys.version_info < (3, 0):
 
     gzip.compress = compress
 
+
+GEO_COLUMN_NAME = 'geometry'
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'

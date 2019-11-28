@@ -7,9 +7,10 @@ from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory import Variable, Dataset
+from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.repository.entity_repo import EntityRepository
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables, \
-    _GEOJSON_COLUMN
+    _ENRICHMENT_ID, _GEOJSON_COLUMN
 from cartoframes.exceptions import EnrichmentException
 from cartoframes.utils.geom_utils import to_geojson
 
@@ -33,12 +34,17 @@ class TestEnrichmentService(object):
         geom_column = 'the_geom'
         enrichment_service = EnrichmentService(credentials=self.credentials)
         point = Point(1, 1)
-        df = pd.DataFrame([[1, point]], columns=['cartodb_id', geom_column])
+        df = pd.DataFrame(
+            [[1, point]],
+            columns=['cartodb_id', geom_column])
         expected_cdf = CartoDataFrame(
-            [[point, 0, to_geojson(point)]],
-            columns=['geometry', 'enrichment_id', _GEOJSON_COLUMN], index=[1])
+            [[1, point, 0, to_geojson(point)]],
+            columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOJSON_COLUMN],
+            geometry=geom_column
+        )
 
         result = enrichment_service._prepare_data(df, geom_column)
+
         assert result.equals(expected_cdf)
 
     def test_prepare_data_polygon_with_close_vertex(self):
@@ -47,39 +53,35 @@ class TestEnrichmentService(object):
 
         polygon = Polygon([(10, 2), (1.12345688, 1), (1.12345677, 1), (10, 2)])
         df = pd.DataFrame(
-            [
-                [1, polygon]
-            ],
+            [[1, polygon]],
             columns=['cartodb_id', geom_column])
 
         expected_cdf = CartoDataFrame(
-            [
-                [
-                    polygon,
-                    0,
-                    to_geojson(polygon)
-                ]
-            ],
-            columns=['geometry', 'enrichment_id', _GEOJSON_COLUMN], index=[1])
+            [[1, polygon, 0, to_geojson(polygon)]],
+            columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOJSON_COLUMN],
+            geometry=geom_column
+        )
 
         result = enrichment_service._prepare_data(df, geom_column)
 
-        assert result['enrichment_id'].equals(expected_cdf['enrichment_id'])
-        assert result[_GEOJSON_COLUMN].equals(expected_cdf[_GEOJSON_COLUMN])
+        assert result.equals(expected_cdf)
 
     def test_upload_data(self):
+        geom_column = 'the_geom'
         expected_project = 'carto-do-customers'
         user_dataset = 'test_dataset'
 
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
-            [[point, 0, to_geojson(point)]],
-            columns=['geometry', 'enrichment_id', _GEOJSON_COLUMN], index=[1])
+            [[1, point, 0, to_geojson(point)]],
+            columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOJSON_COLUMN],
+            geometry=geom_column
+        )
 
-        expected_schema = {'enrichment_id': 'INTEGER', _GEOJSON_COLUMN: 'GEOGRAPHY'}
+        expected_schema = {_ENRICHMENT_ID: 'INTEGER', _GEOJSON_COLUMN: 'GEOGRAPHY'}
         expected_cdf = CartoDataFrame(
             [[0, to_geojson(point)]],
-            columns=['enrichment_id', _GEOJSON_COLUMN], index=[1])
+            columns=[_ENRICHMENT_ID, _GEOJSON_COLUMN])
 
         # mock
         def assert_upload_data(_, dataframe, schema, tablename, project, dataset):
@@ -104,17 +106,18 @@ class TestEnrichmentService(object):
 
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
-            [[point, 0], [None, 1]],
-            columns=['geometry', 'enrichment_id']
+            [[1, point, 0], [2, None, 1]],
+            columns=['cartodb_id', geom_column, _ENRICHMENT_ID],
+            geometry=geom_column
         )
 
         enrichment_service = EnrichmentService(credentials=self.credentials)
         input_cdf = enrichment_service._prepare_data(input_cdf, geom_column)
 
-        expected_schema = {'enrichment_id': 'INTEGER', _GEOJSON_COLUMN: 'GEOGRAPHY'}
+        expected_schema = {_ENRICHMENT_ID: 'INTEGER', _GEOJSON_COLUMN: 'GEOGRAPHY'}
         expected_cdf = CartoDataFrame(
             [[0, to_geojson(point)], [1, None]],
-            columns=['enrichment_id', _GEOJSON_COLUMN])
+            columns=[_ENRICHMENT_ID, _GEOJSON_COLUMN])
 
         # mock
         def assert_upload_data(_, dataframe, schema, tablename, project, dataset):
@@ -133,17 +136,18 @@ class TestEnrichmentService(object):
         BigQueryClient.upload_dataframe = original
 
     def test_execute_enrichment(self):
+        geom_column = 'the_geom'
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
             [[point, 0, to_geojson(point)]],
-            columns=['geometry', 'enrichment_id', _GEOJSON_COLUMN], index=[1])
+            columns=[geom_column, _ENRICHMENT_ID, _GEOJSON_COLUMN])
         expected_cdf = CartoDataFrame(
             [[point, 'new data']],
-            columns=['geometry', 'var1'])
+            columns=[geom_column, 'var1'])
 
         class EnrichMock():
             def to_dataframe(self):
-                return pd.DataFrame([[0, 'new data']], columns=['enrichment_id', 'var1'])
+                return pd.DataFrame([[0, 'new data']], columns=[_ENRICHMENT_ID, 'var1'])
 
         original = BigQueryClient.query
         BigQueryClient.query = Mock(return_value=EnrichMock())
@@ -155,10 +159,10 @@ class TestEnrichmentService(object):
 
         BigQueryClient._init_client = original
 
-    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._validate_bq_operations')
     @patch.object(Variable, 'get')
-    def test_prepare_variables(self, get_mock, _is_available_in_bq_mock):
-        _is_available_in_bq_mock.return_value = True
+    def test_prepare_variables(self, get_mock, _validate_bq_operations_mock):
+        _validate_bq_operations_mock.return_value = True
 
         variable_id = 'project.dataset.table.variable'
         variable = Variable({
@@ -169,13 +173,15 @@ class TestEnrichmentService(object):
 
         get_mock.return_value = variable
 
+        credentials = Credentials('fake_user', '1234')
+
         one_variable_cases = [
             variable_id,
             variable
         ]
 
         for case in one_variable_cases:
-            result = prepare_variables(case)
+            result = prepare_variables(case, credentials)
 
             assert result == [variable]
 
@@ -186,45 +192,14 @@ class TestEnrichmentService(object):
         ]
 
         for case in several_variables_cases:
-            result = prepare_variables(case)
+            result = prepare_variables(case, credentials)
 
             assert result == [variable, variable]
 
-    @patch.object(EntityRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._validate_bq_operations')
     @patch.object(Variable, 'get')
-    def test_prepare_variables_raises_if_not_available_in_bq(self, get_mock, entity_repo):
-        # mock dataset
-        entity_repo.return_value = Dataset({
-            'id': 'id',
-            'slug': 'slug',
-            'name': 'name',
-            'description': 'description',
-            'available_in': [],
-            'geography_id': 'geography'
-        })
-
-        variable = Variable({
-            'id': 'id',
-            'column_name': 'column',
-            'dataset_id': 'fake_name',
-            'slug': 'slug'
-        })
-
-        get_mock.return_value = variable
-
-        with pytest.raises(EnrichmentException) as e:
-            prepare_variables(variable)
-
-        error = """
-            The Dataset or the Geography of the Variable '{}' is not ready for Enrichment.
-            Please, contact us for more information.
-        """.format(variable.slug)
-        assert str(e.value) == error
-
-    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
-    @patch.object(Variable, 'get')
-    def test_prepare_variables_with_agg_method(self, get_mock, _is_available_in_bq_mock):
-        _is_available_in_bq_mock.return_value = True
+    def test_prepare_variables_with_agg_method(self, get_mock, _validate_bq_operations_mock):
+        _validate_bq_operations_mock.return_value = True
 
         variable_id = 'project.dataset.table.variable'
         variable = Variable({
@@ -236,25 +211,27 @@ class TestEnrichmentService(object):
 
         get_mock.return_value = variable
 
+        credentials = Credentials('fake_user', '1234')
+
         one_variable_cases = [
             variable_id,
             variable
         ]
 
         for case in one_variable_cases:
-            result = prepare_variables(case)
+            result = prepare_variables(case, credentials)
 
             assert result == [variable]
 
         for case in one_variable_cases:
-            result = prepare_variables(case, aggregation='SUM')
+            result = prepare_variables(case, credentials, aggregation={variable.id: 'SUM'})
 
             assert result == [variable]
 
-    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._validate_bq_operations')
     @patch.object(Variable, 'get')
-    def test_prepare_variables_without_agg_method(self, get_mock, _is_available_in_bq_mock):
-        _is_available_in_bq_mock.return_value = True
+    def test_prepare_variables_without_agg_method(self, get_mock, _validate_bq_operations_mock):
+        _validate_bq_operations_mock.return_value = True
 
         variable_id = 'project.dataset.table.variable'
         variable = Variable({
@@ -266,25 +243,208 @@ class TestEnrichmentService(object):
 
         get_mock.return_value = variable
 
+        credentials = Credentials('fake_user', '1234')
+
         one_variable_cases = [
             variable_id,
             variable
         ]
 
         for case in one_variable_cases:
-            result = prepare_variables(case)
+            result = prepare_variables(case, credentials)
 
             assert result == [variable]
 
         for case in one_variable_cases:
-            result = prepare_variables(case, aggregation='SUM')
+            result = prepare_variables(case, credentials, aggregation={})
 
-            assert result == [variable]
+            assert result == []
 
-    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch.object(EntityRepository, 'get_by_id')
     @patch.object(Variable, 'get')
-    def test_prepare_variables_without_agg_method_and_custom_agg(self, get_mock, _is_available_in_bq_mock):
-        _is_available_in_bq_mock.return_value = True
+    def test_prepare_variables_raises_if_not_available_in_bq_even_public(self, get_mock, entity_repo):
+        dataset = Dataset({
+            'id': 'id',
+            'slug': 'slug',
+            'name': 'name',
+            'description': 'description',
+            'available_in': [],
+            'geography_id': 'geography',
+            'is_public_data': True
+        })
+
+        # mock dataset
+        entity_repo.return_value = dataset
+
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'slug': 'slug'
+        })
+
+        get_mock.return_value = variable
+
+        credentials = Credentials('fake_user', '1234')
+
+        with pytest.raises(EnrichmentException) as e:
+            prepare_variables(variable, credentials)
+
+        error = """
+            The Dataset '{}' is not ready for Enrichment. Please, contact us for more information.
+        """.format(dataset)
+        assert str(e.value) == error
+
+    @patch.object(DatasetRepository, 'get_all')
+    @patch.object(EntityRepository, 'get_by_id')
+    @patch.object(Variable, 'get')
+    def test_prepare_variables_raises_if_not_available_in_bq(self, get_mock, entity_repo, get_all_mock):
+        dataset = Dataset({
+            'id': 'id',
+            'slug': 'slug',
+            'name': 'name',
+            'description': 'description',
+            'available_in': [],
+            'geography_id': 'geography',
+            'is_public_data': False
+        })
+
+        # mock dataset
+        entity_repo.return_value = dataset
+
+        # mock subscriptions
+        get_all_mock.return_value = [dataset]
+
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'slug': 'slug'
+        })
+
+        get_mock.return_value = variable
+
+        credentials = Credentials('fake_user', '1234')
+
+        with pytest.raises(EnrichmentException) as e:
+            prepare_variables(variable, credentials)
+
+        error = """
+            The Dataset '{}' is not ready for Enrichment. Please, contact us for more information.
+        """.format(dataset)
+        assert str(e.value) == error
+
+    @patch.object(DatasetRepository, 'get_all')
+    @patch.object(EntityRepository, 'get_by_id')
+    @patch.object(Variable, 'get')
+    def test_prepare_variables_works_with_public_dataset(self, get_mock, entity_repo, get_all_mock):
+        dataset = Dataset({
+            'id': 'id',
+            'slug': 'slug',
+            'name': 'name',
+            'description': 'description',
+            'available_in': ['bq'],
+            'geography_id': 'geography',
+            'is_public_data': True
+        })
+
+        # mock dataset
+        entity_repo.return_value = dataset
+
+        # mock subscriptions
+        get_all_mock.return_value = []
+
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'slug': 'slug'
+        })
+
+        get_mock.return_value = variable
+
+        credentials = Credentials('fake_user', '1234')
+
+        result = prepare_variables(variable, credentials)
+        assert result == [variable]
+
+    @patch.object(DatasetRepository, 'get_all')
+    @patch.object(EntityRepository, 'get_by_id')
+    @patch.object(Variable, 'get')
+    def test_prepare_variables_fails_with_private(self, get_mock, entity_repo, get_all_mock):
+        dataset = Dataset({
+            'id': 'id',
+            'slug': 'slug',
+            'name': 'name',
+            'description': 'description',
+            'available_in': ['bq'],
+            'geography_id': 'geography',
+            'is_public_data': False
+        })
+
+        # mock dataset
+        entity_repo.return_value = dataset
+
+        # mock subscriptions
+        get_all_mock.return_value = []
+
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'slug': 'slug'
+        })
+
+        get_mock.return_value = variable
+
+        credentials = Credentials('fake_user', '1234')
+
+        with pytest.raises(EnrichmentException) as e:
+            prepare_variables(variable, credentials)
+
+        error = """
+            You are not subscribed to the Dataset '{}' yet. Please, use the subscribe method first.
+        """.format(dataset)
+        assert str(e.value) == error
+
+    @patch.object(DatasetRepository, 'get_all')
+    @patch.object(EntityRepository, 'get_by_id')
+    @patch.object(Variable, 'get')
+    def test_prepare_variables_works_with_private_and_subscribed(self, get_mock, entity_repo, get_all_mock):
+        dataset = Dataset({
+            'id': 'id',
+            'slug': 'slug',
+            'name': 'name',
+            'description': 'description',
+            'available_in': ['bq'],
+            'geography_id': 'geography',
+            'is_public_data': False
+        })
+
+        # mock dataset
+        entity_repo.return_value = dataset
+
+        # mock subscriptions
+        get_all_mock.return_value = [dataset]
+
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'slug': 'slug'
+        })
+
+        get_mock.return_value = variable
+
+        credentials = Credentials('fake_user', '1234')
+
+        result = prepare_variables(variable, credentials)
+        assert result == [variable]
+
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._validate_bq_operations')
+    @patch.object(Variable, 'get')
+    def test_prepare_variables_without_agg_method_and_custom_agg(self, get_mock, _validate_bq_operations_mock):
+        _validate_bq_operations_mock.return_value = True
 
         variable_id = 'project.dataset.table.variable'
         variable = Variable({
@@ -296,22 +456,24 @@ class TestEnrichmentService(object):
 
         get_mock.return_value = variable
 
+        credentials = Credentials('fake_user', '1234')
+
         one_variable_cases = [
             variable_id,
             variable
         ]
 
         for case in one_variable_cases:
-            result = prepare_variables(case)
+            result = prepare_variables(case, credentials)
 
             assert result == [variable]
 
         for case in one_variable_cases:
-            result = prepare_variables(case, aggregation={})
+            result = prepare_variables(case, credentials, aggregation={})
 
             assert result == []
 
         for case in one_variable_cases:
-            result = prepare_variables(case, aggregation={variable_id: 'SUM'})
+            result = prepare_variables(case, credentials, aggregation={variable_id: 'SUM'})
 
             assert result == [variable]
