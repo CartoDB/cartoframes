@@ -4,7 +4,6 @@ import os
 import appdirs
 import csv
 import tqdm
-import time
 
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery, storage
@@ -41,7 +40,7 @@ class BigQueryClient(object):
             project=self._project,
             credentials=google_credentials)
 
-        self.storage_client = storage.Client(
+        self.gcs_client = storage.Client(
             project=self._project,
             credentials=google_credentials
         )
@@ -57,32 +56,14 @@ class BigQueryClient(object):
 
     @refresh_client
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
-        # dataset_ref = self.client.dataset(dataset, project=project)
-        # table_ref = dataset_ref.table(tablename)
 
-        # schema_wrapped = [bigquery.SchemaField(column, dtype) for column, dtype in schema.items()]
-
-        # job_config = bigquery.LoadJobConfig()
-        # job_config.schema = schema_wrapped
-
-        # job = self.client.load_table_from_dataframe(dataframe, table_ref, job_config=job_config)
-        # job.result()
-
-        # return
-      
-        print('Uploading GCS')
-        start_time = time.time()
-        
-        #bucket = self.storage_client.bucket(self._bucket)
-        bucket = self.storage_client.bucket('carto-do-aasuero')
+        # Upload file to Google Cloud Storage
+        bucket = self.gcs_client.bucket(self._bucket)
         blob = bucket.blob(tablename)
         dataframe.to_csv(tablename, index=False, header=False)
         blob.upload_from_filename(tablename)
-        elapsed_time = time.time() - start_time
-        print(elapsed_time)
 
-        print('Uploading BQ')
-        start_time = time.time()
+        # Import from GCS To BigQuery
         dataset_ref = self.client.dataset(dataset, project=project)
         table_ref = dataset_ref.table(tablename)
         schema_wrapped = [bigquery.SchemaField(column, dtype) for column, dtype in schema.items()]
@@ -94,12 +75,9 @@ class BigQueryClient(object):
 
         job = self.client.load_table_from_uri(
             uri, table_ref, job_config=job_config
-        )  # API request
-  
+        )
+
         job.result()  # Waits for table load to complete.
-        elapsed_time = time.time() - start_time
-        print(elapsed_time)
-        print(tablename)
 
     @refresh_client
     def query(self, query, **kwargs):
