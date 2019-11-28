@@ -80,7 +80,7 @@ class ContextManager(object):
     def delete_table(self, table_name):
         query = _drop_table_query(table_name)
         output = self.execute_query(query)
-        if ('does not exist' in output['notices'][0]):
+        if ('notices' in output and 'does not exist' in output['notices'][0]):
             print('Debug: table "{}" does not exist'.format(table_name))
         else:
             print('Debug: table "{}" removed'.format(table_name))

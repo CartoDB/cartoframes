@@ -45,7 +45,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
             print('Debug: column "{}" does not exist'.format(index_col))
 
     if decode_geom and 'the_geom' in cdf:
-        cdf.set_geometry('the_geom', drop=False, inplace=True)
+        cdf.set_geometry('the_geom', drop=True, inplace=True)
 
     return cdf
 
@@ -158,8 +158,16 @@ def describe_table(table_name, credentials=None, schema=None):
     context_manager = ContextManager(credentials)
     query = context_manager.compute_query(table_name, schema)
 
+    try:
+        privacy = context_manager.get_privacy(table_name)
+    except Exception:
+        # There is an issue with ghost tables when
+        # the table is created for the first time
+        print('Debug: we can not retrieve the privacy from the metadata')
+        privacy = ''
+
     return {
-        'privacy': context_manager.get_privacy(table_name),
+        'privacy': privacy,
         'num_rows': context_manager.get_num_rows(query),
         'geom_type': context_manager.get_geom_type(query)
     }

@@ -1,7 +1,7 @@
 from pandas import Series
-from geopandas import GeoDataFrame
+from geopandas import GeoDataFrame, points_from_xy
 
-from ..utils.geom_utils import decode_geometry_column, compose_geometry_column_from_lnglat
+from ..utils.geom_utils import decode_geometry_column
 
 
 class CartoDataFrame(GeoDataFrame):
@@ -147,12 +147,16 @@ class CartoDataFrame(GeoDataFrame):
         if not inplace:
             return frame
 
-    def set_geometry_from_lnglat(self, lnglat, drop=False, inplace=False, crs=None):
-        lng_col = self[lnglat[0]]
-        lat_col = self[lnglat[1]]
+    def set_geometry_from_xy(self, x, y, drop=False, inplace=False, crs=None):
+        if isinstance(x, str) and x in self and isinstance(y, str) and y in self:
+            x_col = self[x]
+            y_col = self[y]
+        else:
+            x_col = x
+            y_col = y
 
-        # Generate geometry:
-        geom_col = compose_geometry_column_from_lnglat(lng_col, lat_col)
+        # Generate geometry
+        geom_col = points_from_xy(x_col, y_col)
 
         # Call super set_geometry with generated column
         frame = super(CartoDataFrame, self).set_geometry(geom_col, drop=False, inplace=inplace, crs=crs)
@@ -160,8 +164,8 @@ class CartoDataFrame(GeoDataFrame):
         if drop:
             if frame is None:
                 frame = self
-            del frame[lnglat[0]]
-            del frame[lnglat[1]]
+            del frame[x]
+            del frame[y]
 
         return frame
 

@@ -15,69 +15,14 @@ ENC_EWKT = 'ewkt'
 if sys.version_info < (3, 0):
     ENC_WKB_BHEX = ENC_WKB_HEX
 
-GEO_COLUMN_NAME = 'geometry'
 
-
-def decode_geometry_column(col):
-    return _compute_geometry_from_geom(col)
-
-
-def compose_geometry_column_from_lnglat(lng, lat):
-    return _compute_geometry_from_lnglat(lng, lat)
-
-
-def _compute_geometry_from_geom(geom_column):
+def decode_geometry_column(geom_column):
     if geom_column.size > 0:
         first_geom = next(item for item in geom_column if item is not None)
         enc_type = detect_encoding_type(first_geom)
         return geom_column.apply(lambda g: decode_geometry(g, enc_type))
     else:
         return geom_column
-
-
-def _compute_geometry_from_lnglat(lng, lat):
-    return [shapely.geometry.Point(xy) for xy in zip(lng, lat)]
-
-
-def _get_column(df, main=None, options=[]):
-    if main is None:
-        for name in options:
-            if name in df:
-                return df[name]
-    else:
-        if main in df:
-            return df[main]
-    return None
-
-
-def _encode_decode_decorator(func):
-    """decorator for encoding and decoding geoms"""
-    def wrapper(*args):
-        """error catching"""
-        try:
-            processed_geom = func(*args)
-            return processed_geom
-        except ImportError as err:
-            raise ImportError('The Python package `shapely` needs to be '
-                              'installed to encode or decode geometries. '
-                              '({})'.format(err))
-    return wrapper
-
-
-@_encode_decode_decorator
-def decode_geometry(geom, enc_type):
-    """Decode any geometry into a shapely geometry."""
-    if geom:
-        func = {
-            ENC_SHAPELY: lambda: geom,
-            ENC_WKB: lambda: _load_wkb(geom),
-            ENC_WKB_HEX: lambda: _load_wkb_hex(geom),
-            ENC_WKB_BHEX: lambda: _load_wkb_bhex(geom),
-            ENC_WKT: lambda: _load_wkt(geom),
-            ENC_EWKT: lambda: _load_ewkt(geom)
-        }.get(enc_type)
-        return func() if func else geom
-    return shapely.geometry.base.BaseGeometry()
 
 
 def detect_encoding_type(input_geom):
@@ -106,7 +51,7 @@ def detect_encoding_type(input_geom):
                 return ENC_EWKT
             else:
                 try:
-                    # This is required because in P27 bytes = str
+                    # This is required because in Py27 bytes = str
                     _load_wkb(geom)
                     return ENC_WKB
                 except Exception:
@@ -120,6 +65,21 @@ def detect_encoding_type(input_geom):
             return ENC_WKB
 
     return None
+
+
+def decode_geometry(geom, enc_type):
+    """Decode any geometry into a shapely geometry."""
+    if geom:
+        func = {
+            ENC_SHAPELY: lambda: geom,
+            ENC_WKB: lambda: _load_wkb(geom),
+            ENC_WKB_HEX: lambda: _load_wkb_hex(geom),
+            ENC_WKB_BHEX: lambda: _load_wkb_bhex(geom),
+            ENC_WKT: lambda: _load_wkt(geom),
+            ENC_EWKT: lambda: _load_ewkt(geom)
+        }.get(enc_type)
+        return func() if func else geom
+    return shapely.geometry.base.BaseGeometry()
 
 
 def _load_wkb(geom):
