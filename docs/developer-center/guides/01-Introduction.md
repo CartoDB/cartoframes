@@ -25,7 +25,7 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 <div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Quickstart/">Quickstart Part 1</a>
+      <a href="/developers/cartoframes/guides/Quickstart/">Quickstart Guide</a>
     </span>
     <p class="doc-guides__description">Import, analyze, visualize, and share your results.</p>
   </div>
