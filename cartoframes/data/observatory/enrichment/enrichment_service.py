@@ -58,7 +58,6 @@ class VariableFilter(object):
     """
     def __init__(self, variable, query):
         self.variable = _prepare_variable(variable)
-        print(self.variable)
         self.query = query
 
 
