@@ -35,7 +35,18 @@ class BigQueryClient(object):
     def __init__(self, project, credentials):
         self._project = project
         self._credentials = credentials or get_default_credentials()
-        self.client = self._init_client()
+        google_credentials = GoogleCredentials(self._credentials.get_do_token())
+
+        self.client = bigquery.Client(
+            project=self._project,
+            credentials=google_credentials)
+
+        self.storage_client = storage.Client(
+            project=self._project,
+            credentials=google_credentials
+        )
+
+        self._bucket = 'carto-do-{username}'.format(username=self._credentials.username)
 
     def _init_client(self):
         google_credentials = GoogleCredentials(self._credentials.get_do_token())
@@ -61,8 +72,9 @@ class BigQueryClient(object):
       
         print('Uploading GCS')
         start_time = time.time()
-        client = storage.Client('cartodb-on-gcp-poc')
-        bucket = client.bucket('alasarr-poc')
+        
+        #bucket = self.storage_client.bucket(self._bucket)
+        bucket = self.storage_client.bucket('carto-do-aasuero')
         blob = bucket.blob(tablename)
         dataframe.to_csv(tablename, index=False, header=False)
         blob.upload_from_filename(tablename)
@@ -77,15 +89,13 @@ class BigQueryClient(object):
 
         job_config = bigquery.LoadJobConfig()
         job_config.schema = schema_wrapped
-        # The source format defaults to CSV, so the line below is optional.
         job_config.source_format = bigquery.SourceFormat.CSV
-        uri = f'gs://alasarr-poc/{tablename}'
+        uri = 'gs://{bucket}/{tablename}'.format(bucket=self._bucket, tablename=tablename)
 
         job = self.client.load_table_from_uri(
             uri, table_ref, job_config=job_config
         )  # API request
   
-
         job.result()  # Waits for table load to complete.
         elapsed_time = time.time() - start_time
         print(elapsed_time)

@@ -213,12 +213,14 @@ class Credentials(object):
     def get_do_token(self):
         """Returns the Data Observatory v2 token"""
 
-        do_token_manager = DoTokenManager(self.get_api_key_auth_client())
-        token = do_token_manager.get()
-        if not token:
-            raise CartoException('Authentication error: do you have permissions to access Data Observatory v2?')
+        return "ya29.c.Kv8BsgeQMGLsSaQ6omt1oj83LD-CdHGcNN7U599RwV7q2pE-V6sD8pplruwCfIds9btSVgODH95RvNQt5VTI2LEX21leDGyNPi8YXFjN_XPmTzvVPtkY5Ox2pBfhGWDRCdRutL6p9NhszUxNTNs7lHjxUx51LFcYHQHJl2_n-3GAsJE3FnFJfiD8a9fE_U_A7KpJ_ku1KatCJYPcntDsQvzjlKRhGG1AnsdC14uW9Za3zPKIcriqLvY-T1voVVDxc-8QdSj3no7qpeBifLNt1-KLsFwEMjb92bx3uPoxp_Ox-TtB76A3F9bWYxsMFGIK7LZHj8hlK0nadFeZ-UTCY-bp"
 
-        return token.access_token
+        # do_token_manager = DoTokenManager(self.get_api_key_auth_client())
+        # token = do_token_manager.get()
+        # if not token:
+        #     raise CartoException('Authentication error: do you have permissions to access Data Observatory v2?')
+
+        # return token.access_token
 
     def get_do_user_dataset(self):
         return self._username.replace('-', '_')
