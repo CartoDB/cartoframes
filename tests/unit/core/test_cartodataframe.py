@@ -84,11 +84,17 @@ class TestCartoDataFrame(object):
         mock_layer.assert_called_once_with(cdf, '__style__')
         assert viz == '__map__'
 
-    def test_getitem(self):
+    def test_getitem_series(self):
         cdf = CartoDataFrame(self.gdf)
         cdf = cdf[cdf.id > 1]
         assert isinstance(cdf, CartoDataFrame)
         assert len(cdf) == 1
+
+    def test_getitem_list(self):
+        cdf = CartoDataFrame(self.gdf)
+        cdf = cdf[['id']]
+        assert isinstance(cdf, CartoDataFrame)
+        assert len(cdf) == 2
 
     def test_astype(self):
         cdf = CartoDataFrame({'a': [1], 'geometry': [Point(0, 0)]})

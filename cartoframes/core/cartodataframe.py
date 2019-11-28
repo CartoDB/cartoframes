@@ -175,7 +175,7 @@ class CartoDataFrame(GeoDataFrame):
 
     def __getitem__(self, key):
         result = super(self._constructor, self).__getitem__(key)
-        if isinstance(key, (ndarray, Series)):
+        if isinstance(key, (list, ndarray, Series)):
             result.__class__ = self._constructor
         return result
 
