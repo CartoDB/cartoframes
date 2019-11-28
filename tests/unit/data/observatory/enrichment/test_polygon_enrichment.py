@@ -175,8 +175,8 @@ class TestPolygonEnrichment(object):
 
     @patch('cartoframes.data.observatory.enrichment.enrichment_service._validate_bq_operations')
     @patch.object(Dataset, 'get')
-    def test_enrichment_query_by_polygons_two_vars_agg_none_custom(self, dataset_get_mock, _validate_bq_operations_mock):
-        _validate_bq_operations_mock.return_value = True
+    def test_enrichment_query_by_polygons_two_vars_agg_none_custom(self, dataset_get_mock, _validate_bq_ops_mock):
+        _validate_bq_ops_mock.return_value = True
 
         enrichment = Enrichment(credentials=self.credentials)
 
