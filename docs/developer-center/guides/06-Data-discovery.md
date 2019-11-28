@@ -1964,12 +1964,13 @@ Catalog().country('usa').category('financial').geographies
 
 
 
-    [<Geography.get('mc_block_9ebc626c')>,
+    <pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Geography.get('mc_block_9ebc626c')>,
      <Geography.get('mc_blockgroup_c4b8da4c')>,
      <Geography.get('mc_county_31cde2d')>,
      <Geography.get('mc_state_cc31b9d1')>,
      <Geography.get('mc_tract_3704a85c')>,
      <Geography.get('mc_zipcode_263079e3')>]
+     </code></pre>
 
 
 
@@ -1981,7 +1982,7 @@ from cartoframes.data.observatory import Geography
 Geography.get('mc_blockgroup_c4b8da4c').to_dict()
 ```
 
-    {'id': 'carto-do.mastercard.geography_usa_blockgroup_2019',
+    <pre class="u-vertical-scroll u-topbottom-Margin"><code>{'id': 'carto-do.mastercard.geography_usa_blockgroup_2019',
      'slug': 'mc_blockgroup_c4b8da4c',
      'name': 'USA Census Block Groups',
      'description': None,
@@ -1993,6 +1994,7 @@ Geography.get('mc_blockgroup_c4b8da4c').to_dict()
      'update_frequency': None,
      'version': '2019',
      'is_public_data': False}
+     </code></pre>
 
 
 
@@ -2072,7 +2074,7 @@ Dataset.get('mc_mrli_35402a9d').variables
 
 
 
-  <pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Variable.get('transactions_st_d22b3489')> #'Same as transactions_score, but only comparing ran...',
+    <pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Variable.get('transactions_st_d22b3489')> #'Same as transactions_score, but only comparing ran...',
      <Variable.get('region_id_3c7d0d92')> #'Region identifier (construction varies depending o...',
      <Variable.get('category_8c84b3a7')> #'Industry/sector categories (Total Retail, Retail e...',
      <Variable.get('month_57cd6f80')> #'Name of the month the data refers to',
