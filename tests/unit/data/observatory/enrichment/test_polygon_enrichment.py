@@ -69,10 +69,10 @@ class TestPolygonEnrichment(object):
 
         assert actual == expected
 
-    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._validate_bq_operations')
     @patch.object(Dataset, 'get')
-    def test_enrichment_query_by_polygons_two_variables(self, dataset_get_mock, _is_available_in_bq_mock):
-        _is_available_in_bq_mock.return_value = True
+    def test_enrichment_query_by_polygons_two_variables(self, dataset_get_mock, _validate_bq_operations_mock):
+        _validate_bq_operations_mock.return_value = True
 
         enrichment = Enrichment(credentials=self.credentials)
 
@@ -103,7 +103,7 @@ class TestPolygonEnrichment(object):
         })
         variables = [variable1, variable2]
         aggregation = AGGREGATION_DEFAULT
-        variables = prepare_variables(variables, aggregation)
+        variables = prepare_variables(variables, self.credentials, aggregation)
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
@@ -121,10 +121,10 @@ class TestPolygonEnrichment(object):
 
         assert actual == expected
 
-    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._validate_bq_operations')
     @patch.object(Dataset, 'get')
-    def test_enrichment_query_by_polygons_two_variables_agg_none(self, dataset_get_mock, _is_available_in_bq_mock):
-        _is_available_in_bq_mock.return_value = True
+    def test_enrichment_query_by_polygons_two_variables_agg_none(self, dataset_get_mock, _validate_bq_operations_mock):
+        _validate_bq_operations_mock.return_value = True
 
         enrichment = Enrichment(credentials=self.credentials)
 
@@ -155,7 +155,7 @@ class TestPolygonEnrichment(object):
         })
         variables = [variable1, variable2]
         aggregation = AGGREGATION_DEFAULT
-        variables = prepare_variables(variables, aggregation)
+        variables = prepare_variables(variables, self.credentials, aggregation)
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
@@ -173,10 +173,10 @@ class TestPolygonEnrichment(object):
 
         assert actual == expected
 
-    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._validate_bq_operations')
     @patch.object(Dataset, 'get')
-    def test_enrichment_query_by_polygons_two_vars_agg_none_custom(self, dataset_get_mock, _is_available_in_bq_mock):
-        _is_available_in_bq_mock.return_value = True
+    def test_enrichment_query_by_polygons_two_vars_agg_none_custom(self, dataset_get_mock, _validate_bq_ops_mock):
+        _validate_bq_ops_mock.return_value = True
 
         enrichment = Enrichment(credentials=self.credentials)
 
@@ -207,7 +207,7 @@ class TestPolygonEnrichment(object):
         })
         variables = [variable1, variable2]
         aggregation = agg
-        variables = prepare_variables(variables, aggregation)
+        variables = prepare_variables(variables, self.credentials, aggregation)
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
@@ -225,10 +225,10 @@ class TestPolygonEnrichment(object):
 
         assert actual == expected
 
-    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._validate_bq_operations')
     @patch.object(Dataset, 'get')
-    def test_enrichment_query_by_polygons_two_vars_agg_none_custom2(self, dataset_get_mock, _is_available_in_bq_mock):
-        _is_available_in_bq_mock.return_value = True
+    def test_enrichment_query_by_polygons_two_vars_agg_none_custom2(self, dataset_get_mock, _validate_bq_ops_mock):
+        _validate_bq_ops_mock.return_value = True
 
         enrichment = Enrichment(credentials=self.credentials)
 
@@ -259,7 +259,7 @@ class TestPolygonEnrichment(object):
         })
         variables = [variable1, variable2]
         aggregation = {variable2.id: agg}
-        variables = prepare_variables(variables, aggregation)
+        variables = prepare_variables(variables, self.credentials, aggregation)
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog

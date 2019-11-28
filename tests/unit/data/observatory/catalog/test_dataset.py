@@ -248,40 +248,45 @@ class TestDataset(object):
         assert isinstance(sliced_dataset, pd.Series)
         assert sliced_dataset.equals(dataset.to_series())
 
+    @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_download(self, mocked_bq_client, mocked_repo):
+    def test_dataset_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # mock dataset
-        mocked_repo.return_value = test_dataset1
+        get_by_id_mock.return_value = test_dataset1
+        dataset = Dataset.get(test_dataset1.id)
+
+        # mock subscriptions
+        get_all_mock.return_value = [dataset]
 
         # mock big query client
         file_path = 'fake_path'
         mocked_bq_client.return_value = BigQueryClientMock(file_path)
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
+        credentials = Credentials('fake_user', '1234')
 
-        dataset = Dataset.get(test_dataset1.id)
         response = dataset.download(credentials)
 
         assert response == file_path
 
+    @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_not_available_in_bq_download_fails(self, mocked_bq_client, mocked_repo):
+    def test_dataset_not_available_in_bq_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # mock dataset
-        mocked_repo.return_value = test_dataset2
+        get_by_id_mock.return_value = test_dataset2
+        dataset = Dataset.get(test_dataset2.id)
+
+        # mock subscriptions
+        get_all_mock.return_value = [dataset]
 
         # mock big query client
         file_path = 'fake_path'
         mocked_bq_client.return_value = BigQueryClientMock(file_path)
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
-
-        dataset = Dataset.get(test_dataset2.id)
+        credentials = Credentials('fake_user', '1234')
 
         with pytest.raises(CartoException) as e:
             dataset.download(credentials)
@@ -289,20 +294,69 @@ class TestDataset(object):
         error = '{} is not ready for Download. Please, contact us for more information.'.format(dataset)
         assert str(e.value) == error
 
+    @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
+    def test_dataset_not_subscribed_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # mock dataset
-        mocked_repo.return_value = test_dataset1
+        get_by_id_mock.return_value = test_dataset2
+        dataset = Dataset.get(test_dataset2.id)
+
+        # mock subscriptions
+        get_all_mock.return_value = []
+
+        # mock big query client
+        file_path = 'fake_path'
+        mocked_bq_client.return_value = BigQueryClientMock(file_path)
+
+        # test
+        credentials = Credentials('fake_user', '1234')
+
+        with pytest.raises(CartoException) as e:
+            dataset.download(credentials)
+
+        error = 'You are not subscribed to this Dataset yet. Please, use the subscribe method first.'
+        assert str(e.value) == error
+
+    @patch.object(DatasetRepository, 'get_all')
+    @patch.object(DatasetRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
+    def test_dataset_not_subscribed_but_public_download_works(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+        # mock dataset
+        get_by_id_mock.return_value = test_dataset1  # is public
+        dataset = Dataset.get(test_dataset1.id)
+
+        # mock subscriptions
+        get_all_mock.return_value = []
+
+        # mock big query client
+        file_path = 'fake_path'
+        mocked_bq_client.return_value = BigQueryClientMock(file_path)
+
+        # test
+        credentials = Credentials('fake_user', '1234')
+
+        response = dataset.download(credentials)
+
+        assert response == file_path
+
+    @patch.object(DatasetRepository, 'get_all')
+    @patch.object(DatasetRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
+    def test_dataset_download_raises_without_do_active(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+        # mock dataset
+        get_by_id_mock.return_value = test_dataset1
+        dataset = Dataset.get(test_dataset1.id)
+
+        # mock subscriptions
+        get_all_mock.return_value = []
 
         # mock big query client
         mocked_bq_client.return_value = BigQueryClientMock(NotFound('Fake error'))
 
         # test
-        username = 'fake_user'
-        credentials = Credentials(username, '1234')
+        credentials = Credentials('fake_user', '1234')
 
-        dataset = Dataset.get(test_dataset1.id)
         with pytest.raises(CartoException):
             dataset.download(credentials)
 

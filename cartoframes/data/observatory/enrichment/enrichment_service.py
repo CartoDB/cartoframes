@@ -312,11 +312,13 @@ class EnrichmentService(object):
         return where
 
 
-def prepare_variables(variables, aggregation=None):
+def prepare_variables(variables, credentials, aggregation=None):
     if isinstance(variables, list):
         variables = [_prepare_variable(var, aggregation) for var in variables]
     else:
         variables = [_prepare_variable(variables, aggregation)]
+
+    _validate_bq_operations(variables, credentials)
 
     return list(filter(None, variables))
 
@@ -337,20 +339,42 @@ def _prepare_variable(variable, aggregation=None):
             warnings.warn('{} skipped because it does not have aggregation method'.format(variable))
             return None
 
-    _is_available_in_bq(variable)
-
     return variable
 
 
-def _is_available_in_bq(variable):
-    dataset = Dataset.get(variable.dataset)
-    geography = Geography.get(dataset.geography)
+def _validate_bq_operations(variables, credentials):
+    dataset_ids = list(set([variable.dataset for variable in variables]))
 
-    if not (dataset._is_available_in('bq') and geography._is_available_in('bq')):
+    for dataset_id in dataset_ids:
+        dataset = Dataset.get(dataset_id)
+        geography = Geography.get(dataset.geography)
+
+        _is_subscribed(dataset, geography, credentials)
+        _is_available_in_bq(dataset, geography)
+
+
+def _is_available_in_bq(dataset, geography):
+    if not dataset._is_available_in('bq'):
         raise EnrichmentException("""
-            The Dataset or the Geography of the Variable '{}' is not ready for Enrichment.
-            Please, contact us for more information.
-        """.format(variable.slug))
+            The Dataset '{}' is not ready for Enrichment. Please, contact us for more information.
+        """.format(dataset))
+
+    if not geography._is_available_in('bq'):
+        raise EnrichmentException("""
+            The Geography '{}' is not ready for Enrichment. Please, contact us for more information.
+        """.format(geography))
+
+
+def _is_subscribed(dataset, geography, credentials):
+    if not dataset._is_subscribed(credentials):
+        raise EnrichmentException("""
+            You are not subscribed to the Dataset '{}' yet. Please, use the subscribe method first.
+        """.format(dataset))
+
+    if not geography._is_subscribed(credentials):
+        raise EnrichmentException("""
+            You are not subscribed to the Geography '{}' yet. Please, use the subscribe method first.
+        """.format(geography))
 
 
 def _get_aggregation(variable, aggregation):

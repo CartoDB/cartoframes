@@ -113,7 +113,7 @@ class Enrichment(EnrichmentService):
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_points(df, variables=[variable], filters=[filter])
         """
-        variables = prepare_variables(variables)
+        variables = prepare_variables(variables, self.credentials)
         cartodataframe = self._prepare_data(dataframe, geom_column)
 
         temp_table_name = self._get_temp_table_name()
@@ -317,8 +317,7 @@ class Enrichment(EnrichmentService):
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=aggregation)
         """
-
-        variables = prepare_variables(variables, aggregation)
+        variables = prepare_variables(variables, self.credentials, aggregation)
         cartodataframe = self._prepare_data(dataframe, geom_column)
 
         temp_table_name = self._get_temp_table_name()
