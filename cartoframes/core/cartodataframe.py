@@ -1,3 +1,4 @@
+from numpy import ndarray
 from pandas import Series
 from geopandas import GeoDataFrame, points_from_xy
 
@@ -26,16 +27,6 @@ class CartoDataFrame(GeoDataFrame):
                 kwargs['crs'] = data.crs
 
         super(CartoDataFrame, self).__init__(data, *args, **kwargs)
-
-    def __getitem__(self, key):
-        result = GeoDataFrame.__getitem__(self, key)
-        if isinstance(key, Series):
-            result.__class__ = CartoDataFrame
-        return result
-
-    @property
-    def _constructor(self):
-        return CartoDataFrame
 
     @staticmethod
     def from_carto(*args, **kwargs):
@@ -134,6 +125,9 @@ class CartoDataFrame(GeoDataFrame):
         from ..viz import Map, Layer
         return Map(Layer(self, *args, **kwargs))
 
+    def has_geometry(self):
+        return self._geometry_column_name in self
+
     def set_geometry(self, col, drop=False, inplace=False, crs=None):
         if inplace:
             frame = self
@@ -175,5 +169,37 @@ class CartoDataFrame(GeoDataFrame):
 
         return frame
 
-    def has_geometry(self):
-        return self._geometry_column_name in self
+    @property
+    def _constructor(self):
+        return CartoDataFrame
+
+    def __getitem__(self, key):
+        result = super(self._constructor, self).__getitem__(key)
+        if isinstance(key, (ndarray, Series)):
+            result.__class__ = self._constructor
+        return result
+
+    def __finalize__(self, *args, **kwargs):
+        result = super(self._constructor, self).__finalize__(*args, **kwargs)
+        result.__class__ = self._constructor
+        return result
+
+    def astype(self, *args, **kwargs):
+        result = super(self._constructor, self).astype(*args, **kwargs)
+        result.__class__ = self._constructor
+        return result
+
+    def merge(self, *args, **kwargs):
+        result = super(self._constructor, self).merge(*args, **kwargs)
+        result.__class__ = self._constructor
+        return result
+
+    def dissolve(self, *args, **kwargs):
+        result = super(self._constructor, self).dissolve(*args, **kwargs)
+        result.__class__ = self._constructor
+        return result
+
+    def explode(self, *args, **kwargs):
+        result = super(self._constructor, self).explode(*args, **kwargs)
+        result.__class__ = self._constructor
+        return result

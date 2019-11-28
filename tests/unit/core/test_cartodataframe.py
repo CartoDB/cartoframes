@@ -1,7 +1,8 @@
 """Unit tests for cartoframes.data."""
 
-from shapely.geometry import box
+from pandas import concat
 from geopandas import GeoDataFrame
+from shapely.geometry import box, Point
 
 from cartoframes import CartoDataFrame
 
@@ -52,12 +53,6 @@ class TestCartoDataFrame(object):
         assert isinstance(cdf, CartoDataFrame)
         assert cdf.geometry.name == 'other_geometry'
 
-    def test_filter(self):
-        cdf = CartoDataFrame(self.gdf)
-        cdf = cdf[cdf.id > 1]
-        assert isinstance(cdf, CartoDataFrame)
-        assert len(cdf) == 1
-
     def test_from_carto(self, mocker):
         mock = mocker.patch('cartoframes.io.carto.read_carto')
         CartoDataFrame.from_carto('table_name')
@@ -88,3 +83,36 @@ class TestCartoDataFrame(object):
         viz = cdf.viz('__style__')
         mock_layer.assert_called_once_with(cdf, '__style__')
         assert viz == '__map__'
+
+    def test_getitem(self):
+        cdf = CartoDataFrame(self.gdf)
+        cdf = cdf[cdf.id > 1]
+        assert isinstance(cdf, CartoDataFrame)
+        assert len(cdf) == 1
+
+    def test_astype(self):
+        cdf = CartoDataFrame({'a': [1], 'geometry': [Point(0, 0)]})
+        cdf = cdf.astype('object')
+        assert isinstance(cdf, CartoDataFrame)
+
+    def test_merge(self):
+        cdf1 = CartoDataFrame({'lkey': ['foo', 'bar'], 'value': [1, 2]})
+        cdf2 = CartoDataFrame({'rkey': ['foo', 'bar'], 'value': [5, 6]})
+        cdf = cdf1.merge(cdf2, left_on='lkey', right_on='rkey')
+        assert isinstance(cdf, CartoDataFrame)
+
+    def test_dissolve(self):
+        cdf = CartoDataFrame({'a': [1], 'geometry': [Point(0, 0)]})
+        cdf = cdf.dissolve(by='a')
+        assert isinstance(cdf, CartoDataFrame)
+
+    def test_explode(self):
+        cdf = CartoDataFrame({'a': [1], 'geometry': [Point(0, 0)]})
+        cdf = cdf.explode()
+        assert isinstance(cdf, CartoDataFrame)
+
+    def test_concat(self):
+        cdf1 = CartoDataFrame({'a': [1], 'geometry': [Point(0, 0)]})
+        cdf2 = CartoDataFrame({'a': [2], 'geometry': [Point(1, 1)]})
+        cdf = concat([cdf1, cdf2])
+        assert isinstance(cdf, CartoDataFrame)
