@@ -32,9 +32,8 @@ from cartoframes.data.observatory import Catalog
 Catalog().country('usa').categories
 ```
 
-<div>
-<pre><code>
-[<Category.get('road_traffic')>,
+<div class="u-topbottom-Margin">
+<pre><code>[<Category.get('road_traffic')>,
   <Category.get('points_of_interest')>,
   <Category.get('human_mobility')>,
   <Category.get('financial')>,
@@ -51,9 +50,8 @@ geographies = Catalog().country('usa').category('demographics').geographies
 geographies
 ```
 
-<div class="u-vertical-scroll">
-<pre><code>
-[<Geography.get('ags_blockgroup_1c63771c')>,
+<div class="u-vertical-scroll u-topbottom-Margin">
+<pre><code>[<Geography.get('ags_blockgroup_1c63771c')>,
   <Geography.get('ags_q17_4739be4f')>,
   <Geography.get('mbi_blockgroups_1ab060a')>,
   <Geography.get('mbi_counties_141b61cd')>,
@@ -173,9 +171,8 @@ datasets = Catalog().country('usa').category('demographics').geography('ags_bloc
 datasets
 ```
 
-<div>
-<pre><code>
-[<Dataset.get('ags_sociodemogr_e92b1637')>,
+<div class="u-topbottom-Margin">
+<pre><code>[<Dataset.get('ags_sociodemogr_e92b1637')>,
     <Dataset.get('ags_consumerspe_fe5d060a')>,
     <Dataset.get('ags_retailpoten_ddf56a1a')>,
     <Dataset.get('ags_consumerpro_e8344e2e')>,
@@ -379,9 +376,8 @@ variables = dataset.variables
 variables
 ```
 
-<div class="u-vertical-scroll">
-<pre><code>
-[<Variable.get('HINCYMED65_310bc888')> #'Median Household Income: Age 65-74 (2019A)',
+<div class="u-vertical-scroll u-topbottom-Margin">
+<pre><code>[<Variable.get('HINCYMED65_310bc888')> #'Median Household Income: Age 65-74 (2019A)',
 <Variable.get('HINCYMED55_1a269b4b')> #'Median Household Income: Age 55-64 (2019A)',
 <Variable.get('HINCYMED45_33daa0a')> #'Median Household Income: Age 45-54 (2019A)',
 <Variable.get('HINCYMED35_4c7c3ccd')> #'Median Household Income: Age 35-44 (2019A)',
@@ -3511,9 +3507,8 @@ Every `Dataset` instance in the catalog contains other useful metadata:
 dataset.to_dict()
 ```
 
-<div class="u-vertical-scroll">
-<pre><code>
-{
+<div class="u-vertical-scroll u-topbottom-Margin">
+<pre><code>{
   'id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019',
   'slug': 'ags_sociodemogr_e92b1637',
   'name': 'Sociodemographic',
@@ -3743,10 +3738,8 @@ catalog = Catalog()
 catalog.country('usa').category('demographics').datasets
 ```
 
-<div class="u-vertical-scroll">
-<pre><code>
-[
-  <Dataset.get('od_acs_181619a3')>,
+<div class="u-vertical-scroll u-topbottom-Margin">
+<pre><code>[<Dataset.get('od_acs_181619a3')>,
   <Dataset.get('od_acs_38016c42')>,
   <Dataset.get('od_acs_1f614ee8')>,
   <Dataset.get('od_acs_c6bf32c9')>,
