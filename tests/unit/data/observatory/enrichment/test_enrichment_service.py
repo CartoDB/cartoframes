@@ -30,6 +30,21 @@ class TestEnrichmentService(object):
         self.credentials = None
         BigQueryClient._init_client = self.original_init_client
 
+    def test_prepare_data_no_geom(self):
+        geom_column = 'the_geom'
+        enrichment_service = EnrichmentService(credentials=self.credentials)
+        point = Point(1, 1)
+        df = pd.DataFrame(
+            [[1, point]],
+            columns=['cartodb_id', geom_column])
+
+        with pytest.raises(EnrichmentException) as e:
+            enrichment_service._prepare_data(df, None)
+
+        error = ('No valid geometry found. Please provide an input source with ' +
+                 'a valid geometry or specify the "geom_col" param with a geometry column.')
+        assert str(e.value) == error
+
     def test_prepare_data(self):
         geom_column = 'the_geom'
         enrichment_service = EnrichmentService(credentials=self.credentials)

@@ -96,8 +96,8 @@ class EnrichmentService(object):
             cartodataframe.set_geometry(geom_col, inplace=True)
 
         if not cartodataframe.has_geometry():
-            raise Exception('No valid geometry found. Please provide an input source with ' +
-                            'a valid geometry or specify the "geom_col" param with a geometry column.')
+            raise EnrichmentException('No valid geometry found. Please provide an input source with ' +
+                                      'a valid geometry or specify the "geom_col" param with a geometry column.')
 
         # Add extra columns for the enrichment
         cartodataframe[self.enrichment_id] = range(cartodataframe.shape[0])
