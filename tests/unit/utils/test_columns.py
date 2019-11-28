@@ -74,51 +74,37 @@ class TestColumns(object):
     def test_database_column_name_the_geom(self):
         dataframe_column_info = DataframeColumnInfo('other')
         assert dataframe_column_info.name == 'other'
+        assert dataframe_column_info.dbname == 'other'
         dataframe_column_info = DataframeColumnInfo('the_geom', 'geometry')
         assert dataframe_column_info.name == 'the_geom'
-        assert dataframe_column_info.type == 'geometry(Point, 4326)'
+        assert dataframe_column_info.dbname == 'the_geom'
+        assert dataframe_column_info.dbtype == 'geometry(Point, 4326)'
 
     def test_column_info_with_geom(self):
         cdf = CartoDataFrame(
             [['Gran Vía 46', 'Madrid', 'POINT (0 0)'], ['Ebro 1', 'Sevilla', 'POINT (1 1)']],
-            columns=['address', 'city', 'the_geom'],
+            columns=['Address', 'City', 'the_geom'],
             geometry='the_geom'
         )
-
-        expected_columns = [
-            {'name': 'address', 'type': 'text'},
-            {'name': 'city', 'type': 'text'},
-            {'name': 'the_geom', 'type': 'geometry(Point, 4326)'}
-        ]
 
         dataframe_columns_info = DataframeColumnsInfo(cdf)
 
         assert len(dataframe_columns_info.columns) == 3
-        assert dataframe_columns_info.columns[0].name == expected_columns[0]['name']
-        assert dataframe_columns_info.columns[0].type == expected_columns[0]['type']
-        assert dataframe_columns_info.columns[1].name == expected_columns[1]['name']
-        assert dataframe_columns_info.columns[1].type == expected_columns[1]['type']
-        assert dataframe_columns_info.columns[2].name == expected_columns[2]['name']
-        assert dataframe_columns_info.columns[2].type == expected_columns[2]['type']
+        assert str(dataframe_columns_info.columns[0]) == 'Address address text'
+        assert str(dataframe_columns_info.columns[1]) == 'City city text'
+        assert str(dataframe_columns_info.columns[2]) == 'the_geom the_geom geometry(Point, 4326)'
 
     def test_column_info_without_geom(self):
         cdf = CartoDataFrame(
             [['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']],
-            columns=['address', 'city']
+            columns=['Address', 'City']
         )
-
-        expected_columns = [
-            {'name': 'address', 'type': 'text'},
-            {'name': 'city', 'type': 'text'}
-        ]
 
         dataframe_columns_info = DataframeColumnsInfo(cdf)
 
         assert len(dataframe_columns_info.columns) == 2
-        assert dataframe_columns_info.columns[0].name == expected_columns[0]['name']
-        assert dataframe_columns_info.columns[0].type == expected_columns[0]['type']
-        assert dataframe_columns_info.columns[1].name == expected_columns[1]['name']
-        assert dataframe_columns_info.columns[1].type == expected_columns[1]['type']
+        assert str(dataframe_columns_info.columns[0]) == 'Address address text'
+        assert str(dataframe_columns_info.columns[1]) == 'City city text'
 
     def test_column_info_basic_troubled_names(self):
         cdf = CartoDataFrame(
@@ -127,38 +113,22 @@ class TestColumns(object):
             geometry='the_geom'
         )
 
-        expected_columns = [
-            {'name': 'cartodb_id', 'type': 'bigint'},
-            {'name': 'the_geom', 'type': 'geometry(Point, 4326)'}
-        ]
-
         dataframe_columns_info = DataframeColumnsInfo(cdf)
 
         assert len(dataframe_columns_info.columns) == 2
-        assert dataframe_columns_info.columns[0].name == expected_columns[0]['name']
-        assert dataframe_columns_info.columns[0].type == expected_columns[0]['type']
-        assert dataframe_columns_info.columns[1].name == expected_columns[1]['name']
-        assert dataframe_columns_info.columns[1].type == expected_columns[1]['type']
+        assert str(dataframe_columns_info.columns[0]) == 'cartodb_id cartodb_id bigint'
+        assert str(dataframe_columns_info.columns[1]) == 'the_geom the_geom geometry(Point, 4326)'
 
     def test_column_info_geometry_troubled_names(self):
         cdf = CartoDataFrame(
             [['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']],
-            columns=['geom', 'the_geom', 'geometry'],
+            columns=['Geom', 'the_geom', 'g-e-o-m-e-t-r-y'],
             geometry='the_geom'
         )
-
-        expected_columns = [
-            {'name': 'geom', 'type': 'text'},
-            {'name': 'the_geom', 'type': 'geometry(Point, 4326)'},
-            {'name': 'geometry', 'type': 'text'}
-        ]
 
         dataframe_columns_info = DataframeColumnsInfo(cdf)
 
         assert len(dataframe_columns_info.columns) == 3
-        assert dataframe_columns_info.columns[0].name == expected_columns[0]['name']
-        assert dataframe_columns_info.columns[0].type == expected_columns[0]['type']
-        assert dataframe_columns_info.columns[1].name == expected_columns[1]['name']
-        assert dataframe_columns_info.columns[1].type == expected_columns[1]['type']
-        assert dataframe_columns_info.columns[2].name == expected_columns[2]['name']
-        assert dataframe_columns_info.columns[2].type == expected_columns[2]['type']
+        assert str(dataframe_columns_info.columns[0]) == 'Geom geom text'
+        assert str(dataframe_columns_info.columns[1]) == 'the_geom the_geom geometry(Point, 4326)'
+        assert str(dataframe_columns_info.columns[2]) == 'g-e-o-m-e-t-r-y g_e_o_m_e_t_r_y text'

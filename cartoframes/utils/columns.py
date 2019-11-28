@@ -100,18 +100,20 @@ def _extract_pgtype(fields):
 
 class DataframeColumnInfo(object):
     def __init__(self, name, dtype=None, geom_type=None):
-        self.name = normalize_name(name)
+        self.name = name
+        self.dbname = normalize_name(name)
         if str(dtype) == 'geometry':
             self.is_geom = True
-            self.type = 'geometry({}, 4326)'.format(geom_type or 'Point')
+            self.dbtype = 'geometry({}, 4326)'.format(geom_type or 'Point')
         else:
             self.is_geom = False
-            self.type = dtypes2pg(dtype)
+            self.dbtype = dtypes2pg(dtype)
 
     def __repr__(self):
-        return "DataframeColumnInfo<{}, {}>".format(
+        return '{} {} {}'.format(
             self.name,
-            self.type
+            self.dbname,
+            self.dbtype
         )
 
 

@@ -275,7 +275,7 @@ def _drop_table_query(table_name, if_exists=True):
 
 
 def _create_table_from_columns_query(table_name, columns):
-    columns = ['{name} {type}'.format(name=column.name, type=column.type) for column in columns]
+    columns = ['{name} {type}'.format(name=column.dbname, type=column.dbtype) for column in columns]
 
     return 'CREATE TABLE {table_name} ({columns})'.format(
         table_name=table_name,

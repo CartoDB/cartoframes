@@ -2,6 +2,8 @@
 
 import pandas as pd
 
+from carto.exceptions import CartoException
+
 from ..core.cartodataframe import CartoDataFrame
 from ..core.managers.context_manager import ContextManager
 from ..utils.utils import is_sql_query
@@ -167,7 +169,7 @@ def describe_table(table_name, credentials=None, schema=None):
 
     try:
         privacy = context_manager.get_privacy(table_name)
-    except Exception:
+    except CartoException:
         # There is an issue with ghost tables when
         # the table is created for the first time
         print('Debug: we can not retrieve the privacy from the metadata')
