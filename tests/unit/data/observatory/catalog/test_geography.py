@@ -120,7 +120,7 @@ class TestGeography(object):
     def test_geography_is_exported_as_dict(self):
         # Given
         geography = Geography(db_geography1)
-        excluded_fields = ['summary_json', 'available_in']
+        excluded_fields = ['summary_json', 'available_in', 'geom_coverage']
         expected_dict = {key: value for key, value in db_geography1.items() if key not in excluded_fields}
 
         # When
