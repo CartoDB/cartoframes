@@ -1,8 +1,8 @@
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
-from cartoframes.data.observatory import Enrichment, Variable, Dataset, VariableAggregation, VariableFilter
+from cartoframes.data.observatory import Enrichment, Variable, Dataset, VariableFilter
 from cartoframes.data.observatory.enrichment.enrichment_service import _PUBLIC_PROJECT, _WORKING_PROJECT, \
-    AGGREGATION_DEFAULT, AGGREGATION_NONE
+    AGGREGATION_DEFAULT, AGGREGATION_NONE, prepare_variables, _GEOJSON_COLUMN
 
 try:
     from unittest.mock import Mock, patch
@@ -102,12 +102,170 @@ class TestPolygonEnrichment(object):
             'dataset_id': 'fake_name'
         })
         variables = [variable1, variable2]
+        aggregation = AGGREGATION_DEFAULT
+        variables = prepare_variables(variables, aggregation)
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_polygon_enrichment_sql(
             temp_table_name, variables, [], AGGREGATION_DEFAULT
+        )
+
+        expected_queries = [
+            _get_query(agg, [column1, column2], self.username, view, geo_view, temp_table_name)
+        ]
+
+        actual = sorted(_clean_queries(actual_queries))
+        expected = sorted(_clean_queries(expected_queries))
+
+        assert actual == expected
+
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch.object(Dataset, 'get')
+    def test_enrichment_query_by_polygons_two_variables_agg_none(self, dataset_get_mock, _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
+        enrichment = Enrichment(credentials=self.credentials)
+
+        temp_table_name = 'test_table'
+        project = 'project'
+        dataset = 'dataset'
+        table = 'table'
+        variable1_name = 'variable1'
+        variable2_name = 'variable2'
+        column1 = 'column1'
+        column2 = 'column2'
+        geo_table = 'geo_table'
+        view = 'view_{}_{}'.format(dataset, table)
+        geo_view = 'view_{}_{}'.format(dataset, geo_table)
+        agg = 'AVG'
+
+        variable1 = Variable({
+            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable1_name),
+            'column_name': column1,
+            'agg_method': agg,
+            'dataset_id': 'fake_name'
+        })
+        variable2 = Variable({
+            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable2_name),
+            'column_name': column2,
+            'agg_method': None,
+            'dataset_id': 'fake_name'
+        })
+        variables = [variable1, variable2]
+        aggregation = AGGREGATION_DEFAULT
+        variables = prepare_variables(variables, aggregation)
+
+        catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
+        dataset_get_mock.return_value = catalog
+
+        actual_queries = enrichment._get_polygon_enrichment_sql(
+            temp_table_name, variables, [], aggregation
+        )
+
+        expected_queries = [
+            _get_query(agg, [column1], self.username, view, geo_view, temp_table_name)
+        ]
+
+        actual = sorted(_clean_queries(actual_queries))
+        expected = sorted(_clean_queries(expected_queries))
+
+        assert actual == expected
+
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch.object(Dataset, 'get')
+    def test_enrichment_query_by_polygons_two_vars_agg_none_custom(self, dataset_get_mock, _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
+        enrichment = Enrichment(credentials=self.credentials)
+
+        temp_table_name = 'test_table'
+        project = 'project'
+        dataset = 'dataset'
+        table = 'table'
+        variable1_name = 'variable1'
+        variable2_name = 'variable2'
+        column1 = 'column1'
+        column2 = 'column2'
+        geo_table = 'geo_table'
+        view = 'view_{}_{}'.format(dataset, table)
+        geo_view = 'view_{}_{}'.format(dataset, geo_table)
+        agg = 'AVG'
+
+        variable1 = Variable({
+            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable1_name),
+            'column_name': column1,
+            'agg_method': agg,
+            'dataset_id': 'fake_name'
+        })
+        variable2 = Variable({
+            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable2_name),
+            'column_name': column2,
+            'agg_method': None,
+            'dataset_id': 'fake_name'
+        })
+        variables = [variable1, variable2]
+        aggregation = agg
+        variables = prepare_variables(variables, aggregation)
+
+        catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
+        dataset_get_mock.return_value = catalog
+
+        actual_queries = enrichment._get_polygon_enrichment_sql(
+            temp_table_name, variables, [], aggregation
+        )
+
+        expected_queries = [
+            _get_query(agg, [column1, column2], self.username, view, geo_view, temp_table_name)
+        ]
+
+        actual = sorted(_clean_queries(actual_queries))
+        expected = sorted(_clean_queries(expected_queries))
+
+        assert actual == expected
+
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
+    @patch.object(Dataset, 'get')
+    def test_enrichment_query_by_polygons_two_vars_agg_none_custom2(self, dataset_get_mock, _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
+        enrichment = Enrichment(credentials=self.credentials)
+
+        temp_table_name = 'test_table'
+        project = 'project'
+        dataset = 'dataset'
+        table = 'table'
+        variable1_name = 'variable1'
+        variable2_name = 'variable2'
+        column1 = 'column1'
+        column2 = 'column2'
+        geo_table = 'geo_table'
+        view = 'view_{}_{}'.format(dataset, table)
+        geo_view = 'view_{}_{}'.format(dataset, geo_table)
+        agg = 'AVG'
+
+        variable1 = Variable({
+            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable1_name),
+            'column_name': column1,
+            'agg_method': agg,
+            'dataset_id': 'fake_name'
+        })
+        variable2 = Variable({
+            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable2_name),
+            'column_name': column2,
+            'agg_method': None,
+            'dataset_id': 'fake_name'
+        })
+        variables = [variable1, variable2]
+        aggregation = {variable2.id: agg}
+        variables = prepare_variables(variables, aggregation)
+
+        catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
+        dataset_get_mock.return_value = catalog
+
+        actual_queries = enrichment._get_polygon_enrichment_sql(
+            temp_table_name, variables, [], aggregation
         )
 
         expected_queries = [
@@ -390,8 +548,7 @@ class TestPolygonEnrichment(object):
             'dataset_id': 'fake_name'
         })
         variables = [variable1, variable2]
-
-        aggregation = [VariableAggregation(variable2, agg2)]
+        aggregation = {variable2.id: agg2}
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset1, geo_table))
         dataset_get_mock.return_value = catalog
@@ -528,7 +685,7 @@ def _get_query(agg, columns, username, view, geo_table, temp_table_name, filters
             view=view,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column='__geojson_geom',
+            data_geom_column=_GEOJSON_COLUMN,
             where=_get_where(filters),
             group=group)
 
@@ -554,16 +711,35 @@ def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_ta
             table=table,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column='__geojson_geom',
+            data_geom_column=_GEOJSON_COLUMN,
             where=_get_where(filters))
 
 
 def _get_column_sql(agg, column):
-    return '''
-        {agg}(enrichment_table.{column} *
-        (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column})) /
-        ST_area(data_table.{data_geom_column}))) AS {column}
-            '''.format(agg=agg, column=column, data_geom_column='__geojson_geom')
+    if (agg == 'SUM'):
+        return """
+            {aggregation}(
+                enrichment_table.{column} * (
+                    ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                    /
+                    ST_area(data_table.{geo_column})
+                )
+            ) AS {aggregation}_{column}
+            """.format(
+                column=column,
+                geo_column=_GEOJSON_COLUMN,
+                aggregation=agg)
+    else:
+        return """
+            {aggregation}(
+                enrichment_table.{column} * (
+                    ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                )
+            ) AS {aggregation}_{column}
+            """.format(
+                column=column,
+                geo_column=_GEOJSON_COLUMN,
+                aggregation=agg)
 
 
 def _get_column_sql_without_agg(columns):
@@ -575,7 +751,7 @@ def _get_column_sql_without_agg(columns):
         ST_area(data_table.{data_geom_column}) AS measures_proportion
         '''.format(
             columns=', '.join(columns),
-            data_geom_column='__geojson_geom')
+            data_geom_column=_GEOJSON_COLUMN)
 
 
 def _get_where(filters):

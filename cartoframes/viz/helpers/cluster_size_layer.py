@@ -2,7 +2,7 @@ from __future__ import absolute_import, division
 
 from carto.exceptions import CartoException
 
-from .utils import get_value
+from .utils import get_value, get_popup
 from ..constants import CLUSTER_KEYS, CLUSTER_OPERATIONS
 from ..layer import Layer
 
@@ -72,12 +72,8 @@ def cluster_size_layer(
                 'resolution': '{0}'.format(resolution)
             }
         },
-        popup=popup and not animate and {
-            'hover': {
-                'title': title or cluster_operation_title,
-                'value': cluster_operation
-            }
-        },
+        popup=popup and not animate and get_popup(
+          popup, title, cluster_operation_title, None, cluster_operation),
         legend=legend and {
             'type': {
                 'point': 'size-continuous-point'
