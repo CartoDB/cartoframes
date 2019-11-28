@@ -9,7 +9,7 @@ Before you get started, we encourage you to have CARTOframes installed so you ca
 pip install --pre cartoframes
 ```
 
-If you want to know other ways to install it, check out the [installation guide](/developers/cartoframes/guides/Install-CARTOframes-in-your-Notebooks) first.
+If you want to know other ways to install it, check out the [installation guide](/developers/cartoframes/guides/Installation) first.
 
 #### Spatial analysis scenario
 

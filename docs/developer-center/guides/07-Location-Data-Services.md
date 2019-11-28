@@ -16,7 +16,7 @@ We will be using the same dataset of fake locations used along these guides [sta
 
 ### Authentication
 
-Using Location Data Services requires to be authenticated. For more information about how to authenticate, please read the [Login to CARTO Platform guide](/developers/cartoframes/guides/Login-to-CARTO-Platform/)
+Using Location Data Services requires to be authenticated. For more information about how to authenticate, please read the [Login to CARTO Platform guide](/developers/cartoframes/guides/Authentication/)
 
 ```python
 from cartoframes.auth import Credentials, set_default_credentials

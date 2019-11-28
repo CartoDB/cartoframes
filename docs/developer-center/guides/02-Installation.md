@@ -6,19 +6,19 @@ This guide is intended for those who are going to start using CARTOframes and gi
 
 It is possible to install CARTOframes with [`pip`](https://pypi.org/project/pip/) by simply typing one of the following commands to do a system install:
 
-To install the pre release, use the `--pre` flag:
+To install the latest beta release, use the `--pre` flag:
 
 ```bash
 $ pip install cartoframes --pre
 ```
 
-To install the last version:
+To install the latest stable version:
 
 ```bash
 $ pip install cartoframes
 ```
 
-To install a specific version, for example, let's say the 1.2.3 version:
+To install a specific version, for example, let's say the 1.0b5 version:
 
 ```bash
 $ pip install cartoframes==1.2.3
