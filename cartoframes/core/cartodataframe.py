@@ -1,7 +1,8 @@
+from numpy import ndarray
 from pandas import Series
-from geopandas import GeoDataFrame
+from geopandas import GeoDataFrame, points_from_xy
 
-from ..utils.geom_utils import generate_index, generate_geometry
+from ..utils.geom_utils import decode_geometry_column
 
 
 class CartoDataFrame(GeoDataFrame):
@@ -12,18 +13,20 @@ class CartoDataFrame(GeoDataFrame):
     access to the CARTO platform.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(CartoDataFrame, self).__init__(*args, **kwargs)
+    def __init__(self, data, *args, **kwargs):
+        geometry = kwargs.get('geometry', None)
+        if geometry is None:
+            # Load geometry from data if not specified in kwargs
+            if hasattr(data, 'geometry'):
+                kwargs['geometry'] = data.geometry.name
 
-    def __getitem__(self, key):
-        result = GeoDataFrame.__getitem__(self, key)
-        if isinstance(key, Series):
-            result.__class__ = CartoDataFrame
-        return result
+        crs = kwargs.get('crs', None)
+        if crs is None:
+            # Load crs from data if not specified in kwargs
+            if hasattr(data, 'crs'):
+                kwargs['crs'] = data.crs
 
-    @property
-    def _constructor(self):
-        return CartoDataFrame
+        super(CartoDataFrame, self).__init__(data, *args, **kwargs)
 
     @staticmethod
     def from_carto(*args, **kwargs):
@@ -115,76 +118,88 @@ class CartoDataFrame(GeoDataFrame):
         from ..io.carto import to_carto
         return to_carto(self, *args, **kwargs)
 
-    def convert(self, index_column=None, geom_column=None, lnglat_columns=None,
-                drop_index=True, drop_geom=True, drop_lnglat=True):
-        """ For internal usage only.
-        Tries to decode the geometry automatically as a `shapely https://pypi.org/project/Shapely/_.`
-        object by looking for coordinates in columns.
-
-        Args:
-            index_column (str, optional):
-                Name of the index column. If it is `None`, it is generated automatically.
-            geom_column (str, optional):
-                Name of the geometry column to be used to generate the decoded geometry.
-                If it is None, it tries to find common geometry column names, but if there is
-                no geometry column it will leave it empty.
-            lnglat_columns ([str, str], optional):
-                Tuple with the longitude and latitude column names to be used to generate
-                the decoded geometry.
-            drop_index (bool, optional):
-                Defaults to True. Removes the index column.
-            drop_geom (bool, optional):
-                Defaults to True. Removes the geometry column.
-            drop_lnglat (bool, optional):
-                Defaults to True. Removes the lnglat column.
-
-        Returns:
-            The CartoDataFrame itself
-
-        Examples:
-
-            Decode the geometry automatically:
-
-            .. code::
-                from cartoframes import CartoDataFrame
-
-                cdf = CartoDataFrame.from_file('filename.csv').convert()
-
-            Passing the geometry column explicitly:
-
-            .. code::
-
-                from cartoframes import CartoDataFrame
-
-                cdf = CartoDataFrame.from_file('filename.csv')
-                cdf.convert(geom_column='my_geom_column')
-
-            Passing lnglat_columns explicitly:
-
-            .. code::
-
-                from cartoframes import CartoDataFrame
-
-                cdf = CartoDataFrame.from_file('filename.csv')
-                cdf.convert(lnglat_columns=['longitude', 'latitude'])
-
-            Passing the index column explicitly:
-
-            .. code::
-
-                from cartoframes import CartoDataFrame
-
-                cdf = CartoDataFrame.from_file('filename.csv')
-                cdf.convert(index_column='my_index')
-
-        """
-        generate_index(self, index_column, drop_index)
-        generate_geometry(self, geom_column, lnglat_columns, drop_geom, drop_lnglat)
-        return self
-
     def viz(self, *args, **kwargs):
         """
         Creates a :py:class:`Map <cartoframes.viz.Map>` visualization
         """
         from ..viz import Map, Layer
         return Map(Layer(self, *args, **kwargs))
+
+    def has_geometry(self):
+        return self._geometry_column_name in self
+
+    def set_geometry(self, col, drop=False, inplace=False, crs=None):
+        if inplace:
+            frame = self
+        else:
+            frame = self.copy()
+
+        # Decode geometry:
+        #   WKB, EWKB, WKB_HEX, EWKB_HEX, WKB_BHEX, EWKB_BHEX, WKT, EWKT
+        if isinstance(col, str) and col in frame:
+            frame[col] = decode_geometry_column(frame[col])
+        else:
+            col = decode_geometry_column(col)
+
+        # Call super set_geometry with decoded column
+        super(CartoDataFrame, frame).set_geometry(col, drop=drop, inplace=True, crs=crs)
+
+        if not inplace:
+            return frame
+
+    def set_geometry_from_xy(self, x, y, drop=False, inplace=False, crs=None):
+        if isinstance(x, str) and x in self and isinstance(y, str) and y in self:
+            x_col = self[x]
+            y_col = self[y]
+        else:
+            x_col = x
+            y_col = y
+
+        # Generate geometry
+        geom_col = points_from_xy(x_col, y_col)
+
+        # Call super set_geometry with generated column
+        frame = super(CartoDataFrame, self).set_geometry(geom_col, inplace=inplace, crs=crs)
+
+        if drop:
+            if frame is None:
+                frame = self
+            del frame[x]
+            del frame[y]
+
+        return frame
+
+    @property
+    def _constructor(self):
+        return CartoDataFrame
+
+    def __getitem__(self, key):
+        result = super(self._constructor, self).__getitem__(key)
+        if isinstance(key, (list, ndarray, Series)):
+            result.__class__ = self._constructor
+        return result
+
+    def __finalize__(self, *args, **kwargs):
+        result = super(self._constructor, self).__finalize__(*args, **kwargs)
+        result.__class__ = self._constructor
+        return result
+
+    def astype(self, *args, **kwargs):
+        result = super(self._constructor, self).astype(*args, **kwargs)
+        result.__class__ = self._constructor
+        return result
+
+    def merge(self, *args, **kwargs):
+        result = super(self._constructor, self).merge(*args, **kwargs)
+        result.__class__ = self._constructor
+        return result
+
+    def dissolve(self, *args, **kwargs):
+        result = super(self._constructor, self).dissolve(*args, **kwargs)
+        result.__class__ = self._constructor
+        return result
+
+    def explode(self, *args, **kwargs):
+        result = super(self._constructor, self).explode(*args, **kwargs)
+        result.__class__ = self._constructor
+        return result

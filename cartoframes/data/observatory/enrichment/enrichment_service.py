@@ -91,8 +91,7 @@ class EnrichmentService(object):
         return cartodataframe
 
     def _prepare_data(self, dataframe, geom_column):
-        cartodataframe = CartoDataFrame(dataframe, copy=True)
-        cartodataframe.convert(geom_column=geom_column)  # Decode geom
+        cartodataframe = CartoDataFrame(dataframe, copy=True, geometry=geom_column)
 
         # Add extra columns for the enrichment
         cartodataframe[self.enrichment_id] = range(cartodataframe.shape[0])
