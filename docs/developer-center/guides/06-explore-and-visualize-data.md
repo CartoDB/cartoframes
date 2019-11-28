@@ -65,7 +65,7 @@ df_stores
 ```
 
 <div>
-  <table>
+  <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -111,9 +111,10 @@ df_stores
     </tr>
   </tbody>
 </table>
-<div>
+</div>
 
 From the isochrone Layer, you will use the demographic attributes:
+
 * `popcy` which counts the total population in each area
 * `inccymedhh` that is the median household income in each area
 * `lbfcyempl` counts the employed population
