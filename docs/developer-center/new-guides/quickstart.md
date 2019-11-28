@@ -10,24 +10,24 @@ Before you get started, we encourage you to have CARTOframes installed so you ca
 pip install --pre cartoframes
 ```
 
-If you don’t have your python environment set-up yet, check out this guide first.
+If you want to know more about this, check out the [installation guide](/developers/cartoframes/guides/Install-CARTOframes-in-your-Notebooks) first.
 
 ### Spatial analysis scenario
 
-Let's say you are a data scientist working for Starbucks and you want to better understand why some stores at Brooklyn, New York, perform better than others.
+Let's say you are a data scientist working for Starbucks and you want to better understand why some stores in Brooklyn, New York, perform better than others.
 
 To begin, let's outline a workflow: 
 
 - Get and explore your company's data
-- Create the areas of influence for your stores
-- Discover and enrich your data thanks to CARTO's Data Observatory
+- Create areas of influence for your stores
+- Enrich your data with demographic data
 - And finally, share the results of your analysis with your team
 
 Let's get started!
 
 ## Get and explore your company's data
 
-[This]() is the dataset you have to start your exploration. It contains information about the Starbucks stores. As a first exploratory step, you read it into a Jupyter Notebook using pandas.
+[This dataset](../files/starbucks_brooklyn.csv) is the one you have to start your exploration. It contains information about the location of Starbucks and each store's annual revenue. As a first exploratory step, you read it into a Jupyter Notebook using pandas.
 
 
 ```python
@@ -99,20 +99,17 @@ starbucks_df.head()
 </div>
 
 
+To be able to display your stores as points on a map, you first have to convert the `address` column into geometries. This process is called geocoding and CARTO provides a straightforward way to do it (you can learn more about it in the [location data services guide]()).
 
-By only reading the data into a dataframe you aren't able to see at a glance where the stations are. So let's visualize it in a map!
+In order to geocode, you have to set your CARTO credentials. If you don't know your API key yet, check the [authentication guide]() to learn how to get it. In case you want to see the result of the geocoding without being logged in, here it is the [geocoded dataset]().
 
-The first thing you have to do is to transform the `address` column into geometries. This process is called geocoding and CARTO provides a straightforward way to do it (you can learn more about it in the [location data services guide]()).
-
-Before being able to do it, you have to set your CARTO credentials. If you don't know your API key yet, check the [authentication guide]() to learn how to get it. In case you want to see the result of the geocoding without being logged in, here it is the [geocoded dataset]().
-
-Note: If you don't have an account yet, you can get a [free account]() if you are a student or [get a trial]() if you aren't.
+> Note: If you don't have an account yet, you can get a free account if you are a student or get a trial if you aren't by [signing up]().
 
 
 ```python
 from cartoframes.auth import set_default_credentials
 
-set_default_credentials()
+set_default_credentials('credentials.json')
 ```
 
 Now, we are ready to geocode the dataframe:
@@ -204,9 +201,9 @@ starbucks_df.head()
 
 
 
-Done! Now that the stores are geocoded, you will notice a new column called `geometry` has been added. This column stores the geographic location of each store and it's used to plot each location on the map.
+Done! Now that the stores are geocoded, you will notice a new column named `geometry` has been added. This column stores the geographic location of each store and it's used to plot each location on the map.
 
-You can quickly visualize your geocoded dataframes using the Map and Layer classes. Check the [visualization guide]() to know all the visualization possibilities.
+You can quickly visualize your geocoded dataframe using the Map and Layer classes. Check out the [visualization guide]() to learn more about the visualization capabilities inside of CARTOframes.
 
 
 ```python
@@ -249,15 +246,15 @@ Map(size_continuous_layer(starbucks_df, 'revenue', 'Revenue in $'))
     </iframe>
 </div>
 
-Good job! Now, just taking a look, you can see where are the stores with more revenue. Also, thanks to be using a helper, we get a legend out of it.
-
-To learn more about visualizating your data, about how to add legends, pop-ups, widgets and how to do it faster thanks to helpers, check the [visualization guide]().
+Good job! By using the [size continuous visualization layer](link to example) you can see right away where the stores with higher revenue are. By default, visualization layers also provide a popup with the mapped value and an appropriate legend.
 
 ## Create your areas of influence
 
-In the same way as with the geocoding, you can use a straightforward method for creating your areas of influence using isochrones. Isochrones are lines drawn on a map connecting points at which something occurs or arrives at the same time.
+Similar to geocoding, there is a straightforward method for creating isochrones to define your areas of influence. Isochrones are concentric polygons that display equally calculated levels over a given surface area measured by time.
 
-For our analysis, let's create and plot isochrones of 15 minutes by walk. Let's see how to do it:
+For our analysis, let's create isochrones for each store that cover the area within a 15 minute walk.
+
+To do this we will use the Isolines data service:
 
 
 ```python
@@ -281,16 +278,15 @@ Map([
     </iframe>
 </div>
 
-There they are! You can learn more about them and isodistances in the [location data services guide]().
+There they are! To learn more about creating isochrones and isodistances check out the [location data services guide]().
 
 
 
-## Discover and enrich your data thanks to CARTO's Data Observatory
+## Enrich your data with demographic data
 
-Once you know the areas of influence of your stores, let's try to find the population for each one. This will help us to calculate the average revenue per person.
+Now that you have the area of influence calculated for each store, let's augment the result with population information to help better understand a store's average revenue per person.
 
-First, let's find the dataset we need. We will use the Catalog class that can be filter by country and category. In our case, we have to look for USA demographics datasets. Let's check which are the geographies (spatial resolution) availables.
-
+First, let's find the demographic variable we need. We will use the [Catalog]() class that can be filter by country and category. In our case, we have to look for USA demographics datasets. Let's check which geographies (spatial resolution) are available.
 
 ```python
 from cartoframes.data.observatory import Catalog
@@ -322,7 +318,7 @@ Catalog().country('usa').category('demographics').geographies
 
 
 
-This time, let's choose the block groups from AGS and check which datasets are avaialble.
+This time, let's choose the block groups from AGS and check which datasets are available.
 
 
 ```python
@@ -341,7 +337,7 @@ Catalog().country('usa').category('demographics').geography('ags_blockgroup_1c63
 
 
 
-Nice! The population variables should be inside the sociodemographic dataset, let's find them looking into their descriptions.
+Nice! The population variables are inside of the sociodemographic category, let take a look at what options are available and the associated descriptions.
 
 
 ```python
@@ -799,7 +795,7 @@ variables_df[variables_df['description'].str.contains('population', case=False)]
 
 
 
-We can see the variable that contains the population for 2019 is the one with the slug `POPCY_f5800f44`. Finally, we are ready to enrich our areas of influence with that variable.
+We can see the variable that contains the population for 2019 is the one with the slug `POPCY_f5800f44`. Now we are ready to enrich our areas of influence with that variable.
 
 
 ```python
@@ -875,7 +871,7 @@ isochrones_df.head()
 
 
 
-Great! Let's see the result in a map:
+Great! Let's see the result on a map:
 
 
 ```python
@@ -896,7 +892,7 @@ Map(color_continuous_layer(isochrones_df, 'POPCY', 'Population'))
 </div>
 
 
-We can see that the area of influence of the store on the right, it's the one with the largest population. Let's go a bit further and calculate and visualize the average revenue per person.
+We can see that the area of influence of the store on the right, is the one with the highest population. Let's go a bit further and calculate and visualize the average revenue per person.
 
 
 ```python
@@ -918,11 +914,11 @@ Map(size_continuous_layer(starbucks_df, 'rev_pop', 'Revenue per person'))
 
 As we can see, there are clearly 3 stores that have lower revenue per person. This insight will help us to focus on them in further analyses.
 
-To know more about discovering the data you want, check the [data discovery guide](). Check the [data enrichment guide]() to know more possibilities about enriching your data.
+To learn more about discovering the data you want, check out the [data discovery guide](). To learn more about enriching your data check out the [data enrichment guide]().
 
 ### Publish and share your results
 
-To finish your work, you want to share the results with your teammates. Also, it would be great if you could allow them to play with the information. Let's do it!
+The final step in the workflow is to share this interactive map with your colleagues so they can explore the information on their own. Let's do it!
 
 First, let's add widgets so people are able to see some graphs of the information and filter it. To do this, we only have to add `widget=True` to the visualization layers. Remember to check the [visualization guide]() to learn more.
 
