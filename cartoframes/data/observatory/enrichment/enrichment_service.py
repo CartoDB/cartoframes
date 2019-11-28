@@ -93,7 +93,7 @@ class EnrichmentService(object):
     def _prepare_data(self, dataframe, geom_col):
         cartodataframe = CartoDataFrame(dataframe, copy=True)
         if geom_col:
-            cartodataframe.set_geometry(geom_col)
+            cartodataframe.set_geometry(geom_col, inplace=True)
 
         if not cartodataframe.has_geometry():
             raise Exception('No valid geometry found. Please provide an input source with ' +

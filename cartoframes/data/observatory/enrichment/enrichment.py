@@ -36,7 +36,7 @@ class Enrichment(EnrichmentService):
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
-            geom_col (str, optional): string indicating the 4326 geometry column name in the source `DataFrame`.
+            geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (list, optional): list of :obj:`VariableFilter` to filter rows from
                 the enrichment data. Example: `[VariableFilter(variable1, "= 'a string'")]`
 
@@ -146,7 +146,7 @@ class Enrichment(EnrichmentService):
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
-            geom_col (str, optional): string indicating the 4326 geometry column name in the source `DataFrame`.
+            geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (list, optional): list of :obj:`VariableFilter` to filter rows from
                 the enrichment data. Example: `[VariableFilter(variable1, "= 'a string'")]`
             aggregation (str, list, optional): sets the data aggregation. The polygons in the source `DataFrame` can
