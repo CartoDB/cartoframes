@@ -99,7 +99,7 @@ def _extract_pgtype(fields):
 
 
 class DataframeColumnInfo(object):
-    def __init__(self, name, dtype, geom_type=None):
+    def __init__(self, name, dtype=None, geom_type=None):
         self.name = normalize_name(name)
         if str(dtype) == 'geometry':
             self.is_geom = True

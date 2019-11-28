@@ -128,5 +128,5 @@ def _extract_srid(egeom):
 
 
 def to_geojson(geom):
-    if geom:
+    if geom is not None and str(geom) != 'GEOMETRYCOLLECTION EMPTY':
         return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)

@@ -39,13 +39,13 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
     if index_col:
         if index_col in cdf:
-            cdf.set_index(index_col, drop=True, inplace=True)
+            cdf.set_index(index_col, inplace=True)
             cdf.index.name = None
         else:
             print('Debug: column "{}" does not exist'.format(index_col))
 
     if decode_geom and 'the_geom' in cdf:
-        cdf.set_geometry('the_geom', drop=True, inplace=True)
+        cdf.set_geometry('the_geom', inplace=True)
 
     return cdf
 
@@ -86,7 +86,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             raise ValueError('Wrong index name. You should provide a valid index label.')
 
     if geom_col in cdf:
-        cdf.set_geometry(geom_col, drop=True, inplace=True)
+        cdf.set_geometry(geom_col, inplace=True)
 
     has_geometry = cdf.has_geometry()
     if has_geometry:

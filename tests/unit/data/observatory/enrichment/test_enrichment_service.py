@@ -32,12 +32,16 @@ class TestEnrichmentService(object):
         geom_column = 'the_geom'
         enrichment_service = EnrichmentService(credentials=self.credentials)
         point = Point(1, 1)
-        df = pd.DataFrame([[1, point]], columns=['cartodb_id', geom_column])
+        df = pd.DataFrame(
+            [[1, point]],
+            columns=['cartodb_id', geom_column])
         expected_cdf = CartoDataFrame(
-            [[point, 0, to_geojson(point)]],
-            columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
+            [[1, point, 0, to_geojson(point)]],
+            columns=['cartodb_id', geom_column, 'enrichment_id', '__geojson_geom'])
+        expected_cdf.set_geometry(geom_column, inplace=True)
 
         result = enrichment_service._prepare_data(df, geom_column)
+
         assert result.equals(expected_cdf)
 
     def test_prepare_data_polygon_with_close_vertex(self):
@@ -46,39 +50,33 @@ class TestEnrichmentService(object):
 
         polygon = Polygon([(10, 2), (1.12345688, 1), (1.12345677, 1), (10, 2)])
         df = pd.DataFrame(
-            [
-                [1, polygon]
-            ],
+            [[1, polygon]],
             columns=['cartodb_id', geom_column])
 
         expected_cdf = CartoDataFrame(
-            [
-                [
-                    polygon,
-                    0,
-                    to_geojson(polygon)
-                ]
-            ],
-            columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
+            [[1, polygon, 0, to_geojson(polygon)]],
+            columns=['cartodb_id', geom_column, 'enrichment_id', '__geojson_geom'])
+        expected_cdf.set_geometry(geom_column, inplace=True)
 
         result = enrichment_service._prepare_data(df, geom_column)
 
-        assert result['enrichment_id'].equals(expected_cdf['enrichment_id'])
-        assert result['__geojson_geom'].equals(expected_cdf['__geojson_geom'])
+        assert result.equals(expected_cdf)
 
     def test_upload_data(self):
+        geom_column = 'the_geom'
         expected_project = 'carto-do-customers'
         user_dataset = 'test_dataset'
 
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
-            [[point, 0, to_geojson(point)]],
-            columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
+            [[1, point, 0, to_geojson(point)]],
+            columns=['cartodb_id', geom_column, 'enrichment_id', '__geojson_geom'])
+        input_cdf.set_geometry(geom_column, inplace=True)
 
         expected_schema = {'enrichment_id': 'INTEGER', '__geojson_geom': 'GEOGRAPHY'}
         expected_cdf = CartoDataFrame(
             [[0, to_geojson(point)]],
-            columns=['enrichment_id', '__geojson_geom'], index=[1])
+            columns=['enrichment_id', '__geojson_geom'])
 
         # mock
         def assert_upload_data(_, dataframe, schema, tablename, project, dataset):
@@ -103,9 +101,10 @@ class TestEnrichmentService(object):
 
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
-            [[point, 0], [None, 1]],
-            columns=['geometry', 'enrichment_id']
+            [[1, point, 0], [2, None, 1]],
+            columns=['cartodb_id', geom_column, 'enrichment_id']
         )
+        input_cdf.set_geometry(geom_column, inplace=True)
 
         enrichment_service = EnrichmentService(credentials=self.credentials)
         input_cdf = enrichment_service._prepare_data(input_cdf, geom_column)
@@ -132,13 +131,14 @@ class TestEnrichmentService(object):
         BigQueryClient.upload_dataframe = original
 
     def test_execute_enrichment(self):
+        geom_column = 'the_geom'
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
             [[point, 0, to_geojson(point)]],
-            columns=['geometry', 'enrichment_id', '__geojson_geom'], index=[1])
+            columns=[geom_column, 'enrichment_id', '__geojson_geom'], index=[1])
         expected_cdf = CartoDataFrame(
             [[point, 'new data']],
-            columns=['geometry', 'var1'])
+            columns=[geom_column, 'var1'])
 
         class EnrichMock():
             def to_dataframe(self):
