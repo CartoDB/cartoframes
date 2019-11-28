@@ -34,7 +34,7 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 <div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/explore-the-data-observatory-catalog/">Explore the Data Observatory Catalog</a>
+      <a href="/developers/cartoframes/guides/Explore-the-Data-Observatory/">Explore the Data Observatory Catalog</a>
     </span>
     <p class="doc-guides__description">Description</p>
   </div>
@@ -50,14 +50,14 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 <div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/enrich-your-data/">Enrich your Data</a>
+      <a href="/developers/cartoframes/guides/Enrich-your-Data/">Enrich your Data</a>
     </span>
     <p class="doc-guides__description">Description</p>
   </div>
 
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/use-location-data-services/">Use Location Data Services</a>
+      <a href="/developers/cartoframes/guides/Use-Location-Data-Services/">Use Location Data Services</a>
     </span>
     <p class="doc-guides__description">Learn how to use Geocoding and Isolines services with your data</p>
   </div>
