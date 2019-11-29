@@ -26,13 +26,13 @@ Let's get started!
 
 ### Get and explore your company's data
 
-[This dataset](../files/starbucks_brooklyn.csv) is the one you have to start your exploration. It contains information about the location of Starbucks and each store's annual revenue. As a first exploratory step, you read it into a Jupyter Notebook using pandas.
+[This dataset](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn.csv) is the one you have to start your exploration. It contains information about the location of Starbucks and each store's annual revenue. As a first exploratory step, you read it into a Jupyter Notebook using pandas.
 
 
 ```python
 import pandas as pd
 
-starbucks_df = pd.read_csv('starbucks_brooklyn.csv')
+starbucks_df = pd.read_csv('../files/starbucks_brooklyn.csv')
 starbucks_df.head()
 ```
 
@@ -81,11 +81,11 @@ starbucks_df.head()
 </table>
 </div>
 
-To be able to display your stores as points on a map, you first have to convert the `address` column into geometries. This process is called geocoding and CARTO provides a straightforward way to do it (you can learn more about it in the [location data services guide]()).
+To be able to display your stores as points on a map, you first have to convert the `address` column into geometries. This process is called geocoding and CARTO provides a straightforward way to do it (you can learn more about it in the [location data services guide](/developers/cartoframes/guides/Location-Data-Services)).
 
-In order to geocode, you have to set your CARTO credentials. If you don't know your API key yet, check the [authentication guide]() to learn how to get it. In case you want to see the result of the geocoding without being logged in, here it is the [geocoded dataset]().
+In order to geocode, you have to set your CARTO credentials. If you don't know your API key yet, check the [authentication guide](/developers/cartoframes/guides/Authentication/) to learn how to get it. In case you want to see the result of the geocoding without being logged in, here it is the [geocoded dataset](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn_iso_enriched.csv).
 
-> Note: If you don't have an account yet, you can get a free account if you are a student or get a trial if you aren't by [signing up]().
+> Note: If you don't have an account yet, you can get a trial, or a free account if you are a student, by [signing up here](https://carto.com/signup/).
 
 
 ```python
@@ -172,7 +172,7 @@ starbucks_df.head()
 
 Done! Now that the stores are geocoded, you will notice a new column named `geometry` has been added. This column stores the geographic location of each store and it's used to plot each location on the map.
 
-You can quickly visualize your geocoded dataframe using the Map and Layer classes. Check out the [visualization guide]() to learn more about the visualization capabilities inside of CARTOframes.
+You can quickly visualize your geocoded dataframe using the Map and Layer classes. Check out the [visualization guide](/developers/cartoframes/guides/Visualization) to learn more about the visualization capabilities inside of CARTOframes.
 
 
 ```python
@@ -215,7 +215,7 @@ Map(size_continuous_layer(starbucks_df, 'revenue', 'Revenue in $'))
     </iframe>
 </div>
 
-Good job! By using the [size continuous visualization layer](link to example) you can see right away where the stores with higher revenue are. By default, visualization layers also provide a popup with the mapped value and an appropriate legend.
+Good job! By using the [size continuous visualization layer](/developers/cartoframes/examples/#example-size-continuous-layer) you can see right away where the stores with higher revenue are. By default, visualization layers also provide a popup with the mapped value and an appropriate legend.
 
 ### Create your areas of influence
 
@@ -247,14 +247,14 @@ Map([
     </iframe>
 </div>
 
-There they are! To learn more about creating isochrones and isodistances check out the [location data services guide]().
+There they are! To learn more about creating isochrones and isodistances check out the [location data services guide](/developers/cartoframes/guides/Location-Data-Services).
 
 
 ### Enrich your data with demographic data
 
 Now that you have the area of influence calculated for each store, let's augment the result with population information to help better understand a store's average revenue per person.
 
-First, let's find the demographic variable we need. We will use the [Catalog]() class that can be filter by country and category. In our case, we have to look for USA demographics datasets. Let's check which geographies (spatial resolution) are available.
+First, let's find the demographic variable we need. We will use the `Catalog` class that can be filter by country and category. In our case, we have to look for USA demographics datasets. Let's check which geographies (spatial resolution) are available.
 
 ```python
 from cartoframes.data.observatory import Catalog
@@ -836,13 +836,13 @@ Map(size_continuous_layer(starbucks_df, 'rev_pop', 'Revenue per person'))
 
 As we can see, there are clearly 3 stores that have lower revenue per person. This insight will help us to focus on them in further analyses.
 
-To learn more about discovering the data you want, check out the [data discovery guide](). To learn more about enriching your data check out the [data enrichment guide]().
+To learn more about discovering the data you want, check out the [data discovery guide](/developers/cartoframes/guides/Data-discovery). To learn more about enriching your data check out the [data enrichment guide]().
 
 ### Publish and share your results
 
 The final step in the workflow is to share this interactive map with your colleagues so they can explore the information on their own. Let's do it!
 
-First, let's add widgets so people are able to see some graphs of the information and filter it. To do this, we only have to add `widget=True` to the visualization layers. Remember to check the [visualization guide]() to learn more.
+First, let's add widgets so people are able to see some graphs of the information and filter it. To do this, we only have to add `widget=True` to the visualization layers. Remember to check the [visualization guide](/developers/cartoframes/guides/Visualization) to learn more.
 
 ```python
 result_map = Map([
@@ -878,4 +878,4 @@ result_map.publish('startbucks_analysis')
 
 ### Conclusion
 
-Congratulations! You have finished this guide and have a sense about how CARTOframes can speed up your workflow. To continue learning, you can check the specific [guides](), check the [reference]() to know everything about a class or a method or check the [examples]().
+Congratulations! You have finished this guide and have a sense about how CARTOframes can speed up your workflow. To continue learning, you can check the specific [guides](/developers/cartoframes/guides), check the [reference](/developers/cartoframes/reference) to know everything about a class or a method or check the [examples](/developers/cartoframes/examples).
