@@ -163,10 +163,13 @@ class Enrichment(EnrichmentService):
                     aggregation method in the :py:attr:`Variable.agg_method` property and it will be used to aggregate
                     the data (a variable could not have `agg_method` defined and in this case, the variables will be
                     skipped).
+
                     - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
                     You will receive a row of data from each polygon instersected.
+
                     - str: if you want to overwrite every default aggregation method, you can pass a string with the
                     aggregation method to use.
+
                     - dictionary: if you want to overwrite some default aggregation methods from your selected
                     variables, use a dict as :py:attr:`Variable.id`: aggregation method pairs, for example:
                     `{variable1.id: 'SUM', variable3.id: 'AVG'}`.
