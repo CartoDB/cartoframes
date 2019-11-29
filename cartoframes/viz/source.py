@@ -26,6 +26,7 @@ class Source(object):
           keys, or an array of floats in the following structure: [[west,
           south], [east, north]]. If not provided the bounds will be automatically
           calculated to fit all features.
+        geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
 
     Example:
 
@@ -76,19 +77,26 @@ class Source(object):
             Source('table_name', credentials)
     """
 
-    def __init__(self, source, credentials=None, schema=None):
+    def __init__(self, source, credentials=None, geom_col=None):
         self.credentials = None
 
         if isinstance(source, str):
             # Table, SQL query
             self.type = SourceType.QUERY
             self.manager = ContextManager(credentials)
-            self.query = self.manager.compute_query(source, schema)
+            self.query = self.manager.compute_query(source)
             self.credentials = self.manager.credentials
         elif isinstance(source, pandas.DataFrame):
             # DataFrame, GeoDataFrame, CartoDataFrame
             self.type = SourceType.GEOJSON
             self.cdf = CartoDataFrame(source, copy=True)
+
+            if geom_col:
+                self.cdf.set_geometry(geom_col, inplace=True)
+
+            if not self.cdf.has_geometry():
+                raise Exception('No valid geometry found. Please provide an input source with ' +
+                                'a valid geometry or specify the "geom_col" param with a geometry column.')
         else:
             raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 
@@ -113,7 +121,9 @@ class Source(object):
             self.data = self.query
             self.bounds = self.manager.get_bounds(self.query)
         elif self.type == SourceType.GEOJSON:
-            self.cdf = CartoDataFrame(self.cdf[columns]) if columns is not None else self.cdf
+            if columns is not None:
+                columns += [self.cdf.geometry.name]
+                self.cdf = self.cdf[columns]
             self.data = encode_geodataframe(self.cdf)
             self.bounds = get_geodataframe_bounds(self.cdf)
 

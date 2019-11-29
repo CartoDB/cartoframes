@@ -91,6 +91,7 @@ class EnrichmentService(object):
 
     def _prepare_data(self, dataframe, geom_col):
         cartodataframe = CartoDataFrame(dataframe, copy=True)
+
         if geom_col:
             cartodataframe.set_geometry(geom_col, inplace=True)
 
