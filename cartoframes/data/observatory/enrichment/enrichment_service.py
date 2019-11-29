@@ -12,7 +12,6 @@ from ....exceptions import EnrichmentException
 from ....core.cartodataframe import CartoDataFrame
 from ....utils.geom_utils import to_geojson
 
-
 _ENRICHMENT_ID = 'enrichment_id'
 _GEOJSON_COLUMN = '__geojson_geom'
 _DEFAULT_PROJECT = 'carto-do'

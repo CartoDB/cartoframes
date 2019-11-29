@@ -17,15 +17,15 @@ class CatalogEntityWithGeographyMock:
 
 class TestPolygonEnrichment(object):
     def setup_method(self):
-        self.original_init_client = BigQueryClient._init_client
-        BigQueryClient._init_client = Mock(return_value=True)
+        self.original_init_clients = BigQueryClient._init_clients
+        BigQueryClient._init_clients = Mock(return_value=(True, True))
         self.username = 'username'
         self.apikey = 'apikey'
         self.credentials = Credentials(self.username, self.apikey)
 
     def teardown_method(self):
         self.credentials = None
-        BigQueryClient._init_client = self.original_init_client
+        BigQueryClient._init_clients = self.original_init_clients
 
     @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
