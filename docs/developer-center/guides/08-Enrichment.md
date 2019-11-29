@@ -633,7 +633,7 @@ Let's try to explain what happens under the hood when you do a polygons enrichme
 
 Imagine we have polygons representing municipalities, in blue, each of which have a population attribute, and we want to find out the population inside the green circle. 
 
-<img src="../files/enrichment_01.png" width="400"/>
+<img src="../../img/guides/enrichment/enrichment_01.png" width="400"/>
 
 We don’t know how the population is distributed inside these municipalities. They are probably concentrated in cities somewhere but, since we don’t know where those are, our best guess is to assume that the population is evenly distributed in the municipality (every point inside the municipality has the same population density).
 
