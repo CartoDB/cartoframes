@@ -10,7 +10,7 @@ from cartoframes.data.observatory import Variable, Dataset
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.repository.entity_repo import EntityRepository
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables, \
-    _ENRICHMENT_ID, _GEOJSON_COLUMN
+    _ENRICHMENT_ID, _GEOJSON_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation
 from cartoframes.exceptions import EnrichmentException
 from cartoframes.utils.geom_utils import to_geojson
 
@@ -477,3 +477,40 @@ class TestEnrichmentService(object):
             result = prepare_variables(case, credentials, aggregation={variable_id: 'SUM'})
 
             assert result == [variable]
+
+    def test_get_aggregation(self):
+        variable_agg = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': 'SUM'
+        })
+
+        assert _get_aggregation(variable_agg, AGGREGATION_DEFAULT) == variable_agg.agg_method.lower()
+        assert _get_aggregation(variable_agg, AGGREGATION_NONE) is None
+        assert _get_aggregation(variable_agg, 'sum') == 'sum'
+        assert _get_aggregation(variable_agg, 'SUM') == 'sum'
+        assert _get_aggregation(variable_agg, 'avg') == 'avg'
+        assert _get_aggregation(variable_agg, 'AVG') == 'avg'
+        custom_agg = {variable_agg.id: 'AVG'}
+        assert _get_aggregation(variable_agg, custom_agg) == 'avg'
+        custom_agg = {}
+        assert _get_aggregation(variable_agg, custom_agg) == variable_agg.agg_method.lower()
+
+        variable_agg_none = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': None
+        })
+
+        assert _get_aggregation(variable_agg_none, AGGREGATION_DEFAULT) is None
+        assert _get_aggregation(variable_agg_none, AGGREGATION_NONE) is None
+        assert _get_aggregation(variable_agg_none, 'sum') == 'sum'
+        assert _get_aggregation(variable_agg_none, 'SUM') == 'sum'
+        assert _get_aggregation(variable_agg_none, 'avg') == 'avg'
+        assert _get_aggregation(variable_agg_none, 'AVG') == 'avg'
+        custom_agg = {variable_agg.id: 'AVG'}
+        assert _get_aggregation(variable_agg_none, custom_agg) == 'avg'
+        custom_agg = {}
+        assert _get_aggregation(variable_agg_none, custom_agg) is None

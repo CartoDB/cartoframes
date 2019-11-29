@@ -651,7 +651,8 @@ def _get_query(agg, columns, username, view, geo_table, temp_table_name, filters
 
 
 def _get_column_sql(agg, column):
-    if (agg == 'SUM'):
+    agg = agg.lower()
+    if (agg == 'sum'):
         return """
             {aggregation}(
                 enrichment_table.{column} * (

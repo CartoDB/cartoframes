@@ -267,7 +267,7 @@ class EnrichmentService(object):
     def _build_polygons_query_variable_with_aggregation(self, variable, aggregation):
         variable_agg = _get_aggregation(variable, aggregation)
 
-        if (variable_agg == 'SUM'):
+        if (variable_agg == 'sum'):
             return """
                 {aggregation}(
                     enrichment_table.{column} * (
@@ -279,7 +279,7 @@ class EnrichmentService(object):
                 """.format(
                     column=variable.column_name,
                     geo_column=self.geojson_column,
-                    aggregation=variable_agg.lower())
+                    aggregation=variable_agg)
         else:
             return """
                 {aggregation}(
@@ -290,7 +290,7 @@ class EnrichmentService(object):
                 """.format(
                     column=variable.column_name,
                     geo_column=self.geojson_column,
-                    aggregation=variable_agg.lower())
+                    aggregation=variable_agg)
 
     def _build_polygons_query_variables_without_aggregation(self, variables):
         variables = ['enrichment_table.{}'.format(variable.column_name) for variable in variables]
@@ -378,11 +378,18 @@ def _is_subscribed(dataset, geography, credentials):
 
 
 def _get_aggregation(variable, aggregation):
-    if aggregation == AGGREGATION_NONE:
-        return None
+    if aggregation in [None, AGGREGATION_NONE]:
+        aggregation_method = None
     elif aggregation == AGGREGATION_DEFAULT:
-        return variable.agg_method
+        aggregation_method = variable.agg_method
     elif isinstance(aggregation, str):
-        return aggregation
+        aggregation_method = aggregation
     elif isinstance(aggregation, dict):
-        return aggregation.get(variable.id, variable.agg_method)
+        aggregation_method = aggregation.get(variable.id, variable.agg_method)
+    else:
+        raise ValueError('The `aggregation` parameter is invalid.')
+
+    if aggregation_method is None:
+        return aggregation_method
+    else:
+        return aggregation_method.lower()
