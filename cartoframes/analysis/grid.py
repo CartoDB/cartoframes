@@ -24,6 +24,4 @@ class QuadGrid():
 
             dfs.append(pd.DataFrame(resp))
 
-        cdf = CartoDataFrame(pd.concat(dfs).reset_index(drop=True))
-        cdf.crs = 'epsg:4326'
-        return cdf
+        return CartoDataFrame(pd.concat(dfs).reset_index(drop=True), crs='epsg:4326')

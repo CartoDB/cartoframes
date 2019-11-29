@@ -41,7 +41,6 @@ class TestPointsEnrichment(object):
         geo_table = 'geo_table'
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
-        area_name = 'view_{}_{}_area'.format(dataset, table)
 
         variable = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
@@ -58,7 +57,7 @@ class TestPointsEnrichment(object):
         )
 
         expected_queries = [
-            get_query([column], self.username, view, geo_view, temp_table_name, area_name)
+            get_query([column], self.username, view, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -81,7 +80,6 @@ class TestPointsEnrichment(object):
         geo_table = 'geo_table'
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
-        area_name = 'view_{}_{}_area'.format(dataset, table)
 
         variable1 = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table, variable1_name),
@@ -103,7 +101,7 @@ class TestPointsEnrichment(object):
         )
 
         expected_queries = [
-            get_query([column1, column2], self.username, view, geo_view, temp_table_name, area_name)
+            get_query([column1, column2], self.username, view, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -128,8 +126,6 @@ class TestPointsEnrichment(object):
         view1 = 'view_{}_{}'.format(dataset, table1)
         view2 = 'view_{}_{}'.format(dataset, table2)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
-        area_name1 = 'view_{}_{}_area'.format(dataset, table1)
-        area_name2 = 'view_{}_{}_area'.format(dataset, table2)
 
         variable1 = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table1, variable1_name),
@@ -151,8 +147,8 @@ class TestPointsEnrichment(object):
         )
 
         expected_queries = [
-            get_query([column1], self.username, view1, geo_view, temp_table_name, area_name1),
-            get_query([column2], self.username, view2, geo_view, temp_table_name, area_name2)
+            get_query([column1], self.username, view1, geo_view, temp_table_name),
+            get_query([column2], self.username, view2, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -178,8 +174,6 @@ class TestPointsEnrichment(object):
         view1 = 'view_{}_{}'.format(dataset1, table1)
         view2 = 'view_{}_{}'.format(dataset2, table2)
         geo_view = 'view_{}_{}'.format(dataset1, geo_table)
-        area_name1 = 'view_{}_{}_area'.format(dataset1, table1)
-        area_name2 = 'view_{}_{}_area'.format(dataset2, table2)
 
         variable1 = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset1, table1, variable1_name),
@@ -201,8 +195,8 @@ class TestPointsEnrichment(object):
         )
 
         expected_queries = [
-            get_query([column1], self.username, view1, geo_view, temp_table_name, area_name1),
-            get_query([column2], self.username, view2, geo_view, temp_table_name, area_name2)
+            get_query([column1], self.username, view1, geo_view, temp_table_name),
+            get_query([column2], self.username, view2, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -226,7 +220,6 @@ class TestPointsEnrichment(object):
         geo_table = 'geo_table'
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
-        area_name = 'view_{}_{}_area'.format(dataset, table)
 
         variable = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
@@ -246,7 +239,7 @@ class TestPointsEnrichment(object):
         )
 
         expected_queries = [
-            get_query([column], self.username, view, geo_view, temp_table_name, area_name, filters)
+            get_query([column], self.username, view, geo_view, temp_table_name, filters)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -263,11 +256,11 @@ def _clean_query(query):
     return query.replace('\n', '').replace(' ', '').lower()
 
 
-def get_query(columns, username, view, geo_table, temp_table_name, area_name, filters=[]):
+def get_query(columns, username, view, geo_table, temp_table_name, filters=[]):
     columns = ', '.join(get_column_sql(column) for column in columns)
 
     return '''
-        SELECT data_table.enrichment_id, {columns}, ST_Area(enrichment_geo_table.geom) AS {area_name}
+        SELECT data_table.enrichment_id, {columns}, ST_Area(enrichment_geo_table.geom) AS do_geom_area
         FROM `carto-do-customers.{username}.{view}` enrichment_table
         JOIN `carto-do-customers.{username}.{geo_table}` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
@@ -276,7 +269,6 @@ def get_query(columns, username, view, geo_table, temp_table_name, area_name, fi
         {where};
         '''.format(
             columns=columns,
-            area_name=area_name,
             username=username,
             view=view,
             geo_table=geo_table,

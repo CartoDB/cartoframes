@@ -22,7 +22,7 @@ class Enrichment(EnrichmentService):
     def __init__(self, credentials=None):
         super(Enrichment, self).__init__(credentials)
 
-    def enrich_points(self, dataframe, variables, geom_column='geometry', filters={}):
+    def enrich_points(self, dataframe, variables, geom_col=None, filters={}):
         """Enrich your points `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset`
         in the Data Observatory, intersecting the points in the source `DataFrame` with the geographies in the
         Data Observatory.
@@ -36,8 +36,7 @@ class Enrichment(EnrichmentService):
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
-            geom_column (str): string indicating the 4326 geometry column name in the
-                source `DataFrame`. Defaults to `geometry`.
+            geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (list, optional): list of :obj:`VariableFilter` to filter rows from
                 the enrichment data. Example: `[VariableFilter(variable1, "= 'a string'")]`
 
@@ -113,8 +112,8 @@ class Enrichment(EnrichmentService):
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_points(df, variables=[variable], filters=[filter])
         """
-        variables = prepare_variables(variables)
-        cartodataframe = self._prepare_data(dataframe, geom_column)
+        variables = prepare_variables(variables, self.credentials)
+        cartodataframe = self._prepare_data(dataframe, geom_col)
 
         temp_table_name = self._get_temp_table_name()
         self._upload_data(temp_table_name, cartodataframe)
@@ -128,7 +127,7 @@ class Enrichment(EnrichmentService):
     AGGREGATION_NONE = AGGREGATION_NONE
     """Do not aggregate data in polygons enrichment. More info in :py:attr:`Enrichment.enrich_polygons`"""
 
-    def enrich_polygons(self, dataframe, variables, geom_column='geometry', filters=[],
+    def enrich_polygons(self, dataframe, variables, geom_col=None, filters=[],
                         aggregation=AGGREGATION_DEFAULT):
         """Enrich your polygons `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset` in
         the Data Observatory by intersecting the polygons in the source `DataFrame` with geographies in the
@@ -147,8 +146,7 @@ class Enrichment(EnrichmentService):
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
-            geom_column (str): string indicating the 4326 geometry column name in the source `DataFrame`.
-                Defaults to `geometry`.
+            geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (list, optional): list of :obj:`VariableFilter` to filter rows from
                 the enrichment data. Example: `[VariableFilter(variable1, "= 'a string'")]`
             aggregation (str, list, optional): sets the data aggregation. The polygons in the source `DataFrame` can
@@ -317,9 +315,8 @@ class Enrichment(EnrichmentService):
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=aggregation)
         """
-
-        variables = prepare_variables(variables, aggregation)
-        cartodataframe = self._prepare_data(dataframe, geom_column)
+        variables = prepare_variables(variables, self.credentials, aggregation)
+        cartodataframe = self._prepare_data(dataframe, geom_col)
 
         temp_table_name = self._get_temp_table_name()
         self._upload_data(temp_table_name, cartodataframe)
