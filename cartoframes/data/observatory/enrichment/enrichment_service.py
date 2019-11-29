@@ -1,7 +1,6 @@
 import uuid
 
 from collections import defaultdict
-import warnings
 
 from ..catalog.variable import Variable
 from ..catalog.dataset import Dataset
@@ -91,6 +90,7 @@ class EnrichmentService(object):
 
     def _prepare_data(self, dataframe, geom_col):
         cartodataframe = CartoDataFrame(dataframe, copy=True)
+
         if geom_col:
             cartodataframe.set_geometry(geom_col, inplace=True)
 
@@ -318,9 +318,11 @@ def prepare_variables(variables, credentials, aggregation=None):
     else:
         variables = [_prepare_variable(variables, aggregation)]
 
+    variables = list(filter(None, variables))
+
     _validate_bq_operations(variables, credentials)
 
-    return list(filter(None, variables))
+    return variables
 
 
 def _prepare_variable(variable, aggregation=None):
@@ -336,7 +338,7 @@ def _prepare_variable(variable, aggregation=None):
     if aggregation is not None:
         variable_agg = _get_aggregation(variable, aggregation)
         if not variable_agg and aggregation is not AGGREGATION_NONE:
-            warnings.warn('{} skipped because it does not have aggregation method'.format(variable))
+            print('Warning: {} skipped because it does not have aggregation method'.format(variable.id))
             return None
 
     return variable

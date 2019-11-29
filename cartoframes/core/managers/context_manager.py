@@ -79,13 +79,14 @@ class ContextManager(object):
         query = self.compute_query(table_name, schema)
         return self._check_exists(query)
 
-    def delete_table(self, table_name):
+    def delete_table(self, table_name, log_enabled=True):
         query = _drop_table_query(table_name)
         output = self.execute_query(query)
-        if ('notices' in output and 'does not exist' in output['notices'][0]):
-            print('Debug: table "{}" does not exist'.format(table_name))
-        else:
-            print('Debug: table "{}" removed'.format(table_name))
+        if log_enabled:
+            if ('notices' in output and 'does not exist' in output['notices'][0]):
+                print('Debug: table "{}" does not exist'.format(table_name))
+            else:
+                print('Debug: table "{}" removed'.format(table_name))
 
     def update_table(self, table_name, privacy=None, new_table_name=None):
         dataset_info = DatasetInfo(self.auth_client, table_name)
