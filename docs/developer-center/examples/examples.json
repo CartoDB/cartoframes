@@ -20,9 +20,9 @@
             "file": "create_cdf_from_geojson",
             "path": "data_workflows"
         }, {
-            "title": "Download CartoDataFrame from Table name",
-            "desc": "Download a CartoDataFrame from a table name",
-            "file": "download_cdf_from_table",
+            "title": "Create CartoDataFrame from Table name",
+            "desc": "Create a CartoDataFrame from a table name",
+            "file": "create_cdf_from_table",
             "path": "data_workflows"
         }, {
             "title": "Create CartoDataFrame from SQL query",
