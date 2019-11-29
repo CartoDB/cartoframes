@@ -22,13 +22,13 @@ except ImportError:
 
 class TestEnrichmentService(object):
     def setup_method(self):
-        self.original_init_client = BigQueryClient._init_client
-        BigQueryClient._init_client = Mock(return_value=True)
+        self.original_init_clients = BigQueryClient._init_clients
+        BigQueryClient._init_clients = Mock(return_value=(True, True))
         self.credentials = Credentials('username', 'apikey')
 
     def teardown_method(self):
         self.credentials = None
-        BigQueryClient._init_client = self.original_init_client
+        BigQueryClient._init_clients = self.original_init_clients
 
     def test_prepare_data_no_geom(self):
         geom_column = 'the_geom'
@@ -172,7 +172,7 @@ class TestEnrichmentService(object):
 
         assert result.equals(expected_cdf)
 
-        BigQueryClient._init_client = original
+        BigQueryClient.query = original
 
     @patch('cartoframes.data.observatory.enrichment.enrichment_service._validate_bq_operations')
     @patch.object(Variable, 'get')
