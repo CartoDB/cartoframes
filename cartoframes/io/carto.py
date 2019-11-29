@@ -127,7 +127,7 @@ def has_table(table_name, credentials=None, schema=None):
     return context_manager.has_table(table_name, schema)
 
 
-def delete_table(table_name, credentials=None):
+def delete_table(table_name, credentials=None, log_enabled=True):
     """
     Delete the table from the CARTO account.
 
@@ -141,7 +141,7 @@ def delete_table(table_name, credentials=None):
 
     context_manager = ContextManager(credentials)
 
-    return context_manager.delete_table(table_name)
+    return context_manager.delete_table(table_name, log_enabled)
 
 
 def describe_table(table_name, credentials=None, schema=None):

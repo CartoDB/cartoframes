@@ -147,8 +147,7 @@ class Isolines(Service):
                 raise Exception('No valid geometry found. Please provide an input source with ' +
                                 'a valid geometry or specify the "geom_col" param with a geometry column.')
 
-            log_enabled = not dry_run
-            to_carto(source, temporary_table_name, self._credentials, log_enabled)
+            to_carto(source, temporary_table_name, self._credentials, log_enabled=False)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
 
         source_columns = source_manager.get_column_names()
@@ -182,10 +181,10 @@ class Isolines(Service):
 
         if table_name:
             # save result in a table
-            to_carto(cdf, table_name, self._credentials, if_exists, dry_run)
+            to_carto(cdf, table_name, self._credentials, if_exists, log_enabled=dry_run)
 
         if temporary_table_name:
-            delete_table(temporary_table_name, self._credentials)
+            delete_table(temporary_table_name, self._credentials, log_enabled=False)
 
         result = self.result(data=cdf, metadata=metadata)
 
