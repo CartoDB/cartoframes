@@ -46,6 +46,7 @@ class Layer(object):
           keys, or an array of floats in the following structure: [[west,
           south], [east, north]]. If not provided the bounds will be automatically
           calculated to fit all features.
+        geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
 
 
     Example:
@@ -129,11 +130,12 @@ class Layer(object):
                  legend=None,
                  widgets=None,
                  credentials=None,
-                 bounds=None):
+                 bounds=None,
+                 geom_col=None):
 
         self.is_basemap = False
 
-        self.source = _set_source(source, credentials)
+        self.source = _set_source(source, credentials, geom_col)
         self.style = _set_style(style)
         self.popup = _set_popup(popup)
         self.legend = _set_legend(legend)
@@ -161,10 +163,10 @@ class Layer(object):
         return Map(self)._repr_html_()
 
 
-def _set_source(source, credentials):
+def _set_source(source, credentials, geom_col):
     """Set a Source class from the input"""
     if isinstance(source, (str, pandas.DataFrame)):
-        return Source(source, credentials)
+        return Source(source, credentials, geom_col)
     elif isinstance(source, Source):
         return source
     else:
