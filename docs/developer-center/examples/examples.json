@@ -5,40 +5,40 @@
     "categories": [{
         "title": "Data Workflows",
         "samples": [{
-            "title": "Create Dataset from CSV",
-            "desc": "Create a dataset from a CSV file",
-            "file": "create_dataset_from_csv",
-            "path": "downloading_and_uploading_data"
+            "title": "Create CartoDataFrame from CSV",
+            "desc": "Create a CartoDataFrame from a CSV file",
+            "file": "create_cdf_from_csv",
+            "path": "data_workflows"
         }, {
-            "title": "Create Dataset from JSON",
-            "desc": "Create a dataset from a JSON file",
-            "file": "create_dataset_from_json",
-            "path": "downloading_and_uploading_data"
+            "title": "Create CartoDataFrame from JSON",
+            "desc": "Create a CartoDataFrame from a JSON file",
+            "file": "create_cdf_from_json",
+            "path": "data_workflows"
         }, {
-            "title": "Create Dataset from GeoJSON",
-            "desc": "Create a dataset from a GeoJSON file",
-            "file": "create_dataset_from_geojson",
-            "path": "downloading_and_uploading_data"
+            "title": "Create CartoDataFrame from GeoJSON",
+            "desc": "Create a CartoDataFrame from a GeoJSON file",
+            "file": "create_cdf_from_geojson",
+            "path": "data_workflows"
         }, {
-            "title": "Create Dataset from SQL Query",
-            "desc": "Create a dataset from a SQL query",
-            "file": "create_dataset_from_query",
-            "path": "downloading_and_uploading_data"
+            "title": "Download CartoDataFrame from Table name",
+            "desc": "Download a CartoDataFrame from a table name",
+            "file": "download_cdf_from_table",
+            "path": "data_workflows"
         }, {
-            "title": "Download Dataset from CARTO",
-            "desc": "Download a dataset from CARTO",
-            "file": "download_dataset_from_carto",
-            "path": "downloading_and_uploading_data"
+            "title": "Create CartoDataFrame from SQL query",
+            "desc": "Create a CartoDataFrame from a SQL query",
+            "file": "create_cdf_from_query",
+            "path": "data_workflows"
         }, {
-            "title": "Upload Dataset to CARTO",
-            "desc": "Upload a dataset to CARTO",
-            "file": "upload_dataset_to_carto",
-            "path": "downloading_and_uploading_data"
+            "title": "Upload CartoDataFrame to CARTO",
+            "desc": "Upload a CartoDataFrame to CARTO",
+            "file": "upload_cdf_to_carto",
+            "path": "data_workflows"
         }, {
             "title": "Change Dataset Privacy",
             "desc": "Change dataset privacy",
             "file": "change_dataset_privacy",
-            "path": "downloading_and_uploading_data"
+            "path": "data_workflows"
         }]
     }, {
         "title": "Data Enrichment",
