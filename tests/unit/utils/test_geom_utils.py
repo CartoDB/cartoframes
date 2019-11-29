@@ -7,7 +7,7 @@ from shapely.geometry import Point
 
 from cartoframes.utils.geom_utils import (ENC_EWKT, ENC_SHAPELY, ENC_WKB,
                                           ENC_WKB_BHEX, ENC_WKB_HEX, ENC_WKT,
-                                          generate_geometry, decode_geometry, detect_encoding_type)
+                                          decode_geometry, detect_encoding_type)
 
 
 class TestGeomUtils(object):
@@ -26,56 +26,6 @@ class TestGeomUtils(object):
             Point([10, 15]),
             Point([20, 30])
         ], name='geometry')
-
-    def test_generate_geometry_the_geom(self, mocker):
-        gdf = gpd.GeoDataFrame({'the_geom': self.geom})
-        generate_geometry(gdf)
-        assert str(gdf.geometry) == str(self.geometry)
-
-    def test_generate_geometry_wkt_geometry(self, mocker):
-        gdf = gpd.GeoDataFrame({'wkt_geometry': self.geom})
-        generate_geometry(gdf)
-        assert str(gdf.geometry) == str(self.geometry)
-
-    def test_generate_geometry_wkb_geometry(self, mocker):
-        gdf = gpd.GeoDataFrame({'wkb_geometry': self.geom})
-        generate_geometry(gdf)
-        assert str(gdf.geometry) == str(self.geometry)
-
-    def test_compute_geodataframe_geom(self, mocker):
-        gdf = gpd.GeoDataFrame({'geom': self.geom})
-        generate_geometry(gdf)
-        assert str(gdf.geometry) == str(self.geometry)
-
-    def test_compute_geodataframe_wkt(self, mocker):
-        gdf = gpd.GeoDataFrame({'wkt': self.geom})
-        generate_geometry(gdf)
-        assert str(gdf.geometry) == str(self.geometry)
-
-    def test_compute_geodataframe_wkb(self, mocker):
-        gdf = gpd.GeoDataFrame({'wkb': self.geom})
-        generate_geometry(gdf)
-        assert str(gdf.geometry) == str(self.geometry)
-
-    def test_generate_geometry_latitude_longitude(self, mocker):
-        gdf = gpd.GeoDataFrame({'latitude': self.lat, 'longitude': self.lng})
-        generate_geometry(gdf)
-        assert str(gdf.geometry) == str(self.geometry)
-
-    def test_generate_geometry_lat_lng(self, mocker):
-        gdf = gpd.GeoDataFrame({'lat': self.lat, 'lng': self.lng})
-        generate_geometry(gdf)
-        assert str(gdf.geometry) == str(self.geometry)
-
-    def test_generate_geometry_lat_lon(self, mocker):
-        gdf = gpd.GeoDataFrame({'lat': self.lat, 'lon': self.lng})
-        generate_geometry(gdf)
-        assert str(gdf.geometry) == str(self.geometry)
-
-    def test_generate_geometry_lat_long(self, mocker):
-        gdf = gpd.GeoDataFrame({'lat': self.lat, 'long': self.lng})
-        generate_geometry(gdf)
-        assert str(gdf.geometry) == str(self.geometry)
 
     def test_detect_encoding_type_shapely(self):
         enc_type = detect_encoding_type(Point(1234, 5789))

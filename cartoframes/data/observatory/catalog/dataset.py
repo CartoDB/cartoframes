@@ -5,6 +5,8 @@ import geopandas as gpd
 
 from shapely import wkt
 
+from carto.exceptions import CartoException
+
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
@@ -15,6 +17,7 @@ from .summary import dataset_describe, head, tail, counts, fields_by_type, geom_
 from . import subscription_info
 from . import subscriptions
 from . import utils
+from ....auth import Credentials, defaults
 
 DATASET_TYPE = 'dataset'
 
@@ -379,6 +382,8 @@ class Dataset(CatalogEntity):
         :raises CartoException: If you have not a valid license for the dataset being downloaded.
         :raises ValueError: If the credentials argument is not valud.
         """
+        if not self._is_subscribed(credentials):
+            raise CartoException('You are not subscribed to this Dataset yet. Please, use the subscribe method first.')
 
         return self._download(credentials)
 
@@ -467,3 +472,16 @@ class Dataset(CatalogEntity):
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, DATASET_TYPE, _credentials))
+
+    def _is_subscribed(self, credentials=None):
+        if self.is_public_data:
+            return True
+
+        _credentials = credentials or defaults.get_default_credentials()
+
+        if not isinstance(_credentials, Credentials):
+            raise ValueError('`credentials` must be a Credentials class instance')
+
+        datasets = Dataset.get_all({}, _credentials)
+
+        return self in datasets
