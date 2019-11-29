@@ -58,7 +58,10 @@ class BigQueryClient(object):
         bucket = self.gcs_client.bucket(self._bucket)
         blob = bucket.blob(tablename)
         dataframe.to_csv(tablename, index=False, header=False)
-        blob.upload_from_filename(tablename)
+        try:
+            blob.upload_from_filename(tablename)
+        finally:
+            os.remove(tablename)
 
         # Import from GCS To BigQuery
         dataset_ref = self.bq_client.dataset(dataset, project=project)
