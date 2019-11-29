@@ -38,7 +38,7 @@ variables
 
 
 
-<pre class="u-topbottom-Margin"><code>[<Variable.get('HINCYMED65_310bc888')> #'Median Household Income: Age 65-74 (2019A)',
+<pre class="u-topbottom-Margin u-vertical-scroll"><code>[<Variable.get('HINCYMED65_310bc888')> #'Median Household Income: Age 65-74 (2019A)',
   <Variable.get('HINCYMED55_1a269b4b')> #'Median Household Income: Age 55-64 (2019A)',
   <Variable.get('HINCYMED45_33daa0a')> #'Median Household Income: Age 45-54 (2019A)',
   <Variable.get('HINCYMED35_4c7c3ccd')> #'Median Household Income: Age 35-44 (2019A)',
