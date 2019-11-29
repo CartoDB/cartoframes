@@ -96,6 +96,12 @@ class TestCartoDataFrame(object):
         assert isinstance(cdf, CartoDataFrame)
         assert len(cdf) == 2
 
+    def test_getitem_slice(self):
+        cdf = CartoDataFrame(self.gdf)
+        cdf = cdf[slice(1)]
+        assert isinstance(cdf, CartoDataFrame)
+        assert len(cdf) == 1
+
     def test_astype(self):
         cdf = CartoDataFrame({'a': [1], 'geometry': [Point(0, 0)]})
         cdf = cdf.astype('object')
