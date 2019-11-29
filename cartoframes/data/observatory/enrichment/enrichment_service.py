@@ -389,7 +389,5 @@ def _get_aggregation(variable, aggregation):
     else:
         raise ValueError('The `aggregation` parameter is invalid.')
 
-    if aggregation_method is None:
-        return aggregation_method
-    else:
+    if aggregation_method is not None:
         return aggregation_method.lower()
