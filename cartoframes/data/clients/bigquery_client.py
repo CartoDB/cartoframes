@@ -35,6 +35,7 @@ class BigQueryClient(object):
         self._project = project
         self._credentials = credentials or get_default_credentials()
         self._bucket = 'carto-do-{username}'.format(username=self._credentials.username)
+        self.bq_client, self.gcs_client = self._init_clients()
 
     def _init_clients(self):
         google_credentials = GoogleCredentials(self._credentials.get_do_token())

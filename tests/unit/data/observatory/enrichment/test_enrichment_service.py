@@ -23,7 +23,7 @@ except ImportError:
 class TestEnrichmentService(object):
     def setup_method(self):
         self.original_init_clients = BigQueryClient._init_clients
-        BigQueryClient._init_clients = Mock(return_value=True)
+        BigQueryClient._init_clients = Mock(return_value=(True, True))
         self.credentials = Credentials('username', 'apikey')
 
     def teardown_method(self):
