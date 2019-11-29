@@ -1,4 +1,4 @@
-## Explore the Data Observatory catalog
+## Data discovery
 
 ### Introduction
 
@@ -8,9 +8,9 @@ This guide is intended for those who are going to start augmenting their own dat
 
 **Note: The catalog is public and you don't need a CARTO account to search for available datasets**
 
-### Looking for population data in the US in the catalog
+### Looking for demographics and financial data in the US in the catalog
 
-In this guide we are going to filter the Data Observatory catalog looking for population data in the US.
+In this guide we are going to filter the Data Observatory catalog looking for demographics and financial data in the US.
 
 The catalog is comprised of thousands of curated spatial datasets, so when searching for
 data the easiest way to find out what you are looking for is make use of a feceted search. A faceted (or hierarchical) search allows you to narrow down search results by applying multiple filters based on faceted classification of the catalog datasets.
@@ -21,32 +21,26 @@ Datasets are organized in three main hirearchies:
 - Category
 - Geography (or spatial resolution)
 
-For our analysis we are looking for a demographics dataset in the US with a spatial resolution at the level of block groups. 
+For our analysis we are looking for demographics and financial datasets in the US with a spatial resolution at the level of block groups. 
 
 First we can start for discovering which available geographies (orspatial resolutions) we have for demographics data in the US, by filtering the `catalog` by `country` and `category` and listing the available `geographies`.
 
 Let's start exploring the available categories of data for the US:
-
 
 ```python
 from cartoframes.data.observatory import Catalog
 Catalog().country('usa').categories
 ```
 
-
-
-
-    [<Category.get('road_traffic')>,
-     <Category.get('points_of_interest')>,
-     <Category.get('human_mobility')>,
-     <Category.get('financial')>,
-     <Category.get('environmental')>,
-     <Category.get('demographics')>]
-
-
+<pre class="u-topbottom-Margin"><code>[<Category.get('road_traffic')>,
+  <Category.get('points_of_interest')>,
+  <Category.get('human_mobility')>,
+  <Category.get('financial')>,
+  <Category.get('environmental')>,
+  <Category.get('demographics')>]
+</code></pre>
 
 For the case of the US, the Data Observatory provides six different categories of datasets. Let's discover the available spatial resolutions for the demographics category (which at a first sight will contain the population data we need).
-
 
 ```python
 from cartoframes.data.observatory import Catalog
@@ -54,30 +48,27 @@ geographies = Catalog().country('usa').category('demographics').geographies
 geographies
 ```
 
-
-
-
-    [<Geography.get('ags_blockgroup_1c63771c')>,
-     <Geography.get('ags_q17_4739be4f')>,
-     <Geography.get('mbi_blockgroups_1ab060a')>,
-     <Geography.get('mbi_counties_141b61cd')>,
-     <Geography.get('mbi_county_subd_e8e6ea23')>,
-     <Geography.get('mbi_pc_5_digit_4b1682a6')>,
-     <Geography.get('od_blockclippe_9c508438')>,
-     <Geography.get('od_blockgroupc_3ab29c84')>,
-     <Geography.get('od_cbsaclipped_b6a32adc')>,
-     <Geography.get('od_censustract_5962fe30')>,
-     <Geography.get('od_congression_6774ebb')>,
-     <Geography.get('od_countyclipp_caef1ec9')>,
-     <Geography.get('od_placeclippe_48a89947')>,
-     <Geography.get('od_pumaclipped_b065909')>,
-     <Geography.get('od_schooldistr_6d5c417f')>,
-     <Geography.get('od_schooldistr_f70c7e28')>,
-     <Geography.get('od_schooldistr_75493a16')>,
-     <Geography.get('od_stateclippe_8d79f5be')>,
-     <Geography.get('od_zcta5clippe_6b6ff33c')>,
-     <Geography.get('usct_censustract_784cc2ed')>]
-
+<pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Geography.get('ags_blockgroup_1c63771c')>,
+  <Geography.get('ags_q17_4739be4f')>,
+  <Geography.get('mbi_blockgroups_1ab060a')>,
+  <Geography.get('mbi_counties_141b61cd')>,
+  <Geography.get('mbi_county_subd_e8e6ea23')>,
+  <Geography.get('mbi_pc_5_digit_4b1682a6')>,
+  <Geography.get('od_blockclippe_9c508438')>,
+  <Geography.get('od_blockgroupc_3ab29c84')>,
+  <Geography.get('od_cbsaclipped_b6a32adc')>,
+  <Geography.get('od_censustract_5962fe30')>,
+  <Geography.get('od_congression_6774ebb')>,
+  <Geography.get('od_countyclipp_caef1ec9')>,
+  <Geography.get('od_placeclippe_48a89947')>,
+  <Geography.get('od_pumaclipped_b065909')>,
+  <Geography.get('od_schooldistr_6d5c417f')>,
+  <Geography.get('od_schooldistr_f70c7e28')>,
+  <Geography.get('od_schooldistr_75493a16')>,
+  <Geography.get('od_stateclippe_8d79f5be')>,
+  <Geography.get('od_zcta5clippe_6b6ff33c')>,
+  <Geography.get('usct_censustract_784cc2ed')>]
+</code></pre>
 
 
 Let's filter the geographies by those that contain information at the level of blockgroup. For that purpose we are converting the geographies to a pandas `DataFrame` and search for the string `blockgroup` in the `id` of the geographies:
@@ -87,9 +78,6 @@ Let's filter the geographies by those that contain information at the level of b
 df = geographies.to_dataframe()
 df[df['id'].str.contains('blockgroup', case=False, na=False)]
 ```
-
-
-
 
 <div>
 <table border="1" class="dataframe u-vertical-scroll">
@@ -172,35 +160,26 @@ df[df['id'].str.contains('blockgroup', case=False, na=False)]
 </table>
 </div>
 
-
-
 We have three available datasets, from three different providers: Michael Bauer International, Open Data and AGS. For this example, we are going to look for demographic datasets for the AGS blockgroups geography `ags_blockgroup_1c63771c`:
-
 
 ```python
 datasets = Catalog().country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
 datasets
 ```
 
-
-
-
-    [<Dataset.get('ags_sociodemogr_e92b1637')>,
-     <Dataset.get('ags_consumerspe_fe5d060a')>,
-     <Dataset.get('ags_retailpoten_ddf56a1a')>,
-     <Dataset.get('ags_consumerpro_e8344e2e')>,
-     <Dataset.get('ags_businesscou_a8310a11')>,
-     <Dataset.get('ags_crimerisk_9ec89442')>]
-
+<pre class="u-topbottom-Margin"><code>[<Dataset.get('ags_sociodemogr_e92b1637')>,
+    <Dataset.get('ags_consumerspe_fe5d060a')>,
+    <Dataset.get('ags_retailpoten_ddf56a1a')>,
+    <Dataset.get('ags_consumerpro_e8344e2e')>,
+    <Dataset.get('ags_businesscou_a8310a11')>,
+    <Dataset.get('ags_crimerisk_9ec89442')>]
+</code></pre>
 
 Let's continue with the data discovery. We have 6 datasets in the US with demographics information at the level of AGS blockgroups:
 
 ```python
 datasets.to_dataframe()
 ```
-
-
-
 
 <div>
 <table border="1" class="dataframe u-vertical-scroll">
@@ -380,12 +359,9 @@ datasets.to_dataframe()
 <p>6 rows × 21 columns</p>
 </div>
 
-
-
 They comprise different information: consumer spending, retail potential, consumer profiles, etc.
 
 At a first sight, it looks the dataset with `data_source_id: sociodemographic` might contain the population information we are looking for. Let's try to understand a little bit better what data this dataset contains by looking at its variables:
-
 
 ```python
 from cartoframes.data.observatory import Dataset
@@ -394,129 +370,120 @@ variables = dataset.variables
 variables
 ```
 
-
-
-
-    [<Variable.get('HINCYMED65_310bc888')> #'Median Household Income: Age 65-74 (2019A)',
-     <Variable.get('HINCYMED55_1a269b4b')> #'Median Household Income: Age 55-64 (2019A)',
-     <Variable.get('HINCYMED45_33daa0a')> #'Median Household Income: Age 45-54 (2019A)',
-     <Variable.get('HINCYMED35_4c7c3ccd')> #'Median Household Income: Age 35-44 (2019A)',
-     <Variable.get('HINCYMED25_55670d8c')> #'Median Household Income: Age 25-34 (2019A)',
-     <Variable.get('HINCYMED24_22603d1a')> #'Median Household Income: Age < 25 (2019A)',
-     <Variable.get('HINCYGT200_e552a738')> #'Household Income > $200000 (2019A)',
-     <Variable.get('HINCY6075_1933e114')> #'Household Income $60000-$74999 (2019A)',
-     <Variable.get('HINCY4550_f7ad7d79')> #'Household Income $45000-$49999 (2019A)',
-     <Variable.get('HINCY4045_98177a5c')> #'Household Income $40000-$44999 (2019A)',
-     <Variable.get('HINCY3540_73617481')> #'Household Income $35000-$39999 (2019A)',
-     <Variable.get('HINCY2530_849c8523')> #'Household Income $25000-$29999 (2019A)',
-     <Variable.get('HINCY2025_eb268206')> #'Household Income $20000-$24999 (2019A)',
-     <Variable.get('HINCY1520_8f321b8c')> #'Household Income $15000-$19999 (2019A)',
-     <Variable.get('HINCY12550_f5b5f848')> #'Household Income $125000-$149999 (2019A)',
-     <Variable.get('HHSCYMCFCH_9bddf3b1')> #'Families married couple w children (2019A)',
-     <Variable.get('HHSCYLPMCH_e844cd91')> #'Families male no wife w children (2019A)',
-     <Variable.get('HHSCYLPFCH_e4112270')> #'Families female no husband children (2019A)',
-     <Variable.get('HHDCYMEDAG_69c53f22')> #'Median Age of Householder (2019A)',
-     <Variable.get('HHDCYFAM_85548592')> #'Family Households (2019A)',
-     <Variable.get('HHDCYAVESZ_f4a95c6f')> #'Average Household Size (2019A)',
-     <Variable.get('HHDCY_23e8e012')> #'Households (2019A)',
-     <Variable.get('EDUCYSHSCH_5c444deb')> #'Pop 25+ 9th-12th grade no diploma (2019A)',
-     <Variable.get('EDUCYLTGR9_cbcfcc89')> #'Pop 25+ less than 9th grade (2019A)',
-     <Variable.get('EDUCYHSCH_b236c803')> #'Pop 25+ HS graduate (2019A)',
-     <Variable.get('EDUCYGRAD_d0179ccb')> #'Pop 25+ graduate or prof school degree (2019A)',
-     <Variable.get('EDUCYBACH_c2295f79')> #'Pop 25+ Bachelors degree (2019A)',
-     <Variable.get('DWLCYVACNT_4d5e33e9')> #'Housing units vacant (2019A)',
-     <Variable.get('DWLCYRENT_239f79ae')> #'Occupied units renter (2019A)',
-     <Variable.get('DWLCYOWNED_a34794a5')> #'Occupied units owner (2019A)',
-     <Variable.get('AGECYMED_b6eaafb4')> #'Median Age (2019A)',
-     <Variable.get('AGECYGT85_b9d8a94d')> #'Population age 85+ (2019A)',
-     <Variable.get('AGECYGT25_433741c7')> #'Population Age 25+ (2019A)',
-     <Variable.get('AGECYGT15_681a1204')> #'Population Age 15+ (2019A)',
-     <Variable.get('AGECY8084_b25d4aed')> #'Population age 80-84 (2019A)',
-     <Variable.get('AGECY7579_15dcf822')> #'Population age 75-79 (2019A)',
-     <Variable.get('AGECY7074_6da64674')> #'Population age 70-74 (2019A)',
-     <Variable.get('AGECY6064_cc011050')> #'Population age 60-64 (2019A)',
-     <Variable.get('AGECY5559_8de3522b')> #'Population age 55-59 (2019A)',
-     <Variable.get('AGECY5054_f599ec7d')> #'Population age 50-54 (2019A)',
-     <Variable.get('AGECY4549_2c44040f')> #'Population age 45-49 (2019A)',
-     <Variable.get('AGECY4044_543eba59')> #'Population age 40-44 (2019A)',
-     <Variable.get('AGECY3034_86a81427')> #'Population age 30-34 (2019A)',
-     <Variable.get('AGECY2529_5f75fc55')> #'Population age 25-29 (2019A)',
-     <Variable.get('AGECY1519_66ed0078')> #'Population age 15-19 (2019A)',
-     <Variable.get('AGECY0509_c74a565c')> #'Population age 5-9 (2019A)',
-     <Variable.get('AGECY0004_bf30e80a')> #'Population age 0-4 (2019A)',
-     <Variable.get('EDUCYSCOLL_1e8c4828')> #'Pop 25+ college no diploma (2019A)',
-     <Variable.get('MARCYMARR_26e07b7')> #'Now Married (2019A)',
-     <Variable.get('AGECY2024_270f4203')> #'Population age 20-24 (2019A)',
-     <Variable.get('AGECY1014_1e97be2e')> #'Population age 10-14 (2019A)',
-     <Variable.get('AGECY3539_fed2aa71')> #'Population age 35-39 (2019A)',
-     <Variable.get('EDUCYASSOC_fa1bcf13')> #'Pop 25+ Associate degree (2019A)',
-     <Variable.get('HINCY1015_d2be7e2b')> #'Household Income $10000-$14999 (2019A)',
-     <Variable.get('HINCYLT10_745f9119')> #'Household Income < $10000 (2019A)',
-     <Variable.get('POPPY_946f4ed6')> #'Population (2024A)',
-     <Variable.get('INCPYMEDHH_e8930404')> #'Median household income (2024A)',
-     <Variable.get('AGEPYMED_91aa42e6')> #'Median Age (2024A)',
-     <Variable.get('DWLPY_819e5af0')> #'Housing units (2024A)',
-     <Variable.get('INCPYAVEHH_6e0d7b43')> #'Average household Income (2024A)',
-     <Variable.get('INCPYPCAP_ec5fd8ca')> #'Per capita income (2024A)',
-     <Variable.get('HHDPY_4207a180')> #'Households (2024A)',
-     <Variable.get('VPHCYNONE_22cb7350')> #'Households: No Vehicle Available (2019A)',
-     <Variable.get('VPHCYGT1_a052056d')> #'Households: Two or More Vehicles Available (2019A)',
-     <Variable.get('VPHCY1_53dc760f')> #'Households: One Vehicle Available (2019A)',
-     <Variable.get('UNECYRATE_b3dc32ba')> #'Unemployment Rate (2019A)',
-     <Variable.get('SEXCYMAL_ca14d4b8')> #'Population male (2019A)',
-     <Variable.get('SEXCYFEM_d52acecb')> #'Population female (2019A)',
-     <Variable.get('RCHCYWHNHS_9206188d')> #'Non Hispanic White (2019A)',
-     <Variable.get('RCHCYOTNHS_d8592ce9')> #'Non Hispanic Other Race (2019A)',
-     <Variable.get('RCHCYMUNHS_1a2518ec')> #'Non Hispanic Multiple Race (2019A)',
-     <Variable.get('RCHCYHANHS_dbe5754')> #'Non Hispanic Hawaiian/Pacific Islander (2019A)',
-     <Variable.get('RCHCYBLNHS_b5649728')> #'Non Hispanic Black (2019A)',
-     <Variable.get('RCHCYASNHS_fabeaa31')> #'Non Hispanic Asian (2019A)',
-     <Variable.get('RCHCYAMNHS_4a788a9d')> #'Non Hispanic American Indian (2019A)',
-     <Variable.get('POPCYGRPI_147af7a9')> #'Institutional Group Quarters Population (2019A)',
-     <Variable.get('POPCYGRP_74c19673')> #'Population in Group Quarters (2019A)',
-     <Variable.get('POPCY_f5800f44')> #'Population (2019A)',
-     <Variable.get('MARCYWIDOW_7a2977e0')> #'Widowed (2019A)',
-     <Variable.get('MARCYSEP_9024e7e5')> #'Separated (2019A)',
-     <Variable.get('MARCYNEVER_c82856b0')> #'Never Married (2019A)',
-     <Variable.get('MARCYDIVOR_32a11923')> #'Divorced (2019A)',
-     <Variable.get('LNIEXSPAN_9a19f7f7')> #'SPANISH SPEAKING HOUSEHOLDS',
-     <Variable.get('LNIEXISOL_d776b2f7')> #'LINGUISTICALLY ISOLATED HOUSEHOLDS (NON-ENGLISH SP...',
-     <Variable.get('LBFCYUNEM_1e711de4')> #'Pop 16+ civilian unemployed (2019A)',
-     <Variable.get('LBFCYNLF_c4c98350')> #'Pop 16+ not in labor force (2019A)',
-     <Variable.get('INCCYMEDHH_bea58257')> #'Median household income (2019A)',
-     <Variable.get('INCCYMEDFA_59fa177d')> #'Median family income (2019A)',
-     <Variable.get('INCCYAVEHH_383bfd10')> #'Average household Income (2019A)',
-     <Variable.get('HUSEXAPT_988f452f')> #'UNITS IN STRUCTURE: 20 OR MORE',
-     <Variable.get('HUSEX1DET_3684405c')> #'UNITS IN STRUCTURE: 1 DETACHED',
-     <Variable.get('HOOEXMED_c2d4b5b')> #'Median Value of Owner Occupied Housing Units',
-     <Variable.get('HISCYHISP_f3b3a31e')> #'Population Hispanic (2019A)',
-     <Variable.get('HINCYMED75_2810f9c9')> #'Median Household Income: Age 75+ (2019A)',
-     <Variable.get('HINCY15020_21e894dd')> #'Household Income $150000-$199999 (2019A)',
-     <Variable.get('BLOCKGROUP_16298bd5')> #'Geographic Identifier',
-     <Variable.get('LBFCYLBF_59ce7ab0')> #'Population In Labor Force (2019A)',
-     <Variable.get('LBFCYARM_8c06223a')> #'Pop 16+ in Armed Forces (2019A)',
-     <Variable.get('DWLCY_e0711b62')> #'Housing units (2019A)',
-     <Variable.get('LBFCYPOP16_53fa921c')> #'Population Age 16+ (2019A)',
-     <Variable.get('LBFCYEMPL_c9c22a0')> #'Pop 16+ civilian employed (2019A)',
-     <Variable.get('INCCYPCAP_691da8ff')> #'Per capita income (2019A)',
-     <Variable.get('RNTEXMED_2e309f54')> #'Median Cash Rent',
-     <Variable.get('HINCY3035_4a81d422')> #'Household Income $30000-$34999 (2019A)',
-     <Variable.get('HINCY5060_62f78b34')> #'Household Income $50000-$59999 (2019A)',
-     <Variable.get('HINCY10025_665c9060')> #'Household Income $100000-$124999 (2019A)',
-     <Variable.get('HINCY75100_9d5c69c8')> #'Household Income $75000-$99999 (2019A)',
-     <Variable.get('AGECY6569_b47bae06')> #'Population age 65-69 (2019A)']
-
-
-
+<pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Variable.get('HINCYMED65_310bc888')> #'Median Household Income: Age 65-74 (2019A)',
+<Variable.get('HINCYMED55_1a269b4b')> #'Median Household Income: Age 55-64 (2019A)',
+<Variable.get('HINCYMED45_33daa0a')> #'Median Household Income: Age 45-54 (2019A)',
+<Variable.get('HINCYMED35_4c7c3ccd')> #'Median Household Income: Age 35-44 (2019A)',
+<Variable.get('HINCYMED25_55670d8c')> #'Median Household Income: Age 25-34 (2019A)',
+<Variable.get('HINCYMED24_22603d1a')> #'Median Household Income: Age < 25 (2019A)',
+<Variable.get('HINCYGT200_e552a738')> #'Household Income > $200000 (2019A)',
+<Variable.get('HINCY6075_1933e114')> #'Household Income $60000-$74999 (2019A)',
+<Variable.get('HINCY4550_f7ad7d79')> #'Household Income $45000-$49999 (2019A)',
+<Variable.get('HINCY4045_98177a5c')> #'Household Income $40000-$44999 (2019A)',
+<Variable.get('HINCY3540_73617481')> #'Household Income $35000-$39999 (2019A)',
+<Variable.get('HINCY2530_849c8523')> #'Household Income $25000-$29999 (2019A)',
+<Variable.get('HINCY2025_eb268206')> #'Household Income $20000-$24999 (2019A)',
+<Variable.get('HINCY1520_8f321b8c')> #'Household Income $15000-$19999 (2019A)',
+<Variable.get('HINCY12550_f5b5f848')> #'Household Income $125000-$149999 (2019A)',
+<Variable.get('HHSCYMCFCH_9bddf3b1')> #'Families married couple w children (2019A)',
+<Variable.get('HHSCYLPMCH_e844cd91')> #'Families male no wife w children (2019A)',
+<Variable.get('HHSCYLPFCH_e4112270')> #'Families female no husband children (2019A)',
+<Variable.get('HHDCYMEDAG_69c53f22')> #'Median Age of Householder (2019A)',
+<Variable.get('HHDCYFAM_85548592')> #'Family Households (2019A)',
+<Variable.get('HHDCYAVESZ_f4a95c6f')> #'Average Household Size (2019A)',
+<Variable.get('HHDCY_23e8e012')> #'Households (2019A)',
+<Variable.get('EDUCYSHSCH_5c444deb')> #'Pop 25+ 9th-12th grade no diploma (2019A)',
+<Variable.get('EDUCYLTGR9_cbcfcc89')> #'Pop 25+ less than 9th grade (2019A)',
+<Variable.get('EDUCYHSCH_b236c803')> #'Pop 25+ HS graduate (2019A)',
+<Variable.get('EDUCYGRAD_d0179ccb')> #'Pop 25+ graduate or prof school degree (2019A)',
+<Variable.get('EDUCYBACH_c2295f79')> #'Pop 25+ Bachelors degree (2019A)',
+<Variable.get('DWLCYVACNT_4d5e33e9')> #'Housing units vacant (2019A)',
+<Variable.get('DWLCYRENT_239f79ae')> #'Occupied units renter (2019A)',
+<Variable.get('DWLCYOWNED_a34794a5')> #'Occupied units owner (2019A)',
+<Variable.get('AGECYMED_b6eaafb4')> #'Median Age (2019A)',
+<Variable.get('AGECYGT85_b9d8a94d')> #'Population age 85+ (2019A)',
+<Variable.get('AGECYGT25_433741c7')> #'Population Age 25+ (2019A)',
+<Variable.get('AGECYGT15_681a1204')> #'Population Age 15+ (2019A)',
+<Variable.get('AGECY8084_b25d4aed')> #'Population age 80-84 (2019A)',
+<Variable.get('AGECY7579_15dcf822')> #'Population age 75-79 (2019A)',
+<Variable.get('AGECY7074_6da64674')> #'Population age 70-74 (2019A)',
+<Variable.get('AGECY6064_cc011050')> #'Population age 60-64 (2019A)',
+<Variable.get('AGECY5559_8de3522b')> #'Population age 55-59 (2019A)',
+<Variable.get('AGECY5054_f599ec7d')> #'Population age 50-54 (2019A)',
+<Variable.get('AGECY4549_2c44040f')> #'Population age 45-49 (2019A)',
+<Variable.get('AGECY4044_543eba59')> #'Population age 40-44 (2019A)',
+<Variable.get('AGECY3034_86a81427')> #'Population age 30-34 (2019A)',
+<Variable.get('AGECY2529_5f75fc55')> #'Population age 25-29 (2019A)',
+<Variable.get('AGECY1519_66ed0078')> #'Population age 15-19 (2019A)',
+<Variable.get('AGECY0509_c74a565c')> #'Population age 5-9 (2019A)',
+<Variable.get('AGECY0004_bf30e80a')> #'Population age 0-4 (2019A)',
+<Variable.get('EDUCYSCOLL_1e8c4828')> #'Pop 25+ college no diploma (2019A)',
+<Variable.get('MARCYMARR_26e07b7')> #'Now Married (2019A)',
+<Variable.get('AGECY2024_270f4203')> #'Population age 20-24 (2019A)',
+<Variable.get('AGECY1014_1e97be2e')> #'Population age 10-14 (2019A)',
+<Variable.get('AGECY3539_fed2aa71')> #'Population age 35-39 (2019A)',
+<Variable.get('EDUCYASSOC_fa1bcf13')> #'Pop 25+ Associate degree (2019A)',
+<Variable.get('HINCY1015_d2be7e2b')> #'Household Income $10000-$14999 (2019A)',
+<Variable.get('HINCYLT10_745f9119')> #'Household Income < $10000 (2019A)',
+<Variable.get('POPPY_946f4ed6')> #'Population (2024A)',
+<Variable.get('INCPYMEDHH_e8930404')> #'Median household income (2024A)',
+<Variable.get('AGEPYMED_91aa42e6')> #'Median Age (2024A)',
+<Variable.get('DWLPY_819e5af0')> #'Housing units (2024A)',
+<Variable.get('INCPYAVEHH_6e0d7b43')> #'Average household Income (2024A)',
+<Variable.get('INCPYPCAP_ec5fd8ca')> #'Per capita income (2024A)',
+<Variable.get('HHDPY_4207a180')> #'Households (2024A)',
+<Variable.get('VPHCYNONE_22cb7350')> #'Households: No Vehicle Available (2019A)',
+<Variable.get('VPHCYGT1_a052056d')> #'Households: Two or More Vehicles Available (2019A)',
+<Variable.get('VPHCY1_53dc760f')> #'Households: One Vehicle Available (2019A)',
+<Variable.get('UNECYRATE_b3dc32ba')> #'Unemployment Rate (2019A)',
+<Variable.get('SEXCYMAL_ca14d4b8')> #'Population male (2019A)',
+<Variable.get('SEXCYFEM_d52acecb')> #'Population female (2019A)',
+<Variable.get('RCHCYWHNHS_9206188d')> #'Non Hispanic White (2019A)',
+<Variable.get('RCHCYOTNHS_d8592ce9')> #'Non Hispanic Other Race (2019A)',
+<Variable.get('RCHCYMUNHS_1a2518ec')> #'Non Hispanic Multiple Race (2019A)',
+<Variable.get('RCHCYHANHS_dbe5754')> #'Non Hispanic Hawaiian/Pacific Islander (2019A)',
+<Variable.get('RCHCYBLNHS_b5649728')> #'Non Hispanic Black (2019A)',
+<Variable.get('RCHCYASNHS_fabeaa31')> #'Non Hispanic Asian (2019A)',
+<Variable.get('RCHCYAMNHS_4a788a9d')> #'Non Hispanic American Indian (2019A)',
+<Variable.get('POPCYGRPI_147af7a9')> #'Institutional Group Quarters Population (2019A)',
+<Variable.get('POPCYGRP_74c19673')> #'Population in Group Quarters (2019A)',
+<Variable.get('POPCY_f5800f44')> #'Population (2019A)',
+<Variable.get('MARCYWIDOW_7a2977e0')> #'Widowed (2019A)',
+<Variable.get('MARCYSEP_9024e7e5')> #'Separated (2019A)',
+<Variable.get('MARCYNEVER_c82856b0')> #'Never Married (2019A)',
+<Variable.get('MARCYDIVOR_32a11923')> #'Divorced (2019A)',
+<Variable.get('LNIEXSPAN_9a19f7f7')> #'SPANISH SPEAKING HOUSEHOLDS',
+<Variable.get('LNIEXISOL_d776b2f7')> #'LINGUISTICALLY ISOLATED HOUSEHOLDS (NON-ENGLISH SP...',
+<Variable.get('LBFCYUNEM_1e711de4')> #'Pop 16+ civilian unemployed (2019A)',
+<Variable.get('LBFCYNLF_c4c98350')> #'Pop 16+ not in labor force (2019A)',
+<Variable.get('INCCYMEDHH_bea58257')> #'Median household income (2019A)',
+<Variable.get('INCCYMEDFA_59fa177d')> #'Median family income (2019A)',
+<Variable.get('INCCYAVEHH_383bfd10')> #'Average household Income (2019A)',
+<Variable.get('HUSEXAPT_988f452f')> #'UNITS IN STRUCTURE: 20 OR MORE',
+<Variable.get('HUSEX1DET_3684405c')> #'UNITS IN STRUCTURE: 1 DETACHED',
+<Variable.get('HOOEXMED_c2d4b5b')> #'Median Value of Owner Occupied Housing Units',
+<Variable.get('HISCYHISP_f3b3a31e')> #'Population Hispanic (2019A)',
+<Variable.get('HINCYMED75_2810f9c9')> #'Median Household Income: Age 75+ (2019A)',
+<Variable.get('HINCY15020_21e894dd')> #'Household Income $150000-$199999 (2019A)',
+<Variable.get('BLOCKGROUP_16298bd5')> #'Geographic Identifier',
+<Variable.get('LBFCYLBF_59ce7ab0')> #'Population In Labor Force (2019A)',
+<Variable.get('LBFCYARM_8c06223a')> #'Pop 16+ in Armed Forces (2019A)',
+<Variable.get('DWLCY_e0711b62')> #'Housing units (2019A)',
+<Variable.get('LBFCYPOP16_53fa921c')> #'Population Age 16+ (2019A)',
+<Variable.get('LBFCYEMPL_c9c22a0')> #'Pop 16+ civilian employed (2019A)',
+<Variable.get('INCCYPCAP_691da8ff')> #'Per capita income (2019A)',
+<Variable.get('RNTEXMED_2e309f54')> #'Median Cash Rent',
+<Variable.get('HINCY3035_4a81d422')> #'Household Income $30000-$34999 (2019A)',
+<Variable.get('HINCY5060_62f78b34')> #'Household Income $50000-$59999 (2019A)',
+<Variable.get('HINCY10025_665c9060')> #'Household Income $100000-$124999 (2019A)',
+<Variable.get('HINCY75100_9d5c69c8')> #'Household Income $75000-$99999 (2019A)',
+<Variable.get('AGECY6569_b47bae06')> #'Population age 65-69 (2019A)']
+</code></pre>
 
 ```python
-from cartoframes.data.observatory import Dataset
 vdf = variables.to_dataframe()
 vdf
 ```
-
-
-
 
 <div>
 <table border="1" class="dataframe u-vertical-scroll">
@@ -1396,17 +1363,11 @@ vdf
 <p>108 rows × 11 columns</p>
 </div>
 
-
-
 We can see there are several variables related to population, so this is the `Dataset` we are looking for.
-
 
 ```python
 vdf[vdf['description'].str.contains('pop', case=False, na=False)]
 ```
-
-
-
 
 <div>
 <table border="1" class="dataframe u-vertical-scroll">
@@ -1992,6 +1953,146 @@ vdf[vdf['description'].str.contains('pop', case=False, na=False)]
 </div>
 
 
+We can follow the very same process to discover `financial` datasets, let's see how it works by first listing the geographies available for the category `financial` in the US:
+
+
+```python
+Catalog().country('usa').category('financial').geographies
+```
+
+
+
+
+<pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Geography.get('mc_block_9ebc626c')>,
+  <Geography.get('mc_blockgroup_c4b8da4c')>,
+  <Geography.get('mc_county_31cde2d')>,
+  <Geography.get('mc_state_cc31b9d1')>,
+  <Geography.get('mc_tract_3704a85c')>,
+  <Geography.get('mc_zipcode_263079e3')>]
+  </code></pre>
+
+
+
+We can clearly identify a geography at the blockgroup resolution, provided by Mastercard:
+
+
+```python
+from cartoframes.data.observatory import Geography
+Geography.get('mc_blockgroup_c4b8da4c').to_dict()
+```
+
+<pre class="u-vertical-scroll u-topbottom-Margin"><code>{'id': 'carto-do.mastercard.geography_usa_blockgroup_2019',
+  'slug': 'mc_blockgroup_c4b8da4c',
+  'name': 'USA Census Block Groups',
+  'description': None,
+  'country_id': 'usa',
+  'provider_id': 'mastercard',
+  'provider_name': 'Mastercard',
+  'lang': 'eng',
+  'geom_type': 'MULTIPOLYGON',
+  'update_frequency': None,
+  'version': '2019',
+  'is_public_data': False}
+  </code></pre>
+
+
+
+Now we can list the available datasets provided by Mastercard for the US Census blockgroups spatial resolution:
+
+
+```python
+Catalog().country('usa').category('financial').geography('mc_blockgroup_c4b8da4c').datasets.to_dataframe()
+```
+
+<div>
+<table border="1" class="dataframe u-vertical-scroll">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>available_in</th>
+      <th>category_id</th>
+      <th>category_name</th>
+      <th>country_id</th>
+      <th>data_source_id</th>
+      <th>description</th>
+      <th>geography_description</th>
+      <th>geography_id</th>
+      <th>geography_name</th>
+      <th>id</th>
+      <th>...</th>
+      <th>lang</th>
+      <th>name</th>
+      <th>provider_id</th>
+      <th>provider_name</th>
+      <th>slug</th>
+      <th>summary_json</th>
+      <th>temporal_aggregation</th>
+      <th>time_coverage</th>
+      <th>update_frequency</th>
+      <th>version</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>None</td>
+      <td>financial</td>
+      <td>Financial</td>
+      <td>usa</td>
+      <td>mrli</td>
+      <td>MRLI scores validate, evaluate and benchmark t...</td>
+      <td>None</td>
+      <td>carto-do.mastercard.geography_usa_blockgroup_2019</td>
+      <td>USA Census Block Groups</td>
+      <td>carto-do.mastercard.financial_mrli_usa_blockgr...</td>
+      <td>...</td>
+      <td>eng</td>
+      <td>MRLI Data for Census Block Groups</td>
+      <td>mastercard</td>
+      <td>Mastercard</td>
+      <td>mc_mrli_35402a9d</td>
+      <td>{'counts': {'rows': 1072383, 'cells': 22520043...</td>
+      <td>monthly</td>
+      <td>None</td>
+      <td>monthly</td>
+      <td>2019</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 21 columns</p>
+</div>
+
+
+
+Let's finally inspect the variables available in the dataset:
+
+
+```python
+Dataset.get('mc_mrli_35402a9d').variables
+```
+
+
+
+<pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Variable.get('transactions_st_d22b3489')> #'Same as transactions_score, but only comparing ran...',
+  <Variable.get('region_id_3c7d0d92')> #'Region identifier (construction varies depending o...',
+  <Variable.get('category_8c84b3a7')> #'Industry/sector categories (Total Retail, Retail e...',
+  <Variable.get('month_57cd6f80')> #'Name of the month the data refers to',
+  <Variable.get('region_type_d875e9e7')> #'Administrative boundary type (block, block group, ...',
+  <Variable.get('stability_state_8af6b92')> #'Same as stability_score, but only comparing rankin...',
+  <Variable.get('sales_score_49d02f1e')> #'Rank based on the average monthly sales for the pr...',
+  <Variable.get('stability_score_6756cb72')> #'Rank based on the change in merchants between the ...',
+  <Variable.get('ticket_size_sta_3bfd5114')> #'Same as ticket_size_score, but only comparing rank...',
+  <Variable.get('sales_metro_sco_e088134d')> #'Same as sales_score, but only comparing ranking wi...',
+  <Variable.get('transactions_me_628f6065')> #'Same as transactions_score, but only comparing ran...',
+  <Variable.get('growth_score_68b3f9ac')> #'Rank based on the percent change in sales between ...',
+  <Variable.get('ticket_size_met_8b5905f8')> #'Same as ticket_size_score, but only comparing rank...',
+  <Variable.get('ticket_size_sco_21f7820a')> #'Rank based on the average monthly sales for the pr...',
+  <Variable.get('growth_state_sc_11870b1c')> #'Same as growth_score, but only comparing ranking w...',
+  <Variable.get('stability_metro_b80b3f7e')> #'Same as stability_score, but only comparing rankin...',
+  <Variable.get('growth_metro_sc_a1235ff0')> #'Same as growth_score, but only comparing ranking w...',
+  <Variable.get('sales_state_sco_502c47a1')> #'Same as sales_score, but only comparing ranking wi...',
+  <Variable.get('transactions_sc_ee976f1e')> #'Rank based on the average number of transactions f...']
+</code></pre>
 
 ### Dataset and variables metadata
 
@@ -2017,8 +2118,6 @@ dataset = Dataset.get('ags_sociodemogr_e92b1637')
 ```python
 dataset.head()
 ```
-
-
 
 
 <div>
@@ -2295,8 +2394,6 @@ dataset.head()
 <p>10 rows × 101 columns</p>
 </div>
 
-
-
 Alternatively, you can get the last ten ones with `dataset.tail()`
 
 An overview of the coverage of the dataset
@@ -2305,9 +2402,6 @@ An overview of the coverage of the dataset
 ```python
 dataset.geom_coverage()
 ```
-
-
-
 
 <iframe
   frameborder="0"
@@ -3216,48 +3310,32 @@ dataset.geom_coverage()
 
 </iframe>
 
-
-
 Some stats about the dataset:
-
 
 ```python
 dataset.counts()
 ```
 
-
-
-
-    rows                    217182
-    cells                 22369746
-    null_cells                   0
-    null_cells_percent           0
-    dtype: int64
-
-
-
+<pre class="u-topbottom-Margin"><code>rows                    217182
+cells                 22369746
+null_cells                   0
+null_cells_percent           0
+dtype: int64
+</code></pre>
 
 ```python
 dataset.fields_by_type()
 ```
 
-
-
-
-    float       4
-    string      1
-    integer    96
-    dtype: int64
-
-
-
+<pre class="u-topbottom-Margin"><code>float       4
+string      1
+integer    96
+dtype: int64
+</code></pre>
 
 ```python
 dataset.describe()
 ```
-
-
-
 
 <div>
 <table border="1" class="dataframe u-vertical-scroll">
@@ -3556,30 +3634,28 @@ Every `Dataset` instance in the catalog contains other useful metadata:
 dataset.to_dict()
 ```
 
-
-
-
-    {'id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019',
-     'slug': 'ags_sociodemogr_e92b1637',
-     'name': 'Sociodemographic',
-     'description': 'Census and ACS sociodemographic data estimated for the current year and data projected to five years. Projected fields are general aggregates (total population, total households, median age, avg income etc.)',
-     'country_id': 'usa',
-     'geography_id': 'carto-do.ags.geography_usa_blockgroup_2015',
-     'geography_name': 'USA Census Block Group',
-     'geography_description': None,
-     'category_id': 'demographics',
-     'category_name': 'Demographics',
-     'provider_id': 'ags',
-     'provider_name': 'Applied Geographic Solutions',
-     'data_source_id': 'sociodemographic',
-     'lang': 'eng',
-     'temporal_aggregation': 'yearly',
-     'time_coverage': '[2019-01-01,2020-01-01)',
-     'update_frequency': None,
-     'version': '2019',
-     'is_public_data': False}
-
-
+<pre class="u-vertical-scroll u-topbottom-Margin"><code>{
+  'id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019',
+  'slug': 'ags_sociodemogr_e92b1637',
+  'name': 'Sociodemographic',
+  'description': 'Census and ACS sociodemographic data estimated for the current year and data projected to five years. Projected fields are general aggregates (total population, total households, median age, avg income etc.)',
+  'country_id': 'usa',
+  'geography_id': 'carto-do.ags.geography_usa_blockgroup_2015',
+  'geography_name': 'USA Census Block Group',
+  'geography_description': None,
+  'category_id': 'demographics',
+  'category_name': 'Demographics',
+  'provider_id': 'ags',
+  'provider_name': 'Applied Geographic Solutions',
+  'data_source_id': 'sociodemographic',
+  'lang': 'eng',
+  'temporal_aggregation': 'yearly',
+  'time_coverage': '[2019-01-01,2020-01-01)',
+  'update_frequency': None,
+  'version': '2019',
+  'is_public_data': False
+}
+</code></pre>
 
 There's also some intersting metadata, for each variable in the dataset:
 
@@ -3604,122 +3680,92 @@ Some of them are:
 
 Let's overview some of that augmented metadata for the variables in the AGS population dataset.
 
-
 ```python
 from cartoframes.data.observatory import Variable
 variable = Variable.get('POPPY_946f4ed6')
 variable
 ```
 
-
-
-
-    <Variable.get('POPPY_946f4ed6')> #'Population (2024A)'
-
-
-
+<pre class="u-topbottom-Margin"><code>
+  <Variable.get('POPPY_946f4ed6')> #'Population (2024A)'
+</code></pre>
 
 ```python
 variable.to_dict()
 ```
 
-
-
-
-    {'id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019.POPPY',
-     'slug': 'POPPY_946f4ed6',
-     'name': 'POPPY',
-     'description': 'Population (2024A)',
-     'column_name': 'POPPY',
-     'db_type': 'FLOAT',
-     'dataset_id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019',
-     'agg_method': 'SUM',
-     'variable_group_id': None,
-     'starred': False}
-
-
+<pre class="u-topbottom-Margin"><code>{'id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019.POPPY',
+    'slug': 'POPPY_946f4ed6',
+    'name': 'POPPY',
+    'description': 'Population (2024A)',
+    'column_name': 'POPPY',
+    'db_type': 'FLOAT',
+    'dataset_id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019',
+    'agg_method': 'SUM',
+    'variable_group_id': None,
+    'starred': False}
+</code></pre>
 
 There's also some utility methods ot understand the underlying data for each variable:
-
 
 ```python
 variable.head()
 ```
 
-
-
-
-    0     0
-    1     0
-    2     8
-    3     0
-    4     0
-    5     0
-    6     4
-    7     0
-    8     2
-    9    59
-    dtype: int64
-
-
-
+<pre class="u-topbottom-Margin"><code>0     0
+1     0
+2     8
+3     0
+4     0
+5     0
+6     4
+7     0
+8     2
+9    59
+dtype: int64
+</code></pre>
 
 ```python
 variable.counts()
 ```
 
-
-
-
-    all                 217182.000000
-    null                     0.000000
-    zero                   303.000000
-    extreme               9380.000000
-    distinct              6947.000000
-    outliers             27571.000000
-    null_percent             0.000000
-    zero_percent             0.139514
-    extreme_percent          0.043190
-    distinct_percent         3.198700
-    outliers_percent         0.126949
-    dtype: float64
-
-
-
+<pre class="u-topbottom-Margin"><code>all                 217182.000000
+null                     0.000000
+zero                   303.000000
+extreme               9380.000000
+distinct              6947.000000
+outliers             27571.000000
+null_percent             0.000000
+zero_percent             0.139514
+extreme_percent          0.043190
+distinct_percent         3.198700
+outliers_percent         0.126949
+dtype: float64
+</code></pre>
 
 ```python
 variable.quantiles()
 ```
 
-
-
-
-    q1                      867
-    q3                     1490
-    median                 1149
-    interquartile_range     623
-    dtype: int64
-
-
-
+<pre class="u-topbottom-Margin"><code>
+q1                      867
+q3                     1490
+median                 1149
+interquartile_range     623
+dtype: int64
+</code></pre>
 
 ```python
 variable.histogram()
 ```
 
-
 ![png](../../img/guides/explore_data_observatory_catalog_files/explore_data_observatory_catalog_37_0.png)
-
-
 
 ```python
 variable.describe()
 ```
 
-
-
-
-    avg                    1.564793e+03
+<pre class="u-topbottom-Margin"><code>avg                    1.564793e+03
     max                    7.127400e+04
     min                    0.000000e+00
     sum                    3.398448e+08
@@ -3730,8 +3776,7 @@ variable.describe()
     median                 1.149000e+03
     interquartile_range    6.230000e+02
     dtype: float64
-
-
+</code></pre>
 
 ### Subscribe to a Dataset in the catalog
 
@@ -3741,44 +3786,32 @@ Subscriptions to datasets allow you to use them from CARTOframes to enrich your 
 
 Let's see the dataset and geography in our previous example:
 
-
 ```python
 dataset = Dataset.get('ags_sociodemogr_e92b1637')
 ```
-
 
 ```python
 dataset.is_public_data
 ```
 
-
-
-
-    False
-
-
-
+<pre class="u-topbottom-Margin"><code>False
+</code></pre>
 
 ```python
 from cartoframes.data.observatory import Geography
 geography = Geography.get(dataset.geography)
 ```
 
-
 ```python
 geography.is_public_data
 ```
 
-
-
-
-    False
-
-
+<pre class="u-topbottom-Margin"><code>False
+</code></pre>
 
 Both `dataset` and `geography` are not public data, that means you need a subscription to be able to use them to enrich your own data.
 
-**To subscribe to data in the Data Observatory catalog you need a CARTO account with access to Data Observatory. See the [credentials](https://carto.com/developers/cartoframes/guides/Login-to-CARTO-Platform/#the-config-file) guide for more info on this topic.**
+**To subscribe to data in the Data Observatory catalog you need a CARTO account with access to Data Observatory. See the [credentials](/developers/cartoframes/guides/Authentication/#the-config-file) guide for more info on this topic.**
 
 
 ```python
@@ -3787,15 +3820,12 @@ set_default_credentials('creds.json')
 dataset.subscribe()
 ```
 
-
 ![png](../../img/guides/explore_data_observatory_catalog_files/sub_dat.png)
-
 
 
 ```python
 geography.subscribe()
 ```
-
 
 ![png](../../img/guides/explore_data_observatory_catalog_files/sub_geo.png)
 
@@ -3804,17 +3834,13 @@ geography.subscribe()
 
 You can check the actual status of your subscriptions directly from the catalog.
 
-
 ```python
 Catalog().subscriptions()
 ```
 
-
-
-
-    Datasets: None
-    Geographies: None
-
+<pre class="u-topbottom-Margin"><code>Datasets: None
+Geographies: None
+</code></pre>
 
 
 ### About nested filters in the Catalog instance
@@ -3829,150 +3855,147 @@ catalog = Catalog()
 catalog.country('usa').category('demographics').datasets
 ```
 
-
-
-
-    [<Dataset.get('od_acs_181619a3')>,
-     <Dataset.get('od_acs_38016c42')>,
-     <Dataset.get('od_acs_1f614ee8')>,
-     <Dataset.get('od_acs_c6bf32c9')>,
-     <Dataset.get('od_acs_91ff81e3')>,
-     <Dataset.get('od_acs_13345497')>,
-     <Dataset.get('od_acs_87fa66db')>,
-     <Dataset.get('od_acs_b98db80e')>,
-     <Dataset.get('od_acs_9f4d1f13')>,
-     <Dataset.get('od_acs_5b67fbbf')>,
-     <Dataset.get('od_acs_29664073')>,
-     <Dataset.get('od_acs_4bb9b377')>,
-     <Dataset.get('od_acs_9df157a1')>,
-     <Dataset.get('od_acs_550657ce')>,
-     <Dataset.get('od_tiger_19a6dc83')>,
-     <Dataset.get('od_acs_6e4b69f6')>,
-     <Dataset.get('od_acs_1a22afad')>,
-     <Dataset.get('od_acs_9510981d')>,
-     <Dataset.get('od_acs_6d43ed82')>,
-     <Dataset.get('od_acs_dc3cfd0f')>,
-     <Dataset.get('od_acs_194c5960')>,
-     <Dataset.get('od_acs_9a9c93b8')>,
-     <Dataset.get('od_acs_7b2649a9')>,
-     <Dataset.get('od_acs_478c37b8')>,
-     <Dataset.get('od_acs_f98ddfce')>,
-     <Dataset.get('od_acs_8b00f653')>,
-     <Dataset.get('od_acs_d52a0635')>,
-     <Dataset.get('od_acs_1deaa51')>,
-     <Dataset.get('od_acs_e0f5ff55')>,
-     <Dataset.get('od_acs_52710085')>,
-     <Dataset.get('od_acs_b3eac6e8')>,
-     <Dataset.get('od_acs_e9e3046f')>,
-     <Dataset.get('od_acs_506e3e6a')>,
-     <Dataset.get('od_acs_b4cbd26')>,
-     <Dataset.get('od_acs_fc07c6c5')>,
-     <Dataset.get('od_acs_a1083df8')>,
-     <Dataset.get('od_tiger_3336cbf')>,
-     <Dataset.get('od_acs_1a09274c')>,
-     <Dataset.get('od_tiger_66b9092c')>,
-     <Dataset.get('od_acs_db9898c5')>,
-     <Dataset.get('od_acs_670c8beb')>,
-     <Dataset.get('od_acs_6926adef')>,
-     <Dataset.get('mbi_population_678f3375')>,
-     <Dataset.get('mbi_retail_spen_e2c1988e')>,
-     <Dataset.get('mbi_retail_spen_14142fb4')>,
-     <Dataset.get('ags_sociodemogr_e92b1637')>,
-     <Dataset.get('ags_consumerspe_fe5d060a')>,
-     <Dataset.get('od_acs_e8a7d88d')>,
-     <Dataset.get('od_acs_60614ff2')>,
-     <Dataset.get('od_acs_f09b24f4')>,
-     <Dataset.get('od_acs_1cfa643a')>,
-     <Dataset.get('od_acs_c4a00c26')>,
-     <Dataset.get('od_acs_c1c86582')>,
-     <Dataset.get('od_acs_5b8fdefd')>,
-     <Dataset.get('mbi_population_341ee33b')>,
-     <Dataset.get('od_spielmansin_5d03106a')>,
-     <Dataset.get('mbi_households__109a963')>,
-     <Dataset.get('od_acs_c2868f47')>,
-     <Dataset.get('od_acs_b581bfd1')>,
-     <Dataset.get('od_acs_2d438a42')>,
-     <Dataset.get('od_acs_aa92e673')>,
-     <Dataset.get('od_acs_1db77442')>,
-     <Dataset.get('od_acs_f3eaa128')>,
-     <Dataset.get('od_tiger_e5e51d96')>,
-     <Dataset.get('od_tiger_41814018')>,
-     <Dataset.get('od_tiger_b0608dc7')>,
-     <Dataset.get('ags_retailpoten_ddf56a1a')>,
-     <Dataset.get('ags_consumerpro_e8344e2e')>,
-     <Dataset.get('ags_businesscou_a8310a11')>,
-     <Dataset.get('od_acs_5c10acf4')>,
-     <Dataset.get('mbi_households__45067b14')>,
-     <Dataset.get('od_acs_d28e63ff')>,
-     <Dataset.get('ags_sociodemogr_e128078d')>,
-     <Dataset.get('ags_crimerisk_9ec89442')>,
-     <Dataset.get('od_acs_a9825694')>,
-     <Dataset.get('od_tiger_5e55275d')>,
-     <Dataset.get('od_acs_a665f9e1')>,
-     <Dataset.get('od_acs_5ec6965e')>,
-     <Dataset.get('od_acs_f2f40516')>,
-     <Dataset.get('od_acs_1209a7e9')>,
-     <Dataset.get('od_acs_6c9090b5')>,
-     <Dataset.get('od_acs_f9681e48')>,
-     <Dataset.get('od_acs_8c8516b')>,
-     <Dataset.get('od_acs_59534db1')>,
-     <Dataset.get('od_acs_57d06d64')>,
-     <Dataset.get('od_acs_6bfd54ac')>,
-     <Dataset.get('od_tiger_f9247903')>,
-     <Dataset.get('od_acs_abd63a91')>,
-     <Dataset.get('mbi_households__981be2e8')>,
-     <Dataset.get('od_acs_e1b123b7')>,
-     <Dataset.get('od_acs_c31e5f28')>,
-     <Dataset.get('od_tiger_476ce2e9')>,
-     <Dataset.get('od_tiger_fac69779')>,
-     <Dataset.get('od_tiger_384d0b09')>,
-     <Dataset.get('od_acs_7c4b8db0')>,
-     <Dataset.get('od_acs_eaf66737')>,
-     <Dataset.get('od_lodes_b4b9dfac')>,
-     <Dataset.get('od_acs_17667f64')>,
-     <Dataset.get('od_acs_8c6d324a')>,
-     <Dataset.get('od_acs_d60f0d6e')>,
-     <Dataset.get('od_tiger_e10059f')>,
-     <Dataset.get('od_acs_4f56aa89')>,
-     <Dataset.get('od_acs_d9e8a21b')>,
-     <Dataset.get('od_acs_c5eb4b5e')>,
-     <Dataset.get('od_acs_de856602')>,
-     <Dataset.get('od_acs_5978c550')>,
-     <Dataset.get('mbi_purchasing__53ab279d')>,
-     <Dataset.get('mbi_purchasing__d7fd187')>,
-     <Dataset.get('mbi_consumer_sp_54c4abc3')>,
-     <Dataset.get('mbi_sociodemogr_b5516832')>,
-     <Dataset.get('mbi_households__c943a740')>,
-     <Dataset.get('mbi_households__d75b838')>,
-     <Dataset.get('mbi_population_d3c82409')>,
-     <Dataset.get('mbi_education_53d49ab0')>,
-     <Dataset.get('mbi_education_5139bb8a')>,
-     <Dataset.get('mbi_education_ecd69207')>,
-     <Dataset.get('mbi_consumer_sp_b6a3b235')>,
-     <Dataset.get('mbi_consumer_sp_9f31484d')>,
-     <Dataset.get('mbi_households__1de12da2')>,
-     <Dataset.get('mbi_households__b277b08f')>,
-     <Dataset.get('mbi_consumer_pr_8e977645')>,
-     <Dataset.get('mbi_retail_spen_ab162703')>,
-     <Dataset.get('mbi_retail_spen_c31f0ba0')>,
-     <Dataset.get('mbi_retail_cent_eab3bd00')>,
-     <Dataset.get('mbi_retail_turn_705247a')>,
-     <Dataset.get('mbi_purchasing__31cd621')>,
-     <Dataset.get('mbi_purchasing__b27dd930')>,
-     <Dataset.get('mbi_consumer_pr_31957ef2')>,
-     <Dataset.get('mbi_consumer_pr_55b2234f')>,
-     <Dataset.get('mbi_consumer_pr_68d1265a')>,
-     <Dataset.get('mbi_population_d88d3bc2')>,
-     <Dataset.get('mbi_education_20063878')>,
-     <Dataset.get('mbi_retail_cent_55b1b5b7')>,
-     <Dataset.get('mbi_sociodemogr_285eaf93')>,
-     <Dataset.get('mbi_sociodemogr_bd619b07')>,
-     <Dataset.get('mbi_retail_turn_b8072ccd')>,
-     <Dataset.get('mbi_sociodemogr_975ca724')>,
-     <Dataset.get('mbi_consumer_sp_9a1ba82')>,
-     <Dataset.get('mbi_households__be0ba1d4')>]
-
-
+<pre class="u-vertical-scroll u-topbottom-Margin"><code>[<Dataset.get('od_acs_181619a3')>,
+  <Dataset.get('od_acs_38016c42')>,
+  <Dataset.get('od_acs_1f614ee8')>,
+  <Dataset.get('od_acs_c6bf32c9')>,
+  <Dataset.get('od_acs_91ff81e3')>,
+  <Dataset.get('od_acs_13345497')>,
+  <Dataset.get('od_acs_87fa66db')>,
+  <Dataset.get('od_acs_b98db80e')>,
+  <Dataset.get('od_acs_9f4d1f13')>,
+  <Dataset.get('od_acs_5b67fbbf')>,
+  <Dataset.get('od_acs_29664073')>,
+  <Dataset.get('od_acs_4bb9b377')>,
+  <Dataset.get('od_acs_9df157a1')>,
+  <Dataset.get('od_acs_550657ce')>,
+  <Dataset.get('od_tiger_19a6dc83')>,
+  <Dataset.get('od_acs_6e4b69f6')>,
+  <Dataset.get('od_acs_1a22afad')>,
+  <Dataset.get('od_acs_9510981d')>,
+  <Dataset.get('od_acs_6d43ed82')>,
+  <Dataset.get('od_acs_dc3cfd0f')>,
+  <Dataset.get('od_acs_194c5960')>,
+  <Dataset.get('od_acs_9a9c93b8')>,
+  <Dataset.get('od_acs_7b2649a9')>,
+  <Dataset.get('od_acs_478c37b8')>,
+  <Dataset.get('od_acs_f98ddfce')>,
+  <Dataset.get('od_acs_8b00f653')>,
+  <Dataset.get('od_acs_d52a0635')>,
+  <Dataset.get('od_acs_1deaa51')>,
+  <Dataset.get('od_acs_e0f5ff55')>,
+  <Dataset.get('od_acs_52710085')>,
+  <Dataset.get('od_acs_b3eac6e8')>,
+  <Dataset.get('od_acs_e9e3046f')>,
+  <Dataset.get('od_acs_506e3e6a')>,
+  <Dataset.get('od_acs_b4cbd26')>,
+  <Dataset.get('od_acs_fc07c6c5')>,
+  <Dataset.get('od_acs_a1083df8')>,
+  <Dataset.get('od_tiger_3336cbf')>,
+  <Dataset.get('od_acs_1a09274c')>,
+  <Dataset.get('od_tiger_66b9092c')>,
+  <Dataset.get('od_acs_db9898c5')>,
+  <Dataset.get('od_acs_670c8beb')>,
+  <Dataset.get('od_acs_6926adef')>,
+  <Dataset.get('mbi_population_678f3375')>,
+  <Dataset.get('mbi_retail_spen_e2c1988e')>,
+  <Dataset.get('mbi_retail_spen_14142fb4')>,
+  <Dataset.get('ags_sociodemogr_e92b1637')>,
+  <Dataset.get('ags_consumerspe_fe5d060a')>,
+  <Dataset.get('od_acs_e8a7d88d')>,
+  <Dataset.get('od_acs_60614ff2')>,
+  <Dataset.get('od_acs_f09b24f4')>,
+  <Dataset.get('od_acs_1cfa643a')>,
+  <Dataset.get('od_acs_c4a00c26')>,
+  <Dataset.get('od_acs_c1c86582')>,
+  <Dataset.get('od_acs_5b8fdefd')>,
+  <Dataset.get('mbi_population_341ee33b')>,
+  <Dataset.get('od_spielmansin_5d03106a')>,
+  <Dataset.get('mbi_households__109a963')>,
+  <Dataset.get('od_acs_c2868f47')>,
+  <Dataset.get('od_acs_b581bfd1')>,
+  <Dataset.get('od_acs_2d438a42')>,
+  <Dataset.get('od_acs_aa92e673')>,
+  <Dataset.get('od_acs_1db77442')>,
+  <Dataset.get('od_acs_f3eaa128')>,
+  <Dataset.get('od_tiger_e5e51d96')>,
+  <Dataset.get('od_tiger_41814018')>,
+  <Dataset.get('od_tiger_b0608dc7')>,
+  <Dataset.get('ags_retailpoten_ddf56a1a')>,
+  <Dataset.get('ags_consumerpro_e8344e2e')>,
+  <Dataset.get('ags_businesscou_a8310a11')>,
+  <Dataset.get('od_acs_5c10acf4')>,
+  <Dataset.get('mbi_households__45067b14')>,
+  <Dataset.get('od_acs_d28e63ff')>,
+  <Dataset.get('ags_sociodemogr_e128078d')>,
+  <Dataset.get('ags_crimerisk_9ec89442')>,
+  <Dataset.get('od_acs_a9825694')>,
+  <Dataset.get('od_tiger_5e55275d')>,
+  <Dataset.get('od_acs_a665f9e1')>,
+  <Dataset.get('od_acs_5ec6965e')>,
+  <Dataset.get('od_acs_f2f40516')>,
+  <Dataset.get('od_acs_1209a7e9')>,
+  <Dataset.get('od_acs_6c9090b5')>,
+  <Dataset.get('od_acs_f9681e48')>,
+  <Dataset.get('od_acs_8c8516b')>,
+  <Dataset.get('od_acs_59534db1')>,
+  <Dataset.get('od_acs_57d06d64')>,
+  <Dataset.get('od_acs_6bfd54ac')>,
+  <Dataset.get('od_tiger_f9247903')>,
+  <Dataset.get('od_acs_abd63a91')>,
+  <Dataset.get('mbi_households__981be2e8')>,
+  <Dataset.get('od_acs_e1b123b7')>,
+  <Dataset.get('od_acs_c31e5f28')>,
+  <Dataset.get('od_tiger_476ce2e9')>,
+  <Dataset.get('od_tiger_fac69779')>,
+  <Dataset.get('od_tiger_384d0b09')>,
+  <Dataset.get('od_acs_7c4b8db0')>,
+  <Dataset.get('od_acs_eaf66737')>,
+  <Dataset.get('od_lodes_b4b9dfac')>,
+  <Dataset.get('od_acs_17667f64')>,
+  <Dataset.get('od_acs_8c6d324a')>,
+  <Dataset.get('od_acs_d60f0d6e')>,
+  <Dataset.get('od_tiger_e10059f')>,
+  <Dataset.get('od_acs_4f56aa89')>,
+  <Dataset.get('od_acs_d9e8a21b')>,
+  <Dataset.get('od_acs_c5eb4b5e')>,
+  <Dataset.get('od_acs_de856602')>,
+  <Dataset.get('od_acs_5978c550')>,
+  <Dataset.get('mbi_purchasing__53ab279d')>,
+  <Dataset.get('mbi_purchasing__d7fd187')>,
+  <Dataset.get('mbi_consumer_sp_54c4abc3')>,
+  <Dataset.get('mbi_sociodemogr_b5516832')>,
+  <Dataset.get('mbi_households__c943a740')>,
+  <Dataset.get('mbi_households__d75b838')>,
+  <Dataset.get('mbi_population_d3c82409')>,
+  <Dataset.get('mbi_education_53d49ab0')>,
+  <Dataset.get('mbi_education_5139bb8a')>,
+  <Dataset.get('mbi_education_ecd69207')>,
+  <Dataset.get('mbi_consumer_sp_b6a3b235')>,
+  <Dataset.get('mbi_consumer_sp_9f31484d')>,
+  <Dataset.get('mbi_households__1de12da2')>,
+  <Dataset.get('mbi_households__b277b08f')>,
+  <Dataset.get('mbi_consumer_pr_8e977645')>,
+  <Dataset.get('mbi_retail_spen_ab162703')>,
+  <Dataset.get('mbi_retail_spen_c31f0ba0')>,
+  <Dataset.get('mbi_retail_cent_eab3bd00')>,
+  <Dataset.get('mbi_retail_turn_705247a')>,
+  <Dataset.get('mbi_purchasing__31cd621')>,
+  <Dataset.get('mbi_purchasing__b27dd930')>,
+  <Dataset.get('mbi_consumer_pr_31957ef2')>,
+  <Dataset.get('mbi_consumer_pr_55b2234f')>,
+  <Dataset.get('mbi_consumer_pr_68d1265a')>,
+  <Dataset.get('mbi_population_d88d3bc2')>,
+  <Dataset.get('mbi_education_20063878')>,
+  <Dataset.get('mbi_retail_cent_55b1b5b7')>,
+  <Dataset.get('mbi_sociodemogr_285eaf93')>,
+  <Dataset.get('mbi_sociodemogr_bd619b07')>,
+  <Dataset.get('mbi_retail_turn_b8072ccd')>,
+  <Dataset.get('mbi_sociodemogr_975ca724')>,
+  <Dataset.get('mbi_consumer_sp_9a1ba82')>,
+  <Dataset.get('mbi_households__be0ba1d4')>
+]
+</code></pre>
 
 And now you want to take the `financial` datasets for the use, you should:
 
@@ -3985,14 +4008,10 @@ Alternatively, you can just list all the datasets in the `US` or list all the da
 
 Let's see an example of that, in which we filter public data for the `demographics` category world wide:
 
-
 ```python
 df = Catalog().category('demographics').datasets.to_dataframe()
 df[df['is_public_data'] == True]
 ```
-
-
-
 
 <div>
 <table border="1" class="dataframe u-vertical-scroll">
@@ -5492,8 +5511,6 @@ df[df['is_public_data'] == True]
 <p>92 rows × 21 columns</p>
 </div>
 
-
-
 ### Conclusion
 
 In this guide we've presented how to explore the Data Observatory catalog on the seek for variables of datasets that we can use to enrich our own data.
@@ -5507,7 +5524,7 @@ We've learnt:
 
 We recommend you to check also these resources if you want to know more about the Data Observatory catalog:
 
-- The CARTOframes Enrichment guides and examples
-- [Our public website](https://carto.com/platform/location-data-streams/)
+- The CARTOframes [enrichment guide](/developers/developers/cartoframes/guides/Data-enrichment/)
+- [Our public website](/platform/location-data-streams/)
 - Your user dashboard: Under the data section
-- The CARTOframes catalog [API reference](https://carto.com/developers/cartoframes/reference/#heading-Data-Observatory)
+- The CARTOframes catalog [API reference](/developers/cartoframes/reference/#heading-Data-Observatory)

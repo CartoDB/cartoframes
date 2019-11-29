@@ -1,7 +1,6 @@
+## Quickstart
 
-# Quickstart
-
-## Introduction
+### Introduction
 Hi! Glad to see you made it to the Quickstart guide! In this guide you are introduced to how CARTOframes can be used by data scientists in spatial analysis workflows. Using fake Starbucks revenue data, this guide walks through some common steps a data scientist takes to answer the following question: which stores are performing better than others?
 
 Before you get started, we encourage you to have CARTOframes installed so you can get a feel for the library by using it:
@@ -10,9 +9,9 @@ Before you get started, we encourage you to have CARTOframes installed so you ca
 pip install --pre cartoframes
 ```
 
-If you want to know more about this, check out the [installation guide](/developers/cartoframes/guides/Install-CARTOframes-in-your-Notebooks) first.
+If you want to know other ways to install it, check out the [installation guide](/developers/cartoframes/guides/Installation) first.
 
-### Spatial analysis scenario
+#### Spatial analysis scenario
 
 Let's say you are a data scientist working for Starbucks and you want to better understand why some stores in Brooklyn, New York, perform better than others.
 
@@ -25,35 +24,19 @@ To begin, let's outline a workflow:
 
 Let's get started!
 
-## Get and explore your company's data
+### Get and explore your company's data
 
-[This dataset](../files/starbucks_brooklyn.csv) is the one you have to start your exploration. It contains information about the location of Starbucks and each store's annual revenue. As a first exploratory step, you read it into a Jupyter Notebook using pandas.
+[This dataset](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn.csv) is the one you have to start your exploration. It contains information about the location of Starbucks and each store's annual revenue. As a first exploratory step, you read it into a Jupyter Notebook using pandas.
 
 
 ```python
 import pandas as pd
 
-starbucks_df = pd.read_csv('starbucks_brooklyn.csv')
+starbucks_df = pd.read_csv('../files/starbucks_brooklyn.csv')
 starbucks_df.head()
 ```
 
-
-
-
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -98,18 +81,17 @@ starbucks_df.head()
 </table>
 </div>
 
+To be able to display your stores as points on a map, you first have to convert the `address` column into geometries. This process is called geocoding and CARTO provides a straightforward way to do it (you can learn more about it in the [location data services guide](/developers/cartoframes/guides/Location-Data-Services)).
 
-To be able to display your stores as points on a map, you first have to convert the `address` column into geometries. This process is called geocoding and CARTO provides a straightforward way to do it (you can learn more about it in the [location data services guide]()).
+In order to geocode, you have to set your CARTO credentials. If you don't know your API key yet, check the [authentication guide](/developers/cartoframes/guides/Authentication/) to learn how to get it. In case you want to see the result of the geocoding without being logged in, here it is the [geocoded dataset](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn_iso_enriched.csv).
 
-In order to geocode, you have to set your CARTO credentials. If you don't know your API key yet, check the [authentication guide]() to learn how to get it. In case you want to see the result of the geocoding without being logged in, here it is the [geocoded dataset]().
-
-> Note: If you don't have an account yet, you can get a free account if you are a student or get a trial if you aren't by [signing up]().
+> Note: If you don't have an account yet, you can get a trial, or a free account if you are a student, by [signing up here](https://carto.com/signup/).
 
 
 ```python
 from cartoframes.auth import set_default_credentials
 
-set_default_credentials('credentials.json')
+set_default_credentials('creds.json')
 ```
 
 Now, we are ready to geocode the dataframe:
@@ -124,19 +106,6 @@ starbucks_df.head()
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -203,7 +172,7 @@ starbucks_df.head()
 
 Done! Now that the stores are geocoded, you will notice a new column named `geometry` has been added. This column stores the geographic location of each store and it's used to plot each location on the map.
 
-You can quickly visualize your geocoded dataframe using the Map and Layer classes. Check out the [visualization guide]() to learn more about the visualization capabilities inside of CARTOframes.
+You can quickly visualize your geocoded dataframe using the Map and Layer classes. Check out the [visualization guide](/developers/cartoframes/guides/Visualization) to learn more about the visualization capabilities inside of CARTOframes.
 
 
 ```python
@@ -246,9 +215,9 @@ Map(size_continuous_layer(starbucks_df, 'revenue', 'Revenue in $'))
     </iframe>
 </div>
 
-Good job! By using the [size continuous visualization layer](link to example) you can see right away where the stores with higher revenue are. By default, visualization layers also provide a popup with the mapped value and an appropriate legend.
+Good job! By using the [size continuous visualization layer](/developers/cartoframes/examples/#example-size-continuous-layer) you can see right away where the stores with higher revenue are. By default, visualization layers also provide a popup with the mapped value and an appropriate legend.
 
-## Create your areas of influence
+### Create your areas of influence
 
 Similar to geocoding, there is a straightforward method for creating isochrones to define your areas of influence. Isochrones are concentric polygons that display equally calculated levels over a given surface area measured by time.
 
@@ -278,15 +247,14 @@ Map([
     </iframe>
 </div>
 
-There they are! To learn more about creating isochrones and isodistances check out the [location data services guide]().
+There they are! To learn more about creating isochrones and isodistances check out the [location data services guide](/developers/cartoframes/guides/Location-Data-Services).
 
 
-
-## Enrich your data with demographic data
+### Enrich your data with demographic data
 
 Now that you have the area of influence calculated for each store, let's augment the result with population information to help better understand a store's average revenue per person.
 
-First, let's find the demographic variable we need. We will use the [Catalog]() class that can be filter by country and category. In our case, we have to look for USA demographics datasets. Let's check which geographies (spatial resolution) are available.
+First, let's find the demographic variable we need. We will use the `Catalog` class that can be filter by country and category. In our case, we have to look for USA demographics datasets. Let's check which geographies (spatial resolution) are available.
 
 ```python
 from cartoframes.data.observatory import Catalog
@@ -295,47 +263,39 @@ Catalog().country('usa').category('demographics').geographies
 ```
 
 
-
-
-    [<Geography('ags_blockgroup_1c63771c')>,
-     <Geography('ags_q17_4739be4f')>,
-     <Geography('mbi_blockgroups_1ab060a')>,
-     <Geography('mbi_counties_141b61cd')>,
-     <Geography('mbi_county_subd_e8e6ea23')>,
-     <Geography('mbi_pc_5_digit_4b1682a6')>,
-     <Geography('usct_blockgroup_f45b6b49')>,
-     <Geography('usct_cbsa_6c8b51ef')>,
-     <Geography('usct_censustract_bc698c5a')>,
-     <Geography('usct_congression_b6336b2c')>,
-     <Geography('usct_county_ec40c962')>,
-     <Geography('usct_place_12d6699f')>,
-     <Geography('usct_puma_b859f0fa')>,
-     <Geography('usct_schooldistr_515af763')>,
-     <Geography('usct_schooldistr_da72a4cb')>,
-     <Geography('usct_schooldistr_287be4f7')>,
-     <Geography('usct_state_4c8090b5')>,
-     <Geography('usct_zcta5_75071016')>]
-
-
+<pre class="u-topbottom-Margin"><code>[<Geography('ags_blockgroup_1c63771c')>,
+<Geography('ags_q17_4739be4f')>,
+<Geography('mbi_blockgroups_1ab060a')>,
+<Geography('mbi_counties_141b61cd')>,
+<Geography('mbi_county_subd_e8e6ea23')>,
+<Geography('mbi_pc_5_digit_4b1682a6')>,
+<Geography('usct_blockgroup_f45b6b49')>,
+<Geography('usct_cbsa_6c8b51ef')>,
+<Geography('usct_censustract_bc698c5a')>,
+<Geography('usct_congression_b6336b2c')>,
+<Geography('usct_county_ec40c962')>,
+<Geography('usct_place_12d6699f')>,
+<Geography('usct_puma_b859f0fa')>,
+<Geography('usct_schooldistr_515af763')>,
+<Geography('usct_schooldistr_da72a4cb')>,
+<Geography('usct_schooldistr_287be4f7')>,
+<Geography('usct_state_4c8090b5')>,
+<Geography('usct_zcta5_75071016')>]
+</code></pre>
 
 This time, let's choose the block groups from AGS and check which datasets are available.
-
 
 ```python
 Catalog().country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
 ```
 
-
-
-
-    [<Dataset('ags_sociodemogr_e92b1637')>,
-     <Dataset('ags_consumerspe_fe5d060a')>,
-     <Dataset('ags_retailpoten_ddf56a1a')>,
-     <Dataset('ags_consumerpro_e8344e2e')>,
-     <Dataset('ags_businesscou_a8310a11')>,
-     <Dataset('ags_crimerisk_9ec89442')>]
-
-
+<pre class="u-topbottom-Margin"><code>[<Dataset('ags_sociodemogr_e92b1637')>,
+<Dataset('ags_consumerspe_fe5d060a')>,
+<Dataset('ags_retailpoten_ddf56a1a')>,
+<Dataset('ags_consumerpro_e8344e2e')>,
+<Dataset('ags_businesscou_a8310a11')>,
+<Dataset('ags_crimerisk_9ec89442')>]
+</code></pre>
 
 Nice! The population variables are inside of the sociodemographic category, let take a look at what options are available and the associated descriptions.
 
@@ -348,23 +308,7 @@ variables_df = dataset.variables.to_dataframe()
 variables_df[variables_df['description'].str.contains('population', case=False)]
 ```
 
-
-
-
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -794,9 +738,7 @@ variables_df[variables_df['description'].str.contains('population', case=False)]
 </div>
 
 
-
 We can see the variable that contains the population for 2019 is the one with the slug `POPCY_f5800f44`. Now we are ready to enrich our areas of influence with that variable.
-
 
 ```python
 from cartoframes.data.observatory import Variable
@@ -808,23 +750,7 @@ isochrones_df = Enrichment().enrich_polygons(isochrones_df, [variable])
 isochrones_df.head()
 ```
 
-
-
-
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -869,8 +795,6 @@ isochrones_df.head()
 </table>
 </div>
 
-
-
 Great! Let's see the result on a map:
 
 
@@ -891,9 +815,7 @@ Map(color_continuous_layer(isochrones_df, 'POPCY', 'Population'))
     </iframe>
 </div>
 
-
 We can see that the area of influence of the store on the right, is the one with the highest population. Let's go a bit further and calculate and visualize the average revenue per person.
-
 
 ```python
 starbucks_df = starbucks_df.reset_index(drop=True)
@@ -914,14 +836,13 @@ Map(size_continuous_layer(starbucks_df, 'rev_pop', 'Revenue per person'))
 
 As we can see, there are clearly 3 stores that have lower revenue per person. This insight will help us to focus on them in further analyses.
 
-To learn more about discovering the data you want, check out the [data discovery guide](). To learn more about enriching your data check out the [data enrichment guide]().
+To learn more about discovering the data you want, check out the [data discovery guide](/developers/cartoframes/guides/Data-discovery). To learn more about enriching your data check out the [data enrichment guide]().
 
 ### Publish and share your results
 
 The final step in the workflow is to share this interactive map with your colleagues so they can explore the information on their own. Let's do it!
 
-First, let's add widgets so people are able to see some graphs of the information and filter it. To do this, we only have to add `widget=True` to the visualization layers. Remember to check the [visualization guide]() to learn more.
-
+First, let's add widgets so people are able to see some graphs of the information and filter it. To do this, we only have to add `widget=True` to the visualization layers. Remember to check the [visualization guide](/developers/cartoframes/guides/Visualization) to learn more.
 
 ```python
 result_map = Map([
@@ -949,14 +870,12 @@ Cool! Now that you have a small dashboard to play with, let's publish it on CART
 result_map.publish('startbucks_analysis')
 ```
 
-```
-{'id': '3c900d1f-d3ef-472f-9bc0-a2005a08df27',
+<pre class="u-topbottom-Margin"><code>{'id': '3c900d1f-d3ef-472f-9bc0-a2005a08df27',
  'url': 'https://cartoframes.carto.com/kuviz/3c900d1f-d3ef-472f-9bc0-a2005a08df27',
  'name': 'startbucks_analysis',
  'privacy': 'public'}
+</code></pre>
 
-```
+### Conclusion
 
-## Conclusion
-
-Congratulations! You have finished this guide and have a sense about how CARTOframes can speed up your workflow. To continue learning, you can check the specific [guides](), check the [reference]() to know everything about a class or a method or check the [examples]().
+Congratulations! You have finished this guide and have a sense about how CARTOframes can speed up your workflow. To continue learning, you can check the specific [guides](/developers/cartoframes/guides), check the [reference](/developers/cartoframes/reference) to know everything about a class or a method or check the [examples](/developers/cartoframes/examples).

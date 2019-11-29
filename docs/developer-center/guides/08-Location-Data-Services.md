@@ -1,4 +1,4 @@
-## Use Location Data Services
+## Location Data Services
 
 ### Introduction
 
@@ -12,11 +12,11 @@ In this guide we go through the use case of, given a set of ten Starbucks store 
 
 ### Data
 
-We will be using the same dataset of fake locations used along these guides [starbucks_brooklyn.csv]()
+We will be using the same dataset of fake locations used along these guides [starbucks_brooklyn.csv](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn.csv)
 
 ### Authentication
 
-Using Location Data Services requires to be authenticated. For more information about how to authenticate, please read the [Login to CARTO Platform guide](/developers/cartoframes/guides/Login-to-CARTO-Platform/)
+Using Location Data Services requires to be authenticated. For more information about how to authenticate, please read the [Login to CARTO Platform guide](/developers/cartoframes/guides/Authentication/)
 
 ```python
 from cartoframes.auth import Credentials, set_default_credentials
@@ -28,10 +28,8 @@ set_default_credentials('creds.json')
 
 The first step is to read and understand the data we have. Once we've the Starbucks store data in a DataFrame, we can see we've two columns that can be used in the **geocoding** service: `name` and `address`. There's also a third column that reflects the anual revenue of the store.
 
-
 ```python
 import pandas
-from cartoframes import CartoDataFrame
 
 df = pandas.read_csv('../files/starbucks_brooklyn.csv')
 df
@@ -784,25 +782,21 @@ We observe the store at 228 Duffield st, Brooklyn, NY 11201 is really close to a
 
 We could try to calculate where to place a new possible store between other stores that don't have as much revenue as others and that are placed separately.
 
-Let's can calculate the **centroid** of three different stores that we've identified previously and use it as a possible location for a new spot:
-
+Now, let's calculate the **centroid** of three different stores that we've identified previously and use it as a possible location for a new spot:
 
 ```python
 from shapely import geometry
+import geopandas as gpd
 
-new_store_location = [
-    geo_cdf.iloc[6].geometry,
-    geo_cdf.iloc[9].geometry,
-    geo_cdf.iloc[1].geometry
-]
+# Create a polygon using three points from the geo_cdf
+polygon = geometry.Polygon([[p.x, p.y] for p in geo_cdf.iloc[[1, 6, 9]])
 
-polygon = geometry.Polygon([[p.x, p.y] for p in new_store_location])
+new_store_gdf = gpd.GeoDataFrame(geometry=gpd.GeoSeries(polygon.centroid))
 ```
 
 ```python
 from cartoframes.viz import Layer
 
-new_store_df = pandas.DataFrame([['New Store', polygon.centroid.y, polygon.centroid.x]], columns=['name', 'lat', 'lon'])
 isochrones_new_cdf, isochrones_new_metadata = iso_service.isochrones(new_store_df, [300, 900, 1800], mode='walk')
 ```
 

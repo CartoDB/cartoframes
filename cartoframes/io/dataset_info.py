@@ -64,7 +64,7 @@ class DatasetInfo(object):
         if modified:
             self._save_metadata()
 
-    def _get_metadata(self, auth_client, table_name, retries=3, retry_wait_time=1):
+    def _get_metadata(self, auth_client, table_name, retries=4, retry_wait_time=1):
         ds_manager = DatasetManager(auth_client)
         try:
             return ds_manager.get(table_name)

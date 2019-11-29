@@ -1,4 +1,4 @@
-## Explore and Visualize Data
+## Visualization
 
 ### Introduction
 
@@ -10,7 +10,7 @@ In this guide you are introduced to the Map and Layer classes, how to explore da
 
 ### Data
 
-This guide uses two datasets: a point dataset of simulated Starbucks locations in Brooklyn, New York and 15 minute walk time polygons (isochrones) around each store augmented with demographic variables from CARTO's [Data Observatory](). To follow along, you can get the [point dataset here](cartoframes/examples/files/starbucks_brooklyn_geocoded.csv) and the [polygon dataset here](cartoframes/examples/files/starbucks_brooklyn_iso_enriched.csv).
+This guide uses two datasets: a point dataset of simulated Starbucks locations in Brooklyn, New York and 15 minute walk time polygons (isochrones) around each store augmented with demographic variables from CARTO's [Data Observatory](). To follow along, you can get the [point dataset here](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn_geocoded.csv) and the [polygon dataset here](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn_iso_enriched.csv).
 
 As a first step, load both datasets as [Pandas DataFrames](https://pandas.pydata.org/pandas-docs/stable/getting_started/dsintro.html#dataframe) into the notebook:
 

@@ -1,26 +1,29 @@
-## Install CARTOframes in your Notebooks
+## Installation
 
 This guide is intended for those who are going to start using CARTOframes and gives some instructions to install CARTOframes **locally**, in a **Jupyter Notebook** and using a **Virtual Environment**.
 
 ### Install CARTOframes using `pip`
 
-It is possible to install CARTOframes with [`pip`](https://pypi.org/project/pip/) by simply typing the following in the command line to do a system install:
+It is possible to install CARTOframes with [`pip`](https://pypi.org/project/pip/) by simply typing one of the following commands to do a system install:
+
+To install the latest beta release, use the `--pre` flag:
+
+```bash
+$ pip install cartoframes --pre
+```
+
+To install the latest stable version:
 
 ```bash
 $ pip install cartoframes
 ```
 
-To install a specific version, for example, let's say the 1.2.3 version:
+To install a specific version, for example, let's say the 1.0b6 version:
 
 ```bash
-$ pip install cartoframes==1.2.3
+$ pip install cartoframes==1.0b6
 ```
 
-To install a pre release, use the `--pre` flag:
-
-```bash
-$ pip install cartoframes --pre
-```
 
 ### Install CARTOframes in a Jupyter Notebook
 

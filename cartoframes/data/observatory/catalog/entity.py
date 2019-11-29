@@ -33,7 +33,7 @@ class CatalogEntity(ABC):
 
     id_field = 'id'
     _entity_repo = None
-    export_excluded_fields = ['summary_json', 'available_in']
+    export_excluded_fields = ['summary_json', 'available_in', 'geom_coverage']
 
     def __init__(self, data):
         self.data = data
