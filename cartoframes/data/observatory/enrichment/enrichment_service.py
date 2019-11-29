@@ -1,7 +1,6 @@
 import uuid
 
 from collections import defaultdict
-import warnings
 
 from ..catalog.variable import Variable
 from ..catalog.dataset import Dataset
@@ -339,7 +338,7 @@ def _prepare_variable(variable, aggregation=None):
     if aggregation is not None:
         variable_agg = _get_aggregation(variable, aggregation)
         if not variable_agg and aggregation is not AGGREGATION_NONE:
-            warnings.warn('{} skipped because it does not have aggregation method'.format(variable))
+            print('Warning: {} skipped because it does not have aggregation method'.format(variable.id))
             return None
 
     return variable
