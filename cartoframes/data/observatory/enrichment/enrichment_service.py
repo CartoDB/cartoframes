@@ -202,7 +202,7 @@ class EnrichmentService(object):
 
         return '''
             SELECT data_table.{enrichment_id}, {variables},
-                ST_Area(enrichment_geo_table.geom) AS {table}_area
+                ST_Area(enrichment_geo_table.geom) AS do_geom_area
             FROM `{enrichment_dataset}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
@@ -273,7 +273,7 @@ class EnrichmentService(object):
     def _build_polygons_query_variable_with_aggregation(self, variable, aggregation):
         variable_agg = _get_aggregation(variable, aggregation)
 
-        if (variable_agg == 'SUM'):
+        if (variable_agg == 'sum'):
             return """
                 {aggregation}(
                     enrichment_table.{column} * (
@@ -379,11 +379,16 @@ def _is_subscribed(dataset, geography, credentials):
 
 
 def _get_aggregation(variable, aggregation):
-    if aggregation == AGGREGATION_NONE:
-        return None
+    if aggregation in [None, AGGREGATION_NONE]:
+        aggregation_method = None
     elif aggregation == AGGREGATION_DEFAULT:
-        return variable.agg_method
+        aggregation_method = variable.agg_method
     elif isinstance(aggregation, str):
-        return aggregation
+        aggregation_method = aggregation
     elif isinstance(aggregation, dict):
-        return aggregation.get(variable.id, variable.agg_method)
+        aggregation_method = aggregation.get(variable.id, variable.agg_method)
+    else:
+        raise ValueError('The `aggregation` parameter is invalid.')
+
+    if aggregation_method is not None:
+        return aggregation_method.lower()
