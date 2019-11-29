@@ -10,7 +10,7 @@ from cartoframes.data.observatory import Variable, Dataset
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.repository.entity_repo import EntityRepository
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables, \
-    _ENRICHMENT_ID, _GEOJSON_COLUMN
+    _ENRICHMENT_ID, _GEOJSON_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation
 from cartoframes.exceptions import EnrichmentException
 from cartoframes.utils.geom_utils import to_geojson
 
@@ -29,6 +29,21 @@ class TestEnrichmentService(object):
     def teardown_method(self):
         self.credentials = None
         BigQueryClient._init_clients = self.original_init_clients
+
+    def test_prepare_data_no_geom(self):
+        geom_column = 'the_geom'
+        enrichment_service = EnrichmentService(credentials=self.credentials)
+        point = Point(1, 1)
+        df = pd.DataFrame(
+            [[1, point]],
+            columns=['cartodb_id', geom_column])
+
+        with pytest.raises(EnrichmentException) as e:
+            enrichment_service._prepare_data(df, None)
+
+        error = ('No valid geometry found. Please provide an input source with ' +
+                 'a valid geometry or specify the "geom_col" param with a geometry column.')
+        assert str(e.value) == error
 
     def test_prepare_data(self):
         geom_column = 'the_geom'
@@ -477,3 +492,40 @@ class TestEnrichmentService(object):
             result = prepare_variables(case, credentials, aggregation={variable_id: 'SUM'})
 
             assert result == [variable]
+
+    def test_get_aggregation(self):
+        variable_agg = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': 'SUM'
+        })
+
+        assert _get_aggregation(variable_agg, AGGREGATION_DEFAULT) == variable_agg.agg_method.lower()
+        assert _get_aggregation(variable_agg, AGGREGATION_NONE) is None
+        assert _get_aggregation(variable_agg, 'sum') == 'sum'
+        assert _get_aggregation(variable_agg, 'SUM') == 'sum'
+        assert _get_aggregation(variable_agg, 'avg') == 'avg'
+        assert _get_aggregation(variable_agg, 'AVG') == 'avg'
+        custom_agg = {variable_agg.id: 'AVG'}
+        assert _get_aggregation(variable_agg, custom_agg) == 'avg'
+        custom_agg = {}
+        assert _get_aggregation(variable_agg, custom_agg) == variable_agg.agg_method.lower()
+
+        variable_agg_none = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': None
+        })
+
+        assert _get_aggregation(variable_agg_none, AGGREGATION_DEFAULT) is None
+        assert _get_aggregation(variable_agg_none, AGGREGATION_NONE) is None
+        assert _get_aggregation(variable_agg_none, 'sum') == 'sum'
+        assert _get_aggregation(variable_agg_none, 'SUM') == 'sum'
+        assert _get_aggregation(variable_agg_none, 'avg') == 'avg'
+        assert _get_aggregation(variable_agg_none, 'AVG') == 'avg'
+        custom_agg = {variable_agg.id: 'AVG'}
+        assert _get_aggregation(variable_agg_none, custom_agg) == 'avg'
+        custom_agg = {}
+        assert _get_aggregation(variable_agg_none, custom_agg) is None

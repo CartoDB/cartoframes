@@ -1,7 +1,7 @@
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory import Enrichment, Variable, Dataset, VariableFilter
-from cartoframes.data.observatory.enrichment.enrichment_service import _PUBLIC_PROJECT, _WORKING_PROJECT, \
+from cartoframes.data.observatory.enrichment.enrichment_service import _WORKING_PROJECT, _PUBLIC_PROJECT, \
     AGGREGATION_DEFAULT, AGGREGATION_NONE, prepare_variables, _GEOJSON_COLUMN
 
 try:
@@ -569,46 +569,6 @@ class TestPolygonEnrichment(object):
 
     @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
-    def test_enrichment_query_using_public_project(self, dataset_get_mock, _is_available_in_bq_mock):
-        _is_available_in_bq_mock.return_value = True
-
-        enrichment = Enrichment(credentials=self.credentials)
-
-        temp_table_name = 'test_table'
-        project = _PUBLIC_PROJECT
-        dataset = 'dataset'
-        table = 'table'
-        variable_name = 'variable1'
-        column = 'column1'
-        geo_table = 'geo_table'
-        agg = 'AVG'
-
-        variable = Variable({
-            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
-            'column_name': column,
-            'agg_method': agg,
-            'dataset_id': '{}.{}.{}'.format(project, dataset, table)
-        })
-        variables = [variable]
-
-        catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
-        dataset_get_mock.return_value = catalog
-
-        actual_queries = enrichment._get_polygon_enrichment_sql(
-            temp_table_name, variables, [], AGGREGATION_DEFAULT
-        )
-
-        expected_queries = [
-            _get_public_query(agg, [column], self.username, dataset, table, geo_table, temp_table_name)
-        ]
-
-        actual = sorted(_clean_queries(actual_queries))
-        expected = sorted(_clean_queries(expected_queries))
-
-        assert actual == expected
-
-    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
-    @patch.object(Dataset, 'get')
     def test_enrichment_query_by_polygons_with_filters(self, dataset_get_mock, _is_available_in_bq_mock):
         _is_available_in_bq_mock.return_value = True
 
@@ -645,6 +605,43 @@ class TestPolygonEnrichment(object):
 
         expected_queries = [
             _get_query(agg, [column], self.username, view, geo_view, temp_table_name, filters)
+        ]
+
+        actual = sorted(_clean_queries(actual_queries))
+        expected = sorted(_clean_queries(expected_queries))
+
+        assert actual == expected
+
+    @patch.object(Dataset, 'get')
+    def test_enrichment_query_using_public_project(self, dataset_get_mock):
+        enrichment = Enrichment(credentials=self.credentials)
+
+        temp_table_name = 'test_table'
+        project = _PUBLIC_PROJECT
+        dataset = 'dataset'
+        table = 'table'
+        variable_name = 'variable1'
+        column = 'column1'
+        geo_table = 'geo_table'
+        agg = 'AVG'
+
+        variable = Variable({
+            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
+            'column_name': column,
+            'agg_method': agg,
+            'dataset_id': '{}.{}.{}'.format(project, dataset, table)
+        })
+        variables = [variable]
+
+        catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
+        dataset_get_mock.return_value = catalog
+
+        actual_queries = enrichment._get_polygon_enrichment_sql(
+            temp_table_name, variables, [], AGGREGATION_DEFAULT
+        )
+
+        expected_queries = [
+            _get_public_query(agg, [column], self.username, dataset, table, geo_table, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -690,33 +687,9 @@ def _get_query(agg, columns, username, view, geo_table, temp_table_name, filters
             group=group)
 
 
-def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_table_name, filters=[]):
-    columns = ', '.join(_get_column_sql(agg, column) for column in columns)
-
-    return '''
-        SELECT data_table.enrichment_id, {columns}
-        FROM `{public_project}.{dataset}.{table}` enrichment_table
-        JOIN `{public_project}.{dataset}.{geo_table}` enrichment_geo_table
-        ON enrichment_table.geoid = enrichment_geo_table.geoid
-        JOIN `{project}.{username}.{temp_table_name}` data_table
-        ON ST_Intersects(data_table.{data_geom_column}, enrichment_geo_table.geom)
-        {where}
-        group by data_table.enrichment_id;
-        '''.format(
-            columns=columns,
-            public_project=_PUBLIC_PROJECT,
-            project=_WORKING_PROJECT,
-            dataset=dataset,
-            username=username,
-            table=table,
-            geo_table=geo_table,
-            temp_table_name=temp_table_name,
-            data_geom_column=_GEOJSON_COLUMN,
-            where=_get_where(filters))
-
-
 def _get_column_sql(agg, column):
-    if (agg == 'SUM'):
+    agg = agg.lower()
+    if (agg == 'sum'):
         return """
             {aggregation}(
                 enrichment_table.{column} * (
@@ -731,14 +704,9 @@ def _get_column_sql(agg, column):
                 aggregation=agg)
     else:
         return """
-            {aggregation}(
-                enrichment_table.{column} * (
-                    ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
-                )
-            ) AS {aggregation}_{column}
+            {aggregation}(enrichment_table.{column}) AS {aggregation}_{column}
             """.format(
                 column=column,
-                geo_column=_GEOJSON_COLUMN,
                 aggregation=agg)
 
 
@@ -762,3 +730,28 @@ def _get_where(filters):
         where = 'WHERE {}'.format('AND '.join(where_clausules))
 
     return where
+
+
+def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_table_name, filters=[]):
+    columns = ', '.join(_get_column_sql(agg, column) for column in columns)
+
+    return '''
+        SELECT data_table.enrichment_id, {columns}
+        FROM `{public_project}.{dataset}.{table}` enrichment_table
+        JOIN `{public_project}.{dataset}.{geo_table}` enrichment_geo_table
+        ON enrichment_table.geoid = enrichment_geo_table.geoid
+        JOIN `{project}.{username}.{temp_table_name}` data_table
+        ON ST_Intersects(data_table.{data_geom_column}, enrichment_geo_table.geom)
+        {where}
+        group by data_table.enrichment_id;
+        '''.format(
+            columns=columns,
+            public_project=_PUBLIC_PROJECT,
+            project=_WORKING_PROJECT,
+            dataset=dataset,
+            username=username,
+            table=table,
+            geo_table=geo_table,
+            temp_table_name=temp_table_name,
+            data_geom_column=_GEOJSON_COLUMN,
+            where=_get_where(filters))
