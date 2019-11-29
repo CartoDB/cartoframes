@@ -6,11 +6,11 @@ We call enrichment to the process of augmenting your data with new variables by 
 
 "*Enrichment is the process of adding variables to a geometry, which we call the target, (point, line, polygon…) from a spatial (polygon) dataset, which we call the source*"
 
-We recommend you to check the [CARTOframes quickstart](https://carto.com/developers/cartoframes/guides/Quickstart/) since we'll use some of the DataFrames generated in the exaple and the [Discovery guide](https://carto.com/developers/cartoframes/guides/Data-discovery) to learn how to explore the Data Observatory catalog to find out variables of interest for your analyses.
+We recommend you to check the [CARTOframes quickstart](/developers/cartoframes/guides/Quickstart/) since we'll use some of the DataFrames generated in the exaple and the [Discovery guide](/developers/cartoframes/guides/Data-discovery) to learn how to explore the Data Observatory catalog to find out variables of interest for your analyses.
 
 ### Choose variables to enrich from the Data Observatory catalog
 
-Let's follow up the [Discovery guide](https://carto.com/developers/cartoframes/guides/Data-discovery) where we subscribed to the AGS demographics dataset and list the variables we have available to enrich our own data.
+Let's follow up the [Discovery guide](/developers/cartoframes/guides/Data-discovery) where we subscribed to the AGS demographics dataset and list the variables we have available to enrich our own data.
 
 
 ```python
@@ -287,7 +287,7 @@ The `POPCY` variable contains the `SUM` of the population for blockgroup for the
 
 ### Enrich a points DataFrame
 
-We learned in the [CARTOframes quickstart](https://carto.com/developers/cartoframes/guides/Quickstart/) how to load our own data (in this case Starbucks stores) and geocode their addresses to coordinates for further analysis, so we start by loading our geocoded Starbucks stores:
+We learned in the [CARTOframes quickstart](/developers/cartoframes/guides/Quickstart/) how to load our own data (in this case Starbucks stores) and geocode their addresses to coordinates for further analysis, so we start by loading our geocoded Starbucks stores:
 
 
 ```python
@@ -304,8 +304,6 @@ stores_df.head(5)
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>cartodb_id</th>
-      <th>field_1</th>
       <th>name</th>
       <th>address</th>
       <th>revenue</th>
@@ -315,8 +313,6 @@ stores_df.head(5)
   <tbody>
     <tr>
       <th>0</th>
-      <td>1</td>
-      <td>0</td>
       <td>Franklin Ave &amp; Eastern Pkwy</td>
       <td>341 Eastern Pkwy,Brooklyn, NY 11238</td>
       <td>1321040.772</td>
@@ -324,8 +320,6 @@ stores_df.head(5)
     </tr>
     <tr>
       <th>1</th>
-      <td>2</td>
-      <td>1</td>
       <td>607 Brighton Beach Ave</td>
       <td>607 Brighton Beach Avenue,Brooklyn, NY 11235</td>
       <td>1268080.418</td>
@@ -333,8 +327,6 @@ stores_df.head(5)
     </tr>
     <tr>
       <th>2</th>
-      <td>3</td>
-      <td>2</td>
       <td>65th St &amp; 18th Ave</td>
       <td>6423 18th Avenue,Brooklyn, NY 11204</td>
       <td>1248133.699</td>
@@ -342,8 +334,6 @@ stores_df.head(5)
     </tr>
     <tr>
       <th>3</th>
-      <td>4</td>
-      <td>3</td>
       <td>Bay Ridge Pkwy &amp; 3rd Ave</td>
       <td>7419 3rd Avenue,Brooklyn, NY 11209</td>
       <td>1185702.676</td>
@@ -351,8 +341,6 @@ stores_df.head(5)
     </tr>
     <tr>
       <th>4</th>
-      <td>5</td>
-      <td>4</td>
       <td>Caesar's Bay Shopping Center</td>
       <td>8973 Bay Parkway,Brooklyn, NY 11214</td>
       <td>1148427.411</td>
@@ -387,8 +375,6 @@ enriched_stores_df.head(5)
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>cartodb_id</th>
-      <th>field_1</th>
       <th>name</th>
       <th>address</th>
       <th>revenue</th>
@@ -400,8 +386,6 @@ enriched_stores_df.head(5)
   <tbody>
     <tr>
       <th>0</th>
-      <td>1</td>
-      <td>0</td>
       <td>Franklin Ave &amp; Eastern Pkwy</td>
       <td>341 Eastern Pkwy,Brooklyn, NY 11238</td>
       <td>1321040.772</td>
@@ -411,8 +395,6 @@ enriched_stores_df.head(5)
     </tr>
     <tr>
       <th>1</th>
-      <td>2</td>
-      <td>1</td>
       <td>607 Brighton Beach Ave</td>
       <td>607 Brighton Beach Avenue,Brooklyn, NY 11235</td>
       <td>1268080.418</td>
@@ -422,8 +404,6 @@ enriched_stores_df.head(5)
     </tr>
     <tr>
       <th>2</th>
-      <td>3</td>
-      <td>2</td>
       <td>65th St &amp; 18th Ave</td>
       <td>6423 18th Avenue,Brooklyn, NY 11204</td>
       <td>1248133.699</td>
@@ -433,8 +413,6 @@ enriched_stores_df.head(5)
     </tr>
     <tr>
       <th>3</th>
-      <td>4</td>
-      <td>3</td>
       <td>Bay Ridge Pkwy &amp; 3rd Ave</td>
       <td>7419 3rd Avenue,Brooklyn, NY 11209</td>
       <td>1185702.676</td>
@@ -444,8 +422,6 @@ enriched_stores_df.head(5)
     </tr>
     <tr>
       <th>4</th>
-      <td>5</td>
-      <td>4</td>
       <td>Caesar's Bay Shopping Center</td>
       <td>8973 Bay Parkway,Brooklyn, NY 11214</td>
       <td>1148427.411</td>
@@ -509,7 +485,7 @@ dataset.to_dict()
 
 ### Enrich a polygons DataFrame
 
-Let's do a second enrichment but in this case let's use the DataFrame with the areas of influence calculated in the [Quickstart guide](https://carto.com/developers/cartoframes/guides/Quickstart-Part-1/). There, we used the [CARTOframes isochrones](https://carto.com/developers/cartoframes/reference/#heading-Isolines) service to obtain the polygon around each store that cover the area within 8, 17 and 25 minutes walk.
+Let's do a second enrichment but in this case let's use the DataFrame with the areas of influence, we used the [CARTOframes isochrones](/developers/cartoframes/reference/#heading-Isolines) service to obtain the polygon around each store that cover the area within 8, 17 and 25 minutes walk.
 
 
 ```python
