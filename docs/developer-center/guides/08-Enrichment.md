@@ -15,19 +15,16 @@ Let's follow up the [Discovery guide](/developers/cartoframes/guides/Data-discov
 
 ```python
 from cartoframes.auth import set_default_credentials
-set_default_credentials(username= 'carto-do-1', api_key='3f1605d074dd2b52cebb2e3bbcfe4a0565ff1660')
-```
-
-
-```python
 from cartoframes.data.observatory import Catalog, Dataset, Variable, Geography
+
+set_default_credentials('creds.json')
 Catalog().subscriptions().datasets
 ```
 
 
 
-
-    [<Dataset.get('ags_sociodemogr_e92b1637')>]
+<pre class="u-topbottom-Margin"><code>[<Dataset.get('ags_sociodemogr_e92b1637')>]
+</code></pre>
 
 
 
