@@ -90,9 +90,14 @@ class EnrichmentService(object):
 
         return cartodataframe
 
-    def _prepare_data(self, dataframe, geom_column):
+    def _prepare_data(self, dataframe, geom_col):
         cartodataframe = CartoDataFrame(dataframe, copy=True)
-        cartodataframe.convert(geom_column=geom_column)  # Decode geom
+        if geom_col:
+            cartodataframe.set_geometry(geom_col, inplace=True)
+
+        if not cartodataframe.has_geometry():
+            raise EnrichmentException('No valid geometry found. Please provide an input source with ' +
+                                      'a valid geometry or specify the "geom_col" param with a geometry column.')
 
         # Add extra columns for the enrichment
         cartodataframe[self.enrichment_id] = range(cartodataframe.shape[0])
@@ -197,7 +202,7 @@ class EnrichmentService(object):
 
         return '''
             SELECT data_table.{enrichment_id}, {variables},
-                ST_Area(enrichment_geo_table.geom) AS {table}_area
+                ST_Area(enrichment_geo_table.geom) AS do_geom_area
             FROM `{enrichment_dataset}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
@@ -268,7 +273,7 @@ class EnrichmentService(object):
     def _build_polygons_query_variable_with_aggregation(self, variable, aggregation):
         variable_agg = _get_aggregation(variable, aggregation)
 
-        if (variable_agg == 'SUM'):
+        if (variable_agg == 'sum'):
             return """
                 {aggregation}(
                     enrichment_table.{column} * (
@@ -283,14 +288,9 @@ class EnrichmentService(object):
                     aggregation=variable_agg)
         else:
             return """
-                {aggregation}(
-                    enrichment_table.{column} * (
-                        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
-                    )
-                ) AS {aggregation}_{column}
+                {aggregation}(enrichment_table.{column}) AS {aggregation}_{column}
                 """.format(
                     column=variable.column_name,
-                    geo_column=self.geojson_column,
                     aggregation=variable_agg)
 
     def _build_polygons_query_variables_without_aggregation(self, variables):
@@ -313,11 +313,13 @@ class EnrichmentService(object):
         return where
 
 
-def prepare_variables(variables, aggregation=None):
+def prepare_variables(variables, credentials, aggregation=None):
     if isinstance(variables, list):
         variables = [_prepare_variable(var, aggregation) for var in variables]
     else:
         variables = [_prepare_variable(variables, aggregation)]
+
+    _validate_bq_operations(variables, credentials)
 
     return list(filter(None, variables))
 
@@ -338,28 +340,55 @@ def _prepare_variable(variable, aggregation=None):
             warnings.warn('{} skipped because it does not have aggregation method'.format(variable))
             return None
 
-    _is_available_in_bq(variable)
-
     return variable
 
 
-def _is_available_in_bq(variable):
-    dataset = Dataset.get(variable.dataset)
-    geography = Geography.get(dataset.geography)
+def _validate_bq_operations(variables, credentials):
+    dataset_ids = list(set([variable.dataset for variable in variables]))
 
-    if not (dataset._is_available_in('bq') and geography._is_available_in('bq')):
+    for dataset_id in dataset_ids:
+        dataset = Dataset.get(dataset_id)
+        geography = Geography.get(dataset.geography)
+
+        _is_subscribed(dataset, geography, credentials)
+        _is_available_in_bq(dataset, geography)
+
+
+def _is_available_in_bq(dataset, geography):
+    if not dataset._is_available_in('bq'):
         raise EnrichmentException("""
-            The Dataset or the Geography of the Variable '{}' is not ready for Enrichment.
-            Please, contact us for more information.
-        """.format(variable.slug))
+            The Dataset '{}' is not ready for Enrichment. Please, contact us for more information.
+        """.format(dataset))
+
+    if not geography._is_available_in('bq'):
+        raise EnrichmentException("""
+            The Geography '{}' is not ready for Enrichment. Please, contact us for more information.
+        """.format(geography))
+
+
+def _is_subscribed(dataset, geography, credentials):
+    if not dataset._is_subscribed(credentials):
+        raise EnrichmentException("""
+            You are not subscribed to the Dataset '{}' yet. Please, use the subscribe method first.
+        """.format(dataset))
+
+    if not geography._is_subscribed(credentials):
+        raise EnrichmentException("""
+            You are not subscribed to the Geography '{}' yet. Please, use the subscribe method first.
+        """.format(geography))
 
 
 def _get_aggregation(variable, aggregation):
-    if aggregation == AGGREGATION_NONE:
-        return None
+    if aggregation in [None, AGGREGATION_NONE]:
+        aggregation_method = None
     elif aggregation == AGGREGATION_DEFAULT:
-        return variable.agg_method
+        aggregation_method = variable.agg_method
     elif isinstance(aggregation, str):
-        return aggregation
+        aggregation_method = aggregation
     elif isinstance(aggregation, dict):
-        return aggregation.get(variable.id, variable.agg_method)
+        aggregation_method = aggregation.get(variable.id, variable.agg_method)
+    else:
+        raise ValueError('The `aggregation` parameter is invalid.')
+
+    if aggregation_method is not None:
+        return aggregation_method.lower()

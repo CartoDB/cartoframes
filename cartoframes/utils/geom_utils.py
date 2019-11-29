@@ -4,31 +4,6 @@ import json
 import shapely
 import binascii as ba
 
-INDEX_COL_NAMES = [
-    'cartodb_id'
-]
-
-GEOM_COLUMN_NAMES = [
-    'geometry',
-    'the_geom',
-    'wkt_geometry',
-    'wkb_geometry',
-    'geom',
-    'wkt',
-    'wkb'
-]
-
-LAT_COLUMN_NAMES = [
-    'latitude',
-    'lat'
-]
-
-LNG_COLUMN_NAMES = [
-    'longitude',
-    'lng',
-    'lon',
-    'long'
-]
 
 ENC_SHAPELY = 'shapely'
 ENC_WKB = 'wkb'
@@ -40,90 +15,14 @@ ENC_EWKT = 'ewkt'
 if sys.version_info < (3, 0):
     ENC_WKB_BHEX = ENC_WKB_HEX
 
-GEO_COLUMN_NAME = 'geometry'
 
-
-def generate_index(dataframe, index_column, drop_index):
-    index_column = _get_column(dataframe, index_column, INDEX_COL_NAMES)
-    if index_column is not None:
-        dataframe.set_index(index_column, inplace=True)
-        if drop_index:
-            del dataframe[index_column.name]
-        dataframe.index.name = None
-
-
-def generate_geometry(dataframe, geom_column=None, lnglat_columns=None, drop_geom=True, drop_lnglat=True):
-    if GEO_COLUMN_NAME not in dataframe:
-        geom_column = _get_column(dataframe, geom_column, GEOM_COLUMN_NAMES)
-        if geom_column is not None:
-            dataframe[GEO_COLUMN_NAME] = _compute_geometry_from_geom(geom_column)
-            if drop_geom:
-                del dataframe[geom_column.name]
-        else:
-            lng_column = _get_column(dataframe, lnglat_columns and lnglat_columns[0], LNG_COLUMN_NAMES)
-            lat_column = _get_column(dataframe, lnglat_columns and lnglat_columns[1], LAT_COLUMN_NAMES)
-            if lng_column is not None and lat_column is not None:
-                dataframe[GEO_COLUMN_NAME] = _compute_geometry_from_lnglat(lng_column, lat_column)
-                if drop_lnglat:
-                    del dataframe[lng_column.name]
-                    del dataframe[lat_column.name]
-
-    if GEO_COLUMN_NAME in dataframe:
-        dataframe.set_geometry(GEO_COLUMN_NAME, inplace=True)
-
-
-def _compute_geometry_from_geom(geom_column):
+def decode_geometry_column(geom_column):
     if geom_column.size > 0:
         first_geom = next(item for item in geom_column if item is not None)
         enc_type = detect_encoding_type(first_geom)
         return geom_column.apply(lambda g: decode_geometry(g, enc_type))
     else:
         return geom_column
-
-
-def _compute_geometry_from_lnglat(lng, lat):
-    return [shapely.geometry.Point(xy) for xy in zip(lng, lat)]
-
-
-def _get_column(df, main=None, options=[]):
-    if main is None:
-        for name in options:
-            if name in df:
-                return df[name]
-    else:
-        if main in df:
-            return df[main]
-    return None
-
-
-def _encode_decode_decorator(func):
-    """decorator for encoding and decoding geoms"""
-    def wrapper(*args):
-        """error catching"""
-        try:
-            processed_geom = func(*args)
-            return processed_geom
-        except ImportError as err:
-            raise ImportError('The Python package `shapely` needs to be '
-                              'installed to encode or decode geometries. '
-                              '({})'.format(err))
-    return wrapper
-
-
-@_encode_decode_decorator
-def decode_geometry(geom, enc_type):
-    """Decode any geometry into a shapely geometry."""
-    if geom:
-        func = {
-            ENC_SHAPELY: lambda: geom,
-            ENC_WKB: lambda: _load_wkb(geom),
-            ENC_WKB_HEX: lambda: _load_wkb_hex(geom),
-            ENC_WKB_BHEX: lambda: _load_wkb_bhex(geom),
-            ENC_WKT: lambda: _load_wkt(geom),
-            ENC_EWKT: lambda: _load_ewkt(geom)
-        }.get(enc_type)
-        return func() if func else geom
-    return shapely.geometry.base.BaseGeometry()
 
 
 def detect_encoding_type(input_geom):
@@ -152,7 +51,7 @@ def detect_encoding_type(input_geom):
                 return ENC_EWKT
             else:
                 try:
-                    # This is required because in P27 bytes = str
+                    # This is required because in Py27 bytes = str
                     _load_wkb(geom)
                     return ENC_WKB
                 except Exception:
@@ -166,6 +65,21 @@ def detect_encoding_type(input_geom):
             return ENC_WKB
 
     return None
+
+
+def decode_geometry(geom, enc_type):
+    """Decode any geometry into a shapely geometry."""
+    if geom:
+        func = {
+            ENC_SHAPELY: lambda: geom,
+            ENC_WKB: lambda: _load_wkb(geom),
+            ENC_WKB_HEX: lambda: _load_wkb_hex(geom),
+            ENC_WKB_BHEX: lambda: _load_wkb_bhex(geom),
+            ENC_WKT: lambda: _load_wkt(geom),
+            ENC_EWKT: lambda: _load_ewkt(geom)
+        }.get(enc_type)
+        return func() if func else geom
+    return shapely.geometry.base.BaseGeometry()
 
 
 def _load_wkb(geom):
@@ -214,5 +128,5 @@ def _extract_srid(egeom):
 
 
 def to_geojson(geom):
-    if geom:
+    if geom is not None and str(geom) != 'GEOMETRYCOLLECTION EMPTY':
         return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)

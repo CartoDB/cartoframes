@@ -18,10 +18,10 @@ To install the latest stable version:
 $ pip install cartoframes
 ```
 
-To install a specific version, for example, let's say the 1.0b5 version:
+To install a specific version, for example, let's say the 1.0b6 version:
 
 ```bash
-$ pip install cartoframes==1.2.3
+$ pip install cartoframes==1.0b6
 ```
 
 
