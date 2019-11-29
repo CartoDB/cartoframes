@@ -49,6 +49,7 @@ class Isolines(Service):
                 Increasing the number of maxpoints may increase the response time of the service.
             quality: (int, optional): Allows you to reduce the quality of the polygons in favor of the response time.
                 Admitted values: 1/2/3.
+            geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
 
         Returns:
             A named-tuple ``(data, metadata)`` containing a ``data`` :py:class:`CartoDataFrame
@@ -94,6 +95,7 @@ class Isolines(Service):
                 Increasing the number of maxpoints may increase the response time of the service.
             quality: (int, optional): Allows you to reduce the quality of the polygons in favor of the response time.
                 Admitted values: 1/2/3.
+            geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
 
         Returns:
             A named-tuple ``(data, metadata)`` containing a ``data`` :py:class:`CartoDataFrame
@@ -119,7 +121,8 @@ class Isolines(Service):
                    maxpoints=None,
                    quality=None,
                    exclusive=True,
-                   function=None):
+                   function=None,
+                   geom_col=None):
         metadata = {}
 
         source_manager = SourceManager(source, self._credentials)
@@ -136,6 +139,14 @@ class Isolines(Service):
         else:
             # upload to temporary table
             temporary_table_name = self._new_temporary_table_name()
+
+            if geom_col:
+                source.set_geometry(geom_col, inplace=True)
+
+            if not source.has_geometry():
+                raise Exception('No valid geometry found. Please provide an input source with ' +
+                                'a valid geometry or specify the "geom_col" param with a geometry column.')
+
             log_enabled = not dry_run
             to_carto(source, temporary_table_name, self._credentials, log_enabled)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
