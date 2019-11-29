@@ -273,7 +273,7 @@ class Geocoding(Service):
         if self._source_manager.is_table():
             raise ValueError('cached geocoding cannot be used with tables')
 
-        to_carto(source, tmp_table_name, self._credentials, log_enabled=False)
+        to_carto(source, tmp_table_name, self._credentials, force_cartodbfy=True, log_enabled=False)
 
         self._execute_query(
             """

@@ -139,15 +139,16 @@ class Isolines(Service):
         else:
             # upload to temporary table
             temporary_table_name = self._new_temporary_table_name()
+            source_cdf = source_manager.cdf
 
             if geom_col:
-                source.set_geometry(geom_col, inplace=True)
+                source_cdf.set_geometry(geom_col, inplace=True)
 
-            if not source.has_geometry():
+            if not source_cdf.has_geometry():
                 raise Exception('No valid geometry found. Please provide an input source with ' +
                                 'a valid geometry or specify the "geom_col" param with a geometry column.')
 
-            to_carto(source, temporary_table_name, self._credentials, log_enabled=False)
+            to_carto(source_cdf, temporary_table_name, self._credentials, log_enabled=False)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
 
         source_columns = source_manager.get_column_names()
@@ -188,7 +189,7 @@ class Isolines(Service):
 
         result = self.result(data=cdf, metadata=metadata)
 
-        print('Success! Isolines correctly created')
+        print('Success! Isolines created correctly')
 
         return result
 
