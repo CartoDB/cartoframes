@@ -58,7 +58,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
-             log_enabled=True):
+             log_enabled=True, force_cartodbfy=False):
     """
     Upload a Dataframe to CARTO.
 
@@ -102,7 +102,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         # Prepare geometry column for the upload
         cdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
 
-    context_manager.copy_from(cdf, table_name, if_exists, has_geometry, log_enabled)
+    cartodbfy = force_cartodbfy or has_geometry
+
+    context_manager.copy_from(cdf, table_name, if_exists, cartodbfy, log_enabled)
 
     if log_enabled:
         print('Success! Data uploaded correctly')
@@ -184,7 +186,7 @@ def describe_table(table_name, credentials=None, schema=None):
     }
 
 
-def update_table(table_name, credentials=None, new_table_name=None, privacy=None):
+def update_table(table_name, credentials=None, new_table_name=None, privacy=None, log_enabled=True):
     """
     Update the table information in the CARTO account.
 
@@ -212,10 +214,11 @@ def update_table(table_name, credentials=None, new_table_name=None, privacy=None
     context_manager = ContextManager(credentials)
     context_manager.update_table(table_name, privacy, new_table_name)
 
-    print('Success! Table updated correctly')
+    if log_enabled:
+        print('Success! Table updated correctly')
 
 
-def copy_table(table_name, new_table_name, credentials=None, if_exists='fail'):
+def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
     """
     Copy a table into a new table in the CARTO account.
 
@@ -238,10 +241,11 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail'):
     query = 'SELECT * FROM {}'.format(table_name)
     context_manager.create_table_from_query(new_table_name, query, if_exists)
 
-    print('Success! Table copied correctly')
+    if log_enabled:
+        print('Success! Table copied correctly')
 
 
-def create_table_from_query(query, new_table_name, credentials=None, if_exists='fail'):
+def create_table_from_query(query, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
     """
     Create a new table from an SQL query in the CARTO account.
 
@@ -263,4 +267,5 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
 
     context_manager.create_table_from_query(new_table_name, query, if_exists)
 
-    print('Success! Table created correctly')
+    if log_enabled:
+        print('Success! Table created correctly')

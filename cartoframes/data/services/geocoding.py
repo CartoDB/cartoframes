@@ -241,7 +241,7 @@ class Geocoding(Service):
         cdf = read_carto(input_table_name, self._credentials)
 
         if is_temporary:
-            delete_table(input_table_name, self._credentials)
+            delete_table(input_table_name, self._credentials, log_enabled=False)
 
         result = self.result(data=cdf, metadata=metadata)
 
@@ -273,7 +273,7 @@ class Geocoding(Service):
         if self._source_manager.is_table():
             raise ValueError('cached geocoding cannot be used with tables')
 
-        to_carto(source, tmp_table_name, self._credentials, dry_run)
+        to_carto(source, tmp_table_name, self._credentials, log_enabled=False)
 
         self._execute_query(
             """
@@ -296,13 +296,14 @@ class Geocoding(Service):
                 hash_expr=hash_expr
             ))
 
-        delete_table(table_name, self._credentials)
+        delete_table(table_name, self._credentials, log_enabled=False)
 
         update_table(
             table_name=tmp_table_name,
             credentials=self._credentials,
             new_table_name=table_name,
-            privacy='private'
+            privacy='private',
+            log_enabled=False
         )
 
         # TODO: should remove the cartodb_id column from the result
@@ -318,20 +319,19 @@ class Geocoding(Service):
         input_table_name = table_name
         if self._source_manager.is_table():
             if table_name:
-                copy_table(source, input_table_name, self._credentials, if_exists)
+                copy_table(source, input_table_name, self._credentials, if_exists, log_enabled=False)
             else:
                 input_table_name = source
         elif self._source_manager.is_query():
             if not input_table_name:
                 input_table_name = self._new_temporary_table_name()
                 is_temporary = True
-            create_table_from_query(source, input_table_name, self._credentials, if_exists)
+            create_table_from_query(source, input_table_name, self._credentials, if_exists, log_enabled=False)
         elif self._source_manager.is_dataframe():
             if not input_table_name:
                 input_table_name = self._new_temporary_table_name()
                 is_temporary = True
-            log_enabled = not dry_run
-            to_carto(source, input_table_name, self._credentials, if_exists, log_enabled)
+            to_carto(source, input_table_name, self._credentials, if_exists, force_cartodbfy=True, log_enabled=False)
         return (input_table_name, is_temporary)
 
     # Note that this can be optimized for non in-place cases (table_name is not None), e.g.
