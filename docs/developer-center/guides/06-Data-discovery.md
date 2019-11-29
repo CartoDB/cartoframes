@@ -5524,7 +5524,7 @@ We've learnt:
 
 We recommend you to check also these resources if you want to know more about the Data Observatory catalog:
 
-- The CARTOframes [enrichment guide](/developers/developers/cartoframes/guides/Enrichment/)
+- The CARTOframes [enrichment guide](/developers/developers/cartoframes/guides/Data-enrichment/)
 - [Our public website](/platform/location-data-streams/)
 - Your user dashboard: Under the data section
 - The CARTOframes catalog [API reference](/developers/cartoframes/reference/#heading-Data-Observatory)

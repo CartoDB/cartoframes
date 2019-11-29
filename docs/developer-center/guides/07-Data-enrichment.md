@@ -1,4 +1,4 @@
-## Enrichment
+## Data enrichment
 
 ### Introduction
 
