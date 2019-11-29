@@ -319,9 +319,11 @@ def prepare_variables(variables, credentials, aggregation=None):
     else:
         variables = [_prepare_variable(variables, aggregation)]
 
+    variables = list(filter(None, variables))
+
     _validate_bq_operations(variables, credentials)
 
-    return list(filter(None, variables))
+    return variables
 
 
 def _prepare_variable(variable, aggregation=None):
