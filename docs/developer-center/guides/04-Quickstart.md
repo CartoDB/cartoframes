@@ -91,7 +91,7 @@ In order to geocode, you have to set your CARTO credentials. If you don't know y
 ```python
 from cartoframes.auth import set_default_credentials
 
-set_default_credentials('credentials.json')
+set_default_credentials('creds.json')
 ```
 
 Now, we are ready to geocode the dataframe:
