@@ -282,14 +282,9 @@ class EnrichmentService(object):
                     aggregation=variable_agg)
         else:
             return """
-                {aggregation}(
-                    enrichment_table.{column} * (
-                        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
-                    )
-                ) AS {aggregation}_{column}
+                {aggregation}(enrichment_table.{column}) AS {aggregation}_{column}
                 """.format(
                     column=variable.column_name,
-                    geo_column=self.geojson_column,
                     aggregation=variable_agg)
 
     def _build_polygons_query_variables_without_aggregation(self, variables):
