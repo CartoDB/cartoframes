@@ -3672,7 +3672,7 @@ geography.is_public_data
 
 Both `dataset` and `geography` are not public data, that means you need a subscription to be able to use them to enrich your own data.
 
-**To subscribe to data in the Data Observatory catalog you need a CARTO account with access to Data Observatory. See the [credentials](https://carto.com/developers/cartoframes/guides/Authentication/#the-config-file) guide for more info on this topic.**
+**To subscribe to data in the Data Observatory catalog you need a CARTO account with access to Data Observatory. See the [credentials](/developers/cartoframes/guides/Authentication/#the-config-file) guide for more info on this topic.**
 
 
 ```python
@@ -5385,7 +5385,7 @@ We've learnt:
 
 We recommend you to check also these resources if you want to know more about the Data Observatory catalog:
 
-- The CARTOframes Enrichment guides and examples
-- [Our public website](https://carto.com/platform/location-data-streams/)
+- The CARTOframes [enrichment guide](/developers/developers/cartoframes/guides/Enrichment/)
+- [Our public website](/platform/location-data-streams/)
 - Your user dashboard: Under the data section
-- The CARTOframes catalog [API reference](https://carto.com/developers/cartoframes/reference/#heading-Data-Observatory)
+- The CARTOframes catalog [API reference](/developers/cartoframes/reference/#heading-Data-Observatory)

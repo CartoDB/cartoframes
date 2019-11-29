@@ -48,7 +48,7 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Data-enrichment/">Data enrichment</a>
+      <a href="/developers/cartoframes/guides/Enrichment/">Data enrichment</a>
     </span>
     <p class="doc-guides__description">Enrich your data with data from the data catalog</p>
   </div>
