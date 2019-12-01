@@ -10,13 +10,12 @@ import time
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery, storage, bigquery_storage_v1beta1 as bigquery_storage
 
-from google.oauth2.credentials import Credentials as GoogleCredentials
-
 from carto.exceptions import CartoException
 from ...auth import get_default_credentials
+from ...core.logger import log
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
-
+_UPLOAD_CHUNK_SIZE = 10 * 1024 * 1024
 
 def refresh_clients(func):
     def wrapper(self, *args, **kwargs):
@@ -61,7 +60,7 @@ class BigQueryClient(object):
 
         # Upload file to Google Cloud Storage
         bucket = self.gcs_client.bucket(self._bucket)
-        blob = bucket.blob(tablename)
+        blob = bucket.blob(tablename, chunk_size = _UPLOAD_CHUNK_SIZE) 
         dataframe.to_csv(tablename, index=False, header=False)
         try:
             blob.upload_from_filename(tablename)
@@ -127,35 +126,24 @@ class BigQueryClient(object):
         return file_path
 
     def query_dataframe(self, query):
-
+        log.debug('Running query')
         job = self.bq_client.query(query)
+
         # Wait to complete the job
         while not job.done():
-            time.sleep(1)
+            time.sleep(0.5)
 
-        # print(job.destination)
-        # while True:
-        #     try:
-        #         table = self.bq_client.get_table(job.destination)
-        #         break
-        #     except Exception as err:
-        #         # print(err)
-        #         time.sleep(1)
-
-        # print(table.num_rows)
-        print('Downloading')
-        # return self._download_job_storage_api(job)
+        log.debug('Downloading')
         try:
             return self._download_job_storage_api(job)
-        except Exception as error:
-            print('Warning: Cannot download storage API, fallback to standard')
-            print(error)
+        except Exception:
+            log.warning('Cannot download storage API, fallback to standard')
             return job.to_dataframe()
 
     def _download_job_storage_api(self, job):
 
         table_ref = job.destination.to_bqstorage()
- 
+
         parent = 'projects/{}'.format(self._project)
         session = self.bq_storage_client.create_read_session(
             table_ref,
@@ -176,6 +164,7 @@ class BigQueryClient(object):
         rows = reader.rows(session)
         data = list(rows)
         return pd.DataFrame(data)
+
 
 def _download_query(project, dataset, table, limit=None, offset=None):
     full_table_name = '`{}.{}.{}`'.format(project, dataset, table)

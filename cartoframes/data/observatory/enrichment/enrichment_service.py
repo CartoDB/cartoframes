@@ -1,5 +1,4 @@
 import uuid
-import time
 
 from collections import defaultdict
 
@@ -12,6 +11,7 @@ from ....exceptions import EnrichmentException
 from ....core.cartodataframe import CartoDataFrame
 from ....core.logger import log
 from ....utils.geom_utils import to_geojson
+from ....utils.utils import timelogger
 
 
 _ENRICHMENT_ID = 'enrichment_id'
@@ -75,6 +75,7 @@ class EnrichmentService(object):
         self.working_project = _WORKING_PROJECT
         self.public_project = _PUBLIC_PROJECT
 
+    @timelogger
     def _execute_enrichment(self, queries, cartodataframe):
 
         dfs_enriched = list()
@@ -91,7 +92,7 @@ class EnrichmentService(object):
 
         return cartodataframe
 
-
+    @timelogger
     def _prepare_data(self, dataframe, geom_col):
         cartodataframe = CartoDataFrame(dataframe, copy=True)
 
@@ -316,6 +317,7 @@ class EnrichmentService(object):
         return where
 
 
+@timelogger
 def prepare_variables(variables, credentials, aggregation=None):
     if isinstance(variables, list):
         variables = [_prepare_variable(var, aggregation) for var in variables]
@@ -397,4 +399,3 @@ def _get_aggregation(variable, aggregation):
 
     if aggregation_method is not None:
         return aggregation_method.lower()
-

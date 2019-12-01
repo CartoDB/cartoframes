@@ -12,11 +12,13 @@ import hashlib
 import requests
 import geopandas
 import numpy as np
+import time
 
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
 
 from ..auth.credentials import Credentials
+from ..core.logger import log
 
 try:
     basestring
@@ -391,3 +393,13 @@ def remove_comments(text):
         re.DOTALL | re.MULTILINE
     )
     return re.sub(pattern, replacer, text).strip()
+
+
+def timelogger(method):
+    def fn(*args, **kw):
+        start = time.time()
+        result = method(*args, **kw)
+        log.info('%s in %s s', method.__name__, round(time.time() - start, 2))
+        return result
+
+    return fn
