@@ -9,7 +9,9 @@ from ...clients import bigquery_client
 from ....auth import get_default_credentials
 from ....exceptions import EnrichmentException
 from ....core.cartodataframe import CartoDataFrame
+from ....core.logger import log
 from ....utils.geom_utils import to_geojson
+
 
 _ENRICHMENT_ID = 'enrichment_id'
 _GEOJSON_COLUMN = '__geojson_geom'
@@ -338,7 +340,7 @@ def _prepare_variable(variable, aggregation=None):
     if aggregation is not None:
         variable_agg = _get_aggregation(variable, aggregation)
         if not variable_agg and aggregation is not AGGREGATION_NONE:
-            print('Warning: {} skipped because it does not have aggregation method'.format(variable.id))
+            log.warning('%s skipped because it does not have aggregation method', variable.id)
             return None
 
     return variable
