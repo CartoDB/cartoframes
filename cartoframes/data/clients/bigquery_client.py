@@ -4,9 +4,12 @@ import os
 import appdirs
 import csv
 import tqdm
+import pandas as pd
+import time
 
 from google.auth.exceptions import RefreshError
-from google.cloud import bigquery, storage
+from google.cloud import bigquery, storage, bigquery_storage_v1beta1 as bigquery_storage
+
 from google.oauth2.credentials import Credentials as GoogleCredentials
 
 from carto.exceptions import CartoException
@@ -35,21 +38,23 @@ class BigQueryClient(object):
         self._project = project
         self._credentials = credentials or get_default_credentials()
         self._bucket = 'carto-do-{username}'.format(username=self._credentials.username)
-        self.bq_client, self.gcs_client = self._init_clients()
+        self.bq_client, self.gcs_client, self.bq_storage_client = self._init_clients()
 
     def _init_clients(self):
-        google_credentials = GoogleCredentials(self._credentials.get_do_token())
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/alasarr/.google/cred_sdsc-demo.json'
+
+        # google_credentials = GoogleCredentials(self._credentials.get_do_token())
 
         bq_client = bigquery.Client(
-            project=self._project,
-            credentials=google_credentials)
+            project=self._project)
 
         gcs_client = storage.Client(
-            project=self._project,
-            credentials=google_credentials
+            project=self._project
         )
 
-        return bq_client, gcs_client
+        bq_storage_client = bigquery_storage.BigQueryStorageClient()
+
+        return bq_client, gcs_client, bq_storage_client
 
     @refresh_clients
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
@@ -121,6 +126,56 @@ class BigQueryClient(object):
 
         return file_path
 
+    def query_dataframe(self, query):
+
+        job = self.bq_client.query(query)
+        # Wait to complete the job
+        while not job.done():
+            time.sleep(1)
+
+        # print(job.destination)
+        # while True:
+        #     try:
+        #         table = self.bq_client.get_table(job.destination)
+        #         break
+        #     except Exception as err:
+        #         # print(err)
+        #         time.sleep(1)
+
+        # print(table.num_rows)
+        print('Downloading')
+        # return self._download_job_storage_api(job)
+        try:
+            return self._download_job_storage_api(job)
+        except Exception as error:
+            print('Warning: Cannot download storage API, fallback to standard')
+            print(error)
+            return job.to_dataframe()
+
+    def _download_job_storage_api(self, job):
+
+        table_ref = job.destination.to_bqstorage()
+ 
+        parent = 'projects/{}'.format(self._project)
+        session = self.bq_storage_client.create_read_session(
+            table_ref,
+            parent,
+            requested_streams=1,
+            # This API can also deliver data serialized in Apache Arrow format.
+            # This example leverages Apache Avro.
+            format_=bigquery_storage.enums.DataFormat.AVRO,
+            # We use a LIQUID strategy because we only read from a
+            # single stream. Consider BALANCED if requested_streams > 1
+            sharding_strategy=(bigquery_storage.enums.ShardingStrategy.LIQUID),
+        )
+
+        reader = self.bq_storage_client.read_rows(
+            bigquery_storage.types.StreamPosition(stream=session.streams[0])
+        )
+
+        rows = reader.rows(session)
+        data = list(rows)
+        return pd.DataFrame(data)
 
 def _download_query(project, dataset, table, limit=None, offset=None):
     full_table_name = '`{}.{}.{}`'.format(project, dataset, table)

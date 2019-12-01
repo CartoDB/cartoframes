@@ -1,4 +1,5 @@
 import uuid
+import time
 
 from collections import defaultdict
 
@@ -73,11 +74,11 @@ class EnrichmentService(object):
         self.public_project = _PUBLIC_PROJECT
 
     def _execute_enrichment(self, queries, cartodataframe):
+
         dfs_enriched = list()
 
         for query in queries:
-            df_enriched = self.bq_client.query(query).to_dataframe()
-            dfs_enriched.append(df_enriched)
+            dfs_enriched.append(self.bq_client.query_dataframe(query))
 
         for df in dfs_enriched:
             cartodataframe = cartodataframe.merge(df, on=self.enrichment_id, how='left')
@@ -87,6 +88,7 @@ class EnrichmentService(object):
         cartodataframe.drop(self.geojson_column, axis=1, inplace=True)
 
         return cartodataframe
+
 
     def _prepare_data(self, dataframe, geom_col):
         cartodataframe = CartoDataFrame(dataframe, copy=True)
@@ -393,3 +395,4 @@ def _get_aggregation(variable, aggregation):
 
     if aggregation_method is not None:
         return aggregation_method.lower()
+
