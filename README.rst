@@ -15,17 +15,17 @@ Try it Out
 ==========
 
 * Stable (v0.10.1): |stable|
-* Beta (v1.0b5): |beta|
+* Beta (v1.0b6): |beta|
 * Latest (develop branch): |develop|
 
 .. |stable| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v0.10.1?filepath=examples
 
+.. |beta| image:: https://mybinder.org/badge_logo.svg
+    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0b6?filepath=examples
+
 .. |develop| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/develop?filepath=examples
-
-.. |beta| image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0b5?filepath=examples
 
 If you do not have an API key, you can still use cartoframes for creating maps locally.
 
@@ -69,11 +69,11 @@ latest version:
 
     $ pip install cartoframes
 
-To install the 1.0b5 beta version:
+To install the 1.0b6 beta version:
 
 .. code:: bash
 
-    $ pip install cartoframes==1.0b5
+    $ pip install cartoframes==1.0b6
 
 `cartoframes` is continuously tested on Python versions 2.7, 3.5, and 3.6. It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyter`). See the example usage section below or notebooks in the `examples directory <https://github.com/CartoDB/cartoframes/tree/master/examples>`__ for using `cartoframes` in that environment.
 
@@ -95,11 +95,11 @@ To setup `cartoframes` and `Jupyter` in a `virtual environment <http://python-gu
     (venv) $ pip install cartoframes jupyter
     (venv) $ jupyter notebook
 
-To install the 1.0b5 version, run instead:
+To install the 1.0b6 version, run instead:
 
 .. code:: bash
 
-    (venv) $ pip install cartoframes==1.0b5 jupyter
+    (venv) $ pip install cartoframes==1.0b6 jupyter
 
 Then create a new notebook and try the example code snippets below with tables that are in your CARTO account.
 
@@ -119,12 +119,12 @@ Alternatively, `pipenv <https://pipenv.readthedocs.io/en/latest/>`__ provides an
     $ pipenv install cartoframes jupyter
     $ pipenv run jupyter notebook
 
-To install the 1.0b5 version, run instead:
+To install the 1.0b6 version, run instead:
 
 .. code:: bash
 
     $ pipenv --three
-    $ pipenv install cartoframes==1.0b5 jupyter
+    $ pipenv install cartoframes==1.0b6 jupyter
     $ pipenv run jupyter notebook
 
 Native pip
@@ -136,11 +136,11 @@ If you install packages at a system level, you can install `cartoframes` with:
 
     $ pip install cartoframes
 
-or to install the 1.0b5 version:
+or to install the 1.0b6 version:
 
 .. code:: bash
 
-    $ pip install cartoframes==1.0b5
+    $ pip install cartoframes==1.0b6
 
 Example usage
 =============

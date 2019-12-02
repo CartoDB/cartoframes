@@ -15,7 +15,8 @@ from ...auth import get_default_credentials
 from ...core.logger import log
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
-_UPLOAD_CHUNK_SIZE = 10 * 1024 * 1024
+_GCS_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB. This must be a multiple of 256 KB per the API specification.
+
 
 def refresh_clients(func):
     def wrapper(self, *args, **kwargs):
@@ -60,7 +61,7 @@ class BigQueryClient(object):
 
         # Upload file to Google Cloud Storage
         bucket = self.gcs_client.bucket(self._bucket)
-        blob = bucket.blob(tablename, chunk_size = _UPLOAD_CHUNK_SIZE) 
+        blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
         dataframe.to_csv(tablename, index=False, header=False)
         try:
             blob.upload_from_filename(tablename)
