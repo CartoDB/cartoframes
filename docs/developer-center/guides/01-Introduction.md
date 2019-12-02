@@ -27,7 +27,7 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
     <span class="doc-guides__title">
       <a href="/developers/cartoframes/guides/Authentication/">Authentication</a>
     </span>
-    <p class="doc-guides__description">Login into CARTO to unlock the power of spatial anlysis (data management, data enrichment, location data services, etc)</p>
+    <p class="doc-guides__description">Login into CARTO to unlock the power of spatial analysis (data management, data enrichment, location data services, etc)</p>
   </div>
 
   <div class="doc-guides__cartoframes-block">
