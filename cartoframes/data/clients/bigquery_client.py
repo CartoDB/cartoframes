@@ -12,6 +12,8 @@ from google.cloud import bigquery, storage, bigquery_storage_v1beta1 as bigquery
 from carto.exceptions import CartoException
 from ...auth import get_default_credentials
 from ...core.logger import log
+from ...utils.utils import timelogger
+
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 _GCS_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB. This must be a multiple of 256 KB per the API specification.
@@ -56,8 +58,10 @@ class BigQueryClient(object):
         return bq_client, gcs_client, bq_storage_client
 
     @refresh_clients
+    @timelogger
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
 
+        log.debug('Uploading to GCS')
         # Upload file to Google Cloud Storage
         bucket = self.gcs_client.bucket(self._bucket)
         blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
@@ -67,6 +71,7 @@ class BigQueryClient(object):
         finally:
             os.remove(tablename)
 
+        log.debug('Importing to BQ from GCS')
         # Import from GCS To BigQuery
         dataset_ref = self.bq_client.dataset(dataset, project=project)
         table_ref = dataset_ref.table(tablename)
@@ -96,6 +101,7 @@ class BigQueryClient(object):
         table_info = self.get_table(project, dataset, table)
         return [field.name for field in table_info.schema]
 
+    @timelogger
     def download_to_file(self, project, dataset, table, limit=None, offset=None,
                          file_path=None, fail_if_exists=False, progress_bar=True):
         if not file_path:
@@ -125,6 +131,7 @@ class BigQueryClient(object):
 
         return file_path
 
+    @timelogger
     def to_dataframe(self, job):
         try:
             return self._download_job_storage_api(job)
