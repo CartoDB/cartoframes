@@ -40,7 +40,7 @@ Catalog().country('usa').categories
   <Category.get('demographics')>]
 </code></pre>
 
-For the case of the US, the Data Observatory provides six different categories of datasets. Let's take a look at the spatial resolutions available for the demographics category which should contain the population data we need.
+For the case of the US, the Data Observatory provides six different categories of datasets. Let's take a look at the spatial resolutions available for the demographics category (which on this occasion contains the population data we need).
 
 ```python
 from cartoframes.data.observatory import Catalog

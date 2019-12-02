@@ -47,7 +47,10 @@ def fetch_subscriptions(credentials):
         api_key_auth_client = credentials.get_api_key_auth_client()
         do_manager = DOSubscriptionManager(api_key_auth_client)
         if do_manager is not None:
-            return do_manager.all()
+            try:
+                return do_manager.all()
+            except Exception:
+                return []
     return []
 
 

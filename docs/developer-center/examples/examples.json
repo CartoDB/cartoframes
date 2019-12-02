@@ -20,9 +20,9 @@
             "file": "create_cdf_from_geojson",
             "path": "data_workflows"
         }, {
-            "title": "Download CartoDataFrame from Table name",
-            "desc": "Download a CartoDataFrame from a table name",
-            "file": "download_cdf_from_table",
+            "title": "Create CartoDataFrame from Table name",
+            "desc": "Create a CartoDataFrame from a table name",
+            "file": "create_cdf_from_table",
             "path": "data_workflows"
         }, {
             "title": "Create CartoDataFrame from SQL query",
@@ -396,11 +396,6 @@
             "title": "Paris Remarkable Trees",
             "desc": "Transform and visualize data from a .json file",
             "file": "paris_remarkable_trees",
-            "path": "real_use_cases"
-        }, {
-            "title": "Police Department Incident Reports in San Francisco",
-            "desc": "Use and analyze datasets from different sources",
-            "file": "police_department_incident_reports",
             "path": "real_use_cases"
         }, {
             "title": "Geocode London Stations",
