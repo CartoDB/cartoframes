@@ -19,7 +19,7 @@ We will be using the same dataset of fake locations used along these guides [sta
 Using Location Data Services requires to be authenticated. For more information about how to authenticate, please read the [Login to CARTO Platform guide](/developers/cartoframes/guides/Authentication/)
 
 ```python
-from cartoframes.auth import Credentials, set_default_credentials
+from cartoframes.auth import set_default_credentials
 
 set_default_credentials('creds.json')
 ```
@@ -786,21 +786,32 @@ Now, let's calculate the **centroid** of three different stores that we've ident
 
 ```python
 from shapely import geometry
-import geopandas as gpd
+
+new_store_location = [
+    geo_cdf.iloc[6].the_geom,
+    geo_cdf.iloc[9].the_geom,
+    geo_cdf.iloc[1].the_geom
+]
 
 # Create a polygon using three points from the geo_cdf
-polygon = geometry.Polygon([[p.x, p.y] for p in geo_cdf.iloc[[1, 6, 9]])
+polygon = geometry.Polygon([[p.x, p.y] for p in new_store_location])
+```
 
-new_store_gdf = gpd.GeoDataFrame(geometry=gpd.GeoSeries(polygon.centroid))
+```python
+from cartoframes import CartoDataFrame
+
+new_store_cdf = CartoDataFrame(
+    [['New Store', polygon.centroid.y, polygon.centroid.x]],
+    columns=['name', 'lat', 'lon'])
+
+new_store_cdf.set_geometry_from_xy('lon', 'lat', inplace=True)
+
+isochrones_new_cdf, isochrones_new_metadata = iso_service.isochrones(new_store_cdf, [300, 900, 1800], mode='walk')
 ```
 
 ```python
 from cartoframes.viz import Layer
 
-isochrones_new_cdf, isochrones_new_metadata = iso_service.isochrones(new_store_df, [300, 900, 1800], mode='walk')
-```
-
-```python
 Map([
     isolines_layer(
         isochrones_cdf,

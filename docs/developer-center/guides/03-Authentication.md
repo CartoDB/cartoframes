@@ -10,11 +10,11 @@ Authentication is needed to set up your credentials to save your data and visual
 ### Get your Master API Key
 Once you have created an account, you need to get you **Master** API Key. The API keys page can be accesed from your dashboard. Once there, click on your avatar to open the dashboard menu. The API keys link will be shown.
 
-![API Keys link - CARTO Dashboard](../img/guides/credentials/dashboard.png)
+![API Keys link - CARTO Dashboard](../../img/guides/credentials/dashboard.png)
 
 Now that you are at your API Keys page, copy the **Master** API Key to use in the next section.
 
-![Master API Key - CARTO Dashboard](../img/guides/credentials/api-keys.png)
+![Master API Key - CARTO Dashboard](../../img/guides/credentials/api-keys.png)
 
 ### Setting default Credentials
 
@@ -39,7 +39,7 @@ Example `creds.json` file:
 
 - `username`: your CARTO account username
 - `api_key`: API Key of user's CARTO account. If the data to be accessed is **public**, it can be set to `default_public`.
-- `base_url`: (**needed for on premise or custom installations**). It is usually of the form `https://username.carto.com/` for user `username`. On premises installation (and others) have a different URL pattern.
+- `base_url`: only needed for on premise or custom installations. It is usually of the form `https://username.carto.com/` for user `username`. On premises installation (and others) have a different URL pattern.
 
 ### Conclusion
 You have learnt how to authenticate to CARTO reading your credentials from a file. [Check the reference](/developers/cartoframes/reference/#heading-Auth) to learn more about how to manage your credentials.
