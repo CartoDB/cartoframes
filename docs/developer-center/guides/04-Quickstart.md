@@ -32,8 +32,8 @@ Let's get started!
 ```python
 import pandas as pd
 
-starbucks_df = pd.read_csv('../files/starbucks_brooklyn.csv')
-starbucks_df.head()
+stores_df = pd.read_csv('../files/starbucks_brooklyn.csv')
+stores_df.head()
 ```
 
 <div>
@@ -83,7 +83,7 @@ starbucks_df.head()
 
 To be able to display your stores as points on a map, you first have to convert the `address` column into geometries. This process is called geocoding and CARTO provides a straightforward way to do it (you can learn more about it in the [location data services guide](/developers/cartoframes/guides/Location-Data-Services)).
 
-In order to geocode, you have to set your CARTO credentials. If you don't know your API key yet, check the [authentication guide](/developers/cartoframes/guides/Authentication/) to learn how to get it. In case you want to see the result of the geocoding without being logged in, here it is the [geocoded dataset](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn_iso_enriched.csv).
+In order to geocode, you have to set your CARTO credentials. If you don't know your API key yet, check the [authentication guide](/developers/cartoframes/guides/Authentication/) to learn how to get it. In case you want to see the result of the geocoding without being logged in, here it is the [geocoded dataset](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn_geocoded.csv).
 
 > Note: If you don't have an account yet, you can get a trial, or a free account if you are a student, by [signing up here](https://carto.com/signup/).
 
@@ -100,8 +100,8 @@ Now, we are ready to geocode the dataframe:
 ```python
 from cartoframes.data.services import Geocoding
 
-starbucks_df, _ = Geocoding().geocode(starbucks_df, street='address')
-starbucks_df.head()
+stores_df, _ = Geocoding().geocode(stores_df, street='address')
+stores_df.head()
 ```
 
 
@@ -110,59 +110,65 @@ starbucks_df.head()
   <thead>
     <tr style="text-align: right;">
       <th></th>
+      <th>cartodb_id</th>
+      <th>the_geom</th>
       <th>name</th>
       <th>address</th>
       <th>revenue</th>
       <th>gc_status_rel</th>
       <th>carto_geocode_hash</th>
-      <th>geometry</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>1</th>
+      <th>0</th>
+      <td>1</td>
+      <td>POINT (-73.95901 40.67109)</td>
       <td>Franklin Ave &amp; Eastern Pkwy</td>
       <td>341 Eastern Pkwy,Brooklyn, NY 11238</td>
       <td>1321040.772</td>
       <td>0.91</td>
       <td>9212e0e908d8c64d07c6a94827322397</td>
-      <td>POINT (-73.95901 40.67109)</td>
     </tr>
     <tr>
-      <th>2</th>
+      <th>1</th>
+      <td>2</td>
+      <td>POINT (-73.96122 40.57796)</td>
       <td>607 Brighton Beach Ave</td>
       <td>607 Brighton Beach Avenue,Brooklyn, NY 11235</td>
       <td>1268080.418</td>
       <td>0.97</td>
       <td>b1bbfe2893914a350193969a682dc1f5</td>
-      <td>POINT (-73.96122 40.57796)</td>
     </tr>
     <tr>
-      <th>3</th>
+      <th>2</th>
+      <td>3</td>
+      <td>POINT (-73.98976 40.61912)</td>
       <td>65th St &amp; 18th Ave</td>
       <td>6423 18th Avenue,Brooklyn, NY 11204</td>
       <td>1248133.699</td>
       <td>0.95</td>
       <td>e47cf7b16d6c9b53c63e86a0418add1d</td>
-      <td>POINT (-73.98976 40.61912)</td>
     </tr>
     <tr>
-      <th>4</th>
+      <th>3</th>
+      <td>4</td>
+      <td>POINT (-74.02744 40.63152)</td>
       <td>Bay Ridge Pkwy &amp; 3rd Ave</td>
       <td>7419 3rd Avenue,Brooklyn, NY 11209</td>
       <td>1185702.676</td>
       <td>0.95</td>
       <td>2f21749c02f73116892eb3b6fd5d5738</td>
-      <td>POINT (-74.02744 40.63152)</td>
     </tr>
     <tr>
-      <th>5</th>
+      <th>4</th>
+      <td>5</td>
+      <td>POINT (-74.00098 40.59321)</td>
       <td>Caesar's Bay Shopping Center</td>
       <td>8973 Bay Parkway,Brooklyn, NY 11214</td>
       <td>1148427.411</td>
       <td>0.95</td>
       <td>134c23973313802448365db6235783f9</td>
-      <td>POINT (-74.00098 40.59321)</td>
     </tr>
   </tbody>
 </table>
@@ -178,7 +184,7 @@ You can quickly visualize your geocoded dataframe using the Map and Layer classe
 ```python
 from cartoframes.viz import Map, Layer
 
-Map(Layer(starbucks_df))
+Map(Layer(stores_df))
 ```
 
 <div class="example-map">
@@ -201,13 +207,13 @@ Now, you have a better sense about where the stores are. To continue with your e
 ```python
 from cartoframes.viz.helpers import size_continuous_layer
 
-Map(size_continuous_layer(starbucks_df, 'revenue', 'Revenue in $'))
+Map(size_continuous_layer(stores_df, 'revenue', 'Annual Revenue ($)'))
 ```
 
 <div class="example-map">
     <iframe
         id="quickstart_guide_starbucks_brooklyn_by_revenue"
-        src="https://cartoframes.carto.com/kuviz/2e27384e-0cb4-4c02-809f-efa618ee5a6c"
+        src="https://cartoframes.carto.com/kuviz/7611a80b-0796-4eef-b3f0-a84135dacfd8"
         width="100%"
         height="500"
         style="margin: 20px auto !important"
@@ -215,7 +221,7 @@ Map(size_continuous_layer(starbucks_df, 'revenue', 'Revenue in $'))
     </iframe>
 </div>
 
-Good job! By using the [size continuous visualization layer](/developers/cartoframes/examples/#example-size-continuous-layer) you can see right away where the stores with higher revenue are. By default, visualization layers also provide a popup with the mapped value and an appropriate legend.
+Good job! By using the [`size continuous visualization layer`](/developers/cartoframes/examples/#example-size-continuous-layer) you can see right away where the stores with higher revenue are. By default, visualization layers also provide a popup with the mapped value and an appropriate legend.
 
 ### Create your areas of influence
 
@@ -229,10 +235,77 @@ To do this we will use the Isolines data service:
 ```python
 from cartoframes.data.services import Isolines
 
-isochrones_df, _ = Isolines().isochrones(starbucks_df, [15*60], mode='walk')
+isochrones_df, _ = Isolines().isochrones(stores_df, [15*60], mode='walk')
+isochrones_df.head()
+```
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>cartodb_id</th>
+      <th>source_id</th>
+      <th>data_range</th>
+      <th>lower_data_range</th>
+      <th>the_geom</th>
+      <th>range_label</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>1</td>
+      <td>900</td>
+      <td>0</td>
+      <td>MULTIPOLYGON (((-73.95934 40.68011, -73.96074 ...</td>
+      <td>15 min.</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>2</td>
+      <td>900</td>
+      <td>0</td>
+      <td>MULTIPOLYGON (((-73.96187 40.58632, -73.96289 ...</td>
+      <td>15 min.</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>3</td>
+      <td>900</td>
+      <td>0</td>
+      <td>MULTIPOLYGON (((-73.99082 40.62694, -73.99170 ...</td>
+      <td>15 min.</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>4</td>
+      <td>900</td>
+      <td>0</td>
+      <td>MULTIPOLYGON (((-74.02851 40.64062, -74.02882 ...</td>
+      <td>15 min.</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>5</td>
+      <td>900</td>
+      <td>0</td>
+      <td>MULTIPOLYGON (((-74.00110 40.60186, -74.00249 ...</td>
+      <td>15 min.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+```python
 Map([
     Layer(isochrones_df),
-    Layer(starbucks_df)]
+    Layer(stores_df)]
 )
 ```
 
@@ -755,45 +828,70 @@ isochrones_df.head()
   <thead>
     <tr style="text-align: right;">
       <th></th>
+      <th>cartodb_id</th>
+      <th>source_id</th>
       <th>data_range</th>
-      <th>geometry</th>
-      <th>POPCY</th>
+      <th>lower_data_range</th>
+      <th>the_geom</th>
+      <th>range_label</th>
+      <th>sum_POPCY</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
+      <td>1</td>
+      <td>1</td>
       <td>900</td>
+      <td>0</td>
       <td>MULTIPOLYGON (((-73.95934 40.68011, -73.96074 ...</td>
+      <td>15 min.</td>
       <td>1221.455789</td>
     </tr>
     <tr>
       <th>1</th>
+      <td>2</td>
+      <td>2</td>
       <td>900</td>
+      <td>0</td>
       <td>MULTIPOLYGON (((-73.96187 40.58632, -73.96289 ...</td>
+      <td>15 min.</td>
       <td>1534.248133</td>
     </tr>
     <tr>
       <th>2</th>
+      <td>3</td>
+      <td>3</td>
       <td>900</td>
+      <td>0</td>
       <td>MULTIPOLYGON (((-73.99082 40.62694, -73.99170 ...</td>
+      <td>15 min.</td>
       <td>1311.667005</td>
     </tr>
     <tr>
       <th>3</th>
+      <td>4</td>
+      <td>4</td>
       <td>900</td>
+      <td>0</td>
       <td>MULTIPOLYGON (((-74.02851 40.64062, -74.02882 ...</td>
+      <td>15 min.</td>
       <td>1179.999175</td>
     </tr>
     <tr>
       <th>4</th>
+      <td>5</td>
+      <td>5</td>
       <td>900</td>
+      <td>0</td>
       <td>MULTIPOLYGON (((-74.00110 40.60186, -74.00249 ...</td>
+      <td>15 min.</td>
       <td>1334.454790</td>
     </tr>
   </tbody>
 </table>
 </div>
+
 
 Great! Let's see the result on a map:
 
@@ -801,7 +899,7 @@ Great! Let's see the result on a map:
 ```python
 from cartoframes.viz.helpers import color_continuous_layer
 
-Map(color_continuous_layer(isochrones_df, 'POPCY', 'Population'))
+Map(color_continuous_layer(isochrones_df, 'sum_POPCY', 'Population'))
 ```
 
 <div class="example-map">
@@ -818,15 +916,14 @@ Map(color_continuous_layer(isochrones_df, 'POPCY', 'Population'))
 We can see that the area of influence of the store on the right, is the one with the highest population. Let's go a bit further and calculate and visualize the average revenue per person.
 
 ```python
-starbucks_df = starbucks_df.reset_index(drop=True)
-starbucks_df['rev_pop'] = starbucks_df['revenue']/isochrones_df['POPCY']
-Map(size_continuous_layer(starbucks_df, 'rev_pop', 'Revenue per person'))
+stores_df['rev_pop'] = stores_df['revenue']/isochrones_df['sum_POPCY']
+Map(size_continuous_layer(stores_df, 'rev_pop', 'Revenue per person ($)'))
 ```
 
 <div class="example-map">
     <iframe
         id="quickstart_guide_starbucks_brooklyn_rev_pop"
-        src="https://cartoframes.carto.com/kuviz/6b3e7bc2-cca2-4172-9f6e-73deb71cde03"
+        src="https://cartoframes.carto.com/kuviz/6a91f524-3afa-4452-b67b-608fbc95b84c"
         width="100%"
         height="500"
         style="margin: 20px auto !important"
@@ -836,18 +933,18 @@ Map(size_continuous_layer(starbucks_df, 'rev_pop', 'Revenue per person'))
 
 As we can see, there are clearly 3 stores that have lower revenue per person. This insight will help us to focus on them in further analyses.
 
-To learn more about discovering the data you want, check out the [data discovery guide](/developers/cartoframes/guides/Data-discovery). To learn more about enriching your data check out the [data enrichment guide]().
+To learn more about discovering the data you want, check out the [data discovery guide](/developers/cartoframes/guides/Data-discovery). To learn more about enriching your data check out the [data enrichment guide](/developers/cartoframes/guides/Data-enrichment/).
 
 ### Publish and share your results
 
 The final step in the workflow is to share this interactive map with your colleagues so they can explore the information on their own. Let's do it!
 
-First, let's add widgets so people are able to see some graphs of the information and filter it. To do this, we only have to add `widget=True` to the visualization layers. Remember to check the [visualization guide](/developers/cartoframes/guides/Visualization) to learn more.
+First, let's add widgets so people are able to see some graphs of the information and filter it. To do this, we only have to add `widget=True` to the visualization layers.
 
 ```python
 result_map = Map([
-    color_continuous_layer(isochrones_df, 'POPCY', 'Population', stroke_width=0, opacity=0.7),
-    size_continuous_layer(starbucks_df, 'rev_pop', 'Rev/Pop', stroke_color='white', widget=True)
+    color_continuous_layer(isochrones_df, 'sum_POPCY', 'Population', stroke_width=0, opacity=0.7),
+    size_continuous_layer(stores_df, 'rev_pop', 'Revenue per person ($)', stroke_color='white', widget=True)
 ])
 result_map
 ```
@@ -855,7 +952,7 @@ result_map
 <div class="example-map">
     <iframe
         id="quickstart_guide_startbucks_analysis"
-        src="https://cartoframes.carto.com/kuviz/3c900d1f-d3ef-472f-9bc0-a2005a08df27"
+        src="https://cartoframes.carto.com/kuviz/0de1c575-758d-4a42-b269-16c22217d6c6"
         width="100%"
         height="500"
         style="margin: 20px auto !important"

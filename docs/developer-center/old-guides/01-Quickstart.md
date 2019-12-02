@@ -14,10 +14,10 @@ You can install CARTOframes with `pip`. Simply type the following in the command
 $ pip install cartoframes
 ```
 
-To install the 1.0b5 beta version:
+To install the 1.0b6 beta version:
 
 ```bash
-$ pip install cartoframes==1.0b5
+$ pip install cartoframes==1.0b6
 ```
 
 To install through a Jupyter notebook, you can run
@@ -26,10 +26,10 @@ To install through a Jupyter notebook, you can run
 ! pip install cartoframes
 ```
 
-To install the 1.0b5 beta version:
+To install the 1.0b6 beta version:
 
 ```bash
-!pip install cartoframes==1.0b5
+!pip install cartoframes==1.0b6
 ```
 
 It is recommended to install cartoframes in a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/). For example, you can run the following command to create a virtual env, activate it, and install cartoframes:
@@ -40,12 +40,12 @@ $ source cfenv/bin/activate
 (cfenv) $ pip install cartoframes
 ```
 
-To install the 1.0b5 beta version:
+To install the 1.0b6 beta version:
 
 ```bash
 $ virtualenv cfenv
 $ source cfenv/bin/activate
-(cfenv) $ pip install cartoframes==1.0b5
+(cfenv) $ pip install cartoframes==1.0b6
 ```
 
 You'll notice the virtual environment name in your command line prompt, like above. Type `deactivate` to exit the virtualenv:
