@@ -5,7 +5,6 @@ import appdirs
 import csv
 import tqdm
 import pandas as pd
-import time
 
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery, storage, bigquery_storage_v1beta1 as bigquery_storage
@@ -126,15 +125,7 @@ class BigQueryClient(object):
 
         return file_path
 
-    def query_dataframe(self, query):
-        log.debug('Running query')
-        job = self.bq_client.query(query)
-
-        # Wait to complete the job
-        while not job.done():
-            time.sleep(0.5)
-
-        log.debug('Downloading')
+    def to_dataframe(self, job):
         try:
             return self._download_job_storage_api(job)
         except Exception:

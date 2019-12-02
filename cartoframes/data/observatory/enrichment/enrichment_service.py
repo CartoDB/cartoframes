@@ -1,4 +1,5 @@
 import uuid
+import time
 
 from collections import defaultdict
 
@@ -79,9 +80,19 @@ class EnrichmentService(object):
     def _execute_enrichment(self, queries, cartodataframe):
 
         dfs_enriched = list()
+        awaiting_jobs = set()
+
+        def callback(future):
+            awaiting_jobs.discard(future.job_id)
+            dfs_enriched.append(self.bq_client.to_dataframe(future))
 
         for query in queries:
-            dfs_enriched.append(self.bq_client.query_dataframe(query))
+            job = self.bq_client.query(query)
+            awaiting_jobs.add(job.job_id)
+            job.add_done_callback(callback)
+
+        while awaiting_jobs:
+            time.sleep(1)
 
         for df in dfs_enriched:
             cartodataframe = cartodataframe.merge(df, on=self.enrichment_id, how='left')
