@@ -1,76 +1,45 @@
 ## Authentication
 
-In this guide, our purpose is to focus on the basics of authentication in CARTOframes. There's a full [Authorization Fundamentals](https://carto.com/developers/fundamentals/authorization/) at CARTO guide to understand how to configure and manage API Keys.
+### Introduction
+In this guide, our purpose is to focus on the basics of authentication in CARTOframes.
 
-> To visualize local data with CARTOframes is not needed to be authenticated.
+> To visualize your local data with CARTOframes, you don't need to be authenticated.
 
-It is needed to set up the user credentials to use Location Data Services, the Data Observatory or to save data and visualizations. In these cases, it's required to have a [CARTO account](https://carto.com/signup/). Once the user has created an account, the credentials can be found at **http://johnsmith.carto.com/your_apps.** for user `johnsmith`, and it should be a **Master** API Key:
+Authentication is needed to set up your credentials to save your data and visualizations to CARTO or to use the Location Data Services or the Data Observatory. In these cases, it's required to have a [CARTO account](https://carto.com/signup/).
 
-![Master API Key - CARTO Dashboard](../../img/guides/credentials/api-keys.png)
+### Get your Master API Key
+Once you have created an account, you need to get you **Master** API Key. The API keys page can be accesed from your dashboard. Once there, click on your avatar to open the dashboard menu. The API keys link will be shown.
 
-All user accounts have a `default_public` API Key to access **public** data.
+![API Keys link - CARTO Dashboard](../img/guides/credentials/dashboard.png)
+
+Now that you are at your API Keys page, copy the **Master** API Key to use in the next section.
+
+![Master API Key - CARTO Dashboard](../img/guides/credentials/api-keys.png)
+
+### Setting default Credentials
+
+With [set_default_credentials](/developers/cartoframes/reference/#cartoframes-auth-set_default_credentials), the same user's authentication will be used by every CARTOframes component. There are different ways to set them but we encourage you to use the one that reads the credentials from a JSON file.
+
+```py
+from cartoframes.auth import set_default_credentials
+
+set_default_credentials('creds.json')
+```
+
+Example `creds.json` file:
+
+```json
+{
+  "username": "YOUR_USERNAME",
+  "api_key": "YOUR_API_KEY"
+}
+```
 
 ### Credential parameters
 
 - `username`: your CARTO account username
-- `base_url`: Base URL used for API calls. This is usually of the form `https://johnsmith.carto.com/` for user `johnsmith`. On premises installation (and others) have a different URL pattern.
-- `api_key`: API Key of user's CARTO account. If the data is to be accessed is **public**, it can be set to `default_public`.
+- `api_key`: API Key of user's CARTO account. If the data to be accessed is **public**, it can be set to `default_public`.
+- `base_url`: (**needed for on premise or custom installations**). It is usually of the form `https://username.carto.com/` for user `username`. On premises installation (and others) have a different URL pattern.
 
-### Default Credentials
-
-With [set_default_credentials](/developers/cartoframes/reference/#cartoframes-auth-set_default_credentials), the same user's authentication will be used by _all_ layers and sources by default.
-
-```py
-from cartoframes.auth import set_default_credentials
-
-set_default_credentials(
-    username='johnsmith',
-    api_key='1a2b3c4d5e6f7g8h'
-)
-```
-
-Credentials can be also set by using the `base_url` parameter, which is useful when having an **On premise** or a custom installation:
-
-```py
-from cartoframes.auth import set_default_credentials
-
-set_default_credentials(
-    base_url='https://johnsmith.carto.com/',
-    api_key='1a2b3c4d5e6f7g8h'
-)
-```
-
-When the data is public, the `api_key` parameter isn't required: it's automatically set to `default_public`:
-
-```py
-from cartoframes.auth import set_default_credentials
-
-set_default_credentials('johnsmith')
-```
-
-### Specific Credentials
-
-Instead of setting credentials generally, it is possible to assign specific and different credentials for a Map, Dataset, Layer or Source, between others.
-
-```py
-from cartoframes.auth import Credentials
-from cartoframes.data import Dataset
-
-dataset = Dataset('dataset', credentials=Credentials('johnsmith', '1a2b3c4d5e6f7g8h'))
-```
-
-### The config file
-
-Credentials can be stored in a **configuration file** with the following format:
-
-Example `config.json` file:
-
-```json
-{
-  "APIKEY": "",
-  "USERNAME": "",
-  "USERURL": "https://{username}.carto.com/"
-}
-```
-
-The filename is `cartocreds.json` by default, but it can be overwriten. There are [different methods](/developers/cartoframes/reference/#cartoframes-auth-Credentials) to read, update and delete your credentials.
+### Conclusion
+You have learnt how to authenticate to CARTO reading your credentials from a file. [Check the reference](/developers/cartoframes/reference/#heading-Auth) to learn more about how to manage your credentials.

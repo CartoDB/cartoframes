@@ -2,15 +2,15 @@
 
 ### Introduction
 
-We call enrichment to the process of augmenting your data with new variables by means of a spatial join between your data and a `Dataset` aggregated at a given spatial resolution in the CARTO Data Observatory or in other words:
+We define enrichment as the process of augmenting your data with new variables by means of a spatial join between your data and a `Dataset` aggregated at a given spatial resolution in the CARTO Data Observatory, or in other words:
 
 "*Enrichment is the process of adding variables to a geometry, which we call the target, (point, line, polygon…) from a spatial (polygon) dataset, which we call the source*"
 
-We recommend you to check the [CARTOframes quickstart](/developers/cartoframes/guides/Quickstart/) since we'll use some of the DataFrames generated in the exaple and the [Discovery guide](/developers/cartoframes/guides/Data-discovery) to learn how to explore the Data Observatory catalog to find out variables of interest for your analyses.
+We recommend you check out the [CARTOframes quickstart](/developers/cartoframes/guides/Quickstart/) since we'll use some of the DataFrames generated in the example and the [Discovery guide](/developers/cartoframes/guides/Data-discovery) to learn how to explore the Data Observatory catalog to find variables of interest for your analyses.
 
 ### Choose variables to enrich from the Data Observatory catalog
 
-Let's follow up the [Discovery guide](/developers/cartoframes/guides/Data-discovery) where we subscribed to the AGS demographics dataset and list the variables we have available to enrich our own data.
+Let's follow up on the [Discovery guide](/developers/cartoframes/guides/Data-discovery), where we subscribed to the AGS demographics dataset and list the variables we have available to enrich our own data.
 
 
 ```python
@@ -150,7 +150,7 @@ variables
 
 
 
-As we saw in the discovery guide the `ags_sociodemogr_e92b1637` dataset contains socio-demographic variables aggregated at the Census blockgroup level. Let's try to find out a variable indicating the total population.
+As we saw in the discovery guide the `ags_sociodemogr_e92b1637` dataset contains socio-demographic variables aggregated at the Census block group level. Let's try to find out a variable indicating the total population.
 
 
 ```python
@@ -282,7 +282,7 @@ variable.to_dict()
 
 
 
-The `POPCY` variable contains the `SUM` of the population for blockgroup for the year 2019. Let's enrich our stores DataFrame with that variable.
+The `POPCY` variable contains the `SUM` of the population for the block group for the year of 2019. Let's enrich our stores DataFrame with that variable.
 
 ### Enrich a points DataFrame
 
@@ -351,13 +351,13 @@ stores_df.head(5)
 
 
 
-**Note: We could alternatively load any geospatial format supported by GeoPandas or CARTO. See the Data Management guide for more information about this**
+**Note: We could alternatively load any geospatial format supported by GeoPandas or CARTO. See the Data Management guide for more information about this.**
 
-As we can see for each store we have its name, address, the total revenue by year and a `geometry` column indicating the location of the store. This is important because for the enrichment service to work we need a DataFrame with a geometry column encoded as a [shapely](https://pypi.org/project/Shapely/) object.
+As we can see for each store we have its name, address, the total revenue by year and a `geometry` column indicating the location of the store. This is important because for the enrichment service to work, we need a DataFrame with a geometry column encoded as a [shapely](https://pypi.org/project/Shapely/) object.
 
-We can now create a new `Enrichment` instance, and since the `stores_df` dataset represents stores locations (points), we can use the `enrich_points` function passing as arguments, the stores DataFrame and a list of `Variables` we have a valid subscription from the Data Observatory catalog.
+We can now create a new `Enrichment` instance, and since the `stores_df` dataset represents stores locations (points), we can use the `enrich_points` function passing as arguments, the stores DataFrame and a list of `Variables` (that we have a valid subscription from the Data Observatory catalog for).
 
-In this case we are just enriching one variable (the total population), but we could pass a list of them.
+In this case we are only enriching one variable (the total population), but we could enrich a list of them.
 
 
 ```python
@@ -434,9 +434,9 @@ enriched_stores_df.head(5)
 
 
 
-Once the enrichment finishes, we've obtained a new column in our DataFrame called `POPCY` with the `SUM` of population projected for the year 2019, in the US Census blockgroup which contains each one of our Starbucks stores.
+Once the enrichment finishes, we've obtained a new column in our DataFrame called `POPCY` with the `SUM` of population projected for the year 2019, in the US Census block group which contains each one of our Starbucks stores.
 
-The reason why we are obtaining the `SUM` is because we are using the `ags_sociodemogr_e92b1637` which data is aggregated at the Census blockgroup level and more concretely the `POPCY` variable is aggregated by `SUM` as we can see in the Catalog `Variable` metadata:
+The reason why we are obtaining the `SUM` is because we are using the `ags_sociodemogr_e92b1637` which is data is aggregated at the Census block group level, and furthermore, the `POPCY` variable is aggregated by `SUM` as we can see in the Catalog `Variable` metadata:
 
 
 ```python
@@ -450,7 +450,7 @@ variable.agg_method
 
 
 
-All this information, is available in the `ags_sociodemogr_e92b1637` metadata. Let's take a look:
+All this information is available in the `ags_sociodemogr_e92b1637` metadata. Let's take a look:
 
 
 ```python
@@ -485,7 +485,7 @@ dataset.to_dict()
 
 ### Enrich a polygons DataFrame
 
-Let's do a second enrichment but in this case let's use the DataFrame with the areas of influence, we used the [CARTOframes isochrones](/developers/cartoframes/reference/#heading-Isolines) service to obtain the polygon around each store that cover the area within 8, 17 and 25 minutes walk.
+Now we'll do a second enrichment, but in this case let's use the DataFrame with the areas of influence. We used the [CARTOframes isochrones](/developers/cartoframes/reference/#heading-Isolines) service to obtain the polygon around each store that cover the area within 8, 17 and 25 minutes walk.
 
 
 ```python
@@ -551,7 +551,7 @@ aoi_df.head(5)
 
 In this case we have a DataFrame which, for each index in the `stores_df` contains a polygon of the areas of influence around each store at 8, 17 and 25 minutes walking. Again the `geometry` is encoded as a `shapely` object.
 
-In this case, the `Enrichment` service provides an `enrich_polygons` function, which in his basic version, works in the same way as the `enrich_points` function. It just needs a DataFrame with a polygon geometry and a list of variables to enrich:
+In this case, the `Enrichment` service provides an `enrich_polygons` function, which in its basic version, works in the same way as the `enrich_points` function. It just needs a DataFrame with a polygon geometry and a list of variables to enrich:
 
 
 ```python
@@ -626,13 +626,13 @@ We have obtained a new column in our areas of influence DataFrame, `SUM_POPCY` w
 
 ### How enrichment works
 
-Let's try to explain what happens under the hood when you do a polygons enrichment.
+Let's try to explain what happens under the hood when you carry out a polygons enrichment.
 
 Imagine we have polygons representing municipalities, in blue, each of which have a population attribute, and we want to find out the population inside the green circle. 
 
 <img src="../../img/guides/enrichment/enrichment_01.png" width="400"/>
 
-We don’t know how the population is distributed inside these municipalities. They are probably concentrated in cities somewhere but, since we don’t know where those are, our best guess is to assume that the population is evenly distributed in the municipality (every point inside the municipality has the same population density).
+We don’t know how the population is distributed inside these municipalities. They are probably concentrated in cities somewhere, but, since we don’t know where they are, our best guess is to assume that the population is evenly distributed in the municipality (i.e. every point inside the municipality has the same population density).
 
 Population is an extensive property (it grows with area), so we can subset it (a region inside the municipality will always have a smaller population than the whole municipality), and also aggregate it by summing.
 
@@ -646,8 +646,8 @@ In the Data Observatory, we suggest a default aggregation method for certain fie
 
 In this guide we've learned how to use CARTOframes together with the Data Observatory to enrich our Starbucks dataset with a new population variable for our use case of revenue prediction analysis. For that purpose we've:
 
-- Choose the total population variable from the Data Observatory catalog
+- Chosen the total population variable from the Data Observatory catalog
 - Calculated the sum of total population for each store
 - Calculated the sum of total population around the walking areas of influence around each store
 
-Finally we've introduced some other advanced concepts and further explanation on how the enrichment works.
+Finally, we've introduced some other advanced concepts and further explanation on how the enrichment works.
