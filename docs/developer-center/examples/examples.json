@@ -398,11 +398,6 @@
             "file": "paris_remarkable_trees",
             "path": "real_use_cases"
         }, {
-            "title": "Police Department Incident Reports in San Francisco",
-            "desc": "Use and analyze datasets from different sources",
-            "file": "police_department_incident_reports",
-            "path": "real_use_cases"
-        }, {
             "title": "Geocode London Stations",
             "desc": "Geocode a dataset in xls format",
             "file": "geocoding_london_stations",

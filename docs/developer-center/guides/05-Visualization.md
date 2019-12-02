@@ -17,11 +17,15 @@ As a first step, load both datasets as [Pandas DataFrames](https://pandas.pydata
 ```python
 import pandas
 
+from cartoframes import CartoDataFrame
+
 # store point locations
-df_stores = pandas.read_csv('../files/starbucks_brooklyn_geocoded.csv')
+stores_df = pandas.read_csv('../files/starbucks_brooklyn_geocoded.csv')
+stores_cdf = CartoDataFrame(stores_df, geometry='the_geom')
 
 # 15 minute walk time polygons
-df_iso = pandas.read_csv('../files/starbucks_brooklyn_iso_enriched.csv')
+iso_df = pandas.read_csv('../files/starbucks_brooklyn_iso_enriched.csv')
+iso_cdf = CartoDataFrame(iso_df, geometry='the_geom')
 ```
 
 ### Add Layers to a Map
@@ -32,8 +36,8 @@ Next, import the Map and Layer classes from the [Viz namespace](/developers/cart
 from cartoframes.viz import Map, Layer
 
 Map([
-    Layer(df_iso),
-    Layer(df_stores)
+    Layer(iso_cdf),
+    Layer(stores_cdf)
 ])
 ```
 
@@ -61,7 +65,7 @@ First, explore the store location attributes. In this dataset you will use the f
 * `revenue` which provides the information about how much a particular store earned in the year 2018
 
 ```python
-df_stores
+stores_cdf.head(3)
 ```
 
 <div>
@@ -81,7 +85,7 @@ df_stores
   <tbody>
     <tr>
       <th>0</th>
-      <td>0101000020E61000005EA27A6B607D52C01956F146E655...</td>
+      <td>POINT (-73.95901 40.67109)</td>
       <td>1</td>
       <td>0</td>
       <td>Franklin Ave &amp; Eastern Pkwy</td>
@@ -91,7 +95,7 @@ df_stores
     </tr>
     <tr>
       <th>1</th>
-      <td>0101000020E6100000B610E4A0847D52C0B532E197FA49...</td>
+      <td>POINT (-73.96122 40.57796)</td>
       <td>2</td>
       <td>1</td>
       <td>607 Brighton Beach Ave</td>
@@ -101,7 +105,7 @@ df_stores
     </tr>
     <tr>
       <th>2</th>
-      <td>0101000020E6100000E5B8533A587F52C05726FC523F4F...</td>
+      <td>POINT (-73.98976 40.61912)</td>
       <td>3</td>
       <td>2</td>
       <td>65th St &amp; 18th Ave</td>
@@ -122,7 +126,7 @@ From the isochrone Layer, you will use the demographic attributes:
 * `id_store` which matches the unique id in the store points
 
 ```python
-df_iso
+iso_cdf.head(3)
 ```
 
 <div>
@@ -144,7 +148,7 @@ df_iso
   <tbody>
     <tr>
       <th>0</th>
-      <td>0106000020E61000000100000001030000000100000033...</td>
+      <td>MULTIPOLYGON (((-73.99082 40.62694, -73.99170 ...	</td>
       <td>3</td>
       <td>1311.667005</td>
       <td>900</td>
@@ -156,7 +160,7 @@ df_iso
     </tr>
     <tr>
       <th>1</th>
-      <td>0106000020E61000000100000001030000000100000033...</td>
+      <td>MULTIPOLYGON (((-73.87101 40.66114, -73.87166 ...</td>
       <td>7</td>
       <td>2215.539290</td>
       <td>900</td>
@@ -168,7 +172,7 @@ df_iso
     </tr>
     <tr>
       <th>2</th>
-      <td>0106000020E61000000100000001030000000100000033...</td>
+      <td>MULTIPOLYGON (((-73.98467 40.70054, -73.98658 ...</td>
       <td>9</td>
       <td>1683.229186</td>
       <td>900</td>
@@ -192,14 +196,14 @@ As seen in the table summaries above, there are a variety of demographic attribu
 
 To make this information available while exploring each location on the map, you can add each attribute as a [Widget](developers/cartoframes/reference/#heading-Widgets). For this case specifically, you will use [Formula Widgets](/developers/cartoframes/examples/#example-formula-widget) to summarize the demographic variables and a [Category Widget](/developers/cartoframes/examples/#example-category-widget) on the categorical attribute of `id_store`.
 
-To add Widgets, you first need to import the types that you want to use and then, inside of the `df_iso` Layer add one widget for each attribute of interest. The Formula Widget accepts different types of aggregations. For this map, we will aggregate each demographic variable using `sum` so the totals update as we zoom, pan and interact with the map. We will also label each Widget appropriately using the `title` parameter.
+To add Widgets, you first need to import the types that you want to use and then, inside of the `iso_cdf` Layer add one widget for each attribute of interest. The Formula Widget accepts different types of aggregations. For this map, we will aggregate each demographic variable using `sum` so the totals update as we zoom, pan and interact with the map. We will also label each Widget appropriately using the `title` parameter.
 
 ```python
 from cartoframes.viz.widgets import formula_widget, category_widget
 
 Map([
     Layer(
-        df_iso,
+        iso_cdf,
         widgets=[
             formula_widget(
                 'popcy',
@@ -228,7 +232,7 @@ Map([
         ]
     ),
     Layer(
-        df_stores
+        stores_cdf
     )
 ])
 ```
@@ -236,14 +240,14 @@ At this point, take a few minutes to explore the map to see how the Widget value
 
 #### Add Popups
 
-In order to aid this map-based exploration, import the [Popup](developers/cartoframes/examples/#example-popup-on-hover) class and use the hover option on the `df_iso` Layer to be able to quickly hover over stores and get their ID:
+In order to aid this map-based exploration, import the [Popup](developers/cartoframes/examples/#example-popup-on-hover) class and use the hover option on the `iso_cdf` Layer to be able to quickly hover over stores and get their ID:
 
 ```python
 from cartoframes.viz import Popup
 
 Map([
     Layer(
-        df_iso,
+        iso_cdf,
         widgets=[
             formula_widget(
                 'popcy',
@@ -278,7 +282,7 @@ Map([
         })
     ),
     Layer(
-        df_stores
+        stores_cdf
     )
 ])
 ```
@@ -295,7 +299,7 @@ from cartoframes.viz.helpers import size_continuous_layer
 
 Map([
     Layer(
-        df_iso,
+        iso_cdf,
         widgets=[
             formula_widget(
                 'popcy',
@@ -330,7 +334,7 @@ Map([
         })
     ),
     size_continuous_layer(
-        df_stores,
+        stores_cdf,
         'revenue'
     )
 ])
@@ -350,7 +354,7 @@ Let's make a few adjustments to make it easier to distinguish and locate the hig
 
 ```python
 size_continuous_layer(
-    df_stores,
+    stores_cdf,
     'revenue',
     size=[10,50],
     title='Annual Revenue ($)',
@@ -394,7 +398,7 @@ from cartoframes.viz.helpers import color_bins_layer
 
 Map([
     color_bins_layer(
-        df_iso,
+        iso_cdf,
         'inccymedhh',
         bins=7,
         palette='pinkyl',
@@ -404,7 +408,7 @@ Map([
         footer='Source: US Census Bureau'
     ),
     size_continuous_layer(
-        df_stores,
+        stores_cdf,
         'revenue',
         size=[10,50],
         range_max=1000000,
@@ -415,7 +419,7 @@ Map([
         description='Reported in 2018'
     ),
     Layer(
-        df_stores,
+        stores_cdf,
         popup=Popup({
             'hover': {
                 'title': 'Store ID',
@@ -449,7 +453,7 @@ from cartoframes.viz import Layout
 Layout([
     Map([
         size_continuous_layer(
-            df_stores,
+            stores_cdf,
             'revenue',
             size=[10,50],
             range_max=1000000,
@@ -459,11 +463,11 @@ Layout([
             title='Annual Revenue',
             popup=False
         ),
-        Layer(df_stores)
+        Layer(stores_cdf)
     ]),
     Map([
         color_bins_layer(
-            df_iso,
+            iso_cdf,
             'inccymedhh',
             bins=7,
             palette='pinkyl',
@@ -471,11 +475,11 @@ Layout([
             title='Median Income',
             popup=False
         ),
-        Layer(df_stores)
+        Layer(stores_cdf)
     ]),
     Map([
         color_bins_layer(
-            df_iso,
+            iso_cdf,
             'popcy',
             bins=7,
             palette='pinkyl',
@@ -483,11 +487,11 @@ Layout([
             title='Total Pop',
             popup=False
         ),
-        Layer(df_stores)
+        Layer(stores_cdf)
     ]),
     Map([
         color_bins_layer(
-            df_iso,
+            iso_cdf,
             'lbfcyempl',
             bins=7,
             palette='pinkyl',
@@ -495,7 +499,7 @@ Layout([
             title='Employed Pop',
             popup=False
         ),
-        Layer(df_stores)
+        Layer(stores_cdf)
     ]),
 ],2,2,viewport={'zoom': 10, 'lat': 40.64, 'lng': -73.92}, map_height=400)
 ```

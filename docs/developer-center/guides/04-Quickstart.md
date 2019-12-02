@@ -100,8 +100,8 @@ Now, we are ready to geocode the dataframe:
 ```python
 from cartoframes.data.services import Geocoding
 
-stores_df, _ = Geocoding().geocode(stores_df, street='address')
-stores_df.head()
+stores_cdf, _ = Geocoding().geocode(stores_df, street='address')
+stores_cdf.head()
 ```
 
 
@@ -184,7 +184,7 @@ You can quickly visualize your geocoded dataframe using the Map and Layer classe
 ```python
 from cartoframes.viz import Map, Layer
 
-Map(Layer(stores_df))
+Map(Layer(stores_cdf))
 ```
 
 <div class="example-map">
@@ -207,7 +207,7 @@ Now, you have a better sense about where the stores are. To continue with your e
 ```python
 from cartoframes.viz.helpers import size_continuous_layer
 
-Map(size_continuous_layer(stores_df, 'revenue', 'Annual Revenue ($)'))
+Map(size_continuous_layer(stores_cdf, 'revenue', 'Annual Revenue ($)'))
 ```
 
 <div class="example-map">
@@ -235,8 +235,8 @@ To do this we will use the Isolines data service:
 ```python
 from cartoframes.data.services import Isolines
 
-isochrones_df, _ = Isolines().isochrones(stores_df, [15*60], mode='walk')
-isochrones_df.head()
+isochrones_cdf, _ = Isolines().isochrones(stores_cdf, [15*60], mode='walk')
+isochrones_cdf.head()
 ```
 <div>
 <table border="1" class="dataframe">
@@ -304,8 +304,8 @@ isochrones_df.head()
 
 ```python
 Map([
-    Layer(isochrones_df),
-    Layer(stores_df)]
+    Layer(isochrones_cdf),
+    Layer(stores_cdf)]
 )
 ```
 
@@ -819,8 +819,8 @@ from cartoframes.data.observatory import Enrichment
 
 variable = Variable.get('POPCY_f5800f44')
 
-isochrones_df = Enrichment().enrich_polygons(isochrones_df, [variable])
-isochrones_df.head()
+isochrones_cdf = Enrichment().enrich_polygons(isochrones_cdf, [variable])
+isochrones_cdf.head()
 ```
 
 <div>
@@ -899,7 +899,7 @@ Great! Let's see the result on a map:
 ```python
 from cartoframes.viz.helpers import color_continuous_layer
 
-Map(color_continuous_layer(isochrones_df, 'sum_POPCY', 'Population'))
+Map(color_continuous_layer(isochrones_cdf, 'sum_POPCY', 'Population'))
 ```
 
 <div class="example-map">
@@ -916,8 +916,8 @@ Map(color_continuous_layer(isochrones_df, 'sum_POPCY', 'Population'))
 We can see that the area of influence of the store on the right, is the one with the highest population. Let's go a bit further and calculate and visualize the average revenue per person.
 
 ```python
-stores_df['rev_pop'] = stores_df['revenue']/isochrones_df['sum_POPCY']
-Map(size_continuous_layer(stores_df, 'rev_pop', 'Revenue per person ($)'))
+stores_cdf['rev_pop'] = stores_cdf['revenue']/isochrones_cdf['sum_POPCY']
+Map(size_continuous_layer(stores_cdf, 'rev_pop', 'Revenue per person ($)'))
 ```
 
 <div class="example-map">
@@ -943,8 +943,8 @@ First, let's add widgets so people are able to see some graphs of the informatio
 
 ```python
 result_map = Map([
-    color_continuous_layer(isochrones_df, 'sum_POPCY', 'Population', stroke_width=0, opacity=0.7),
-    size_continuous_layer(stores_df, 'rev_pop', 'Revenue per person ($)', stroke_color='white', widget=True)
+    color_continuous_layer(isochrones_cdf, 'sum_POPCY', 'Population', stroke_width=0, opacity=0.7),
+    size_continuous_layer(stores_cdf, 'rev_pop', 'Revenue per person ($)', stroke_color='white', widget=True)
 ])
 result_map
 ```
