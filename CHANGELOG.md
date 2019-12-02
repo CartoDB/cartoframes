@@ -6,9 +6,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Add new properties in Catalog Dataset and Geography (#1209)
+- Add IO functions and CartoDataFrame class (#1130, #1245)
+  - IO functions: read_carto, to_carto, has_table, describe_table, 
+    update_table, copy_table, create_table_from_query, delete_table.
+  - CartoDataFrame class: inherit GeoDataFrame class + from_carto, to_carto, viz.
+  - Refactor internals: ContextManager, SourceManager.
+- Add index management in upload/download (#1265)
+  - read_carto: index_col.
+  - to_carto: index, index_label.
+  - Improve CDF geometry methods: add set_geometry_from_xy, add geom decoding in
+    set_geometry (WKB, EWKB, WKB_HEX, EWKB_HEX, WKB_BHEX, EWKB_BHEX, WKT, EWKT).
+- Add geom_col param in upload, enrichment, isolines and visualization (#1270, #1276)
+- Add Enrichment/Catalog reference (#1183, #1216)
+- Add Discovery Data guide (#996)
+- Add Location Data Services guide (#995)
+- Add Data Visualization guide (#1251)
+- Add Quickstart guide (#966)
+- Add Discovery Finantial Data guide (#1263)
+- Add Data Enrichment guide (#997)
+- Guides review (#1266, #1284)
+
 ### Changed
 - Optimize local data visualizations size using gzip compression (#1202)
-- Discover API reference (#1183)
+- Optimize enrichment geometry management (#1130)
+- Validate DO operations (#1228, #1277)
+- Validate Dataset/Geometry access (#1256)
+- Upload Enrichment data via GCS (#1271)
+
+### Fixed
+- Fix Catalog filters (#1229)
+- Fix Enrichment columns type issue (#1243, #1268, #1273)
+
+### Removed
+- Remove data.Dataset class (#1130)
 
 ## [1.0b5] - 2019-11-14
 ### Added
