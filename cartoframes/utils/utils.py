@@ -399,7 +399,7 @@ def timelogger(method):
     def fn(*args, **kw):
         start = time.time()
         result = method(*args, **kw)
-        log.info('%s in %s s', method.__name__, round(time.time() - start, 2))
+        log.debug('%s in %s s', method.__name__, round(time.time() - start, 2))
         return result
 
     return fn
