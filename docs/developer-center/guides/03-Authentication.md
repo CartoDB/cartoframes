@@ -39,7 +39,7 @@ Example `creds.json` file:
 
 - `username`: your CARTO account username
 - `api_key`: API Key of user's CARTO account. If the data to be accessed is **public**, it can be set to `default_public`.
-- `base_url`: It is usually of the form `https://username.carto.com/` for user `username`. On premises installation (and others) have a different URL pattern. (**It's only really needed for on premise or custom installations**).
+- `base_url`: only needed for on premise or custom installations. It is usually of the form `https://username.carto.com/` for user `username`. On premises installation (and others) have a different URL pattern.
 
 ### Conclusion
 You have learnt how to authenticate to CARTO reading your credentials from a file. [Check the reference](/developers/cartoframes/reference/#heading-Auth) to learn more about how to manage your credentials.
