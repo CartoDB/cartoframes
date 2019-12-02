@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Optimize local data visualizations size using gzip compression (#1202)
 - Optimize enrichment geometry management (#1130)
+- Rename CatalogDataset class to Dataset (#1130)
 - Validate DO operations (#1228, #1277)
 - Validate Dataset/Geometry access (#1256)
 - Upload Enrichment data via GCS (#1271)
