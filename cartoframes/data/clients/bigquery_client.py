@@ -32,21 +32,21 @@ def refresh_clients(func):
 
 class BigQueryClient(object):
 
-    def __init__(self, project, credentials):
-        self._project = project
+    def __init__(self, credentials):
         self._credentials = credentials or get_default_credentials()
         self._bucket = 'carto-do-{username}'.format(username=self._credentials.username)
         self.bq_client, self.gcs_client = self._init_clients()
 
     def _init_clients(self):
-        google_credentials = GoogleCredentials(self._credentials.get_do_token())
+        do_credentials = self._credentials.get_do_credentials()
+        google_credentials = GoogleCredentials(do_credentials.access_token)
 
         bq_client = bigquery.Client(
-            project=self._project,
+            project=do_credentials.execution_project,
             credentials=google_credentials)
 
         gcs_client = storage.Client(
-            project=self._project,
+            project=do_credentials.execution_project,
             credentials=google_credentials
         )
 

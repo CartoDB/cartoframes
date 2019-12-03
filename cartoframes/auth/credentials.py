@@ -67,6 +67,7 @@ class Credentials(object):
         self.base_url = base_url or self._base_url_from_username()
         self._session = session
         self._api_key_auth_client = None
+        self.__do_credentials = None
 
         self._norm_credentials()
 
@@ -210,18 +211,21 @@ class Credentials(object):
         except OSError:
             warnings.warn('No credential file found at {}.'.format(path_to_remove))
 
-    def get_do_token(self):
-        """Returns the Data Observatory v2 token"""
+    def get_do_credentials(self):
+        """Returns the Data Observatory v2 credentials"""
 
         do_token_manager = DoTokenManager(self.get_api_key_auth_client())
-        token = do_token_manager.get()
-        if not token:
+        self.__do_credentials = do_token_manager.get()  # don't cache it, every call here should refresh it
+        if not self.__do_credentials:
             raise CartoException('Authentication error: do you have permissions to access Data Observatory v2?')
 
-        return token.access_token
+        return self.__do_credentials
 
     def get_do_user_dataset(self):
-        return self._username.replace('-', '_')
+        if not self.__do_credentials:
+            self.get_do_credentials()
+
+        return self.__do_credentials.dataset or self._username.replace('-', '_')
 
     def get_api_key_auth_client(self):
         if not self._api_key_auth_client:
