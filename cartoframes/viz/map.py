@@ -42,8 +42,11 @@ class Map(object):
           map or not. It is False by default.
         is_static (bool, optional): Default False. If True, instead of showing and interactive
           map, a png image will be displayed.
-        theme (string, optional): Use a different UI theme
-        title (string, optional): Title to label the map
+        theme (string, optional): Use a different UI theme (legends, widgets, popups). Available
+          themes are `dark` and `ligth`. By default, it is `light` for `Positron` and `Voyager`
+          basemaps and `dark` for `DarkMatter` basemap.
+        title (string, optional): Title to label the map. and will be displayed in the
+          default legend.
         description (string, optional): Text that describes the map and will be displayed in the
           default legend after the title.
 
