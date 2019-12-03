@@ -1,3 +1,4 @@
+from google.cloud import bigquery, storage
 import pytest
 import pandas as pd
 from shapely.geometry.point import Point
@@ -19,19 +20,36 @@ try:
 except ImportError:
     from mock import Mock, patch
 
+_WORKING_PROJECT = 'carto-do-customers'
+_PUBLIC_PROJECT = 'carto-do-public-data'
+
+
+class DoCredentials:
+    def __init__(self, public_data_project, user_data_project, access_token='access_token',
+                 execution_project='execution_project', dataset='username', bucket='bucket'):
+        self.access_token = access_token
+        self.execution_project = execution_project
+        self.public_data_project = public_data_project
+        self.user_data_project = user_data_project
+        self.dataset = dataset
+        self.bucket = bucket
+
 
 class TestEnrichmentService(object):
     def setup_method(self):
-        self.original_init_clients = BigQueryClient._init_clients
-        BigQueryClient._init_clients = Mock(return_value=(True, True))
-        self.original_do_dataset = Credentials.get_do_user_dataset
-        Credentials.get_do_user_dataset = Mock(return_value='username')
+        self.original_bigquery_Client = bigquery.Client
+        bigquery.Client = Mock(return_value=True)
+        self.original_storage_Client = storage.Client
+        storage.Client = Mock(return_value=True)
+        self.original_get_do_credentials = Credentials.get_do_credentials
+        Credentials.get_do_credentials = Mock(return_value=DoCredentials(_PUBLIC_PROJECT, _WORKING_PROJECT))
         self.credentials = Credentials('username', 'apikey')
 
     def teardown_method(self):
+        bigquery.Client = self.original_bigquery_Client
+        storage.Client = self.original_storage_Client
+        Credentials.get_do_credentials = self.original_get_do_credentials
         self.credentials = None
-        BigQueryClient._init_clients = self.original_init_clients
-        Credentials.get_do_user_dataset = self.original_do_dataset
 
     def test_prepare_data_no_geom(self):
         geom_column = 'the_geom'

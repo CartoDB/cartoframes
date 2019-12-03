@@ -36,7 +36,11 @@ class BigQueryClient(object):
         self._credentials = credentials or get_default_credentials()
         self.bq_client = None
         self.gcs_client = None
-        self._bucket_name = None
+
+        self.public_data_project = None
+        self.user_data_project = None
+        self.dataset = None
+        self.bucket_name = None
 
         self._init_clients()
 
@@ -53,13 +57,15 @@ class BigQueryClient(object):
             credentials=google_credentials
         )
 
-        self._bucket_name = do_credentials.bucket
+        self.public_data_project = do_credentials.public_data_project
+        self.user_data_project = do_credentials.user_data_project
+        self.dataset = do_credentials.dataset
+        self.bucket_name = do_credentials.bucket
 
     @refresh_clients
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
-
         # Upload file to Google Cloud Storage
-        bucket = self.gcs_client.bucket(self._bucket_name)
+        bucket = self.gcs_client.bucket(self.bucket_name)
         blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
         dataframe.to_csv(tablename, index=False, header=False)
         try:
@@ -75,7 +81,7 @@ class BigQueryClient(object):
         job_config = bigquery.LoadJobConfig()
         job_config.schema = schema_wrapped
         job_config.source_format = bigquery.SourceFormat.CSV
-        uri = 'gs://{bucket}/{tablename}'.format(bucket=self._bucket_name, tablename=tablename)
+        uri = 'gs://{bucket}/{tablename}'.format(bucket=self.bucket_name, tablename=tablename)
 
         job = self.bq_client.load_table_from_uri(
             uri, table_ref, job_config=job_config

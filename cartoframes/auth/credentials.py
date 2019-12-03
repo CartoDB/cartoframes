@@ -221,12 +221,6 @@ class Credentials(object):
 
         return self._do_credentials
 
-    def get_do_user_dataset(self):
-        if not self._do_credentials:
-            self.get_do_credentials()
-
-        return self._do_credentials.dataset
-
     def get_api_key_auth_client(self):
         if not self._api_key_auth_client:
             self._api_key_auth_client = APIKeyAuthClient(

@@ -14,7 +14,6 @@ except ImportError:
     from abc import ABCMeta
     ABC = ABCMeta('ABC', (object,), {'__slots__': ()})
 
-_WORKING_PROJECT = 'carto-do-customers'
 _PLATFORM_BQ = 'bq'
 
 
@@ -120,14 +119,13 @@ class CatalogEntity(ABC):
             raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
         credentials = self._get_credentials(credentials)
-        user_dataset = credentials.get_do_user_dataset()
         bq_client = _get_bigquery_client(credentials)
 
         project, dataset, table = self.id.split('.')
         view = 'view_{}_{}'.format(dataset.replace('-', '_'), table)
 
         try:
-            file_path = bq_client.download_to_file(_WORKING_PROJECT, user_dataset, view)
+            file_path = bq_client.download_to_file(bq_client.user_data_project, bq_client.dataset, view)
         except NotFound:
             raise CartoException('You have not purchased the dataset `{}` yet'.format(self.id))
 

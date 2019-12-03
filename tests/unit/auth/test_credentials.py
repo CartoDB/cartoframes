@@ -145,20 +145,10 @@ class TestCredentials(object):
 
     def test_get_do_credentials(self, mocker):
         access_token = '1234'
-        execution_project = '1234'
-        data_project = '1234'
-        dataset = '1234'
-        bucket = '1234'
-        speed_licensing = True
 
         class Token:
             def __init__(self):
                 self.access_token = access_token
-                self.execution_project = execution_project
-                self.data_project = data_project
-                self.dataset = dataset
-                self.bucket = bucket
-                self.speed_licensing = speed_licensing
 
         mocker.patch('carto.do_token.DoTokenManager.get', return_value=Token())
 
@@ -166,11 +156,6 @@ class TestCredentials(object):
         do_credentials = credentials.get_do_credentials()
 
         assert do_credentials.access_token == access_token
-        assert do_credentials.execution_project == execution_project
-        assert do_credentials.data_project == data_project
-        assert do_credentials.dataset == dataset
-        assert do_credentials.bucket == bucket
-        assert do_credentials.speed_licensing == speed_licensing
 
 
 class TestCredentialsFromFile(object):

@@ -1,13 +1,28 @@
+from google.cloud import bigquery, storage
+
 from cartoframes.auth import Credentials
-from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory import Enrichment, Variable, Dataset, VariableFilter
-from cartoframes.data.observatory.enrichment.enrichment_service import _WORKING_PROJECT, _PUBLIC_PROJECT, \
-    AGGREGATION_DEFAULT, AGGREGATION_NONE, prepare_variables, _GEOJSON_COLUMN
+from cartoframes.data.observatory.enrichment.enrichment_service import AGGREGATION_DEFAULT, AGGREGATION_NONE, \
+    prepare_variables, _GEOJSON_COLUMN
 
 try:
     from unittest.mock import Mock, patch
 except ImportError:
     from mock import Mock, patch
+
+_WORKING_PROJECT = 'carto-do-customers'
+_PUBLIC_PROJECT = 'carto-do-public-data'
+
+
+class DoCredentials:
+    def __init__(self, public_data_project, user_data_project, access_token='access_token',
+                 execution_project='execution_project', dataset='username', bucket='bucket'):
+        self.access_token = access_token
+        self.execution_project = execution_project
+        self.public_data_project = public_data_project
+        self.user_data_project = user_data_project
+        self.dataset = dataset
+        self.bucket = bucket
 
 
 class CatalogEntityWithGeographyMock:
@@ -17,18 +32,21 @@ class CatalogEntityWithGeographyMock:
 
 class TestPolygonEnrichment(object):
     def setup_method(self):
-        self.original_init_clients = BigQueryClient._init_clients
-        BigQueryClient._init_clients = Mock(return_value=(True, True))
-        self.original_do_dataset = Credentials.get_do_user_dataset
-        Credentials.get_do_user_dataset = Mock(return_value='username')
+        self.original_bigquery_Client = bigquery.Client
+        bigquery.Client = Mock(return_value=True)
+        self.original_storage_Client = storage.Client
+        storage.Client = Mock(return_value=True)
+        self.original_get_do_credentials = Credentials.get_do_credentials
+        Credentials.get_do_credentials = Mock(return_value=DoCredentials(_PUBLIC_PROJECT, _WORKING_PROJECT))
         self.username = 'username'
         self.apikey = 'apikey'
         self.credentials = Credentials(self.username, self.apikey)
 
     def teardown_method(self):
+        bigquery.Client = self.original_bigquery_Client
+        storage.Client = self.original_storage_Client
+        Credentials.get_do_credentials = self.original_get_do_credentials
         self.credentials = None
-        BigQueryClient._init_clients = self.original_init_clients
-        Credentials.get_do_user_dataset = self.original_do_dataset
 
     @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
@@ -650,6 +668,10 @@ class TestPolygonEnrichment(object):
         actual = sorted(_clean_queries(actual_queries))
         expected = sorted(_clean_queries(expected_queries))
 
+        print(' ')
+        print(actual)
+        print(' ')
+        print(expected)
         assert actual == expected
 
 
