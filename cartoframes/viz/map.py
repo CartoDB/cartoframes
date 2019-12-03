@@ -41,7 +41,8 @@ class Map(object):
         show_info (bool, optional): Whether to display center and zoom information in the
           map or not. It is False by default.
         is_static (bool, optional): Default False. If True, instead of showing and interactive
-          map, a png image will be displayed.
+          map, a png image will be displayed. Warning: UI components are not properly rendered in
+          the static view, we recommend to remove legends and widgets before rendering a static map.
         theme (string, optional): Use a different UI theme (legends, widgets, popups). Available
           themes are `dark` and `ligth`. By default, it is `light` for `Positron` and `Voyager`
           basemaps and `dark` for `DarkMatter` basemap.
