@@ -28,7 +28,7 @@ class CatalogEntity(ABC):
         datasets, categories, variables, etc.
       - Instance methods to convert to pandas Series, Python dict, compare instances, etc.
 
-    As a rule of thumb you don't use directly this class, it is documented for inheritance purposes.
+    As a rule of thumb you don't directly use this class, it is documented for inheritance purposes.
     """
 
     id_field = 'id'
@@ -81,7 +81,7 @@ class CatalogEntity(ABC):
 
         Args:
             id_list (list):
-                List of sD or slugs of a entities in the catalog to retrieve instances.
+                List of sD or slugs of entities in the catalog to retrieve instances.
 
         :raises DiscoveryException: When no entities found.
         :raises CartoException: If there's a problem when connecting to the catalog.
@@ -164,7 +164,7 @@ class CatalogList(list):
       - Instance methods to convert to get an instance of the entity by ID and to convert the list to a pandas
         DataFrame for further filtering and exploration.
 
-    As a rule of thumb you don't use directly this class, it is documented for inheritance purposes.
+    As a rule of thumb you don't directly use this class, it is documented for inheritance purposes.
     """
 
     def __init__(self, data):

@@ -189,7 +189,7 @@ def get_default_credentials():
     Returns:
 
         :py:class:`cartoframes.auth.Credentials`: Default credentials
-        previously set in current Python session. `None` will returned if
+        previously set in current Python session. `None` will be returned if
         default credentials were not previously set.
 
     """

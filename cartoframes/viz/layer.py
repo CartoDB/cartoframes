@@ -39,7 +39,7 @@ class Layer(object):
             :py:class:`WidgetList` for more information.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             A Credentials instance. This is only used for the simplified Source API.
-            When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+            When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
             these credentials is simply ignored. If not provided the credentials will be
             automatically obtained from the default credentials.
         bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`

@@ -21,7 +21,7 @@ def size_bins_layer(
           Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
         breaks (list<int>, optional): Assign manual class break values.
-        size (int, optiona): Min/max size array in CARTO VL syntax. Default is
+        size (int, optional): Min/max size array in CARTO VL syntax. Default is
           '[2, 14]' for point geometries and '[1, 10]' for lines.
         color (str, optional): Hex value, rgb expression, or other valid
           CARTO VL color. Default is '#EE5D5A' for point geometries and
@@ -42,7 +42,7 @@ def size_bins_layer(
         animate (str, optional): Animate features by date/time or other numeric field.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
           A Credentials instance. This is only used for the simplified Source API.
-          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+          When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
           these credentials is simply ignored. If not provided the credentials will be
           automatically obtained from the default credentials.
 

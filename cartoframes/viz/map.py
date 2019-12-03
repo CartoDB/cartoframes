@@ -275,8 +275,8 @@ class Map(object):
 
         Args:
             name (str): The Kuviz name on CARTO
-            table_name (str, optional): Desired table name for the dataset on CARTO.
-                It is required working with local data (we need to upload it to CARTO)
+            table_name (str, optional): Desired table name for the dataset in CARTO.
+                It is required for working with local data (we need to upload it to CARTO).
                 If name does not conform to SQL naming conventions, it will be
                 'normalized' (e.g., all lower case, adding `_` in place of spaces
                 and other special characters.
@@ -284,8 +284,8 @@ class Map(object):
                 A Credentials instance. If not provided, the credentials will be automatically
                 obtained from the default credentials if available. It is used to create the
                 publication and also to save local data (if exists) into your CARTO account
-            password (str, optional): setting it your Kuviz will be protected by
-                password. When someone will try to show the Kuviz, the password
+            password (str, optional): By setting it, your Kuviz will be protected by
+                password. When someone tries to show the Kuviz, the password
                 will be requested
 
         Example:

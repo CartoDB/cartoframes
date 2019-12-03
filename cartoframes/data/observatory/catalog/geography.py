@@ -21,10 +21,10 @@ class Geography(CatalogEntity):
 
       - Use any public geography to enrich your data with the variables in it by means of the :obj:`Enrichment`
         functions.
-      - Subscribe (:py:attr:`Geography.subscribe`) to any premium geography, to get a license, that grants you
+      - Subscribe (:py:attr:`Geography.subscribe`) to any premium geography to get a license that grants you
         the right to enrich your data with the variables in it.
 
-    See the enrichment guides for more information about geographies, variables and
+    See the enrichment guides for more information about geographies, variables, and
     enrichment functions.
 
     The metadata of a geography allows you to understand the underlying data,
