@@ -8,6 +8,7 @@ import pandas as pd
 
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery, storage, bigquery_storage_v1beta1 as bigquery_storage
+from google.oauth2.credentials import Credentials as GoogleCredentials
 
 from carto.exceptions import CartoException
 from ...auth import get_default_credentials
@@ -40,24 +41,26 @@ class BigQueryClient(object):
         self.bq_client, self.gcs_client, self.bq_storage_client = self._init_clients()
 
     def _init_clients(self):
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/alasarr/.google/cred_sdsc-demo.json'
-
-        # google_credentials = GoogleCredentials(self._credentials.get_do_token())
+        google_credentials = GoogleCredentials(self._credentials.get_do_token())
 
         bq_client = bigquery.Client(
-            project=self._project)
-
-        gcs_client = storage.Client(
-            project=self._project
+            project=self._project,
+            credentials=google_credentials
         )
 
-        bq_storage_client = bigquery_storage.BigQueryStorageClient()
+        gcs_client = storage.Client(
+            project=self._project,
+            credentials=google_credentials
+        )
+
+        bq_storage_client = bigquery_storage.BigQueryStorageClient(
+            credentials=google_credentials
+        )
 
         return bq_client, gcs_client, bq_storage_client
 
     @refresh_clients
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
-
         # Upload file to Google Cloud Storage
         bucket = self.gcs_client.bucket(self._bucket)
         blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
@@ -126,6 +129,7 @@ class BigQueryClient(object):
         return file_path
 
     def to_dataframe(self, job):
+
         try:
             return self._download_job_storage_api(job)
         except Exception:
