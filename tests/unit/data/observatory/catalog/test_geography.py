@@ -225,10 +225,14 @@ class TestGeography(object):
         assert isinstance(sliced_geography, pd.Series)
         assert sliced_geography.equals(geography.to_series())
 
+    @patch.object(Credentials, 'get_do_user_dataset')
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    def test_geography_download(self, mocked_bq_client, get_by_id_mock, get_all_mock, dataset_mock):
+        # mock bq dataset
+        dataset_mock.return_value = 'bq_dataset'
+
         # mock geography
         get_by_id_mock.return_value = test_geography1
         geography = Geography.get(test_geography1.id)
@@ -295,10 +299,15 @@ class TestGeography(object):
         error = 'You are not subscribed to this Geography yet. Please, use the subscribe method first.'
         assert str(e.value) == error
 
+    @patch.object(Credentials, 'get_do_user_dataset')
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_not_subscribed_but_public_download_works(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    def test_geography_not_subscribed_but_public_download_works(self, mocked_bq_client, get_by_id_mock, get_all_mock,
+                                                                dataset_mock):
+        # mock bq dataset
+        dataset_mock.return_value = 'bq_dataset'
+
         # mock dataset
         get_by_id_mock.return_value = test_geography1  # is public
         geography = Geography.get(test_geography1.id)
@@ -317,9 +326,13 @@ class TestGeography(object):
 
         assert response == file_path
 
+    @patch.object(Credentials, 'get_do_user_dataset')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download_raises_without_do_active(self, mocked_bq_client, mocked_repo):
+    def test_geography_download_raises_without_do_active(self, mocked_bq_client, mocked_repo, dataset_mock):
+        # mock bq dataset
+        dataset_mock.return_value = 'bq_dataset'
+
         # mock geography
         mocked_repo.return_value = test_geography1
 

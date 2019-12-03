@@ -248,10 +248,14 @@ class TestDataset(object):
         assert isinstance(sliced_dataset, pd.Series)
         assert sliced_dataset.equals(dataset.to_series())
 
+    @patch.object(Credentials, 'get_do_user_dataset')
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    def test_dataset_download(self, mocked_bq_client, get_by_id_mock, get_all_mock, dataset_mock):
+        # mock bq dataset
+        dataset_mock.return_value = 'bq_dataset'
+
         # mock dataset
         get_by_id_mock.return_value = test_dataset1
         dataset = Dataset.get(test_dataset1.id)
@@ -318,10 +322,15 @@ class TestDataset(object):
         error = 'You are not subscribed to this Dataset yet. Please, use the subscribe method first.'
         assert str(e.value) == error
 
+    @patch.object(Credentials, 'get_do_user_dataset')
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_not_subscribed_but_public_download_works(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    def test_dataset_not_subscribed_but_public_download_works(self, mocked_bq_client, get_by_id_mock, get_all_mock,
+                                                              dataset_mock):
+        # mock bq dataset
+        dataset_mock.return_value = 'bq_dataset'
+
         # mock dataset
         get_by_id_mock.return_value = test_dataset1  # is public
         dataset = Dataset.get(test_dataset1.id)
@@ -340,10 +349,15 @@ class TestDataset(object):
 
         assert response == file_path
 
+    @patch.object(Credentials, 'get_do_user_dataset')
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_download_raises_without_do_active(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    def test_dataset_download_raises_without_do_active(self, mocked_bq_client, get_by_id_mock, get_all_mock,
+                                                       dataset_mock):
+        # mock bq dataset
+        dataset_mock.return_value = 'bq_dataset'
+
         # mock dataset
         get_by_id_mock.return_value = test_dataset1
         dataset = Dataset.get(test_dataset1.id)

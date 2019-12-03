@@ -121,7 +121,7 @@ class CatalogEntity(ABC):
 
         credentials = self._get_credentials(credentials)
         user_dataset = credentials.get_do_user_dataset()
-        bq_client = _get_bigquery_client(_WORKING_PROJECT, credentials)
+        bq_client = _get_bigquery_client(credentials)
 
         project, dataset, table = self.id.split('.')
         view = 'view_{}_{}'.format(dataset.replace('-', '_'), table)
@@ -148,8 +148,8 @@ class CatalogEntity(ABC):
         return _credentials
 
 
-def _get_bigquery_client(project, credentials):
-    return BigQueryClient(project, credentials)
+def _get_bigquery_client(credentials):
+    return BigQueryClient(credentials)
 
 
 def is_slug_value(id_value):

@@ -19,6 +19,8 @@ class TestPolygonEnrichment(object):
     def setup_method(self):
         self.original_init_clients = BigQueryClient._init_clients
         BigQueryClient._init_clients = Mock(return_value=(True, True))
+        self.original_do_dataset = Credentials.get_do_user_dataset
+        Credentials.get_do_user_dataset = Mock(return_value='username')
         self.username = 'username'
         self.apikey = 'apikey'
         self.credentials = Credentials(self.username, self.apikey)
@@ -26,6 +28,7 @@ class TestPolygonEnrichment(object):
     def teardown_method(self):
         self.credentials = None
         BigQueryClient._init_clients = self.original_init_clients
+        Credentials.get_do_user_dataset = self.original_do_dataset
 
     @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')

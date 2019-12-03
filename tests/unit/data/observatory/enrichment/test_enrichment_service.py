@@ -24,11 +24,14 @@ class TestEnrichmentService(object):
     def setup_method(self):
         self.original_init_clients = BigQueryClient._init_clients
         BigQueryClient._init_clients = Mock(return_value=(True, True))
+        self.original_do_dataset = Credentials.get_do_user_dataset
+        Credentials.get_do_user_dataset = Mock(return_value='username')
         self.credentials = Credentials('username', 'apikey')
 
     def teardown_method(self):
         self.credentials = None
         BigQueryClient._init_clients = self.original_init_clients
+        Credentials.get_do_user_dataset = self.original_do_dataset
 
     def test_prepare_data_no_geom(self):
         geom_column = 'the_geom'
