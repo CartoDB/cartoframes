@@ -43,7 +43,7 @@ class ContextManager(object):
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
-    def copy_from(self, cdf, table_name, if_exists, cartodbfy=True, log_enabled=True):
+    def copy_from(self, cdf, table_name, if_exists='fail', cartodbfy=True, log_enabled=True):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
         columns = get_dataframe_columns_info(cdf)
