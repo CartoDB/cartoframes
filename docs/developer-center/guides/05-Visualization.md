@@ -344,7 +344,7 @@ Now you have a proportional symbol map where points are sized by revenue. You wi
 
 Next, let's take a look at how to modify some of the defaults.
 
-Every Visualization Layer has a set of paramaters available to customize the defaults to better suit a given map. A quick way to see which parameters are available for customization in the `size_continuous_layer`, is to run `help(size_continuous_layer)` in a notebook cell.
+Every Visualization Layer has a set of parameters available to customize the defaults to better suit a given map. A quick way to see which parameters are available for customization in the `size_continuous_layer`, is to run `help(size_continuous_layer)` in a notebook cell.
 
 Let's make a few adjustments to make it easier to distinguish and locate the highest and lowest performing stores:
 
