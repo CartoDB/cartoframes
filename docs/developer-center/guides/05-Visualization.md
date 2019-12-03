@@ -196,7 +196,7 @@ As seen in the table summaries above, there are a variety of demographic attribu
 
 To make this information available while exploring each location on the map, you can add each attribute as a [Widget](developers/cartoframes/reference/#heading-Widgets). For this case specifically, you will use [Formula Widgets](/developers/cartoframes/examples/#example-formula-widget) to summarize the demographic variables and a [Category Widget](/developers/cartoframes/examples/#example-category-widget) on the categorical attribute of `id_store`.
 
-To add Widgets, you first need to import the types that you want to use and then, inside of the `iso_cdf` Layer add one widget for each attribute of interest. The Formula Widget accepts different types of aggregations. For this map, we will aggregate each demographic variable using `sum` so the totals update as we zoom, pan and interact with the map. We will also label each Widget appropriately using the `title` parameter.
+To add Widgets, you first need to import the types that you want to use and then, inside of the `iso_cdf` Layer add one widget for each attribute of interest. The Formula Widget accepts different types of aggregations. For this map, you will aggregate each demographic variable using `sum` so the totals update as you zoom, pan and interact with the map. You will also label each Widget appropriately using the `title` parameter.
 
 ```python
 from cartoframes.viz.widgets import formula_widget, category_widget
@@ -292,7 +292,7 @@ Now, as you explore the map and summarize demographics, it is much easier to rel
 
 At this point, you have some really useful information available on the map but only coming from the isochrone Layer. Sizing the store points by the attribute `revenue` will provide a way to visually locate which stores are performing better than others. A quick way to visualize numeric or categorical attributes during the data exploration process is to take advantage of [Visualization Layers](/developers/cartoframes/reference/#heading-Helpers).
 
-To size the store points proportionate to their revenue, we'll use the [`size_continuous_layer`](/developers/cartoframes/examples/#example-size-continuous-layer):
+To size the store points proportionate to their revenue, you'll use the [`size_continuous_layer`](/developers/cartoframes/examples/#example-size-continuous-layer):
 
 ```python
 from cartoframes.viz.helpers import size_continuous_layer
@@ -350,7 +350,7 @@ Let's make a few adjustments to make it easier to distinguish and locate the hig
 
 * The continuous point size reads between a minimum and maximum range of symbol sizes. Since the smallest revenue value on this map is hard to see, set `size=[10,50]`
 * By default both the Legend and Popup titles are set to the attribute being visualized. To give them more descriptive titles, set `title=Annual Revenue ($)`
-* In order to see and interact with the distribution of revenue values, we can also add a Histogram Widget (turned off by default) by setting `widget=True`
+* In order to see and interact with the distribution of revenue values, you can also add a Histogram Widget (turned off by default) by setting `widget=True`
 
 ```python
 size_continuous_layer(
