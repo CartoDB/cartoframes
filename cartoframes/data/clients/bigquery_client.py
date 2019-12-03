@@ -132,7 +132,8 @@ class BigQueryClient(object):
 
         try:
             return self._download_job_storage_api(job)
-        except Exception:
+        except Exception as e:
+            log.error(str(e))
             log.warning('Cannot download storage API, fallback to standard')
             return job.to_dataframe()
 
