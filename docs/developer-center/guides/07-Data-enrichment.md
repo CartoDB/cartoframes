@@ -6,7 +6,7 @@ We define enrichment as the process of augmenting your data with new variables b
 
 "*Enrichment is the process of adding variables to a geometry, which we call the target, (point, line, polygon…) from a spatial (polygon) dataset, which we call the source*"
 
-We recommend you check out the [CARTOframes quickstart](/developers/cartoframes/guides/Quickstart/) since we'll use some of the DataFrames generated in the example and the [Data Discovery guide](/developers/cartoframes/guides/Data-discovery) to learn how to explore the Data Observatory catalog to find variables of interest for your analyses.
+We recommend you check out the [CARTOframes quickstart](/developers/cartoframes/guides/Quickstart/) since this guide uses some of the generated DataFrames as well as the [Data Discovery guide](/developers/cartoframes/guides/Data-discovery) to learn about exploring the Data Observatory catalog to find variables of interest for your analyses.
 
 ### Choose variables to enrich from the Data Observatory catalog
 
