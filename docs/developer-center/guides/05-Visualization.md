@@ -375,7 +375,7 @@ And now you have a map to visually and interactively explore the relationship be
     </iframe>
 </div>
 
-## Insights
+### Insights
 
 The map above provides a way to explore the data both visually and interactively in different ways:
 
@@ -387,7 +387,7 @@ The map above provides a way to explore the data both visually and interactively
 
 Use the map to see if you can find the highest and lowest performing stores and summarize the demographic characteristics of each one!
 
-## Present Insights
+#### Present Insights
 
 Now that you have gained insight into the relationship between revenue and demographics, let's say that the most influential factor of how well a store performed was median income and you want to create a map to show that particular relationship.
 
@@ -441,7 +441,7 @@ Map([
     </iframe>
 </div>
 
-### Compare Variables with a Layout
+#### Compare Variables with a Layout
 
 If you want to compare store revenue with multiple demographic variables, you can create a [Layout](https://carto.com/developers/cartoframes/examples/#example-custom-layout) with multiple maps.
 
