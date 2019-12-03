@@ -12,13 +12,12 @@ from ...io.dataset_info import DatasetInfo
 from ...auth.defaults import get_default_credentials
 
 from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
-from ...utils.columns import Column, DataframeColumnsInfo, obtain_converters, date_columns_names, normalize_name
+from ...utils.columns import Column, get_dataframe_columns_info, obtain_converters, \
+                             date_columns_names, normalize_name
 
 from ... import __version__
 
 DEFAULT_RETRY_TIMES = 3
-
-# TODO: refactor
 
 
 class ContextManager(object):
@@ -40,26 +39,26 @@ class ContextManager(object):
 
     def copy_to(self, source, schema, limit=None, retry_times=DEFAULT_RETRY_TIMES):
         query = self.compute_query(source, schema)
-        columns = self._get_columns(query)
+        columns = self._get_query_columns_info(query)
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
     def copy_from(self, cdf, table_name, if_exists, cartodbfy=True, log_enabled=True):
-        dataframe_columns_info = DataframeColumnsInfo(cdf)
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
+        columns = get_dataframe_columns_info(cdf)
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
             if log_enabled:
                 print('Debug: creating table "{}"'.format(table_name))
-            self._create_table_from_columns(table_name, dataframe_columns_info.columns, schema, cartodbfy)
+            self._create_table_from_columns(table_name, columns, schema, cartodbfy)
         elif if_exists == 'fail':
             raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
                             'Please choose a different `table_name` or use '
                             'if_exists="replace" to overwrite it'.format(
                                 table_name=table_name, schema=schema))
 
-        return self._copy_from(cdf, table_name, dataframe_columns_info)
+        return self._copy_from(cdf, table_name, columns)
 
     def create_table_from_query(self, table_name, query, if_exists, cartodbfy=True, log_enabled=True):
         schema = self.get_schema()
@@ -138,7 +137,7 @@ class ContextManager(object):
 
     def get_column_names(self, source, schema=None, exclude=None):
         query = self.compute_query(source, schema)
-        columns = [c.name for c in self._get_columns(query)]
+        columns = [c.name for c in self._get_query_columns_info(query)]
 
         if exclude and isinstance(exclude, list):
             columns = list(set(columns) - set(exclude))
@@ -203,7 +202,7 @@ class ContextManager(object):
         except CartoException:
             return False
 
-    def _get_columns(self, query):
+    def _get_query_columns_info(self, query):
         query = 'SELECT * FROM ({}) _q LIMIT 0'.format(query)
         table_info = self.execute_query(query)
         return Column.from_sql_api_fields(table_info['fields'])
@@ -251,14 +250,14 @@ class ContextManager(object):
 
         return df
 
-    def _copy_from(self, dataframe, table_name, dataframe_columns_info):
+    def _copy_from(self, dataframe, table_name, columns):
         query = """
             COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '{null}');
         """.format(
             table_name=table_name, null=PG_NULL,
-            columns=','.join(column.dbname for column in dataframe_columns_info.columns)).strip()
+            columns=','.join(column.dbname for column in columns)).strip()
 
-        data = _compute_copy_data(dataframe, dataframe_columns_info)
+        data = _compute_copy_data(dataframe, columns)
 
         self.copy_client.copyfrom(query, data)
 
@@ -302,10 +301,10 @@ def _create_auth_client(credentials, public=False):
     )
 
 
-def _compute_copy_data(df, dataframe_columns_info):
+def _compute_copy_data(df, columns):
     for index, _ in df.iterrows():
         row_data = []
-        for column in dataframe_columns_info.columns:
+        for column in columns:
             val = df.at[index, column.name]
 
             if column.is_geom and hasattr(val, 'wkt'):
