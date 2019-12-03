@@ -93,6 +93,9 @@ class Column(object):
         return value
 
 
+ColumnInfo = namedtuple('ColumnInfo', ['name', 'dbname', 'dbtype', 'is_geom'])
+
+
 def _extract_pgtype(fields):
     if 'pgtype' in fields:
         return fields['pgtype']
@@ -126,9 +129,6 @@ def _get_geometry_type(df):
 
 def _is_valid_column(name):
     return name.lower() not in Column.FORBIDDEN_COLUMN_NAMES
-
-
-ColumnInfo = namedtuple('ColumnInfo', ['name', 'dbname', 'dbtype', 'is_geom'])
 
 
 def _compute_column_info(name, dtype=None, geom_type=None):
