@@ -21,7 +21,7 @@ def refresh_clients(func):
         try:
             return func(self, *args, **kwargs)
         except RefreshError:
-            self.bq_client, self.gcs_client = self._init_clients()
+            self._init_clients()
             try:
                 return func(self, *args, **kwargs)
             except RefreshError:
@@ -34,29 +34,32 @@ class BigQueryClient(object):
 
     def __init__(self, credentials):
         self._credentials = credentials or get_default_credentials()
-        self._bucket = 'carto-do-{username}'.format(username=self._credentials.username)
-        self.bq_client, self.gcs_client = self._init_clients()
+        self.bq_client = None
+        self.gcs_client = None
+        self._bucket_name = None
+
+        self._init_clients()
 
     def _init_clients(self):
         do_credentials = self._credentials.get_do_credentials()
         google_credentials = GoogleCredentials(do_credentials.access_token)
 
-        bq_client = bigquery.Client(
+        self.bq_client = bigquery.Client(
             project=do_credentials.execution_project,
             credentials=google_credentials)
 
-        gcs_client = storage.Client(
+        self.gcs_client = storage.Client(
             project=do_credentials.execution_project,
             credentials=google_credentials
         )
 
-        return bq_client, gcs_client
+        self._bucket_name = do_credentials.bucket
 
     @refresh_clients
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
 
         # Upload file to Google Cloud Storage
-        bucket = self.gcs_client.bucket(self._bucket)
+        bucket = self.gcs_client.bucket(self._bucket_name)
         blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
         dataframe.to_csv(tablename, index=False, header=False)
         try:
@@ -72,7 +75,7 @@ class BigQueryClient(object):
         job_config = bigquery.LoadJobConfig()
         job_config.schema = schema_wrapped
         job_config.source_format = bigquery.SourceFormat.CSV
-        uri = 'gs://{bucket}/{tablename}'.format(bucket=self._bucket, tablename=tablename)
+        uri = 'gs://{bucket}/{tablename}'.format(bucket=self._bucket_name, tablename=tablename)
 
         job = self.bq_client.load_table_from_uri(
             uri, table_ref, job_config=job_config
