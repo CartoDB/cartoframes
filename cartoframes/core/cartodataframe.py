@@ -33,7 +33,21 @@ class CartoDataFrame(GeoDataFrame):
         """
         Alternate constructor to create a CartoDataFrame from a table or SQL query in CARTO.
         It is needed to set up the :py:class:`cartoframes.auth.Credentials`.
-        Equivalent to :py:meth:`read_carto <cartoframes.io.carto.read_carto>`.
+        Equivalent to :py:meth:`cartoframes.read_carto <cartoframes.io.carto.read_carto>`.
+
+        Args:
+            source (str): table name or SQL query.
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                instance of Credentials (username, api_key, etc).
+            limit (int, optional):
+                The number of rows to download. Default is to download all rows.
+            retry_times (int, optional):
+                Number of time to retry the download in case it fails. Default is 3.
+            schema (str, optional): prefix of the table. By default, it gets the
+                `current_schema()` using the credentials.
+            index_col (str, optional): name of the column to be loaded as index.
+                It can be used also to set the index name.
+            decode_geom (bool, optional): convert the "the_geom" column into a valid geometry column.
 
         Examples:
 
@@ -117,7 +131,8 @@ class CartoDataFrame(GeoDataFrame):
                             'coordinates': [125.6, 10.1]
                         },
                     'properties': {
-                    'name': 'Dinagat Islands'
+                        'name': 'Dinagat Islands'
+                    }
                 }])
         """
         result = GeoDataFrame.from_features(features, **kwargs)
@@ -128,7 +143,17 @@ class CartoDataFrame(GeoDataFrame):
         """
         Upload a CartoDataFrame to CARTO. It is needed to set up the
         :py:class:`cartoframes.auth.Credentials`.
-        Equivalent to :py:meth:`to_carto <cartoframes.io.carto.to_carto>`.
+        Equivalent to :py:meth:`cartoframes.to_carto <cartoframes.io.carto.to_carto>`.
+
+        Args:
+            table_name (str): name of the table to upload the data.
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                instance of Credentials (username, api_key, etc).
+            if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
+            geom_col (str, optional): name of the geometry column of the dataframe.
+            index (bool, optional): write the index in the table. Default is False.
+            index_label (str, optional): name of the index column in the table. By default it
+                uses the name of the index from the dataframe.
 
         Examples:
 
@@ -160,6 +185,35 @@ class CartoDataFrame(GeoDataFrame):
         Creates a quick :py:class:`Map <cartoframes.viz.Map>` visualization. The parameters
         are passed directly to the Layer (style, popup, legend, widgets, etc.).
 
+        Args:
+            style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
+                The style of the visualization.
+            popup (dict or :py:class:`Popup <cartoframes.viz.Popup>`, optional):
+                This option adds interactivity (click and hover) to a layer to show popups.
+                The columns to be shown must be added in a list format for each event.
+                See :py:class:`Popup <cartoframes.viz.Popup>` for more information.
+            legend (dict or :py:class:`Legend <cartoframes.viz.Legend>`, optional):
+                The legend definition for a layer. It contains the information
+                to show a legend "type" (``color-category``, ``color-bins``,
+                ``color-continuous``), "prop" (color) and also text information:
+                "title", "description" and "footer". See :py:class:`Legend
+                <cartoframes.viz.Legend>` for more information.
+            widgets (dict, list, or :py:class:`WidgetList <cartoframes.viz.WidgetList>`, optional):
+                Widget or list of widgets for a layer. It contains the information to display
+                different widget types on the top right of the map. See
+                :py:class:`WidgetList` for more information.
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                A Credentials instance. This is only used for the simplified Source API.
+                When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
+                these credentials is simply ignored. If not provided the credentials will be
+                automatically obtained from the default credentials.
+            bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
+                keys, or an array of floats in the following structure: [[west,
+                south], [east, north]]. If not provided the bounds will be automatically
+                calculated to fit all features.
+            geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
+
+
         Examples:
 
             .. code::
@@ -175,21 +229,45 @@ class CartoDataFrame(GeoDataFrame):
 
     def has_geometry(self):
         """
-        Method to check if the CartoDataFrame contains a valid geometry column or not.
+        Method to check if the CartoDataFrame contains a valid geometry column.
         If there is no valid geometry, you can use the following methods:
-        - set_geometry: to create a decoded geometry column from any raw geometry column.
-        - set_geometry_from_xy: to create a geometry column from `longitude` and `latitude` columns.
+
+            - `set_geometry`: to create a decoded geometry column from any raw geometry column.
+            - `set_geometry_from_xy`: to create a geometry column from `longitude` and `latitude` columns.
         """
         return self._geometry_column_name in self
 
     def set_geometry(self, col, drop=False, inplace=False, crs=None):
+        """
+        Set the CartoDataFrame geometry using either an existing column or the specified input.
+        By default yields a new object. The original geometry column is replaced with the input.
+        It detects the geometry encoding and it decodes the column if required. Supported geometry
+        encodings are:
+
+            - `WKB` (Bytes, Hexadecimal String, Hexadecimal Bytestring)
+            - `Extended WKB` (Bytes, Hexadecimal String, Hexadecimal Bytestring)
+            - `WKT` (String)
+            - `Extended WKT` (String)
+
+        Args:
+            col (column label or array): Name of the column or column containing the geometry.
+            drop (boolean, default False): Delete the column to be used as the new geometry.
+            inplace (boolean, default False): Modify the CartoDataFrame in place (do not create a new object).
+            crs (str/result of fion.get_crs, optional): Coordinate system to use. If passed, overrides both
+                DataFrame and col's crs. Otherwise, tries to get crs from passed col values or DataFrame.
+
+        Examples:
+
+            .. code::
+
+                cdf.set_geometry('the_geom', drop=True, inplace=True)
+        """
         if inplace:
             frame = self
         else:
             frame = self.copy()
 
-        # Decode geometry:
-        #   WKB, EWKB, WKB_HEX, EWKB_HEX, WKB_BHEX, EWKB_BHEX, WKT, EWKT
+        # Decode geometry
         if isinstance(col, str) and col in frame:
             frame[col] = decode_geometry_column(frame[col])
         else:
@@ -202,6 +280,24 @@ class CartoDataFrame(GeoDataFrame):
             return frame
 
     def set_geometry_from_xy(self, x, y, drop=False, inplace=False, crs=None):
+        """
+        Set the CartoDataFrame geometry using either existing lng/lat columns or the specified inputs.
+        By default yields a new object. The original geometry column is replaced with the new one.
+
+        Args:
+            x (column label or array): Name of the x (longitude) column or column containing the x coordinates.
+            y (column label or array): Name of the y (latitude) column or column containing the y coordinates.
+            drop (boolean, default False): Delete the columns to be used to generate the new geometry.
+            inplace (boolean, default False): Modify the CartoDataFrame in place (do not create a new object).
+            crs (str/result of fion.get_crs, optional): Coordinate system to use. If passed, overrides both
+                DataFrame and col's crs. Otherwise, tries to get crs from passed col values or DataFrame.
+
+        Examples:
+
+            .. code::
+
+                cdf.set_geometry_from_xy('lng', 'lat', drop=True, inplace=True)
+        """
         if isinstance(x, str) and x in self and isinstance(y, str) and y in self:
             x_col = self[x]
             y_col = self[y]
