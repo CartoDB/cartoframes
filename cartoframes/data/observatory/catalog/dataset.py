@@ -252,6 +252,7 @@ class Dataset(CatalogEntity):
             return data
 
         print('Summary information is not available')
+        return None
 
     def head(self):
         """Returns a sample of the 10 first rows of the dataset data.
@@ -268,6 +269,7 @@ class Dataset(CatalogEntity):
             return head(self.__class__, data)
 
         print('Summary information is not available')
+        return None
 
     def tail(self):
         """"Returns the last ten rows of the dataset"
@@ -284,6 +286,7 @@ class Dataset(CatalogEntity):
             return tail(self.__class__, data)
 
         print('Summary information is not available')
+        return None
 
     def counts(self):
         """Returns a summary of different counts over the actual dataset data.
@@ -307,6 +310,7 @@ class Dataset(CatalogEntity):
             return counts(data)
 
         print('Summary information is not available')
+        return None
 
     def fields_by_type(self):
         """Returns a summary of the number of columns per data type in the dataset.
@@ -329,6 +333,7 @@ class Dataset(CatalogEntity):
             return fields_by_type(data)
 
         print('Summary information is not available')
+        return None
 
     def geom_coverage(self):
         """Shows a map to visualize the geographical coverage of the dataset.
