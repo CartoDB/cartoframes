@@ -484,4 +484,4 @@ class Dataset(CatalogEntity):
 
         datasets = Dataset.get_all({}, _credentials)
 
-        return self in datasets
+        return datasets is not None and self in datasets
