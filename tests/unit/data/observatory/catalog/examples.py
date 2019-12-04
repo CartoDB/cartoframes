@@ -106,7 +106,7 @@ db_dataset2 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'summary_json': None,
+    'summary_json': [['key', 'value']],
     'available_in': []
 }
 test_dataset1 = Dataset(db_dataset1)
@@ -137,7 +137,7 @@ db_variable2 = {
     'agg_method': '',
     'variable_group_id': 'vargroup1',
     'starred': False,
-    'summary_json': None
+    'summary_json': [{'key': 'value'}]
 }
 test_variable1 = Variable(db_variable1)
 test_variable2 = Variable(db_variable2)

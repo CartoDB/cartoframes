@@ -246,13 +246,7 @@ class Dataset(CatalogEntity):
     def summary(self):
         """JSON object with extra metadata that summarizes different properties of the dataset content."""
 
-        data = self.data['summary_json']
-
-        if data:
-            return data
-
-        print('Summary information is not available')
-        return None
+        return self._get_summary_data()
 
     def head(self):
         """Returns a sample of the 10 first rows of the dataset data.
@@ -263,13 +257,8 @@ class Dataset(CatalogEntity):
             pandas.DataFrame
         """
 
-        data = self.data['summary_json']
-
-        if data:
-            return head(self.__class__, data)
-
-        print('Summary information is not available')
-        return None
+        data = self._get_summary_data()
+        return head(self.__class__, data) if data else None
 
     def tail(self):
         """"Returns the last ten rows of the dataset"
@@ -280,13 +269,8 @@ class Dataset(CatalogEntity):
             pandas.DataFrame
         """
 
-        data = self.data['summary_json']
-
-        if data:
-            return tail(self.__class__, data)
-
-        print('Summary information is not available')
-        return None
+        data = self._get_summary_data()
+        return tail(self.__class__, data) if data else None
 
     def counts(self):
         """Returns a summary of different counts over the actual dataset data.
@@ -304,13 +288,8 @@ class Dataset(CatalogEntity):
                 # null_cells_percent:   percent of cells with null value in the dataset
         """
 
-        data = self.data['summary_json']
-
-        if data:
-            return counts(data)
-
-        print('Summary information is not available')
-        return None
+        data = self._get_summary_data()
+        return counts(data) if data else None
 
     def fields_by_type(self):
         """Returns a summary of the number of columns per data type in the dataset.
@@ -327,13 +306,8 @@ class Dataset(CatalogEntity):
                 # integer      number of columns with type integer in the dataset
         """
 
-        data = self.data['summary_json']
-
-        if data:
-            return fields_by_type(data)
-
-        print('Summary information is not available')
-        return None
+        data = self._get_summary_data()
+        return fields_by_type(self.__class__, data) if data else None
 
     def geom_coverage(self):
         """Shows a map to visualize the geographical coverage of the dataset.
@@ -513,3 +487,12 @@ class Dataset(CatalogEntity):
         datasets = Dataset.get_all({}, _credentials)
 
         return self in datasets
+
+    def _get_summary_data(self):
+        data = self.data.get('summary_json')
+
+        if data:
+            return data
+        else:
+            print('Summary information is not available')
+            return None

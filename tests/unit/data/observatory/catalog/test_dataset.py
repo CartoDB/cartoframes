@@ -173,6 +173,16 @@ class TestDataset(object):
         # Then
         assert dataset_str == 'Dataset({dict_str})'.format(dict_str=str(db_dataset1))
 
+    def test_summary_values(self):
+        # Given
+        dataset = Dataset(db_dataset2)
+
+        # When
+        summary = dataset.summary
+
+        # Then
+        assert summary == dataset.data['summary_json']
+
     @patch.object(DatasetRepository, 'get_all')
     def test_get_all_datasets(self, mocked_repo):
         # Given
