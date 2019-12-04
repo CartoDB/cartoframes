@@ -8,7 +8,7 @@ class BigQueryClientMock(object):
         self.dataset = 'username'
         self.bucket_name = 'bucket_name'
 
-    def download_to_file(self, _1, _2, _3):
+    def download_to_file(self, _1, _2, _3, _4):
         if isinstance(self.response, Exception):
             raise self.response
         else:

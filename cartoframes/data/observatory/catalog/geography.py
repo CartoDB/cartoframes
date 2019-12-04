@@ -200,7 +200,7 @@ class Geography(CatalogEntity):
 
         return cls._entity_repo.get_all(filters, credentials)
 
-    def download(self, credentials=None):
+    def download(self, credentials=None, file_path=None):
         """Download geography data as a local file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
@@ -208,6 +208,7 @@ class Geography(CatalogEntity):
         Check the subscription guides for more information.
 
         Args:
+            file_path (str, optional): the file path where save the dataset
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
@@ -223,7 +224,7 @@ class Geography(CatalogEntity):
             raise CartoException('You are not subscribed to this Geography yet. Please, use the subscribe method '
                                  'first.')
 
-        return self._download(credentials)
+        return self._download(credentials, file_path)
 
     def subscribe(self, credentials=None):
         """Subscribe to a Geography. You need Data Observatory enabled in your CARTO account, please contact us at

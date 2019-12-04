@@ -114,7 +114,7 @@ class CatalogEntity(ABC):
 
         return self.id
 
-    def _download(self, credentials=None):
+    def _download(self, credentials=None, file_path=None):
         if not self._is_available_in('bq'):
             raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
@@ -130,7 +130,7 @@ class CatalogEntity(ABC):
         project, dataset, table = full_remote_table_name.split('.')
 
         try:
-            file_path = bq_client.download_to_file(project, dataset, table)
+            file_path = bq_client.download_to_file(project, dataset, table, file_path)
         except NotFound:
             raise CartoException('You have not purchased the dataset `{}` yet'.format(self.id))
 
