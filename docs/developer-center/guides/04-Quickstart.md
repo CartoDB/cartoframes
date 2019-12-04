@@ -929,7 +929,7 @@ To learn more about discovering the data you want, check out the [data discovery
 
 ### Save your data
 
-The `CartoDataFrame` structure allows you to save your data directly in your CARTO account, so you can use it in different notebooks directly. Once it's saved, you can download it whenever you want, but also use it in your visualizations using the `table_name` you've given to the dataset. For example, let's save the `stores_cdf` under the name of `starbucks_stores_analysis`:
+The `CartoDataFrame` class allows you to save your data directly to your CARTO account, so you can use it in different notebooks or Python scripts directly. Once it's saved, you can download it whenever you want, but also use it in your visualizations using the `table_name` you've given to the dataset. For example, let's save the CartoDataFrame `stores_cdf` under the name of `starbucks_stores_analysis` in CARTO:
 
 ```python
 stores_cdf.to_carto('starbucks_stores_analysis')
