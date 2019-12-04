@@ -41,8 +41,9 @@ class Catalog(object):
         Let's say you explore a `dataset` with demographic data for the whole US at the Census tract level.
         The variables give you information about the actual columns you have available, such as: total_population,
         total_males, etc.
-        On the other hand, you can use `Variable` instances or lists of :py:attr:`Variable.id` or
-        :py:attr:`Dataset.slug` to enrich your own data.
+        On the other hand, you can use lists of `Variable` instances, :py:attr:`Variable.id`, or
+        :py:attr:`Variable.slug` to enrich your own data.
+
 
     Every `Dataset` is related to a `Geography`. You can have for example, demographics data at the Census
     tract, block groups or blocks levels.
