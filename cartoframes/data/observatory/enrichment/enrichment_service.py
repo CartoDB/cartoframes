@@ -186,10 +186,10 @@ class EnrichmentService(object):
     def _get_points_enrichment_sql(self, temp_table_name, variables, filters):
         tables_metadata = self._get_tables_metadata(variables).items()
 
-        return [self._build_points_query(table, metadata, temp_table_name, filters)
-                for table, metadata in tables_metadata]
+        return [self._build_points_query(metadata, temp_table_name, filters)
+                for _, metadata in tables_metadata]
 
-    def _build_points_query(self, table, metadata, temp_table_name, filters):
+    def _build_points_query(self, metadata, temp_table_name, filters):
         variables = ['enrichment_table.{}'.format(variable.column_name) for variable in metadata['variables']]
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
@@ -215,17 +215,16 @@ class EnrichmentService(object):
             enrichment_geo_table=enrichment_geo_table,
             enrichment_id=self.enrichment_id,
             where=self._build_where_clausule(filters),
-            data_table=data_table,
-            table=table
+            data_table=data_table
         )
 
     def _get_polygon_enrichment_sql(self, temp_table_name, variables, filters, aggregation):
         tables_metadata = self._get_tables_metadata(variables).items()
 
-        return [self._build_polygons_query(table, metadata, temp_table_name, filters, aggregation)
-                for table, metadata in tables_metadata]
+        return [self._build_polygons_query(metadata, temp_table_name, filters, aggregation)
+                for _, metadata in tables_metadata]
 
-    def _build_polygons_query(self, table, metadata, temp_table_name, filters, aggregation):
+    def _build_polygons_query(self, metadata, temp_table_name, filters, aggregation):
         variables = metadata['variables']
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
