@@ -35,8 +35,8 @@
             "file": "upload_cdf_to_carto",
             "path": "data_workflows"
         }, {
-            "title": "Change Dataset Privacy",
-            "desc": "Change dataset privacy",
+            "title": "Change Table Privacy",
+            "desc": "Change table privacy",
             "file": "change_dataset_privacy",
             "path": "data_workflows"
         }]
