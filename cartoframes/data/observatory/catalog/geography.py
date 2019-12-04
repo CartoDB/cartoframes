@@ -293,4 +293,4 @@ class Geography(CatalogEntity):
 
         geographies = Geography.get_all({}, _credentials)
 
-        return self in geographies
+        return geographies is not None and self in geographies
