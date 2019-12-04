@@ -246,7 +246,12 @@ class Dataset(CatalogEntity):
     def summary(self):
         """JSON object with extra metadata that summarizes different properties of the dataset content."""
 
-        return self.data['summary_json']
+        data = self.data['summary_json']
+
+        if data:
+            return data
+
+        print('Summary information is not available')
 
     def head(self):
         """Returns a sample of the 10 first rows of the dataset data.
@@ -258,7 +263,11 @@ class Dataset(CatalogEntity):
         """
 
         data = self.data['summary_json']
-        return head(self.__class__, data)
+
+        if data:
+            return head(self.__class__, data)
+
+        print('Summary information is not available')
 
     def tail(self):
         """"Returns the last ten rows of the dataset"
@@ -268,8 +277,13 @@ class Dataset(CatalogEntity):
         Returns:
             pandas.DataFrame
         """
+
         data = self.data['summary_json']
-        return tail(self.__class__, data)
+
+        if data:
+            return tail(self.__class__, data)
+
+        print('Summary information is not available')
 
     def counts(self):
         """Returns a summary of different counts over the actual dataset data.
@@ -288,7 +302,11 @@ class Dataset(CatalogEntity):
         """
 
         data = self.data['summary_json']
-        return counts(data)
+
+        if data:
+            return counts(data)
+
+        print('Summary information is not available')
 
     def fields_by_type(self):
         """Returns a summary of the number of columns per data type in the dataset.
@@ -304,8 +322,13 @@ class Dataset(CatalogEntity):
                 # string       number of columns with type string in the dataset
                 # integer      number of columns with type integer in the dataset
         """
+
         data = self.data['summary_json']
-        return fields_by_type(data)
+
+        if data:
+            return fields_by_type(data)
+
+        print('Summary information is not available')
 
     def geom_coverage(self):
         """Shows a map to visualize the geographical coverage of the dataset.
