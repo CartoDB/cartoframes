@@ -121,7 +121,7 @@ class CatalogEntity(ABC):
         credentials = self._get_credentials(credentials)
         bq_client = _get_bigquery_client(credentials)
 
-        full_remote_table_name = self._get_full_remote_table_name(
+        full_remote_table_name = self._get_remote_full_table_name(
             bq_client.user_data_project,
             bq_client.dataset,
             bq_client.public_data_project
