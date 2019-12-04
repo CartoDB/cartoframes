@@ -43,23 +43,23 @@
     }, {
         "title": "Data Enrichment",
         "samples": [{
-            "title": "Points Enrichment - Public Dataset",
-            "desc": "Points Enrichment - Public Dataset",
+            "title": "Enrich Points - Public Dataset",
+            "desc": "Enrich Points - Public Dataset",
             "file": "points_enrichment_public_dataset",
             "path": "data_enrichment"
         }, {
-            "title": "Polygons Enrichment - Public Dataset",
-            "desc": "Polygons Enrichment - Public Dataset",
+            "title": "Enrich Polygons - Public Dataset",
+            "desc": "Enrich Polygons - Public Dataset",
             "file": "polygons_enrichment_public_dataset",
             "path": "data_enrichment"
         }, {
-            "title": "Points Enrichment - Private Dataset",
-            "desc": "Points Enrichment - Private Dataset",
+            "title": "Enrich Points - Private Dataset",
+            "desc": "Enrich Points - Private Dataset",
             "file": "points_enrichment_private_dataset",
             "path": "data_enrichment"
         }, {
-            "title": "Polygons Enrichment - Private Dataset",
-            "desc": "Polygons Enrichment - Private Dataset",
+            "title": "Enrich Polygons - Private Dataset",
+            "desc": "Enrich Polygons - Private Dataset",
             "file": "polygons_enrichment_private_dataset",
             "path": "data_enrichment"
         }, {
