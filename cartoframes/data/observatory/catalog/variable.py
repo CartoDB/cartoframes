@@ -14,7 +14,7 @@ class Variable(CatalogEntity):
     """This class represents a :py:class:`Variable <cartoframes.data.observatory.Variable>`
     of datasets in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`.
 
-    Variables contain column names, description, data type, aggregation method and some other metadata that is
+    Variables contain column names, description, data type, aggregation method, and some other metadata that is
     useful to understand the underlying data inside a :obj:`Dataset`
 
     Examples:
@@ -165,7 +165,7 @@ class Variable(CatalogEntity):
 
             .. code::
 
-                # all               total number of valiues
+                # all               total number of values
                 # null              total number of null values
                 # zero              number of zero-valued entries
                 # extreme           number of values 3stdev outside the interquartile range

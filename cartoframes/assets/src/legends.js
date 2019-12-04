@@ -1,21 +1,6 @@
 import { format } from './utils';
 
-export function createDefaultLegend(layers) {
-  const defaultLegendContainer = document.getElementById('default-legend-container');
-  defaultLegendContainer.style.display = 'none';
-
-  AsBridge.VL.Legends.layersLegend(
-    '#default-legend',
-    layers,
-    {
-      onLoad: () => defaultLegendContainer.style.display = 'unset'
-    }
-  );
-}
-
 export function createLegend(layer, legendData, layerIndex, mapIndex=0) {
-  const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend`);
-  
   if (legendData.length) {
     legendData.forEach((legend, legendIndex) => _createLegend(layer, legend, layerIndex, legendIndex, mapIndex));
   } else {

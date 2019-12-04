@@ -29,7 +29,7 @@ class Dataset(CatalogEntity):
 
       - Use any public dataset to enrich your data with the variables in it by means of the :obj:`Enrichment`
         functions.
-      - Subscribe (:py:attr:`Dataset.subscribe`) to any premium dataset, to get a license, that grants you
+      - Subscribe (:py:attr:`Dataset.subscribe`) to any premium dataset to get a license that grants you
         the right to enrich your data with the variables (:obj:`Variable`) in it.
 
     See the enrichment guides for more information about datasets, variables and
@@ -67,7 +67,7 @@ class Dataset(CatalogEntity):
 
         The catalog supports nested filters for a hierarchical exploration.
         This way you could list the datasets available for different hierarchies:
-        country, provider, category, geography or a combination of them.
+        country, provider, category, geography, or a combination of them.
 
         .. code::
 
@@ -380,7 +380,7 @@ class Dataset(CatalogEntity):
             os.path with the local file path with the file downloaded
 
         :raises CartoException: If you have not a valid license for the dataset being downloaded.
-        :raises ValueError: If the credentials argument is not valud.
+        :raises ValueError: If the credentials argument is not valid.
         """
         if not self._is_subscribed(credentials):
             raise CartoException('You are not subscribed to this Dataset yet. Please, use the subscribe method first.')
