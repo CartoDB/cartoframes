@@ -5,27 +5,27 @@
     "categories": [{
         "title": "Data Workflows",
         "samples": [{
-            "title": "Create CartoDataFrame from CSV",
+            "title": "CartoDataFrame from CSV",
             "desc": "Create a CartoDataFrame from a CSV file",
             "file": "create_cdf_from_csv",
             "path": "data_workflows"
         }, {
-            "title": "Create CartoDataFrame from JSON",
+            "title": "CartoDataFrame from JSON",
             "desc": "Create a CartoDataFrame from a JSON file",
             "file": "create_cdf_from_json",
             "path": "data_workflows"
         }, {
-            "title": "Create CartoDataFrame from GeoJSON",
+            "title": "CartoDataFrame from GeoJSON",
             "desc": "Create a CartoDataFrame from a GeoJSON file",
             "file": "create_cdf_from_geojson",
             "path": "data_workflows"
         }, {
-            "title": "Create CartoDataFrame from Table name",
+            "title": "CartoDataFrame from Table Name",
             "desc": "Create a CartoDataFrame from a table name",
             "file": "create_cdf_from_table",
             "path": "data_workflows"
         }, {
-            "title": "Create CartoDataFrame from SQL query",
+            "title": "CartoDataFrame from SQL Query",
             "desc": "Create a CartoDataFrame from a SQL query",
             "file": "create_cdf_from_query",
             "path": "data_workflows"
