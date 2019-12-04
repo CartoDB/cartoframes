@@ -19,8 +19,8 @@ class Layer(object):
     notebook to get a preview of a Layer.
 
     Args:
-        source (str, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`,
-            pandas.DataFrame, geopandas.GeoDataFrame): The source data.
+        source (str, pandas.DataFrame, geopandas.GeoDataFrame,
+            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): The source data.
         style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
             The style of the visualization.
         popup (dict or :py:class:`Popup <cartoframes.viz.Popup>`, optional):
@@ -43,9 +43,9 @@ class Layer(object):
             these credentials is simply ignored. If not provided the credentials will be
             automatically obtained from the default credentials.
         bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
-          keys, or an array of floats in the following structure: [[west,
-          south], [east, north]]. If not provided the bounds will be automatically
-          calculated to fit all features.
+            keys, or an array of floats in the following structure: [[west,
+            south], [east, north]]. If not provided the bounds will be automatically
+            calculated to fit all features.
         geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
 
 
