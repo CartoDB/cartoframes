@@ -37,6 +37,10 @@ tox -e e2e
 
 We use `flake8` in CI because it's standard, fast and compatible with GitHub tools like Hound. However, we use also `pylint`for a deeper lint analysis with `tox -e lint`.
 
+### Coverage
+
+We use `pytest-cov` to compute the coverage of the tests. There are two commands available: `tox -e cov` which provides a simple console report, and `tox -e cov-html` which creates an HTML report in the `htmlcov` folder.
+
 ### Testing
 
 We use `pytest` to run both the `unit` and `e2e` tests. This tool is fully compatible with the standard `unittest`, but we will try to avoid using unittest directly in the code.
