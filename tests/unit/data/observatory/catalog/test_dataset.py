@@ -181,7 +181,48 @@ class TestDataset(object):
         summary = dataset.summary
 
         # Then
+
         assert summary == dataset.data['summary_json']
+
+    def test_summary_head(self):
+        # Given
+        dataset = Dataset(db_dataset2)
+
+        # When
+        summary = dataset.head()
+
+        # Then
+        assert isinstance(summary, pd.DataFrame)
+
+    def test_summary_tail(self):
+        # Given
+        dataset = Dataset(db_dataset2)
+
+        # When
+        summary = dataset.tail()
+
+        # Then
+        assert isinstance(summary, pd.DataFrame)
+
+    def test_summary_counts(self):
+        # Given
+        dataset = Dataset(db_dataset2)
+
+        # When
+        summary = dataset.counts()
+
+        # Then
+        assert isinstance(summary, pd.Series)
+
+    def test_summary_fields_by_type(self):
+        # Given
+        dataset = Dataset(db_dataset2)
+
+        # When
+        summary = dataset.fields_by_type()
+
+        # Then
+        assert isinstance(summary, pd.Series)
 
     @patch.object(DatasetRepository, 'get_all')
     def test_get_all_datasets(self, mocked_repo):

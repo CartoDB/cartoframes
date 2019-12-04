@@ -106,7 +106,23 @@ db_dataset2 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'summary_json': [['key', 'value']],
+    'summary_json': {
+        'glimpses': {
+            'head': ['a', 'b', 'c'],
+            'tail': ['e', 'f', 'g']
+        },
+        'counts': {
+            'rows': 3,
+            'columns': 3,
+            'null_cells': 0,
+            'null_cells_percent': 0
+        },
+        'fields_by_type': {
+            'float': 1,
+            'string': 1,
+            'integer': 1
+        }
+    },
     'available_in': []
 }
 test_dataset1 = Dataset(db_dataset1)

@@ -307,7 +307,7 @@ class Dataset(CatalogEntity):
         """
 
         data = self._get_summary_data()
-        return fields_by_type(self.__class__, data) if data else None
+        return fields_by_type(data) if data else None
 
     def geom_coverage(self):
         """Shows a map to visualize the geographical coverage of the dataset.
