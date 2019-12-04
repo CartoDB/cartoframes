@@ -41,6 +41,7 @@ class BigQueryClient(object):
         self.user_data_project = None
         self.dataset = None
         self.bucket_name = None
+        self.instant_licensing = None
 
         self._init_clients()
 
@@ -49,18 +50,19 @@ class BigQueryClient(object):
         google_credentials = GoogleCredentials(do_credentials.access_token)
 
         self.bq_client = bigquery.Client(
-            project=do_credentials.execution_project,
+            project=do_credentials.gcp_execution_project,
             credentials=google_credentials)
 
         self.gcs_client = storage.Client(
-            project=do_credentials.execution_project,
+            project=do_credentials.gcp_execution_project,
             credentials=google_credentials
         )
 
-        self.public_data_project = do_credentials.public_data_project
-        self.user_data_project = do_credentials.user_data_project
-        self.dataset = do_credentials.dataset
-        self.bucket_name = do_credentials.bucket
+        self.public_data_project = do_credentials.bq_public_project
+        self.user_data_project = do_credentials.bq_project
+        self.dataset = do_credentials.bq_dataset
+        self.bucket_name = do_credentials.gcs_bucket
+        self.instant_licensing = do_credentials.instant_licensing
 
     @refresh_clients
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset):

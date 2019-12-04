@@ -14,14 +14,15 @@ _PUBLIC_PROJECT = 'carto-do-public-data'
 
 
 class DoCredentials:
-    def __init__(self, public_data_project, user_data_project, access_token='access_token',
+    def __init__(self, public_data_project, user_data_project, access_token='access_token', instant_licensing=False,
                  execution_project='execution_project', dataset='username', bucket='bucket'):
         self.access_token = access_token
-        self.execution_project = execution_project
-        self.public_data_project = public_data_project
-        self.user_data_project = user_data_project
-        self.dataset = dataset
-        self.bucket = bucket
+        self.gcp_execution_project = execution_project
+        self.bq_public_project = public_data_project
+        self.bq_project = user_data_project
+        self.bq_dataset = dataset
+        self.gcs_bucket = bucket
+        self.instant_licensing = instant_licensing
 
 
 class CatalogEntityWithGeographyMock:
