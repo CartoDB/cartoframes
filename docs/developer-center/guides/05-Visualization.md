@@ -514,3 +514,7 @@ Layout([
         frameBorder="0">
     </iframe>
 </div>
+
+### Conclusion
+
+In this guide you were introduced to the Map and Layer classes, saw how to explore data with Widgets and Popups, and how to use Visualization Layers to quickly symbolize thematic attributes. You also saw some options for creating different maps of your findings.
