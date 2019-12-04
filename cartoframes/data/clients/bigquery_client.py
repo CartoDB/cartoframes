@@ -21,7 +21,7 @@ def refresh_clients(func):
         try:
             return func(self, *args, **kwargs)
         except RefreshError:
-            self.bq_client, self.gcs_client = self._init_clients()
+            self._init_clients()
             try:
                 return func(self, *args, **kwargs)
             except RefreshError:
@@ -32,31 +32,42 @@ def refresh_clients(func):
 
 class BigQueryClient(object):
 
-    def __init__(self, project, credentials):
-        self._project = project
+    def __init__(self, credentials):
         self._credentials = credentials or get_default_credentials()
-        self._bucket = 'carto-do-{username}'.format(username=self._credentials.username)
-        self.bq_client, self.gcs_client = self._init_clients()
+        self.bq_client = None
+        self.gcs_client = None
+
+        self.public_data_project = None
+        self.user_data_project = None
+        self.dataset = None
+        self.bucket_name = None
+        self.instant_licensing = None
+
+        self._init_clients()
 
     def _init_clients(self):
-        google_credentials = GoogleCredentials(self._credentials.get_do_token())
+        do_credentials = self._credentials.get_do_credentials()
+        google_credentials = GoogleCredentials(do_credentials.access_token)
 
-        bq_client = bigquery.Client(
-            project=self._project,
+        self.bq_client = bigquery.Client(
+            project=do_credentials.gcp_execution_project,
             credentials=google_credentials)
 
-        gcs_client = storage.Client(
-            project=self._project,
+        self.gcs_client = storage.Client(
+            project=do_credentials.gcp_execution_project,
             credentials=google_credentials
         )
 
-        return bq_client, gcs_client
+        self.public_data_project = do_credentials.bq_public_project
+        self.user_data_project = do_credentials.bq_project
+        self.dataset = do_credentials.bq_dataset
+        self.bucket_name = do_credentials.gcs_bucket
+        self.instant_licensing = do_credentials.instant_licensing
 
     @refresh_clients
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
-
         # Upload file to Google Cloud Storage
-        bucket = self.gcs_client.bucket(self._bucket)
+        bucket = self.gcs_client.bucket(self.bucket_name)
         blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
         dataframe.to_csv(tablename, index=False, header=False)
         try:
@@ -72,7 +83,7 @@ class BigQueryClient(object):
         job_config = bigquery.LoadJobConfig()
         job_config.schema = schema_wrapped
         job_config.source_format = bigquery.SourceFormat.CSV
-        uri = 'gs://{bucket}/{tablename}'.format(bucket=self._bucket, tablename=tablename)
+        uri = 'gs://{bucket}/{tablename}'.format(bucket=self.bucket_name, tablename=tablename)
 
         job = self.bq_client.load_table_from_uri(
             uri, table_ref, job_config=job_config

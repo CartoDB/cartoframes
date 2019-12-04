@@ -13,9 +13,6 @@ from ....utils.geom_utils import to_geojson
 
 _ENRICHMENT_ID = 'enrichment_id'
 _GEOJSON_COLUMN = '__geojson_geom'
-_DEFAULT_PROJECT = 'carto-do'
-_WORKING_PROJECT = 'carto-do-customers'
-_PUBLIC_PROJECT = 'carto-do-public-data'
 
 AGGREGATION_DEFAULT = 'default'
 AGGREGATION_NONE = 'none'
@@ -65,12 +62,12 @@ class EnrichmentService(object):
 
     def __init__(self, credentials=None):
         self.credentials = credentials = credentials or get_default_credentials()
-        self.user_dataset = self.credentials.get_do_user_dataset()
-        self.bq_client = bigquery_client.BigQueryClient(_WORKING_PROJECT, credentials)
+        self.bq_client = bigquery_client.BigQueryClient(credentials)
+        self.user_dataset = self.bq_client.dataset
+        self.working_project = self.bq_client.user_data_project
+        self.public_project = self.bq_client.public_data_project
         self.enrichment_id = _ENRICHMENT_ID
         self.geojson_column = _GEOJSON_COLUMN
-        self.working_project = _WORKING_PROJECT
-        self.public_project = _PUBLIC_PROJECT
 
     def _execute_enrichment(self, queries, cartodataframe):
         dfs_enriched = list()

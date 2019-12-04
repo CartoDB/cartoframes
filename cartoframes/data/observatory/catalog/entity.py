@@ -14,7 +14,6 @@ except ImportError:
     from abc import ABCMeta
     ABC = ABCMeta('ABC', (object,), {'__slots__': ()})
 
-_WORKING_PROJECT = 'carto-do-customers'
 _PLATFORM_BQ = 'bq'
 
 
@@ -120,14 +119,18 @@ class CatalogEntity(ABC):
             raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
         credentials = self._get_credentials(credentials)
-        bq_client = _get_bigquery_client(_WORKING_PROJECT, credentials)
-        self._get_full_remote_table_name()
+        bq_client = _get_bigquery_client(credentials)
 
-        project, dataset, table = self.id.split('.')
-        view = 'view_{}_{}'.format(dataset.replace('-', '_'), table)
+        full_remote_table_name = self._get_full_remote_table_name(
+            bq_client.user_data_project,
+            bq_client.dataset,
+            bq_client.public_data_project
+        )
+
+        project, dataset, table = full_remote_table_name.split('.')
 
         try:
-            file_path = bq_client.download_to_file(_WORKING_PROJECT, user_dataset, view)
+            file_path = bq_client.download_to_file(project, dataset, table)
         except NotFound:
             raise CartoException('You have not purchased the dataset `{}` yet'.format(self.id))
 
@@ -160,8 +163,8 @@ class CatalogEntity(ABC):
             return self.id
 
 
-def _get_bigquery_client(project, credentials):
-    return BigQueryClient(project, credentials)
+def _get_bigquery_client(credentials):
+    return BigQueryClient(credentials)
 
 
 def is_slug_value(id_value):
