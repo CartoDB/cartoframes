@@ -2,13 +2,13 @@
 
 ### Introduction
 
-The Data Observatory is a spatial data repository that enables Data Scientists to augment their data and broaden their analysis. It offers a wide range of datasets from around the globe.
+The Data Observatory is a spatial data repository that enables data scientists to augment their data and broaden their analysis. It offers a wide range of datasets from around the globe.
 
 This guide is intended for those who want to start augmenting their own data using CARTOframes and wish to explore CARTO's public Data Observatory catalog to find datasets that best fit their use cases and analyses.
 
 **Note: The catalog is public and you don't need a CARTO account to search for available datasets**
 
-### Looking for demographics and financial data in the US
+### Find demographic and financial data for the US
 
 In this guide we walk through the Data Observatory catalog looking for demographics and financial data in the US.
 
@@ -22,7 +22,7 @@ Datasets are organized in three main hierarchies:
 
 For our analysis we are looking for demographic and financial datasets in the US with a spatial resolution at the block group level.
 
-Firstly we can start by discovering which available geographies (or spatial resolutions) we have for demographic data in the US, by filtering the `catalog` by `country` and `category` and listing the available `geographies`.
+We can start by discovering which available geographies (or spatial resolutions) we have for demographic data in the US, by filtering the `catalog` by `country` and `category` and listing the available `geographies`.
 
 Let's start exploring the available categories of data for the US:
 
@@ -159,7 +159,7 @@ df[df['id'].str.contains('blockgroup', case=False, na=False)]
 </table>
 </div>
 
-We have three available datasets, from three different providers: Michael Bauer International, Open Data and AGS. For this example, we are going to look for demographic datasets for the AGS block group geography `ags_blockgroup_1c63771c`:
+We have three available datasets, from three different providers: Michael Bauer International, Open Data, and AGS. For this example, we are going to look for demographic datasets for the AGS block group geography `ags_blockgroup_1c63771c`:
 
 ```python
 datasets = Catalog().country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
@@ -174,7 +174,7 @@ datasets
     <Dataset.get('ags_crimerisk_9ec89442')>]
 </code></pre>
 
-Let's continue with the data discovery. We have 6 datasets in the US with demographics information at the level of AGS block groups:
+Let's continue the data discovery process. We have 6 datasets in the US with demographic information at the level of AGS block groups:
 
 ```python
 datasets.to_dataframe()
@@ -358,7 +358,7 @@ datasets.to_dataframe()
 <p>6 rows × 21 columns</p>
 </div>
 
-They include different information: consumer spending, retail potential, consumer profiles, etc.
+The datasets include different information: consumer spending, retail potential, consumer profiles, etc.
 
 At first glance, it looks like the dataset with `data_source_id: sociodemographic` might contain the population information we are looking for. Let's try to understand a little bit better what data this dataset contains by looking at its variables:
 
@@ -1952,7 +1952,9 @@ vdf[vdf['description'].str.contains('pop', case=False, na=False)]
 </div>
 
 
-We can follow the very same process to discover `financial` datasets, let's take a look at how it works. Firstly, we list the geographies available for the category `financial` in the US:
+We can follow the very same process to discover `financial` datasets, let's take a look at how that works.
+
+First, we list the geographies available for the category `financial` in the US:
 
 
 ```python
@@ -1996,7 +1998,7 @@ Geography.get('mc_blockgroup_c4b8da4c').to_dict()
 
 
 
-Now we can list the available datasets provided by Mastercard for the US Census block groups spatial resolution:
+Now we can list the available datasets provided by Mastercard for the block group spatial resolution:
 
 
 ```python
@@ -2095,11 +2097,11 @@ Dataset.get('mc_mrli_35402a9d').variables
 
 ### Dataset and variables metadata
 
-The Data Observatory catalog is not only a repository of curated spatial datasets, it also contains valuable information that helps us better understand the underlying data for every dataset, so you can make an informed decision on what data best fits your problem.
+The Data Observatory catalog is not only a repository of curated spatial datasets, it also contains valuable information that helps us better understand the underlying data for each dataset, so you can make an informed decision on what data best fits your problem.
 
 Some of the augmented metadata you can find for each dataset in the catalog is:
 
-- `head` and `tail` methods to get a glimpse of the actual data. This helps you to understand the available columns, data types, etc. allowing you to start modelling your problem right away.
+- `head` and `tail` methods to get a glimpse of the actual data. This helps understand the available columns, data types, etc. allowing you to start modelling your problem right away.
 - `geom_coverage` to visualize the geographic coverage of the data in the `Dataset` on a map.
 - `counts`, `fields_by_type` and a full `describe` method with stats of the actual values in the dataset, such as: average, stdev, quantiles, min, max, median for each of the variables in the dataset.
 
@@ -2393,9 +2395,9 @@ dataset.head()
 <p>10 rows × 101 columns</p>
 </div>
 
-Alternatively, you can get the last ten with `dataset.tail()`
+Alternatively, you can get the last ten with `dataset.tail()`.
 
-An overview of the coverage of the dataset
+The map below shows the coverage of the dataset
 
 
 ```python
@@ -3309,7 +3311,7 @@ dataset.geom_coverage()
 
 </iframe>
 
-Some stats about the dataset:
+We can also see some stats about the dataset:
 
 ```python
 dataset.counts()
@@ -3666,9 +3668,9 @@ There's also some interesting metadata, for each variable in the dataset:
 - agg_method: Aggregation method used
 - temporal aggregation and time coverage
 
-Variables are the most important asset in the catalog and when exploring datasets in the Data Observatory catalog it's important to understand exactly which variables are available to enrich your own data.
+Variables are the most important asset in the catalog and when exploring datasets in the Data Observatory catalog it is important to understand exactly which variables are available to enrich your own data.
 
-For each `Variable` in each dataset, the Data Observatory provides (as it does with datasets) a set of methods and attributes to understand their underlying data.
+For each `Variable` in each dataset, the Data Observatory provides (as it does with datasets) a set of methods and attributes to better understand the underlying data.
 
 Some of them are:
 
@@ -3778,9 +3780,9 @@ variable.describe()
 
 ### Subscribe to a Dataset in the catalog
 
-Once you have explored the catalog, detected a dataset with the variables you need for your analysis and the right spatial resolution, you have to look at the `is_public_data` to know if you can simply use it from CARTOframes or if you need to subscribe for a license first.
+Once you have explored the catalog, found a dataset with the variables you need for your analysis at the right spatial resolution, you have to look at the `is_public_data` to know if you can simply use it from CARTOframes or if you need to subscribe for a license first.
 
-Subscriptions to datasets allow you to use them from CARTOframes to enrich your own data or to download them. See the [Data Enrichment guide](/developers/cartoframes/guides/Data-enrichment/) for more information about this.
+Subscriptions to datasets allow you to download them or use them with CARTOframes to enrich your own data. See the [Data Enrichment guide](/developers/cartoframes/guides/Data-enrichment/) for more information about subscriptions.
 
 Let's take a look at the dataset and geography from the previous example:
 
@@ -3809,7 +3811,7 @@ geography.is_public_data
 
 Both `dataset` and `geography` are not public data, this means you need a subscription to be able to use them to enrich your own data.
 
-**To subscribe to data in the Data Observatory catalog you need a CARTO account with access to the Data Observatory. See the [Authentication guide](/developers/cartoframes/guides/Authentication/#the-config-file) for more information on this topic.**
+> To subscribe to data in the Data Observatory catalog you need a CARTO account with access to the Data Observatory. See the [Authentication guide](/developers/cartoframes/guides/Authentication/#the-config-file) for more information on this topic.
 
 
 ```python
@@ -3843,7 +3845,7 @@ Geographies: None
 
 ### About nested filters in the Catalog instance
 
-**Please note that every time you search the catalog you create a new instance of the `Catalog` class. Alternatively, when applying `country`, `category` and `geography` filters a catalog instance, you can reuse the same instance of the `catalog` by using the `catalog.clean_filters()` method.**
+It is important to note that **every time you search the catalog you create a new instance of the `Catalog` class. Alternatively, when applying `country`, `category` and `geography` filters a catalog instance, you can reuse the same instance of the `catalog` by using the `catalog.clean_filters()` method.**
 
 For example, if you've filtered the catalog this way:
 
@@ -4002,7 +4004,7 @@ Now, if you want to use the `financial` datasets, you should:
 
 Although a recommended way to discover data is nesting filters over a `Catalog` instance, you don't need to follow the complete hierarchy (`country`, `category`, `geography`) to list the available datasets.
 
-Alternatively, you can just list all the datasets in the `US` or list all the datasets for the `demographics` category, and continue exploring the catalog locally with pandas.
+Alternatively, you can list all the datasets in the `US` or list all the datasets for the `demographics` category, and continue exploring the catalog locally with pandas.
 
 Let's look at an example of that, where we filter public data for the `demographics` category worldwide:
 
@@ -5511,16 +5513,16 @@ df[df['is_public_data'] == True]
 
 ### Conclusion
 
-In this guide we've presented how to explore the Data Observatory catalog to identify variables of datasets that you can use to enrich your own data.
+In this guide you've seen how to explore the Data Observatory catalog to identify variables of datasets that you can use to enrich your own data.
 
 You've learned how to:
 
-- Discover the catalog using nested hierarchical filters.
-- Describe the three main entities in the catalog: `Geography`, `Dataset` and their `Variables`
-- Get a glimpse of the data and stats taken from the actual repository, for a better informed decision on what variables to choose.
-- Subscribe to the chosen datasets to get a license that grants the right to enrich your own data.
+- Explore the catalog using nested hierarchical filters.
+- Describe the three main entities in the catalog: `Geography`, `Dataset` and their `Variables`.
+- Taken a look at the data and stats taken from the actual repository, to make a more informed decision on which variables to choose.
+- How to subscribe to the chosen dataset to get a license that grants the right to enrich your own data.
 
-We also recommend checking out these resources if you want to know more about the Data Observatory catalog:
+We also recommend checking out the resources below to learn more about the Data Observatory catalog:
 
 - The CARTOframes [enrichment guide](/developers/developers/cartoframes/guides/Data-enrichment/)
 - [Our public website](/platform/location-data-streams/)
