@@ -33,7 +33,7 @@ class CartoDataFrame(GeoDataFrame):
         """
         Alternate constructor to create a CartoDataFrame from a table or SQL query in CARTO.
         It is needed to set up the :py:class:`cartoframes.auth.Credentials`.
-        Equivalent to :py:meth:`read_carto <cartoframes.io.read_carto>`.
+        Equivalent to :py:meth:`read_carto <cartoframes.io.carto.read_carto>`.
 
         Examples:
 
@@ -42,9 +42,18 @@ class CartoDataFrame(GeoDataFrame):
             .. code::
 
                 from cartoframes import CartoDataFrame
+                from cartoframes.auth import Credentials
+
+                creds = Credentials.from_file('creds.json')
+
+                cdf = CartoDataFrame.from_carto('table_name', creds)
+
+                # or
+
+                from cartoframes import CartoDataFrame
                 from cartoframes.auth import set_default_credentials
 
-                set_default_credentials('your_user_name', 'your api key')
+                set_default_credentials('creds.json')
 
                 cdf = CartoDataFrame.from_carto('table_name')
 
@@ -53,9 +62,18 @@ class CartoDataFrame(GeoDataFrame):
             .. code::
 
                 from cartoframes import CartoDataFrame
+                from cartoframes.auth import Credentials
+
+                creds = Credentials.from_file('creds.json')
+
+                cdf = CartoDataFrame.from_carto('SELECT * FROM table_name WHERE value > 100', creds)
+
+                # or
+
+                from cartoframes import CartoDataFrame
                 from cartoframes.auth import set_default_credentials
 
-                set_default_credentials('your_user_name', 'your api key')
+                set_default_credentials('creds.json')
 
                 cdf = CartoDataFrame.from_carto('SELECT * FROM table_name WHERE value > 100')
         """
@@ -65,7 +83,7 @@ class CartoDataFrame(GeoDataFrame):
     @classmethod
     def from_file(cls, filename, **kwargs):
         """
-        Alternate constructor to create a CartoDataFrame from a file.
+        Alternate constructor to create a CartoDataFrame from a Shapefile or GeoJSON file.
         Extends from the GeoDataFrame.from_file method.
 
         Examples:
@@ -92,7 +110,15 @@ class CartoDataFrame(GeoDataFrame):
 
                 from cartoframes import CartoDataFrame
 
-                cdf = CartoDataFrame.from_features('nybb.shp')
+                cdf = CartoDataFrame.from_features([{
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                            'coordinates': [125.6, 10.1]
+                        },
+                    'properties': {
+                    'name': 'Dinagat Islands'
+                }])
         """
         result = GeoDataFrame.from_features(features, **kwargs)
         result.__class__ = cls
@@ -102,15 +128,26 @@ class CartoDataFrame(GeoDataFrame):
         """
         Upload a CartoDataFrame to CARTO. It is needed to set up the
         :py:class:`cartoframes.auth.Credentials`.
-        Equivalent to :py:meth:`to_carto <cartoframes.io.to_carto>`.
+        Equivalent to :py:meth:`to_carto <cartoframes.io.carto.to_carto>`.
 
         Examples:
 
             .. code::
+
+                from cartoframes import CartoDataFrame
+                from cartoframes.auth import Credentials
+
+                creds = Credentials.from_file('creds.json')
+
+                cdf = CartoDataFrame.from_file('nybb.shp')
+                cdf.to_carto('table_name', creds, if_exists='replace')
+
+                # or
+
                 from cartoframes import CartoDataFrame
                 from cartoframes.auth import set_default_credentials
 
-                set_default_credentials('your_user_name', 'your api key')
+                set_default_credentials('creds.json')
 
                 cdf = CartoDataFrame.from_file('nybb.shp')
                 cdf.to_carto('table_name', if_exists='replace')
@@ -120,12 +157,29 @@ class CartoDataFrame(GeoDataFrame):
 
     def viz(self, *args, **kwargs):
         """
-        Creates a :py:class:`Map <cartoframes.viz.Map>` visualization
+        Creates a quick :py:class:`Map <cartoframes.viz.Map>` visualization. The parameters
+        are passed directly to the Layer (style, popup, legend, widgets, etc.).
+
+        Examples:
+
+            .. code::
+
+                from cartoframes import CartoDataFrame
+
+                cdf = CartoDataFrame.from_file('world_population.geojson')
+
+                cdf.viz()
         """
         from ..viz import Map, Layer
         return Map(Layer(self, *args, **kwargs))
 
     def has_geometry(self):
+        """
+        Method to check if the CartoDataFrame contains a valid geometry column or not.
+        If there is no valid geometry, you can use the following methods:
+        - set_geometry: to create a decoded geometry column from any raw geometry column.
+        - set_geometry_from_xy: to create a geometry column from `longitude` and `latitude` columns.
+        """
         return self._geometry_column_name in self
 
     def set_geometry(self, col, drop=False, inplace=False, crs=None):
