@@ -240,6 +240,9 @@ class Geocoding(Service):
 
         cdf = read_carto(input_table_name, self._credentials)
 
+        if self._source_manager.is_dataframe():
+            del cdf['cartodb_id']
+
         if is_temporary:
             delete_table(input_table_name, self._credentials, log_enabled=False)
 

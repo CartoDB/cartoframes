@@ -184,6 +184,9 @@ class Isolines(Service):
             # save result in a table
             to_carto(cdf, table_name, self._credentials, if_exists, log_enabled=dry_run)
 
+        if source_manager.is_dataframe():
+            del cdf['cartodb_id']
+
         if temporary_table_name:
             delete_table(temporary_table_name, self._credentials, log_enabled=False)
 
