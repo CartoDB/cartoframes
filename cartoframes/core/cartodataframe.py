@@ -98,7 +98,8 @@ class CartoDataFrame(GeoDataFrame):
     def from_file(cls, filename, **kwargs):
         """
         Alternate constructor to create a CartoDataFrame from a Shapefile or GeoJSON file.
-        Extends from the GeoDataFrame.from_file method.
+        Extends from the `GeoDataFrame.from_file
+        <http://geopandas.org/reference.html?#geopandas.GeoDataFrame.from_file>`_ method.
 
         Examples:
 
