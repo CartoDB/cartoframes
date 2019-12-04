@@ -1,6 +1,7 @@
 ## Quickstart
 
 ### Introduction
+
 Hi! Glad to see you made it to the Quickstart guide! In this guide you are introduced to how CARTOframes can be used by data scientists in spatial analysis workflows. Using fake Starbucks revenue data, this guide walks through some common steps a data scientist takes to answer the following question: which stores are performing better than others?
 
 Before you get started, we encourage you to have CARTOframes installed so you can get a feel for the library by using it:
@@ -15,7 +16,7 @@ If you want to know other ways to install it, check out the [installation guide]
 
 Let's say you are a data scientist working for Starbucks and you want to better understand why some stores in Brooklyn, New York, perform better than others.
 
-To begin, let's outline a workflow: 
+To begin, let's outline a workflow:
 
 - Get and explore your company's data
 - Create areas of influence for your stores
@@ -87,14 +88,13 @@ In order to geocode, you have to set your CARTO credentials. If you don't know y
 
 > Note: If you don't have an account yet, you can get a trial, or a free account if you are a student, by [signing up here](https://carto.com/signup/).
 
-
 ```python
 from cartoframes.auth import set_default_credentials
 
 set_default_credentials('creds.json')
 ```
 
-Now, we are ready to geocode the dataframe:
+Now, we are ready to geocode the dataframe. The resulting data will be a [CartoDataFrame](/developers/cartoframes/reference#heading-CartoDataFrame) structure, which extends from [GeoDataFrame](http://geopandas.org/data_structures.html#geodataframe). Since CARTOframes is built on top of [GeoPandas](http://geopandas.org/) to guarantee compatibility between both libraries, all [GeoDataFrame](http://geopandas.org/data_structures.html#geodataframe) operations are available.
 
 
 ```python
@@ -103,7 +103,6 @@ from cartoframes.data.services import Geocoding
 stores_cdf, _ = Geocoding().geocode(stores_df, street='address')
 stores_cdf.head()
 ```
-
 
 <div>
 <table border="1" class="dataframe">
@@ -175,11 +174,9 @@ stores_cdf.head()
 </div>
 
 
-
 Done! Now that the stores are geocoded, you will notice a new column named `geometry` has been added. This column stores the geographic location of each store and it's used to plot each location on the map.
 
 You can quickly visualize your geocoded dataframe using the Map and Layer classes. Check out the [visualization guide](/developers/cartoframes/guides/Visualization) to learn more about the visualization capabilities inside of CARTOframes.
-
 
 ```python
 from cartoframes.viz import Map, Layer
@@ -198,11 +195,9 @@ Map(Layer(stores_cdf))
     </iframe>
 </div>
 
-
 Great! We have a map!
 
 Now, you have a better sense about where the stores are. To continue with your exploration, you want to know where are the stores with more revenue. To do so, you can use the `size_continuous_layer` visualization layer:
-
 
 ```python
 from cartoframes.viz.helpers import size_continuous_layer
@@ -810,7 +805,6 @@ variables_df[variables_df['description'].str.contains('population', case=False)]
 </table>
 </div>
 
-
 We can see the variable that contains the population for 2019 is the one with the slug `POPCY_f5800f44`. Now we are ready to enrich our areas of influence with that variable.
 
 ```python
@@ -892,9 +886,7 @@ isochrones_cdf.head()
 </table>
 </div>
 
-
 Great! Let's see the result on a map:
-
 
 ```python
 from cartoframes.viz.helpers import color_continuous_layer
@@ -935,6 +927,30 @@ As we can see, there are clearly 3 stores that have lower revenue per person. Th
 
 To learn more about discovering the data you want, check out the [data discovery guide](/developers/cartoframes/guides/Data-discovery). To learn more about enriching your data check out the [data enrichment guide](/developers/cartoframes/guides/Data-enrichment/).
 
+### Save your data
+
+The `CartoDataFrame` structure allows you to save your data directly in your CARTO account, so you can use it in different notebooks directly. Once it's saved, you can download it whenever you want, but also use it in your visualizations using the `table_name` you've given to the dataset. For example, let's save the `stores_cdf` under the name of `starbucks_stores_analysis`:
+
+```python
+stores_cdf.to_carto('starbucks_stores_analysis')
+```
+
+Now, we can visualize the table directly from CARTO as follows:
+
+```python
+# Using the CartoDataFrame:
+# Map(size_continuous_layer(stores_cdf, 'rev_pop', 'Revenue per person ($)'))
+
+# Using the table name:
+Map(size_continuous_layer('starbucks_stores_analysis', 'rev_pop', 'Revenue per person ($)'))
+```
+
+If you need to get the data in a different notebook, you can simply run:
+
+```python
+stores_cdf = CartoDataFrame.from_carto('starbucks_stores_analysis')
+```
+
 ### Publish and share your results
 
 The final step in the workflow is to share this interactive map with your colleagues so they can explore the information on their own. Let's do it!
@@ -961,7 +977,6 @@ result_map
 </div>
 
 Cool! Now that you have a small dashboard to play with, let's publish it on CARTO so you are able to share it with anyone. To do this, you just need to call the publish method from the Map class:
-
 
 ```python
 result_map.publish('startbucks_analysis')
