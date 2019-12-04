@@ -120,8 +120,8 @@ class CatalogEntity(ABC):
             raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
         credentials = self._get_credentials(credentials)
-        user_dataset = credentials.get_do_user_dataset()
         bq_client = _get_bigquery_client(_WORKING_PROJECT, credentials)
+        self._get_full_remote_table_name()
 
         project, dataset, table = self.id.split('.')
         view = 'view_{}_{}'.format(dataset.replace('-', '_'), table)
@@ -146,6 +146,18 @@ class CatalogEntity(ABC):
             raise ValueError('`credentials` must be a Credentials class instance')
 
         return _credentials
+
+    def _get_remote_full_table_name(self, user_project, user_dataset, public_project):
+        project, dataset, table = self.id.split('.')
+
+        if project != public_project:
+            return '{project}.{dataset}.{table_name}'.format(
+                project=user_project,
+                dataset=user_dataset,
+                table_name='view_{}_{}'.format(dataset, table)
+            )
+        else:
+            return self.id
 
 
 def _get_bigquery_client(project, credentials):
