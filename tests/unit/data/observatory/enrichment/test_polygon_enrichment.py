@@ -669,10 +669,6 @@ class TestPolygonEnrichment(object):
         actual = sorted(_clean_queries(actual_queries))
         expected = sorted(_clean_queries(expected_queries))
 
-        print(' ')
-        print(actual)
-        print(' ')
-        print(expected)
         assert actual == expected
 
 
