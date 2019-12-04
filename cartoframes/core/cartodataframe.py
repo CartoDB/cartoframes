@@ -29,7 +29,7 @@ class CartoDataFrame(GeoDataFrame):
         super(CartoDataFrame, self).__init__(data, *args, **kwargs)
 
     @staticmethod
-    def from_carto(*args, **kwargs):
+    def from_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True):
         """
         Alternate constructor to create a CartoDataFrame from a table or SQL query in CARTO.
         It is needed to set up the :py:class:`cartoframes.auth.Credentials`.
@@ -92,7 +92,7 @@ class CartoDataFrame(GeoDataFrame):
                 cdf = CartoDataFrame.from_carto('SELECT * FROM table_name WHERE value > 100')
         """
         from ..io.carto import read_carto
-        return read_carto(*args, **kwargs)
+        return read_carto(source, credentials, limit, retry_times, schema, index_col, decode_geom)
 
     @classmethod
     def from_file(cls, filename, **kwargs):
@@ -139,7 +139,7 @@ class CartoDataFrame(GeoDataFrame):
         result.__class__ = cls
         return result
 
-    def to_carto(self, *args, **kwargs):
+    def to_carto(self, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None):
         """
         Upload a CartoDataFrame to CARTO. It is needed to set up the
         :py:class:`cartoframes.auth.Credentials`.
@@ -178,12 +178,12 @@ class CartoDataFrame(GeoDataFrame):
                 cdf.to_carto('table_name', if_exists='replace')
         """
         from ..io.carto import to_carto
-        return to_carto(self, *args, **kwargs)
+        return to_carto(self, table_name, credentials, if_exists, geom_col, index, index_label)
 
-    def viz(self, *args, **kwargs):
+    def viz(self, style=None, popup=None, legend=None, widgets=None, credentials=None, bounds=None, geom_col=None):
         """
-        Creates a quick :py:class:`Map <cartoframes.viz.Map>` visualization. The parameters
-        are passed directly to the Layer (style, popup, legend, widgets, etc.).
+        Creates a quick :py:class:`Map <cartoframes.viz.Map>` visualization.
+        This is equivalent to `Map(Layer(cdf))`.
 
         Args:
             style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
@@ -225,7 +225,7 @@ class CartoDataFrame(GeoDataFrame):
                 cdf.viz()
         """
         from ..viz import Map, Layer
-        return Map(Layer(self, *args, **kwargs))
+        return Map(Layer(self, style, popup, legend, widgets, credentials, bounds, geom_col))
 
     def has_geometry(self):
         """

@@ -20,7 +20,8 @@ class Layer(object):
 
     Args:
         source (str, pandas.DataFrame, geopandas.GeoDataFrame,
-            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): The source data.
+            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): The source data:
+            table name, SQL query or a dataframe.
         style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
             The style of the visualization.
         popup (dict or :py:class:`Popup <cartoframes.viz.Popup>`, optional):
