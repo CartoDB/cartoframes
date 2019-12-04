@@ -29,14 +29,14 @@ class Isolines(Service):
                 will be produced enclosing the area within range of the source.
             exclusive (bool, optional): when False, inclusive range areas are generated, each one
                 containing the areas for smaller time values (so the area is reachable from the source
-                whithin the given time). When True (the default), areas are exclusive, each one corresponding
+                within the given time). When True (the default), areas are exclusive, each one corresponding
                 time values between the immediately smaller range value (or zero) and the area range value.
             table_name (str, optional): the resulting areas will be saved in a new
                 CARTO table with this name.
             if_exists (str, optional): Behavior for creating new datasets, only applicable
                 if table_name isn't None;
                 Options are 'fail', 'replace', or 'append'. Defaults to 'fail'.
-            dry_run (bool, optional): no actual computattion will be performed,
+            dry_run (bool, optional): no actual computation will be performed,
                 and metadata will be returned including the required quota.
             mode (str, optional):  defines the travel mode: ``'car'`` (the default) or ``'walk'``.
             is_destination (bool, optional):  indicates that the source points are to be taken as
@@ -75,14 +75,14 @@ class Isolines(Service):
                 will be produced enclosing the area within range of the source.
             exclusive (bool, optional): when False, inclusive range areas are generated, each one
                 containing the areas for smaller distance values (so the area is reachable from the source
-                whithin the given distance). When True, areas are exclusive (the default), each one corresponding
+                within the given distance). When True, areas are exclusive (the default), each one corresponding
                 distance values between the immediately smaller range value (or zero) and the area range value.
             table_name (str, optional): the resulting areas will be saved in a new
                 CARTO table with this name.
             if_exists (str, optional): Behavior for creating new datasets, only applicable
                 if table_name isn't None;
                 Options are 'fail', 'replace', or 'append'. Defaults to 'fail'.
-            dry_run (bool, optional): no actual computattion will be performed,
+            dry_run (bool, optional): no actual computation will be performed,
                 and metadata will be returned including the required quota.
             mode (str, optional):  defines the travel mode: ``'car'`` (the default) or ``'walk'``.
             is_destination (bool, optional):  indicates that the source points are to be taken as

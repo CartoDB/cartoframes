@@ -39,9 +39,9 @@ class VariableFilter(object):
             - Equal to string: `VariableFilter(variable, "= 'the string'")`
             - Greater that 3: `VariableFilter(variable, '> 3')`
 
-            Next example uses a `VariableFilter` instance to calculate the `SUM` of car-free households
+            The next example uses a `VariableFilter` instance to calculate the `SUM` of car-free households
             :obj:`Variable` of the :obj:`Catalog` for each polygon of `my_local_dataframe` pandas `DataFrame` only for
-            areas with more than 100 free car-free households
+            areas with more than 100 car-free households,
 
             .. code::
 

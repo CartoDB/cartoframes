@@ -134,9 +134,9 @@ class Enrichment(EnrichmentService):
 
         When a polygon intersects with multiple geographies, the proportional part of the intersection will be used
         to interpolate the quantity of the polygon value intersected, aggregating them. Most of :obj:`Variable`
-        instances have a :py:attr:`Variable.agg_method` property which is used by default as aggregation function, but
-        you can overwrite it using the `aggregation` parameter (not even doing the aggregation). If a variable does not
-        have the `agg_method` property set and you do not overwrite it either (with the `aggregation` parameter), the
+        instances have a :py:attr:`Variable.agg_method` property which is used by default as an aggregation function,
+        but you can overwrite it using the `aggregation` parameter (not even doing the aggregation). If a variable does
+        not have the `agg_method` property set and you do not overwrite it (with the `aggregation` parameter), the
         variable column will be skipped from the enrichment.
 
         Args:
@@ -164,7 +164,7 @@ class Enrichment(EnrichmentService):
                     variables will be skipped).
 
                     - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
-                    You will receive a row of data from each polygon instersected.
+                    You will receive a row of data from each polygon intersected.
 
                     - str: if you want to overwrite every default aggregation method, you can pass a string with the
                     aggregation method to use.
@@ -266,7 +266,7 @@ class Enrichment(EnrichmentService):
                 cdf_enrich = enrichment.enrich_polygons(df, variables=[variable], filters=[filter])
 
 
-            Enrich a polygons dataframe overwriting every variables aggregation methods to use `SUM` function:
+            Enrich a polygons dataframe overwriting every variables aggregation method to use `SUM` function:
 
             .. code::
 

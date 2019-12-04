@@ -39,7 +39,7 @@ def color_category_layer(
         animate (str, optional): Animate features by date/time or other numeric field.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
           A Credentials instance. This is only used for the simplified Source API.
-          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+          When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
           these credentials is simply ignored. If not provided the credentials will be
           automatically obtained from the default credentials.
 

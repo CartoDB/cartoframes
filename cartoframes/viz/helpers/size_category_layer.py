@@ -20,7 +20,7 @@ def size_category_layer(
           5. Valid values range from 1 to 16.
         cat (list<str>, optional): Category list. Must be a valid CARTO VL category
           list.
-        size (str, optiona): Min/max size array in CARTO VL syntax. Default is
+        size (str, optional): Min/max size array in CARTO VL syntax. Default is
           '[2, 20]' for point geometries and '[1, 10]' for lines.
         color (str, optional): Hex value, rgb expression, or other valid
           CARTO VL color. Default is '#F46D43' for point geometries and
@@ -41,7 +41,7 @@ def size_category_layer(
         animate (str, optional): Animate features by date/time or other numeric field.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
           A Credentials instance. This is only used for the simplified Source API.
-          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+          When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
           these credentials is simply ignored. If not provided the credentials will be
           automatically obtained from the default credentials.
 

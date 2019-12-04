@@ -17,7 +17,7 @@ from ...io.carto import read_carto, to_carto, has_table, delete_table, update_ta
 class Geocoding(Service):
     """Geocoding using CARTO data services.
 
-    This requires a CARTO account with and API key that allows for using geocoding services;
+    This requires a CARTO account with an API key that allows for using geocoding services;
     (through explicit argument in constructor or via the default credentials).
 
     To prevent having to geocode records that have been previously geocoded, and thus spend quota unnecessarily,
@@ -28,7 +28,7 @@ class Geocoding(Service):
 
     In case you're geocoding local data from a ``DataFrame`` that you plan to re-geocode again, (e.g. because
     you're making your work reproducible by saving all the data preparation steps in a notebook),
-    we advise to save the geocoding results immediately to the same store from when the data is originally taken,
+    we advise to save the geocoding results immediately to the same store from where the data is originally taken,
     for example:
 
     .. code:: python
@@ -37,11 +37,11 @@ class Geocoding(Service):
         dataframe = Geocoding().geocode(dataframe, 'address').data
         dataframe.to_csv('my_data')
 
-    As an alternative you can use the ``cached`` option to store geocoding results in a CARTO table
-    and reuse them in later geocodings. It is needed to use the ``table_name`` parameter with the name
+    As an alternative, you can use the ``cached`` option to store geocoding results in a CARTO table
+    and reuse them in later geocodings. To do this, you need to use the ``table_name`` parameter with the name
     of the table used to cache the results.
 
-    If the same dataframe if geocoded repeatedly no credits will be spent, but note there is a time overhead
+    If the same dataframe is geocoded repeatedly no credits will be spent, but note there is a time overhead
     related to uploading the dataframe to a temporary table for checking for changes.
 
     .. code:: python
@@ -71,15 +71,15 @@ class Geocoding(Service):
             street (str): name of the column containing postal addresses
             city (dict, optional): dictionary with either a `column` key
                 with the name of a column containing the addresses' city names or
-                a `value` key with a literal city value value, e.g. 'New York'.
+                a `value` key with a literal city value, e.g. 'New York'.
                 It also accepts a string, in which case `column` is implied.
             state (dict, optional): dictionary with either a `column` key
                 with the name of a column containing the addresses' state names or
-                a `value` key with a literal state value value, e.g. 'WA'.
+                a `value` key with a literal state value, e.g. 'WA'.
                 It also accepts a string, in which case `column` is implied.
             country (dict, optional): dictionary with either a `column` key
                 with the name of a column containing the addresses' country names or
-                a `value` key with a literal country value value, e.g. 'US'.
+                a `value` key with a literal country value, e.g. 'US'.
                 It also accepts a string, in which case `column` is implied.
             status (dict, optional): dictionary that defines a mapping from geocoding state
                 attributes ('relevance', 'precision', 'match_types') to column names.

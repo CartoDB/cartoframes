@@ -27,8 +27,8 @@ class Catalog(object):
       - Download data and use your licensed datasets and variables to enrich your own data by means of the
         :obj:`Enrichment` functions.
 
-    The Catalog is public and you can explore it without the need of a CARTO account. Once you discover a
-    :obj:`Dataset` of your interest and want to acquire a license to use it, then you'll need a CARTO account to
+    The Catalog is public and can be explored without a CARTO account. Once you discover a
+    :obj:`Dataset` of interest and want to acquire a license to use it, you'll need a CARTO account to
     subscribe to it, by means of the :py:attr:`Dataset.subscribe` or :py:attr:`Geography.subscribe` functions.
 
     The Catalog is composed of three main entities:
@@ -41,13 +41,14 @@ class Catalog(object):
         Let's say you explore a `dataset` with demographic data for the whole US at the Census tract level.
         The variables give you information about the actual columns you have available, such as: total_population,
         total_males, etc.
-        On the other hand, you use `Variable` instances or lists of :py:attr:`Variable.id` or :py:attr:`Dataset.slug`
-        to enrich your own data.
+        On the other hand, you can use lists of `Variable` instances, :py:attr:`Variable.id`, or
+        :py:attr:`Variable.slug` to enrich your own data.
+
 
     Every `Dataset` is related to a `Geography`. You can have for example, demographics data at the Census
     tract, block groups or blocks levels.
 
-    When subscribing to a premium dataset, you should subscribe both to the :py:attr:`Dataset.subscribe` and the
+    When subscribing to a premium dataset, you should subscribe to both the :py:attr:`Dataset.subscribe` and the
     :py:attr:`Geography.subscribe` to be able to access both tables to enrich your own data.
 
     The two main entities of the Catalog (`Dataset` and `Geography`) are related to other entities, that
