@@ -201,7 +201,7 @@ class Geography(CatalogEntity):
         return cls._entity_repo.get_all(filters, credentials)
 
     def download(self, credentials=None):
-        """Download Geography data as a pandas DataFrame locally. You need Data Observatory enabled in your CARTO
+        """Download geography data as a local file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
         For premium geographies (those with `is_public_data` set to False), you need a subscription to the geography.

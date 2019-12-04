@@ -367,7 +367,7 @@ class Dataset(CatalogEntity):
         """Download dataset data as a local file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
-        For premium geographies (those with `is_public_data` set to False), you need a subscription to the geography.
+        For premium datasets (those with `is_public_data` set to False), you need a subscription to the dataset.
         Check the subscription guides for more information.
 
         Args:
