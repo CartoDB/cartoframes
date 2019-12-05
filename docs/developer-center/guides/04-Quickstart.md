@@ -905,11 +905,32 @@ Map(color_continuous_layer(isochrones_cdf, 'sum_POPCY', 'Population'))
     </iframe>
 </div>
 
-We can see that the area of influence of the store on the right, is the one with the highest population. Let's go a bit further and calculate and visualize the average revenue per person.
+We can see that the area of influence of the store on the right, is the one with the highest population.
+
+### Save your data
+
+Let's go a bit further and calculate the **average revenue per person**:
 
 ```python
 stores_cdf['rev_pop'] = stores_cdf['revenue']/isochrones_cdf['sum_POPCY']
-Map(size_continuous_layer(stores_cdf, 'rev_pop', 'Revenue per person ($)'))
+```
+
+The `CartoDataFrame` class allows you to save your data directly to your CARTO account, so you can use it in different notebooks or Python scripts directly. Once it's saved, you can download it whenever you want, but also use it in your visualizations using the `table_name` you've given to the dataset. For example, let's save the CartoDataFrame `stores_cdf` under the name of `starbucks_stores_analysis` in CARTO:
+
+```python
+stores_cdf.to_carto('starbucks_stores_analysis')
+```
+
+If you need to get the data in a different notebook, you can simply run:
+
+```python
+stores_cdf = CartoDataFrame.from_carto('starbucks_stores_analysis')
+```
+
+Now, using the table name (`starbucks_stores_analysis`) we can visualize the table directly from CARTO as follows:
+
+```python
+Map(size_continuous_layer('starbucks_stores_analysis', 'rev_pop', 'Revenue per person ($)'))
 ```
 
 <div class="example-map">
@@ -926,30 +947,6 @@ Map(size_continuous_layer(stores_cdf, 'rev_pop', 'Revenue per person ($)'))
 As we can see, there are clearly 3 stores that have lower revenue per person. This insight will help us to focus on them in further analyses.
 
 To learn more about discovering the data you want, check out the [data discovery guide](/developers/cartoframes/guides/Data-discovery). To learn more about enriching your data check out the [data enrichment guide](/developers/cartoframes/guides/Data-enrichment/).
-
-### Save your data
-
-The `CartoDataFrame` class allows you to save your data directly to your CARTO account, so you can use it in different notebooks or Python scripts directly. Once it's saved, you can download it whenever you want, but also use it in your visualizations using the `table_name` you've given to the dataset. For example, let's save the CartoDataFrame `stores_cdf` under the name of `starbucks_stores_analysis` in CARTO:
-
-```python
-stores_cdf.to_carto('starbucks_stores_analysis')
-```
-
-Now, we can visualize the table directly from CARTO as follows:
-
-```python
-# Using the CartoDataFrame:
-# Map(size_continuous_layer(stores_cdf, 'rev_pop', 'Revenue per person ($)'))
-
-# Using the table name:
-Map(size_continuous_layer('starbucks_stores_analysis', 'rev_pop', 'Revenue per person ($)'))
-```
-
-If you need to get the data in a different notebook, you can simply run:
-
-```python
-stores_cdf = CartoDataFrame.from_carto('starbucks_stores_analysis')
-```
 
 ### Publish and share your results
 
