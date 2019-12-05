@@ -47,6 +47,7 @@ class BigQueryClient(object):
 
     def _init_clients(self):
         do_credentials = self._credentials.get_do_credentials()
+        print(do_credentials.access_token)
         google_credentials = GoogleCredentials(do_credentials.access_token)
 
         self.bq_client = bigquery.Client(
@@ -54,7 +55,7 @@ class BigQueryClient(object):
             credentials=google_credentials)
 
         self.gcs_client = storage.Client(
-            project=do_credentials.gcp_execution_project,
+            project=do_credentials.bq_project,
             credentials=google_credentials
         )
 
