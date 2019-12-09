@@ -655,8 +655,8 @@ class DataObsClient(object):
 
         return self._fetch(query, decode_geom=False, table_name=persist_as)
 
-    def _fetch(self, query, table_name=None):
-        cdf = read_carto(query, self._credentials)
+    def _fetch(self, query, decode_geom=False, table_name=None):
+        cdf = read_carto(query, self._credentials, decode_geom=decode_geom)
         if table_name:
             cdf.to_carto(table_name, self._credentials)
         return cdf
