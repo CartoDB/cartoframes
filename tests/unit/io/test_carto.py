@@ -6,8 +6,8 @@ from shapely.geometry import Point
 
 from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
-from cartoframes.io.carto import read_carto
 from cartoframes.core.managers.context_manager import ContextManager
+from cartoframes.io.carto import read_carto, to_carto, copy_table, create_table_from_query
 
 
 CREDENTIALS = Credentials('fake_user', 'fake_api_key')
@@ -43,21 +43,15 @@ def test_read_carto(mocker):
 
 
 def test_read_carto_wrong_source(mocker):
-    # Given
-    mocker.patch.object(ContextManager, 'copy_to')
-
     # When
     with pytest.raises(ValueError) as e:
-        read_carto(1234, CREDENTIALS)
+        read_carto(1234)
 
     # Then
     assert str(e.value) == 'Wrong source. You should provide a valid table_name or SQL query.'
 
 
 def test_read_carto_wrong_credentials(mocker):
-    # Given
-    mocker.patch.object(ContextManager, 'copy_to')
-
     # When
     with pytest.raises(AttributeError) as e:
         read_carto('__source__', 1234)
@@ -181,3 +175,123 @@ def test_read_carto_decode_geom_false(mocker):
 
     # Then
     assert expected.equals(cdf)
+
+
+def test_to_carto_wrong_dataframe(mocker):
+    # When
+    with pytest.raises(ValueError) as e:
+        to_carto(1234, '')
+
+    # Then
+    assert str(e.value) == 'Wrong dataframe. You should provide a valid DataFrame instance.'
+
+
+def test_to_carto_wrong_table_name(mocker):
+    # Given
+    df = GeoDataFrame({'geometry': [Point([0, 0])]})
+
+    # When
+    with pytest.raises(ValueError) as e:
+        to_carto(df, 1234)
+
+    # Then
+    assert str(e.value) == 'Wrong table name. You should provide a valid table name.'
+
+
+def test_to_carto_wrong_credentials(mocker):
+    # Given
+    df = GeoDataFrame({'geometry': [Point([0, 0])]})
+
+    # When
+    with pytest.raises(AttributeError) as e:
+        to_carto(df, '__table_name__', 1234)
+
+    # Then
+    assert str(e.value) == 'Credentials attribute is required. Please pass a `Credentials` ' + \
+                           'instance or use the `set_default_credentials` function.'
+
+
+def test_to_carto_wrong_if_exists(mocker):
+    # Given
+    df = GeoDataFrame({'geometry': [Point([0, 0])]})
+
+    # When
+    with pytest.raises(ValueError) as e:
+        to_carto(df, '__table_name__', if_exists='keep_calm')
+
+    # Then
+    assert str(e.value) == 'Wrong option. You should provide: fail, replace, append.'
+
+
+def test_copy_table_wrong_table_name(mocker):
+    # When
+    with pytest.raises(ValueError) as e:
+        copy_table(1234, '__new_table_name__')
+
+    # Then
+    assert str(e.value) == 'Wrong table name. You should provide a valid table name.'
+
+
+def test_copy_table_wrong_new_table_name(mocker):
+    # When
+    with pytest.raises(ValueError) as e:
+        copy_table('__table_name__', 1234)
+
+    # Then
+    assert str(e.value) == 'Wrong new table name. You should provide a valid table name.'
+
+
+def test_copy_table_wrong_credentials(mocker):
+    # When
+    with pytest.raises(AttributeError) as e:
+        copy_table('__table_name__', '__new_table_name__', 1234)
+
+    # Then
+    assert str(e.value) == 'Credentials attribute is required. Please pass a `Credentials` ' + \
+                           'instance or use the `set_default_credentials` function.'
+
+
+def test_copy_table_wrong_if_exists(mocker):
+    # When
+    with pytest.raises(ValueError) as e:
+        copy_table('__table_name__', '__new_table_name__', if_exists='keep_calm')
+
+    # Then
+    assert str(e.value) == 'Wrong option. You should provide: fail, replace, append.'
+
+
+def test_create_table_from_query_wrong_query(mocker):
+    # When
+    with pytest.raises(ValueError) as e:
+        create_table_from_query('WRONG SQL QUERY', '__new_table_name__')
+
+    # Then
+    assert str(e.value) == 'Wrong query. You should provide a valid SQL query.'
+
+
+def test_create_table_from_query_wrong_new_table_name(mocker):
+    # When
+    with pytest.raises(ValueError) as e:
+        create_table_from_query('SELECT * FROM table', 1234)
+
+    # Then
+    assert str(e.value) == 'Wrong new table name. You should provide a valid table name.'
+
+
+def test_create_table_from_query_wrong_credentials(mocker):
+    # When
+    with pytest.raises(AttributeError) as e:
+        create_table_from_query('SELECT * FROM table', '__new_table_name__', 1234)
+
+    # Then
+    assert str(e.value) == 'Credentials attribute is required. Please pass a `Credentials` ' + \
+                           'instance or use the `set_default_credentials` function.'
+
+
+def test_create_table_from_query_wrong_if_exists(mocker):
+    # When
+    with pytest.raises(ValueError) as e:
+        create_table_from_query('SELECT * FROM table', '__new_table_name__', if_exists='keep_calm')
+
+    # Then
+    assert str(e.value) == 'Wrong option. You should provide: fail, replace, append.'

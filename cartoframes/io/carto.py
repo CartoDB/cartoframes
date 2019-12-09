@@ -235,10 +235,10 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
         if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
     """
     if not isinstance(table_name, str):
-        raise ValueError('Wrong table name. You should provide a valid string.')
+        raise ValueError('Wrong table name. You should provide a valid table name.')
 
     if not isinstance(new_table_name, str):
-        raise ValueError('Wrong new table name. You should provide a valid string.')
+        raise ValueError('Wrong new table name. You should provide a valid table name.')
 
     if if_exists not in IF_EXISTS_OPTIONS:
         raise ValueError('Wrong option. You should provide: {}.'.format(', '.join(IF_EXISTS_OPTIONS)))
@@ -267,7 +267,7 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
         raise ValueError('Wrong query. You should provide a valid SQL query.')
 
     if not isinstance(new_table_name, str):
-        raise ValueError('Wrong table name. You should provide a valid table name.')
+        raise ValueError('Wrong new table name. You should provide a valid table name.')
 
     if if_exists not in IF_EXISTS_OPTIONS:
         raise ValueError('Wrong option. You should provide: {}.'.format(', '.join(IF_EXISTS_OPTIONS)))
