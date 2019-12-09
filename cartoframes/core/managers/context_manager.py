@@ -11,6 +11,7 @@ from ...io.dataset_info import DatasetInfo
 
 from ...auth.defaults import get_default_credentials
 
+from ...utils.geom_utils import encode_geometry
 from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
 from ...utils.columns import Column, get_dataframe_columns_info, obtain_converters, \
                              date_columns_names, normalize_name
@@ -307,8 +308,8 @@ def _compute_copy_data(df, columns):
         for column in columns:
             val = df.at[index, column.name]
 
-            if column.is_geom and hasattr(val, 'wkt'):
-                val = 'SRID=4326;{}'.format(val.wkt)
+            if column.is_geom:
+                val = encode_geometry(val)
 
             row_data.append(encode_row(val))
 
