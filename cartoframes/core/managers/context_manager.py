@@ -58,6 +58,9 @@ class ContextManager(object):
                             'Please choose a different `table_name` or use '
                             'if_exists="replace" to overwrite it'.format(
                                 table_name=table_name, schema=schema))
+        else:
+            # 'append'
+            pass
 
         return self._copy_from(cdf, table_name, columns)
 
@@ -74,6 +77,9 @@ class ContextManager(object):
                             'Please choose a different `table_name` or use '
                             'if_exists="replace" to overwrite it'.format(
                                 table_name=table_name, schema=schema))
+        else:
+            # 'append'
+            pass
 
     def has_table(self, table_name, schema=None):
         query = self.compute_query(table_name, schema)

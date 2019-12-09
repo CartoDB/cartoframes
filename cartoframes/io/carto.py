@@ -13,6 +13,8 @@ from ..utils.utils import is_sql_query
 
 GEOM_COLUMN_NAME = 'the_geom'
 
+IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
+
 
 def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True):
     """
@@ -80,6 +82,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     if not isinstance(table_name, str):
         raise ValueError('Wrong table name. You should provide a valid table name.')
+
+    if if_exists not in IF_EXISTS_OPTIONS:
+        raise ValueError('Wrong option. You should provide: {}.'.format(', '.join(IF_EXISTS_OPTIONS)))
 
     context_manager = ContextManager(credentials)
 
@@ -227,14 +232,16 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
         new_table_name(str, optional): name for the new table.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
-        if_exists (str, optional): 'fail', 'replace'. Default is 'fail'.
+        if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
     """
     if not isinstance(table_name, str):
         raise ValueError('Wrong table name. You should provide a valid string.')
 
     if not isinstance(new_table_name, str):
         raise ValueError('Wrong new table name. You should provide a valid string.')
-    pass
+
+    if if_exists not in IF_EXISTS_OPTIONS:
+        raise ValueError('Wrong option. You should provide: {}.'.format(', '.join(IF_EXISTS_OPTIONS)))
 
     context_manager = ContextManager(credentials)
 
@@ -254,14 +261,16 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
         new_table_name(str): name for the new table.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
-        if_exists (str, optional): 'fail', 'replace'. Default is 'fail'.
+        if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
     """
     if not is_sql_query(query):
         raise ValueError('Wrong query. You should provide a valid SQL query.')
 
     if not isinstance(new_table_name, str):
         raise ValueError('Wrong table name. You should provide a valid table name.')
-    pass
+
+    if if_exists not in IF_EXISTS_OPTIONS:
+        raise ValueError('Wrong option. You should provide: {}.'.format(', '.join(IF_EXISTS_OPTIONS)))
 
     context_manager = ContextManager(credentials)
 
