@@ -7,6 +7,7 @@ from ...io.carto import read_carto, to_carto, delete_table
 QUOTA_SERVICE = 'isolines'
 DATA_RANGE_KEY = 'data_range'
 RANGE_LABEL_KEY = 'range_label'
+CARTO_INDEX_KEY = 'cartodb_id'
 
 
 class Isolines(Service):
@@ -50,6 +51,9 @@ class Isolines(Service):
             quality: (int, optional): Allows you to reduce the quality of the polygons in favor of the response time.
                 Admitted values: 1/2/3.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
+            source_col (str, optional): string indicating the source column name. This column will be used to reference
+                the generated isolines with the original geometry. By default it uses the `cartodb_id` column if exists,
+                or the index of the source `DataFrame`.
 
         Returns:
             A named-tuple ``(data, metadata)`` containing a ``data`` :py:class:`CartoDataFrame
@@ -96,6 +100,9 @@ class Isolines(Service):
             quality: (int, optional): Allows you to reduce the quality of the polygons in favor of the response time.
                 Admitted values: 1/2/3.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
+            source_col (str, optional): string indicating the source column name. This column will be used to reference
+                the generated isolines with the original geometry. By default it uses the `cartodb_id` column if exists,
+                or the index of the source `DataFrame`.
 
         Returns:
             A named-tuple ``(data, metadata)`` containing a ``data`` :py:class:`CartoDataFrame
@@ -122,7 +129,8 @@ class Isolines(Service):
                    quality=None,
                    exclusive=True,
                    function=None,
-                   geom_col=None):
+                   geom_col=None,
+                   source_col=None):
         metadata = {}
 
         source_manager = SourceManager(source, self._credentials)
@@ -148,11 +156,14 @@ class Isolines(Service):
                 raise Exception('No valid geometry found. Please provide an input source with ' +
                                 'a valid geometry or specify the "geom_col" param with a geometry column.')
 
-            to_carto(source_cdf, temporary_table_name, self._credentials, log_enabled=False)
+            index_as_cartodbid = CARTO_INDEX_KEY not in source_cdf.columns
+
+            to_carto(source_cdf, temporary_table_name, self._credentials, index=index_as_cartodbid,
+                     index_col=CARTO_INDEX_KEY, log_enabled=False)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
 
-        source_columns = source_manager.get_column_names()
-        source_has_id = 'cartodb_id' in source_columns
+        if source_col is None:
+            source_col = CARTO_INDEX_KEY
 
         iso_function = '_cdb_{function}_exception_safe'.format(function=function)
         # TODO: use **options argument?
@@ -168,10 +179,10 @@ class Isolines(Service):
         iso_options = "ARRAY[{opts}]".format(opts=','.join(iso_options))
         iso_ranges = 'ARRAY[{ranges}]'.format(ranges=','.join([str(r) for r in ranges]))
 
-        sql = _areas_query(
-            source_query, source_columns, iso_function, mode, iso_ranges, iso_options, source_has_id or exclusive)
+        sql = _areas_query(source_query, source_col, iso_function, mode, iso_ranges, iso_options)
+
         if exclusive:
-            sql = _rings_query(sql, source_has_id)
+            sql = _rings_query(sql)
 
         # Execute and download the query to generate the isolines
         cdf = read_carto(sql, self._credentials)
@@ -185,7 +196,7 @@ class Isolines(Service):
             to_carto(cdf, table_name, self._credentials, if_exists, log_enabled=dry_run)
 
         if source_manager.is_dataframe():
-            del cdf['cartodb_id']
+            del cdf[CARTO_INDEX_KEY]
 
         if temporary_table_name:
             delete_table(temporary_table_name, self._credentials, log_enabled=False)
@@ -197,20 +208,12 @@ class Isolines(Service):
         return result
 
 
-def _areas_query(source_query, source_columns, iso_function, mode, iso_ranges, iso_options, with_source_id):
-    select_source_id = 'source_id,' if with_source_id else ''
-    source_id = ''
-    if with_source_id:
-        if 'cartodb_id' in source_columns:
-            source_id = '_source.cartodb_id AS source_id,'
-        else:
-            source_id = 'row_number() over () AS source_id,'
-
+def _areas_query(source_query, source_col, iso_function, mode, iso_ranges, iso_options):
     return """
         WITH _source AS ({source_query}),
         _iso_areas AS (
             SELECT
-              {source_id}
+              _source.{source_col} AS source_id,
               {iso_function}(
                   _source.the_geom,
                   '{mode}',
@@ -221,31 +224,25 @@ def _areas_query(source_query, source_columns, iso_function, mode, iso_ranges, i
         )
         SELECT
           row_number() OVER () AS cartodb_id,
-          {select_source_id}
+          source_id,
           (_area).data_range,
           (_area).the_geom
         FROM _iso_areas
     """.format(
-        iso_function=iso_function,
         source_query=source_query,
-        source_id=source_id,
-        select_source_id=select_source_id,
+        source_col=source_col,
+        iso_function=iso_function,
         mode=mode,
         iso_ranges=iso_ranges,
         iso_options=iso_options
     )
 
 
-def _rings_query(areas_query, with_source_id):
-    if with_source_id:
-        select_source_id = 'source_id,'
-    else:
-        select_source_id = 'row_number() OVER () AS source_id,'
-
+def _rings_query(areas_query):
     return """
         SELECT
             cartodb_id,
-            {select_source_id}
+            source_id,
             data_range,
             COALESCE(
               LAG(data_range, 1) OVER (PARTITION BY source_id ORDER BY data_range),
@@ -257,6 +254,5 @@ def _rings_query(areas_query, with_source_id):
             ) AS the_geom
         FROM ({areas_query}) _areas_query
     """.format(
-        select_source_id=select_source_id,
         areas_query=areas_query
     )
