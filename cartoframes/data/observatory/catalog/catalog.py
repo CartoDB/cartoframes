@@ -44,7 +44,6 @@ class Catalog(object):
         On the other hand, you can use lists of `Variable` instances, :py:attr:`Variable.id`, or
         :py:attr:`Variable.slug` to enrich your own data.
 
-
     Every `Dataset` is related to a `Geography`. You can have for example, demographics data at the Census
     tract, block groups or blocks levels.
 
@@ -53,6 +52,7 @@ class Catalog(object):
 
     The two main entities of the Catalog (`Dataset` and `Geography`) are related to other entities, that
     are useful for a hierarchical categorization and discovery of available data in the Data Observatory:
+
       - :obj:`Category`: Groups datasets of the same topic, for example, `demographics`, `financial`, etc.
       - :obj:`Country`: Groups datasets available by country
       - :obj:`Provider`: Gives you information about the provider of the source data
