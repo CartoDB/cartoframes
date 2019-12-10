@@ -234,7 +234,7 @@ class TestMapPublication(object):
         vmap = Map(Layer('fake_table', credentials=self.credentials))
 
         name = 'cf_publish'
-        kuviz_dict = vmap.publish(name)
+        kuviz_dict = vmap.publish(name, None)
         self.assert_kuviz_dict(kuviz_dict, name, 'link')
         mock_set_content.assert_called_once_with(
             _airship_path=None,
@@ -270,7 +270,7 @@ class TestMapPublication(object):
         )
 
         name = 'cf_publish'
-        kuviz_dict = vmap.publish(name)
+        kuviz_dict = vmap.publish(name, None)
         self.assert_kuviz_dict(kuviz_dict, name, 'link')
         mock_set_content.assert_called_once_with(
             _airship_path=None,
@@ -295,7 +295,7 @@ class TestMapPublication(object):
         map = Map(Layer(Source('fake_table', credentials=self.credentials)))
 
         name = 'cf_publish'
-        kuviz_dict = map.publish(name, credentials=self.credentials, password="1234")
+        kuviz_dict = map.publish(name, '1234', credentials=self.credentials)
         self.assert_kuviz_dict(kuviz_dict, name, 'password')
 
     def test_map_publish_deletion(self, mocker):
@@ -304,7 +304,7 @@ class TestMapPublication(object):
         map = Map(Layer(Source('fake_table', credentials=self.credentials)))
 
         name = 'cf_publish'
-        map.publish(name, credentials=self.credentials)
+        map.publish(name, None, credentials=self.credentials)
         response = map.delete_publication()
 
         assert response is True
@@ -315,7 +315,7 @@ class TestMapPublication(object):
         map = Map(Layer(Source('fake_table', credentials=self.credentials)))
 
         name = 'cf_publish'
-        map.publish(name, credentials=self.credentials)
+        map.publish(name, None, credentials=self.credentials)
 
         new_name = 'cf_update'
         kuviz_dict = map.update_publication(new_name, password=None)
@@ -328,7 +328,7 @@ class TestMapPublication(object):
         map = Map(Layer(Source('fake_table', credentials=self.credentials)))
 
         name = 'cf_publish'
-        map.publish(name, credentials=self.credentials)
-        kuviz_dict = map.update_publication(name, password="1234")
+        map.publish(name, None, credentials=self.credentials)
+        kuviz_dict = map.update_publication(name, '1234"')
 
         self.assert_kuviz_dict(kuviz_dict, name, 'password')

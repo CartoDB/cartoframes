@@ -274,23 +274,23 @@ class Map(object):
             '_airship_path': self._airship_path
         }
 
-    def publish(self, name, table_name=None, credentials=None, password=None):
+    def publish(self, name, password, table_name=None, credentials=None):
         """Publish the map visualization as a CARTO custom visualization (aka Kuviz).
 
         Args:
-            name (str): The Kuviz name on CARTO
+            name (str): The Kuviz name on CARTO.
+            password (str): By setting it, your Kuviz will be protected by
+                password. When someone tries to show the Kuviz, the password
+                will be requested. To disable password you must set it to None.
             table_name (str, optional): Desired table name for the dataset in CARTO.
                 It is required for working with local data (we need to upload it to CARTO).
                 If name does not conform to SQL naming conventions, it will be
-                'normalized' (e.g., all lower case, adding `_` in place of spaces
+                'normalized' (e.g., all lower case, adding `_` in place of spaces.
                 and other special characters.
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 A Credentials instance. If not provided, the credentials will be automatically
                 obtained from the default credentials if available. It is used to create the
-                publication and also to save local data (if exists) into your CARTO account
-            password (str, optional): By setting it, your Kuviz will be protected by
-                password. When someone tries to show the Kuviz, the password
-                will be requested
+                publication and also to save local data (if exists) into your CARTO account.
 
         Example:
 
@@ -301,7 +301,7 @@ class Map(object):
                 from cartoframes.viz import Map, Layer
 
                 tmap = Map(Layer('tablename'))
-                tmap.publish('Custom Map Title')
+                tmap.publish('Custom Map Title', password=None)
 
         """
         self._publisher = _get_publisher(table_name, credentials)
