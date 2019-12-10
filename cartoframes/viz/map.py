@@ -275,12 +275,12 @@ class Map(object):
         }
 
     def publish(self, name, password, table_name=None, credentials=None):
-        """Publish the map visualization as a CARTO custom visualization (aka Kuviz).
+        """Publish the map visualization as a CARTO custom visualization.
 
         Args:
-            name (str): The Kuviz name on CARTO.
-            password (str): By setting it, your Kuviz will be protected by
-                password. When someone tries to show the Kuviz, the password
+            name (str): The visualization name on CARTO.
+            password (str): By setting it, your visualization will be protected by
+                password. When someone tries to show the visualization, the password
                 will be requested. To disable password you must set it to None.
             table_name (str, optional): Desired table name for the dataset in CARTO.
                 It is required for working with local data (we need to upload it to CARTO).
@@ -311,16 +311,16 @@ class Map(object):
         return self._publisher.publish(html, name, password)
 
     def delete_publication(self):
-        """Delete the published map Kuviz."""
+        """Delete the published map visualization."""
         return self._publisher.delete()
 
     def update_publication(self, name, password):
-        """Update the published map Kuviz.
+        """Update the published map visualization.
 
         Args:
-            name (str): The Kuviz name on CARTO
-            password (str): setting it your Kuviz will be protected by
-                password and using `None` the Kuviz will be public
+            name (str): The visualization name on CARTO.
+            password (str): setting it your visualization will be protected by
+                password and using `None` the visualization will be public.
         """
 
         html = self._get_publication_html(name)
@@ -328,7 +328,7 @@ class Map(object):
 
     @staticmethod
     def all_publications(credentials=None):
-        """Get all map Kuviz published by the current user.
+        """Get all map visualization published by the current user.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
