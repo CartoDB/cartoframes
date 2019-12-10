@@ -76,7 +76,7 @@ class BigQueryClient(object):
             os.remove(tablename)
 
         # Import from GCS To BigQuery
-        dataset_ref = self.bq_client.dataset(self._do_credentials.bq_dataset, project=self._do_credentials.bq_project)
+        dataset_ref = self.bq_client.dataset(self.bq_dataset, project=self.bq_project)
         table_ref = dataset_ref.table(tablename)
         schema_wrapped = [bigquery.SchemaField(column, dtype) for column, dtype in schema.items()]
 
