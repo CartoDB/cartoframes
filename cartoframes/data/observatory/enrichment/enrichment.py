@@ -1,5 +1,5 @@
-from .core.logger import log
 from .enrichment_service import EnrichmentService, prepare_variables, AGGREGATION_DEFAULT, AGGREGATION_NONE
+from ....core.logger import log
 
 
 class Enrichment(EnrichmentService):

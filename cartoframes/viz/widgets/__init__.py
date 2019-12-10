@@ -11,6 +11,7 @@ from .formula_widget import formula_widget
 from .histogram_widget import histogram_widget
 from .time_series_widget import time_series_widget
 
+
 __all__ = [
     'animation_widget',
     'category_widget',
@@ -19,9 +20,3 @@ __all__ = [
     'histogram_widget',
     'time_series_widget',
 ]
-
-
-def _inspect(widget):
-    import inspect
-    lines = inspect.getsource(widget)
-    print(lines)
