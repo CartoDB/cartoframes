@@ -375,9 +375,9 @@
             "file": "publish_a_public_visualization",
             "path": "publish_and_share"
         }, {
-            "title": "Publish Private Visualization",
-            "desc": "Publish a private visualization",
-            "file": "publish_a_private_visualization",
+            "title": "Publish Protected Visualization",
+            "desc": "Publish a protected visualization",
+            "file": "publish_a_protected_visualization",
             "path": "publish_and_share"
         }]
     }, {
