@@ -47,7 +47,6 @@ class BigQueryClient(object):
 
     def _init_clients(self):
         do_credentials = self._credentials.get_do_credentials()
-        print(do_credentials.access_token)
         google_credentials = GoogleCredentials(do_credentials.access_token)
 
         self.bq_client = bigquery.Client(
@@ -59,6 +58,7 @@ class BigQueryClient(object):
             credentials=google_credentials
         )
 
+        self.gcp_execution_project = do_credentials.gcp_execution_project
         self.public_data_project = do_credentials.bq_public_project
         self.user_data_project = do_credentials.bq_project
         self.dataset = do_credentials.bq_dataset
@@ -68,7 +68,7 @@ class BigQueryClient(object):
     @refresh_clients
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
         # Upload file to Google Cloud Storage
-        bucket = self.gcs_client.bucket(self.bucket_name)
+        bucket = self.gcs_client.get_bucket(self.bucket_name)
         blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
         dataframe.to_csv(tablename, index=False, header=False)
         try:
