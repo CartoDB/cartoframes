@@ -220,7 +220,7 @@ def test_to_carto_wrong_if_exists(mocker):
         to_carto(df, '__table_name__', if_exists='keep_calm')
 
     # Then
-    assert str(e.value) == 'Wrong option. You should provide: fail, replace, append.'
+    assert str(e.value) == 'Wrong option for the `if_exists` param. You should provide: fail, replace, append.'
 
 
 def test_copy_table_wrong_table_name(mocker):
@@ -257,7 +257,7 @@ def test_copy_table_wrong_if_exists(mocker):
         copy_table('__table_name__', '__new_table_name__', if_exists='keep_calm')
 
     # Then
-    assert str(e.value) == 'Wrong option. You should provide: fail, replace, append.'
+    assert str(e.value) == 'Wrong option for the `if_exists` param. You should provide: fail, replace, append.'
 
 
 def test_create_table_from_query_wrong_query(mocker):
@@ -294,4 +294,4 @@ def test_create_table_from_query_wrong_if_exists(mocker):
         create_table_from_query('SELECT * FROM table', '__new_table_name__', if_exists='keep_calm')
 
     # Then
-    assert str(e.value) == 'Wrong option. You should provide: fail, replace, append.'
+    assert str(e.value) == 'Wrong option for the `if_exists` param. You should provide: fail, replace, append.'
