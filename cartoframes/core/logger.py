@@ -12,12 +12,27 @@ def init_logger():
     return log
 
 
-def log_debug():
-    log.setLevel(logging.DEBUG)
+def set_log_level(level):
+    """Set the level of the log in the library.
 
+    Args:
+        level (str): log level name. By default it's set to "info". Valid log levels are:
+        critical, error, warning, info, debug, notset.
 
-def log_info():
-    log.setLevel(logging.INFO)
+    """
+    levels = {
+        'critical': logging.CRITICAL,
+        'error': logging.ERROR,
+        'warning': logging.WARNING,
+        'info': logging.INFO,
+        'debug': logging.DEBUG,
+        'notset': logging.NOTSET
+    }
+
+    if level not in levels:
+        return ValueError('Wrong log level. Valid log levels are: critical, error, warning, info, debug, notset.')
+
+    log.setLevel(levels[level])
 
 
 log = init_logger()
