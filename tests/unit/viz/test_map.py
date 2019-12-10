@@ -9,7 +9,7 @@ from cartoframes.core.managers.context_manager import ContextManager
 
 from .utils import build_cartodataframe
 
-from ..mocks.kuviz_mock import CartoKuvizMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
+from ..mocks.kuviz_mock import CartoKuvizMock
 
 
 def setup_mocks(mocker):
@@ -235,7 +235,7 @@ class TestMapPublication(object):
 
         name = 'cf_publish'
         kuviz_dict = vmap.publish(name)
-        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PUBLIC)
+        self.assert_kuviz_dict(kuviz_dict, name, 'link')
         mock_set_content.assert_called_once_with(
             _airship_path=None,
             _carto_vl_path=None,
@@ -271,7 +271,7 @@ class TestMapPublication(object):
 
         name = 'cf_publish'
         kuviz_dict = vmap.publish(name)
-        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PUBLIC)
+        self.assert_kuviz_dict(kuviz_dict, name, 'link')
         mock_set_content.assert_called_once_with(
             _airship_path=None,
             _carto_vl_path=None,
@@ -296,7 +296,7 @@ class TestMapPublication(object):
 
         name = 'cf_publish'
         kuviz_dict = map.publish(name, credentials=self.credentials, password="1234")
-        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PASSWORD)
+        self.assert_kuviz_dict(kuviz_dict, name, 'password')
 
     def test_map_publish_deletion(self, mocker):
         setup_mocks(mocker)
@@ -320,7 +320,7 @@ class TestMapPublication(object):
         new_name = 'cf_update'
         kuviz_dict = map.update_publication(new_name, password=None)
 
-        self.assert_kuviz_dict(kuviz_dict, new_name, PRIVACY_PUBLIC)
+        self.assert_kuviz_dict(kuviz_dict, new_name, 'link')
 
     def test_map_publish_update_password(self, mocker):
         setup_mocks(mocker)
@@ -331,4 +331,4 @@ class TestMapPublication(object):
         map.publish(name, credentials=self.credentials)
         kuviz_dict = map.update_publication(name, password="1234")
 
-        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PASSWORD)
+        self.assert_kuviz_dict(kuviz_dict, name, 'password')

@@ -110,4 +110,16 @@ def _get_kuviz_manager(auth_client):
 
 
 def kuviz_to_dict(kuviz):
-    return {'id': kuviz.id, 'url': kuviz.url, 'name': kuviz.name, 'privacy': kuviz.privacy}
+    return {
+        'id': kuviz.id,
+        'url': kuviz.url,
+        'name': kuviz.name,
+        'privacy': rename_privacy(kuviz.privacy)
+    }
+
+
+def rename_privacy(privacy):
+    return {
+        'public': 'link',
+        'password': 'password'
+    }[privacy]
