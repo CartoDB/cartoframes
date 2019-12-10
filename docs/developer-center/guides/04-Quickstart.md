@@ -1,7 +1,6 @@
 ## Quickstart
 
 ### Introduction
-```
 
 For additional ways to install CARTOframes, check out the [Installation Guide](/developers/cartoframes/guides/Installation).
 
