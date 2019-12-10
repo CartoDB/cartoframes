@@ -4,6 +4,7 @@ import re
 import sys
 
 from unidecode import unidecode
+from collections import namedtuple
 
 from .utils import dtypes2pg, pg2dtypes, PG_NULL
 from .geom_utils import decode_geometry, detect_encoding_type
@@ -92,62 +93,54 @@ class Column(object):
         return value
 
 
+ColumnInfo = namedtuple('ColumnInfo', ['name', 'dbname', 'dbtype', 'is_geom'])
+
+
 def _extract_pgtype(fields):
     if 'pgtype' in fields:
         return fields['pgtype']
     return None
 
 
-class DataframeColumnInfo(object):
-    def __init__(self, name, dtype=None, geom_type=None):
-        self.name = name
-        self.dbname = normalize_name(name)
-        if str(dtype) == 'geometry':
-            self.is_geom = True
-            self.dbtype = 'geometry({}, 4326)'.format(geom_type or 'Point')
-        else:
-            self.is_geom = False
-            self.dbtype = dtypes2pg(dtype)
+def get_dataframe_columns_info(df):
+    columns = []
+    geom_type = _get_geometry_type(df)
+    df_columns = [(name, df.dtypes[name]) for name in df.columns]
 
-    def __repr__(self):
-        return '{} {} {}'.format(
-            self.name,
-            self.dbname,
-            self.dbtype
-        )
+    for name, dtype in df_columns:
+        if _is_valid_column(name):
+            columns.append(_compute_column_info(name, dtype, geom_type))
+
+    return columns
 
 
-class DataframeColumnsInfo(object):
-    def __init__(self, df):
-        geom_column = self._get_geom_col_name(df)
-        geom_type = self._get_geometry_type(df, geom_column)
-        self.columns = self._get_columns_info(df, geom_type)
+def _get_geom_col_name(df):
+    return getattr(df, '_geometry_column_name', None)
 
-    def __repr__(self):
-        return str(self.columns)
 
-    def _get_geom_col_name(self, df):
-        return getattr(df, '_geometry_column_name', None)
+def _get_geometry_type(df):
+    geom_column = _get_geom_col_name(df)
+    if geom_column in df:
+        first_geom = _first_value(df[geom_column])
+        if first_geom:
+            enc_type = detect_encoding_type(first_geom)
+            return decode_geometry(first_geom, enc_type).geom_type
 
-    def _get_columns_info(self, df, geom_type):
-        columns = []
-        df_columns = [(name, df.dtypes[name]) for name in df.columns]
 
-        for name, dtype in df_columns:
-            if self._is_valid_column(name):
-                columns.append(DataframeColumnInfo(name, dtype, geom_type))
+def _is_valid_column(name):
+    return name.lower() not in Column.FORBIDDEN_COLUMN_NAMES
 
-        return columns
 
-    def _is_valid_column(self, name):
-        return name.lower() not in Column.FORBIDDEN_COLUMN_NAMES
-
-    def _get_geometry_type(self, df, geom_column):
-        if geom_column in df:
-            first_geom = _first_value(df[geom_column])
-            if first_geom:
-                enc_type = detect_encoding_type(first_geom)
-                return decode_geometry(first_geom, enc_type).geom_type
+def _compute_column_info(name, dtype=None, geom_type=None):
+    name = name
+    dbname = normalize_name(name)
+    if str(dtype) == 'geometry':
+        dbtype = 'geometry({}, 4326)'.format(geom_type or 'Point')
+        is_geom = True
+    else:
+        dbtype = dtypes2pg(dtype)
+        is_geom = False
+    return ColumnInfo(name, dbname, dbtype, is_geom)
 
 
 def normalize_names(column_names):

@@ -41,9 +41,13 @@ class Map(object):
         show_info (bool, optional): Whether to display center and zoom information in the
           map or not. It is False by default.
         is_static (bool, optional): Default False. If True, instead of showing and interactive
-          map, a png image will be displayed.
-        theme (string, optional): Use a different UI theme
-        title (string, optional): Title to label the map
+          map, a png image will be displayed. Warning: UI components are not properly rendered in
+          the static view, we recommend to remove legends and widgets before rendering a static map.
+        theme (string, optional): Use a different UI theme (legends, widgets, popups). Available
+          themes are `dark` and `ligth`. By default, it is `light` for `Positron` and `Voyager`
+          basemaps and `dark` for `DarkMatter` basemap.
+        title (string, optional): Title to label the map. and will be displayed in the
+          default legend.
         description (string, optional): Text that describes the map and will be displayed in the
           default legend after the title.
 
@@ -275,8 +279,8 @@ class Map(object):
 
         Args:
             name (str): The Kuviz name on CARTO
-            table_name (str, optional): Desired table name for the dataset on CARTO.
-                It is required working with local data (we need to upload it to CARTO)
+            table_name (str, optional): Desired table name for the dataset in CARTO.
+                It is required for working with local data (we need to upload it to CARTO).
                 If name does not conform to SQL naming conventions, it will be
                 'normalized' (e.g., all lower case, adding `_` in place of spaces
                 and other special characters.
@@ -284,8 +288,8 @@ class Map(object):
                 A Credentials instance. If not provided, the credentials will be automatically
                 obtained from the default credentials if available. It is used to create the
                 publication and also to save local data (if exists) into your CARTO account
-            password (str, optional): setting it your Kuviz will be protected by
-                password. When someone will try to show the Kuviz, the password
+            password (str, optional): By setting it, your Kuviz will be protected by
+                password. When someone tries to show the Kuviz, the password
                 will be requested
 
         Example:

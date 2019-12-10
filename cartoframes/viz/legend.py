@@ -13,7 +13,7 @@ class Legend(object):
         prop (str, optional):
             'color', 'width', 'strokeColor', or 'strokeWidth'.
         dynamic (boolean, optional):
-            Update an render the legend depending on viewport changes.
+            Update and render the legend depending on viewport changes.
             Defaults to ``True``.
         title (str, optional):
             Title of legend.

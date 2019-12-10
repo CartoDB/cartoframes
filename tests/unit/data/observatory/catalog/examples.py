@@ -83,7 +83,7 @@ db_dataset1 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': True,
-    'summary_json': {},
+    'summary_json': None,
     'available_in': ['bq']
 }
 db_dataset2 = {
@@ -106,7 +106,23 @@ db_dataset2 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'summary_json': {},
+    'summary_json': {
+        'glimpses': {
+            'head': ['a', 'b', 'c'],
+            'tail': ['e', 'f', 'g']
+        },
+        'counts': {
+            'rows': 3,
+            'columns': 3,
+            'null_cells': 0,
+            'null_cells_percent': 0
+        },
+        'fields_by_type': {
+            'float': 1,
+            'string': 1,
+            'integer': 1
+        }
+    },
     'available_in': []
 }
 test_dataset1 = Dataset(db_dataset1)
@@ -124,7 +140,7 @@ db_variable1 = {
     'agg_method': '',
     'variable_group_id': 'vargroup1',
     'starred': True,
-    'summary_json': {}
+    'summary_json': None
 }
 db_variable2 = {
     'id': 'carto-do.variable.var2',
@@ -137,7 +153,7 @@ db_variable2 = {
     'agg_method': '',
     'variable_group_id': 'vargroup1',
     'starred': False,
-    'summary_json': {}
+    'summary_json': [{'key': 'value'}]
 }
 test_variable1 = Variable(db_variable1)
 test_variable2 = Variable(db_variable2)
