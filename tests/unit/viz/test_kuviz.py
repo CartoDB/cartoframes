@@ -145,7 +145,7 @@ class TestKuvizPublisher(object):
 
         kuviz_publisher = KuvizPublisher(None)
         kuviz_publisher.set_layers(vmap.layers, kuviz_name, 'fake_table_name')
-        result = kuviz_publisher.publish(html, kuviz_name)
+        result = kuviz_publisher.publish(html, kuviz_name, None)
 
         assert kuviz_publisher.kuviz == kuviz
         assert result == kuviz_to_dict(kuviz)
@@ -177,7 +177,7 @@ class TestKuvizPublisher(object):
 
         kuviz_publisher = KuvizPublisher(None)
         kuviz_publisher.set_layers(vmap.layers, kuviz_name, 'fake_table_name')
-        result_publish = kuviz_publisher.publish(html, kuviz_name)
+        result_publish = kuviz_publisher.publish(html, kuviz_name, None)
 
         kuviz.name = 'fake_name_2'
         result_update = kuviz_publisher.update(html, kuviz_name, None)
@@ -199,7 +199,7 @@ class TestKuvizPublisher(object):
 
         kuviz_publisher = KuvizPublisher(None)
         kuviz_publisher.set_layers(vmap.layers, kuviz_name, 'fake_table_name')
-        kuviz_publisher.publish(html, kuviz_name)
+        kuviz_publisher.publish(html, kuviz_name, None)
 
         kuviz_publisher.delete()
 
