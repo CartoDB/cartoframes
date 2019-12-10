@@ -3,13 +3,13 @@
 from __future__ import absolute_import
 
 import re
-import logging
 
 from .utils import geocoding_utils
 from .utils import geocoding_constants
 from .utils import TableGeocodingLock
 
 from .service import Service
+from ...core.logger import log
 from ...core.managers.source_manager import SourceManager
 from ...io.carto import read_carto, to_carto, has_table, delete_table, update_table, copy_table, create_table_from_query
 
@@ -248,7 +248,7 @@ class Geocoding(Service):
 
         result = self.result(data=cdf, metadata=metadata)
 
-        print('Success! Data geocoded correctly')
+        log.info('Success! Data geocoded correctly')
 
         return result
 
@@ -346,13 +346,13 @@ class Geocoding(Service):
         # Internal Geocoding implementation.
         # Geocode a table's rows not already geocoded in a dataset'
 
-        logging.info('table_name = "%s"', table_name)
-        logging.info('street = "%s"', street)
-        logging.info('city = "%s"', city)
-        logging.info('state = "%s"', state)
-        logging.info('country = "%s"', country)
-        logging.info('status = "%s"', status)
-        logging.info('dry_run = "%s"', dry_run)
+        log.debug('table_name = "%s"', table_name)
+        log.debug('street = "%s"', street)
+        log.debug('city = "%s"', city)
+        log.debug('state = "%s"', state)
+        log.debug('country = "%s"', country)
+        log.debug('status = "%s"', status)
+        log.debug('dry_run = "%s"', dry_run)
 
         output = {}
 
@@ -389,19 +389,19 @@ class Geocoding(Service):
 
                     add_columns += [(geocoding_constants.HASH_COLUMN, 'text')]
 
-                    logging.info("Adding columns %s if needed", ', '.join([c[0] for c in add_columns]))
+                    log.debug("Adding columns %s if needed", ', '.join([c[0] for c in add_columns]))
                     alter_sql = "ALTER TABLE {table} {add_columns};".format(
                         table=table_name,
                         add_columns=','.join([
                             'ADD COLUMN IF NOT EXISTS {} {}'.format(name, type) for name, type in add_columns]))
                     self._execute_query(alter_sql)
 
-                    logging.debug("Executing query: %s", sql)
+                    log.debug("Executing query: %s", sql)
                     result = None
                     try:
                         result = self._execute_long_running_query(sql)
                     except Exception as err:
-                        logging.error(err)
+                        log.error(err)
                         msg = str(err)
                         output['error'] = msg
                         # FIXME: Python SDK should return proper exceptions
@@ -421,12 +421,12 @@ class Geocoding(Service):
                     if result and not aborted:
                         # Number of updated rows not available for batch queries
                         # output['updated_rows'] = result.rowcount
-                        # logging.info('Number of rows updated: %d', output['updated_rows'])
+                        # log.debug('Number of rows updated: %d', output['updated_rows'])
                         pass
 
             if not aborted:
                 sql = geocoding_utils.posterior_summary_query(table_name)
-                logging.debug("Executing result summary query: %s", sql)
+                log.debug("Executing result summary query: %s", sql)
                 result = self._execute_query(sql)
                 geocoding_utils.set_post_summary_info(summary, result, output)
 
@@ -439,12 +439,12 @@ class Geocoding(Service):
 
     def _execute_prior_summary(self, dataset_name, street, city, state, country):
         sql = geocoding_utils.exists_column_query(dataset_name, geocoding_constants.HASH_COLUMN)
-        logging.debug("Executing check first time query: %s", sql)
+        log.debug("Executing check first time query: %s", sql)
         result = self._execute_query(sql)
         if not result or result.get('total_rows', 0) == 0:
             sql = geocoding_utils.first_time_summary_query(dataset_name, street, city, state, country)
-            logging.debug("Executing first time summary query: %s", sql)
+            log.debug("Executing first time summary query: %s", sql)
         else:
             sql = geocoding_utils.prior_summary_query(dataset_name, street, city, state, country)
-            logging.debug("Executing summary query: %s", sql)
+            log.debug("Executing summary query: %s", sql)
         return self._execute_query(sql)

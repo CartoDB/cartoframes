@@ -105,6 +105,6 @@ class TestContextManager(object):
             COPY table_name(a,b) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
         '''.strip()
         assert list(mock.call_args[0][1]) == [
-            b'1|SRID=4326;POINT (0 0)\n',
-            b'2|SRID=4326;POINT (1 1)\n'
+            b'1|0101000020E610000000000000000000000000000000000000\n',
+            b'2|0101000020E6100000000000000000F03F000000000000F03F\n'
         ]
