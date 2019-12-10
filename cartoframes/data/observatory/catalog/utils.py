@@ -3,6 +3,8 @@ from __future__ import absolute_import
 from .subscriptions import trigger_subscription
 from .subscription_info import fetch_subscription_info
 
+from ....core.logger import log
+
 
 def is_ipython_notebook():
     """
@@ -109,4 +111,4 @@ def _create_notebook_form(id, type, message, ok_response, cancel_message, creden
 
 
 def display_subscription_form_cli():
-    print('This method is not yet implemented in CLI')
+    log.info('This method is not yet implemented in CLI')

@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from .service import Service
+from ...core.logger import log
 from ...core.managers.source_manager import SourceManager
 from ...io.carto import read_carto, to_carto, delete_table
 
@@ -192,7 +193,7 @@ class Isolines(Service):
 
         result = self.result(data=cdf, metadata=metadata)
 
-        print('Success! Isolines created correctly')
+        log.info('Success! Isolines created correctly')
 
         return result
 
