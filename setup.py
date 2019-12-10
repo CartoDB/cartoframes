@@ -25,6 +25,7 @@ def get_version():
 
 REQUIRES = [
     'appdirs>=1.4.3,<2.0',
+    'carto>=1.8.2,<2.0',
     'jinja2>=2.10.1,<3.0',
     'geopandas>=0.6.0,<1.0',
     'tqdm>=4.32.1,<5.0',
@@ -95,6 +96,8 @@ setup(
     package_data=PACKAGE_DATA,
     package_dir={'cartoframes': 'cartoframes'},
     include_package_data=True,
+
+    dependency_links=['git+https://github.com/CartoDB/carto-python.git#egg=carto'],
 
     install_requires=REQUIRES,
     extras_requires={
