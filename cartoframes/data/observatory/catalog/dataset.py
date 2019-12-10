@@ -486,3 +486,6 @@ class Dataset(CatalogEntity):
         datasets = Dataset.get_all({}, _credentials)
 
         return datasets is not None and self in datasets
+
+    def __str__(self):
+        return "<Dataset.get('{}')>".format(self._get_print_id())
