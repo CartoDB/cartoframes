@@ -5,27 +5,27 @@
     "categories": [{
         "title": "Data Workflows",
         "samples": [{
-            "title": "Create CartoDataFrame from CSV",
+            "title": "CartoDataFrame from CSV",
             "desc": "Create a CartoDataFrame from a CSV file",
             "file": "create_cdf_from_csv",
             "path": "data_workflows"
         }, {
-            "title": "Create CartoDataFrame from JSON",
+            "title": "CartoDataFrame from JSON",
             "desc": "Create a CartoDataFrame from a JSON file",
             "file": "create_cdf_from_json",
             "path": "data_workflows"
         }, {
-            "title": "Create CartoDataFrame from GeoJSON",
+            "title": "CartoDataFrame from GeoJSON",
             "desc": "Create a CartoDataFrame from a GeoJSON file",
             "file": "create_cdf_from_geojson",
             "path": "data_workflows"
         }, {
-            "title": "Create CartoDataFrame from Table name",
+            "title": "CartoDataFrame from Table Name",
             "desc": "Create a CartoDataFrame from a table name",
             "file": "create_cdf_from_table",
             "path": "data_workflows"
         }, {
-            "title": "Create CartoDataFrame from SQL query",
+            "title": "CartoDataFrame from SQL Query",
             "desc": "Create a CartoDataFrame from a SQL query",
             "file": "create_cdf_from_query",
             "path": "data_workflows"
@@ -35,31 +35,31 @@
             "file": "upload_cdf_to_carto",
             "path": "data_workflows"
         }, {
-            "title": "Change Dataset Privacy",
-            "desc": "Change dataset privacy",
+            "title": "Change Table Privacy",
+            "desc": "Change table privacy",
             "file": "change_dataset_privacy",
             "path": "data_workflows"
         }]
     }, {
         "title": "Data Enrichment",
         "samples": [{
-            "title": "Points Enrichment - Public Dataset",
-            "desc": "Points Enrichment - Public Dataset",
+            "title": "Enrich Points - Public Dataset",
+            "desc": "Enrich Points - Public Dataset",
             "file": "points_enrichment_public_dataset",
             "path": "data_enrichment"
         }, {
-            "title": "Polygons Enrichment - Public Dataset",
-            "desc": "Polygons Enrichment - Public Dataset",
+            "title": "Enrich Polygons - Public Dataset",
+            "desc": "Enrich Polygons - Public Dataset",
             "file": "polygons_enrichment_public_dataset",
             "path": "data_enrichment"
         }, {
-            "title": "Points Enrichment - Private Dataset",
-            "desc": "Points Enrichment - Private Dataset",
+            "title": "Enrich Points - Private Dataset",
+            "desc": "Enrich Points - Private Dataset",
             "file": "points_enrichment_private_dataset",
             "path": "data_enrichment"
         }, {
-            "title": "Polygons Enrichment - Private Dataset",
-            "desc": "Polygons Enrichment - Private Dataset",
+            "title": "Enrich Polygons - Private Dataset",
+            "desc": "Enrich Polygons - Private Dataset",
             "file": "polygons_enrichment_private_dataset",
             "path": "data_enrichment"
         }, {
@@ -375,9 +375,9 @@
             "file": "publish_a_public_visualization",
             "path": "publish_and_share"
         }, {
-            "title": "Publish Private Visualization",
-            "desc": "Publish a private visualization",
-            "file": "publish_a_private_visualization",
+            "title": "Publish Protected Visualization",
+            "desc": "Publish a protected visualization",
+            "file": "publish_a_protected_visualization",
             "path": "publish_and_share"
         }]
     }, {

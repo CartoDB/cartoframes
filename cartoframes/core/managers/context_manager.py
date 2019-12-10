@@ -7,8 +7,9 @@ from carto.auth import APIKeyAuthClient
 from carto.exceptions import CartoException, CartoRateLimitException
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
+from ... import __version__
+from ...core.logger import log
 from ...io.dataset_info import DatasetInfo
-
 from ...auth.defaults import get_default_credentials
 
 from ...utils.geom_utils import encode_geometry_ewkb
@@ -16,7 +17,6 @@ from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom
 from ...utils.columns import Column, get_dataframe_columns_info, obtain_converters, \
                              date_columns_names, normalize_name
 
-from ... import __version__
 
 DEFAULT_RETRY_TIMES = 3
 
@@ -51,7 +51,7 @@ class ContextManager(object):
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
             if log_enabled:
-                print('Debug: creating table "{}"'.format(table_name))
+                log.debug('Creating table "{}"'.format(table_name))
             self._create_table_from_columns(table_name, columns, schema, cartodbfy)
         elif if_exists == 'fail':
             raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
@@ -70,7 +70,7 @@ class ContextManager(object):
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
             if log_enabled:
-                print('Debug: creating table "{}"'.format(table_name))
+                log.debug('Creating table "{}"'.format(table_name))
             self._create_table_from_query(table_name, query, schema, cartodbfy)
         elif if_exists == 'fail':
             raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
@@ -90,9 +90,9 @@ class ContextManager(object):
         output = self.execute_query(query)
         if log_enabled:
             if ('notices' in output and 'does not exist' in output['notices'][0]):
-                print('Debug: table "{}" does not exist'.format(table_name))
+                log.debug('Table "{}" does not exist'.format(table_name))
             else:
-                print('Debug: table "{}" removed'.format(table_name))
+                log.debug('Table "{}" removed'.format(table_name))
 
     def update_table(self, table_name, privacy=None, new_table_name=None):
         dataset_info = DatasetInfo(self.auth_client, table_name)
@@ -271,7 +271,7 @@ class ContextManager(object):
     def normalize_table_name(self, table_name):
         norm_table_name = normalize_name(table_name)
         if norm_table_name != table_name:
-            print('Debug: table name normalized: "{}"'.format(norm_table_name))
+            log.debug('Table name normalized: "{}"'.format(norm_table_name))
         return norm_table_name
 
 

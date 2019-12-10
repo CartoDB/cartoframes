@@ -2,7 +2,7 @@
 
 Use these guides to learn about integrating CARTOframes into your data science workflows. Working inside of a Jupyter Notebook, the guides walk through installation, visualization, authentication, data enrichment and location data services.
 
-If you're already familiar with Jupyter Notebooks, you can also take a look to our [Notebook Examples](/developers/cartoframes/examples) for more detailed use cases.
+If you are already familiar with Jupyter Notebooks, you can take a look at our [Notebook Examples](/developers/cartoframes/examples) for more detailed use cases.
 
 ### Content
 
@@ -41,16 +41,16 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 <div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Data-discovery/">Data discovery</a>
+      <a href="/developers/cartoframes/guides/Data-discovery/">Data Discovery</a>
     </span>
-    <p class="doc-guides__description">Discover the spatial data you need searching the data catalog</p>
+    <p class="doc-guides__description">Discover the spatial data you need by searching the data catalog</p>
   </div>
 
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
-      <a href="/developers/cartoframes/guides/Data-enrichment/">Data enrichment</a>
+      <a href="/developers/cartoframes/guides/Data-enrichment/">Data Enrichment</a>
     </span>
-    <p class="doc-guides__description">Enrich your data with data from the data catalog</p>
+    <p class="doc-guides__description">Enrich your data with data from the Data Observatory</p>
   </div>
 </div>
 

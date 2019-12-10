@@ -1,4 +1,5 @@
 from .enrichment_service import EnrichmentService, prepare_variables, AGGREGATION_DEFAULT, AGGREGATION_NONE
+from ....core.logger import log
 
 
 class Enrichment(EnrichmentService):
@@ -314,11 +315,12 @@ class Enrichment(EnrichmentService):
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=aggregation)
         """
+        log.debug('Preparing')
         variables = prepare_variables(variables, self.credentials, aggregation)
         cartodataframe = self._prepare_data(dataframe, geom_col)
 
         temp_table_name = self._get_temp_table_name()
+        log.debug('Uploading')
         self._upload_data(temp_table_name, cartodataframe)
-
         queries = self._get_polygon_enrichment_sql(temp_table_name, variables, filters, aggregation)
         return self._execute_enrichment(queries, cartodataframe)

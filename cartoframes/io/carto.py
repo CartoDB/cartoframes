@@ -6,6 +6,7 @@ import pandas as pd
 
 from carto.exceptions import CartoException
 
+from ..core.logger import log
 from ..core.cartodataframe import CartoDataFrame
 from ..core.managers.context_manager import ContextManager
 from ..utils.utils import is_sql_query
@@ -117,7 +118,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     context_manager.copy_from(cdf, table_name, if_exists, cartodbfy, log_enabled)
 
     if log_enabled:
-        print('Success! Data uploaded correctly')
+        log.info('Success! Data uploaded correctly')
 
 
 def has_table(table_name, credentials=None, schema=None):
@@ -186,7 +187,7 @@ def describe_table(table_name, credentials=None, schema=None):
     except CartoException:
         # There is an issue with ghost tables when
         # the table is created for the first time
-        print('Debug: we can not retrieve the privacy from the metadata')
+        log.debug('We can not retrieve the privacy from the metadata')
         privacy = ''
 
     return {
@@ -225,7 +226,7 @@ def update_table(table_name, credentials=None, new_table_name=None, privacy=None
     context_manager.update_table(table_name, privacy, new_table_name)
 
     if log_enabled:
-        print('Success! Table updated correctly')
+        log.info('Success! Table updated correctly')
 
 
 def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
@@ -259,7 +260,7 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
     context_manager.create_table_from_query(new_table_name, query, if_exists)
 
     if log_enabled:
-        print('Success! Table copied correctly')
+        log.info('Success! Table copied correctly')
 
 
 def create_table_from_query(query, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
@@ -292,4 +293,4 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
     context_manager.create_table_from_query(new_table_name, query, if_exists)
 
     if log_enabled:
-        print('Success! Table created correctly')
+        log.info('Success! Table created correctly')
