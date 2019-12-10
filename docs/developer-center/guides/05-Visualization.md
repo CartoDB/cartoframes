@@ -12,7 +12,7 @@ In this guide you are introduced to the Map and Layer classes, how to explore da
 
 This guide uses two datasets: a point dataset of simulated Starbucks locations in Brooklyn, New York and 15 minute walk time polygons (isochrones) around each store augmented with demographic variables from CARTO's [Data Observatory](). To follow along, you can get the [point dataset here](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn_geocoded.csv) and the [polygon dataset here](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn_iso_enriched.csv).
 
-As a first step, load both datasets as [Pandas DataFrames](https://pandas.pydata.org/pandas-docs/stable/getting_started/dsintro.html#dataframe) into the notebook:
+As a first step, load both datasets as [pandas DataFrames](https://pandas.pydata.org/pandas-docs/stable/getting_started/dsintro.html#dataframe) into the notebook:
 
 ```python
 import pandas
@@ -196,7 +196,7 @@ As seen in the table summaries above, there are a variety of demographic attribu
 
 To make this information available while exploring each location on the map, you can add each attribute as a [Widget](developers/cartoframes/reference/#heading-Widgets). For this case specifically, you will use [Formula Widgets](/developers/cartoframes/examples/#example-formula-widget) to summarize the demographic variables and a [Category Widget](/developers/cartoframes/examples/#example-category-widget) on the categorical attribute of `id_store`.
 
-To add Widgets, you first need to import the types that you want to use and then, inside of the `iso_cdf` Layer add one widget for each attribute of interest. The Formula Widget accepts different types of aggregations. For this map, we will aggregate each demographic variable using `sum` so the totals update as we zoom, pan and interact with the map. We will also label each Widget appropriately using the `title` parameter.
+To add Widgets, you first need to import the types that you want to use and then, inside of the `iso_cdf` Layer add one widget for each attribute of interest. The Formula Widget accepts different types of aggregations. For this map, you will aggregate each demographic variable using `sum` so the totals update as you zoom, pan and interact with the map. You will also label each Widget appropriately using the `title` parameter.
 
 ```python
 from cartoframes.viz.widgets import formula_widget, category_widget
@@ -292,7 +292,7 @@ Now, as you explore the map and summarize demographics, it is much easier to rel
 
 At this point, you have some really useful information available on the map but only coming from the isochrone Layer. Sizing the store points by the attribute `revenue` will provide a way to visually locate which stores are performing better than others. A quick way to visualize numeric or categorical attributes during the data exploration process is to take advantage of [Visualization Layers](/developers/cartoframes/reference/#heading-Helpers).
 
-To size the store points proportionate to their revenue, we'll use the [`size_continuous_layer`](/developers/cartoframes/examples/#example-size-continuous-layer):
+To size the store points proportionate to their revenue, you'll use the [`size_continuous_layer`](/developers/cartoframes/examples/#example-size-continuous-layer):
 
 ```python
 from cartoframes.viz.helpers import size_continuous_layer
@@ -344,13 +344,13 @@ Now you have a proportional symbol map where points are sized by revenue. You wi
 
 Next, let's take a look at how to modify some of the defaults.
 
-Every Visualization Layer has a set of paramaters available to customize the defaults to better suit a given map. A quick way to see which parameters are available for customization in the `size_continuous_layer`, is to run `help(size_continuous_layer)` in a notebook cell.
+Every Visualization Layer has a set of parameters available to customize the defaults to better suit a given map. A quick way to see which parameters are available for customization in the `size_continuous_layer`, is to run `help(size_continuous_layer)` in a notebook cell.
 
 Let's make a few adjustments to make it easier to distinguish and locate the highest and lowest performing stores:
 
 * The continuous point size reads between a minimum and maximum range of symbol sizes. Since the smallest revenue value on this map is hard to see, set `size=[10,50]`
 * By default both the Legend and Popup titles are set to the attribute being visualized. To give them more descriptive titles, set `title=Annual Revenue ($)`
-* In order to see and interact with the distribution of revenue values, we can also add a Histogram Widget (turned off by default) by setting `widget=True`
+* In order to see and interact with the distribution of revenue values, you can also add a Histogram Widget (turned off by default) by setting `widget=True`
 
 ```python
 size_continuous_layer(
@@ -375,7 +375,7 @@ And now you have a map to visually and interactively explore the relationship be
     </iframe>
 </div>
 
-## Insights
+### Insights
 
 The map above provides a way to explore the data both visually and interactively in different ways:
 
@@ -387,7 +387,7 @@ The map above provides a way to explore the data both visually and interactively
 
 Use the map to see if you can find the highest and lowest performing stores and summarize the demographic characteristics of each one!
 
-## Present Insights
+#### Present Insights
 
 Now that you have gained insight into the relationship between revenue and demographics, let's say that the most influential factor of how well a store performed was median income and you want to create a map to show that particular relationship.
 
@@ -441,7 +441,7 @@ Map([
     </iframe>
 </div>
 
-### Compare Variables with a Layout
+#### Compare Variables with a Layout
 
 If you want to compare store revenue with multiple demographic variables, you can create a [Layout](https://carto.com/developers/cartoframes/examples/#example-custom-layout) with multiple maps.
 
@@ -514,3 +514,7 @@ Layout([
         frameBorder="0">
     </iframe>
 </div>
+
+### Conclusion
+
+In this guide you were introduced to the Map and Layer classes, saw how to explore data with Widgets and Popups, and how to use Visualization Layers to quickly symbolize thematic attributes. You also saw some options for creating different maps of your findings.

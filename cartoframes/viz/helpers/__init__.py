@@ -14,12 +14,6 @@ from .animation_layer import animation_layer
 from .isolines_layer import isolines_layer
 
 
-def _inspect(helper):
-    import inspect
-    lines = inspect.getsource(helper)
-    print(lines)
-
-
 __all__ = [
     'color_bins_layer',
     'color_category_layer',

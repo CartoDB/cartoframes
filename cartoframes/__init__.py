@@ -1,6 +1,6 @@
 from ._version import __version__
 from .core.cartodataframe import CartoDataFrame
-from .core.logger import log
+from .core.logger import set_log_level
 from .io.carto import read_carto, to_carto, has_table, delete_table, describe_table, \
                       update_table, copy_table, create_table_from_query
 
@@ -16,5 +16,5 @@ __all__ = [
     'update_table',
     'copy_table',
     'create_table_from_query',
-    'log'
+    'set_log_level'
 ]

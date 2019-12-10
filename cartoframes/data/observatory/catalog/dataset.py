@@ -17,6 +17,7 @@ from .summary import dataset_describe, head, tail, counts, fields_by_type, geom_
 from . import subscription_info
 from . import subscriptions
 from . import utils
+from ....core.logger import log
 from ....auth import Credentials, defaults
 
 DATASET_TYPE = 'dataset'
@@ -494,5 +495,5 @@ class Dataset(CatalogEntity):
         if data:
             return data
         else:
-            print('Summary information is not available')
+            log.info('Summary information is not available')
             return None
