@@ -58,7 +58,7 @@ class ContextManager(object):
                             'if_exists="replace" to overwrite it'.format(
                                 table_name=table_name, schema=schema))
 
-        return self._copy_from(cdf, table_name, columns)
+        self._copy_from(cdf, table_name, columns)
 
     def create_table_from_query(self, table_name, query, if_exists, cartodbfy=True, log_enabled=True):
         schema = self.get_schema()
@@ -172,7 +172,7 @@ class ContextManager(object):
             create=_create_table_from_query_query(table_name, query),
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else ''
         )
-        self.execute_long_running_query(query)
+        self.execute_query(query)
 
     def _create_table_from_columns(self, table_name, columns, schema, cartodbfy=True):
         query = 'BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'.format(
@@ -180,7 +180,7 @@ class ContextManager(object):
             create=_create_table_from_columns_query(table_name, columns),
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else ''
         )
-        self.execute_long_running_query(query)
+        self.execute_query(query)
 
     def compute_query(self, source, schema=None):
         if is_sql_query(source):

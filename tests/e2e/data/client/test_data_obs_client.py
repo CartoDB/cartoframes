@@ -2,17 +2,18 @@
 
 """Unit tests for cartoframes.client.DataObsClient"""
 
-import json
 import os
 import sys
+import json
+import pytest
 import unittest
 import warnings
-
 import pandas as pd
+
 from carto.exceptions import CartoException
 
+from cartoframes import read_carto, delete_table
 from cartoframes.auth import Credentials
-from cartoframes.data import Dataset
 from cartoframes.data.clients import DataObsClient, SQLClient
 from cartoframes.data.clients.data_obs_client import get_countrytag
 from cartoframes.utils.columns import normalize_name
@@ -49,12 +50,11 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
 
         # table naming info
         has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
-        has_gpd = 'gpd' if os.environ.get('USE_GEOPANDAS') else 'nongpd'
         pyver = sys.version[0:3].replace('.', '_')
         buildnum = os.environ.get('TRAVIS_BUILD_NUMBER')
 
-        test_slug = '{ver}_{num}_{mpl}_{gpd}'.format(
-            ver=pyver, num=buildnum, mpl=has_mpl, gpd=has_gpd
+        test_slug = '{ver}_{num}_{mpl}'.format(
+            ver=pyver, num=buildnum, mpl=has_mpl
         )
 
         # test tables
@@ -111,7 +111,7 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
 
         for table in tables:
             try:
-                Dataset(table, credentials=self.credentials).delete()
+                delete_table(table, credentials=self.credentials)
                 self.sql_client.query(sql_drop.format(table))
             except CartoException:
                 warnings.warn('Error deleting tables')
@@ -122,18 +122,18 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
 
         # all boundary metadata
         boundary_meta = do.boundaries()
-        self.assertTrue(boundary_meta.dataframe.shape[0] > 0,
+        self.assertTrue(boundary_meta.shape[0] > 0,
                         msg='has non-zero number of boundaries')
         meta_cols = set(('geom_id', 'geom_tags', 'geom_type', ))
-        self.assertTrue(meta_cols & set(boundary_meta.dataframe.columns))
+        self.assertTrue(meta_cols & set(boundary_meta.columns))
 
         # boundary metadata with correct timespan
         meta_2015 = do.boundaries(timespan='2015')
-        self.assertTrue(meta_2015.dataframe[meta_2015.dataframe.valid_timespan].shape[0] > 0)
+        self.assertTrue(meta_2015[meta_2015.valid_timespan].shape[0] > 0)
 
         # test for no data with an incorrect or invalid timespan
         meta_9999 = do.boundaries(timespan='invalid_timespan')
-        self.assertTrue(meta_9999.dataframe[meta_9999.dataframe.valid_timespan].shape[0] == 0)
+        self.assertTrue(meta_9999[meta_9999.valid_timespan].shape[0] == 0)
 
         # boundary metadata in a region
         regions = (
@@ -143,16 +143,16 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
             'Australia', )
         for region in regions:
             boundary_meta = do.boundaries(region=region)
-            self.assertTrue(meta_cols & set(boundary_meta.dataframe.columns))
-            self.assertTrue(boundary_meta.dataframe.shape[0] > 0,
+            self.assertTrue(meta_cols & set(boundary_meta.columns))
+            self.assertTrue(boundary_meta.shape[0] > 0,
                             msg='has non-zero number of boundaries')
 
         #  boundaries for world
         boundaries = do.boundaries(boundary='us.census.tiger.state')
-        self.assertTrue(boundaries.dataframe.shape[0] > 0)
-        self.assertEqual(boundaries.dataframe.shape[1], 2)
+        self.assertTrue(boundaries.shape[0] > 0)
+        self.assertEqual(boundaries.shape[1], 2)
         self.assertSetEqual(set(('the_geom', 'geom_refs', )),
-                            set(boundaries.dataframe.columns))
+                            set(boundaries.columns))
 
         # boundaries for region
         boundaries = ('us.census.tiger.state', )
@@ -160,17 +160,17 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
             geoms = do.boundaries(
                 boundary=b,
                 region=self.test_data_table)
-            self.assertTrue(geoms.dataframe.shape[0] > 0)
-            self.assertEqual(geoms.dataframe.shape[1], 2)
+            self.assertTrue(geoms.shape[0] > 0)
+            self.assertEqual(geoms.shape[1], 2)
             self.assertSetEqual(set(('the_geom', 'geom_refs', )),
-                                set(geoms.dataframe.columns))
+                                set(geoms.columns))
 
         # presence or lack of clipped boundaries
         nonclipped = (True, False, )
         for tf in nonclipped:
             meta = do.boundaries(include_nonclipped=tf)
             self.assertEqual(
-                'us.census.tiger.state' in set(meta.dataframe.geom_id),
+                'us.census.tiger.state' in set(meta.geom_id),
                 tf
             )
 
@@ -253,19 +253,18 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         meta = do.discovery(self.test_read_table,
                             keywords=('poverty', ),
                             time=('2010 - 2014', ))
-        dataset = do.augment(self.test_data_table, meta)
+        cartodataframe = do.augment(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
         origcols = set(
-            Dataset(self.test_data_table, credentials=self.credentials
-                    ).download(limit=1, decode_geom=True).columns)
-        self.assertSetEqual(anscols, set(dataset.dataframe.columns) - origcols - {'the_geom', 'cartodb_id'})
+            read_carto(self.test_data_table, credentials=self.credentials, limit=1, decode_geom=True).columns)
+        self.assertSetEqual(anscols, set(cartodataframe.columns) - origcols - {'the_geom', 'cartodb_id'})
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
                  'geom_id': 'us.census.tiger.block_group',
                  'numer_timespan': '2011 - 2015'}, ]
-        dataset = do.augment(self.test_data_table, meta)
+        cartodataframe = do.augment(self.test_data_table, meta)
         self.assertSetEqual(set(('median_income_2011_2015', )),
-                            set(dataset.dataframe.columns) - origcols - {'the_geom', 'cartodb_id'})
+                            set(cartodataframe.columns) - origcols - {'the_geom', 'cartodb_id'})
 
         with self.assertRaises(ValueError, msg='no measures'):
             meta = do.discovery('United States', keywords='not a measure')
@@ -277,6 +276,7 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
                                 keywords='education')
             do.augment(self.test_read_table, meta)
 
+    @pytest.mark.skip()
     def test_augment_with_persist_as(self):
         """DataObsClient.augment with persist_as"""
         do = DataObsClient(self.credentials)
@@ -284,43 +284,42 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         meta = do.discovery(self.test_read_table,
                             keywords=('poverty', ),
                             time=('2010 - 2014', ))
-        dataset = do.augment(self.test_data_table, meta)
+        cartodataframe = do.augment(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
         origcols = set(
-            Dataset(self.test_data_table, credentials=self.credentials
-                    ).download(limit=1, decode_geom=True).columns)
-        self.assertSetEqual(anscols, set(dataset.dataframe.columns) - origcols - {'the_geom', 'cartodb_id'})
+            read_carto(self.test_data_table, credentials=self.credentials, limit=1, decode_geom=True).columns)
+        self.assertSetEqual(anscols, set(cartodataframe.columns) - origcols - {'the_geom', 'cartodb_id'})
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
                  'geom_id': 'us.census.tiger.block_group',
                  'numer_timespan': '2011 - 2015'}, ]
-        dataset = do.augment(self.test_data_table, meta, persist_as=self.test_write_table)
+        cartodataframe = do.augment(self.test_data_table, meta, persist_as=self.test_write_table)
         self.assertSetEqual(set(('median_income_2011_2015', )),
-                            set(dataset.dataframe.columns) - origcols - {'the_geom', 'cartodb_id'})
-        self.assertEqual(dataset.dataframe.index.name, 'cartodb_id')
-        self.assertEqual(dataset.dataframe.index.dtype, 'int64')
+                            set(cartodataframe.columns) - origcols - {'the_geom', 'cartodb_id'})
+        self.assertEqual(cartodataframe.index.name, 'cartodb_id')
+        self.assertEqual(cartodataframe.index.dtype, 'int64')
 
-        df = Dataset(self.test_write_table, credentials=self.credentials).download(decode_geom=False)
+        df = read_carto(self.test_write_table, credentials=self.credentials, decode_geom=False)
 
         self.assertEqual(df.index.name, 'cartodb_id')
         self.assertEqual(df.index.dtype, 'int64')
 
         # same number of rows
-        self.assertEqual(len(df), len(dataset.dataframe),
+        self.assertEqual(len(df), len(cartodataframe),
                          msg='Expected number or rows')
 
         # same type of object
         self.assertIsInstance(df, pd.DataFrame,
                               'Should be a pandas DataFrame')
         # same column names
-        self.assertSetEqual(set(dataset.dataframe.columns.values),
+        self.assertSetEqual(set(cartodataframe.columns.values),
                             set(df.columns.values),
                             msg='Should have the columns requested')
 
         # should have exected schema
         self.assertEqual(
             sorted(tuple(str(d) for d in df.dtypes)),
-            sorted(tuple(str(d) for d in dataset.dataframe.dtypes)),
+            sorted(tuple(str(d) for d in cartodataframe.dtypes)),
             msg='Should have same schema/types'
         )
 
@@ -346,12 +345,12 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         do = DataObsClient(self.credentials)
         meta = do.discovery(region=self.test_write_table, keywords='female')
         meta = meta[meta.suggested_name == dup_col]
-        dataset = do.augment(
+        cartodataframe = do.augment(
             self.test_write_table,
             meta[meta.suggested_name == dup_col]
         )
 
-        self.assertIn('_' + dup_col, dataset.dataframe.keys())
+        self.assertIn('_' + dup_col, cartodataframe.keys())
 
     def test_get_countrytag(self):
         valid_regions = ('Australia', 'Brasil', 'EU', 'España', 'U.K.', )
