@@ -11,6 +11,8 @@ from ... import __version__
 from ...core.logger import log
 from ...io.dataset_info import DatasetInfo
 from ...auth.defaults import get_default_credentials
+
+from ...utils.geom_utils import encode_geometry_ewkb
 from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
 from ...utils.columns import Column, get_dataframe_columns_info, obtain_converters, \
                              date_columns_names, normalize_name
@@ -56,6 +58,9 @@ class ContextManager(object):
                             'Please choose a different `table_name` or use '
                             'if_exists="replace" to overwrite it'.format(
                                 table_name=table_name, schema=schema))
+        else:
+            # 'append'
+            pass
 
         return self._copy_from(cdf, table_name, columns)
 
@@ -72,6 +77,9 @@ class ContextManager(object):
                             'Please choose a different `table_name` or use '
                             'if_exists="replace" to overwrite it'.format(
                                 table_name=table_name, schema=schema))
+        else:
+            # 'append'
+            pass
 
     def has_table(self, table_name, schema=None):
         query = self.compute_query(table_name, schema)
@@ -306,8 +314,8 @@ def _compute_copy_data(df, columns):
         for column in columns:
             val = df.at[index, column.name]
 
-            if column.is_geom and hasattr(val, 'wkt'):
-                val = 'SRID=4326;{}'.format(val.wkt)
+            if column.is_geom:
+                val = encode_geometry_ewkb(val)
 
             row_data.append(encode_row(val))
 
