@@ -1,15 +1,23 @@
-import logging
 import sys
+import logging
 
 
-def set_handler():
+def init_logger():
     handler = logging.StreamHandler(sys.stdout)
-    # handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
+    log = logging.getLogger('CARTOframes')
+    log.setLevel(logging.INFO)
     log.addHandler(handler)
+    return log
 
 
-log = logging.getLogger('CARTOframes')
-log.setLevel(logging.INFO)
-set_handler()
+def log_debug():
+    log.setLevel(logging.DEBUG)
+
+
+def log_info():
+    log.setLevel(logging.INFO)
+
+
+log = init_logger()
