@@ -97,7 +97,7 @@ setup(
     package_dir={'cartoframes': 'cartoframes'},
     include_package_data=True,
 
-    dependency_links=['git+https://github.com/CartoDB/carto-python.git#egg=carto'],
+    dependency_links=['https://github.com/CartoDB/carto-python.git#egg=carto'],
 
     install_requires=REQUIRES,
     extras_requires={
