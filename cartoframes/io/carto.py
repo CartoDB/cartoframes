@@ -249,7 +249,7 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
         raise ValueError('Wrong new table name. You should provide a valid table name.')
 
     if if_exists not in IF_EXISTS_OPTIONS:
-        raise ValueError('Wrong option. You should provide: {}.'.format(', '.join(IF_EXISTS_OPTIONS)))
+        raise ValueError('Wrong option for the `if_exists` param. You should provide: {}.'.format(', '.join(IF_EXISTS_OPTIONS)))
 
     context_manager = ContextManager(credentials)
 
