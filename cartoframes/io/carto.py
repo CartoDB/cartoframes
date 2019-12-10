@@ -76,6 +76,10 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         index_label (str, optional): name of the index column in the table. By default it
             uses the name of the index from the dataframe.
 
+    Raises:
+        ValueError:
+            When the dataframe or table name provided is wrong or the if_exists param is not valid.
+
     """
     if not isinstance(dataframe, pd.DataFrame):
         raise ValueError('Wrong dataframe. You should provide a valid DataFrame instance.')
@@ -233,6 +237,10 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
         if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
+
+    Raises:
+        ValueError:
+            When the table name provided is wrong or the if_exists param is not valid.
     """
     if not isinstance(table_name, str):
         raise ValueError('Wrong table name. You should provide a valid table name.')
@@ -262,6 +270,10 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
         if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
+
+    Raises:
+        ValueError:
+            When the query or table name provided is wrong or the if_exists param is not valid.
     """
     if not is_sql_query(query):
         raise ValueError('Wrong query. You should provide a valid SQL query.')
