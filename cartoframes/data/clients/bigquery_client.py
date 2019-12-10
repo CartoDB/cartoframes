@@ -105,8 +105,8 @@ class BigQueryClient(object):
         table_info = self.get_table(project, dataset, table)
         return [field.name for field in table_info.schema]
 
-    def download_to_file(self, project, dataset, table, limit=None, offset=None,
-                         file_path=None, fail_if_exists=False, progress_bar=True):
+    def download_to_file(self, project, dataset, table, file_path=None, limit=None, offset=None,
+                         fail_if_exists=False, progress_bar=True):
         if not file_path:
             file_name = '{}.{}.{}.csv'.format(project, dataset, table)
             file_path = os.path.join(_USER_CONFIG_DIR, file_name)
