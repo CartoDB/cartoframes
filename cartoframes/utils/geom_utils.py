@@ -127,12 +127,12 @@ def _extract_srid(egeom):
         return (0, egeom)
 
 
-def encode_geometry_wkt(geom, srid=4326):
+def encode_geometry_ewkt(geom, srid=4326):
     if isinstance(geom, shapely.geometry.base.BaseGeometry):
         return 'SRID={0};{1}'.format(srid, geom.wkt)
 
 
-def encode_geometry_wkb(geom, srid=4326):
+def encode_geometry_ewkb(geom, srid=4326):
     if isinstance(geom, shapely.geometry.base.BaseGeometry):
         shapely.geos.lgeos.GEOSSetSRID(geom._geom, srid)
         return shapely.wkb.dumps(geom, hex=True, include_srid=True)
