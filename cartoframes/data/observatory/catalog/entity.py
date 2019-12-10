@@ -122,9 +122,9 @@ class CatalogEntity(ABC):
         bq_client = _get_bigquery_client(credentials)
 
         full_remote_table_name = self._get_remote_full_table_name(
-            bq_client.user_data_project,
-            bq_client.dataset,
-            bq_client.public_data_project
+            bq_client.bq_project,
+            bq_client.bq_dataset,
+            bq_client.bq_public_project
         )
 
         project, dataset, table = full_remote_table_name.split('.')

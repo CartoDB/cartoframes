@@ -63,9 +63,9 @@ class EnrichmentService(object):
     def __init__(self, credentials=None):
         self.credentials = credentials = credentials or get_default_credentials()
         self.bq_client = bigquery_client.BigQueryClient(credentials)
-        self.user_dataset = self.bq_client.dataset
-        self.working_project = self.bq_client.user_data_project
-        self.public_project = self.bq_client.public_data_project
+        self.bq_dataset = self.bq_client.bq_dataset
+        self.bq_project = self.bq_client.bq_project
+        self.bq_public_project = self.bq_client.bq_public_project
         self.enrichment_id = _ENRICHMENT_ID
         self.geojson_column = _GEOJSON_COLUMN
 
@@ -134,7 +134,7 @@ class EnrichmentService(object):
         return tables_metadata
 
     def __get_enrichment_table(self, variable):
-        if variable.project_name != self.public_project:
+        if variable.project_name != self.bq_public_project:
             return 'view_{dataset}_{table}'.format(
                 dataset=variable.schema_name,
                 table=variable.dataset_name
@@ -143,10 +143,10 @@ class EnrichmentService(object):
             return variable.dataset_name
 
     def __get_dataset(self, variable, table_name):
-        if variable.project_name != self.public_project:
+        if variable.project_name != self.bq_public_project:
             return '{project}.{dataset}.{table_name}'.format(
-                project=self.working_project,
-                dataset=self.user_dataset,
+                project=self.bq_project,
+                dataset=self.bq_dataset,
                 table_name=table_name
             )
         else:
@@ -156,25 +156,25 @@ class EnrichmentService(object):
         geography_id = Dataset.get(variable.dataset).geography
         _, dataset_geo_table, geo_table = geography_id.split('.')
 
-        if variable.project_name != self.public_project:
+        if variable.project_name != self.bq_public_project:
             return '{project}.{dataset}.view_{dataset_geo_table}_{geo_table}'.format(
-                project=self.working_project,
-                dataset=self.user_dataset,
+                project=self.bq_project,
+                dataset=self.bq_dataset,
                 dataset_geo_table=dataset_geo_table,
                 geo_table=geo_table
             )
         else:
             return '{project}.{dataset}.{geo_table}'.format(
-                project=self.public_project,
+                project=self.bq_public_project,
                 dataset=dataset_geo_table,
                 geo_table=geo_table
             )
 
     def __get_project(self, variable):
-        project = self.public_project
+        project = self.bq_public_project
 
-        if variable.project_name != self.public_project:
-            project = self.working_project
+        if variable.project_name != self.bq_public_project:
+            project = self.bq_project
 
         return project
 
@@ -189,8 +189,8 @@ class EnrichmentService(object):
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
-            project=self.working_project,
-            user_dataset=self.user_dataset,
+            project=self.bq_project,
+            user_dataset=self.bq_dataset,
             temp_table_name=temp_table_name
         )
 
@@ -224,8 +224,8 @@ class EnrichmentService(object):
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
-            project=self.working_project,
-            user_dataset=self.user_dataset,
+            project=self.bq_project,
+            user_dataset=self.bq_dataset,
             temp_table_name=temp_table_name
         )
 

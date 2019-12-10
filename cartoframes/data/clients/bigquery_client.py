@@ -37,11 +37,11 @@ class BigQueryClient(object):
         self.bq_client = None
         self.gcs_client = None
 
-        self.public_data_project = None
-        self.user_data_project = None
-        self.dataset = None
-        self.bucket_name = None
+        self.bq_public_project = None
+        self.bq_project = None
+        self.bq_dataset = None
         self.instant_licensing = None
+        self._gcs_bucket = None
 
         self._init_clients()
 
@@ -58,17 +58,16 @@ class BigQueryClient(object):
             credentials=google_credentials
         )
 
-        self.gcp_execution_project = do_credentials.gcp_execution_project
-        self.public_data_project = do_credentials.bq_public_project
-        self.user_data_project = do_credentials.bq_project
-        self.dataset = do_credentials.bq_dataset
-        self.bucket_name = do_credentials.gcs_bucket
+        self.bq_public_project = do_credentials.bq_public_project
+        self.bq_project = do_credentials.bq_project
+        self.bq_dataset = do_credentials.bq_dataset
         self.instant_licensing = do_credentials.instant_licensing
+        self._gcs_bucket = do_credentials.gcs_bucket
 
     @refresh_clients
     def upload_dataframe(self, dataframe, schema, tablename):
         # Upload file to Google Cloud Storage
-        bucket = self.gcs_client.get_bucket(self.bucket_name)
+        bucket = self.gcs_client.get_bucket(self._gcs_bucket)
         blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
         dataframe.to_csv(tablename, index=False, header=False)
         try:
@@ -77,14 +76,14 @@ class BigQueryClient(object):
             os.remove(tablename)
 
         # Import from GCS To BigQuery
-        dataset_ref = self.bq_client.dataset(self.dataset, project=self.user_data_project)
+        dataset_ref = self.bq_client.dataset(self._do_credentials.bq_dataset, project=self._do_credentials.bq_project)
         table_ref = dataset_ref.table(tablename)
         schema_wrapped = [bigquery.SchemaField(column, dtype) for column, dtype in schema.items()]
 
         job_config = bigquery.LoadJobConfig()
         job_config.schema = schema_wrapped
         job_config.source_format = bigquery.SourceFormat.CSV
-        uri = 'gs://{bucket}/{tablename}'.format(bucket=self.bucket_name, tablename=tablename)
+        uri = 'gs://{bucket}/{tablename}'.format(bucket=self._gcs_bucket, tablename=tablename)
 
         job = self.bq_client.load_table_from_uri(
             uri, table_ref, job_config=job_config
