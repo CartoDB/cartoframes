@@ -56,7 +56,7 @@ class TestCartoDataFrame(object):
     def test_from_carto(self, mocker):
         mock = mocker.patch('cartoframes.io.carto.read_carto')
         CartoDataFrame.from_carto('table_name')
-        mock.assert_called_once_with('table_name')
+        mock.assert_called_once_with('table_name', None, None, 3, None, None, True)
 
     def test_from_file(self, mocker):
         mock = mocker.patch.object(GeoDataFrame, 'from_file')
@@ -74,14 +74,14 @@ class TestCartoDataFrame(object):
         mock = mocker.patch('cartoframes.io.carto.to_carto')
         cdf = CartoDataFrame(self.gdf)
         cdf.to_carto('table_name')
-        mock.assert_called_once_with(cdf, 'table_name')
+        mock.assert_called_once_with(cdf, 'table_name', None, 'fail', None, False, None)
 
     def test_viz(self, mocker):
         mocker.patch('cartoframes.viz.Map', return_value='__map__')
         mock_layer = mocker.patch('cartoframes.viz.Layer')
         cdf = CartoDataFrame(self.gdf)
         viz = cdf.viz('__style__')
-        mock_layer.assert_called_once_with(cdf, '__style__')
+        mock_layer.assert_called_once_with(cdf, '__style__', None, None, None, None, None, None)
         assert viz == '__map__'
 
     def test_getitem_series(self):

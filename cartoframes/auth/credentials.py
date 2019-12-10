@@ -25,7 +25,7 @@ _DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR, 'cartocreds.json')
 
 
 class Credentials(object):
-    """Credentials class for managing and storing user CARTO credentials. The
+    """Credentials class is used for managing and storing user CARTO credentials. The
     arguments are listed in order of precedence: :obj:`Credentials` instances
     are first, `key` and `base_url`/`username` are taken next, and
     `config_file` (if given) is taken last. The config file is `cartocreds.json`

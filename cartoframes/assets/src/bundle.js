@@ -13,142 +13,6 @@ var init = (function () {
 
   const FIT_BOUNDS_SETTINGS = { animate: false, padding: 50, maxZoom: 16 };
 
-  function format(value) {
-    if (Array.isArray(value)) {
-      const [first, second] = value;
-      if (first === -Infinity) {
-        return `< ${formatValue(second)}`;
-      }
-      if (second === Infinity) {
-        return `> ${formatValue(first)}`;
-      }
-      return `${formatValue(first)} - ${formatValue(second)}`;
-    }
-    return formatValue(value);
-  }
-
-  function formatValue(value) {
-    if (typeof value === 'number') {
-      return formatNumber(value);
-    }
-    return value;
-  }
-
-  function formatNumber(value) {
-    const log = Math.log10(Math.abs(value));
-
-    if ((log > 4 || log < -2.00000001) && value) {
-      return value.toExponential(2);
-    }
-    
-    if (!Number.isInteger(value)) {
-      return value.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 3
-      });
-    }
-    
-    return value.toLocaleString();
-  }
-
-  function updateViewport(map) {
-    function updateMapInfo() {
-      const mapInfo$ = document.getElementById('map-info');
-      const center = map.getCenter();
-      const lat = center.lat.toFixed(6);
-      const lng = center.lng.toFixed(6);
-      const zoom = map.getZoom().toFixed(2);
-    
-      mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
-    }
-
-    updateMapInfo();
-
-    map.on('zoom', updateMapInfo);
-    map.on('move', updateMapInfo); 
-  }
-
-  function getBasecolorSettings(basecolor) {
-    return {
-      'version': 8,
-      'sources': {},
-      'layers': [{
-          'id': 'background',
-          'type': 'background',
-          'paint': {
-              'background-color': basecolor
-          }
-      }]
-    };
-  }
-
-  function getImageElement(mapIndex) {
-    const id = mapIndex !== undefined ? `map-image-${mapIndex}` : 'map-image';
-    return document.getElementById(id);
-  }
-
-  function getContainerElement(mapIndex) {
-    const id = mapIndex !== undefined ? `main-container-${mapIndex}` : 'main-container';
-    return document.getElementById(id);
-  }
-
-  function saveImage(mapIndex) {
-    const img = getImageElement(mapIndex);
-    const container = getContainerElement(mapIndex);
-
-    html2canvas(container)
-      .then((canvas) => setMapImage(canvas, img, container));
-  }
-
-  function setMapImage(canvas, img, container) {
-    const src = canvas.toDataURL();
-    img.setAttribute('src', src);
-    img.style.display = 'block';
-    container.style.display = 'none';
-  }
-
-  function createDefaultLegend(layers) {
-    const defaultLegendContainer = document.getElementById('default-legend-container');
-    defaultLegendContainer.style.display = 'none';
-
-    AsBridge.VL.Legends.layersLegend(
-      '#default-legend',
-      layers,
-      {
-        onLoad: () => defaultLegendContainer.style.display = 'unset'
-      }
-    );
-  }
-
-  function createLegend(layer, legendData, layerIndex, mapIndex=0) {
-    const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend`);
-    
-    if (legendData.length) {
-      legendData.forEach((legend, legendIndex) => _createLegend(layer, legend, layerIndex, legendIndex, mapIndex));
-    } else {
-      _createLegend(layer, legendData, layerIndex, 0, mapIndex);
-    }
-  }
-
-  function _createLegend(layer, legend, layerIndex, legendIndex, mapIndex=0) {
-    const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend${legendIndex}`);
-
-    if (legend.prop) {
-      const othersLabel = 'Others';   // TODO: i18n
-      const prop = legend.prop;
-      const dynamic = legend.dynamic;
-      const variable = legend.variable;
-      const config = { othersLabel, variable };
-      const options = { format, config, dynamic };
-
-      if (legend.type.startsWith('size-continuous')) {
-        config.samples = 4;
-      }
-      
-      AsBridge.VL.Legends.rampLegend(element, layer, prop, options);
-    }
-  }
-
   /** From https://github.com/errwischt/stacktrace-parser/blob/master/src/stack-trace-parser.js */
 
   /**
@@ -270,6 +134,100 @@ var init = (function () {
     });
 
     stacktrace$.innerHTML = list.join('\n');
+  }
+
+  function format(value) {
+    if (Array.isArray(value)) {
+      const [first, second] = value;
+      if (first === -Infinity) {
+        return `< ${formatValue(second)}`;
+      }
+      if (second === Infinity) {
+        return `> ${formatValue(first)}`;
+      }
+      return `${formatValue(first)} - ${formatValue(second)}`;
+    }
+    return formatValue(value);
+  }
+
+  function formatValue(value) {
+    if (typeof value === 'number') {
+      return formatNumber(value);
+    }
+    return value;
+  }
+
+  function formatNumber(value) {
+    const log = Math.log10(Math.abs(value));
+
+    if ((log > 4 || log < -2.00000001) && value) {
+      return value.toExponential(2);
+    }
+    
+    if (!Number.isInteger(value)) {
+      return value.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 3
+      });
+    }
+    
+    return value.toLocaleString();
+  }
+
+  function updateViewport(map) {
+    function updateMapInfo() {
+      const mapInfo$ = document.getElementById('map-info');
+      const center = map.getCenter();
+      const lat = center.lat.toFixed(6);
+      const lng = center.lng.toFixed(6);
+      const zoom = map.getZoom().toFixed(2);
+    
+      mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
+    }
+
+    updateMapInfo();
+
+    map.on('zoom', updateMapInfo);
+    map.on('move', updateMapInfo); 
+  }
+
+  function getBasecolorSettings(basecolor) {
+    return {
+      'version': 8,
+      'sources': {},
+      'layers': [{
+          'id': 'background',
+          'type': 'background',
+          'paint': {
+              'background-color': basecolor
+          }
+      }]
+    };
+  }
+
+  function getImageElement(mapIndex) {
+    const id = mapIndex !== undefined ? `map-image-${mapIndex}` : 'map-image';
+    return document.getElementById(id);
+  }
+
+  function getContainerElement(mapIndex) {
+    const id = mapIndex !== undefined ? `main-container-${mapIndex}` : 'main-container';
+    return document.getElementById(id);
+  }
+
+  function saveImage(mapIndex) {
+    const img = getImageElement(mapIndex);
+    const container = getContainerElement(mapIndex);
+
+    html2canvas(container)
+      .then((canvas) => setMapImage(canvas, img, container));
+  }
+
+  function setMapImage(canvas, img, container) {
+    const src = canvas.toDataURL();
+    img.setAttribute('src', src);
+    img.style.display = 'block';
+    container.style.display = 'none';
   }
 
   function resetPopupClick(interactivity) {
@@ -427,6 +385,33 @@ var init = (function () {
       : null;
   }
 
+  function createLegend(layer, legendData, layerIndex, mapIndex=0) {
+    if (legendData.length) {
+      legendData.forEach((legend, legendIndex) => _createLegend(layer, legend, layerIndex, legendIndex, mapIndex));
+    } else {
+      _createLegend(layer, legendData, layerIndex, 0, mapIndex);
+    }
+  }
+
+  function _createLegend(layer, legend, layerIndex, legendIndex, mapIndex=0) {
+    const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend${legendIndex}`);
+
+    if (legend.prop) {
+      const othersLabel = 'Others';   // TODO: i18n
+      const prop = legend.prop;
+      const dynamic = legend.dynamic;
+      const variable = legend.variable;
+      const config = { othersLabel, variable };
+      const options = { format, config, dynamic };
+
+      if (legend.type.startsWith('size-continuous')) {
+        config.samples = 4;
+      }
+      
+      AsBridge.VL.Legends.rampLegend(element, layer, prop, options);
+    }
+  }
+
   function SourceFactory() {
     const sourceTypes = { GeoJSON, Query, MVT };
 
@@ -572,7 +557,6 @@ var init = (function () {
   function initLayers(map, settings, mapIndex) {
     const numLayers = settings.layers.length;
     const hasLegends = settings.has_legends;
-    const isDefaultLegend = settings.default_legend;
     const isStatic = settings.is_static;
     const layers = settings.layers;
     const mapLayers = getMapLayers(
@@ -583,7 +567,6 @@ var init = (function () {
       mapIndex
     );
 
-    createLegend$1(isDefaultLegend, mapLayers);
     setInteractiveLayers(map, layers, mapLayers);
 
     return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
@@ -616,12 +599,6 @@ var init = (function () {
 
     if (interactiveLayers && interactiveLayers.length > 0) {
       setInteractivity(map, interactiveLayers, interactiveMapLayers);
-    }
-  }
-
-  function createLegend$1(isDefaultLegend, mapLayers) {
-    if (isDefaultLegend) {
-      createDefaultLegend(mapLayers);
     }
   }
 

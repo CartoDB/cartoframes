@@ -1,5 +1,4 @@
 import { BASEMAPS, attributionControl, FIT_BOUNDS_SETTINGS } from './constants';
-import { createDefaultLegend } from './legends';
 import { displayError } from './errors/display';
 import { setInteractivity } from './map/interactivity';
 import { updateViewport, getBasecolorSettings, saveImage } from './utils';
@@ -39,7 +38,6 @@ export function initMap(settings, mapIndex) {
 export function initLayers(map, settings, mapIndex) {
   const numLayers = settings.layers.length;
   const hasLegends = settings.has_legends;
-  const isDefaultLegend = settings.default_legend;
   const isStatic = settings.is_static;
   const layers = settings.layers;
   const mapLayers = getMapLayers(
@@ -50,7 +48,6 @@ export function initLayers(map, settings, mapIndex) {
     mapIndex
   );
 
-  createLegend(isDefaultLegend, mapLayers);
   setInteractiveLayers(map, layers, mapLayers);
 
   return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
@@ -83,12 +80,6 @@ export function setInteractiveLayers(map, layers, mapLayers) {
 
   if (interactiveLayers && interactiveLayers.length > 0) {
     setInteractivity(map, interactiveLayers, interactiveMapLayers);
-  }
-}
-
-export function createLegend(isDefaultLegend, mapLayers) {
-  if (isDefaultLegend) {
-    createDefaultLegend(mapLayers);
   }
 }
 

@@ -31,7 +31,7 @@ def animation_layer(
         fade (string, optional): Animation fade with the format: "(fade in, fade out)". Default is (1, 1).
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
           A Credentials instance. This is only used for the simplified Source API.
-          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+          When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
           these credentials is simply ignored. If not provided the credentials will be
           automatically obtained from the default credentials.
 

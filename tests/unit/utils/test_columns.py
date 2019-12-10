@@ -3,8 +3,7 @@
 """Unit tests for cartoframes.data.columns"""
 
 from cartoframes import CartoDataFrame
-from cartoframes.utils.columns import (Column, DataframeColumnInfo,
-                                       DataframeColumnsInfo, normalize_names)
+from cartoframes.utils.columns import Column, ColumnInfo, get_dataframe_columns_info, normalize_names
 
 
 class TestColumns(object):
@@ -71,15 +70,6 @@ class TestColumns(object):
     def test_normalize_names_unchanged(self):
         assert normalize_names(self.cols_ans) == self.cols_ans
 
-    def test_database_column_name_the_geom(self):
-        dataframe_column_info = DataframeColumnInfo('other')
-        assert dataframe_column_info.name == 'other'
-        assert dataframe_column_info.dbname == 'other'
-        dataframe_column_info = DataframeColumnInfo('the_geom', 'geometry')
-        assert dataframe_column_info.name == 'the_geom'
-        assert dataframe_column_info.dbname == 'the_geom'
-        assert dataframe_column_info.dbtype == 'geometry(Point, 4326)'
-
     def test_column_info_with_geom(self):
         cdf = CartoDataFrame(
             [['Gran Vía 46', 'Madrid', 'POINT (0 0)'], ['Ebro 1', 'Sevilla', 'POINT (1 1)']],
@@ -87,12 +77,13 @@ class TestColumns(object):
             geometry='the_geom'
         )
 
-        dataframe_columns_info = DataframeColumnsInfo(cdf)
+        dataframe_columns_info = get_dataframe_columns_info(cdf)
 
-        assert len(dataframe_columns_info.columns) == 3
-        assert str(dataframe_columns_info.columns[0]) == 'Address address text'
-        assert str(dataframe_columns_info.columns[1]) == 'City city text'
-        assert str(dataframe_columns_info.columns[2]) == 'the_geom the_geom geometry(Point, 4326)'
+        assert dataframe_columns_info == [
+            ColumnInfo('Address', 'address', 'text', False),
+            ColumnInfo('City', 'city', 'text', False),
+            ColumnInfo('the_geom', 'the_geom', 'geometry(Point, 4326)', True)
+        ]
 
     def test_column_info_without_geom(self):
         cdf = CartoDataFrame(
@@ -100,11 +91,12 @@ class TestColumns(object):
             columns=['Address', 'City']
         )
 
-        dataframe_columns_info = DataframeColumnsInfo(cdf)
+        dataframe_columns_info = get_dataframe_columns_info(cdf)
 
-        assert len(dataframe_columns_info.columns) == 2
-        assert str(dataframe_columns_info.columns[0]) == 'Address address text'
-        assert str(dataframe_columns_info.columns[1]) == 'City city text'
+        assert dataframe_columns_info == [
+            ColumnInfo('Address', 'address', 'text', False),
+            ColumnInfo('City', 'city', 'text', False)
+        ]
 
     def test_column_info_basic_troubled_names(self):
         cdf = CartoDataFrame(
@@ -113,11 +105,12 @@ class TestColumns(object):
             geometry='the_geom'
         )
 
-        dataframe_columns_info = DataframeColumnsInfo(cdf)
+        dataframe_columns_info = get_dataframe_columns_info(cdf)
 
-        assert len(dataframe_columns_info.columns) == 2
-        assert str(dataframe_columns_info.columns[0]) == 'cartodb_id cartodb_id bigint'
-        assert str(dataframe_columns_info.columns[1]) == 'the_geom the_geom geometry(Point, 4326)'
+        assert dataframe_columns_info == [
+            ColumnInfo('cartodb_id', 'cartodb_id', 'bigint', False),
+            ColumnInfo('the_geom', 'the_geom', 'geometry(Point, 4326)', True)
+        ]
 
     def test_column_info_geometry_troubled_names(self):
         cdf = CartoDataFrame(
@@ -126,9 +119,10 @@ class TestColumns(object):
             geometry='the_geom'
         )
 
-        dataframe_columns_info = DataframeColumnsInfo(cdf)
+        dataframe_columns_info = get_dataframe_columns_info(cdf)
 
-        assert len(dataframe_columns_info.columns) == 3
-        assert str(dataframe_columns_info.columns[0]) == 'Geom geom text'
-        assert str(dataframe_columns_info.columns[1]) == 'the_geom the_geom geometry(Point, 4326)'
-        assert str(dataframe_columns_info.columns[2]) == 'g-e-o-m-e-t-r-y g_e_o_m_e_t_r_y text'
+        assert dataframe_columns_info == [
+            ColumnInfo('Geom', 'geom', 'text', False),
+            ColumnInfo('the_geom', 'the_geom', 'geometry(Point, 4326)', True),
+            ColumnInfo('g-e-o-m-e-t-r-y', 'g_e_o_m_e_t_r_y', 'text', False)
+        ]

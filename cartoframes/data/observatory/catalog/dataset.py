@@ -29,7 +29,7 @@ class Dataset(CatalogEntity):
 
       - Use any public dataset to enrich your data with the variables in it by means of the :obj:`Enrichment`
         functions.
-      - Subscribe (:py:attr:`Dataset.subscribe`) to any premium dataset, to get a license, that grants you
+      - Subscribe (:py:attr:`Dataset.subscribe`) to any premium dataset to get a license that grants you
         the right to enrich your data with the variables (:obj:`Variable`) in it.
 
     See the enrichment guides for more information about datasets, variables and
@@ -67,7 +67,7 @@ class Dataset(CatalogEntity):
 
         The catalog supports nested filters for a hierarchical exploration.
         This way you could list the datasets available for different hierarchies:
-        country, provider, category, geography or a combination of them.
+        country, provider, category, geography, or a combination of them.
 
         .. code::
 
@@ -246,7 +246,7 @@ class Dataset(CatalogEntity):
     def summary(self):
         """JSON object with extra metadata that summarizes different properties of the dataset content."""
 
-        return self.data['summary_json']
+        return self._get_summary_data()
 
     def head(self):
         """Returns a sample of the 10 first rows of the dataset data.
@@ -257,8 +257,8 @@ class Dataset(CatalogEntity):
             pandas.DataFrame
         """
 
-        data = self.data['summary_json']
-        return head(self.__class__, data)
+        data = self._get_summary_data()
+        return head(self.__class__, data) if data else None
 
     def tail(self):
         """"Returns the last ten rows of the dataset"
@@ -268,8 +268,9 @@ class Dataset(CatalogEntity):
         Returns:
             pandas.DataFrame
         """
-        data = self.data['summary_json']
-        return tail(self.__class__, data)
+
+        data = self._get_summary_data()
+        return tail(self.__class__, data) if data else None
 
     def counts(self):
         """Returns a summary of different counts over the actual dataset data.
@@ -287,8 +288,8 @@ class Dataset(CatalogEntity):
                 # null_cells_percent:   percent of cells with null value in the dataset
         """
 
-        data = self.data['summary_json']
-        return counts(data)
+        data = self._get_summary_data()
+        return counts(data) if data else None
 
     def fields_by_type(self):
         """Returns a summary of the number of columns per data type in the dataset.
@@ -304,8 +305,9 @@ class Dataset(CatalogEntity):
                 # string       number of columns with type string in the dataset
                 # integer      number of columns with type integer in the dataset
         """
-        data = self.data['summary_json']
-        return fields_by_type(data)
+
+        data = self._get_summary_data()
+        return fields_by_type(data) if data else None
 
     def geom_coverage(self):
         """Shows a map to visualize the geographical coverage of the dataset.
@@ -380,7 +382,7 @@ class Dataset(CatalogEntity):
             os.path with the local file path with the file downloaded
 
         :raises CartoException: If you have not a valid license for the dataset being downloaded.
-        :raises ValueError: If the credentials argument is not valud.
+        :raises ValueError: If the credentials argument is not valid.
         """
         if not self._is_subscribed(credentials):
             raise CartoException('You are not subscribed to this Dataset yet. Please, use the subscribe method first.')
@@ -485,3 +487,12 @@ class Dataset(CatalogEntity):
         datasets = Dataset.get_all({}, _credentials)
 
         return self in datasets
+
+    def _get_summary_data(self):
+        data = self.data.get('summary_json')
+
+        if data:
+            return data
+        else:
+            print('Summary information is not available')
+            return None
