@@ -66,7 +66,7 @@ class BigQueryClient(object):
         self.instant_licensing = do_credentials.instant_licensing
 
     @refresh_clients
-    def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
+    def upload_dataframe(self, dataframe, schema, tablename):
         # Upload file to Google Cloud Storage
         bucket = self.gcs_client.get_bucket(self.bucket_name)
         blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
@@ -77,7 +77,7 @@ class BigQueryClient(object):
             os.remove(tablename)
 
         # Import from GCS To BigQuery
-        dataset_ref = self.bq_client.dataset(dataset, project=project)
+        dataset_ref = self.bq_client.dataset(self.dataset, project=self.user_data_project)
         table_ref = dataset_ref.table(tablename)
         schema_wrapped = [bigquery.SchemaField(column, dtype) for column, dtype in schema.items()]
 

@@ -105,7 +105,6 @@ class TestEnrichmentService(object):
 
     def test_upload_data(self):
         geom_column = 'the_geom'
-        expected_project = 'carto-do-customers'
         user_dataset = 'test_dataset'
 
         point = Point(1, 1)
@@ -121,13 +120,11 @@ class TestEnrichmentService(object):
             columns=[_ENRICHMENT_ID, _GEOJSON_COLUMN])
 
         # mock
-        def assert_upload_data(_, dataframe, schema, tablename, project, dataset):
+        def assert_upload_data(_, dataframe, schema, tablename):
             assert dataframe.equals(expected_cdf)
             assert schema == expected_schema
             assert isinstance(tablename, str) and len(tablename) > 0
-            assert project == expected_project
             assert tablename == user_dataset
-            assert dataset == 'username'
 
         enrichment_service = EnrichmentService(credentials=self.credentials)
         original = BigQueryClient.upload_dataframe
@@ -138,7 +135,6 @@ class TestEnrichmentService(object):
 
     def test_upload_data_null_geometries(self):
         geom_column = 'the_geom'
-        expected_project = 'carto-do-customers'
         user_dataset = 'test_dataset'
 
         point = Point(1, 1)
@@ -157,13 +153,11 @@ class TestEnrichmentService(object):
             columns=[_ENRICHMENT_ID, _GEOJSON_COLUMN])
 
         # mock
-        def assert_upload_data(_, dataframe, schema, tablename, project, dataset):
+        def assert_upload_data(_, dataframe, schema, tablename):
             assert dataframe.equals(expected_cdf)
             assert schema == expected_schema
             assert isinstance(tablename, str) and len(tablename) > 0
-            assert project == expected_project
             assert tablename == user_dataset
-            assert dataset == 'username'
 
         enrichment_service = EnrichmentService(credentials=self.credentials)
         original = BigQueryClient.upload_dataframe

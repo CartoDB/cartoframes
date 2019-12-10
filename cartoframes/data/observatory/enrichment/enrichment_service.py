@@ -112,9 +112,7 @@ class EnrichmentService(object):
         self.bq_client.upload_dataframe(
             dataframe=bq_dataframe,
             schema=schema,
-            tablename=tablename,
-            project=self.working_project,
-            dataset=self.user_dataset
+            tablename=tablename
         )
 
     def _get_tables_metadata(self, variables):
