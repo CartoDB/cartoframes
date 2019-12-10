@@ -2,21 +2,21 @@
 
 ### Introduction
 
-CARTOframes provides the functionality of using the [CARTO Data Services API](https://carto.com/developers/data-services-api/). This API consists of a set of location based functions that can be applied to your data in order to perform geospatial analyses without leaving the context of your notebook.
+CARTOframes provides the functionality to use the [CARTO Data Services API](https://carto.com/developers/data-services-api/). This API consists of a set of location-based functions that can be applied to your data to perform geospatial analyses without leaving the context of your notebook.
 
-For instance, you can **geocode** a pandas DataFrame with addresses on the fly, and then perform trade areas analysis by computing **isodistances** or **isochrones** programatically.
+For instance, you can **geocode** a pandas DataFrame with addresses on the fly, and then perform a trade areas analysis by computing **isodistances** or **isochrones** programmatically.
 
-In this guide we go through the use case of, given a set of ten Starbucks store addresses, finding good location candidates to open another store.
+Given a set of ten simulated Starbucks store addresses, this guide walks through the use case of finding good location candidates to open an additional store.
 
 > Based on your account plan, some of these location data services are subject to different [quota limitations](https://carto.com/developers/data-services-api/support/quota-information/)
 
 ### Data
 
-We will be using the same dataset of fake locations used along these guides [starbucks_brooklyn.csv](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn.csv)
+This guide uses the same dataset of simulated Starbucks locations that has been used in the other guides and can be downloaded [here](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn.csv).
 
 ### Authentication
 
-Using Location Data Services requires to be authenticated. For more information about how to authenticate, please read the [Login to CARTO Platform guide](/developers/cartoframes/guides/Authentication/)
+Using Location Data Services requires CARTO authentication. For more information about how to authenticate, please read the [Authentication guide](/developers/cartoframes/guides/Authentication/).
 
 ```python
 from cartoframes.auth import set_default_credentials
@@ -26,7 +26,7 @@ set_default_credentials('creds.json')
 
 ### Geocoding
 
-The first step is to read and understand the data we have. Once we've the Starbucks store data in a DataFrame, we can see we've two columns that can be used in the **geocoding** service: `name` and `address`. There's also a third column that reflects the anual revenue of the store.
+To get started, let's read in and explore the Starbucks location data we have. With the Starbucks store data in a DataFrame, we can see that there are two columns that can be used in the **geocoding** service: `name` and `address`. There's also a third column that reflects the annual revenue of the store.
 
 ```python
 import pandas
@@ -112,9 +112,9 @@ df
 
 #### Quota consumption
 
-Each time you run a Location Data Service, you're consuming quota. For this reason, we provide the hability to check in advance the **amount of credits** this operation will consume by using the `dry_run` parameter when running the service function.
+Each time you run Location Data Services, you consume quota. For this reason, we provide the ability to check in advance the **amount of credits** an operation will consume by using the `dry_run` parameter when running the service function.
 
-Also, it is possible to check the available quota by running the `available_quota` function.
+It is also possible to check the available quota by running the `available_quota` function.
 
 ```python
 from cartoframes.data.services import Geocoding
@@ -159,10 +159,10 @@ geo_cdf, geo_metadata = geo_service.geocode(
 )
 ```
 
-If the CSV file should ever change, cached results will only be applied to unmodified
-records, and new geocoding will be performed only on new or changed records.
+If the input data file should ever change, cached results will only be applied to unmodified
+records, and new geocoding will be performed only on _new or changed records_.
 
-In order to be able to use cached results, we have to save the results in a CARTO table using `table_name` and `cached=True` parameters.
+In order to use cached results, we have to save the results to a CARTO table using the `table_name` and `cached=True` parameters.
 
 ```python
 geo_cdf, geo_metadata = geo_service.geocode(
@@ -175,7 +175,7 @@ geo_cdf, geo_metadata = geo_service.geocode(
 )
 ```
 
-Let's compare the `geo_dry_metadata` and the `geo_metadata` to see the differences between the information when using or not the `dry_run` option. As we can see, this information reflects that all the locations have been geocoded successfully and that it has consumed 10 credits of quota.
+Let's compare `geo_dry_metadata` and `geo_metadata` to see the differences between the information returned with and without the `dry_run` option. As we can see, this information reflects that all the locations have been geocoded successfully and that it has consumed 10 credits of quota.
 
 ```python
 geo_metadata
@@ -266,14 +266,14 @@ geo_cdf.head()
 </table>
 </div>
 
-In addition, to prevent having to geocode records that have been **previously geocoded**, and thus spend quota **unnecessarily**, you should always preserve the ``the_geom`` and ``carto_geocode_hash`` columns generated by the geocoding process.
+In addition, to prevent geocoding records that have been **previously geocoded**, and thus spend quota **unnecessarily**, you should always preserve the ``the_geom`` and ``carto_geocode_hash`` columns generated by the geocoding process.
 
 This will happen **automatically** in these cases:
 
 1. Your input is a **table** from CARTO processed in place (without a ``table_name`` parameter)
-2. If you save your results in a CARTO table using the ``table_name`` parameter, and only use the resulting table for any further geocoding.
+2. If you save your results to a CARTO table using the ``table_name`` parameter, and only use the resulting table for any further geocoding.
 
-If try to geocode now this DataFrame, which contains both ``the_geom`` and the ``carto_geocode_hash``, we can see that the required quota is 0 cause it has already been geocoded.
+If you try to geocode this DataFrame now, that contains both ``the_geom`` and the ``carto_geocode_hash``, you will see that the required quota is 0 because it has already been geocoded.
 
 ```python
 _, repeat_geo_metadata = geo_service.geocode(
@@ -293,7 +293,7 @@ repeat_geo_metadata.get('required_quota')
 
 #### Precision
 
-The `address` column is more complete than the `name` column, and therefore, the resulting coordinates calculated by the service will be more accurate. If we check this, the accuracy values using the `name` column (`0.95, 0.93, 0.96, 0.83, 0.78, 0.9`) are lower than the ones we get by using the `address` column for geocoding (`0.97, 0.99, 0.98`)
+The `address` column is more complete than the `name` column, and therefore, the resulting coordinates calculated by the service will be more accurate. If we check this, the accuracy values using the `name` column (`0.95, 0.93, 0.96, 0.83, 0.78, 0.9`) are lower than the ones we get by using the `address` column for geocoding (`0.97, 0.99, 0.98`).
 
 ```python
 geo_name_cdf, geo_name_metadata = geo_service.geocode(
@@ -457,7 +457,7 @@ array([0.97, 0.99, 0.98])
 
 #### Visualize the results
 
-Finally, we can visualize through CARTOframes helpers the geocoding results by precision.
+Finally, we can visualize the precision of the geocoded results using a CARTOframes [visualization layer](/developers/cartoframes/examples/#example-color-bins-layer).
 
 ```python
 from cartoframes.viz.helpers import color_bins_layer
@@ -494,16 +494,16 @@ color_bins_layer(
 
 ### Isolines
 
-There are two **Isolines** functions: **isochrones** and **isodistances**. In this guide we're using the **isochrones** to know the walking area by time for each Starbucks store and the **isodistances** to discover the walking area by distance.
+There are two **Isoline** functions: **isochrones** and **isodistances**. In this guide we will use the **isochrones** function to calculate walking areas _by time_ for each Starbucks store and the **isodistances** function to calculate the walking area _by distance_.
 
 By definition, isolines are concentric polygons that display equally calculated levels over a given surface area, and they are calculated as the intersection areas from the origin point, measured by:
 
 * **Time** in the case of **isochrones**
 * **Distance** in the case of **isodistances**
 
-### Isolines: Isochrones
+### Isochrones
 
-We're going to use these values to set the ranges: 5, 15 and 30 min. These ranges are in `seconds`, so they will be **300**, **900**, and **1800** respectively.
+For isochones, let's calculate the time ranges of: 5, 15 and 30 min. These ranges are input in `seconds`, so they will be **300**, **900**, and **1800** respectively.
 
 ```python
 from cartoframes.data.services import Isolines
@@ -591,9 +591,9 @@ isochrones_cdf.head()
 </table>
 </div>
 
-#### The isolines helper
+#### Visualize with the isolines layer
 
-The most straight forward way of visualizing the the resulting geometries is by using the `isolines_layer` helper. It will use the `range_label` column added automatically by the service to classify each polygon by category.
+The most straightforward way of visualizing the resulting geometries is to use the [`isolines_layer`](/developers/cartoframes/examples/#example-isolines-layer) visualization layer. This visualization layer uses the `range_label` column that is automatically added by the service to classify each polygon by category.
 
 
 ```python
@@ -613,7 +613,7 @@ isolines_layer(isochrones_cdf)
     </iframe>
 </div>
 
-### Isolines: Isodistances
+### Isodistances
 
 The isoline services accepts several options to manually change the `resolution` or the `quality` of the polygons. There's more information about these settings in the [Isolines Reference](/developers/cartoframes/reference/#heading-Isolines)
 
@@ -733,6 +733,8 @@ isolines_layer(isodistances_cdf)
 
 ### All together
 
+Let's visualize the data in one map to see what insights we can find.
+
 
 ```python
 from cartoframes.viz import Map
@@ -778,9 +780,9 @@ Map([
     </iframe>
 </div>
 
-We observe the store at 228 Duffield st, Brooklyn, NY 11201 is really close to another store with higher revenue, which means we could even think about closing that one in favor to another one with a better location.
+Looking at the map above, we can see the store at 228 Duffield St, Brooklyn, NY 11201 is really close to another store with higher revenue, which means we could even think about closing that one in favor of another one with a better location.
 
-We could try to calculate where to place a new possible store between other stores that don't have as much revenue as others and that are placed separately.
+We could try to calculate where to place a new store between other stores that don't have as much revenue as others and that are placed separately.
 
 Now, let's calculate the **centroid** of three different stores that we've identified previously and use it as a possible location for a new spot:
 
@@ -859,8 +861,8 @@ Map([
 
 ### Conclusion
 
-In this example we've explained how to use the Location Data Services to perform trade areas analysis easily using CARTOframes built-in functionality without leaving the notebook.
+In this example you've seen how to use Location Data Services to perform a trade area analysis using CARTOframes built-in functionality without leaving the notebook.
 
-As a result, we've calculated a possible new location for our store, and we can check how the isoline areas of our interest can influence in our decission.
+Using the results, we've calculated a possible new location for a store, and used the isoline areas to help in the decision making process.
 
 Take into account that finding optimal spots for new stores is not an easy task and requires more analysis, but this is a great first step!
