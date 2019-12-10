@@ -166,7 +166,6 @@ class Isolines(Service):
             source_col = CARTO_INDEX_KEY
 
         iso_function = '_cdb_{function}_exception_safe'.format(function=function)
-        # TODO: use **options argument?
         options = {
             'is_destination': is_destination,
             'mode_type': mode_type,
