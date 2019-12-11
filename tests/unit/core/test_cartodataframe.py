@@ -134,22 +134,23 @@ class TestCartoDataFrame(object):
         series_plot_mock = mocker.patch.object(Series, 'plot')
         cdf = CartoDataFrame({'x': [1]})
         cdf['x'].plot()
-        series_plot_mock.assert_called_once()
+        series_plot_mock.assert_called_once_with()
 
     def test_plot_geoseries(self, mocker):
         geoseries_plot_mock = mocker.patch.object(GeoSeries, 'plot')
         cdf = CartoDataFrame({'geometry': [Point(0, 0)]})
         cdf['geometry'].plot()
-        geoseries_plot_mock.assert_called_once()
+        geoseries_plot_mock.assert_called_once_with()
 
     def test_plot_dataframe(self, mocker):
         dataframe_plot_mock = mocker.patch.object(DataFrame, 'plot')
         cdf = CartoDataFrame({'x': [1], 'y': [1]})
         cdf[['x', 'y']].plot()
-        dataframe_plot_mock.assert_called_once()
+        dataframe_plot_mock.assert_called_once_with()
 
     def test_plot_geodataframe(self, mocker):
         geodataframe_plot_mock = mocker.patch.object(GeoDataFrame, 'plot')
         cdf = CartoDataFrame({'x': [1], 'geometry': [Point(0, 0)]})
-        cdf[['x', 'geometry']].plot(column='x')
-        geodataframe_plot_mock.assert_called_once()
+        subset = cdf[['x', 'geometry']]
+        subset.plot(column='x')
+        geodataframe_plot_mock.assert_called_once_with(subset, column='x')
