@@ -95,7 +95,7 @@ from cartoframes.auth import set_default_credentials
 set_default_credentials('creds.json')
 ```
 
-Now that your credentials are set, we are ready to geocode the dataframe. The resulting data will be a [CartoDataFrame](/developers/cartoframes/reference#heading-CartoDataFrame), a dataframe that integrates with CARTO services that extends on the functionality of [GeoDataFrame](http://geopandas.org/data_structures.html#geodataframe)s. CARTOframes is built on top of [GeoPandas](http://geopandas.org/) to guarantee compatibility between both libraries, and all [GeoDataFrame](http://geopandas.org/data_structures.html#geodataframe) operations are available.
+Now that your credentials are set, we are ready to geocode the dataframe. The resulting data will be a [CartoDataFrame](/developers/cartoframes/reference#heading-CartoDataFrame), a dataframe that integrates with CARTO services that extends on the functionality of [GeoDataFrames](http://geopandas.org/data_structures.html#geodataframe). CARTOframes is built on top of [GeoPandas](http://geopandas.org/) to guarantee compatibility between both libraries, and all [GeoDataFrame](http://geopandas.org/data_structures.html#geodataframe) operations are available.
 
 
 ```python
