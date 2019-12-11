@@ -128,3 +128,11 @@ class TestCartoDataFrame(object):
         cdf2 = CartoDataFrame({'a': [2], 'geometry': [Point(1, 1)]})
         cdf = concat([cdf1, cdf2])
         assert isinstance(cdf, CartoDataFrame)
+
+    def test_plot(self):
+        cdf = CartoDataFrame({'x': [1], 'y': [1], 'geometry': [Point(0, 0)]})
+        # Assert it works without exception
+        cdf['x'].plot()
+        cdf['geometry'].plot()
+        cdf[['x', 'y']].plot()
+        cdf[['x', 'geometry']].plot(column='x')
