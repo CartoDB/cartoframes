@@ -25,7 +25,7 @@ def refresh_clients(func):
         try:
             return func(self, *args, **kwargs)
         except RefreshError:
-            self.bq_client, self.gcs_client = self._init_clients()
+            self._init_clients()
             try:
                 return func(self, *args, **kwargs)
             except RefreshError:
@@ -40,32 +40,34 @@ class BigQueryClient(object):
         self._project = project
         self._credentials = credentials or get_default_credentials()
         self._bucket = 'carto-do-{username}'.format(username=self._credentials.username)
-        self.bq_client, self.gcs_client, self.bq_storage_client = self._init_clients()
+
+        self.bq_client = None
+        self.gcs_client = None
+        self.bq_storage_client = None
+
+        self._init_clients()
 
     def _init_clients(self):
         google_credentials = GoogleCredentials(self._credentials.get_do_token())
 
-        bq_client = bigquery.Client(
+        self.bq_client = bigquery.Client(
             project=self._project,
             credentials=google_credentials
         )
 
-        gcs_client = storage.Client(
+        self.gcs_client = storage.Client(
             project=self._project,
             credentials=google_credentials
         )
 
-        bq_storage_client = bigquery_storage.BigQueryStorageClient(
+        self.bq_storage_client = bigquery_storage.BigQueryStorageClient(
             credentials=google_credentials
         )
-
-        return bq_client, gcs_client, bq_storage_client
 
     @refresh_clients
     @timelogger
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
         log.debug('Uploading to GCS')
-        # Upload file to Google Cloud Storage
         bucket = self.gcs_client.bucket(self._bucket)
         blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
         dataframe.to_csv(tablename, index=False, header=False)
@@ -75,7 +77,6 @@ class BigQueryClient(object):
             os.remove(tablename)
 
         log.debug('Importing to BQ from GCS')
-        # Import from GCS To BigQuery
         dataset_ref = self.bq_client.dataset(dataset, project=project)
         table_ref = dataset_ref.table(tablename)
         schema_wrapped = [bigquery.SchemaField(column, dtype) for column, dtype in schema.items()]
@@ -117,19 +118,26 @@ class BigQueryClient(object):
         column_names = self.get_table_column_names(project, dataset, table)
 
         query = _download_query(project, dataset, table, limit, offset)
-        query_job = self.query(query)
-        rows = query_job.result()
+        job = self.query(query)
 
-        __rows_to_file(rows, file_path, column_names, progress_bar)
+        try:
+            rows = self._download_job_storage_api(job)
+        except Exception:
+            log.warning('Cannot download using BigQuery Storage API, fallback to standard')
+            rows = job.result()
+
+        _rows_to_file(rows, file_path, column_names, progress_bar)
 
         return file_path
 
     @timelogger
     def download_to_dataframe(self, job):
         try:
-            return self._download_job_storage_api(job)
+            rows = self._download_job_storage_api(job)
+            data = list(rows)
+            return pd.DataFrame(data)
         except Exception:
-            log.warning('Cannot download storage API, fallback to standard')
+            log.warning('Cannot download using BigQuery Storage API, fallback to standard')
             return job.to_dataframe()
 
     def _download_job_storage_api(self, job):
@@ -150,9 +158,7 @@ class BigQueryClient(object):
             bigquery_storage.types.StreamPosition(stream=session.streams[0])
         )
 
-        rows = reader.rows(session)
-        data = list(rows)
-        return pd.DataFrame(data)
+        return reader.rows(session)
 
 
 def _download_query(project, dataset, table, limit=None, offset=None):
@@ -167,7 +173,7 @@ def _download_query(project, dataset, table, limit=None, offset=None):
     return query
 
 
-def __rows_to_file(rows, file_path, column_names, progress_bar=True):
+def _rows_to_file(rows, file_path, column_names, progress_bar=True):
     if progress_bar:
         pb = tqdm.tqdm_notebook(total=rows.total_rows)
 
