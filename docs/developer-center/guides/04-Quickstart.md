@@ -2,6 +2,14 @@
 
 ### Introduction
 
+Hi! Glad to see you made it to the Quickstart guide! In this guide you are introduced to how CARTOframes can be used by data scientists in spatial analysis workflows. Using simulated Starbucks revenue data, this guide walks through some common steps a data scientist takes to answer the following question: which stores are performing better than others?
+
+Before you get started, we encourage you to have CARTOframes installed so you can get a feel for the library by using it:
+
+```
+pip install --pre cartoframes
+```
+
 For additional ways to install CARTOframes, check out the [Installation Guide](/developers/cartoframes/guides/Installation).
 
 #### Spatial analysis scenario
@@ -87,7 +95,7 @@ from cartoframes.auth import set_default_credentials
 set_default_credentials('creds.json')
 ```
 
-Now that your credentials are set, we are ready to geocode the dataframe. The resulting data will be a [CartoDataFrame](/developers/cartoframes/reference#heading-CartoDataFrame), a dataframe that integrates with CARTO services that extends on the functionality of [GeoDataFrame](http://geopandas.org/data_structures.html#geodataframe)s. CARTOframes is built on top of [GeoPandas](http://geopandas.org/) to guarantee compatibility between both libraries, and all [GeoDataFrame](http://geopandas.org/data_structures.html#geodataframe) operations are available.
+Now that your credentials are set, we are ready to geocode the dataframe. The resulting data will be a [CartoDataFrame](/developers/cartoframes/reference#heading-CartoDataFrame), a dataframe that integrates with CARTO services that extends on the functionality of [GeoDataFrames](http://geopandas.org/data_structures.html#geodataframe). CARTOframes is built on top of [GeoPandas](http://geopandas.org/) to guarantee compatibility between both libraries, and all [GeoDataFrame](http://geopandas.org/data_structures.html#geodataframe) operations are available.
 
 
 ```python
