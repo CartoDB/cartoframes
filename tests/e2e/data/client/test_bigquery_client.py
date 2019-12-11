@@ -97,8 +97,8 @@ class TestBigQueryClient(unittest.TestCase):
 
         original_query = BigQueryClient.query
         BigQueryClient.query = Mock(return_value=QueryJobMock(data))
-        original_get_table_column_names = BigQueryClient.get_table_column_names
-        BigQueryClient.get_table_column_names = Mock(return_value=columns)
+        original_get_table_column_names = BigQueryClient._get_table_column_names
+        BigQueryClient._get_table_column_names = Mock(return_value=columns)
 
         project = _WORKING_PROJECT
         dataset = 'fake_dataset'
@@ -120,7 +120,7 @@ class TestBigQueryClient(unittest.TestCase):
         self.assertEqual(rows[1], list(data[0].values()))
 
         BigQueryClient.query = original_query
-        BigQueryClient.get_table_column_names = original_get_table_column_names
+        BigQueryClient._get_table_column_names = original_get_table_column_names
 
     def test_download_using_if_exists(self):
         project = _WORKING_PROJECT

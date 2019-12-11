@@ -65,45 +65,12 @@ class BigQueryClient(object):
         )
 
     @refresh_clients
-    @timelogger
-    def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
-        log.debug('Uploading to GCS')
-        bucket = self.gcs_client.bucket(self._bucket)
-        blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
-        dataframe.to_csv(tablename, index=False, header=False)
-        try:
-            blob.upload_from_filename(tablename)
-        finally:
-            os.remove(tablename)
-
-        log.debug('Importing to BQ from GCS')
-        dataset_ref = self.bq_client.dataset(dataset, project=project)
-        table_ref = dataset_ref.table(tablename)
-        schema_wrapped = [bigquery.SchemaField(column, dtype) for column, dtype in schema.items()]
-
-        job_config = bigquery.LoadJobConfig()
-        job_config.schema = schema_wrapped
-        job_config.source_format = bigquery.SourceFormat.CSV
-        uri = 'gs://{bucket}/{tablename}'.format(bucket=self._bucket, tablename=tablename)
-
-        job = self.bq_client.load_table_from_uri(
-            uri, table_ref, job_config=job_config
-        )
-
-        job.result()  # Waits for table load to complete.
-
-    @refresh_clients
     def query(self, query, **kwargs):
         return self.bq_client.query(query, **kwargs)
 
-    @refresh_clients
-    def get_table(self, project, dataset, table):
-        full_table_name = '{}.{}.{}'.format(project, dataset, table)
-        return self.bq_client.get_table(full_table_name)
-
-    def get_table_column_names(self, project, dataset, table):
-        table_info = self.get_table(project, dataset, table)
-        return [field.name for field in table_info.schema]
+    def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
+        self._upload_dataframe_to_GCS(dataframe, tablename)
+        self._import_from_GCS_to_BQ(schema, tablename, project, dataset)
 
     @timelogger
     def download_to_file(self, project, dataset, table, limit=None, offset=None,
@@ -115,7 +82,7 @@ class BigQueryClient(object):
         if fail_if_exists and os.path.isfile(file_path):
             raise CartoException('The file `{}` already exists.'.format(file_path))
 
-        column_names = self.get_table_column_names(project, dataset, table)
+        column_names = self._get_table_column_names(project, dataset, table)
 
         query = _download_query(project, dataset, table, limit, offset)
         job = self.query(query)
@@ -140,7 +107,7 @@ class BigQueryClient(object):
             log.warning('Cannot download using BigQuery Storage API, fallback to standard')
             return job.to_dataframe()
 
-    def _download_job_storage_api(self, job):
+    def _download_bq_storage_api(self, job):
         table_ref = job.destination.to_bqstorage()
 
         parent = 'projects/{}'.format(self._project)
@@ -159,6 +126,48 @@ class BigQueryClient(object):
         )
 
         return reader.rows(session)
+
+    @refresh_clients
+    @timelogger
+    def _upload_dataframe_to_GCS(self, dataframe, tablename):
+        log.debug('Uploading to GCS')
+
+        bucket = self.gcs_client.bucket(self._bucket)
+        blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
+        dataframe.to_csv(tablename, index=False, header=False)
+        try:
+            blob.upload_from_filename(tablename)
+        finally:
+            os.remove(tablename)
+
+    @refresh_clients
+    @timelogger
+    def _import_from_GCS_to_BQ(self, schema, tablename, project, dataset):
+        log.debug('Importing to BQ from GCS')
+
+        dataset_ref = self.bq_client.dataset(dataset, project=project)
+        table_ref = dataset_ref.table(tablename)
+        schema_wrapped = [bigquery.SchemaField(column, dtype) for column, dtype in schema.items()]
+
+        job_config = bigquery.LoadJobConfig()
+        job_config.schema = schema_wrapped
+        job_config.source_format = bigquery.SourceFormat.CSV
+        uri = 'gs://{bucket}/{tablename}'.format(bucket=self._bucket, tablename=tablename)
+
+        job = self.bq_client.load_table_from_uri(
+            uri, table_ref, job_config=job_config
+        )
+
+        job.result()
+
+    def _get_table_column_names(self, project, dataset, table):
+        table_info = self._get_table(project, dataset, table)
+        return [field.name for field in table_info.schema]
+
+    @refresh_clients
+    def _get_table(self, project, dataset, table):
+        full_table_name = '{}.{}.{}'.format(project, dataset, table)
+        return self.bq_client.get_table(full_table_name)
 
 
 def _download_query(project, dataset, table, limit=None, offset=None):
