@@ -104,7 +104,7 @@ Apply the necessary changes:
 .. code::
     $ git add .
     $ git commit -m "Commit description"
-    $ git push origin docs/v.M.m.p-your-fix-description
+    $ git push origin your-fix-description
 
 And, finally, open a Pull Request against the docs branch.
 
