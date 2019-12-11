@@ -81,9 +81,14 @@ class EnrichmentService(object):
 
         dfs_enriched = list()
         awaiting_jobs = set()
+        errors = list()
 
         def callback(job):
-            dfs_enriched.append(self.bq_client.download_to_dataframe(job))
+            if not job.errors:
+                dfs_enriched.append(self.bq_client.download_to_dataframe(job))
+            else:
+                errors.extend(job.errors)
+
             awaiting_jobs.discard(job.job_id)
 
         for query in queries:
@@ -92,7 +97,10 @@ class EnrichmentService(object):
             job.add_done_callback(callback)
 
         while awaiting_jobs:
-            time.sleep(1)
+            time.sleep(0.5)
+
+        if len(errors) > 0:
+            raise Exception(errors)
 
         for df in dfs_enriched:
             cartodataframe = cartodataframe.merge(df, on=self.enrichment_id, how='left')
@@ -175,9 +183,10 @@ class EnrichmentService(object):
 
     def __get_geo_table(self, variable):
         geography_id = Dataset.get(variable.dataset).geography
+        geography = Geography.get(geography_id)
         _, dataset_geo_table, geo_table = geography_id.split('.')
 
-        if variable.project_name != self.public_project:
+        if not geography.is_public_data:
             return '{project}.{dataset}.view_{dataset_geo_table}_{geo_table}'.format(
                 project=self.working_project,
                 dataset=self.user_dataset,
@@ -388,12 +397,12 @@ def _is_subscribed(dataset, geography, credentials):
     if not dataset._is_subscribed(credentials):
         raise EnrichmentException("""
             You are not subscribed to the Dataset '{}' yet. Please, use the subscribe method first.
-        """.format(dataset))
+        """.format(dataset.id))
 
     if not geography._is_subscribed(credentials):
         raise EnrichmentException("""
             You are not subscribed to the Geography '{}' yet. Please, use the subscribe method first.
-        """.format(geography))
+        """.format(geography.id))
 
 
 def _get_aggregation(variable, aggregation):

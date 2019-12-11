@@ -163,6 +163,7 @@ class TestEnrichmentService(object):
         class JobMock():
             def __init__(self):
                 self.job_id = 'job_id'
+                self.errors = None
 
             def to_dataframe(self):
                 return pd.DataFrame([[0, 'new data']], columns=[_ENRICHMENT_ID, 'var1'])
@@ -425,7 +426,7 @@ class TestEnrichmentService(object):
 
         error = """
             You are not subscribed to the Dataset '{}' yet. Please, use the subscribe method first.
-        """.format(dataset)
+        """.format(dataset.id)
         assert str(e.value) == error
 
     @patch.object(DatasetRepository, 'get_all')

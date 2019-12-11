@@ -487,7 +487,7 @@ class Dataset(CatalogEntity):
 
         datasets = Dataset.get_all({}, _credentials)
 
-        return self in datasets
+        return self in datasets if datasets else False
 
     def _get_summary_data(self):
         data = self.data.get('summary_json')

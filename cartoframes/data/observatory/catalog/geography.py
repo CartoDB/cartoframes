@@ -282,6 +282,7 @@ class Geography(CatalogEntity):
             subscription_info.fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))
 
     def _is_subscribed(self, credentials=None):
+
         if self.is_public_data:
             return True
 
@@ -292,4 +293,4 @@ class Geography(CatalogEntity):
 
         geographies = Geography.get_all({}, _credentials)
 
-        return self in geographies
+        return self in geographies if geographies else False
