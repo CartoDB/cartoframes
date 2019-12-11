@@ -14,8 +14,8 @@ class QuadGrid():
         geometry_name = input_gdf.geometry.name
 
         dfs = []
-        for index, row in input_gdf.iterrows():
-            input_geometry = input_gdf.geometry[index]
+        for _, row in input_gdf.iterrows():
+            input_geometry = row[geometry_name]
             bounds = input_geometry.bounds
             tiles = mercantile.tiles(bounds[0], bounds[1], bounds[2], bounds[3], zoom_level)
             new_rows = []
