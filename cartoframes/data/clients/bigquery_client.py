@@ -135,8 +135,7 @@ class BigQueryClient(object):
         return file_path
 
     @timelogger
-    def to_dataframe(self, job):
-
+    def download_to_dataframe(self, job):
         try:
             return self._download_job_storage_api(job)
         except Exception:
@@ -144,7 +143,6 @@ class BigQueryClient(object):
             return job.to_dataframe()
 
     def _download_job_storage_api(self, job):
-
         table_ref = job.destination.to_bqstorage()
 
         parent = 'projects/{}'.format(self._project)
