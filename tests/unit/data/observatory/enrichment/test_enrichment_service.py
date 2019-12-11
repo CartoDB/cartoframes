@@ -23,7 +23,7 @@ except ImportError:
 class TestEnrichmentService(object):
     def setup_method(self):
         self.original_init_clients = BigQueryClient._init_clients
-        BigQueryClient._init_clients = Mock(return_value=(True, True))
+        BigQueryClient._init_clients = Mock(return_value=(True, True, True))
         self.credentials = Credentials('username', 'apikey')
 
     def teardown_method(self):
@@ -160,12 +160,18 @@ class TestEnrichmentService(object):
             [[point, 'new data']],
             columns=[geom_column, 'var1'])
 
-        class EnrichMock():
+        class JobMock():
+            def __init__(self):
+                self.job_id = 'job_id'
+
             def to_dataframe(self):
                 return pd.DataFrame([[0, 'new data']], columns=[_ENRICHMENT_ID, 'var1'])
 
+            def add_done_callback(self, callback):
+                return callback(self)
+
         original = BigQueryClient.query
-        BigQueryClient.query = Mock(return_value=EnrichMock())
+        BigQueryClient.query = Mock(return_value=JobMock())
         enrichment_service = EnrichmentService(credentials=self.credentials)
 
         result = enrichment_service._execute_enrichment(['fake_query'], input_cdf)

@@ -17,7 +17,7 @@ class CatalogEntityWithGeographyMock:
 class TestPointsEnrichment(object):
     def setup_method(self):
         self.original_init_clients = BigQueryClient._init_clients
-        BigQueryClient._init_clients = Mock(return_value=(True, True))
+        BigQueryClient._init_clients = Mock(return_value=(True, True, True))
         self.username = 'username'
         self.apikey = 'apikey'
         self.credentials = Credentials(self.username, self.apikey)
