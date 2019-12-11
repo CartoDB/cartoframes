@@ -82,9 +82,9 @@ class EnrichmentService(object):
         dfs_enriched = list()
         awaiting_jobs = set()
 
-        def callback(future_job):
-            awaiting_jobs.discard(future_job.job_id)
-            dfs_enriched.append(self.bq_client.download_to_dataframe(future_job))
+        def callback(job):
+            awaiting_jobs.discard(job.job_id)
+            dfs_enriched.append(self.bq_client.download_to_dataframe(job))
 
         for query in queries:
             job = self.bq_client.query(query)

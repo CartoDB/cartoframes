@@ -73,24 +73,18 @@ class BigQueryClient(object):
         self._import_from_GCS_to_BQ(schema, tablename, project, dataset)
 
     @timelogger
-    def download_to_file(self, project, dataset, table, limit=None, offset=None,
-                         file_path=None, fail_if_exists=False, progress_bar=True):
+    def download_to_file(self, job, file_path=None, fail_if_exists=False, column_names=None, progress_bar=True):
         if not file_path:
-            file_name = '{}.{}.{}.csv'.format(project, dataset, table)
+            file_name = '{}.csv'.format(job.job_id)
             file_path = os.path.join(_USER_CONFIG_DIR, file_name)
 
         if fail_if_exists and os.path.isfile(file_path):
             raise CartoException('The file `{}` already exists.'.format(file_path))
 
-        column_names = self._get_table_column_names(project, dataset, table)
-
-        query = _download_query(project, dataset, table, limit, offset)
-        job = self.query(query)
-
         try:
-            rows = self._download_job_storage_api(job)
+            rows = self._download_by_bq_storage_api(job)
         except Exception:
-            log.warning('Cannot download using BigQuery Storage API, fallback to standard')
+            log.debug('Cannot download using BigQuery Storage API, fallback to standard')
             rows = job.result()
 
         _rows_to_file(rows, file_path, column_names, progress_bar)
@@ -100,14 +94,14 @@ class BigQueryClient(object):
     @timelogger
     def download_to_dataframe(self, job):
         try:
-            rows = self._download_job_storage_api(job)
+            rows = self._download_by_bq_storage_api(job)
             data = list(rows)
             return pd.DataFrame(data)
         except Exception:
-            log.warning('Cannot download using BigQuery Storage API, fallback to standard')
+            log.debug('Cannot download using BigQuery Storage API, fallback to standard')
             return job.to_dataframe()
 
-    def _download_bq_storage_api(self, job):
+    def _download_by_bq_storage_api(self, job):
         table_ref = job.destination.to_bqstorage()
 
         parent = 'projects/{}'.format(self._project)
@@ -170,26 +164,15 @@ class BigQueryClient(object):
         return self.bq_client.get_table(full_table_name)
 
 
-def _download_query(project, dataset, table, limit=None, offset=None):
-    full_table_name = '`{}.{}.{}`'.format(project, dataset, table)
-    query = 'SELECT * FROM {}'.format(full_table_name)
-
-    if limit:
-        query += ' LIMIT {}'.format(limit)
-    if offset:
-        query += ' OFFSET {}'.format(offset)
-
-    return query
-
-
-def _rows_to_file(rows, file_path, column_names, progress_bar=True):
+def _rows_to_file(rows, file_path, column_names=None, progress_bar=True):
     if progress_bar:
         pb = tqdm.tqdm_notebook(total=rows.total_rows)
 
     with open(file_path, 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
 
-        csvwriter.writerow(column_names)
+        if column_names:
+            csvwriter.writerow(column_names)
 
         for row in rows:
             csvwriter.writerow(row.values())

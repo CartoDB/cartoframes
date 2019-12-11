@@ -127,7 +127,11 @@ class CatalogEntity(ABC):
         view = 'view_{}_{}'.format(dataset.replace('-', '_'), table)
 
         try:
-            file_path = bq_client.download_to_file(_WORKING_PROJECT, user_dataset, view)
+            column_names = bq_client.get_table_column_names(_WORKING_PROJECT, user_dataset, view)
+            query = 'SELECT * FROM `{}.{}.{}`'.format(_WORKING_PROJECT, user_dataset, view)
+            job = bq_client.query(query)
+
+            file_path = bq_client.download_to_file(job, column_names=column_names)
         except NotFound:
             raise CartoException('You have not purchased the dataset `{}` yet'.format(self.id))
 
