@@ -1,5 +1,4 @@
 import pandas as pd
-from warnings import warn
 
 from google.api_core.exceptions import NotFound
 
@@ -7,6 +6,7 @@ from carto.exceptions import CartoException
 
 from ...clients.bigquery_client import BigQueryClient
 from ....auth import Credentials, defaults
+from ....core.logger import log
 
 try:
     from abc import ABC
@@ -134,8 +134,8 @@ class CatalogEntity(ABC):
         except NotFound:
             raise CartoException('You have not purchased the dataset `{}` yet'.format(self.id))
 
-        warn('Data saved: {}.'.format(file_path))
-        warn("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
+        log.info('Data saved: {}.'.format(file_path))
+        log.info("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
 
         return file_path
 
