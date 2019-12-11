@@ -117,20 +117,10 @@ class BigQueryClient(object):
         column_names = self.get_table_column_names(project, dataset, table)
 
         query = _download_query(project, dataset, table, limit, offset)
-        rows_iter = self.query(query).result()
+        query_job = self.query(query)
+        rows = query_job.result()
 
-        if progress_bar:
-            pb = tqdm.tqdm_notebook(total=rows_iter.total_rows)
-
-        with open(file_path, 'w') as csvfile:
-            csvwriter = csv.writer(csvfile)
-
-            csvwriter.writerow(column_names)
-
-            for row in rows_iter:
-                csvwriter.writerow(row.values())
-                if progress_bar:
-                    pb.update(1)
+        __rows_to_file(rows, file_path, column_names, progress_bar)
 
         return file_path
 
@@ -150,8 +140,6 @@ class BigQueryClient(object):
             table_ref,
             parent,
             requested_streams=1,
-            # This API can also deliver data serialized in Apache Arrow format.
-            # This example leverages Apache Avro.
             format_=bigquery_storage.enums.DataFormat.AVRO,
             # We use a LIQUID strategy because we only read from a
             # single stream. Consider BALANCED if requested_streams > 1
@@ -177,3 +165,18 @@ def _download_query(project, dataset, table, limit=None, offset=None):
         query += ' OFFSET {}'.format(offset)
 
     return query
+
+
+def __rows_to_file(rows, file_path, column_names, progress_bar=True):
+    if progress_bar:
+        pb = tqdm.tqdm_notebook(total=rows.total_rows)
+
+    with open(file_path, 'w') as csvfile:
+        csvwriter = csv.writer(csvfile)
+
+        csvwriter.writerow(column_names)
+
+        for row in rows:
+            csvwriter.writerow(row.values())
+            if progress_bar:
+                pb.update(1)
