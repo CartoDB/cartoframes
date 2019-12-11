@@ -100,8 +100,8 @@ def _load_wkb_bhex(geom):
 
 
 def _load_wkt(geom):
-    return shapely.wkt.loads(geom)
     """Load WKT geometry."""
+    return shapely.wkt.loads(geom)
 
 
 def _load_ewkt(egeom):
@@ -125,6 +125,17 @@ def _extract_srid(egeom):
         return (result.group(1), result.group(2))
     else:
         return (0, egeom)
+
+
+def encode_geometry_ewkt(geom, srid=4326):
+    if isinstance(geom, shapely.geometry.base.BaseGeometry):
+        return 'SRID={0};{1}'.format(srid, geom.wkt)
+
+
+def encode_geometry_ewkb(geom, srid=4326):
+    if isinstance(geom, shapely.geometry.base.BaseGeometry):
+        shapely.geos.lgeos.GEOSSetSRID(geom._geom, srid)
+        return shapely.wkb.dumps(geom, hex=True, include_srid=True)
 
 
 def to_geojson(geom):

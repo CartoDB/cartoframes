@@ -5,7 +5,6 @@ import numpy as np
 import os
 
 from shapely.geometry import box, shape
-from shapely import wkt
 from cartoframes.analysis.grid import QuadGrid
 from cartoframes import CartoDataFrame
 
@@ -15,7 +14,7 @@ from geopandas.testing import assert_geodataframe_equal
 # DATA FRAME SRC BBOX
 pol_1 = box(1, 1, 2, 2)
 pol_2 = box(3, 3, 4, 4)
-GDF_BOX = gpd.GeoDataFrame({'id': [1, 2], 'geometry': [pol_1, pol_2]}, columns=['id', 'geometry'])
+GDF_BOX = gpd.GeoDataFrame({'id': [1, 2], 'geom': [pol_1, pol_2]}, columns=['id', 'geom'], geometry='geom')
 
 pol_geojson = {
     "type": "Polygon",
@@ -61,7 +60,7 @@ pol_geojson = {
     ]
 }
 
-GDF_IRREGULAR = gpd.GeoDataFrame({'id': [1], 'geometry': [shape(pol_geojson)]}, columns=['id', 'geometry'])
+GDF_IRREGULAR = gpd.GeoDataFrame({'id': [1], 'geom': [shape(pol_geojson)]}, columns=['id', 'geom'], geometry='geom')
 
 BASE_FOLDER = os.path.dirname(os.path.abspath(__file__))
 
@@ -70,10 +69,8 @@ class TestGrid(object):
 
     def _load_test_gdf(self, fname):
         fname = os.path.join(BASE_FOLDER, fname)
-        df = pd.read_csv(fname, dtype={'id': np.int64, 'geometry': object, 'quadkey': object})
-        df['geometry'] = df['geometry'].apply(wkt.loads)
-        cdf_test = CartoDataFrame(df)
-        cdf_test.crs = 'epsg:4326'
+        df = pd.read_csv(fname, dtype={'id': np.int64, 'geom': object, 'quadkey': object})
+        cdf_test = CartoDataFrame(df, geometry='geom', crs='epsg:4326')
         return cdf_test
 
     def test_quadgrid_polyfill_box(self, mocker):
