@@ -160,7 +160,7 @@ class Isolines(Service):
             index_as_cartodbid = CARTO_INDEX_KEY not in source_cdf.columns
 
             to_carto(source_cdf, temporary_table_name, self._credentials, index=index_as_cartodbid,
-                     index_col=CARTO_INDEX_KEY, log_enabled=False)
+                     index_label=CARTO_INDEX_KEY, log_enabled=False)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
 
         if source_col is None:
