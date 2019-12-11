@@ -10,7 +10,7 @@ from warnings import warn
 from carto.exceptions import CartoException
 
 from ...core.managers.context_manager import ContextManager
-from ...io.carto import read_carto
+from ...io.carto import read_carto, to_carto
 from ...utils import utils
 
 
@@ -63,7 +63,7 @@ class DataObsClient(object):
                 creds = Credentials('user name', 'api key')
                 do = DataObsClient(creds)
                 au_boundaries = do.boundaries(region='Australia')
-                au_boundaries.dataframe[['geom_name', 'geom_id']]
+                au_boundaries[['geom_name', 'geom_id']]
 
             Get the boundaries for Australian Postal Areas and map them.
 
@@ -328,7 +328,7 @@ class DataObsClient(object):
 
         Returns:
             pandas.DataFrame:
-                A dataframe of the complete metadata model for specific measures based
+                A DataFrame of the complete metadata model for specific measures based
                 on the search parameters.
 
         Raises:
@@ -477,7 +477,7 @@ class DataObsClient(object):
                 numers=numers,
                 quantiles=quantiles).strip()
         utils.debug_print(self._verbose, query=query)
-        return self._fetch(query, decode_geom=True).dataframe
+        return pd.DataFrame(self._fetch(query, decode_geom=True))
 
     def augment(self, table_name, metadata, persist_as=None, how='the_geom'):
         """Get an augmented CARTO dataset with `Data Observatory
@@ -594,7 +594,7 @@ class DataObsClient(object):
                 '      numeric, timespan_rownum numeric)',
             )).format(table_name=table_name,
                       meta=json.dumps(metadata).replace('\'', '\'\''))
-            _meta = self._fetch(query).dataframe
+            _meta = pd.DataFrame(self._fetch(query))
 
         if _meta.shape[0] == 0:
             raise ValueError('There are no valid metadata entries. Check '
@@ -655,10 +655,11 @@ class DataObsClient(object):
 
         return self._fetch(query, decode_geom=False, table_name=persist_as)
 
-    def _fetch(self, query, table_name=None):
-        cdf = read_carto(query, self._credentials)
+    def _fetch(self, query, decode_geom=False, table_name=None):
+        cdf = read_carto(query, self._credentials, decode_geom=decode_geom)
         if table_name:
-            cdf.to_carto(table_name, self._credentials)
+            to_carto(cdf, table_name, self._credentials,
+                     geom_col='the_geom', if_exists='replace', log_enabled=False)
         return cdf
 
     def _geom_type(self, table):

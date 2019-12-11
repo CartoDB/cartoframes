@@ -62,7 +62,7 @@ class ContextManager(object):
             # 'append'
             pass
 
-        return self._copy_from(cdf, table_name, columns)
+        self._copy_from(cdf, table_name, columns)
 
     def create_table_from_query(self, table_name, query, if_exists, cartodbfy=True, log_enabled=True):
         schema = self.get_schema()
