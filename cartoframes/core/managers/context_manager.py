@@ -266,7 +266,18 @@ class ContextManager(object):
 
         data = _compute_copy_data(dataframe, columns)
 
-        self.copy_client.copyfrom(query, data)
+        try:
+            self.copy_client.copyfrom(query, data)
+        except CartoException as e:
+            if e.args == (32, 'EPIPE'):
+                message = (
+                    'COPY FROM maximum POST size of 2GB exceeded.\n'
+                    'You can split the source dataset and upload in batches using if_exists="append".\n'
+                    'More information in https://carto.com/developers/sql-api/guides/copy-queries/#limits.'
+                )
+                raise Exception(message)
+            else:
+                raise e
 
     def normalize_table_name(self, table_name):
         norm_table_name = normalize_name(table_name)
