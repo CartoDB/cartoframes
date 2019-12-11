@@ -9,7 +9,7 @@ from google.auth.exceptions import RefreshError
 from google.cloud import bigquery
 
 from cartoframes.auth import Credentials
-from cartoframes.data.clients.bigquery_client import BigQueryClient, _download_query
+from cartoframes.data.clients.bigquery_client import BigQueryClient
 
 try:
     from unittest.mock import Mock
@@ -97,8 +97,8 @@ class TestBigQueryClient(unittest.TestCase):
 
         original_query = BigQueryClient.query
         BigQueryClient.query = Mock(return_value=QueryJobMock(data))
-        original_get_table_column_names = BigQueryClient._get_table_column_names
-        BigQueryClient._get_table_column_names = Mock(return_value=columns)
+        original_get_table_column_names = BigQueryClient.get_table_column_names
+        BigQueryClient.get_table_column_names = Mock(return_value=columns)
 
         project = _WORKING_PROJECT
         dataset = 'fake_dataset'
@@ -106,7 +106,10 @@ class TestBigQueryClient(unittest.TestCase):
         file_path = self.file_path
 
         bq_client = BigQueryClient(project, self.credentials)
-        bq_client.download_to_file(project, dataset, table, file_path=file_path, progress_bar=False)
+
+        query = 'SELECT * FROM `{}.{}.{}`'.format(project, dataset, table)
+        job = bq_client.query(query)
+        file_path = bq_client.download_to_file(job, file_path=file_path, column_names=columns, progress_bar=False)
 
         self.assertTrue(os.path.isfile(file_path))
 
@@ -120,7 +123,7 @@ class TestBigQueryClient(unittest.TestCase):
         self.assertEqual(rows[1], list(data[0].values()))
 
         BigQueryClient.query = original_query
-        BigQueryClient._get_table_column_names = original_get_table_column_names
+        BigQueryClient.get_table_column_names = original_get_table_column_names
 
     def test_download_using_if_exists(self):
         project = _WORKING_PROJECT
@@ -130,57 +133,10 @@ class TestBigQueryClient(unittest.TestCase):
 
         bq_client = BigQueryClient(project, self.credentials)
 
+        query = 'SELECT * FROM `{}.{}.{}`'.format(project, dataset, table)
+        job = bq_client.query(query)
+
         with open(file_path, 'w'):
             with self.assertRaises(CartoException):
-                bq_client.download_to_file(project, dataset, table, file_path=file_path,
+                bq_client.download_to_file(job, file_path=file_path,
                                            fail_if_exists=True, progress_bar=False)
-
-
-class TestBigQueryClientUnit(unittest.TestCase):
-    def test_download_query_simple(self):
-        project = 'fake_project'
-        dataset = 'fake_dataset'
-        table = 'fake_table'
-        limit = None
-        offset = None
-        expected_query = 'SELECT * FROM `{}.{}.{}`'.format(project, dataset, table)
-
-        query = _download_query(project, dataset, table, limit, offset)
-
-        self.assertEqual(query, expected_query)
-
-    def test_download_query_limit(self):
-        project = 'fake_project'
-        dataset = 'fake_dataset'
-        table = 'fake_table'
-        limit = 10
-        offset = None
-        expected_query = 'SELECT * FROM `{}.{}.{}` LIMIT {}'.format(project, dataset, table, limit)
-
-        query = _download_query(project, dataset, table, limit, offset)
-
-        self.assertEqual(query, expected_query)
-
-    def test_download_query_offset(self):
-        project = 'fake_project'
-        dataset = 'fake_dataset'
-        table = 'fake_table'
-        limit = None
-        offset = 10
-        expected_query = 'SELECT * FROM `{}.{}.{}` OFFSET {}'.format(project, dataset, table, offset)
-
-        query = _download_query(project, dataset, table, limit, offset)
-
-        self.assertEqual(query, expected_query)
-
-    def test_download_query_limit_offset(self):
-        project = 'fake_project'
-        dataset = 'fake_dataset'
-        table = 'fake_table'
-        limit = 10
-        offset = 20
-        expected_query = 'SELECT * FROM `{}.{}.{}` LIMIT {} OFFSET {}'.format(project, dataset, table, limit, offset)
-
-        query = _download_query(project, dataset, table, limit, offset)
-
-        self.assertEqual(query, expected_query)

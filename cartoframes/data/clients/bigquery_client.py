@@ -154,7 +154,7 @@ class BigQueryClient(object):
 
         job.result()
 
-    def _get_table_column_names(self, project, dataset, table):
+    def get_table_column_names(self, project, dataset, table):
         table_info = self._get_table(project, dataset, table)
         return [field.name for field in table_info.schema]
 
