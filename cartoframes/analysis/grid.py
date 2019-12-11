@@ -1,27 +1,33 @@
 import mercantile
-from shapely.geometry import box
 import pandas as pd
-from cartoframes import CartoDataFrame
+
+from shapely.geometry import box
+from ..core.cartodataframe import CartoDataFrame
 
 
 class QuadGrid():
 
     def polyfill(self, input_gdf, zoom_level):
+        if not hasattr(input_gdf, 'geometry'):
+            raise ValueError('This dataframe has no valid geometry.')
+
+        geometry_name = input_gdf.geometry.name
 
         dfs = []
-
-        for _, row in input_gdf.iterrows():
-            bounds = row['geometry'].bounds
+        for index, row in input_gdf.iterrows():
+            input_geometry = input_gdf.geometry[index]
+            bounds = input_geometry.bounds
             tiles = mercantile.tiles(bounds[0], bounds[1], bounds[2], bounds[3], zoom_level)
-            resp = []
-            for t in tiles:
-                r = row.copy()
-                geometry = box(*mercantile.bounds(t))
-                if geometry.intersects(row['geometry']):
-                    r['geometry'] = geometry
-                    r['quadkey'] = mercantile.quadkey(t)
-                    resp.append(r)
+            new_rows = []
+            for tile in tiles:
+                new_row = row.copy()
+                new_geometry = box(*mercantile.bounds(tile))
+                if new_geometry.intersects(input_geometry):
+                    new_row[geometry_name] = new_geometry
+                    new_row['quadkey'] = mercantile.quadkey(tile)
+                    new_rows.append(new_row)
+            dfs.append(pd.DataFrame(new_rows))
 
-            dfs.append(pd.DataFrame(resp))
+        df = pd.concat(dfs).reset_index(drop=True)
 
-        return CartoDataFrame(pd.concat(dfs).reset_index(drop=True), crs='epsg:4326')
+        return CartoDataFrame(df, geometry=geometry_name, crs='epsg:4326')
