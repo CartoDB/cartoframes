@@ -89,10 +89,13 @@ Documentation is placed in `/docs/developer-center` directory.
     
 Download the docs branch and create from it a new one:
 
+    Note: Don't create the branch starting with `docs/*`, because this namespace is used only when creating a documentation-featured branch from a version
+
+
 .. code::
     $ git fetch origin docs/v.M.m.p
     $ git checkout docs/v.M.m.p
-    $ git checkout -b docs/v.M.m.p-your-fix-description
+    $ git checkout -b your-fix-description
 
 Apply the necessary changes:
 
