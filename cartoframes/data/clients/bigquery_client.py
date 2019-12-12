@@ -80,9 +80,9 @@ class BigQueryClient(object):
     def query(self, query, **kwargs):
         return self.bq_client.query(query, **kwargs)
 
-    def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
+    def upload_dataframe(self, dataframe, schema, tablename):
         self._upload_dataframe_to_GCS(dataframe, tablename)
-        self._import_from_GCS_to_BQ(schema, tablename, project, dataset)
+        self._import_from_GCS_to_BQ(schema, tablename)
 
     @timelogger
     def download_to_file(self, job, file_path=None, fail_if_exists=False, column_names=None, progress_bar=True):
@@ -147,10 +147,10 @@ class BigQueryClient(object):
 
     @refresh_clients
     @timelogger
-    def _import_from_GCS_to_BQ(self, schema, tablename, project, dataset):
+    def _import_from_GCS_to_BQ(self, schema, tablename):
         log.debug('Importing to BQ from GCS')
 
-        dataset_ref = self.bq_client.dataset(dataset, project=project)
+        dataset_ref = self.bq_client.dataset(self.bq_dataset, project=self.bq_project)
         table_ref = dataset_ref.table(tablename)
         schema_wrapped = [bigquery.SchemaField(column, dtype) for column, dtype in schema.items()]
 
