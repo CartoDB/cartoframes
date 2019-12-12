@@ -1,5 +1,5 @@
 from numpy import ndarray
-from pandas import Series
+from pandas import DataFrame, Series
 from geopandas import GeoDataFrame, points_from_xy
 
 from ..utils.geom_utils import decode_geometry_column
@@ -354,3 +354,9 @@ class CartoDataFrame(GeoDataFrame):
         result = super(self._constructor, self).explode(*args, **kwargs)
         result.__class__ = self._constructor
         return result
+
+    def plot(self, *args, **kwargs):
+        if self.has_geometry():
+            return GeoDataFrame.plot(self, *args, **kwargs)
+        else:
+            return DataFrame(self).plot(*args, **kwargs)

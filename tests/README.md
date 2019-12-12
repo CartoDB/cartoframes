@@ -97,6 +97,8 @@ def test_simple_mocking(mocker):
     mock_db_service.assert_called_with('foo')
 ```
 
+NOTE: avoid `assert_called_once` because it does not work in Python 3.5.
+
 **Classes**
 
 ```py
