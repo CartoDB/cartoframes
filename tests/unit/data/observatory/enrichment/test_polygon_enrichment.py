@@ -2,7 +2,6 @@ from google.cloud import bigquery, storage
 
 from cartoframes.auth import Credentials
 
-from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geography, VariableFilter
 # from cartoframes.data.observatory.enrichment.enrichment_service import _WORKING_PROJECT, _PUBLIC_PROJECT, \
 #     AGGREGATION_DEFAULT, AGGREGATION_NONE, prepare_variables, _GEOJSON_COLUMN
