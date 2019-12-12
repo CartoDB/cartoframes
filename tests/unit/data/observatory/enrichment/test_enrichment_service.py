@@ -1,3 +1,4 @@
+from google.cloud import bigquery, storage
 import pytest
 import pandas as pd
 from shapely.geometry.point import Point
@@ -19,16 +20,37 @@ try:
 except ImportError:
     from mock import Mock, patch
 
+_WORKING_PROJECT = 'carto-do-customers'
+_PUBLIC_PROJECT = 'carto-do-public-data'
+
+
+class DoCredentials:
+    def __init__(self, public_data_project, user_data_project, access_token='access_token', instant_licensing=False,
+                 execution_project='execution_project', dataset='username', bucket='bucket'):
+        self.access_token = access_token
+        self.gcp_execution_project = execution_project
+        self.bq_public_project = public_data_project
+        self.bq_project = user_data_project
+        self.bq_dataset = dataset
+        self.gcs_bucket = bucket
+        self.instant_licensing = instant_licensing
+
 
 class TestEnrichmentService(object):
     def setup_method(self):
-        self.original_init_clients = BigQueryClient._init_clients
-        BigQueryClient._init_clients = Mock(return_value=(True, True))
+        self.original_bigquery_Client = bigquery.Client
+        bigquery.Client = Mock(return_value=True)
+        self.original_storage_Client = storage.Client
+        storage.Client = Mock(return_value=True)
+        self.original_get_do_credentials = Credentials.get_do_credentials
+        Credentials.get_do_credentials = Mock(return_value=DoCredentials(_PUBLIC_PROJECT, _WORKING_PROJECT))
         self.credentials = Credentials('username', 'apikey')
 
     def teardown_method(self):
+        bigquery.Client = self.original_bigquery_Client
+        storage.Client = self.original_storage_Client
+        Credentials.get_do_credentials = self.original_get_do_credentials
         self.credentials = None
-        BigQueryClient._init_clients = self.original_init_clients
 
     def test_prepare_data_no_geom(self):
         geom_column = 'the_geom'
@@ -83,7 +105,6 @@ class TestEnrichmentService(object):
 
     def test_upload_data(self):
         geom_column = 'the_geom'
-        expected_project = 'carto-do-customers'
         user_dataset = 'test_dataset'
 
         point = Point(1, 1)
@@ -99,13 +120,11 @@ class TestEnrichmentService(object):
             columns=[_ENRICHMENT_ID, _GEOJSON_COLUMN])
 
         # mock
-        def assert_upload_data(_, dataframe, schema, tablename, project, dataset):
+        def assert_upload_data(_, dataframe, schema, tablename):
             assert dataframe.equals(expected_cdf)
             assert schema == expected_schema
             assert isinstance(tablename, str) and len(tablename) > 0
-            assert project == expected_project
             assert tablename == user_dataset
-            assert dataset == 'username'
 
         enrichment_service = EnrichmentService(credentials=self.credentials)
         original = BigQueryClient.upload_dataframe
@@ -116,7 +135,6 @@ class TestEnrichmentService(object):
 
     def test_upload_data_null_geometries(self):
         geom_column = 'the_geom'
-        expected_project = 'carto-do-customers'
         user_dataset = 'test_dataset'
 
         point = Point(1, 1)
@@ -135,13 +153,11 @@ class TestEnrichmentService(object):
             columns=[_ENRICHMENT_ID, _GEOJSON_COLUMN])
 
         # mock
-        def assert_upload_data(_, dataframe, schema, tablename, project, dataset):
+        def assert_upload_data(_, dataframe, schema, tablename):
             assert dataframe.equals(expected_cdf)
             assert schema == expected_schema
             assert isinstance(tablename, str) and len(tablename) > 0
-            assert project == expected_project
             assert tablename == user_dataset
-            assert dataset == 'username'
 
         enrichment_service = EnrichmentService(credentials=self.credentials)
         original = BigQueryClient.upload_dataframe

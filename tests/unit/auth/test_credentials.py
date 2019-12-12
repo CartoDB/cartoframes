@@ -143,7 +143,7 @@ class TestCredentials(object):
         credentials.get_api_key_auth_client()
         assert credentials._api_key_auth_client is not None
 
-    def test_get_do_token(self, mocker):
+    def test_get_do_credentials(self, mocker):
         access_token = '1234'
 
         class Token:
@@ -153,9 +153,9 @@ class TestCredentials(object):
         mocker.patch('carto.do_token.DoTokenManager.get', return_value=Token())
 
         credentials = Credentials(self.username, self.api_key)
-        token = credentials.get_do_token()
+        do_credentials = credentials.get_do_credentials()
 
-        assert token == access_token
+        assert do_credentials.access_token == access_token
 
 
 class TestCredentialsFromFile(object):

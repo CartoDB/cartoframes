@@ -21,7 +21,7 @@ def refresh_clients(func):
         try:
             return func(self, *args, **kwargs)
         except RefreshError:
-            self.bq_client, self.gcs_client = self._init_clients()
+            self._init_clients()
             try:
                 return func(self, *args, **kwargs)
             except RefreshError:
@@ -32,31 +32,42 @@ def refresh_clients(func):
 
 class BigQueryClient(object):
 
-    def __init__(self, project, credentials):
-        self._project = project
+    def __init__(self, credentials):
         self._credentials = credentials or get_default_credentials()
-        self._bucket = 'carto-do-{username}'.format(username=self._credentials.username)
-        self.bq_client, self.gcs_client = self._init_clients()
+        self.bq_client = None
+        self.gcs_client = None
+
+        self.bq_public_project = None
+        self.bq_project = None
+        self.bq_dataset = None
+        self.instant_licensing = None
+        self._gcs_bucket = None
+
+        self._init_clients()
 
     def _init_clients(self):
-        google_credentials = GoogleCredentials(self._credentials.get_do_token())
+        do_credentials = self._credentials.get_do_credentials()
+        google_credentials = GoogleCredentials(do_credentials.access_token)
 
-        bq_client = bigquery.Client(
-            project=self._project,
+        self.bq_client = bigquery.Client(
+            project=do_credentials.gcp_execution_project,
             credentials=google_credentials)
 
-        gcs_client = storage.Client(
-            project=self._project,
+        self.gcs_client = storage.Client(
+            project=do_credentials.bq_project,
             credentials=google_credentials
         )
 
-        return bq_client, gcs_client
+        self.bq_public_project = do_credentials.bq_public_project
+        self.bq_project = do_credentials.bq_project
+        self.bq_dataset = do_credentials.bq_dataset
+        self.instant_licensing = do_credentials.instant_licensing
+        self._gcs_bucket = do_credentials.gcs_bucket
 
     @refresh_clients
-    def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
-
+    def upload_dataframe(self, dataframe, schema, tablename):
         # Upload file to Google Cloud Storage
-        bucket = self.gcs_client.bucket(self._bucket)
+        bucket = self.gcs_client.get_bucket(self._gcs_bucket)
         blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
         dataframe.to_csv(tablename, index=False, header=False)
         try:
@@ -65,14 +76,14 @@ class BigQueryClient(object):
             os.remove(tablename)
 
         # Import from GCS To BigQuery
-        dataset_ref = self.bq_client.dataset(dataset, project=project)
+        dataset_ref = self.bq_client.dataset(self.bq_dataset, project=self.bq_project)
         table_ref = dataset_ref.table(tablename)
         schema_wrapped = [bigquery.SchemaField(column, dtype) for column, dtype in schema.items()]
 
         job_config = bigquery.LoadJobConfig()
         job_config.schema = schema_wrapped
         job_config.source_format = bigquery.SourceFormat.CSV
-        uri = 'gs://{bucket}/{tablename}'.format(bucket=self._bucket, tablename=tablename)
+        uri = 'gs://{bucket}/{tablename}'.format(bucket=self._gcs_bucket, tablename=tablename)
 
         job = self.bq_client.load_table_from_uri(
             uri, table_ref, job_config=job_config
@@ -93,8 +104,8 @@ class BigQueryClient(object):
         table_info = self.get_table(project, dataset, table)
         return [field.name for field in table_info.schema]
 
-    def download_to_file(self, project, dataset, table, limit=None, offset=None,
-                         file_path=None, fail_if_exists=False, progress_bar=True):
+    def download_to_file(self, project, dataset, table, file_path=None, limit=None, offset=None,
+                         fail_if_exists=False, progress_bar=True):
         if not file_path:
             file_name = '{}.{}.{}.csv'.format(project, dataset, table)
             file_path = os.path.join(_USER_CONFIG_DIR, file_name)

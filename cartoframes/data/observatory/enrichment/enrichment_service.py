@@ -15,9 +15,6 @@ from ....utils.geom_utils import to_geojson
 
 _ENRICHMENT_ID = 'enrichment_id'
 _GEOJSON_COLUMN = '__geojson_geom'
-_DEFAULT_PROJECT = 'carto-do'
-_WORKING_PROJECT = 'carto-do-customers'
-_PUBLIC_PROJECT = 'carto-do-public-data'
 
 AGGREGATION_DEFAULT = 'default'
 AGGREGATION_NONE = 'none'
@@ -67,12 +64,12 @@ class EnrichmentService(object):
 
     def __init__(self, credentials=None):
         self.credentials = credentials = credentials or get_default_credentials()
-        self.user_dataset = self.credentials.get_do_user_dataset()
-        self.bq_client = bigquery_client.BigQueryClient(_WORKING_PROJECT, credentials)
+        self.bq_client = bigquery_client.BigQueryClient(credentials)
+        self.bq_dataset = self.bq_client.bq_dataset
+        self.bq_project = self.bq_client.bq_project
+        self.bq_public_project = self.bq_client.bq_public_project
         self.enrichment_id = _ENRICHMENT_ID
         self.geojson_column = _GEOJSON_COLUMN
-        self.working_project = _WORKING_PROJECT
-        self.public_project = _PUBLIC_PROJECT
 
     def _execute_enrichment(self, queries, cartodataframe):
         dfs_enriched = list()
@@ -117,9 +114,7 @@ class EnrichmentService(object):
         self.bq_client.upload_dataframe(
             dataframe=bq_dataframe,
             schema=schema,
-            tablename=tablename,
-            project=self.working_project,
-            dataset=self.user_dataset
+            tablename=tablename
         )
 
     def _get_tables_metadata(self, variables):
@@ -141,7 +136,7 @@ class EnrichmentService(object):
         return tables_metadata
 
     def __get_enrichment_table(self, variable):
-        if variable.project_name != self.public_project:
+        if variable.project_name != self.bq_public_project:
             return 'view_{dataset}_{table}'.format(
                 dataset=variable.schema_name,
                 table=variable.dataset_name
@@ -150,10 +145,10 @@ class EnrichmentService(object):
             return variable.dataset_name
 
     def __get_dataset(self, variable, table_name):
-        if variable.project_name != self.public_project:
+        if variable.project_name != self.bq_public_project:
             return '{project}.{dataset}.{table_name}'.format(
-                project=self.working_project,
-                dataset=self.user_dataset,
+                project=self.bq_project,
+                dataset=self.bq_dataset,
                 table_name=table_name
             )
         else:
@@ -163,41 +158,41 @@ class EnrichmentService(object):
         geography_id = Dataset.get(variable.dataset).geography
         _, dataset_geo_table, geo_table = geography_id.split('.')
 
-        if variable.project_name != self.public_project:
+        if variable.project_name != self.bq_public_project:
             return '{project}.{dataset}.view_{dataset_geo_table}_{geo_table}'.format(
-                project=self.working_project,
-                dataset=self.user_dataset,
+                project=self.bq_project,
+                dataset=self.bq_dataset,
                 dataset_geo_table=dataset_geo_table,
                 geo_table=geo_table
             )
         else:
             return '{project}.{dataset}.{geo_table}'.format(
-                project=self.public_project,
+                project=self.bq_public_project,
                 dataset=dataset_geo_table,
                 geo_table=geo_table
             )
 
     def __get_project(self, variable):
-        project = self.public_project
+        project = self.bq_public_project
 
-        if variable.project_name != self.public_project:
-            project = self.working_project
+        if variable.project_name != self.bq_public_project:
+            project = self.bq_project
 
         return project
 
     def _get_points_enrichment_sql(self, temp_table_name, variables, filters):
         tables_metadata = self._get_tables_metadata(variables).items()
 
-        return [self._build_points_query(table, metadata, temp_table_name, filters)
-                for table, metadata in tables_metadata]
+        return [self._build_points_query(metadata, temp_table_name, filters)
+                for _, metadata in tables_metadata]
 
-    def _build_points_query(self, table, metadata, temp_table_name, filters):
+    def _build_points_query(self, metadata, temp_table_name, filters):
         variables = ['enrichment_table.{}'.format(variable.column_name) for variable in metadata['variables']]
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
-            project=self.working_project,
-            user_dataset=self.user_dataset,
+            project=self.bq_project,
+            user_dataset=self.bq_dataset,
             temp_table_name=temp_table_name
         )
 
@@ -217,23 +212,22 @@ class EnrichmentService(object):
             enrichment_geo_table=enrichment_geo_table,
             enrichment_id=self.enrichment_id,
             where=self._build_where_clausule(filters),
-            data_table=data_table,
-            table=table
+            data_table=data_table
         )
 
     def _get_polygon_enrichment_sql(self, temp_table_name, variables, filters, aggregation):
         tables_metadata = self._get_tables_metadata(variables).items()
 
-        return [self._build_polygons_query(table, metadata, temp_table_name, filters, aggregation)
-                for table, metadata in tables_metadata]
+        return [self._build_polygons_query(metadata, temp_table_name, filters, aggregation)
+                for _, metadata in tables_metadata]
 
-    def _build_polygons_query(self, table, metadata, temp_table_name, filters, aggregation):
+    def _build_polygons_query(self, metadata, temp_table_name, filters, aggregation):
         variables = metadata['variables']
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
-            project=self.working_project,
-            user_dataset=self.user_dataset,
+            project=self.bq_project,
+            user_dataset=self.bq_dataset,
             temp_table_name=temp_table_name
         )
 

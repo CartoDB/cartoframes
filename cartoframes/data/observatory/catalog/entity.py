@@ -1,5 +1,4 @@
 import pandas as pd
-from warnings import warn
 
 from google.api_core.exceptions import NotFound
 
@@ -7,6 +6,7 @@ from carto.exceptions import CartoException
 
 from ...clients.bigquery_client import BigQueryClient
 from ....auth import Credentials, defaults
+from ....core.logger import log
 
 try:
     from abc import ABC
@@ -14,7 +14,6 @@ except ImportError:
     from abc import ABCMeta
     ABC = ABCMeta('ABC', (object,), {'__slots__': ()})
 
-_WORKING_PROJECT = 'carto-do-customers'
 _PLATFORM_BQ = 'bq'
 
 
@@ -115,24 +114,28 @@ class CatalogEntity(ABC):
 
         return self.id
 
-    def _download(self, credentials=None):
+    def _download(self, credentials=None, file_path=None):
         if not self._is_available_in('bq'):
             raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
         credentials = self._get_credentials(credentials)
-        user_dataset = credentials.get_do_user_dataset()
-        bq_client = _get_bigquery_client(_WORKING_PROJECT, credentials)
+        bq_client = _get_bigquery_client(credentials)
 
-        project, dataset, table = self.id.split('.')
-        view = 'view_{}_{}'.format(dataset.replace('-', '_'), table)
+        full_remote_table_name = self._get_remote_full_table_name(
+            bq_client.bq_project,
+            bq_client.bq_dataset,
+            bq_client.bq_public_project
+        )
+
+        project, dataset, table = full_remote_table_name.split('.')
 
         try:
-            file_path = bq_client.download_to_file(_WORKING_PROJECT, user_dataset, view)
+            file_path = bq_client.download_to_file(project, dataset, table, file_path)
         except NotFound:
             raise CartoException('You have not purchased the dataset `{}` yet'.format(self.id))
 
-        warn('Data saved: {}.'.format(file_path))
-        warn("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
+        log.info('Data saved: {}.'.format(file_path))
+        log.info("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
 
         return file_path
 
@@ -147,9 +150,21 @@ class CatalogEntity(ABC):
 
         return _credentials
 
+    def _get_remote_full_table_name(self, user_project, user_dataset, public_project):
+        project, dataset, table = self.id.split('.')
 
-def _get_bigquery_client(project, credentials):
-    return BigQueryClient(project, credentials)
+        if project != public_project:
+            return '{project}.{dataset}.{table_name}'.format(
+                project=user_project,
+                dataset=user_dataset,
+                table_name='view_{}_{}'.format(dataset, table)
+            )
+        else:
+            return self.id
+
+
+def _get_bigquery_client(credentials):
+    return BigQueryClient(credentials)
 
 
 def is_slug_value(id_value):
