@@ -36,33 +36,46 @@ def refresh_clients(func):
 
 class BigQueryClient(object):
 
-    def __init__(self, project, credentials):
-        self._project = project
+    def __init__(self, credentials):
         self._credentials = credentials or get_default_credentials()
-        self._bucket = 'carto-do-{username}'.format(username=self._credentials.username)
-
         self.bq_client = None
         self.gcs_client = None
         self.bq_storage_client = None
 
+        self._gcp_execution_project = None
+        self.bq_public_project = None
+        self.bq_project = None
+        self.bq_dataset = None
+        self.instant_licensing = None
+        self._gcs_bucket = None
+
         self._init_clients()
 
     def _init_clients(self):
-        google_credentials = GoogleCredentials(self._credentials.get_do_token())
+        do_credentials = self._credentials.get_do_credentials()
+        google_credentials = GoogleCredentials(do_credentials.access_token)
 
         self.bq_client = bigquery.Client(
-            project=self._project,
+            project=do_credentials.gcp_execution_project,
             credentials=google_credentials
         )
 
         self.gcs_client = storage.Client(
-            project=self._project,
+            project=do_credentials.bq_project,
             credentials=google_credentials
         )
 
         self.bq_storage_client = bigquery_storage.BigQueryStorageClient(
             credentials=google_credentials
         )
+
+        self._gcp_execution_project = do_credentials.gcp_execution_project
+        self.bq_public_project = do_credentials.bq_public_project
+        self.bq_project = do_credentials.bq_project
+        self.bq_dataset = do_credentials.bq_dataset
+        self.instant_licensing = do_credentials.instant_licensing
+        self._gcs_bucket = do_credentials.gcs_bucket
+
 
     @refresh_clients
     def query(self, query, **kwargs):
@@ -104,7 +117,7 @@ class BigQueryClient(object):
     def _download_by_bq_storage_api(self, job):
         table_ref = job.destination.to_bqstorage()
 
-        parent = 'projects/{}'.format(self._project)
+        parent = 'projects/{}'.format(self._gcp_execution_project)
         session = self.bq_storage_client.create_read_session(
             table_ref,
             parent,
@@ -112,7 +125,7 @@ class BigQueryClient(object):
             format_=bigquery_storage.enums.DataFormat.AVRO,
             # We use a LIQUID strategy because we only read from a
             # single stream. Consider BALANCED if requested_streams > 1
-            sharding_strategy=(bigquery_storage.enums.ShardingStrategy.LIQUID),
+            sharding_strategy=(bigquery_storage.enums.ShardingStrategy.LIQUID)
         )
 
         reader = self.bq_storage_client.read_rows(
@@ -125,8 +138,7 @@ class BigQueryClient(object):
     @timelogger
     def _upload_dataframe_to_GCS(self, dataframe, tablename):
         log.debug('Uploading to GCS')
-
-        bucket = self.gcs_client.bucket(self._bucket)
+        bucket = self.gcs_client.get_bucket(self._gcs_bucket)
         blob = bucket.blob(tablename, chunk_size=_GCS_CHUNK_SIZE)
         dataframe.to_csv(tablename, index=False, header=False)
         try:
@@ -146,7 +158,7 @@ class BigQueryClient(object):
         job_config = bigquery.LoadJobConfig()
         job_config.schema = schema_wrapped
         job_config.source_format = bigquery.SourceFormat.CSV
-        uri = 'gs://{bucket}/{tablename}'.format(bucket=self._bucket, tablename=tablename)
+        uri = 'gs://{bucket}/{tablename}'.format(bucket=self._gcs_bucket, tablename=tablename)
 
         job = self.bq_client.load_table_from_uri(
             uri, table_ref, job_config=job_config

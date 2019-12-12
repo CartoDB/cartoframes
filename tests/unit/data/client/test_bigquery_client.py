@@ -50,10 +50,9 @@ class TestBigQueryClient(unittest.TestCase):
         column_names_mock.return_value = Mock(return_value=columns)
         download_mock.return_value = data
 
-        project = 'fake_project'
         file_path = self.file_path
 
-        bq_client = BigQueryClient(project, self.credentials)
+        bq_client = BigQueryClient(self.credentials)
         job = QueryJobMock(data)
         file_download = bq_client.download_to_file(job, file_path=file_path, column_names=columns, progress_bar=False)
 

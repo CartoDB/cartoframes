@@ -171,7 +171,7 @@ class TestDataset(object):
         dataset_str = str(dataset)
 
         # Then
-        assert dataset_str == 'Dataset({dict_str})'.format(dict_str=str(db_dataset1))
+        assert dataset_str == "<Dataset.get('{id}')>".format(id=db_dataset1['slug'])
 
     def test_summary_values(self):
         # Given

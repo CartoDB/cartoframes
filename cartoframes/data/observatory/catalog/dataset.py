@@ -366,14 +366,15 @@ class Dataset(CatalogEntity):
 
         return cls._entity_repo.get_all(filters, credentials)
 
-    def download(self, credentials=None):
+    def download(self, credentials=None, file_path=None):
         """Download dataset data as a local file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
-        For premium geographies (those with `is_public_data` set to False), you need a subscription to the geography.
+        For premium datasets (those with `is_public_data` set to False), you need a subscription to the dataset.
         Check the subscription guides for more information.
 
         Args:
+            file_path (str, optional): the file path where save the dataset
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
@@ -388,7 +389,7 @@ class Dataset(CatalogEntity):
         if not self._is_subscribed(credentials):
             raise CartoException('You are not subscribed to this Dataset yet. Please, use the subscribe method first.')
 
-        return self._download(credentials)
+        return self._download(credentials, file_path)
 
     @classmethod
     def get_datasets_spatial_filtered(cls, filter_dataset):
@@ -487,7 +488,7 @@ class Dataset(CatalogEntity):
 
         datasets = Dataset.get_all({}, _credentials)
 
-        return self in datasets if datasets else False
+        return datasets is not None and self in datasets
 
     def _get_summary_data(self):
         data = self.data.get('summary_json')
@@ -497,3 +498,6 @@ class Dataset(CatalogEntity):
         else:
             log.info('Summary information is not available')
             return None
+
+    def __str__(self):
+        return "<Dataset.get('{}')>".format(self._get_print_id())

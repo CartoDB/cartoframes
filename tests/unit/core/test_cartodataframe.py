@@ -1,7 +1,8 @@
 """Unit tests for cartoframes.data."""
 
 from pandas import concat
-from geopandas import GeoDataFrame
+from pandas import DataFrame, Series
+from geopandas import GeoDataFrame, GeoSeries
 from shapely.geometry import box, Point
 
 from cartoframes import CartoDataFrame
@@ -128,3 +129,28 @@ class TestCartoDataFrame(object):
         cdf2 = CartoDataFrame({'a': [2], 'geometry': [Point(1, 1)]})
         cdf = concat([cdf1, cdf2])
         assert isinstance(cdf, CartoDataFrame)
+
+    def test_plot_series(self, mocker):
+        series_plot_mock = mocker.patch.object(Series, 'plot')
+        cdf = CartoDataFrame({'x': [1]})
+        cdf['x'].plot()
+        series_plot_mock.assert_called_once_with()
+
+    def test_plot_geoseries(self, mocker):
+        geoseries_plot_mock = mocker.patch.object(GeoSeries, 'plot')
+        cdf = CartoDataFrame({'geometry': [Point(0, 0)]})
+        cdf['geometry'].plot()
+        geoseries_plot_mock.assert_called_once_with()
+
+    def test_plot_dataframe(self, mocker):
+        dataframe_plot_mock = mocker.patch.object(DataFrame, 'plot')
+        cdf = CartoDataFrame({'x': [1], 'y': [1]})
+        cdf[['x', 'y']].plot()
+        dataframe_plot_mock.assert_called_once_with()
+
+    def test_plot_geodataframe(self, mocker):
+        geodataframe_plot_mock = mocker.patch.object(GeoDataFrame, 'plot')
+        cdf = CartoDataFrame({'x': [1], 'geometry': [Point(0, 0)]})
+        subset = cdf[['x', 'geometry']]
+        subset.plot(column='x')
+        geodataframe_plot_mock.assert_called_once_with(subset, column='x')

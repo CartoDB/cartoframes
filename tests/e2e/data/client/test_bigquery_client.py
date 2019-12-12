@@ -59,7 +59,7 @@ class TestBigQueryClient(unittest.TestCase):
             os.remove(self.file_path)
 
     def test_instantiation(self):
-        bq_client = BigQueryClient(_WORKING_PROJECT, self.credentials)
+        bq_client = BigQueryClient(self.credentials)
         assert isinstance(bq_client, BigQueryClient)
 
     def test_refresh_token_raises_cartoexception(self):
@@ -67,7 +67,7 @@ class TestBigQueryClient(unittest.TestCase):
         original_query_method = BigQueryClient.query
         bigquery.Client.query = refresh_token_checker.query_raiser
 
-        bq_client = BigQueryClient(_WORKING_PROJECT, self.credentials)
+        bq_client = BigQueryClient(self.credentials)
         with pytest.raises(CartoException):
             bq_client.query('select * from')
 
@@ -79,7 +79,7 @@ class TestBigQueryClient(unittest.TestCase):
         original_query_method = BigQueryClient.query
         bigquery.Client.query = refresh_token_checker.query_raiser
 
-        bq_client = BigQueryClient(_WORKING_PROJECT, self.credentials)
+        bq_client = BigQueryClient(self.credentials)
         response = bq_client.query('select * from')
         assert response == expected_response
 
@@ -91,7 +91,7 @@ class TestBigQueryClient(unittest.TestCase):
         table = 'fake_table'
         file_path = self.file_path
 
-        bq_client = BigQueryClient(project, self.credentials)
+        bq_client = BigQueryClient(self.credentials)
 
         query = 'SELECT * FROM `{}.{}.{}`'.format(project, dataset, table)
         job = bq_client.query(query)
