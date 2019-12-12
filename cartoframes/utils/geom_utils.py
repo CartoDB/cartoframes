@@ -18,8 +18,10 @@ if sys.version_info < (3, 0):
 
 def decode_geometry_column(geom_column):
     if geom_column.size > 0:
-        first_geom = next(item for item in geom_column if item is not None)
-        enc_type = detect_encoding_type(first_geom)
+        enc_type = None
+        if any(geom_column):
+            first_geom = next(item for item in geom_column if item is not None)
+            enc_type = detect_encoding_type(first_geom)
         return geom_column.apply(lambda g: decode_geometry(g, enc_type))
     else:
         return geom_column
