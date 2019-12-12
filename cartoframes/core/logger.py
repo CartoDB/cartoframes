@@ -3,13 +3,11 @@ import logging
 
 
 def init_logger():
-    handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    log = logging.getLogger('CARTOframes')
-    log.setLevel(logging.INFO)
-    log.addHandler(handler)
-    return log
+    logging.basicConfig(
+        stream=sys.stdout,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        level=logging.INFO)
+    return logging.getLogger('CARTOframes')
 
 
 def set_log_level(level):
