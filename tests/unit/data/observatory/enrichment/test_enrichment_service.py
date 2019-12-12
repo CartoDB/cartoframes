@@ -176,12 +176,19 @@ class TestEnrichmentService(object):
             [[point, 'new data']],
             columns=[geom_column, 'var1'])
 
-        class EnrichMock():
+        class JobMock():
+            def __init__(self):
+                self.job_id = 'job_id'
+                self.errors = None
+
             def to_dataframe(self):
                 return pd.DataFrame([[0, 'new data']], columns=[_ENRICHMENT_ID, 'var1'])
 
+            def add_done_callback(self, callback):
+                return callback(self)
+
         original = BigQueryClient.query
-        BigQueryClient.query = Mock(return_value=EnrichMock())
+        BigQueryClient.query = Mock(return_value=JobMock())
         enrichment_service = EnrichmentService(credentials=self.credentials)
 
         result = enrichment_service._execute_enrichment(['fake_query'], input_cdf)
@@ -435,7 +442,7 @@ class TestEnrichmentService(object):
 
         error = """
             You are not subscribed to the Dataset '{}' yet. Please, use the subscribe method first.
-        """.format(dataset)
+        """.format(dataset.id)
         assert str(e.value) == error
 
     @patch.object(DatasetRepository, 'get_all')

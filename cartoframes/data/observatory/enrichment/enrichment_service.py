@@ -1,4 +1,5 @@
 import uuid
+import time
 
 from collections import defaultdict
 
@@ -11,6 +12,7 @@ from ....exceptions import EnrichmentException
 from ....core.cartodataframe import CartoDataFrame
 from ....core.logger import log
 from ....utils.geom_utils import to_geojson
+from ....utils.utils import timelogger
 
 
 _ENRICHMENT_ID = 'enrichment_id'
@@ -71,12 +73,31 @@ class EnrichmentService(object):
         self.enrichment_id = _ENRICHMENT_ID
         self.geojson_column = _GEOJSON_COLUMN
 
+    @timelogger
     def _execute_enrichment(self, queries, cartodataframe):
+
         dfs_enriched = list()
+        awaiting_jobs = set()
+        errors = list()
+
+        def callback(job):
+            if not job.errors:
+                dfs_enriched.append(self.bq_client.download_to_dataframe(job))
+            else:
+                errors.extend(job.errors)
+
+            awaiting_jobs.discard(job.job_id)
 
         for query in queries:
-            df_enriched = self.bq_client.query(query).to_dataframe()
-            dfs_enriched.append(df_enriched)
+            job = self.bq_client.query(query)
+            awaiting_jobs.add(job.job_id)
+            job.add_done_callback(callback)
+
+        while awaiting_jobs:
+            time.sleep(0.5)
+
+        if len(errors) > 0:
+            raise Exception(errors)
 
         for df in dfs_enriched:
             cartodataframe = cartodataframe.merge(df, on=self.enrichment_id, how='left')
@@ -87,6 +108,7 @@ class EnrichmentService(object):
 
         return cartodataframe
 
+    @timelogger
     def _prepare_data(self, dataframe, geom_col):
         cartodataframe = CartoDataFrame(dataframe, copy=True)
 
@@ -156,9 +178,10 @@ class EnrichmentService(object):
 
     def __get_geo_table(self, variable):
         geography_id = Dataset.get(variable.dataset).geography
+        geography = Geography.get(geography_id)
         _, dataset_geo_table, geo_table = geography_id.split('.')
 
-        if variable.project_name != self.bq_public_project:
+        if not geography.is_public_data:
             return '{project}.{dataset}.view_{dataset_geo_table}_{geo_table}'.format(
                 project=self.bq_project,
                 dataset=self.bq_dataset,
@@ -308,6 +331,7 @@ class EnrichmentService(object):
         return where
 
 
+@timelogger
 def prepare_variables(variables, credentials, aggregation=None):
     if isinstance(variables, list):
         variables = [_prepare_variable(var, aggregation) for var in variables]
@@ -367,12 +391,12 @@ def _is_subscribed(dataset, geography, credentials):
     if not dataset._is_subscribed(credentials):
         raise EnrichmentException("""
             You are not subscribed to the Dataset '{}' yet. Please, use the subscribe method first.
-        """.format(dataset))
+        """.format(dataset.id))
 
     if not geography._is_subscribed(credentials):
         raise EnrichmentException("""
             You are not subscribed to the Geography '{}' yet. Please, use the subscribe method first.
-        """.format(geography))
+        """.format(geography.id))
 
 
 def _get_aggregation(variable, aggregation):

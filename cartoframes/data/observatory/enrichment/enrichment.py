@@ -1,5 +1,5 @@
 from .enrichment_service import EnrichmentService, prepare_variables, AGGREGATION_DEFAULT, AGGREGATION_NONE
-from ....core.logger import log
+from ....utils.utils import timelogger
 
 
 class Enrichment(EnrichmentService):
@@ -128,6 +128,7 @@ class Enrichment(EnrichmentService):
     AGGREGATION_NONE = AGGREGATION_NONE
     """Do not aggregate data in polygons enrichment. More info in :py:attr:`Enrichment.enrich_polygons`"""
 
+    @timelogger
     def enrich_polygons(self, dataframe, variables, geom_col=None, filters=[], aggregation=AGGREGATION_DEFAULT):
         """Enrich your polygons `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset` in
         the Data Observatory by intersecting the polygons in the source `DataFrame` with geographies in the
@@ -315,12 +316,12 @@ class Enrichment(EnrichmentService):
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=aggregation)
         """
-        log.debug('Preparing')
         variables = prepare_variables(variables, self.credentials, aggregation)
-        cartodataframe = self._prepare_data(dataframe, geom_col)
 
+        cartodataframe = self._prepare_data(dataframe, geom_col)
         temp_table_name = self._get_temp_table_name()
-        log.debug('Uploading')
+
         self._upload_data(temp_table_name, cartodataframe)
+
         queries = self._get_polygon_enrichment_sql(temp_table_name, variables, filters, aggregation)
         return self._execute_enrichment(queries, cartodataframe)

@@ -130,7 +130,11 @@ class CatalogEntity(ABC):
         project, dataset, table = full_remote_table_name.split('.')
 
         try:
-            file_path = bq_client.download_to_file(project, dataset, table, file_path)
+            column_names = bq_client.get_table_column_names(project, dataset, table)
+            query = 'SELECT * FROM `{}`'.format(full_remote_table_name)
+            job = bq_client.query(query)
+
+            file_path = bq_client.download_to_file(job, column_names=column_names)
         except NotFound:
             raise CartoException('You have not purchased the dataset `{}` yet'.format(self.id))
 

@@ -7,8 +7,14 @@ class BigQueryClientMock(object):
         self.bq_dataset = 'username'
         self._gcs_bucket = 'bucket_name'
 
-    def download_to_file(self, _1, _2, _3, _4):
+    def query(self, _1):
+        return True
+
+    def download_to_file(self, _1, column_names=None):
         if isinstance(self.response, Exception):
             raise self.response
         else:
             return self.response
+
+    def get_table_column_names(self, _1, _2, _3):
+        return True
