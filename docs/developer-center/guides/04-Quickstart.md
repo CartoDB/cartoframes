@@ -313,7 +313,8 @@ There they are! To learn more about creating isochrones and isodistances check o
 
 Now that you have the area of influence calculated for each store, let's take a look at how to augment the result with population information to help better understand a store's average revenue per person.
 
-> Note: To be able to use the Enrichment functions you need an enterprise CARTO account with Data Observatory 2.0 enabled. Contact your CSM or contact us at sales@carto.com for more information about this.
+> Note: To be able to use the Enrichment functions you need an enterprise CARTO account with Data Observatory 2.0 enabled. Contact your CSM or contact us at [sales@carto.com](mailto:sales@carto.com) for more information.
+
 
 First, let's find the demographic variable we need. We will use the `Catalog` class that can be filter by country and category. In our case, we have to look for USA demographics datasets. Let's see which public ones are available.
 
