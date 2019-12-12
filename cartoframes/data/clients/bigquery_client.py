@@ -76,7 +76,6 @@ class BigQueryClient(object):
         self.instant_licensing = do_credentials.instant_licensing
         self._gcs_bucket = do_credentials.gcs_bucket
 
-
     @refresh_clients
     def query(self, query, **kwargs):
         return self.bq_client.query(query, **kwargs)
