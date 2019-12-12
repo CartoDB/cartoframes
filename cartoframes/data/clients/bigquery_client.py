@@ -163,7 +163,7 @@ class BigQueryClient(object):
             uri, table_ref, job_config=job_config
         )
 
-        job.result()
+        job.result()  # Waits for table load to complete.
 
     def get_table_column_names(self, project, dataset, table):
         table_info = self._get_table(project, dataset, table)

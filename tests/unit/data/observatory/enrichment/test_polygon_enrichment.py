@@ -3,11 +3,8 @@ from google.cloud import bigquery, storage
 from cartoframes.auth import Credentials
 
 from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geography, VariableFilter
-# from cartoframes.data.observatory.enrichment.enrichment_service import _WORKING_PROJECT, _PUBLIC_PROJECT, \
-#     AGGREGATION_DEFAULT, AGGREGATION_NONE, prepare_variables, _GEOJSON_COLUMN
 from enrichment_mock import CatalogEntityWithGeographyMock, GeographyMock
 
-# from cartoframes.data.observatory import Enrichment, Variable, Dataset, VariableFilter
 from cartoframes.data.observatory.enrichment.enrichment_service import AGGREGATION_DEFAULT, AGGREGATION_NONE, \
     prepare_variables, _GEOJSON_COLUMN
 
@@ -34,8 +31,6 @@ class DoCredentials:
 
 class TestPolygonEnrichment(object):
     def setup_method(self):
-        # self.original_init_clients = BigQueryClient._init_clients
-        # BigQueryClient._init_clients = Mock(return_value=(True, True, True))
         self.original_bigquery_Client = bigquery.Client
         bigquery.Client = Mock(return_value=True)
         self.original_storage_Client = storage.Client
