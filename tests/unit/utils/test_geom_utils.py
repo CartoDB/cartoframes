@@ -1,13 +1,14 @@
 """Unit tests for cartoframes.data.utils"""
 
+import pandas as pd
 import geopandas as gpd
 
 from shapely.geos import lgeos
-from shapely.geometry import Point
+from shapely.geometry import Point, base
 
 from cartoframes.utils.geom_utils import (ENC_EWKT, ENC_SHAPELY, ENC_WKB,
                                           ENC_WKB_BHEX, ENC_WKB_HEX, ENC_WKT,
-                                          decode_geometry, detect_encoding_type)
+                                          decode_geometry_column, decode_geometry, detect_encoding_type)
 
 
 class TestGeomUtils(object):
@@ -21,11 +22,32 @@ class TestGeomUtils(object):
         ]
         self.lng = [0, 10, 20]
         self.lat = [0, 15, 30]
-        self.geometry = gpd.geoseries.GeoSeries([
+        self.geometry = gpd.GeoSeries([
             Point([0, 0]),
             Point([10, 15]),
             Point([20, 30])
         ], name='geometry')
+
+    def test_decode_geometry_column(self):
+        geom = pd.Series(['POINT(0 0)', 'POINT(1 1)'])
+        expected_decoded_geom = gpd.GeoSeries([Point([0, 0]), Point([1, 1])])
+
+        decoded_geom = decode_geometry_column(geom)
+        assert str(decoded_geom) == str(expected_decoded_geom)
+
+    def test_decode_geometry_column_empty(self):
+        geom_empty = gpd.GeoSeries([])
+        expected_decoded_geom = gpd.GeoSeries([])
+
+        decoded_geom = decode_geometry_column(geom_empty)
+        assert str(decoded_geom) == str(expected_decoded_geom)
+
+    def test_decode_geometry_column_none(self):
+        geom_none = gpd.GeoSeries([None, None])
+        expected_decoded_geom = gpd.GeoSeries([base.BaseGeometry(), base.BaseGeometry()])
+
+        decoded_geom = decode_geometry_column(geom_none)
+        assert str(decoded_geom) == str(expected_decoded_geom)
 
     def test_detect_encoding_type_shapely(self):
         enc_type = detect_encoding_type(Point(1234, 5789))

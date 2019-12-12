@@ -4,6 +4,8 @@ import json
 import shapely
 import binascii as ba
 
+from geopandas import GeoSeries
+
 
 ENC_SHAPELY = 'shapely'
 ENC_WKB = 'wkb'
@@ -22,7 +24,7 @@ def decode_geometry_column(geom_column):
         if any(geom_column):
             first_geom = next(item for item in geom_column if item is not None)
             enc_type = detect_encoding_type(first_geom)
-        return geom_column.apply(lambda g: decode_geometry(g, enc_type))
+        return GeoSeries(geom_column.apply(lambda g: decode_geometry(g, enc_type)))
     else:
         return geom_column
 
