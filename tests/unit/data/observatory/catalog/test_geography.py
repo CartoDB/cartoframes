@@ -215,18 +215,18 @@ class TestGeography(object):
         # Given
         geographies = test_geographies
         geography = geographies[0]
+        expected_geography_df = geography.to_series()
+        del expected_geography_df['available_in']
+        del expected_geography_df['summary_json']
 
         # When
         geography_df = geographies.to_dataframe()
         sliced_geography = geography_df.iloc[0]
 
-        del geography['available_in']
-        del geography['summary_json']
-
         # Then
         assert isinstance(geography_df, pd.DataFrame)
         assert isinstance(sliced_geography, pd.Series)
-        assert sliced_geography.equals(geography.to_series())
+        assert sliced_geography.equals(expected_geography_df)
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')

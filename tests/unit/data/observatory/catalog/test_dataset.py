@@ -289,18 +289,18 @@ class TestDataset(object):
         # Given
         datasets = test_datasets
         dataset = datasets[0]
+        expected_dataset_df = dataset.to_series()
+        del expected_dataset_df['available_in']
+        del expected_dataset_df['summary_json']
 
         # When
         dataset_df = datasets.to_dataframe()
         sliced_dataset = dataset_df.iloc[0]
 
-        del dataset['available_in']
-        del dataset['summary_json']
-
         # Then
         assert isinstance(dataset_df, pd.DataFrame)
         assert isinstance(sliced_dataset, pd.Series)
-        assert sliced_dataset.equals(dataset.to_series())
+        assert sliced_dataset.equals(expected_dataset_df)
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')

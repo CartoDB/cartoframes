@@ -193,15 +193,14 @@ class TestVariable(object):
         # Given
         variables = test_variables
         variable = variables[0]
+        expected_variable_df = variable.to_series()
+        del expected_variable_df['summary_json']
 
         # When
         variable_df = variables.to_dataframe()
         sliced_variable = variable_df.iloc[0]
 
-        del variable['available_in']
-        del variable['summary_json']
-
         # Then
         assert isinstance(variable_df, pd.DataFrame)
         assert isinstance(sliced_variable, pd.Series)
-        assert sliced_variable.equals(variable.to_series())
+        assert sliced_variable.equals(expected_variable_df)
