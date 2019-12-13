@@ -1,35 +1,51 @@
+from google.cloud import bigquery, storage
+
 from cartoframes.auth import Credentials
-from cartoframes.data.clients.bigquery_client import BigQueryClient
-from cartoframes.data.observatory import Enrichment, Variable, Dataset, VariableFilter
+from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geography, VariableFilter
 from cartoframes.data.observatory.enrichment.enrichment_service import _GEOJSON_COLUMN
+from enrichment_mock import CatalogEntityWithGeographyMock, GeographyMock
 
 try:
     from unittest.mock import Mock, patch
 except ImportError:
     from mock import Mock, patch
 
+_WORKING_PROJECT = 'carto-do-customers'
+_PUBLIC_PROJECT = 'carto-do-public-data'
 
-class CatalogEntityWithGeographyMock:
-    def __init__(self, geography):
-        self.geography = geography
+
+class DoCredentials:
+    def __init__(self, public_data_project, user_data_project, access_token='access_token', instant_licensing=False,
+                 execution_project='execution_project', dataset='username', bucket='bucket'):
+        self.access_token = access_token
+        self.gcp_execution_project = execution_project
+        self.bq_public_project = public_data_project
+        self.bq_project = user_data_project
+        self.bq_dataset = dataset
+        self.gcs_bucket = bucket
+        self.instant_licensing = instant_licensing
 
 
 class TestPointsEnrichment(object):
     def setup_method(self):
-        self.original_init_clients = BigQueryClient._init_clients
-        BigQueryClient._init_clients = Mock(return_value=(True, True))
+        self.original_bigquery_Client = bigquery.Client
+        bigquery.Client = Mock(return_value=True)
+        self.original_storage_Client = storage.Client
+        storage.Client = Mock(return_value=True)
+        self.original_get_do_credentials = Credentials.get_do_credentials
+        Credentials.get_do_credentials = Mock(return_value=DoCredentials(_PUBLIC_PROJECT, _WORKING_PROJECT))
         self.username = 'username'
         self.apikey = 'apikey'
         self.credentials = Credentials(self.username, self.apikey)
 
     def teardown_method(self):
-        self.credentials = None
-        self.apikey = None
-        self.username = None
-        BigQueryClient._init_clients = self.original_init_clients
+        bigquery.Client = self.original_bigquery_Client
+        storage.Client = self.original_storage_Client
+        Credentials.get_do_credentials = self.original_get_do_credentials
 
     @patch.object(Dataset, 'get')
-    def test_enrichment_query_by_points_one_variable(self, dataset_get_mock):
+    @patch.object(Geography, 'get')
+    def test_enrichment_query_by_points_one_variable(self, geography_get_mock, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -51,6 +67,7 @@ class TestPointsEnrichment(object):
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
+        geography_get_mock.return_value = GeographyMock()
 
         actual_queries = enrichment._get_points_enrichment_sql(
             temp_table_name, variables, []
@@ -66,7 +83,8 @@ class TestPointsEnrichment(object):
         assert actual == expected
 
     @patch.object(Dataset, 'get')
-    def test_enrichment_query_by_points_two_variables(self, dataset_get_mock):
+    @patch.object(Geography, 'get')
+    def test_enrichment_query_by_points_two_variables(self, geography_get_mock, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -95,6 +113,7 @@ class TestPointsEnrichment(object):
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
+        geography_get_mock.return_value = GeographyMock()
 
         actual_queries = enrichment._get_points_enrichment_sql(
             temp_table_name, variables, []
@@ -110,7 +129,8 @@ class TestPointsEnrichment(object):
         assert actual == expected
 
     @patch.object(Dataset, 'get')
-    def test_enrichment_query_by_points_two_variables_different_tables(self, dataset_get_mock):
+    @patch.object(Geography, 'get')
+    def test_enrichment_query_by_points_two_variables_different_tables(self, geography_get_mock, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -141,6 +161,7 @@ class TestPointsEnrichment(object):
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
+        geography_get_mock.return_value = GeographyMock()
 
         actual_queries = enrichment._get_points_enrichment_sql(
             temp_table_name, variables, []
@@ -157,7 +178,8 @@ class TestPointsEnrichment(object):
         assert actual == expected
 
     @patch.object(Dataset, 'get')
-    def test_enrichment_query_by_points_two_variables_different_datasets(self, dataset_get_mock):
+    @patch.object(Geography, 'get')
+    def test_enrichment_query_by_points_two_variables_different_datasets(self, geography_get_mock, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -189,6 +211,7 @@ class TestPointsEnrichment(object):
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset1, geo_table))
         dataset_get_mock.return_value = catalog
+        geography_get_mock.return_value = GeographyMock()
 
         actual_queries = enrichment._get_points_enrichment_sql(
             temp_table_name, variables, []
@@ -206,7 +229,9 @@ class TestPointsEnrichment(object):
 
     @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
-    def test_enrichment_query_by_points_with_filters(self, dataset_get_mock, _is_available_in_bq_mock):
+    @patch.object(Geography, 'get')
+    def test_enrichment_query_by_points_with_filters(self, geography_get_mock, dataset_get_mock,
+                                                     _is_available_in_bq_mock):
         _is_available_in_bq_mock.return_value = True
 
         enrichment = Enrichment(credentials=self.credentials)
@@ -233,6 +258,7 @@ class TestPointsEnrichment(object):
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
+        geography_get_mock.return_value = GeographyMock()
 
         actual_queries = enrichment._get_points_enrichment_sql(
             temp_table_name, variables, filters
