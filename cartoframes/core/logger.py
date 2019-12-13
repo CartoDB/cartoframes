@@ -2,12 +2,16 @@ import sys
 import logging
 
 
-def init_logger():
+def init_logger(formatter):
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(logging.Formatter(formatter))
     logging.basicConfig(
-        stream=sys.stdout,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        level=logging.INFO)
-    return logging.getLogger('CARTOframes')
+        level=logging.INFO,
+        handlers=[handler])
+    return handler, logging.getLogger('CARTOframes')
+
+
+handler, log = init_logger('%(message)s')
 
 
 def set_log_level(level):
@@ -30,7 +34,11 @@ def set_log_level(level):
     if level not in levels:
         return ValueError('Wrong log level. Valid log levels are: critical, error, warning, info, debug, notset.')
 
-    log.setLevel(levels[level])
+    level = levels[level]
 
+    if level == logging.DEBUG:
+        handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    else:
+        handler.setFormatter(logging.Formatter('%(message)s'))
 
-log = init_logger()
+    log.setLevel(level)
