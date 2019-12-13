@@ -85,11 +85,7 @@ class BigQueryClient(object):
         self._import_from_GCS_to_BQ(schema, tablename)
 
     @timelogger
-    def download_to_file(self, job, file_path=None, fail_if_exists=False, column_names=None, progress_bar=True):
-        if not file_path:
-            file_name = '{}.csv'.format(job.job_id)
-            file_path = os.path.join(_USER_CONFIG_DIR, file_name)
-
+    def download_to_file(self, job, file_path, fail_if_exists=False, column_names=None, progress_bar=True):
         if fail_if_exists and os.path.isfile(file_path):
             raise CartoException('The file `{}` already exists.'.format(file_path))
 
@@ -100,8 +96,6 @@ class BigQueryClient(object):
             rows = job.result()
 
         _rows_to_file(rows, file_path, column_names, progress_bar)
-
-        return file_path
 
     @timelogger
     def download_to_dataframe(self, job):
