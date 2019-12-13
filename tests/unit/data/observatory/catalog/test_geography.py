@@ -220,6 +220,9 @@ class TestGeography(object):
         geography_df = geographies.to_dataframe()
         sliced_geography = geography_df.iloc[0]
 
+        del geography['available_in']
+        del geography['summary_json']
+
         # Then
         assert isinstance(geography_df, pd.DataFrame)
         assert isinstance(sliced_geography, pd.Series)

@@ -198,6 +198,9 @@ class TestVariable(object):
         variable_df = variables.to_dataframe()
         sliced_variable = variable_df.iloc[0]
 
+        del variable['available_in']
+        del variable['summary_json']
+
         # Then
         assert isinstance(variable_df, pd.DataFrame)
         assert isinstance(sliced_variable, pd.Series)

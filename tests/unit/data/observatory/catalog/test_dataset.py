@@ -294,6 +294,9 @@ class TestDataset(object):
         dataset_df = datasets.to_dataframe()
         sliced_dataset = dataset_df.iloc[0]
 
+        del dataset['available_in']
+        del dataset['summary_json']
+
         # Then
         assert isinstance(dataset_df, pd.DataFrame)
         assert isinstance(sliced_dataset, pd.Series)
