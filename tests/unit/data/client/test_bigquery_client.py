@@ -54,9 +54,7 @@ class TestBigQueryClient(unittest.TestCase):
 
         bq_client = BigQueryClient(self.credentials)
         job = QueryJobMock(data)
-        file_download = bq_client.download_to_file(job, file_path=file_path, column_names=columns, progress_bar=False)
-
-        assert file_download == file_path
+        bq_client.download_to_file(job, file_path, column_names=columns, progress_bar=False)
 
         rows = []
         with open(file_path) as csvfile:

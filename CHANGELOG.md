@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0b7] - 2019-12-13
+### Added
+- Add logger (#1328)
+- Add source_col param in Isolines (#1303, #1336)
+
+### Changed
+- Improve CartoDataFrame docs (#1307, #1308)
+- Do not return cartodb_id in Geocoding/Isolines (#1302)
+- Improve installation instruction guide (#1322)
+- Publish privacy enhancements (#1286)
+- Check if_exists param options (#1325)
+- Improve download OpenData (#1309)
+- Update DO endpoint (#1311, #1353)
+- Improve DO download performance (#1281)
+- Update quickstart (#1335, #1351)
+
+### Fixed
+- Fix Map default_legend param (#1191)
+- Fix column names normalization (#1304)
+- Review reference/guides copies (#1299, #1321)
+- Display message when Dataset summary is not available (#1208)
+- Fix DataObsClient (#1319)
+- Fix CartoDataFrame plot (#1339)
+- Fix enrichment without subscriptions (#1314)
+- Fix encoding detection with all Nones (#1346) 
+
 ## [1.0b6] - 2019-12-02
 ### Added
 - Add new properties in Catalog Dataset and Geography (#1209)

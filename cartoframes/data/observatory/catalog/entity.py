@@ -114,7 +114,7 @@ class CatalogEntity(ABC):
 
         return self.id
 
-    def _download(self, credentials=None, file_path=None):
+    def _download(self, file_path, credentials=None):
         if not self._is_available_in('bq'):
             raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
@@ -134,14 +134,12 @@ class CatalogEntity(ABC):
             query = 'SELECT * FROM `{}`'.format(full_remote_table_name)
             job = bq_client.query(query)
 
-            file_path = bq_client.download_to_file(job, column_names=column_names)
+            bq_client.download_to_file(job, file_path, column_names=column_names)
         except NotFound:
             raise CartoException('You have not purchased the dataset `{}` yet'.format(self.id))
 
         log.info('Data saved: {}.'.format(file_path))
         log.info("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
-
-        return file_path
 
     def _is_available_in(self, platform=_PLATFORM_BQ):
         return self.data['available_in'] and platform in self.data['available_in']
@@ -216,4 +214,13 @@ class CatalogList(list):
                 catalog = Catalog()
                 catalog.categories.to_dataframe()
         """
-        return pd.DataFrame([item.data for item in self])
+
+        df = pd.DataFrame([item.data for item in self])
+
+        if 'available_in' in df:
+            del df['available_in']
+
+        if 'summary_json' in df:
+            del df['summary_json']
+
+        return df

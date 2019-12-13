@@ -4,8 +4,8 @@ CARTOframes
 
 .. image:: https://travis-ci.org/CartoDB/cartoframes.svg
     :target: https://travis-ci.org/CartoDB/CARTOframes
-.. image:: https://img.shields.io/badge/pypi-v1.0b6-orange
-    :target: https://pypi.org/project/cartoframes/1.0b6
+.. image:: https://img.shields.io/badge/pypi-v1.0b7-orange
+    :target: https://pypi.org/project/cartoframes/1.0b7
 
 A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
 
@@ -15,14 +15,14 @@ Try it Out
 ==========
 
 * Stable (v0.10.1): |stable|
-* Beta (v1.0b6): |beta|
+* Beta (v1.0b7): |beta|
 * Latest (develop branch): |develop|
 
 .. |stable| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v0.10.1?filepath=examples
 
 .. |beta| image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0b6?filepath=examples
+    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0b7?filepath=examples
 
 .. |develop| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/develop?filepath=examples
@@ -68,11 +68,11 @@ latest version:
 
     $ pip install cartoframes
 
-To install the 1.0b6 beta version:
+To install the 1.0b7 beta version:
 
 .. code:: bash
 
-    $ pip install cartoframes==1.0b6
+    $ pip install cartoframes==1.0b7
 
 `cartoframes` is continuously tested on Python versions 2.7, 3.5, 3.6, and 3.7. It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyter`). See the example usage section below or notebooks in the `examples directory <https://github.com/CartoDB/cartoframes/tree/master/examples>`__ for using `cartoframes` in that environment.
 

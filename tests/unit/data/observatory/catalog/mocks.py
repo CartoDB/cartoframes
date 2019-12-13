@@ -1,6 +1,6 @@
 class BigQueryClientMock(object):
-    def __init__(self, response):
-        self.response = response
+    def __init__(self, exception=None):
+        self.exception = exception
 
         self.bq_public_project = 'public_data_project'
         self.bq_project = 'user_data_project'
@@ -10,11 +10,9 @@ class BigQueryClientMock(object):
     def query(self, _1):
         return True
 
-    def download_to_file(self, _1, column_names=None):
-        if isinstance(self.response, Exception):
-            raise self.response
-        else:
-            return self.response
+    def download_to_file(self, _1, _2, column_names=None):
+        if isinstance(self.exception, Exception):
+            raise self.exception
 
     def get_table_column_names(self, _1, _2, _3):
         return True
