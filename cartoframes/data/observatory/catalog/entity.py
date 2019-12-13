@@ -214,4 +214,13 @@ class CatalogList(list):
                 catalog = Catalog()
                 catalog.categories.to_dataframe()
         """
-        return pd.DataFrame([item.data for item in self])
+
+        df = pd.DataFrame([item.data for item in self])
+
+        if 'available_in' in df:
+            del df['available_in']
+
+        if 'summary_json' in df:
+            del df['summary_json']
+
+        return df
