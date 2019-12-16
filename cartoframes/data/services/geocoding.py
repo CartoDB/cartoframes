@@ -4,6 +4,8 @@ from __future__ import absolute_import
 
 import re
 
+from carto.exceptions import CartoException
+
 from .utils import geocoding_utils
 from .utils import geocoding_constants
 from .utils import TableGeocodingLock
@@ -379,7 +381,13 @@ class Geocoding(Service):
 
         aborted = False
 
-        if output['required_quota'] > 0 and not dry_run:
+        if not dry_run and self.available_quota() < output['required_quota']:
+            raise CartoException('You do not have enough quota. You need {} and you have {}'.format(
+                output['required_quota'],
+                self.available_quota()
+            ))
+
+        if not dry_run and output['required_quota'] > 0:
             with TableGeocodingLock(self._execute_query, table_name) as locked:
                 if not locked:
                     output['error'] = 'The table is already being geocoded'

@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from carto.exceptions import CartoException
+
 from .service import Service
 from ...core.logger import log
 from ...core.managers.source_manager import SourceManager
@@ -141,6 +143,11 @@ class Isolines(Service):
 
         if dry_run:
             return self.result(data=None, metadata=metadata)
+        elif self.available_quota() < metadata['required_quota']:
+            raise CartoException('You do not have enough quota. You need {} and you have {}'.format(
+                metadata['required_quota'],
+                self.available_quota()
+            ))
 
         if source_manager.is_remote():
             temporary_table_name = False
@@ -189,6 +196,7 @@ class Isolines(Service):
 
         if exclusive:
             # Add range label column
+            import pdb; pdb.set_trace()
             cdf[RANGE_LABEL_KEY] = cdf.apply(lambda r: '%.0f min.' % (r[DATA_RANGE_KEY]/60), axis=1)
 
         if table_name:
