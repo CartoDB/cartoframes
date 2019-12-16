@@ -93,7 +93,14 @@ class BigQueryClient(object):
             rows = self._download_by_bq_storage_api(job)
         except Exception:
             log.debug('Cannot download using BigQuery Storage API, fallback to standard')
-            rows = job.result()
+
+            try:
+                rows = job.result()
+            except Exception:
+                if job.errors:
+                    log.error([error['message'] for error in job.errors if error['message']])
+
+                raise CartoException('Error downloading data from BigQuery')
 
         _rows_to_file(rows, file_path, column_names, progress_bar)
 
@@ -105,7 +112,14 @@ class BigQueryClient(object):
             return pd.DataFrame(data)
         except Exception:
             log.debug('Cannot download using BigQuery Storage API, fallback to standard')
-            return job.to_dataframe()
+
+            try:
+                return job.to_dataframe()
+            except Exception:
+                if job.errors:
+                    log.error([error['message'] for error in job.errors if error['message']])
+
+                raise CartoException('Error downloading data from BigQuery')
 
     def _download_by_bq_storage_api(self, job):
         table_ref = job.destination.to_bqstorage()
