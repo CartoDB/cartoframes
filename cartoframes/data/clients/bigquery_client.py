@@ -157,7 +157,13 @@ class BigQueryClient(object):
             uri, table_ref, job_config=job_config
         )
 
-        job.result()  # Waits for table load to complete.
+        try:
+            job.result()  # Waits for table load to complete.
+        except Exception:
+            if job.errors:
+                log.error([error['message'] for error in job.errors if error['message']])
+
+            raise CartoException('Error uploading data to BigQuery')
 
     def get_table_column_names(self, project, dataset, table):
         table_info = self._get_table(project, dataset, table)
