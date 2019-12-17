@@ -417,7 +417,7 @@ def check_package(pkg_name, spec='*', extra=False):
     except pkg_resources.DistributionNotFound:
         if extra:
             raise Exception('Optional package "{0}" is not installed. '.format(pkg_name) +
-                            'Please run: pip install -U {0}'.format(pkg_name))
+                            'Please run: pip install {0}'.format(pkg_name))
         else:
             raise Exception('Package "{0}" is not installed. '.format(pkg_name) +
-                            'Please run: pip install -U {0}'.format(pkg_name))
+                            'Please run: pip install {0}'.format(pkg_name))
