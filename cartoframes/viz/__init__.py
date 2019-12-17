@@ -14,6 +14,9 @@ from .style import Style
 from .themes import Themes as themes
 from .widget import Widget
 from .widget_list import WidgetList
+from .popups import hover_popup
+from .popups import click_popup
+
 
 __all__ = [
     'basemaps',
@@ -27,5 +30,7 @@ __all__ = [
     'Legend',
     'LegendList',
     'Widget',
-    'WidgetList'
+    'WidgetList',
+    'hover_popup',
+    'click_popup'
 ]
