@@ -98,9 +98,9 @@ class BigQueryClient(object):
                 rows = job.result()
             except Exception:
                 if job.errors:
-                    log.error([error['message'] for error in job.errors if error['message']])
+                    log.error([error['message'] for error in job.errors if 'message' in error])
 
-                raise CartoException('Error downloading data from BigQuery')
+                raise CartoException('Error downloading data')
 
         _rows_to_file(rows, file_path, column_names, progress_bar)
 
@@ -117,9 +117,9 @@ class BigQueryClient(object):
                 return job.to_dataframe()
             except Exception:
                 if job.errors:
-                    log.error([error['message'] for error in job.errors if error['message']])
+                    log.error([error['message'] for error in job.errors if 'message' in error])
 
-                raise CartoException('Error downloading data from BigQuery')
+                raise CartoException('Error downloading data')
 
     def _download_by_bq_storage_api(self, job):
         table_ref = job.destination.to_bqstorage()
@@ -175,9 +175,9 @@ class BigQueryClient(object):
             job.result()  # Waits for table load to complete.
         except Exception:
             if job.errors:
-                log.error([error['message'] for error in job.errors if error['message']])
+                log.error([error['message'] for error in job.errors if 'message' in error])
 
-            raise CartoException('Error uploading data to BigQuery')
+            raise CartoException('Error uploading data')
 
     def get_table_column_names(self, project, dataset, table):
         table_info = self._get_table(project, dataset, table)
