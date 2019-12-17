@@ -57,11 +57,11 @@ class ContextManager(object):
                             'Please choose a different `table_name` or use '
                             'if_exists="replace" to overwrite it'.format(
                                 table_name=table_name, schema=schema))
-        else:
-            # 'append'
+        else:  # 'append'
             pass
 
         self._copy_from(cdf, table_name, columns)
+        return table_name
 
     def create_table_from_query(self, query, table_name, if_exists, cartodbfy=True):
         schema = self.get_schema()
@@ -75,9 +75,10 @@ class ContextManager(object):
                             'Please choose a different `table_name` or use '
                             'if_exists="replace" to overwrite it'.format(
                                 table_name=table_name, schema=schema))
-        else:
-            # 'append'
+        else:  # 'append'
             pass
+
+        return table_name
 
     def has_table(self, table_name, schema=None):
         query = self.compute_query(table_name, schema)
@@ -90,7 +91,9 @@ class ContextManager(object):
 
     def rename_table(self, table_name, new_table_name):
         new_table_name = self.normalize_table_name(new_table_name)
-        pass
+        query = 'ALTER TABLE {0} RENAME TO {1};'.format(table_name, new_table_name)
+        self.execute_query(query)
+        return new_table_name
 
     def update_privacy_table(self, table_name, privacy=None):
         DatasetInfo(self.auth_client, table_name).update_privacy(privacy)

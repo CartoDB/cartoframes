@@ -21,7 +21,7 @@ class DatasetInfo(object):
 
     def __init__(self, auth_client, table_name):
         self._metadata = self._get_metadata(auth_client, table_name)
-        self._privacy = self._metadata.privacy
+        self._privacy = self._metadata.privacy if self._metadata is not None else None
 
     @property
     def privacy(self):

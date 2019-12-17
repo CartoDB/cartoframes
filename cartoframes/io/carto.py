@@ -115,10 +115,10 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     cartodbfy = force_cartodbfy or has_geometry
 
-    context_manager.copy_from(cdf, table_name, if_exists, cartodbfy)
+    table_name = context_manager.copy_from(cdf, table_name, if_exists, cartodbfy)
 
     if log_enabled:
-        log.info('Success! Data uploaded correctly')
+        log.info('Success! Data uploaded to table "{}" correctly'.format(table_name))
 
 
 def has_table(table_name, credentials=None, schema=None):
@@ -156,7 +156,7 @@ def delete_table(table_name, credentials=None, log_enabled=True):
 
     if log_enabled:
         if result:
-            log.info('Success! Table removed correctly')
+            log.info('Success! Table "{}" removed correctly'.format(table_name))
         else:
             log.info('Table "{}" does not exist'.format(table_name))
 
@@ -182,10 +182,10 @@ def rename_table(table_name, new_table_name, credentials=None, log_enabled=True)
         raise ValueError('Wrong new table name. You should provide a valid table name.')
 
     context_manager = ContextManager(credentials)
-    context_manager.rename_table(table_name, new_table_name)
+    new_table_name = context_manager.rename_table(table_name, new_table_name)
 
     if log_enabled:
-        log.info('Success! Table renamed correctly')
+        log.info('Success! Table "{0}" renamed to table "{1}" correctly'.format(table_name, new_table_name))
 
 
 def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
@@ -216,10 +216,10 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
     query = 'SELECT * FROM {}'.format(table_name)
 
     context_manager = ContextManager(credentials)
-    context_manager.create_table_from_query(query, new_table_name, if_exists)
+    new_table_name = context_manager.create_table_from_query(query, new_table_name, if_exists)
 
     if log_enabled:
-        log.info('Success! Table copied correctly')
+        log.info('Success! Table "{0}" copied to table "{1}" correctly'.format(table_name, new_table_name))
 
 
 def create_table_from_query(query, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
@@ -248,10 +248,10 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
             ', '.join(IF_EXISTS_OPTIONS)))
 
     context_manager = ContextManager(credentials)
-    context_manager.create_table_from_query(query, new_table_name, if_exists)
+    new_table_name = context_manager.create_table_from_query(query, new_table_name, if_exists)
 
     if log_enabled:
-        log.info('Success! Table created correctly')
+        log.info('Success! Table "{0}" created correctly'.format(new_table_name))
 
 
 def describe_table(table_name, credentials=None, schema=None):
@@ -322,4 +322,4 @@ def update_privacy_table(table_name, privacy, credentials=None, log_enabled=True
     context_manager.update_privacy_table(table_name, privacy)
 
     if log_enabled:
-        log.info('Success! Table privacy updated correctly')
+        log.info('Success! Table "{}" privacy updated correctly'.format(table_name))
