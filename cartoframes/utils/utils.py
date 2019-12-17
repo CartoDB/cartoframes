@@ -161,8 +161,8 @@ def gen_variable_name(value):
     return 'v' + get_hash(value)[:6]
 
 
-def gen_column_name(value):
-    return '$' + value
+def gen_column_name(value, operation=False):
+    return value if operation else '$' + value
 
 
 def get_hash(text):

@@ -1,6 +1,7 @@
 
 from .. import defaults
 from ..popup import Popup
+from ..popups import hover_popup
 
 
 def serialize_palette(palette):
@@ -15,13 +16,11 @@ def get_value(value, geom_type, prop):
     return value
 
 
-def get_popup(popup, title=None, alt_title=None, value=None, alt_value=None):
+def get_popup(popup, title=None, alt_title=None, value=None, alt_value=None, operation=False):
     if isinstance(popup, Popup):
         return popup
 
-    return {
-        'hover': {
-            'title': title or alt_title,
-            'value': alt_value or '$' + value
-        }
-    }
+    popup_value = alt_value or value
+    popup_title = title or alt_title
+
+    return hover_popup(popup_value, popup_title, operation=operation)

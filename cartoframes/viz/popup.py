@@ -12,16 +12,16 @@ class Popup(object):
         title (str, optional): Title
     """
 
-    def __init__(self, event=None, value=None, title=None):
-        self._init_popup(event, value, title)
+    def __init__(self, event=None, value=None, title=None, operation=False):
+        self._init_popup(event, value, title, operation)
 
-    def _init_popup(self, event=None, value=None, title=None):
+    def _init_popup(self, event=None, value=None, title=None, operation=False):
         if event is None and value is None:
             raise ValueError('Wrong popup input')
 
         self._event = event
-        self._value = gen_column_name(value)
-        self._title = title
+        self._value = gen_column_name(value, operation)
+        self._title = title if title else value
 
         self._interactivity = self._get_interactivity()
         self._variables = self._get_variables()
@@ -41,7 +41,7 @@ class Popup(object):
     def _get_attrs(self):
         return {
             'name': gen_variable_name(self._value),
-            'title': self._title or self._value
+            'title': self._title
         }
 
     def _get_variables(self):
