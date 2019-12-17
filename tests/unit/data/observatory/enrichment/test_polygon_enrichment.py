@@ -6,7 +6,7 @@ from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geograph
 from enrichment_mock import CatalogEntityWithGeographyMock, GeographyMock
 
 from cartoframes.data.observatory.enrichment.enrichment_service import AGGREGATION_DEFAULT, AGGREGATION_NONE, \
-    prepare_variables, _GEOJSON_COLUMN
+    prepare_variables, _GEOM_COLUMN
 
 try:
     from unittest.mock import Mock, patch
@@ -559,6 +559,11 @@ class TestPolygonEnrichment(object):
         actual = sorted(_clean_queries(actual_queries))
         expected = sorted(_clean_queries(expected_queries))
 
+        print(' ')
+        print(actual)
+        print(' ')
+        print(expected)
+
         assert actual == expected
 
     @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
@@ -740,7 +745,7 @@ def _get_query(agg, columns, username, view, geo_table, temp_table_name, filters
             view=view,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column=_GEOJSON_COLUMN,
+            data_geom_column=_GEOM_COLUMN,
             where=_get_where(filters),
             group=group)
 
@@ -758,7 +763,7 @@ def _get_column_sql(agg, column):
             ) AS {aggregation}_{column}
             """.format(
                 column=column,
-                geo_column=_GEOJSON_COLUMN,
+                geo_column=_GEOM_COLUMN,
                 aggregation=agg)
     else:
         return """
@@ -777,7 +782,7 @@ def _get_column_sql_without_agg(columns):
         ST_area(data_table.{data_geom_column}) AS measures_proportion
         '''.format(
             columns=', '.join(columns),
-            data_geom_column=_GEOJSON_COLUMN)
+            data_geom_column=_GEOM_COLUMN)
 
 
 def _get_where(filters):
@@ -811,5 +816,5 @@ def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_ta
             table=table,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column=_GEOJSON_COLUMN,
+            data_geom_column=_GEOM_COLUMN,
             where=_get_where(filters))

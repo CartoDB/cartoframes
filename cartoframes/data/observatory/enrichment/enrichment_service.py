@@ -16,7 +16,7 @@ from ....utils.utils import timelogger
 
 
 _ENRICHMENT_ID = 'enrichment_id'
-_GEOJSON_COLUMN = '__geojson_geom'
+_GEOM_COLUMN = '__geojson_geom'
 
 AGGREGATION_DEFAULT = 'default'
 AGGREGATION_NONE = 'none'
@@ -71,7 +71,7 @@ class EnrichmentService(object):
         self.bq_project = self.bq_client.bq_project
         self.bq_public_project = self.bq_client.bq_public_project
         self.enrichment_id = _ENRICHMENT_ID
-        self.geojson_column = _GEOJSON_COLUMN
+        self.geom_column = _GEOM_COLUMN
 
     @timelogger
     def _execute_enrichment(self, queries, cartodataframe):
@@ -104,7 +104,7 @@ class EnrichmentService(object):
 
         # Remove extra columns
         cartodataframe.drop(self.enrichment_id, axis=1, inplace=True)
-        cartodataframe.drop(self.geojson_column, axis=1, inplace=True)
+        cartodataframe.drop(self.geom_column, axis=1, inplace=True)
 
         return cartodataframe
 
@@ -121,7 +121,7 @@ class EnrichmentService(object):
 
         # Add extra columns for the enrichment
         cartodataframe[self.enrichment_id] = range(cartodataframe.shape[0])
-        cartodataframe[self.geojson_column] = cartodataframe.geometry.apply(to_geojson)
+        cartodataframe[self.geom_column] = cartodataframe.geometry.apply(to_geojson)
 
         return cartodataframe
 
@@ -130,8 +130,8 @@ class EnrichmentService(object):
         return 'temp_{id}'.format(id=id_tablename)
 
     def _upload_data(self, tablename, cartodataframe):
-        bq_dataframe = cartodataframe[[self.enrichment_id, self.geojson_column]]
-        schema = {self.enrichment_id: 'INTEGER', self.geojson_column: 'GEOGRAPHY'}
+        bq_dataframe = cartodataframe[[self.enrichment_id, self.geom_column]]
+        schema = {self.enrichment_id: 'INTEGER', self.geom_column: 'GEOGRAPHY'}
 
         self.bq_client.upload_dataframe(
             dataframe=bq_dataframe,
@@ -230,7 +230,7 @@ class EnrichmentService(object):
             {where};
         '''.format(
             variables=', '.join(variables),
-            geojson_column=self.geojson_column,
+            geojson_column=self.geom_column,
             enrichment_dataset=enrichment_dataset,
             enrichment_geo_table=enrichment_geo_table,
             enrichment_id=self.enrichment_id,
@@ -271,7 +271,7 @@ class EnrichmentService(object):
             {where}
             {grouper};
         '''.format(
-                geojson_column=self.geojson_column,
+                geojson_column=self.geom_column,
                 enrichment_dataset=enrichment_dataset,
                 enrichment_geo_table=enrichment_geo_table,
                 enrichment_id=self.enrichment_id,
@@ -302,7 +302,7 @@ class EnrichmentService(object):
                 ) AS {aggregation}_{column}
                 """.format(
                     column=variable.column_name,
-                    geo_column=self.geojson_column,
+                    geo_column=self.geom_column,
                     aggregation=variable_agg)
         else:
             return """
@@ -320,7 +320,7 @@ class EnrichmentService(object):
             ST_area(data_table.{geojson_column}) AS measures_proportion
             """.format(
                 variables=', '.join(variables),
-                geojson_column=self.geojson_column)
+                geojson_column=self.geom_column)
 
     def _build_where_clausule(self, filters):
         where = ''
