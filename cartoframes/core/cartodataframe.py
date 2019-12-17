@@ -2,8 +2,7 @@ from numpy import ndarray
 from pandas import DataFrame, Series
 from geopandas import GeoDataFrame, points_from_xy
 
-from ..utils.utils import check_package
-from ..utils.geom_utils import decode_geometry_column
+from ..utils import utils, geom_utils
 
 
 class CartoDataFrame(GeoDataFrame):
@@ -270,10 +269,12 @@ class CartoDataFrame(GeoDataFrame):
             frame = self.copy()
 
         # Decode geometry
-        if isinstance(col, str) and col in frame:
-            frame[col] = decode_geometry_column(frame[col])
+        if isinstance(col, str):
+            if col not in frame:
+                raise Exception('Column "{0}" does not exist.'.format(col))
+            frame[col] = geom_utils.decode_geometry_column(frame[col])
         else:
-            col = decode_geometry_column(col)
+            col = geom_utils.decode_geometry_column(col)
 
         # Call super set_geometry with decoded column
         super(CartoDataFrame, frame).set_geometry(col, drop=drop, inplace=True, crs=crs)
@@ -357,7 +358,7 @@ class CartoDataFrame(GeoDataFrame):
         return result
 
     def plot(self, *args, **kwargs):
-        check_package('matplotlib', extra=True)
+        utils.check_package('matplotlib', extra=True)
         if self.has_geometry():
             return GeoDataFrame.plot(self, *args, **kwargs)
         else:

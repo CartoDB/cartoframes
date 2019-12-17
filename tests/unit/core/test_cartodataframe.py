@@ -143,12 +143,14 @@ class TestCartoDataFrame(object):
         geoseries_plot_mock.assert_called_once_with()
 
     def test_plot_dataframe(self, mocker):
+        mocker.patch('cartoframes.utils.utils.check_package')
         dataframe_plot_mock = mocker.patch.object(DataFrame, 'plot')
         cdf = CartoDataFrame({'x': [1], 'y': [1]})
         cdf[['x', 'y']].plot()
         dataframe_plot_mock.assert_called_once_with()
 
     def test_plot_geodataframe(self, mocker):
+        mocker.patch('cartoframes.utils.utils.check_package')
         geodataframe_plot_mock = mocker.patch.object(GeoDataFrame, 'plot')
         cdf = CartoDataFrame({'x': [1], 'geometry': [Point(0, 0)]})
         subset = cdf[['x', 'geometry']]

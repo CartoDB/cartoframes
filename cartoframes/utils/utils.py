@@ -408,7 +408,7 @@ def timelogger(method):
 
 def check_package(pkg_name, spec='*', extra=False):
     try:
-        spec_pattern = semantic_version.Spec(spec)
+        spec_pattern = semantic_version.SimpleSpec(spec)
         pkg_version = pkg_resources.get_distribution(pkg_name).version
         version = semantic_version.Version(pkg_version)
         if not spec_pattern.match(version):
