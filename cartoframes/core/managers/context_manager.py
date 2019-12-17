@@ -89,7 +89,7 @@ class ContextManager(object):
         output = self.execute_query(query)
         return not('notices' in output and 'does not exist' in output['notices'][0])
 
-    def rename_table(self, table_name, new_table_name, if_exists):
+    def rename_table(self, table_name, new_table_name, if_exists='fail'):
         new_table_name = self.normalize_table_name(new_table_name)
 
         if table_name == new_table_name:
@@ -109,8 +109,7 @@ class ContextManager(object):
                                 'if_exists="replace" to overwrite it.'.format(
                                     new_table_name=new_table_name))
 
-        query = _rename_table_query(table_name, new_table_name)
-        self.execute_query(query)
+        self._rename_table(table_name, new_table_name)
         return new_table_name
 
     def update_privacy_table(self, table_name, privacy=None):
@@ -280,10 +279,12 @@ class ContextManager(object):
         """.format(
             table_name=table_name, null=PG_NULL,
             columns=','.join(column.dbname for column in columns)).strip()
-
         data = _compute_copy_data(dataframe, columns)
-
         self.copy_client.copyfrom(query, data)
+
+    def _rename_table(self, table_name, new_table_name):
+        query = _rename_table_query(table_name, new_table_name)
+        self.execute_query(query)
 
     def normalize_table_name(self, table_name):
         norm_table_name = normalize_name(table_name)

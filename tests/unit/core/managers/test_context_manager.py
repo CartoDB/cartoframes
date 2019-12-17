@@ -65,9 +65,9 @@ class TestContextManager(object):
             cm.copy_from(cdf, 'TABLE NAME', 'fail')
 
         # Then
-        assert str(e.value) == ('Table "schema.table_name" already exists in CARTO. '
+        assert str(e.value) == ('Table "schema.table_name" already exists in your CARTO account. '
                                 'Please choose a different `table_name` or use '
-                                'if_exists="replace" to overwrite it')
+                                'if_exists="replace" to overwrite it.')
 
     def test_copy_from_exists_replace(self, mocker):
         # Given
@@ -108,3 +108,86 @@ class TestContextManager(object):
             b'1|0101000020E610000000000000000000000000000000000000\n',
             b'2|0101000020E6100000000000000000F03F000000000000F03F\n'
         ]
+
+    def test_rename_table(self, mocker):
+        # Given
+        def has_table(table_name):
+            if table_name == 'table_name':
+                return True
+            elif table_name == 'new_table_name':
+                return False
+        mocker.patch('cartoframes.core.managers.context_manager._create_auth_client')
+        mocker.patch.object(ContextManager, 'has_table', side_effect=has_table)
+        mock = mocker.patch.object(ContextManager, '_rename_table')
+
+        # When
+        cm = ContextManager(self.credentials)
+        result = cm.rename_table('table_name', 'NEW TABLE NAME')
+
+        # Then
+        mock.assert_called_once_with('table_name', 'new_table_name')
+        assert result == 'new_table_name'
+
+    def test_rename_table_equal(self, mocker):
+        # When
+        with pytest.raises(Exception) as e:
+            cm = ContextManager(self.credentials)
+            cm.rename_table('table_name', 'TABLE NAME')
+
+        # Then
+        assert str(e.value) == ('Table names are equal. Please choose a different table name.')
+
+    def test_rename_table_orig_not_exist(self, mocker):
+        # Given
+        def has_table(table_name):
+            if table_name == 'table_name':
+                return False
+        mocker.patch('cartoframes.core.managers.context_manager._create_auth_client')
+        mocker.patch.object(ContextManager, 'has_table', side_effect=has_table)
+
+        # When
+        with pytest.raises(Exception) as e:
+            cm = ContextManager(self.credentials)
+            cm.rename_table('table_name', 'NEW TABLE NAME')
+
+        # Then
+        assert str(e.value) == ('Table "table_name" does not exist in your CARTO account.')
+
+    def test_rename_table_dest_exists_fail(self, mocker):
+        # Given
+        def has_table(table_name):
+            if table_name == 'table_name':
+                return True
+            elif table_name == 'new_table_name':
+                return True
+        mocker.patch('cartoframes.core.managers.context_manager._create_auth_client')
+        mocker.patch.object(ContextManager, 'has_table', side_effect=has_table)
+
+        # When
+        with pytest.raises(Exception) as e:
+            cm = ContextManager(self.credentials)
+            cm.rename_table('table_name', 'NEW TABLE NAME', 'fail')
+
+        # Then
+        assert str(e.value) == ('Table "new_table_name" already exists in your CARTO account. '
+                                'Please choose a different `new_table_name` or use '
+                                'if_exists="replace" to overwrite it.')
+
+    def test_rename_table_dest_exists_replace(self, mocker):
+        # Given
+        def has_table(table_name):
+            if table_name == 'table_name':
+                return True
+            elif table_name == 'new_table_name':
+                return True
+        mocker.patch('cartoframes.core.managers.context_manager._create_auth_client')
+        mocker.patch.object(ContextManager, 'has_table', side_effect=has_table)
+        mock = mocker.patch.object(ContextManager, '_rename_table')
+
+        # When
+        cm = ContextManager(self.credentials)
+        result = cm.rename_table('table_name', 'NEW TABLE NAME', 'replace')
+
+        # Then
+        mock.assert_called_once_with('table_name', 'new_table_name')
+        assert result == 'new_table_name'
