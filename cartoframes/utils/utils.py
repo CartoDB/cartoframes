@@ -6,13 +6,15 @@ import re
 import sys
 import gzip
 import json
+import time
 import base64
 import decimal
 import hashlib
 import requests
 import geopandas
 import numpy as np
-import time
+import pkg_resources
+import semantic_version
 
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
@@ -403,3 +405,20 @@ def timelogger(method):
         return result
 
     return fn
+
+
+def check_package(pkg_name, extra=False):
+    try:
+        spec = semantic_version.Spec('*')
+        pkg_version = pkg_resources.get_distribution(pkg_name).version
+        version = semantic_version.Version(pkg_version)
+        if not spec.match(version):
+            raise Exception('Package "{0}" version ({1}) does not match {2}'.format(pkg_name, version, spec),
+                            'Please run: pip install -U {0}'.format(pkg_name))
+    except pkg_resources.DistributionNotFound:
+        if extra:
+            raise Exception('Optional package "{0}" is not installed'.format(pkg_name),
+                            'Please run: pip install -U {0}'.format(pkg_name))
+        else:
+            raise Exception('Package "{0}" is not installed'.format(pkg_name, version, spec),
+                            'Please run: pip install -U {0}'.format(pkg_name))
