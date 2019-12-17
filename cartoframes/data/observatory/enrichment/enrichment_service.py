@@ -70,8 +70,6 @@ class EnrichmentService(object):
         self.bq_dataset = self.bq_client.bq_dataset
         self.bq_project = self.bq_client.bq_project
         self.bq_public_project = self.bq_client.bq_public_project
-        self.enrichment_id = _ENRICHMENT_ID
-        self.geom_column = _GEOM_COLUMN
 
     @timelogger
     def _execute_enrichment(self, queries, cartodataframe):
@@ -100,11 +98,11 @@ class EnrichmentService(object):
             raise Exception(errors)
 
         for df in dfs_enriched:
-            cartodataframe = cartodataframe.merge(df, on=self.enrichment_id, how='left')
+            cartodataframe = cartodataframe.merge(df, on=_ENRICHMENT_ID, how='left')
 
         # Remove extra columns
-        cartodataframe.drop(self.enrichment_id, axis=1, inplace=True)
-        cartodataframe.drop(self.geom_column, axis=1, inplace=True)
+        cartodataframe.drop(_ENRICHMENT_ID, axis=1, inplace=True)
+        cartodataframe.drop(_GEOM_COLUMN, axis=1, inplace=True)
 
         return cartodataframe
 
@@ -120,8 +118,8 @@ class EnrichmentService(object):
                                       'a valid geometry or specify the "geom_col" param with a geometry column.')
 
         # Add extra columns for the enrichment
-        cartodataframe[self.enrichment_id] = range(cartodataframe.shape[0])
-        cartodataframe[self.geom_column] = cartodataframe.geometry.apply(to_geojson)
+        cartodataframe[_ENRICHMENT_ID] = range(cartodataframe.shape[0])
+        cartodataframe[_GEOM_COLUMN] = cartodataframe.geometry.apply(to_geojson)
 
         return cartodataframe
 
@@ -130,8 +128,8 @@ class EnrichmentService(object):
         return 'temp_{id}'.format(id=id_tablename)
 
     def _upload_data(self, tablename, cartodataframe):
-        bq_dataframe = cartodataframe[[self.enrichment_id, self.geom_column]]
-        schema = {self.enrichment_id: 'INTEGER', self.geom_column: 'GEOGRAPHY'}
+        bq_dataframe = cartodataframe[[_ENRICHMENT_ID, _GEOM_COLUMN]]
+        schema = {_ENRICHMENT_ID: 'INTEGER', _GEOM_COLUMN: 'GEOGRAPHY'}
 
         self.bq_client.upload_dataframe(
             dataframe=bq_dataframe,
@@ -230,10 +228,10 @@ class EnrichmentService(object):
             {where};
         '''.format(
             variables=', '.join(variables),
-            geom_column=self.geom_column,
+            geom_column=_GEOM_COLUMN,
             enrichment_dataset=enrichment_dataset,
             enrichment_geo_table=enrichment_geo_table,
-            enrichment_id=self.enrichment_id,
+            enrichment_id=_ENRICHMENT_ID,
             where=_build_where_clausule(filters),
             data_table=data_table
         )
@@ -256,10 +254,10 @@ class EnrichmentService(object):
 
         if aggregation == AGGREGATION_NONE:
             grouper = ''
-            columns = _build_polygons_query_variables_without_aggregation(self.geom_column, variables)
+            columns = _build_polygons_query_variables_without_aggregation(variables)
         else:
-            grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=self.enrichment_id)
-            columns = _build_polygons_query_variables_with_aggregation(self.geom_column, variables, aggregation)
+            grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=_ENRICHMENT_ID)
+            columns = _build_polygons_query_variables_with_aggregation(variables, aggregation)
 
         return '''
             SELECT data_table.{enrichment_id}, {columns}
@@ -271,10 +269,10 @@ class EnrichmentService(object):
             {where}
             {grouper};
         '''.format(
-                geom_column=self.geom_column,
+                geom_column=_GEOM_COLUMN,
                 enrichment_dataset=enrichment_dataset,
                 enrichment_geo_table=enrichment_geo_table,
-                enrichment_id=self.enrichment_id,
+                enrichment_id=_ENRICHMENT_ID,
                 where=_build_where_clausule(filters),
                 data_table=data_table,
                 grouper=grouper or '',
@@ -282,16 +280,15 @@ class EnrichmentService(object):
             )
 
 
-def _build_polygons_query_variables_with_aggregation(geom_column, variables, aggregation):
+def _build_polygons_query_variables_with_aggregation(variables, aggregation):
     return ', '.join([
         _build_polygons_query_variable_with_aggregation(
-            geom_column,
             variable,
             aggregation
         ) for variable in variables])
 
 
-def _build_polygons_query_variable_with_aggregation(geom_column, variable, aggregation):
+def _build_polygons_query_variable_with_aggregation(variable, aggregation):
     variable_agg = _get_aggregation(variable, aggregation)
 
     if (variable_agg == 'sum'):
@@ -305,7 +302,7 @@ def _build_polygons_query_variable_with_aggregation(geom_column, variable, aggre
             ) AS {aggregation}_{column}
             """.format(
                 column=variable.column_name,
-                geo_column=geom_column,
+                geo_column=_GEOM_COLUMN,
                 aggregation=variable_agg)
     else:
         return """
@@ -315,7 +312,7 @@ def _build_polygons_query_variable_with_aggregation(geom_column, variable, aggre
                 aggregation=variable_agg)
 
 
-def _build_polygons_query_variables_without_aggregation(geom_column, variables):
+def _build_polygons_query_variables_without_aggregation(variables):
     variables = ['enrichment_table.{}'.format(variable.column_name) for variable in variables]
 
     return """
@@ -326,7 +323,7 @@ def _build_polygons_query_variables_without_aggregation(geom_column, variables):
         enrichment_geo_table.geoid as do_geoid
         """.format(
             variables=', '.join(variables),
-            geom_column=geom_column)
+            geom_column=_GEOM_COLUMN)
 
 
 def _build_where_clausule(filters):
