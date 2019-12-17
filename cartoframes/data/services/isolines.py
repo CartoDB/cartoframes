@@ -196,7 +196,6 @@ class Isolines(Service):
 
         if exclusive:
             # Add range label column
-            import pdb; pdb.set_trace()
             cdf[RANGE_LABEL_KEY] = cdf.apply(lambda r: '%.0f min.' % (r[DATA_RANGE_KEY]/60), axis=1)
 
         if table_name:
