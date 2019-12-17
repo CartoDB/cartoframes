@@ -2,6 +2,7 @@ from numpy import ndarray
 from pandas import DataFrame, Series
 from geopandas import GeoDataFrame, points_from_xy
 
+from ..utils.utils import check_package
 from ..utils.geom_utils import decode_geometry_column
 
 
@@ -356,6 +357,7 @@ class CartoDataFrame(GeoDataFrame):
         return result
 
     def plot(self, *args, **kwargs):
+        check_package('matplotlib', extra=True)
         if self.has_geometry():
             return GeoDataFrame.plot(self, *args, **kwargs)
         else:

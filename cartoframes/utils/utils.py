@@ -403,22 +403,21 @@ def timelogger(method):
         result = method(*args, **kw)
         log.debug('%s in %s s', method.__name__, round(time.time() - start, 2))
         return result
-
     return fn
 
 
-def check_package(pkg_name, extra=False):
+def check_package(pkg_name, spec='*', extra=False):
     try:
-        spec = semantic_version.Spec('*')
+        spec_pattern = semantic_version.Spec(spec)
         pkg_version = pkg_resources.get_distribution(pkg_name).version
         version = semantic_version.Version(pkg_version)
-        if not spec.match(version):
-            raise Exception('Package "{0}" version ({1}) does not match {2}'.format(pkg_name, version, spec),
+        if not spec_pattern.match(version):
+            raise Exception('Package "{0}" version ({1}) does not match "{2}" '.format(pkg_name, version, spec) +
                             'Please run: pip install -U {0}'.format(pkg_name))
     except pkg_resources.DistributionNotFound:
         if extra:
-            raise Exception('Optional package "{0}" is not installed'.format(pkg_name),
+            raise Exception('Optional package "{0}" is not installed. '.format(pkg_name) +
                             'Please run: pip install -U {0}'.format(pkg_name))
         else:
-            raise Exception('Package "{0}" is not installed'.format(pkg_name, version, spec),
+            raise Exception('Package "{0}" is not installed. '.format(pkg_name) +
                             'Please run: pip install -U {0}'.format(pkg_name))
