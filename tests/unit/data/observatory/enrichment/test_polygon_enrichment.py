@@ -719,10 +719,10 @@ def _clean_query(query):
 
 def _get_query(agg, columns, username, view, geo_table, temp_table_name, filters=[]):
     if agg:
-        columns = _build_polygons_query_variables_with_aggregation(_GEOM_COLUMN, columns, agg)
+        columns = _build_polygons_query_variables_with_aggregation(columns, agg)
         group = 'group by data_table.enrichment_id'
     else:
-        columns = _build_polygons_query_variables_without_aggregation(_GEOM_COLUMN, columns)
+        columns = _build_polygons_query_variables_without_aggregation(columns)
         group = ''
 
     return '''
