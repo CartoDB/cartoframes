@@ -163,7 +163,7 @@ class TestSizeBinsLayerHelper(object):
         layer = helpers.size_bins_layer(
             self.source,
             'name',
-            popup=True
+            popups=True
         )
 
         assert layer.popup._hover == [{

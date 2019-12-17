@@ -121,7 +121,7 @@ class TestColorContinuousLayerHelper(object):
         layer = helpers.color_continuous_layer(
             self.source,
             'name',
-            popup=True
+            popups=True
         )
 
         assert layer.popup._hover == [{

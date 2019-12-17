@@ -113,7 +113,7 @@ class TestSizeContinuousLayerHelper(object):
         layer = helpers.size_continuous_layer(
             self.source,
             'name',
-            popup=True
+            popups=True
         )
 
         assert layer.popup._hover == [{

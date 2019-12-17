@@ -135,7 +135,7 @@ class TestSizeCategoryLayerHelper(object):
         layer = helpers.size_category_layer(
             self.source,
             'name',
-            popup=True
+            popups=True
         )
 
         assert layer.popup._hover, [{
