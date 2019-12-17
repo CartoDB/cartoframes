@@ -320,7 +320,7 @@ def _build_polygons_query_variables_without_aggregation(geom_column, variables):
 
     return """
         {variables},
-        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column})) AS intersected_area
+        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column})) AS intersected_area,
         ST_area(enrichment_geo_table.geom) AS do_area,
         ST_area(data_table.{geom_column}) AS user_area,
         enrichment_geo_table.geoid as do_geoid
