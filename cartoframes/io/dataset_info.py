@@ -1,17 +1,12 @@
 from __future__ import absolute_import
 
 import time
-from warnings import warn
 
 from carto.datasets import DatasetManager
 from carto.exceptions import CartoException
 
-from ..utils.columns import normalize_name
-
 from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
-
-# TODO: refactor
 
 
 class DatasetInfo(object):
@@ -27,41 +22,14 @@ class DatasetInfo(object):
     def __init__(self, auth_client, table_name):
         self._metadata = self._get_metadata(auth_client, table_name)
         self._privacy = self._metadata.privacy
-        self._table_name = self._metadata.name
 
     @property
     def privacy(self):
         return self._privacy
 
-    @privacy.setter
-    def privacy(self, privacy):
-        raise setting_value_exception('privacy', privacy)
-
-    @property
-    def table_name(self):
-        return self._table_name
-
-    @table_name.setter
-    def table_name(self, table_name):
-        raise setting_value_exception('table_name', table_name)
-
-    def update(self, privacy=None, table_name=None):
-        modified = False
-
+    def update_privacy(self, privacy=None):
         if privacy and self._validate_privacy(privacy):
             self._privacy = privacy.upper()
-            modified = True
-
-        if table_name:
-            normalized_name = normalize_name(table_name)
-            if self._validate_name(normalized_name):
-                self._table_name = normalized_name
-                modified = True
-
-                if self._table_name != table_name:
-                    warn('Dataset name will be named `{}`'.format(self._table_name))
-
-        if modified:
             self._save_metadata()
 
     def _get_metadata(self, auth_client, table_name, retries=4, retry_wait_time=1):
@@ -79,7 +47,6 @@ class DatasetInfo(object):
 
     def _save_metadata(self):
         self._metadata.privacy = self._privacy
-        self._metadata.name = self._table_name
         self._metadata.save()
 
     def _validate_privacy(self, privacy):
@@ -92,14 +59,3 @@ class DatasetInfo(object):
             return True
 
         return False
-
-    def _validate_name(self, name):
-        if name != self._table_name:
-            return True
-
-        return False
-
-
-def setting_value_exception(prop, value):
-    return CartoException(("Error setting {prop}. You must use the `update` method: "
-                           "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
