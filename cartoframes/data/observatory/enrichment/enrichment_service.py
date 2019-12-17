@@ -256,13 +256,13 @@ class EnrichmentService(object):
 
         if aggregation == AGGREGATION_NONE:
             grouper = ''
-            variables = _build_polygons_query_variables_without_aggregation(self.geom_column, variables)
+            columns = _build_polygons_query_variables_without_aggregation(self.geom_column, variables)
         else:
             grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=self.enrichment_id)
-            variables = _build_polygons_query_variables_with_aggregation(self.geom_column, variables, aggregation)
+            columns = _build_polygons_query_variables_with_aggregation(self.geom_column, variables, aggregation)
 
         return '''
-            SELECT data_table.{enrichment_id}, {variables}
+            SELECT data_table.{enrichment_id}, {columns}
             FROM `{enrichment_dataset}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
@@ -278,7 +278,7 @@ class EnrichmentService(object):
                 where=_build_where_clausule(filters),
                 data_table=data_table,
                 grouper=grouper or '',
-                variables=variables
+                columns=columns
             )
 
 
@@ -321,8 +321,9 @@ def _build_polygons_query_variables_without_aggregation(geom_column, variables):
     return """
         {variables},
         ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column})) AS intersected_area
-        ST_area(enrichment_geo_table.geom) AS target_area,
-        ST_area(data_table.{geom_column}) AS source_area
+        ST_area(enrichment_geo_table.geom) AS do_area,
+        ST_area(data_table.{geom_column}) AS user_area,
+        enrichment_geo_table.geoid as do_geoid
         """.format(
             variables=', '.join(variables),
             geom_column=geom_column)
