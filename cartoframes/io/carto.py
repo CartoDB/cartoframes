@@ -129,7 +129,7 @@ def has_table(table_name, credentials=None, schema=None):
         table_name (str): name of the table.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
-        schema (str, optional):prefix of the table. By default, it gets the
+        schema (str, optional): prefix of the table. By default, it gets the
             `current_schema()` using the credentials.
     """
     if not isinstance(table_name, str):
@@ -161,7 +161,7 @@ def delete_table(table_name, credentials=None, log_enabled=True):
             log.info('Table "{}" does not exist'.format(table_name))
 
 
-def rename_table(table_name, new_table_name, credentials=None, log_enabled=True):
+def rename_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
     """
     Rename a table in the CARTO account.
 
@@ -170,10 +170,11 @@ def rename_table(table_name, new_table_name, credentials=None, log_enabled=True)
         new_table_name (str): new name for the table.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
+        if_exists (str, optional): 'fail', 'replace'. Default is 'fail'.
 
     Raises:
         ValueError:
-            If the table name is not a string.
+            When the table name provided is wrong or the if_exists param is not valid.
     """
     if not isinstance(table_name, str):
         raise ValueError('Wrong table name. You should provide a valid table name.')
@@ -181,8 +182,13 @@ def rename_table(table_name, new_table_name, credentials=None, log_enabled=True)
     if not isinstance(new_table_name, str):
         raise ValueError('Wrong new table name. You should provide a valid table name.')
 
+    IF_EXISTS_OPTIONS = ['fail', 'replace']
+    if if_exists not in IF_EXISTS_OPTIONS:
+        raise ValueError('Wrong option for the `if_exists` param. You should provide: {}.'.format(
+            ', '.join(IF_EXISTS_OPTIONS)))
+
     context_manager = ContextManager(credentials)
-    new_table_name = context_manager.rename_table(table_name, new_table_name)
+    new_table_name = context_manager.rename_table(table_name, new_table_name, if_exists)
 
     if log_enabled:
         log.info('Success! Table "{0}" renamed to table "{1}" correctly'.format(table_name, new_table_name))

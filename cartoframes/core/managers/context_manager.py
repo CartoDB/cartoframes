@@ -53,9 +53,9 @@ class ContextManager(object):
             log.debug('Creating table "{}"'.format(table_name))
             self._create_table_from_columns(table_name, columns, schema, cartodbfy)
         elif if_exists == 'fail':
-            raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
+            raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
                             'Please choose a different `table_name` or use '
-                            'if_exists="replace" to overwrite it'.format(
+                            'if_exists="replace" to overwrite it.'.format(
                                 table_name=table_name, schema=schema))
         else:  # 'append'
             pass
@@ -71,9 +71,9 @@ class ContextManager(object):
             log.debug('Creating table "{}"'.format(table_name))
             self._create_table_from_query(query, table_name, schema, cartodbfy)
         elif if_exists == 'fail':
-            raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
+            raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
                             'Please choose a different `table_name` or use '
-                            'if_exists="replace" to overwrite it'.format(
+                            'if_exists="replace" to overwrite it.'.format(
                                 table_name=table_name, schema=schema))
         else:  # 'append'
             pass
@@ -89,9 +89,27 @@ class ContextManager(object):
         output = self.execute_query(query)
         return not('notices' in output and 'does not exist' in output['notices'][0])
 
-    def rename_table(self, table_name, new_table_name):
+    def rename_table(self, table_name, new_table_name, if_exists):
         new_table_name = self.normalize_table_name(new_table_name)
-        query = 'ALTER TABLE {0} RENAME TO {1};'.format(table_name, new_table_name)
+
+        if table_name == new_table_name:
+            raise ValueError('Table names are equal. Please choose a different table name.')
+
+        if not self.has_table(table_name):
+            raise Exception('Table "{table_name}" does not exist in your CARTO account.'.format(
+                                table_name=table_name))
+
+        if self.has_table(new_table_name):
+            if if_exists == 'replace':
+                log.debug('Removing table "{}"'.format(new_table_name))
+                self.delete_table(new_table_name)
+            elif if_exists == 'fail':
+                raise Exception('Table "{new_table_name}" already exists in your CARTO account. '
+                                'Please choose a different `new_table_name` or use '
+                                'if_exists="replace" to overwrite it.'.format(
+                                    new_table_name=new_table_name))
+
+        query = _rename_table_query(table_name, new_table_name)
         self.execute_query(query)
         return new_table_name
 
@@ -295,6 +313,11 @@ def _create_table_from_query_query(table_name, query):
 def _cartodbfy_query(table_name, schema):
     return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
         .format(schema=schema, table_name=table_name)
+
+
+def _rename_table_query(table_name, new_table_name):
+    return 'ALTER TABLE {table_name} RENAME TO {new_table_name};'.format(
+        table_name=table_name, new_table_name=new_table_name)
 
 
 def _create_auth_client(credentials, public=False):
