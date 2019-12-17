@@ -61,7 +61,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
-             log_enabled=True, force_cartodbfy=False):
+             force_cartodbfy=False, log_enabled=True):
     """
     Upload a Dataframe to CARTO.
 
@@ -115,7 +115,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     cartodbfy = force_cartodbfy or has_geometry
 
-    context_manager.copy_from(cdf, table_name, if_exists, cartodbfy, log_enabled)
+    context_manager.copy_from(cdf, table_name, if_exists, cartodbfy)
 
     if log_enabled:
         log.info('Success! Data uploaded correctly')
@@ -136,7 +136,6 @@ def has_table(table_name, credentials=None, schema=None):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
     context_manager = ContextManager(credentials)
-
     return context_manager.has_table(table_name, schema)
 
 
@@ -153,8 +152,13 @@ def delete_table(table_name, credentials=None, log_enabled=True):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
     context_manager = ContextManager(credentials)
+    result = context_manager.delete_table(table_name)
 
-    return context_manager.delete_table(table_name, log_enabled)
+    if log_enabled:
+        if result:
+            log.info('Success! Table removed correctly')
+        else:
+            log.info('Table "{}" does not exist'.format(table_name))
 
 
 def rename_table(table_name, new_table_name, credentials=None, log_enabled=True):
@@ -171,7 +175,6 @@ def rename_table(table_name, new_table_name, credentials=None, log_enabled=True)
         ValueError:
             If the table name is not a string.
     """
-
     if not isinstance(table_name, str):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
@@ -210,9 +213,9 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
         raise ValueError('Wrong option for the `if_exists` param. You should provide: {}.'.format(
             ', '.join(IF_EXISTS_OPTIONS)))
 
-    context_manager = ContextManager(credentials)
-
     query = 'SELECT * FROM {}'.format(table_name)
+
+    context_manager = ContextManager(credentials)
     context_manager.create_table_from_query(query, new_table_name, if_exists)
 
     if log_enabled:
@@ -245,7 +248,6 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
             ', '.join(IF_EXISTS_OPTIONS)))
 
     context_manager = ContextManager(credentials)
-
     context_manager.create_table_from_query(query, new_table_name, if_exists)
 
     if log_enabled:
