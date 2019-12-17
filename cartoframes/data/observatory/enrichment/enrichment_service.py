@@ -226,15 +226,15 @@ class EnrichmentService(object):
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
                 JOIN `{data_table}` data_table
-                    ON ST_Within(data_table.{geojson_column}, enrichment_geo_table.geom)
+                    ON ST_Within(data_table.{geom_column}, enrichment_geo_table.geom)
             {where};
         '''.format(
             variables=', '.join(variables),
-            geojson_column=self.geom_column,
+            geom_column=self.geom_column,
             enrichment_dataset=enrichment_dataset,
             enrichment_geo_table=enrichment_geo_table,
             enrichment_id=self.enrichment_id,
-            where=self._build_where_clausule(filters),
+            where=_build_where_clausule(filters),
             data_table=data_table
         )
 
@@ -256,10 +256,10 @@ class EnrichmentService(object):
 
         if aggregation == AGGREGATION_NONE:
             grouper = ''
-            variables = self._build_polygons_query_variables_without_aggregation(variables)
+            variables = _build_polygons_query_variables_without_aggregation(self.geom_column, variables)
         else:
             grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=self.enrichment_id)
-            variables = self._build_polygons_query_variables_with_aggregation(variables, aggregation)
+            variables = _build_polygons_query_variables_with_aggregation(self.geom_column, variables, aggregation)
 
         return '''
             SELECT data_table.{enrichment_id}, {variables}
@@ -267,68 +267,74 @@ class EnrichmentService(object):
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
                 JOIN `{data_table}` data_table
-                    ON ST_Intersects(data_table.{geojson_column}, enrichment_geo_table.geom)
+                    ON ST_Intersects(data_table.{geom_column}, enrichment_geo_table.geom)
             {where}
             {grouper};
         '''.format(
-                geojson_column=self.geom_column,
+                geom_column=self.geom_column,
                 enrichment_dataset=enrichment_dataset,
                 enrichment_geo_table=enrichment_geo_table,
                 enrichment_id=self.enrichment_id,
-                where=self._build_where_clausule(filters),
+                where=_build_where_clausule(filters),
                 data_table=data_table,
                 grouper=grouper or '',
                 variables=variables
             )
 
-    def _build_polygons_query_variables_with_aggregation(self, variables, aggregation):
-        return ', '.join([
-            self._build_polygons_query_variable_with_aggregation(
-                variable,
-                aggregation
-            ) for variable in variables])
 
-    def _build_polygons_query_variable_with_aggregation(self, variable, aggregation):
-        variable_agg = _get_aggregation(variable, aggregation)
+def _build_polygons_query_variables_with_aggregation(geom_column, variables, aggregation):
+    return ', '.join([
+        _build_polygons_query_variable_with_aggregation(
+            geom_column,
+            variable,
+            aggregation
+        ) for variable in variables])
 
-        if (variable_agg == 'sum'):
-            return """
-                {aggregation}(
-                    enrichment_table.{column} * (
-                        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
-                        /
-                        ST_area(data_table.{geo_column})
-                    )
-                ) AS {aggregation}_{column}
-                """.format(
-                    column=variable.column_name,
-                    geo_column=self.geom_column,
-                    aggregation=variable_agg)
-        else:
-            return """
-                {aggregation}(enrichment_table.{column}) AS {aggregation}_{column}
-                """.format(
-                    column=variable.column_name,
-                    aggregation=variable_agg)
 
-    def _build_polygons_query_variables_without_aggregation(self, variables):
-        variables = ['enrichment_table.{}'.format(variable.column_name) for variable in variables]
+def _build_polygons_query_variable_with_aggregation(geom_column, variable, aggregation):
+    variable_agg = _get_aggregation(variable, aggregation)
 
+    if (variable_agg == 'sum'):
         return """
-            {variables},
-            ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geojson_column})) /
-            ST_area(data_table.{geojson_column}) AS measures_proportion
+            {aggregation}(
+                enrichment_table.{column} * (
+                    ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                    /
+                    ST_area(data_table.{geo_column})
+                )
+            ) AS {aggregation}_{column}
             """.format(
-                variables=', '.join(variables),
-                geojson_column=self.geom_column)
+                column=variable.column_name,
+                geo_column=geom_column,
+                aggregation=variable_agg)
+    else:
+        return """
+            {aggregation}(enrichment_table.{column}) AS {aggregation}_{column}
+            """.format(
+                column=variable.column_name,
+                aggregation=variable_agg)
 
-    def _build_where_clausule(self, filters):
-        where = ''
-        if len(filters) > 0:
-            where_clausules = ["enrichment_table.{} {}".format(f.variable.column_name, f.query) for f in filters]
-            where = 'WHERE {}'.format('AND '.join(where_clausules))
 
-        return where
+def _build_polygons_query_variables_without_aggregation(geom_column, variables):
+    variables = ['enrichment_table.{}'.format(variable.column_name) for variable in variables]
+
+    return """
+        {variables},
+        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column})) AS intersected_area
+        ST_area(enrichment_geo_table.geom) AS target_area,
+        ST_area(data_table.{geom_column}) AS source_area
+        """.format(
+            variables=', '.join(variables),
+            geom_column=geom_column)
+
+
+def _build_where_clausule(filters):
+    where = ''
+    if len(filters) > 0:
+        where_clausules = ["enrichment_table.{} {}".format(f.variable.column_name, f.query) for f in filters]
+        where = 'WHERE {}'.format('AND '.join(where_clausules))
+
+    return where
 
 
 @timelogger
