@@ -6,6 +6,7 @@ from ..utils.utils import merge_dicts
 from .legend import Legend
 from .legend_list import LegendList
 from .popup import Popup
+from .popup_list import PopupList
 from .source import Source
 from .style import Style
 from .widget_list import WidgetList
@@ -24,9 +25,8 @@ class Layer(object):
             table name, SQL query or a dataframe.
         style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
             The style of the visualization.
-        popup (dict or :py:class:`Popup <cartoframes.viz.Popup>`, optional):
-            This option adds interactivity (click and hover) to a layer to show popups.
-            The columns to be shown must be added in a list format for each event.
+        popups (:py:class:`Popup <cartoframes.viz.Popup>`, optional):
+            This option adds interactivity (click_popup and hover_popup) to a layer to show popups.
             See :py:class:`Popup <cartoframes.viz.Popup>` for more information.
         legend (dict or :py:class:`Legend <cartoframes.viz.Legend>`, optional):
             The legend definition for a layer. It contains the information
@@ -67,10 +67,12 @@ class Layer(object):
             Layer(
                 "SELECT * FROM populated_places WHERE adm0name = 'Spain'",
                 'color: ramp(globalQuantiles($pop_max, 5), reverse(purpor))',
-                popup={
-                    'hover': '$name',
-                    'click': ['$name', '$pop_max', '$pop_min']
-                },
+                popups=[
+                    hover_popup('name'),
+                    click_popup('name'),
+                    click_popup('pop_max'),
+                    click_popup('pop_min')
+                ],
                 legend={
                     'type': 'color-category',
                     'title': 'Population'
@@ -127,7 +129,7 @@ class Layer(object):
     def __init__(self,
                  source,
                  style=None,
-                 popup=None,
+                 popups=None,
                  legend=None,
                  widgets=None,
                  credentials=None,
@@ -138,14 +140,14 @@ class Layer(object):
 
         self.source = _set_source(source, credentials, geom_col)
         self.style = _set_style(style)
-        self.popup = _set_popup(popup)
+        self.popups = _set_popups(popups)
         self.legend = _set_legend(legend)
         self.widgets = _set_widgets(widgets)
 
         geom_type = self.source.get_geom_type()
-        popup_variables = self.popup.get_variables()
+        popups_variables = self.popups.get_variables()
         widget_variables = self.widgets.get_variables()
-        external_variables = merge_dicts(popup_variables, widget_variables)
+        external_variables = merge_dicts(popups_variables, widget_variables)
         self.viz = self.style.compute_viz(geom_type, external_variables)
         viz_columns = extract_viz_columns(self.viz)
 
@@ -154,7 +156,7 @@ class Layer(object):
         self.source_data = self.source.data
         self.bounds = bounds or self.source.bounds
         self.credentials = self.source.get_credentials()
-        self.interactivity = self.popup.get_interactivity()
+        self.interactivity = self.popups.get_interactivity()
         self.widgets_info = self.widgets.get_widgets_info()
         self.legend_info = self.legend.get_info(geom_type) if self.legend is not None else None
         self.has_legend_list = isinstance(self.legend, LegendList)
@@ -184,14 +186,13 @@ def _set_style(style):
         return Style()
 
 
-def _set_popup(popup):
+def _set_popups(popups):
     """Set a Popup class from the input"""
-    if isinstance(popup, dict):
-        return Popup(popup)
-    elif isinstance(popup, Popup):
-        return popup
+
+    if isinstance(popups, (list, Popup)):
+        return PopupList(popups)
     else:
-        return Popup()
+        return PopupList()
 
 
 def _set_legend(legend):
