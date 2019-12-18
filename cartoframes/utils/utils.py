@@ -15,6 +15,7 @@ from functools import wraps
 from warnings import catch_warnings, filterwarnings
 
 from ..auth.credentials import Credentials
+from ..auth.defaults import get_default_credentials
 from ..core.logger import log
 
 GEOM_TYPE_POINT = 'point'
@@ -299,6 +300,12 @@ def is_table_name(data):
     # avoid circular dependecies
     from .columns import normalize_name
     return isinstance(data, str) and normalize_name(data) == data
+
+
+def get_credentials(credentials=None):
+    _credentials = credentials or get_default_credentials()
+    check_credentials(_credentials)
+    return _credentials
 
 
 def check_credentials(credentials):

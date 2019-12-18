@@ -7,7 +7,7 @@ from .repository.constants import GEOGRAPHY_FILTER
 from . import subscription_info
 from . import subscriptions
 from . import utils
-from ....auth import Credentials, defaults
+from ....utils.utils import get_credentials
 
 GEOGRAPHY_TYPE = 'geography'
 
@@ -195,8 +195,9 @@ class Geography(CatalogEntity):
         :raises DiscoveryException: When no geographies are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
+        _credentials = get_credentials(credentials)
 
-        return cls._entity_repo.get_all(filters, credentials)
+        return cls._entity_repo.get_all(filters, _credentials)
 
     def download(self, file_path, credentials=None):
         """Download geography data as a local file. You need Data Observatory enabled in your CARTO
@@ -218,11 +219,13 @@ class Geography(CatalogEntity):
         :raises CartoException: If you have not a valid license for the dataset being downloaded.
         :raises ValueError: If the credentials argument is not valud.
         """
-        if not self._is_subscribed(credentials):
+        _credentials = get_credentials(credentials)
+
+        if not self._is_subscribed(_credentials):
             raise CartoException('You are not subscribed to this Geography yet. Please, use the subscribe method '
                                  'first.')
 
-        return self._download(file_path, credentials)
+        self._download(file_path, _credentials)
 
     def subscribe(self, credentials=None):
         """Subscribe to a Geography. You need Data Observatory enabled in your CARTO account, please contact us at
@@ -250,8 +253,7 @@ class Geography(CatalogEntity):
 
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
-
-        _credentials = self._get_credentials(credentials)
+        _credentials = get_credentials(credentials)
         _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
 
         if self.id in _subscribed_ids:
@@ -274,22 +276,18 @@ class Geography(CatalogEntity):
 
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
-
-        _credentials = self._get_credentials(credentials)
+        _credentials = get_credentials(credentials)
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))
 
-    def _is_subscribed(self, credentials=None):
-
+    def _is_subscribed(self, credentials):
         if self.is_public_data:
             return True
 
-        _credentials = credentials or defaults.get_default_credentials()
-
-        if not isinstance(_credentials, Credentials):
-            raise ValueError('`credentials` must be a Credentials class instance')
-
-        geographies = Geography.get_all({}, _credentials)
+        geographies = Geography.get_all({}, credentials)
 
         return geographies is not None and self in geographies
+
+    def __str__(self):
+        return "<Geography.get('{}')>".format(self._get_print_id())

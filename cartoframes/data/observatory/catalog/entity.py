@@ -7,8 +7,6 @@ from carto.exceptions import CartoException
 
 from ...clients.bigquery_client import BigQueryClient
 from ....core.logger import log
-from ....utils.utils import check_credentials
-from ....auth.defaults import get_default_credentials
 
 
 _PLATFORM_BQ = 'bq'
@@ -139,11 +137,6 @@ class CatalogEntity(ABC):
 
     def _is_available_in(self, platform=_PLATFORM_BQ):
         return self.data['available_in'] and platform in self.data['available_in']
-
-    def _get_credentials(self, credentials=None):
-        _credentials = credentials or get_default_credentials()
-        check_credentials(_credentials)
-        return _credentials
 
     def _get_remote_full_table_name(self, user_project, user_dataset, public_project):
         project, dataset, table = self.id.split('.')

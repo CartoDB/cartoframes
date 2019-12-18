@@ -16,6 +16,7 @@ from . import subscription_info
 from . import subscriptions
 from . import utils
 from ....core.logger import log
+from ....utils.utils import get_credentials
 
 DATASET_TYPE = 'dataset'
 
@@ -360,8 +361,9 @@ class Dataset(CatalogEntity):
         :raises DiscoveryException: When no datasets are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
+        _credentials = get_credentials(credentials)
 
-        return cls._entity_repo.get_all(filters, credentials)
+        return cls._entity_repo.get_all(filters, _credentials)
 
     def download(self, file_path, credentials=None):
         """Download dataset data as a local file. You need Data Observatory enabled in your CARTO
@@ -383,7 +385,7 @@ class Dataset(CatalogEntity):
         :raises CartoException: If you have not a valid license for the dataset being downloaded.
         :raises ValueError: If the credentials argument is not valid.
         """
-        _credentials = self._get_credentials(credentials)
+        _credentials = get_credentials(credentials)
 
         if not self._is_subscribed(_credentials):
             raise CartoException('You are not subscribed to this Dataset yet. Please, use the subscribe method first.')
@@ -446,7 +448,7 @@ class Dataset(CatalogEntity):
 
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
-        _credentials = self._get_credentials(credentials)
+        _credentials = get_credentials(credentials)
         _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
 
         if self.id in _subscribed_ids:
@@ -469,7 +471,7 @@ class Dataset(CatalogEntity):
 
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
-        _credentials = self._get_credentials(credentials)
+        _credentials = get_credentials(credentials)
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, DATASET_TYPE, _credentials))
