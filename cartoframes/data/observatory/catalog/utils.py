@@ -52,14 +52,24 @@ def _display_existing_subscription_message_cli(entity_id, entity_type):
 
 
 def _display_subscription_form_notebook(entity_id, entity_type, info, credentials):
+    if info.get('estimated_delivery_days') == 0:
+        delivery_message = '''
+        This {type} is available for Instant Subscription for your organization,
+        so it will automatically process the order and you will get immediate access to the {type}.
+        '''.format(type=entity_type)
+    else:
+        delivery_message = '''
+        This {type} will be available in your account in about {days} days.
+        We will contact you shortly to complete the subscription details.
+        '''.format(type=entity_type, days=info.get('estimated_delivery_days'))
+
     message = '''
     <h3>Subscription contract</h3>
     You are about to subscribe to <b>{id}</b>.
     The cost of this {type} is <b>${price}</b>.
     If you want to proceed, a Request will be sent to CARTO who will
     order the data and load it into your account.
-    This {type} is available for Instant Order for your organization,
-    so it will automatically process the order and you will get immediate access to the {type}.
+    {delivery_message}
     In order to proceed we need you to agree to the License of the {type}
     available at <b><a href="{link}" target="_blank">this link</a></b>.
     <br>Do you want to proceed?
@@ -67,6 +77,7 @@ def _display_subscription_form_notebook(entity_id, entity_type, info, credential
         id=entity_id,
         type=entity_type,
         price=info.get('subscription_list_price'),
+        delivery_message=delivery_message,
         link=info.get('tos_link'))
 
     responses = {
