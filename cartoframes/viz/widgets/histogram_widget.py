@@ -28,7 +28,7 @@ def histogram_widget(value, **kwargs):
         .. code::
 
             from cartoframes.viz import Map, Layer
-            from cartoframes.viz.widgets import histogram_widget
+            from cartoframes.viz import histogram_widget
 
             Map(
                 Layer(

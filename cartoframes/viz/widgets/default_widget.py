@@ -21,7 +21,7 @@ def default_widget(**kwargs):
         .. code::
 
             from cartoframes.viz import Map, Layer
-            from cartoframes.viz.widgets import default_widget
+            from cartoframes.viz import default_widget
 
             Map(
                 Layer(

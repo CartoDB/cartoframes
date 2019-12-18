@@ -25,7 +25,7 @@ def animation_widget(**kwargs):
         .. code::
 
             from cartoframes.viz import Map, Layer
-            from cartoframes.viz.widgets import animation_widget
+            from cartoframes.viz import animation_widget
 
             Map(
                 Layer(
