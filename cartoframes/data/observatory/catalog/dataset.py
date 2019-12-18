@@ -3,8 +3,6 @@ import geopandas as gpd
 
 from shapely import wkt
 
-from carto.exceptions import CartoException
-
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
@@ -388,8 +386,9 @@ class Dataset(CatalogEntity):
         """
         _credentials = get_credentials(credentials)
 
-        if not self._is_subscribed(_credentials):
-            raise CartoException('You are not subscribed to this Dataset yet. Please, use the subscribe method first.')
+        # if not self._is_subscribed(_credentials):
+        #     raise CartoException('You are not subscribed to this Dataset yet. '
+        #                          'Please, use the subscribe method first.')
 
         self._download(file_path, _credentials)
 

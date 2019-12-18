@@ -110,9 +110,6 @@ class CatalogEntity(ABC):
         return self.id
 
     def _download(self, file_path, credentials):
-        if not self._is_available_in('bq'):
-            raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
-
         bq_client = _get_bigquery_client(credentials)
 
         full_remote_table_name = self._get_remote_full_table_name(
