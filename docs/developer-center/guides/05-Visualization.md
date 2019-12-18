@@ -199,7 +199,7 @@ To make this information available while exploring each location on the map, you
 To add Widgets, you first need to import the types that you want to use and then, inside of the `iso_cdf` Layer add one widget for each attribute of interest. The Formula Widget accepts different types of aggregations. For this map, you will aggregate each demographic variable using `sum` so the totals update as you zoom, pan and interact with the map. You will also label each Widget appropriately using the `title` parameter.
 
 ```python
-from cartoframes.viz.widgets import formula_widget, category_widget
+from cartoframes.viz import formula_widget, category_widget
 
 Map([
     Layer(
