@@ -13,6 +13,8 @@ from ...core.logger import log
 from ...core.managers.source_manager import SourceManager
 from ...io.carto import read_carto, to_carto, has_table, delete_table, update_table, copy_table, create_table_from_query
 
+CARTO_INDEX_KEY = 'cartodb_id'
+
 
 class Geocoding(Service):
     """Geocoding using CARTO data services.
@@ -240,8 +242,8 @@ class Geocoding(Service):
 
         cdf = read_carto(input_table_name, self._credentials)
 
-        if self._source_manager.is_dataframe():
-            del cdf['cartodb_id']
+        if self._source_manager.is_dataframe() and CARTO_INDEX_KEY in cdf:
+            del cdf[CARTO_INDEX_KEY]
 
         if is_temporary:
             delete_table(input_table_name, self._credentials, log_enabled=False)
@@ -379,62 +381,66 @@ class Geocoding(Service):
 
         aborted = False
 
-        if not dry_run and self.available_quota() < output['required_quota']:
-            raise CartoException('You do not have enough quota. You need {} and you have {}'.format(
-                output['required_quota'],
-                self.available_quota()
-            ))
+        if not dry_run:
+            available_quota = self.available_quota()
+            if output['required_quota'] > available_quota:
+                raise CartoException('Your CARTO account does not have enough Geocoding quota: {}/{}'.format(
+                    output['required_quota'],
+                    available_quota
+                ))
 
-        if not dry_run and output['required_quota'] > 0:
-            with TableGeocodingLock(self._execute_query, table_name) as locked:
-                if not locked:
-                    output['error'] = 'The table is already being geocoded'
-                    output['aborted'] = aborted = True
-                else:
-                    sql, add_columns = geocoding_utils.geocode_query(table_name, street, city, state, country, status)
+            if output['required_quota'] > 0:
+                with TableGeocodingLock(self._execute_query, table_name) as locked:
+                    if not locked:
+                        output['error'] = 'The table is already being geocoded'
+                        output['aborted'] = aborted = True
+                    else:
+                        schema = self._schema()
+                        sql, add_columns = geocoding_utils.geocode_query(
+                            table_name, schema, street, city, state, country, status)
 
-                    add_columns += [(geocoding_constants.HASH_COLUMN, 'text')]
+                        add_columns += [(geocoding_constants.HASH_COLUMN, 'text')]
 
-                    log.debug("Adding columns %s if needed", ', '.join([c[0] for c in add_columns]))
-                    alter_sql = "ALTER TABLE {table} {add_columns};".format(
-                        table=table_name,
-                        add_columns=','.join([
-                            'ADD COLUMN IF NOT EXISTS {} {}'.format(name, type) for name, type in add_columns]))
-                    self._execute_query(alter_sql)
+                        log.debug("Adding columns %s if needed", ', '.join([c[0] for c in add_columns]))
+                        alter_sql = "ALTER TABLE {table} {add_columns};".format(
+                            table=table_name,
+                            add_columns=','.join([
+                                'ADD COLUMN IF NOT EXISTS {} {}'.format(name, type) for name, type in add_columns]))
+                        self._execute_query(alter_sql)
 
-                    log.debug("Executing query: %s", sql)
-                    result = None
-                    try:
-                        result = self._execute_long_running_query(sql)
-                    except Exception as err:
-                        log.error(err)
-                        msg = str(err)
-                        output['error'] = msg
-                        # FIXME: Python SDK should return proper exceptions
-                        # see: https://github.com/CartoDB/cartoframes/issues/751
-                        match = re.search(
-                            r'Remaining quota:\s+(\d+)\.\s+Estimated cost:\s+(\d+)',
-                            msg, re.MULTILINE | re.IGNORECASE
-                        )
-                        if match:
-                            output['remaining_quota'] = int(match.group(1))
-                            output['estimated_cost'] = int(match.group(2))
-                        aborted = True
-                        # Don't rollback to avoid losing any partial geocodification:
-                        # TODO
-                        # transaction.commit()
+                        log.debug("Executing query: %s", sql)
+                        result = None
+                        try:
+                            result = self._execute_long_running_query(sql)
+                        except Exception as err:
+                            log.error(err)
+                            msg = str(err)
+                            output['error'] = msg
+                            # FIXME: Python SDK should return proper exceptions
+                            # see: https://github.com/CartoDB/cartoframes/issues/751
+                            match = re.search(
+                                r'Remaining quota:\s+(\d+)\.\s+Estimated cost:\s+(\d+)',
+                                msg, re.MULTILINE | re.IGNORECASE
+                            )
+                            if match:
+                                output['remaining_quota'] = int(match.group(1))
+                                output['estimated_cost'] = int(match.group(2))
+                            aborted = True
+                            # Don't rollback to avoid losing any partial geocodification:
+                            # TODO
+                            # transaction.commit()
 
-                    if result and not aborted:
-                        # Number of updated rows not available for batch queries
-                        # output['updated_rows'] = result.rowcount
-                        # log.debug('Number of rows updated: %d', output['updated_rows'])
-                        pass
+                        if result and not aborted:
+                            # Number of updated rows not available for batch queries
+                            # output['updated_rows'] = result.rowcount
+                            # log.debug('Number of rows updated: %d', output['updated_rows'])
+                            pass
 
-            if not aborted:
-                sql = geocoding_utils.posterior_summary_query(table_name)
-                log.debug("Executing result summary query: %s", sql)
-                result = self._execute_query(sql)
-                geocoding_utils.set_post_summary_info(summary, result, output)
+                if not aborted:
+                    sql = geocoding_utils.posterior_summary_query(table_name)
+                    log.debug("Executing result summary query: %s", sql)
+                    result = self._execute_query(sql)
+                    geocoding_utils.set_post_summary_info(summary, result, output)
 
         if not aborted:
             # TODO
