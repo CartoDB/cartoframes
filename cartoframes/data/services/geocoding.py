@@ -13,6 +13,8 @@ from ...core.logger import log
 from ...core.managers.source_manager import SourceManager
 from ...io.carto import read_carto, to_carto, has_table, delete_table, update_table, copy_table, create_table_from_query
 
+CARTO_INDEX_KEY = 'cartodb_id'
+
 
 class Geocoding(Service):
     """Geocoding using CARTO data services.
@@ -240,8 +242,8 @@ class Geocoding(Service):
 
         cdf = read_carto(input_table_name, self._credentials)
 
-        if self._source_manager.is_dataframe():
-            del cdf['cartodb_id']
+        if self._source_manager.is_dataframe() and CARTO_INDEX_KEY in cdf:
+            del cdf[CARTO_INDEX_KEY]
 
         if is_temporary:
             delete_table(input_table_name, self._credentials, log_enabled=False)
@@ -379,11 +381,13 @@ class Geocoding(Service):
 
         aborted = False
 
-        if not dry_run and self.available_quota() < output['required_quota']:
-            raise CartoException('You do not have enough quota. You need {} and you have {}'.format(
-                output['required_quota'],
-                self.available_quota()
-            ))
+        if not dry_run:
+            available_quota = self.available_quota()
+            if available_quota < output['required_quota']:
+                raise CartoException('Your CARTO account does not have enough Geocoding quota: {}/{}'.format(
+                    output['required_quota'],
+                    available_quota
+                ))
 
         if not dry_run and output['required_quota'] > 0:
             with TableGeocodingLock(self._execute_query, table_name) as locked:
