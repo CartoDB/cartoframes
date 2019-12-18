@@ -23,18 +23,32 @@ if is_ipython_notebook():
     from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
 
 
-def display_existing_subscription_message(id, type):
+def display_existing_subscription_message(entity_id, entity_type):
     if is_ipython_notebook():
-        message = '''
+        _display_existing_subscription_message_notebook(entity_id, entity_type)
+    else:
+        _display_existing_subscription_message_cli(entity_id, entity_type)
+
+
+def _display_existing_subscription_message_notebook(entity_id, entity_type):
+    message = '''
         <h3>Subscription already purchased</h3>
         The {0} <b>{1}</b> has already been purchased.
-        '''.format(type, id)
-        text = HTML(message)
-        display(text)
+        '''.format(entity_type, entity_id)
+    text = HTML(message)
+    display(text)
 
 
-def display_subscription_form(id, type, credentials):
-    info = fetch_subscription_info(id, type, credentials)
+def _display_existing_subscription_message_cli(entity_id, entity_type):
+    message = '''
+        Subscription already purchased
+        The {0} {1} has already been purchased.
+        '''.format(entity_type, entity_id)
+    log.info(message)
+
+
+def display_subscription_form(entity_id, entity_type, credentials):
+    info = fetch_subscription_info(entity_id, entity_type, credentials)
 
     if info.get('type') != type:
         raise Exception('Incorrect type returned.')
@@ -43,16 +57,16 @@ def display_subscription_form(id, type, credentials):
         raise Exception('This {} has incomplete information. Please contact to support@carto.com.'.format(type))
 
     if is_ipython_notebook():
-        display_subscription_form_notebook(id, info, credentials)
+        display_subscription_form_notebook(entity_id, entity_type, info, credentials)
     else:
         display_subscription_form_cli()
 
 
-def display_subscription_form_notebook(id, info, credentials):
+def display_subscription_form_notebook(entity_id, entity_type, info, credentials):
     message = '''
     <h3>Subscription contract</h3>
     You are about to subscribe to <b>{id}</b>.
-    The cost of this {type} is <b>${subscription_list_price}</b>.
+    The cost of this {type} is <b>${price}</b>.
     If you want to proceed, a Request will be sent to CARTO who will
     order the data and load it into your account.
     This {type} is available for Instant Order for your organization,
@@ -60,21 +74,33 @@ def display_subscription_form_notebook(id, info, credentials):
     In order to proceed we need you to agree to the License of the {type}
     available at <b><a href="{tos_link}" target="_blank">this link</a></b>.
     <br>Do you want to proceed?
-    '''.format(**info)
+    '''.format({
+        'id': entity_id,
+        'type': entity_type,
+        'price': info.get('subscription_list_price'),
+        'tos_link': info.get('tos_link')
+    })
 
     ok_response = '''
     <b>Congrats!</b><br>The {type} <b>{id}</b> has been requested and it will be available in your account soon.
-    '''.format(**info)
+    '''.format({
+        'id': entity_id,
+        'type': entity_type
+    })
     cancel_message = '''
     The {type} <b>{id}</b> has not been purchased.
-    '''.format(**info)
+    '''.format({
+        'id': entity_id,
+        'type': entity_type
+    })
 
-    text, buttons = _create_notebook_form(id, info.get('type'), message, ok_response, cancel_message, credentials)
+    text, buttons = _create_notebook_form(
+        entity_id, entity_type, message, ok_response, cancel_message, credentials)
 
     display(text, buttons)
 
 
-def _create_notebook_form(id, type, message, ok_response, cancel_message, credentials):
+def _create_notebook_form(entity_id, entity_type, message, ok_response, cancel_message, credentials):
     text = HTML(message)
 
     button_yes = Button(
@@ -92,7 +118,7 @@ def _create_notebook_form(id, type, message, ok_response, cancel_message, creden
 
     def on_button_yes_clicked(b):
         disable_buttons()
-        response = trigger_subscription(id, type, credentials)
+        response = trigger_subscription(entity_id, entity_type, credentials)
         if response:
             display(HTML(ok_response))
         else:
