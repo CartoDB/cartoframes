@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from .service import Service
 from ...core.logger import log
 from ...core.managers.source_manager import SourceManager

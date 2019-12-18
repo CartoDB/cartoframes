@@ -1,15 +1,12 @@
 import pandas as pd
 
+from unittest.mock import patch
+
 from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.provider import Provider
 from cartoframes.data.observatory.catalog.repository.provider_repo import ProviderRepository
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from .examples import test_datasets, test_provider1, test_providers, db_provider1, test_provider2, db_provider2
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
 
 
 class TestProvider(object):
