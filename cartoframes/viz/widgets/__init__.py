@@ -2,8 +2,6 @@
 Widget helpers to generate widgets faster.
 """
 
-from __future__ import absolute_import
-
 from .animation_widget import animation_widget
 from .category_widget import category_widget
 from .default_widget import default_widget

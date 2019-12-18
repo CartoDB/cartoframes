@@ -1,7 +1,6 @@
 """Map helper functions bootstrap the process of creating common types of maps.
 These functions save time by giving great out-of-the-box cartography, legends,
 and popups. The layer can be further customized using optional overrides."""
-from __future__ import absolute_import
 
 from .color_bins_layer import color_bins_layer
 from .color_category_layer import color_category_layer

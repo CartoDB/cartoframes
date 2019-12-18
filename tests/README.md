@@ -6,7 +6,7 @@
 pip install tox
 ```
 
-The following command runs the linter and all the unit tests for the selected versions of Python (py27, py35, py36, py37)
+The following command runs the linter and all the unit tests for the selected versions of Python (py35, py36, py37)
 
 ```
 tox

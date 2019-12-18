@@ -1,16 +1,13 @@
 import pytest
 
+from unittest.mock import patch
+
 from cartoframes.exceptions import DiscoveryException
 from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.variable import Variable
 from cartoframes.data.observatory.catalog.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 from ..examples import test_variable1, test_variables, db_variable1, db_variable2
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
 
 
 class TestVariableRepo(object):

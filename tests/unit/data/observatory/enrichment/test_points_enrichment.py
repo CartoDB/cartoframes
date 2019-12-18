@@ -1,14 +1,10 @@
+from unittest.mock import Mock, patch
 from google.cloud import bigquery, storage
 
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geography, VariableFilter
 from cartoframes.data.observatory.enrichment.enrichment_service import _GEOJSON_COLUMN
 from enrichment_mock import CatalogEntityWithGeographyMock, GeographyMock
-
-try:
-    from unittest.mock import Mock, patch
-except ImportError:
-    from mock import Mock, patch
 
 _WORKING_PROJECT = 'carto-do-customers'
 _PUBLIC_PROJECT = 'carto-do-public-data'

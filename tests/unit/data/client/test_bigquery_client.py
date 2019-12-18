@@ -1,14 +1,10 @@
 import os
 import csv
-import unittest
+
+from unittest.mock import Mock, patch
 
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
-
-try:
-    from unittest.mock import Mock, patch
-except ImportError:
-    from mock import Mock, patch
 
 
 class ResponseMock(list):
@@ -25,8 +21,8 @@ class QueryJobMock(object):
         return ResponseMock(self.response)
 
 
-class TestBigQueryClient(unittest.TestCase):
-    def setUp(self):
+class TestBigQueryClient(object):
+    def setup_method(self):
         self.original_init_clients = BigQueryClient._init_clients
         BigQueryClient._init_clients = Mock(return_value=(True, True, True))
         self.username = 'username'
@@ -34,7 +30,7 @@ class TestBigQueryClient(unittest.TestCase):
         self.credentials = Credentials(self.username, self.apikey)
         self.file_path = '/tmp/test_download.csv'
 
-    def tearDown(self):
+    def teardown_method(self):
         self.credentials = None
         BigQueryClient._init_clients = self.original_init_clients
 

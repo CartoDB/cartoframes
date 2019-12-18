@@ -1,7 +1,5 @@
 """Functions to interact with the CARTO platform"""
 
-from __future__ import absolute_import
-
 import pandas as pd
 
 from carto.exceptions import CartoException

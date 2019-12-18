@@ -1,10 +1,9 @@
 """Credentials management for CARTOframes usage."""
 
 import os
-import sys
 import json
-
 import appdirs
+
 from carto.auth import APIKeyAuthClient
 from carto.do_token import DoTokenManager
 from carto.exceptions import CartoException
@@ -12,13 +11,9 @@ from carto.exceptions import CartoException
 from .. import __version__
 from ..core.logger import log
 
+from urllib.parse import urlparse
 from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
-
-if sys.version_info >= (3, 0):
-    from urllib.parse import urlparse
-else:
-    from urlparse import urlparse
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 _DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR, 'cartocreds.json')
