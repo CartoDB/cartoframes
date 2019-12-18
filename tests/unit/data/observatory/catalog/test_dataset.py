@@ -461,11 +461,13 @@ class TestDataset(object):
         dataset = Dataset(db_dataset1)
 
         # When
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(AttributeError) as e:
             dataset.subscribe(wrong_credentials)
 
         # Then
-        assert str(e.value) == '`credentials` must be a Credentials class instance'
+        assert str(e.value) == ('Credentials attribute is required. '
+                                'Please pass a `Credentials` instance '
+                                'or use the `set_default_credentials` function.')
 
     @patch('cartoframes.data.observatory.catalog.subscription_info.fetch_subscription_info')
     def test_dataset_subscription_info(self, mock_fetch):
@@ -512,11 +514,13 @@ class TestDataset(object):
         dataset = Dataset(db_dataset1)
 
         # When
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(AttributeError) as e:
             dataset.subscription_info(wrong_credentials)
 
         # Then
-        assert str(e.value) == '`credentials` must be a Credentials class instance'
+        assert str(e.value) == ('Credentials attribute is required. '
+                                'Please pass a `Credentials` instance '
+                                'or use the `set_default_credentials` function.')
 
     def test_dataset_is_available_in(self):
         dataset_in_bq = Dataset(db_dataset1)

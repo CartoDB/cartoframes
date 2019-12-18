@@ -194,8 +194,10 @@ class TestCatalog(object):
         catalog = Catalog()
 
         # When
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(AttributeError) as e:
             catalog.subscriptions(wrong_credentials)
 
         # Then
-        assert str(e.value) == '`credentials` must be a Credentials class instance'
+        assert str(e.value) == ('Credentials attribute is required. '
+                                'Please pass a `Credentials` instance '
+                                'or use the `set_default_credentials` function.')

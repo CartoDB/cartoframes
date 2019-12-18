@@ -6,7 +6,7 @@ from .geography import Geography
 from .subscriptions import Subscriptions
 from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER
 
-from ....auth import Credentials, defaults
+from ....utils.utils import get_credentials
 
 
 class Catalog(object):
@@ -280,10 +280,7 @@ class Catalog(object):
         """
 
         _no_filters = {}
-        _credentials = credentials or defaults.get_default_credentials()
-
-        if not isinstance(_credentials, Credentials):
-            raise ValueError('`credentials` must be a Credentials class instance')
+        _credentials = get_credentials(credentials)
 
         return Subscriptions(
             Dataset.get_all(_no_filters, _credentials),

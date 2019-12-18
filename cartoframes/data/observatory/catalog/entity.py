@@ -6,7 +6,6 @@ from google.api_core.exceptions import NotFound
 from carto.exceptions import CartoException
 
 from ...clients.bigquery_client import BigQueryClient
-from ....auth import Credentials, defaults
 from ....core.logger import log
 
 
@@ -110,11 +109,10 @@ class CatalogEntity(ABC):
 
         return self.id
 
-    def _download(self, file_path, credentials=None):
+    def _download(self, file_path, credentials):
         if not self._is_available_in('bq'):
             raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
-        credentials = self._get_credentials(credentials)
         bq_client = _get_bigquery_client(credentials)
 
         full_remote_table_name = self._get_remote_full_table_name(
@@ -139,14 +137,6 @@ class CatalogEntity(ABC):
 
     def _is_available_in(self, platform=_PLATFORM_BQ):
         return self.data['available_in'] and platform in self.data['available_in']
-
-    def _get_credentials(self, credentials=None):
-        _credentials = credentials or defaults.get_default_credentials()
-
-        if not isinstance(_credentials, Credentials):
-            raise ValueError('`credentials` must be a Credentials class instance')
-
-        return _credentials
 
     def _get_remote_full_table_name(self, user_project, user_dataset, public_project):
         project, dataset, table = self.id.split('.')
