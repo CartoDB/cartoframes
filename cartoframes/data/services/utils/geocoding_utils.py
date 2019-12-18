@@ -129,12 +129,13 @@ def posterior_summary_query(table):
     )
 
 
-def geocode_query(table, street, city, state, country, status):
+def geocode_query(table, schema, street, city, state, country, status):
     hash_expression = hash_expr(street, city, state, country)
     query = """
-        SELECT * FROM {table} WHERE {needs_geocoding}
+        SELECT * FROM "{schema}"."{table}" WHERE {needs_geocoding}
     """.format(
         table=table,
+        schema=schema,
         needs_geocoding=needs_geocoding_expr(hash_expression)
     )
     geocode_expression = """
@@ -158,15 +159,16 @@ def geocode_query(table, street, city, state, country, status):
     status_assignment, status_columns = status_assignment_columns(status)
 
     query = """
-        UPDATE {table}
+        UPDATE "{schema}"."{table}"
         SET
             the_geom = _g.the_geom,
             {status_assignment}
             {hash_column} = {hash_expression}
         FROM (SELECT * FROM {geocode_expression}) _g
-        WHERE _g.cartodb_id = {table}.cartodb_id
+        WHERE _g.cartodb_id = "{schema}"."{table}".cartodb_id
     """.format(
         table=table,
+        schema=schema,
         hash_column=geocoding_constants.HASH_COLUMN,
         hash_expression=hash_expression,
         geocode_expression=geocode_expression,
