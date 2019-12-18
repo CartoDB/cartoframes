@@ -1,9 +1,6 @@
 """general utility functions"""
 
-from __future__ import absolute_import
-
 import re
-import sys
 import gzip
 import json
 import base64
@@ -19,24 +16,6 @@ from warnings import catch_warnings, filterwarnings
 
 from ..auth.credentials import Credentials
 from ..core.logger import log
-
-try:
-    basestring
-except NameError:
-    basestring = str
-
-if sys.version_info < (3, 0):
-    from io import BytesIO
-    from gzip import GzipFile
-
-    def compress(data):
-        buf = BytesIO()
-        with GzipFile(fileobj=buf, mode='wb') as f:
-            f.write(data)
-        return buf.getvalue()
-
-    gzip.compress = compress
-
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
@@ -62,9 +41,7 @@ def dict_items(indict):
     Args:
         indict (dict): Dictionary that will be turned into items iterator
     """
-    if sys.version_info >= (3, 0):
-        return indict.items()
-    return indict.iteritems()
+    return indict.items()
 
 
 def cssify(css_dict):
@@ -364,7 +341,7 @@ def encode_row(row):
         row = row.decode('utf-8')
 
     special_keys = ['"', '|', '\n']
-    if isinstance(row, basestring) and any(key in row for key in special_keys):
+    if isinstance(row, str) and any(key in row for key in special_keys):
         # If the input contains any special key:
         # - replace " by ""
         # - cover the row with "..."

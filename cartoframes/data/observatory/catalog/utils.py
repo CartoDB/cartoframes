@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from .subscriptions import trigger_subscription
 from .subscription_info import fetch_subscription_info
 

@@ -1,18 +1,14 @@
 import pytest
 
-from cartoframes.auth import Credentials
+from unittest.mock import patch, call
 
+from cartoframes.auth import Credentials
 from cartoframes.exceptions import DiscoveryException
 from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.dataset import Dataset
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 from ..examples import test_dataset1, test_datasets, db_dataset1, db_dataset2
-
-try:
-    from unittest.mock import patch, call
-except ImportError:
-    from mock import patch, call
 
 
 class TestDatasetRepo(object):

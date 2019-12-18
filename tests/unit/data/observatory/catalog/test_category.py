@@ -1,5 +1,7 @@
 import pandas as pd
 
+from unittest.mock import patch
+
 from cartoframes.data.observatory.catalog.category import Category
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.repository.category_repo import CategoryRepository
@@ -7,11 +9,6 @@ from cartoframes.data.observatory.catalog.repository.geography_repo import Geogr
 from cartoframes.data.observatory.catalog.entity import CatalogList
 from .examples import test_category1, test_datasets, test_categories, db_category1, test_category2, db_category2, \
     test_geographies
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
 
 
 class TestCategory(object):

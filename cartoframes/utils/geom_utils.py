@@ -1,5 +1,4 @@
 import re
-import sys
 import json
 import shapely
 import binascii as ba
@@ -13,9 +12,6 @@ ENC_WKB_HEX = 'wkb-hex'
 ENC_WKB_BHEX = 'wkb-bhex'
 ENC_WKT = 'wkt'
 ENC_EWKT = 'ewkt'
-
-if sys.version_info < (3, 0):
-    ENC_WKB_BHEX = ENC_WKB_HEX
 
 
 def decode_geometry_column(geom_column):
@@ -54,12 +50,7 @@ def detect_encoding_type(input_geom):
             if srid:
                 return ENC_EWKT
             else:
-                try:
-                    # This is required because in Py27 bytes = str
-                    _load_wkb(geom)
-                    return ENC_WKB
-                except Exception:
-                    return ENC_WKT
+                return ENC_WKT
 
     if isinstance(input_geom, bytes):
         try:

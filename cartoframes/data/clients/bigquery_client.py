@@ -1,7 +1,4 @@
-from __future__ import absolute_import
-
 import os
-import appdirs
 import csv
 import tqdm
 import pandas as pd
@@ -16,7 +13,6 @@ from ...core.logger import log
 from ...utils.utils import timelogger
 
 
-_USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 _GCS_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB. This must be a multiple of 256 KB per the API specification.
 
 

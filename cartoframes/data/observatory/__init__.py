@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from .catalog.catalog import Catalog
 from .catalog.category import Category
 from .catalog.country import Country

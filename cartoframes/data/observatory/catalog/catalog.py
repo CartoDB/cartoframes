@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from .dataset import Dataset
 from .entity import is_slug_value
 from .category import Category

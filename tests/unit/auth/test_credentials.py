@@ -2,16 +2,10 @@
 import os
 import pytest
 
+from io import StringIO
+
 from cartoframes.auth import Credentials
 from cartoframes.auth.credentials import _DEFAULT_PATH, _USER_CONFIG_DIR
-
-# FIXME python 2.7 compatibility
-try:
-    FileNotFoundError
-    from io import StringIO
-except NameError:
-    FileNotFoundError = IOError
-    from io import BytesIO as StringIO
 
 
 class TestCredentials(object):

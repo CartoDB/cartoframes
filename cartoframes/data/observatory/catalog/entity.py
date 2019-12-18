@@ -1,5 +1,6 @@
 import pandas as pd
 
+from abc import ABC
 from google.api_core.exceptions import NotFound
 
 from carto.exceptions import CartoException
@@ -8,11 +9,6 @@ from ...clients.bigquery_client import BigQueryClient
 from ....auth import Credentials, defaults
 from ....core.logger import log
 
-try:
-    from abc import ABC
-except ImportError:
-    from abc import ABCMeta
-    ABC = ABCMeta('ABC', (object,), {'__slots__': ()})
 
 _PLATFORM_BQ = 'bq'
 

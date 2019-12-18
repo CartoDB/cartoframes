@@ -1,16 +1,13 @@
 import pytest
 
+from unittest.mock import patch
+
 from cartoframes.exceptions import DiscoveryException
 from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.provider import Provider
 from cartoframes.data.observatory.catalog.repository.provider_repo import ProviderRepository
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 from ..examples import test_provider1, test_providers, db_provider1, db_provider2
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
 
 
 class TestProviderRepo(object):

@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from ..constants import FORMULA_OPERATIONS_GLOBAL, FORMULA_OPERATIONS_VIEWPORT
 from ..widget import Widget
 

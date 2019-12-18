@@ -1,8 +1,10 @@
-from google.cloud import bigquery, storage
 import pytest
 import pandas as pd
+
+from unittest.mock import Mock, patch
 from shapely.geometry.point import Point
 from shapely.geometry.polygon import Polygon
+from google.cloud import bigquery, storage
 
 from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
@@ -14,11 +16,6 @@ from cartoframes.data.observatory.enrichment.enrichment_service import Enrichmen
     _ENRICHMENT_ID, _GEOJSON_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation
 from cartoframes.exceptions import EnrichmentException
 from cartoframes.utils.geom_utils import to_geojson
-
-try:
-    from unittest.mock import Mock, patch
-except ImportError:
-    from mock import Mock, patch
 
 _WORKING_PROJECT = 'carto-do-customers'
 _PUBLIC_PROJECT = 'carto-do-public-data'

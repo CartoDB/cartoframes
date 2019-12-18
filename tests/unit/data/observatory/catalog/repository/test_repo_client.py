@@ -1,12 +1,9 @@
+from unittest.mock import patch
+
 from cartoframes.core.managers.context_manager import ContextManager
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 
 from ..examples import db_dataset1, db_dataset2
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
 
 
 class TestRepoClient(object):
