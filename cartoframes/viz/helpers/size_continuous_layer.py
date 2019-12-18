@@ -34,8 +34,8 @@ def size_continuous_layer(
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
           Set to "True" by default.
-        popups (bool, optional): Display popups on hover and click: "True" or "False".
-          Set to "True" by default.
+        popups (bool, list of :py:class:`Popup <cartoframes.viz.Popup>`, default False, optional):
+          Display popups on hover and click: "True" or "False". Set to "True" by default.
         widget (bool, optional): Display a widget for mapped data.
           Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.

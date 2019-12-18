@@ -25,7 +25,7 @@ class Layer(object):
             table name, SQL query or a dataframe.
         style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
             The style of the visualization.
-        popups (:py:class:`Popup <cartoframes.viz.Popup>`, optional):
+        popups (list of :py:class:`Popup <cartoframes.viz.Popup>`, optional):
             This option adds interactivity (click_popup and hover_popup) to a layer to show popups.
             See :py:class:`Popup <cartoframes.viz.Popup>` for more information.
         legend (dict or :py:class:`Legend <cartoframes.viz.Legend>`, optional):

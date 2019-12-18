@@ -181,7 +181,7 @@ class CartoDataFrame(GeoDataFrame):
         from ..io.carto import to_carto
         return to_carto(self, table_name, credentials, if_exists, geom_col, index, index_label)
 
-    def viz(self, style=None, popup=None, legend=None, widgets=None, credentials=None, bounds=None, geom_col=None):
+    def viz(self, style=None, popups=None, legend=None, widgets=None, credentials=None, bounds=None, geom_col=None):
         """
         Creates a quick :py:class:`Map <cartoframes.viz.Map>` visualization.
         This is equivalent to `Map(Layer(cdf))`.
@@ -189,7 +189,7 @@ class CartoDataFrame(GeoDataFrame):
         Args:
             style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
                 The style of the visualization.
-            popup (dict or :py:class:`Popup <cartoframes.viz.Popup>`, optional):
+            popups (bool, list of :py:class:`Popup <cartoframes.viz.Popup>`, default False, optional):
                 This option adds interactivity (click and hover) to a layer to show popups.
                 The columns to be shown must be added in a list format for each event.
                 See :py:class:`Popup <cartoframes.viz.Popup>` for more information.
@@ -226,7 +226,7 @@ class CartoDataFrame(GeoDataFrame):
                 cdf.viz()
         """
         from ..viz import Map, Layer
-        return Map(Layer(self, style, popup, legend, widgets, credentials, bounds, geom_col))
+        return Map(Layer(self, style, popups, legend, widgets, credentials, bounds, geom_col))
 
     def has_geometry(self):
         """

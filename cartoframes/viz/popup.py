@@ -9,7 +9,35 @@ class Popup(object):
     Args:
         event (str): Popup type. It can be 'hover' or 'click'
         value (str): Column name to display the value for each feature
-        title (str, optional): Title
+        title (str, optional): Title for the given value. By default, it's the name of the value
+
+    Example:
+
+    .. code::
+
+        from cartoframes.viz import Map, Layer, Popup
+
+        Map(
+            Layer(
+                'buildings_table',
+                popups=[
+                    Popup('hover', value='amount')
+                ]
+            )
+        )
+
+    .. code::
+
+        from cartoframes.viz import Map, Layer, Popup
+
+        Map(
+            Layer(
+                'buildings_table',
+                popups=[
+                    Popup('click', value='amount', title='Price $')
+                ]
+            )
+        )
     """
 
     def __init__(self, event=None, value=None, title=None, operation=False):

@@ -6,6 +6,7 @@ Viz
     :member-order: bysource
     :undoc-members:
     :show-inheritance:
+    :exclude-members: popups, PopupList, WidgetList, LegendList
 
 Widgets
 ^^^^^^^
