@@ -35,12 +35,12 @@ class TestClusterSizeLayerHelper(object):
         assert layer.style._style['point']['filter'] == '1'
         assert layer.style._style['point']['resolution'] == '32'
 
-        assert layer.popup is not None
-        assert layer.popup._hover == [{
-            'title': 'count',
-            'value': 'clusterCount()'
-        }]
+        assert layer.popups is not None
 
+        popup = layer.popups.elements[0]
+
+        assert popup.title == 'count'
+        assert popup.value == 'clusterCount()'
         assert layer.legend is not None
         assert layer.legend._type['point'] == 'size-continuous-point'
         assert layer.legend._title == 'count'

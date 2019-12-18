@@ -27,12 +27,16 @@ class PopupList(object):
         else:
             return []
 
+    @property
+    def elements(self):
+        return self._popups
+
     def get_interactivity(self):
         popups_interactivity = []
 
         for popup in self._popups:
             if popup:
-                popups_interactivity.append(popup.get_interactivity())
+                popups_interactivity.append(popup.interactivity)
 
         return popups_interactivity
 
@@ -41,7 +45,6 @@ class PopupList(object):
 
         for popup in self._popups:
             if popup:
-                variable = popup.get_variables()
-                popups_variables[variable.get('name')] = variable.get('value')
+                popups_variables[popup.variable.get('name')] = popup.variable.get('value')
 
         return popups_variables

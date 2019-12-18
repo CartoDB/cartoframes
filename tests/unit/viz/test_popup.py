@@ -10,74 +10,50 @@ class TestPopup(object):
 
     def test_popup_init(self):
         """Popup should be properly initialized"""
-        popup = Popup({
-            'click': ['$pop', '$name'],
-            'hover': [{
-                'title': 'Pop',
-                'value': '$pop'
-            }]
-        })
+        popup_click_1 = Popup('click', 'pop')
+        popup_hover_1 = Popup('hover', 'pop', 'Pop')
 
-        assert popup._click == ['$pop', '$name']
-        assert popup._hover == [{
-            'title': 'Pop',
-            'value': '$pop'
-        }]
-
-        popup = Popup({
-            'click': '$pop',
-            'hover': {
-                'title': 'Pop',
-                'value': '$pop'
-            }
-        })
-
-        assert popup._click == ['$pop']
-        assert popup._hover == [{
-            'title': 'Pop',
-            'value': '$pop'
-        }]
+        assert popup_click_1.value == '$pop'
+        assert popup_click_1.title == 'pop'
+        assert popup_hover_1.value == '$pop'
+        assert popup_hover_1.title == 'Pop'
 
     def test_popup_interactivity(self):
         """Popup should return a proper interactivity object"""
-        popup = Popup({
-            'click': ['$pop', '$name'],
-            'hover': [{
-                'title': 'Pop',
-                'value': '$pop'
-            }]
-        })
 
-        assert popup.get_interactivity() == [{
+        popup_click_1 = Popup('click', 'pop')
+        popup_hover_1 = Popup('hover', 'pop', 'Pop')
+
+        assert popup_click_1.interactivity == {
             'event': 'click',
-            'attrs': [{
+            'attrs': {
                 'name': 'v559339',
-                'title': '$pop'
-            }, {
-                'name': 'v8e0f74',
-                'title': '$name'
-            }]
-        }, {
+                'title': 'pop'
+            }
+        }
+
+        assert popup_hover_1.interactivity == {
             'event': 'hover',
-            'attrs': [{
+            'attrs': {
                 'name': 'v559339',
                 'title': 'Pop'
-            }]
-        }]
+            }
+        }
 
     def test_popup_variables(self):
         """Popup should return a proper variables object"""
-        popup = Popup({
-            'click': ['$pop', '$name'],
-            'hover': [{
-                'title': 'Pop',
-                'value': '$pop'
-            }]
-        })
 
-        assert popup.get_variables() == {
-            'v559339': '$pop',
-            'v8e0f74': '$name'
+        popup_click_1 = Popup('click', 'pop')
+        popup_hover_1 = Popup('hover', 'pop', 'Pop')
+
+        assert popup_click_1.variable == {
+            'name': 'v559339',
+            'value': '$pop'
+        }
+
+        assert popup_hover_1.variable == {
+            'name': 'v559339',
+            'value': '$pop'
         }
 
     def test_wrong_attribute(self):

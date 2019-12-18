@@ -16,7 +16,7 @@ class Popup(object):
         self._init_popup(event, value, title, operation)
 
     def _init_popup(self, event=None, value=None, title=None, operation=False):
-        if event is None and value is None:
+        if not isinstance(event, str) and not isinstance(value, str):
             raise ValueError('Wrong popup input')
 
         self._event = event
@@ -24,13 +24,23 @@ class Popup(object):
         self._title = title if title else value
 
         self._interactivity = self._get_interactivity()
-        self._variables = self._get_variables()
+        self._variable = self._get_variable()
 
-    def get_interactivity(self):
+    @property
+    def value(self):
+        return self._value
+
+    @property
+    def title(self):
+        return self._title
+
+    @property
+    def interactivity(self):
         return self._interactivity
 
-    def get_variables(self):
-        return self._variables
+    @property
+    def variable(self):
+        return self._variable
 
     def _get_interactivity(self):
         return {
@@ -44,7 +54,7 @@ class Popup(object):
             'title': self._title
         }
 
-    def _get_variables(self):
+    def _get_variable(self):
         return {
             'name': gen_variable_name(self._value),
             'value': self._value

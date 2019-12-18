@@ -88,7 +88,7 @@ def size_bins_layer(
                 'filter': animation_filter
             }
         },
-        popup=popups and not animate and get_popup(
+        popups=popups and not animate and get_popup(
           popups, title, value, value),
         legend=legend and {
             'type': {

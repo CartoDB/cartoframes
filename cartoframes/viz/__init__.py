@@ -14,6 +14,7 @@ from .style import Style
 from .themes import Themes as themes
 from .widget import Widget
 from .widget_list import WidgetList
+from .popup_list import PopupList
 from .popups import hover_popup
 from .popups import click_popup
 
@@ -31,6 +32,7 @@ __all__ = [
     'LegendList',
     'Widget',
     'WidgetList',
+    'PopupList',
     'hover_popup',
     'click_popup'
 ]
