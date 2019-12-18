@@ -143,7 +143,7 @@ class Isolines(Service):
             return self.result(data=None, metadata=metadata)
         else:
             available_quota = self.available_quota()
-            if available_quota < metadata['required_quota']:
+            if metadata['required_quota'] > available_quota:
                 raise CartoException('Your CARTO account does not have enough Isolines quota: {}/{}'.format(
                     metadata['required_quota'],
                     available_quota
