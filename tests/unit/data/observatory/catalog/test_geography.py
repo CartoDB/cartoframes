@@ -2,7 +2,6 @@ import pytest
 import pandas as pd
 
 from unittest.mock import patch
-from carto.exceptions import CartoException
 from google.api_core.exceptions import NotFound
 
 from cartoframes.auth import Credentials
@@ -245,29 +244,6 @@ class TestGeography(object):
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_not_available_in_bq_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
-        # mock geography
-        get_by_id_mock.return_value = test_geography2
-        geography = Geography.get(test_geography2.id)
-
-        # mock subscriptions
-        get_all_mock.return_value = [geography]
-
-        # mock big query client
-        mocked_bq_client.return_value = BigQueryClientMock()
-
-        # test
-        credentials = Credentials('fake_user', '1234')
-
-        with pytest.raises(CartoException) as e:
-            geography.download('fake_path', credentials)
-
-        error = '{} is not ready for Download. Please, contact us for more information.'.format(geography)
-        assert str(e.value) == error
-
-    @patch.object(GeographyRepository, 'get_all')
-    @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_geography_not_subscribed_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # mock dataset
         get_by_id_mock.return_value = test_geography2
@@ -282,7 +258,7 @@ class TestGeography(object):
         # test
         credentials = Credentials('fake_user', '1234')
 
-        with pytest.raises(CartoException) as e:
+        with pytest.raises(Exception) as e:
             geography.download('fake_path', credentials)
 
         error = 'You are not subscribed to this Geography yet. Please, use the subscribe method first.'
@@ -320,7 +296,7 @@ class TestGeography(object):
         credentials = Credentials('fake_user', '1234')
 
         geography = Geography.get(test_geography1.id)
-        with pytest.raises(CartoException):
+        with pytest.raises(Exception):
             geography.download('fake_path', credentials)
 
     @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
