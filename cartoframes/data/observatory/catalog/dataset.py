@@ -14,7 +14,7 @@ from . import subscription_info
 from . import subscriptions
 from . import utils
 from ....core.logger import log
-from ....utils.utils import get_credentials, check_credentials
+from ....utils.utils import get_credentials, check_credentials, check_do_enabled
 
 DATASET_TYPE = 'dataset'
 
@@ -364,34 +364,6 @@ class Dataset(CatalogEntity):
 
         return cls._entity_repo.get_all(filters, credentials)
 
-    def download(self, file_path, credentials=None):
-        """Download dataset data as a local file. You need Data Observatory enabled in your CARTO
-        account, please contact us at support@carto.com for more information.
-
-        For premium datasets (those with `is_public_data` set to False), you need a subscription to the dataset.
-        Check the subscription guides for more information.
-
-        Args:
-            file_path (str): the file path where save the dataset (CSV).
-            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-                credentials of CARTO user account. If not provided,
-                a default credentials (if set with :py:meth:`set_default_credentials
-                <cartoframes.auth.set_default_credentials>`) will be used.
-
-        Returns:
-            os.path with the local file path with the file downloaded
-
-        :raises CartoException: If you have not a valid license for the dataset being downloaded.
-        :raises ValueError: If the credentials argument is not valid.
-        """
-        _credentials = get_credentials(credentials)
-
-        # if not self._is_subscribed(_credentials):
-        #     raise CartoException('You are not subscribed to this Dataset yet. '
-        #                          'Please, use the subscribe method first.')
-
-        self._download(file_path, _credentials)
-
     @classmethod
     def get_datasets_spatial_filtered(cls, filter_dataset):
         user_gdf = cls._get_user_geodataframe(filter_dataset)
@@ -422,6 +394,36 @@ class Dataset(CatalogEntity):
         join_gdf = gpd.sjoin(geographies_gdf1, geographies_gdf2, how='inner', op='intersects')
         return join_gdf['id'].unique()
 
+    @check_do_enabled
+    def download(self, file_path, credentials=None):
+        """Download dataset data as a local file. You need Data Observatory enabled in your CARTO
+        account, please contact us at support@carto.com for more information.
+
+        For premium datasets (those with `is_public_data` set to False), you need a subscription to the dataset.
+        Check the subscription guides for more information.
+
+        Args:
+            file_path (str): the file path where save the dataset (CSV).
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+
+        Returns:
+            os.path with the local file path with the file downloaded
+
+        :raises Exception: If you have not a valid license for the dataset being downloaded.
+        :raises ValueError: If the credentials argument is not valid.
+        """
+        _credentials = get_credentials(credentials)
+
+        if not self._is_subscribed(_credentials):
+            raise Exception('You are not subscribed to this Dataset yet. '
+                            'Please, use the subscribe method first.')
+
+        self._download(file_path, _credentials)
+
+    @check_do_enabled
     def subscribe(self, credentials=None):
         """Subscribe to a dataset. You need Data Observatory enabled in your CARTO account, please contact us at
         support@carto.com for more information.
@@ -456,6 +458,7 @@ class Dataset(CatalogEntity):
         else:
             utils.display_subscription_form(self.id, DATASET_TYPE, _credentials)
 
+    @check_do_enabled
     def subscription_info(self, credentials=None):
         """Get the subscription information of a Dataset, which includes the license, Terms of Service, rights, price, and
         estimated time of delivery, among other metadata of interest during the :py:attr:`Dataset.subscription` process.

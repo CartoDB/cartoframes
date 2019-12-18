@@ -7,7 +7,7 @@ from .repository.constants import GEOGRAPHY_FILTER
 from . import subscription_info
 from . import subscriptions
 from . import utils
-from ....utils.utils import get_credentials, check_credentials
+from ....utils.utils import get_credentials, check_credentials, check_do_enabled
 
 GEOGRAPHY_TYPE = 'geography'
 
@@ -200,6 +200,7 @@ class Geography(CatalogEntity):
 
         return cls._entity_repo.get_all(filters, credentials)
 
+    @check_do_enabled
     def download(self, file_path, credentials=None):
         """Download geography data as a local file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
@@ -228,6 +229,7 @@ class Geography(CatalogEntity):
 
         self._download(file_path, _credentials)
 
+    @check_do_enabled
     def subscribe(self, credentials=None):
         """Subscribe to a Geography. You need Data Observatory enabled in your CARTO account, please contact us at
         support@carto.com for more information.
@@ -262,6 +264,7 @@ class Geography(CatalogEntity):
         else:
             utils.display_subscription_form(self.id, GEOGRAPHY_TYPE, _credentials)
 
+    @check_do_enabled
     def subscription_info(self, credentials=None):
         """Get the subscription information of a Geography, which includes the license, TOS, rights, prize and
         estimated_time_of_delivery, among other metadata of interest during the subscription process.
