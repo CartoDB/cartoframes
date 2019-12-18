@@ -358,7 +358,7 @@ class CartoDataFrame(GeoDataFrame):
         return result
 
     def plot(self, *args, **kwargs):
-        utils.check_package('matplotlib', extra=True)
+        utils.check_package('matplotlib', is_optional=True)
         if self.has_geometry():
             return GeoDataFrame.plot(self, *args, **kwargs)
         else:

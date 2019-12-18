@@ -8,7 +8,7 @@ from ..utils.utils import check_package
 class QuadGrid():
 
     def polyfill(self, input_gdf, zoom_level):
-        check_package('mercantile', extra=True)
+        check_package('mercantile', is_optional=True)
         import mercantile
 
         if not hasattr(input_gdf, 'geometry'):

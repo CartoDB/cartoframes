@@ -406,7 +406,7 @@ def timelogger(method):
     return fn
 
 
-def check_package(pkg_name, spec='*', extra=False):
+def check_package(pkg_name, spec='*', is_optional=False):
     try:
         spec_pattern = semantic_version.SimpleSpec(spec)
         pkg_version = pkg_resources.get_distribution(pkg_name).version
@@ -415,7 +415,7 @@ def check_package(pkg_name, spec='*', extra=False):
             raise Exception('Package "{0}" version ({1}) does not match "{2}" '.format(pkg_name, version, spec) +
                             'Please run: pip install -U {0}'.format(pkg_name))
     except pkg_resources.DistributionNotFound:
-        if extra:
+        if is_optional:
             raise Exception('Optional package "{0}" is not installed. '.format(pkg_name) +
                             'Please run: pip install {0}'.format(pkg_name))
         else:
