@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Next
+[Migration Docs](/docs/developers/migrations/rc1.md)
+
+### Changed
+- Rename `popup` parameter to `popups` in Layer (#1348)
+- Add `click_popup` and `hover_popup` helpers (#1348)
+
 ## [1.0b7] - 2019-12-13
 ### Added
 - Add logger (#1328)
