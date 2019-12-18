@@ -28,10 +28,9 @@ class Category(CatalogEntity):
 
         .. code::
 
-            from cartoframes.data.observatory import Catalog
+            from cartoframes.data.observatory import Category
 
-            catalog = Catalog()
-            category = catalog.categories.get('demographics')
+            category = Category.get('demographics')
     """
 
     _entity_repo = get_category_repo()
@@ -52,11 +51,9 @@ class Category(CatalogEntity):
 
             .. code::
 
-                from cartoframes.data.observatory import Catalog
+                from cartoframes.data.observatory import Category
 
-                catalog = Catalog()
-                category = catalog.categories.get('demographics')
-                datasets = category.datasets
+                datasets = Category.get('demographics').datasets
 
             Same example as above but using nested filters:
 
@@ -72,7 +69,7 @@ class Category(CatalogEntity):
 
             .. code::
 
-                from cartoframes.data.observatory import Catalog
+                from cartoframes.data.observatory import Catalog, Dataset
 
                 catalog = Catalog()
                 datasets = catalog.category('demographics').datasets
@@ -80,7 +77,7 @@ class Category(CatalogEntity):
                 # for further filtering and exploration
                 dataframe = datasets.to_dataframe()
                 # get a dataset by ID or slug
-                dataset = datasets.get(A_VALID_ID_OR_SLUG)
+                dataset = Dataset.get(A_VALID_ID_OR_SLUG)
         """
         return get_dataset_repo().get_all({CATEGORY_FILTER: self.id})
 
@@ -100,10 +97,9 @@ class Category(CatalogEntity):
 
             .. code::
 
-                from cartoframes.data.observatory import Catalog
+                from cartoframes.data.observatory import Category
 
-                catalog = Catalog()
-                category = catalog.categories.get('demographics')
+                category = Category.get('demographics')
                 geographies = category.geographies
 
             Same example as above but using nested filters:
@@ -120,7 +116,7 @@ class Category(CatalogEntity):
 
             .. code::
 
-                from cartoframes.data.observatory import Catalog
+                from cartoframes.data.observatory import Catalog, Geography
 
                 catalog = Catalog()
                 geographies = catalog.category('demographics').geographies
@@ -128,7 +124,7 @@ class Category(CatalogEntity):
                 # for further filtering and exploration
                 dataframe = geographies.to_dataframe()
                 # get a geography by ID or slug
-                dataset = geographies.get(A_VALID_ID_OR_SLUG)
+                dataset = Geography.get(A_VALID_ID_OR_SLUG)
         """
         return get_geography_repo().get_all({CATEGORY_FILTER: self.id})
 

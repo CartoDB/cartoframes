@@ -128,10 +128,10 @@ class Catalog(object):
 
         .. code::
 
-            from cartoframes.data.observatory import Catalog
+            from cartoframes.data.observatory import Catalog, Dataset
 
             catalog = Catalog()
-            dataset = catalog.country('usa').category('demographics').datasets.get('od_acs_13345497')
+            dataset = Dataset.get('od_acs_13345497')
             dataset.variables()
 
     See the Catalog guides and examples in our
