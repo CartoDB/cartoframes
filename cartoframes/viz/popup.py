@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from ..utils.utils import gen_variable_name
 
 

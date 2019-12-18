@@ -1,16 +1,13 @@
 import pandas as pd
 
+from unittest.mock import patch
+
 from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.variable_group import VariableGroup
 from cartoframes.data.observatory.catalog.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.catalog.repository.variable_group_repo import VariableGroupRepository
 from .examples import test_variables_groups, test_variable_group1, test_variables, db_variable_group1, \
     test_variable_group2, db_variable_group2
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
 
 
 class TestVariableGroup(object):

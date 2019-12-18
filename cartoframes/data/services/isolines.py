@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from carto.exceptions import CartoException
 
 from .service import Service

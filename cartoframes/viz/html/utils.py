@@ -1,7 +1,5 @@
 """general utility functions for HTML Map templates"""
 
-from __future__ import absolute_import
-
 
 def safe_quotes(text, escape_single_quotes=False):
     """htmlify string"""

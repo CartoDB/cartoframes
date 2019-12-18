@@ -13,7 +13,7 @@ If the bug is not already reported, open a new issue. Please give the following 
 * Code snippet that produced the error
 * Relevant error messages
 * cartoframes version (find it with `print(cartoframes.__version__)`)
-* Python version (e.g., 3.5, 2.7, etc.)
+* Python version (e.g., 3.5, etc.)
 * Operation system (Windows, Linux, etc.)
 
 ## Pull requests

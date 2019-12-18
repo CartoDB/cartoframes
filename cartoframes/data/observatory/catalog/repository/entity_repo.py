@@ -1,12 +1,8 @@
-from cartoframes.exceptions import DiscoveryException
+from abc import ABC, abstractmethod
+
 from .repo_client import RepoClient
 from ..entity import CatalogList, is_slug_value
-
-try:
-    from abc import ABC, abstractmethod
-except ImportError:
-    from abc import ABCMeta, abstractmethod
-    ABC = ABCMeta('ABC', (object,), {'__slots__': ()})
+from .....exceptions import DiscoveryException
 
 
 class EntityRepository(ABC):

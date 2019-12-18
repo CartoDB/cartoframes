@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from .utils import serialize_palette, get_value, get_popup
 
 from ..layer import Layer

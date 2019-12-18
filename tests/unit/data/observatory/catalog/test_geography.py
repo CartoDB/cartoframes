@@ -1,9 +1,9 @@
 import pytest
 import pandas as pd
 
-from google.api_core.exceptions import NotFound
-
+from unittest.mock import patch
 from carto.exceptions import CartoException
+from google.api_core.exceptions import NotFound
 
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory.catalog.entity import CatalogList
@@ -14,11 +14,6 @@ from cartoframes.data.observatory.catalog.subscription_info import SubscriptionI
 from .examples import test_geography1, test_geographies, test_datasets, db_geography1, \
     test_geography2, db_geography2, test_subscription_info
 from .mocks import BigQueryClientMock
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
 
 
 class TestGeography(object):

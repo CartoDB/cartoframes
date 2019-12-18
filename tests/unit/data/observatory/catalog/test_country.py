@@ -1,5 +1,7 @@
 import pandas as pd
 
+from unittest.mock import patch
+
 from cartoframes.data.observatory.catalog.country import Country
 from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.repository.country_repo import CountryRepository
@@ -8,11 +10,6 @@ from cartoframes.data.observatory.catalog.repository.category_repo import Catego
 from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
 from .examples import test_country1, test_datasets, test_countries, test_geographies, db_country1, test_country2, \
     db_country2, test_categories
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
 
 
 class TestCountry(object):
