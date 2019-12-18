@@ -143,7 +143,7 @@ class TestGeography(object):
         geography_str = str(geography)
 
         # Then
-        assert geography_str == 'Geography({dict_str})'.format(dict_str=str(db_geography1))
+        assert geography_str == "<Geography.get('{id}')>".format(id=db_geography1['slug'])
 
     @patch.object(GeographyRepository, 'get_all')
     def test_get_all_geographies(self, mocked_repo):
@@ -384,11 +384,13 @@ class TestGeography(object):
         geography = Geography(db_geography1)
 
         # When
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(AttributeError) as e:
             geography.subscribe(wrong_credentials)
 
         # Then
-        assert str(e.value) == '`credentials` must be a Credentials class instance'
+        assert str(e.value) == ('Credentials attribute is required. '
+                                'Please pass a `Credentials` instance '
+                                'or use the `set_default_credentials` function.')
 
     @patch('cartoframes.data.observatory.catalog.subscription_info.fetch_subscription_info')
     def test_geography_subscription_info(self, mock_fetch):
@@ -435,11 +437,13 @@ class TestGeography(object):
         geography = Geography(db_geography1)
 
         # When
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(AttributeError) as e:
             geography.subscription_info(wrong_credentials)
 
         # Then
-        assert str(e.value) == '`credentials` must be a Credentials class instance'
+        assert str(e.value) == ('Credentials attribute is required. '
+                                'Please pass a `Credentials` instance '
+                                'or use the `set_default_credentials` function.')
 
     def test_geography_is_available_in(self):
         geography_in_bq = Geography(db_geography1)

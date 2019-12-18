@@ -121,15 +121,15 @@ def _create_notebook_form(entity_id, entity_type, message, responses, credential
 
 def _display_subscription_form_cli(entity_id, entity_type, info, credentials):
     message = (
-        'Subscription contract:\n' +
-        'You are about to subscribe to "{id}". ' +
-        'The cost of this {type} is ${price}. ' +
-        'If you want to proceed, a Request will be sent to CARTO who will ' +
-        'order the data and load it into your account. ' +
-        'This {type} is available for Instant Order for your organization, ' +
-        'so it will automatically process the order and you will get immediate access to the {type}. ' +
-        'In order to proceed we need you to agree to the License of the {type} ' +
-        'available at this link: {link}.\n' +
+        'Subscription contract:\n'
+        'You are about to subscribe to "{id}". '
+        'The cost of this {type} is ${price}. '
+        'If you want to proceed, a Request will be sent to CARTO who will '
+        'order the data and load it into your account. '
+        'This {type} is available for Instant Order for your organization, '
+        'so it will automatically process the order and you will get immediate access to the {type}. '
+        'In order to proceed we need you to agree to the License of the {type} '
+        'available at this link: {link}.\n'
         'Do you want to proceed?').format(
             id=entity_id,
             type=entity_type,
@@ -137,7 +137,7 @@ def _display_subscription_form_cli(entity_id, entity_type, info, credentials):
             link=info.get('tos_link'))
 
     responses = {
-        'ok': ('Congrats! The {type} "{id}" has been requested and ' +
+        'ok': ('Congrats! The {type} "{id}" has been requested and '
                'it will be available in your account soon.').format(id=entity_id, type=entity_type),
         'cancel': 'The {type} "{id}" has not been purchased'.format(id=entity_id, type=entity_type),
         'error': 'Subscription error. Please contact to support@carto.com.'}

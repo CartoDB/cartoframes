@@ -15,7 +15,7 @@ from functools import wraps
 from warnings import catch_warnings, filterwarnings
 
 from ..auth.credentials import Credentials
-from ..auth.defaults import get_default_credentials
+from ..auth import defaults
 from ..core.logger import log
 
 GEOM_TYPE_POINT = 'point'
@@ -303,7 +303,7 @@ def is_table_name(data):
 
 
 def get_credentials(credentials=None):
-    _credentials = credentials or get_default_credentials()
+    _credentials = credentials or defaults.get_default_credentials()
     check_credentials(_credentials)
     return _credentials
 
