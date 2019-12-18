@@ -30,6 +30,15 @@ def display_existing_subscription_message(entity_id, entity_type):
         _display_existing_subscription_message_cli(entity_id, entity_type)
 
 
+def display_subscription_form(entity_id, entity_type, credentials):
+    info = fetch_subscription_info(entity_id, entity_type, credentials)
+
+    if is_ipython_notebook():
+        _display_subscription_form_notebook(entity_id, entity_type, info, credentials)
+    else:
+        _display_subscription_form_cli()
+
+
 def _display_existing_subscription_message_notebook(entity_id, entity_type):
     message = '''
         <h3>Subscription already purchased</h3>
@@ -40,29 +49,12 @@ def _display_existing_subscription_message_notebook(entity_id, entity_type):
 
 
 def _display_existing_subscription_message_cli(entity_id, entity_type):
-    message = '''
-        Subscription already purchased
-        The {0} {1} has already been purchased.
-        '''.format(entity_type, entity_id)
-    log.info(message)
+    message = ('Subscription already purchased:\n' +
+               '- The {0} "{1}" has already been purchased.'.format(entity_type, entity_id))
+    print(message)
 
 
-def display_subscription_form(entity_id, entity_type, credentials):
-    info = fetch_subscription_info(entity_id, entity_type, credentials)
-
-    if info.get('type') != type:
-        raise Exception('Incorrect type returned.')
-
-    if info.get('subscription_list_price') is None:
-        raise Exception('This {} has incomplete information. Please contact to support@carto.com.'.format(type))
-
-    if is_ipython_notebook():
-        display_subscription_form_notebook(entity_id, entity_type, info, credentials)
-    else:
-        display_subscription_form_cli()
-
-
-def display_subscription_form_notebook(entity_id, entity_type, info, credentials):
+def _display_subscription_form_notebook(entity_id, entity_type, info, credentials):
     message = '''
     <h3>Subscription contract</h3>
     You are about to subscribe to <b>{id}</b>.
@@ -72,27 +64,21 @@ def display_subscription_form_notebook(entity_id, entity_type, info, credentials
     This {type} is available for Instant Order for your organization,
     so it will automatically process the order and you will get immediate access to the {type}.
     In order to proceed we need you to agree to the License of the {type}
-    available at <b><a href="{tos_link}" target="_blank">this link</a></b>.
+    available at <b><a href="{link}" target="_blank">this link</a></b>.
     <br>Do you want to proceed?
-    '''.format({
-        'id': entity_id,
-        'type': entity_type,
-        'price': info.get('subscription_list_price'),
-        'tos_link': info.get('tos_link')
-    })
+    '''.format(
+        id=entity_id,
+        type=entity_type,
+        price=info.get('subscription_list_price'),
+        link=info.get('tos_link'))
 
     ok_response = '''
     <b>Congrats!</b><br>The {type} <b>{id}</b> has been requested and it will be available in your account soon.
-    '''.format({
-        'id': entity_id,
-        'type': entity_type
-    })
+    '''.format(id=entity_id, type=entity_type)
+
     cancel_message = '''
     The {type} <b>{id}</b> has not been purchased.
-    '''.format({
-        'id': entity_id,
-        'type': entity_type
-    })
+    '''.format(id=entity_id, type=entity_type)
 
     text, buttons = _create_notebook_form(
         entity_id, entity_type, message, ok_response, cancel_message, credentials)
@@ -134,5 +120,5 @@ def _create_notebook_form(entity_id, entity_type, message, ok_response, cancel_m
     return (text, buttons)
 
 
-def display_subscription_form_cli():
+def _display_subscription_form_cli():
     log.info('This method is not yet implemented in CLI')

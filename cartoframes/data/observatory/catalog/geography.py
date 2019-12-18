@@ -7,7 +7,7 @@ from .repository.constants import GEOGRAPHY_FILTER
 from . import subscription_info
 from . import subscriptions
 from . import utils
-from ....utils.utils import get_credentials
+from ....utils.utils import get_credentials, check_credentials
 
 GEOGRAPHY_TYPE = 'geography'
 
@@ -195,9 +195,10 @@ class Geography(CatalogEntity):
         :raises DiscoveryException: When no geographies are found.
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
-        _credentials = get_credentials(credentials)
+        if credentials is not None:
+            check_credentials(credentials)
 
-        return cls._entity_repo.get_all(filters, _credentials)
+        return cls._entity_repo.get_all(filters, credentials)
 
     def download(self, file_path, credentials=None):
         """Download geography data as a local file. You need Data Observatory enabled in your CARTO
