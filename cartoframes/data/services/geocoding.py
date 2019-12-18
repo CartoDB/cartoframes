@@ -395,7 +395,9 @@ class Geocoding(Service):
                     output['error'] = 'The table is already being geocoded'
                     output['aborted'] = aborted = True
                 else:
-                    sql, add_columns = geocoding_utils.geocode_query(table_name, street, city, state, country, status)
+                    schema = self._schema()
+                    sql, add_columns = geocoding_utils.geocode_query(
+                        table_name, schema, street, city, state, country, status)
 
                     add_columns += [(geocoding_constants.HASH_COLUMN, 'text')]
 
