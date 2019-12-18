@@ -1,13 +1,16 @@
-import mercantile
 import pandas as pd
 
 from shapely.geometry import box
 from ..core.cartodataframe import CartoDataFrame
+from ..utils.utils import check_package
 
 
 class QuadGrid():
 
     def polyfill(self, input_gdf, zoom_level):
+        check_package('mercantile', is_optional=True)
+        import mercantile
+
         if not hasattr(input_gdf, 'geometry'):
             raise ValueError('This dataframe has no valid geometry.')
 
