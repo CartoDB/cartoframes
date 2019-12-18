@@ -16,7 +16,6 @@ from . import subscription_info
 from . import subscriptions
 from . import utils
 from ....core.logger import log
-from ....auth import Credentials, defaults
 
 DATASET_TYPE = 'dataset'
 
@@ -384,10 +383,12 @@ class Dataset(CatalogEntity):
         :raises CartoException: If you have not a valid license for the dataset being downloaded.
         :raises ValueError: If the credentials argument is not valid.
         """
-        if not self._is_subscribed(credentials):
+        _credentials = self._get_credentials(credentials)
+
+        if not self._is_subscribed(_credentials):
             raise CartoException('You are not subscribed to this Dataset yet. Please, use the subscribe method first.')
 
-        self._download(file_path, credentials)
+        self._download(file_path, _credentials)
 
     @classmethod
     def get_datasets_spatial_filtered(cls, filter_dataset):
@@ -445,7 +446,6 @@ class Dataset(CatalogEntity):
 
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
-
         _credentials = self._get_credentials(credentials)
         _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
 
@@ -469,22 +469,16 @@ class Dataset(CatalogEntity):
 
         :raises CartoException: If there's a problem when connecting to the catalog.
         """
-
         _credentials = self._get_credentials(credentials)
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, DATASET_TYPE, _credentials))
 
-    def _is_subscribed(self, credentials=None):
+    def _is_subscribed(self, credentials):
         if self.is_public_data:
             return True
 
-        _credentials = credentials or defaults.get_default_credentials()
-
-        if not isinstance(_credentials, Credentials):
-            raise ValueError('`credentials` must be a Credentials class instance')
-
-        datasets = Dataset.get_all({}, _credentials)
+        datasets = Dataset.get_all({}, credentials)
 
         return datasets is not None and self in datasets
 
