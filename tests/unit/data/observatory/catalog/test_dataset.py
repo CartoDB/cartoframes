@@ -544,3 +544,21 @@ class TestDataset(object):
             'We are sorry, the Data Observatory is not enabled for your account yet. '
             'Please contact your customer success manager or send an email to '
             'sales@carto.com to request access to it.')
+
+    def test_dataset_is_available_in(self):
+        # Given
+        dataset_in_bq = Dataset(db_dataset1)
+        dataset_not_in_bq = Dataset(db_dataset2)
+
+        # Then
+        assert dataset_in_bq._is_available_in('bq')
+        assert not dataset_not_in_bq._is_available_in('bq')
+
+    def test_dataset_is_available_in_with_empty_field(self):
+        # Given
+        db_dataset = dict(db_dataset1)
+        db_dataset['available_in'] = None
+        dataset_null = Dataset(db_dataset)
+
+        # Then
+        assert not dataset_null._is_available_in('bq')

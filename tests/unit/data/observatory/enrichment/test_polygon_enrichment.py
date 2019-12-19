@@ -42,9 +42,13 @@ class TestPolygonEnrichment(object):
         Credentials.get_do_credentials = self.original_get_do_credentials
         self.credentials = None
 
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
     @patch.object(Geography, 'get')
-    def test_enrichment_query_by_polygons_one_variable(self, geography_get_mock, dataset_get_mock):
+    def test_enrichment_query_by_polygons_one_variable(self, geography_get_mock, dataset_get_mock,
+                                                       _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -303,9 +307,13 @@ class TestPolygonEnrichment(object):
 
         assert actual == expected
 
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
     @patch.object(Geography, 'get')
-    def test_enrichment_query_polygons_2_vars_different_tables(self, geography_get_mock, dataset_get_mock):
+    def test_enrichment_query_polygons_2_vars_different_tables(self, geography_get_mock, dataset_get_mock,
+                                                               _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -355,9 +363,13 @@ class TestPolygonEnrichment(object):
 
         assert actual == expected
 
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
     @patch.object(Geography, 'get')
-    def test_enrichment_query_polygons_2_vars_different_datasets(self, geography_get_mock, dataset_get_mock):
+    def test_enrichment_query_polygons_2_vars_different_datasets(self, geography_get_mock, dataset_get_mock,
+                                                                 _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -408,9 +420,13 @@ class TestPolygonEnrichment(object):
 
         assert actual == expected
 
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
     @patch.object(Geography, 'get')
-    def test_enrichment_query_by_polygons_agg_empty_uses_variable_one(self, geography_get_mock, dataset_get_mock):
+    def test_enrichment_query_by_polygons_agg_empty_uses_variable_one(self, geography_get_mock, dataset_get_mock,
+                                                                      _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -450,9 +466,13 @@ class TestPolygonEnrichment(object):
 
         assert actual == expected
 
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
     @patch.object(Geography, 'get')
-    def test_enrichment_query_by_polygons_agg_as_string(self, geography_get_mock, dataset_get_mock):
+    def test_enrichment_query_by_polygons_agg_as_string(self, geography_get_mock, dataset_get_mock,
+                                                        _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -492,9 +512,13 @@ class TestPolygonEnrichment(object):
 
         assert actual == expected
 
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
     @patch.object(Geography, 'get')
-    def test_enrichment_query_by_polygons_agg_none(self, geography_get_mock, dataset_get_mock):
+    def test_enrichment_query_by_polygons_agg_none(self, geography_get_mock, dataset_get_mock,
+                                                   _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -532,9 +556,13 @@ class TestPolygonEnrichment(object):
 
         assert actual == expected
 
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
     @patch.object(Geography, 'get')
-    def test_enrichment_query_by_polygons_agg_custom(self, geography_get_mock, dataset_get_mock):
+    def test_enrichment_query_by_polygons_agg_custom(self, geography_get_mock, dataset_get_mock,
+                                                     _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -587,9 +615,13 @@ class TestPolygonEnrichment(object):
 
         assert actual == expected
 
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
     @patch.object(Geography, 'get')
-    def test_enrichment_query_by_polygons_with_filters(self, geography_get_mock, dataset_get_mock):
+    def test_enrichment_query_by_polygons_with_filters(self, geography_get_mock, dataset_get_mock,
+                                                       _is_available_in_bq_mock):
+        _is_available_in_bq_mock.return_value = True
+
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'

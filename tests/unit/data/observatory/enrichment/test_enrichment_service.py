@@ -295,6 +295,80 @@ class TestEnrichmentService(object):
 
             assert result == []
 
+    @patch.object(EntityRepository, 'get_by_id')
+    @patch.object(Variable, 'get')
+    def test_prepare_variables_raises_if_not_available_in_bq_even_public(self, get_mock, entity_repo):
+        dataset = Dataset({
+            'id': 'id',
+            'slug': 'slug',
+            'name': 'name',
+            'description': 'description',
+            'available_in': [],
+            'geography_id': 'geography',
+            'is_public_data': True
+        })
+
+        # mock dataset
+        entity_repo.return_value = dataset
+
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'slug': 'slug'
+        })
+
+        get_mock.return_value = variable
+
+        credentials = Credentials('fake_user', '1234')
+
+        with pytest.raises(EnrichmentException) as e:
+            prepare_variables(variable, credentials)
+
+        error = """
+            The Dataset '{}' is not ready for Enrichment. Please, contact us for more information.
+        """.format(dataset)
+        assert str(e.value) == error
+
+    @patch.object(DatasetRepository, 'get_all')
+    @patch.object(EntityRepository, 'get_by_id')
+    @patch.object(Variable, 'get')
+    def test_prepare_variables_raises_if_not_available_in_bq(self, get_mock, entity_repo, get_all_mock):
+        dataset = Dataset({
+            'id': 'id',
+            'slug': 'slug',
+            'name': 'name',
+            'description': 'description',
+            'available_in': [],
+            'geography_id': 'geography',
+            'is_public_data': False
+        })
+
+        # mock dataset
+        entity_repo.return_value = dataset
+
+        # mock subscriptions
+        get_all_mock.return_value = [dataset]
+
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'slug': 'slug'
+        })
+
+        get_mock.return_value = variable
+
+        credentials = Credentials('fake_user', '1234')
+
+        with pytest.raises(EnrichmentException) as e:
+            prepare_variables(variable, credentials)
+
+        error = """
+            The Dataset '{}' is not ready for Enrichment. Please, contact us for more information.
+        """.format(dataset)
+        assert str(e.value) == error
+
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(EntityRepository, 'get_by_id')
     @patch.object(Variable, 'get')

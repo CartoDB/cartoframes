@@ -376,6 +376,19 @@ def _validate_bq_operations(variables, credentials):
         geography = Geography.get(dataset.geography)
 
         _is_subscribed(dataset, geography, credentials)
+        _is_available_in_bq(dataset, geography)
+
+
+def _is_available_in_bq(dataset, geography):
+    if not dataset._is_available_in('bq'):
+        raise EnrichmentException("""
+            The Dataset '{}' is not ready for Enrichment. Please, contact us for more information.
+        """.format(dataset))
+
+    if not geography._is_available_in('bq'):
+        raise EnrichmentException("""
+            The Geography '{}' is not ready for Enrichment. Please, contact us for more information.
+        """.format(geography))
 
 
 def _is_subscribed(dataset, geography, credentials):

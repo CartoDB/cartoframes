@@ -126,6 +126,9 @@ class CatalogEntity(ABC):
         log.info('Data saved: {}.'.format(file_path))
         log.info("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
 
+    def _is_available_in(self, platform=_PLATFORM_BQ):
+        return self.data['available_in'] and platform in self.data['available_in']
+
     def _get_remote_full_table_name(self, user_project, user_dataset, public_project):
         project, dataset, table = self.id.split('.')
 
