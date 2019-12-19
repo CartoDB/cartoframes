@@ -3,12 +3,12 @@
 import os
 import json
 import appdirs
-import warnings
 
 from carto.auth import APIKeyAuthClient
 from carto.do_token import DoTokenManager
 
 from .. import __version__
+from ..core.logger import log
 from ..utils.utils import check_do_enabled
 
 from urllib.parse import urlparse
@@ -98,7 +98,7 @@ class Credentials(object):
         new_base_url = self._base_url_from_username()
         if new_base_url != self.base_url:
             self.base_url = self._base_url_from_username()
-            warnings.warn('`base_url` has been updated to {}'.format(self.base_url))
+            log.warning('`base_url` has been updated to {}'.format(self.base_url))
 
     @property
     def base_url(self):
@@ -199,9 +199,9 @@ class Credentials(object):
 
         try:
             os.remove(path_to_remove)
-            warnings.warn('Credentials at {} successfully removed.'.format(path_to_remove))
+            log.warning('Credentials at {} successfully removed.'.format(path_to_remove))
         except OSError:
-            warnings.warn('No credential file found at {}.'.format(path_to_remove))
+            log.warning('No credential file found at {}.'.format(path_to_remove))
 
     @check_do_enabled
     def get_do_credentials(self):
