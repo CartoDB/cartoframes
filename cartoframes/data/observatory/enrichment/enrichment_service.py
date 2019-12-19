@@ -22,45 +22,6 @@ AGGREGATION_DEFAULT = 'default'
 AGGREGATION_NONE = 'none'
 
 
-class VariableFilter(object):
-    """This class can be used for filtering the results of
-    :py:class:`Enrichment <cartoframes.data.observatory.Enrichment>` functions. It works by appending the
-    `VariableFilter` SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND` operator.
-
-        Args:
-            variable (str or :obj:`Variable`):
-                The variable name or :obj:`Variable` instance
-
-            query (str):
-                The SQL query filter to be appended to the enrichment SQL query.
-
-        Examples:
-
-            - Equal to number: `VariableFilter(variable, '= 3')`
-            - Equal to string: `VariableFilter(variable, "= 'the string'")`
-            - Greater that 3: `VariableFilter(variable, '> 3')`
-
-            The next example uses a `VariableFilter` instance to calculate the `SUM` of car-free households
-            :obj:`Variable` of the :obj:`Catalog` for each polygon of `my_local_dataframe` pandas `DataFrame` only for
-            areas with more than 100 car-free households,
-
-            .. code::
-
-                from cartoframes.data.observatory import Enrichment, Variable, VariableFilter
-
-                variable = Variable.get('no_cars_d19dfd10')
-                enriched_dataset_cdf = Enrichment().enrich_polygons(
-                    my_local_dataframe,
-                    variables=[variable],
-                    aggregation=[VariableAggregation(variable, 'SUM')]
-                    filters=[VariableFilter(variable, '> 100')]
-                )
-    """
-    def __init__(self, variable, query):
-        self.variable = _prepare_variable(variable)
-        self.query = query
-
-
 class EnrichmentService(object):
     """Base class for the Enrichment utility with commons auxiliary methods"""
 
