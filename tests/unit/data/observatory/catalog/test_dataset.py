@@ -235,7 +235,7 @@ class TestDataset(object):
     def test_get_all_datasets_credentials(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
-        credentials = Credentials('user', '1234')
+        credentials = Credentials('fake_user', '1234')
 
         # When
         datasets = Dataset.get_all(credentials=credentials)
@@ -307,7 +307,7 @@ class TestDataset(object):
         mocked_bq_client.return_value = BigQueryClientMock()
         credentials = Credentials('fake_user', '1234')
 
-        # Works
+        # Then
         dataset.download('fake_path', credentials)
 
     @patch.object(DatasetRepository, 'get_all')
@@ -341,7 +341,7 @@ class TestDataset(object):
         mocked_bq_client.return_value = BigQueryClientMock()
         credentials = Credentials('fake_user', '1234')
 
-        # Works
+        # Then
         dataset.download('fake_path', credentials)
 
     @patch.object(DatasetRepository, 'get_all')
