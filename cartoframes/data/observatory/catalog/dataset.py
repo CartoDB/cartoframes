@@ -340,6 +340,7 @@ class Dataset(CatalogEntity):
         return dataset_describe(self.variables)
 
     @classmethod
+    @check_do_enabled
     def get_all(cls, filters=None, credentials=None):
         """Get all the Dataset instances that comply with the indicated filters (or all of them if no filters
         are passed). If credentials are given, only the datasets granted for those credentials are returned.

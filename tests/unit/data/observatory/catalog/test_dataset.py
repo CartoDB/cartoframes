@@ -246,6 +246,24 @@ class TestDataset(object):
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
+    @patch.object(DatasetRepository, 'get_all')
+    def test_get_all_datasets_credentials_without_do_enabled(self, mocked_repo):
+        # Given
+        def raise_exception(a, b):
+            raise ServerErrorException(['The user does not have Data Observatory enabled'])
+        mocked_repo.side_effect = raise_exception
+        credentials = Credentials('fake_user', '1234')
+
+        # When
+        with pytest.raises(Exception) as e:
+            Dataset.get_all(credentials=credentials)
+
+        # Then
+        assert str(e.value) == (
+            'We are sorry, the Data Observatory is not enabled for your account yet. '
+            'Please contact your customer success manager or send an email to '
+            'sales@carto.com to request access to it.')
+
     def test_dataset_list_is_printed_with_classname_and_slugs(self):
         # Given
         datasets = CatalogList([test_dataset1, test_dataset2])
