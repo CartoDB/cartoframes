@@ -1,5 +1,5 @@
 import time
-from warnings import filterwarnings, warn
+from warnings import filterwarnings
 
 from carto.kuvizs import KuvizManager
 from carto.exceptions import CartoException
@@ -8,6 +8,7 @@ from .source import Source
 from ..auth import get_default_credentials
 from ..utils.columns import normalize_name
 from ..data.clients.auth_api_client import AuthAPIClient
+from ..core.logger import log
 
 filterwarnings("ignore", category=FutureWarning, module="carto")
 
@@ -58,7 +59,7 @@ class KuvizPublisher(object):
     def delete(self):
         if self.kuviz:
             self.kuviz.delete()
-            warn("Publication '{n}' ({id}) deleted".format(n=self.kuviz.name, id=self.kuviz.id))
+            log.warning("Publication '{n}' ({id}) deleted".format(n=self.kuviz.name, id=self.kuviz.id))
             self.kuviz = None
             return True
         return False

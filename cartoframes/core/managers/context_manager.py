@@ -44,63 +44,79 @@ class ContextManager(object):
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
-    def copy_from(self, cdf, table_name, if_exists='fail', cartodbfy=True, log_enabled=True):
+    def copy_from(self, cdf, table_name, if_exists='fail', cartodbfy=True):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
         columns = get_dataframe_columns_info(cdf)
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
-            if log_enabled:
-                log.debug('Creating table "{}"'.format(table_name))
+            log.debug('Creating table "{}"'.format(table_name))
             self._create_table_from_columns(table_name, columns, schema, cartodbfy)
         elif if_exists == 'fail':
-            raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
+            raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
                             'Please choose a different `table_name` or use '
-                            'if_exists="replace" to overwrite it'.format(
+                            'if_exists="replace" to overwrite it.'.format(
                                 table_name=table_name, schema=schema))
-        else:
-            # 'append'
+        else:  # 'append'
             pass
 
         self._copy_from(cdf, table_name, columns)
+        return table_name
 
-    def create_table_from_query(self, table_name, query, if_exists, cartodbfy=True, log_enabled=True):
+    def create_table_from_query(self, query, table_name, if_exists, cartodbfy=True):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
-            if log_enabled:
-                log.debug('Creating table "{}"'.format(table_name))
-            self._create_table_from_query(table_name, query, schema, cartodbfy)
+            log.debug('Creating table "{}"'.format(table_name))
+            self._create_table_from_query(query, table_name, schema, cartodbfy)
         elif if_exists == 'fail':
-            raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
+            raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
                             'Please choose a different `table_name` or use '
-                            'if_exists="replace" to overwrite it'.format(
+                            'if_exists="replace" to overwrite it.'.format(
                                 table_name=table_name, schema=schema))
-        else:
-            # 'append'
+        else:  # 'append'
             pass
+
+        return table_name
 
     def has_table(self, table_name, schema=None):
         query = self.compute_query(table_name, schema)
         return self._check_exists(query)
 
-    def delete_table(self, table_name, log_enabled=True):
+    def delete_table(self, table_name):
         query = _drop_table_query(table_name)
         output = self.execute_query(query)
-        if log_enabled:
-            if ('notices' in output and 'does not exist' in output['notices'][0]):
-                log.debug('Table "{}" does not exist'.format(table_name))
-            else:
-                log.debug('Table "{}" removed'.format(table_name))
+        return not('notices' in output and 'does not exist' in output['notices'][0])
 
-    def update_table(self, table_name, privacy=None, new_table_name=None):
-        dataset_info = DatasetInfo(self.auth_client, table_name)
-        dataset_info.update(privacy, new_table_name)
+    def rename_table(self, table_name, new_table_name, if_exists='fail'):
+        new_table_name = self.normalize_table_name(new_table_name)
+
+        if table_name == new_table_name:
+            raise ValueError('Table names are equal. Please choose a different table name.')
+
+        if not self.has_table(table_name):
+            raise Exception('Table "{table_name}" does not exist in your CARTO account.'.format(
+                                table_name=table_name))
+
+        if self.has_table(new_table_name):
+            if if_exists == 'replace':
+                log.debug('Removing table "{}"'.format(new_table_name))
+                self.delete_table(new_table_name)
+            elif if_exists == 'fail':
+                raise Exception('Table "{new_table_name}" already exists in your CARTO account. '
+                                'Please choose a different `new_table_name` or use '
+                                'if_exists="replace" to overwrite it.'.format(
+                                    new_table_name=new_table_name))
+
+        self._rename_table(table_name, new_table_name)
+        return new_table_name
+
+    def update_privacy_table(self, table_name, privacy=None):
+        DatasetInfo(self.auth_client, table_name).update_privacy(privacy)
 
     def get_privacy(self, table_name):
-        dataset_info = DatasetInfo(self.auth_client, table_name)
-        return dataset_info.privacy
+        return DatasetInfo(self.auth_client, table_name).privacy
 
     def get_schema(self):
         """Get user schema from current credentials"""
@@ -173,7 +189,7 @@ class ContextManager(object):
             tables = [table.split('.')[1] if '.' in table else table for table in result['rows'][0]['tables']]
         return tables
 
-    def _create_table_from_query(self, table_name, query, schema, cartodbfy=True):
+    def _create_table_from_query(self, query, table_name, schema, cartodbfy=True):
         query = 'BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'.format(
             drop=_drop_table_query(table_name),
             create=_create_table_from_query_query(table_name, query),
@@ -263,10 +279,12 @@ class ContextManager(object):
         """.format(
             table_name=table_name, null=PG_NULL,
             columns=','.join(column.dbname for column in columns)).strip()
-
         data = _compute_copy_data(dataframe, columns)
-
         self.copy_client.copyfrom(query, data)
+
+    def _rename_table(self, table_name, new_table_name):
+        query = _rename_table_query(table_name, new_table_name)
+        self.execute_query(query)
 
     def normalize_table_name(self, table_name):
         norm_table_name = normalize_name(table_name)
@@ -296,6 +314,11 @@ def _create_table_from_query_query(table_name, query):
 def _cartodbfy_query(table_name, schema):
     return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
         .format(schema=schema, table_name=table_name)
+
+
+def _rename_table_query(table_name, new_table_name):
+    return 'ALTER TABLE {table_name} RENAME TO {new_table_name};'.format(
+        table_name=table_name, new_table_name=new_table_name)
 
 
 def _create_auth_client(credentials, public=False):

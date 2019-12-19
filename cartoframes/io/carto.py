@@ -59,7 +59,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
-             log_enabled=True, force_cartodbfy=False):
+             force_cartodbfy=False, log_enabled=True):
     """
     Upload a Dataframe to CARTO.
 
@@ -113,10 +113,10 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     cartodbfy = force_cartodbfy or has_geometry
 
-    context_manager.copy_from(cdf, table_name, if_exists, cartodbfy, log_enabled)
+    table_name = context_manager.copy_from(cdf, table_name, if_exists, cartodbfy)
 
     if log_enabled:
-        log.info('Success! Data uploaded correctly')
+        log.info('Success! Data uploaded to table "{}" correctly'.format(table_name))
 
 
 def has_table(table_name, credentials=None, schema=None):
@@ -127,14 +127,13 @@ def has_table(table_name, credentials=None, schema=None):
         table_name (str): name of the table.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
-        schema (str, optional):prefix of the table. By default, it gets the
+        schema (str, optional): prefix of the table. By default, it gets the
             `current_schema()` using the credentials.
     """
     if not isinstance(table_name, str):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
     context_manager = ContextManager(credentials)
-
     return context_manager.has_table(table_name, schema)
 
 
@@ -151,8 +150,112 @@ def delete_table(table_name, credentials=None, log_enabled=True):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
     context_manager = ContextManager(credentials)
+    result = context_manager.delete_table(table_name)
 
-    return context_manager.delete_table(table_name, log_enabled)
+    if log_enabled:
+        if result:
+            log.info('Success! Table "{}" removed correctly'.format(table_name))
+        else:
+            log.info('Table "{}" does not exist'.format(table_name))
+
+
+def rename_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
+    """
+    Rename a table in the CARTO account.
+
+    Args:
+        table_name (str): name of the table.
+        new_table_name (str): new name for the table.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            instance of Credentials (username, api_key, etc).
+        if_exists (str, optional): 'fail', 'replace'. Default is 'fail'.
+
+    Raises:
+        ValueError:
+            When the table name provided is wrong or the if_exists param is not valid.
+    """
+    if not isinstance(table_name, str):
+        raise ValueError('Wrong table name. You should provide a valid table name.')
+
+    if not isinstance(new_table_name, str):
+        raise ValueError('Wrong new table name. You should provide a valid table name.')
+
+    IF_EXISTS_OPTIONS = ['fail', 'replace']
+    if if_exists not in IF_EXISTS_OPTIONS:
+        raise ValueError('Wrong option for the `if_exists` param. You should provide: {}.'.format(
+            ', '.join(IF_EXISTS_OPTIONS)))
+
+    context_manager = ContextManager(credentials)
+    new_table_name = context_manager.rename_table(table_name, new_table_name, if_exists)
+
+    if log_enabled:
+        log.info('Success! Table "{0}" renamed to table "{1}" correctly'.format(table_name, new_table_name))
+
+
+def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
+    """
+    Copy a table into a new table in the CARTO account.
+
+    Args:
+        table_name (str): name of the original table.
+        new_table_name (str, optional): name for the new table.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            instance of Credentials (username, api_key, etc).
+        if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
+
+    Raises:
+        ValueError:
+            When the table name provided is wrong or the if_exists param is not valid.
+    """
+    if not isinstance(table_name, str):
+        raise ValueError('Wrong table name. You should provide a valid table name.')
+
+    if not isinstance(new_table_name, str):
+        raise ValueError('Wrong new table name. You should provide a valid table name.')
+
+    if if_exists not in IF_EXISTS_OPTIONS:
+        raise ValueError('Wrong option for the `if_exists` param. You should provide: {}.'.format(
+            ', '.join(IF_EXISTS_OPTIONS)))
+
+    query = 'SELECT * FROM {}'.format(table_name)
+
+    context_manager = ContextManager(credentials)
+    new_table_name = context_manager.create_table_from_query(query, new_table_name, if_exists)
+
+    if log_enabled:
+        log.info('Success! Table "{0}" copied to table "{1}" correctly'.format(table_name, new_table_name))
+
+
+def create_table_from_query(query, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
+    """
+    Create a new table from an SQL query in the CARTO account.
+
+    Args:
+        query (str): SQL query
+        new_table_name (str): name for the new table.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            instance of Credentials (username, api_key, etc).
+        if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
+
+    Raises:
+        ValueError:
+            When the query or table name provided is wrong or the if_exists param is not valid.
+    """
+    if not is_sql_query(query):
+        raise ValueError('Wrong query. You should provide a valid SQL query.')
+
+    if not isinstance(new_table_name, str):
+        raise ValueError('Wrong new table name. You should provide a valid table name.')
+
+    if if_exists not in IF_EXISTS_OPTIONS:
+        raise ValueError('Wrong option for the `if_exists` param. You should provide: {}.'.format(
+            ', '.join(IF_EXISTS_OPTIONS)))
+
+    context_manager = ContextManager(credentials)
+    new_table_name = context_manager.create_table_from_query(query, new_table_name, if_exists)
+
+    if log_enabled:
+        log.info('Success! Table "{0}" created correctly'.format(new_table_name))
 
 
 def describe_table(table_name, credentials=None, schema=None):
@@ -195,16 +298,15 @@ def describe_table(table_name, credentials=None, schema=None):
     }
 
 
-def update_table(table_name, credentials=None, new_table_name=None, privacy=None, log_enabled=True):
+def update_privacy_table(table_name, privacy, credentials=None, log_enabled=True):
     """
     Update the table information in the CARTO account.
 
     Args:
         table_name (str): name of the table.
+        privacy (str): privacy of the table: 'private', 'public', 'link'.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
-        new_table_name(str, optional): new name for the table.
-        privacy (str, optional): privacy of the table: 'private', 'public', 'link'.
 
     Raises:
         ValueError:
@@ -221,74 +323,7 @@ def update_table(table_name, credentials=None, new_table_name=None, privacy=None
         raise ValueError('Wrong privacy. Valid names are {}'.format(', '.join(valid_privacy_values)))
 
     context_manager = ContextManager(credentials)
-    context_manager.update_table(table_name, privacy, new_table_name)
+    context_manager.update_privacy_table(table_name, privacy)
 
     if log_enabled:
-        log.info('Success! Table updated correctly')
-
-
-def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
-    """
-    Copy a table into a new table in the CARTO account.
-
-    Args:
-        table_name (str): name of the original table.
-        new_table_name(str, optional): name for the new table.
-        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-            instance of Credentials (username, api_key, etc).
-        if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
-
-    Raises:
-        ValueError:
-            When the table name provided is wrong or the if_exists param is not valid.
-    """
-    if not isinstance(table_name, str):
-        raise ValueError('Wrong table name. You should provide a valid table name.')
-
-    if not isinstance(new_table_name, str):
-        raise ValueError('Wrong new table name. You should provide a valid table name.')
-
-    if if_exists not in IF_EXISTS_OPTIONS:
-        raise ValueError('Wrong option for the `if_exists` param. You should provide: {}.'.format(
-            ', '.join(IF_EXISTS_OPTIONS)))
-
-    context_manager = ContextManager(credentials)
-
-    query = 'SELECT * FROM {}'.format(table_name)
-    context_manager.create_table_from_query(new_table_name, query, if_exists)
-
-    if log_enabled:
-        log.info('Success! Table copied correctly')
-
-
-def create_table_from_query(query, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
-    """
-    Create a new table from an SQL query in the CARTO account.
-
-    Args:
-        query (str): SQL query
-        new_table_name(str): name for the new table.
-        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-            instance of Credentials (username, api_key, etc).
-        if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
-
-    Raises:
-        ValueError:
-            When the query or table name provided is wrong or the if_exists param is not valid.
-    """
-    if not is_sql_query(query):
-        raise ValueError('Wrong query. You should provide a valid SQL query.')
-
-    if not isinstance(new_table_name, str):
-        raise ValueError('Wrong new table name. You should provide a valid table name.')
-
-    if if_exists not in IF_EXISTS_OPTIONS:
-        raise ValueError('Wrong option for the `if_exists` param. You should provide: {}.'.format(
-            ', '.join(IF_EXISTS_OPTIONS)))
-
-    context_manager = ContextManager(credentials)
-
-    context_manager.create_table_from_query(new_table_name, query, if_exists)
-
-    if log_enabled:
-        log.info('Success! Table created correctly')
+        log.info('Success! Table "{}" privacy updated correctly'.format(table_name))
