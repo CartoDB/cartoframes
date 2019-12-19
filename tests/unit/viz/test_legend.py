@@ -41,7 +41,7 @@ class TestLegend(object):
         assert legend._footer == '[footer]'
         assert legend._dynamic is False
 
-    def test_legend_info(self):
+    def test_legends_info(self):
         """Legend should return a proper information object"""
         legend = Legend({
             'type': 'color-category',

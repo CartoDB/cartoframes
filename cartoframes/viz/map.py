@@ -4,7 +4,6 @@ import collections
 from warnings import warn
 
 import numpy as np
-from carto.exceptions import CartoException
 
 from . import constants
 from .basemaps import Basemaps
@@ -36,8 +35,6 @@ class Map(object):
           Default is (1024, 632).
         viewport (dict, optional): Properties for display of the map viewport.
           Keys can be `bearing` or `pitch`.
-        default_legend (bool, optional): Default False. If True, it displays the map title.
-          Therefore, it needs the `title` value to be defined.
         show_info (bool, optional): Whether to display center and zoom information in the
           map or not. It is False by default.
         is_static (bool, optional): Default False. If True, instead of showing and interactive
@@ -189,7 +186,6 @@ class Map(object):
                  bounds=None,
                  size=None,
                  viewport=None,
-                 default_legend=False,
                  show_info=None,
                  theme=None,
                  title=None,
@@ -197,13 +193,10 @@ class Map(object):
                  is_static=None,
                  **kwargs):
 
-        self._validate_default_legend(default_legend, title)
-
         self.layers = _init_layers(layers)
         self.basemap = basemap
         self.size = size
         self.viewport = viewport
-        self.default_legend = default_legend
         self.title = title
         self.description = description
         self.show_info = show_info
@@ -238,7 +231,6 @@ class Map(object):
             size=self.size,
             camera=self.camera,
             basemap=self.basemap,
-            default_legend=self.default_legend,
             show_info=self.show_info,
             theme=self.theme,
             title=self.title,
@@ -250,7 +242,7 @@ class Map(object):
         return self._html_map.html
 
     def get_content(self):
-        has_legends = any(layer['legend'] for layer in self.layer_defs) or self.default_legend
+        has_legends = any(layer['legends'] for layer in self.layer_defs)
         has_widgets = any(len(layer['widgets']) != 0 for layer in self.layer_defs)
 
         return {
@@ -262,7 +254,6 @@ class Map(object):
             'basemap': self.basemap,
             'basecolor': self.basecolor,
             'token': self.token,
-            'default_legend': self.default_legend,
             'show_info': self.show_info,
             'has_legends': has_legends,
             'has_widgets': has_widgets,
@@ -345,7 +336,6 @@ class Map(object):
             size=None,
             camera=self.camera,
             basemap=self.basemap,
-            default_legend=self.default_legend,
             show_info=False,
             theme=self.theme,
             title=name,
@@ -356,10 +346,6 @@ class Map(object):
             _airship_path=self._airship_path)
 
         return html_map.html
-
-    def _validate_default_legend(self, default_legend, title):
-        if default_legend and not title:
-            raise CartoException('The default legend needs a map title to be displayed')
 
 
 def _get_publisher(self, credentials):

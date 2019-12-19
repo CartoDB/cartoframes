@@ -3,14 +3,6 @@
 {%- endmacro %}
 
 <div class="as-panel__element" id="legends">
-  {% if default_legend and title %}
-    <as-legend
-      id="default-legend-container"
-      heading="{{ title }}"
-      description="{{ description or '' }}">
-    </as-legend>
-  {% endif %}
-
   {% for layer in layers|reverse %}
     {% if layer.legends %}
     {% set layer_index = loop.index0 %}
