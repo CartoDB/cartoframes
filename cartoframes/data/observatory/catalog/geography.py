@@ -200,8 +200,8 @@ class Geography(CatalogEntity):
 
         return cls._entity_repo.get_all(filters, credentials)
 
-    def download(self, file_path, credentials=None):
-        """Download geography data as a local file. You need Data Observatory enabled in your CARTO
+    def to_csv(self, file_path, credentials=None):
+        """Download geography data as a local csv file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
         For premium geographies (those with `is_public_data` set to False), you need a subscription to the geography.
@@ -215,7 +215,7 @@ class Geography(CatalogEntity):
                 <cartoframes.auth.set_default_credentials>`) will be used.
 
         Returns:
-            A string with the local file path with the file downloaded
+            os.path with the local file path with the file downloaded
 
         :raises CartoException: If you have not a valid license for the dataset being downloaded.
         :raises ValueError: If the credentials argument is not valud.
@@ -226,7 +226,34 @@ class Geography(CatalogEntity):
             raise CartoException('You are not subscribed to this Geography yet. Please, use the subscribe method '
                                  'first.')
 
-        self._download(file_path, _credentials)
+        self._download(_credentials, file_path)
+
+    def to_dataframe(self, credentials=None):
+        """Download geography data as a pandas.DataFrame. You need Data Observatory enabled in your CARTO
+        account, please contact us at support@carto.com for more information.
+
+        For premium geographies (those with `is_public_data` set to False), you need a subscription to the geography.
+        Check the subscription guides for more information.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+
+        Returns:
+            pandas.DataFrame
+
+        :raises CartoException: If you have not a valid license for the dataset being downloaded.
+        :raises ValueError: If the credentials argument is not valud.
+        """
+        _credentials = get_credentials(credentials)
+
+        if not self._is_subscribed(_credentials):
+            raise CartoException('You are not subscribed to this Geography yet. Please, use the subscribe method '
+                                 'first.')
+
+        self._download(_credentials)
 
     def subscribe(self, credentials=None):
         """Subscribe to a Geography. You need Data Observatory enabled in your CARTO account, please contact us at
