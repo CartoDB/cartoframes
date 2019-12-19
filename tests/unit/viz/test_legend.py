@@ -12,14 +12,14 @@ class TestLegend(object):
         """Legend should be properly initialized when passing a dict"""
         legend = Legend({
             'type': 'color-category',
-            'prop': 'strokeColor',
+            'prop': 'stroke-color',
             'title': '[TITLE]',
             'description': '[description]',
             'footer': '[footer]'
         })
 
         assert legend._type == 'color-category'
-        assert legend._prop == 'strokeColor'
+        assert legend._prop == 'stroke-color'
         assert legend._title == '[TITLE]'
         assert legend._description == '[description]'
         assert legend._footer == '[footer]'
@@ -28,14 +28,14 @@ class TestLegend(object):
     def test_legend_init_properties(self):
         """Legend should be properly initialized when passing properties"""
         legend = Legend('color-category',
-                        prop='strokeColor',
+                        prop='stroke-color',
                         title='[TITLE]',
                         description='[description]',
                         footer='[footer]',
                         dynamic=False)
 
         assert legend._type == 'color-category'
-        assert legend._prop == 'strokeColor'
+        assert legend._prop == 'stroke-color'
         assert legend._title == '[TITLE]'
         assert legend._description == '[description]'
         assert legend._footer == '[footer]'
@@ -101,7 +101,7 @@ class TestLegend(object):
     def test_wrong_prop(self):
         """Legend should raise an error if legend prop is not valid"""
         msg = 'Legend property "xxx" is not valid. Valid legend properties are: ' + \
-            'color, strokeColor, width, strokeWidth.'
+            'color, stroke-color, size, stroke-width.'
         with pytest.raises(ValueError) as e:
             Legend({'type': 'color-category', 'prop': 'xxx'}).get_info()
         assert str(e.value) == msg
