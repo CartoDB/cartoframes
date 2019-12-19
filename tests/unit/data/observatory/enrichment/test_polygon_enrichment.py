@@ -5,7 +5,8 @@ from cartoframes.auth import Credentials
 from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geography, VariableFilter
 from enrichment_mock import CatalogEntityWithGeographyMock, GeographyMock
 from cartoframes.data.observatory.enrichment.enrichment_service import AGGREGATION_DEFAULT, AGGREGATION_NONE, \
-    prepare_variables, _GEOJSON_COLUMN
+    prepare_variables, _GEOM_COLUMN, _build_polygons_query_variables_without_aggregation, \
+    _build_polygons_query_variables_with_aggregation
 
 _WORKING_PROJECT = 'carto-do-customers'
 _PUBLIC_PROJECT = 'carto-do-public-data'
@@ -78,7 +79,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(agg, [column], self.username, view, geo_view, temp_table_name)
+            _get_query(agg, variables, self.username, view, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -133,7 +134,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(agg, [column1, column2], self.username, view, geo_view, temp_table_name)
+            _get_query(agg, variables, self.username, view, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -188,7 +189,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(agg, [column1], self.username, view, geo_view, temp_table_name)
+            _get_query(agg, [variable1], self.username, view, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -243,7 +244,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(agg, [column1, column2], self.username, view, geo_view, temp_table_name)
+            _get_query(agg, variables, self.username, view, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -298,7 +299,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(agg, [column1, column2], self.username, view, geo_view, temp_table_name)
+            _get_query(agg, variables, self.username, view, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -353,8 +354,8 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(agg, [column1], self.username, view1, geo_view, temp_table_name),
-            _get_query(agg, [column2], self.username, view2, geo_view, temp_table_name)
+            _get_query(agg, [variable1], self.username, view1, geo_view, temp_table_name),
+            _get_query(agg, [variable2], self.username, view2, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -410,8 +411,8 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(agg, [column1], self.username, view1, geo_view, temp_table_name),
-            _get_query(agg, [column2], self.username, view2, geo_view, temp_table_name)
+            _get_query(agg, [variable1], self.username, view1, geo_view, temp_table_name),
+            _get_query(agg, [variable2], self.username, view2, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -457,7 +458,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(agg, [column], self.username, view, geo_view, temp_table_name)
+            _get_query(agg, variables, self.username, view, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -503,7 +504,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(agg, [column], self.username, view, geo_view, temp_table_name)
+            _get_query(agg, variables, self.username, view, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -514,8 +515,8 @@ class TestPolygonEnrichment(object):
     @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
     @patch.object(Geography, 'get')
-    def test_enrichment_query_by_polygons_without_agg(self, geography_get_mock, dataset_get_mock,
-                                                      _is_available_in_bq_mock):
+    def test_enrichment_query_by_polygons_agg_none(self, geography_get_mock, dataset_get_mock,
+                                                   _is_available_in_bq_mock):
         _is_available_in_bq_mock.return_value = True
 
         enrichment = Enrichment(credentials=self.credentials)
@@ -547,7 +548,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(None, [column], self.username, view, geo_view, temp_table_name)
+            _get_query(None, variables, self.username, view, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -605,8 +606,8 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(agg1, [column1], self.username, view1, geo_view, temp_table_name),
-            _get_query(agg2, [column2], self.username, view2, geo_view, temp_table_name)
+            _get_query(agg1, [variable1], self.username, view1, geo_view, temp_table_name),
+            _get_query(agg2, [variable2], self.username, view2, geo_view, temp_table_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -654,7 +655,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(agg, [column], self.username, view, geo_view, temp_table_name, filters)
+            _get_query(agg, variables, self.username, view, geo_view, temp_table_name, filters)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -712,10 +713,10 @@ def _clean_query(query):
 
 def _get_query(agg, columns, username, view, geo_table, temp_table_name, filters=[]):
     if agg:
-        columns = ', '.join(_get_column_sql(agg, column) for column in columns)
+        columns = _build_polygons_query_variables_with_aggregation(columns, agg)
         group = 'group by data_table.enrichment_id'
     else:
-        columns = _get_column_sql_without_agg(columns)
+        columns = _build_polygons_query_variables_without_aggregation(columns)
         group = ''
 
     return '''
@@ -734,7 +735,7 @@ def _get_query(agg, columns, username, view, geo_table, temp_table_name, filters
             view=view,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column=_GEOJSON_COLUMN,
+            data_geom_column=_GEOM_COLUMN,
             where=_get_where(filters),
             group=group)
 
@@ -752,7 +753,7 @@ def _get_column_sql(agg, column):
             ) AS {aggregation}_{column}
             """.format(
                 column=column,
-                geo_column=_GEOJSON_COLUMN,
+                geo_column=_GEOM_COLUMN,
                 aggregation=agg)
     else:
         return """
@@ -760,18 +761,6 @@ def _get_column_sql(agg, column):
             """.format(
                 column=column,
                 aggregation=agg)
-
-
-def _get_column_sql_without_agg(columns):
-    columns = ['enrichment_table.{}'.format(column) for column in columns]
-
-    return '''
-        {columns},
-        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column})) /
-        ST_area(data_table.{data_geom_column}) AS measures_proportion
-        '''.format(
-            columns=', '.join(columns),
-            data_geom_column=_GEOJSON_COLUMN)
 
 
 def _get_where(filters):
@@ -805,5 +794,5 @@ def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_ta
             table=table,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column=_GEOJSON_COLUMN,
+            data_geom_column=_GEOM_COLUMN,
             where=_get_where(filters))
