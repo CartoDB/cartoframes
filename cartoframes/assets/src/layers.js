@@ -1,5 +1,5 @@
 import { bridgeLayerWidgets, renderWidget } from './widgets';
-import { createLegend } from './legends';
+import { createLegends } from './legends';
 import SourceFactory from './map/SourceFactory';
 import { displayError } from './errors/display';
 
@@ -48,8 +48,8 @@ export function setLayerInteractivity(layer, mapLayer) {
 }
 
 export function setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends) {
-  if (hasLegends && layer.legend) {
-    createLegend(mapLayer, layer.legend, mapLayerIndex, mapIndex);
+  if (hasLegends && layer.legends) {
+    createLegends(mapLayer, layer.legends, mapLayerIndex, mapIndex);
   }
 }
 
