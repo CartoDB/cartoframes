@@ -220,7 +220,7 @@ class Geography(CatalogEntity):
         _credentials = get_credentials(credentials)
 
         if not self._is_subscribed(_credentials):
-            raise Exception('You are not subscribed to this Dataset yet. '
+            raise Exception('You are not subscribed to this Geography yet. '
                             'Please, use the subscribe method first.')
 
         self._download(_credentials, file_path)
@@ -248,7 +248,7 @@ class Geography(CatalogEntity):
         _credentials = get_credentials(credentials)
 
         if not self._is_subscribed(_credentials):
-            raise Exception('You are not subscribed to this Dataset yet. '
+            raise Exception('You are not subscribed to this Geography yet. '
                             'Please, use the subscribe method first.')
 
         return self._download(_credentials)
