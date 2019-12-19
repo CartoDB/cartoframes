@@ -300,25 +300,6 @@ class TestDataset(object):
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
-        # mock dataset
-        get_by_id_mock.return_value = test_dataset1
-        dataset = Dataset.get(test_dataset1.id)
-
-        # mock subscriptions
-        get_all_mock.return_value = [dataset]
-
-        # mock big query client
-        mocked_bq_client.return_value = BigQueryClientMock()
-
-        # test
-        credentials = Credentials('fake_user', '1234')
-
-        dataset.download('fake_path', credentials)
-
-    @patch.object(DatasetRepository, 'get_all')
-    @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_dataset_not_available_in_bq_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # mock dataset
         get_by_id_mock.return_value = test_dataset2
@@ -334,7 +315,7 @@ class TestDataset(object):
         credentials = Credentials('fake_user', '1234')
 
         with pytest.raises(CartoException) as e:
-            dataset.download('fake_path', credentials)
+            dataset.to_csv('fake_path', credentials)
 
         error = '{} is not ready for Download. Please, contact us for more information.'.format(dataset)
         assert str(e.value) == error
@@ -344,7 +325,7 @@ class TestDataset(object):
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_dataset_not_subscribed_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # mock dataset
-        get_by_id_mock.return_value = test_dataset2
+        get_by_id_mock.return_value = test_dataset2  # is private
         dataset = Dataset.get(test_dataset2.id)
 
         # mock subscriptions
@@ -357,7 +338,7 @@ class TestDataset(object):
         credentials = Credentials('fake_user', '1234')
 
         with pytest.raises(CartoException) as e:
-            dataset.download('fake_path', credentials)
+            dataset.to_csv('fake_path', credentials)
 
         error = 'You are not subscribed to this Dataset yet. Please, use the subscribe method first.'
         assert str(e.value) == error
@@ -379,27 +360,7 @@ class TestDataset(object):
         # test
         credentials = Credentials('fake_user', '1234')
 
-        dataset.download('fake_path', credentials)
-
-    @patch.object(DatasetRepository, 'get_all')
-    @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_download_raises_without_do_active(self, mocked_bq_client, get_by_id_mock, get_all_mock):
-        # mock dataset
-        get_by_id_mock.return_value = test_dataset1
-        dataset = Dataset.get(test_dataset1.id)
-
-        # mock subscriptions
-        get_all_mock.return_value = []
-
-        # mock big query client
-        mocked_bq_client.return_value = BigQueryClientMock(NotFound('Fake error'))
-
-        # test
-        credentials = Credentials('fake_user', '1234')
-
-        with pytest.raises(CartoException):
-            dataset.download('fake_path', credentials)
+        dataset.to_csv('fake_path', credentials)
 
     @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
     @patch('cartoframes.data.observatory.catalog.utils.display_subscription_form')
