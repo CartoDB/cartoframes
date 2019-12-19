@@ -154,7 +154,7 @@ class Layer(object):
         self.credentials = self.source.get_credentials()
         self.interactivity = self.popup.get_interactivity()
         self.widgets_info = self.widgets.get_widgets_info()
-        self.legends_info = self.legends.get_info(geom_type) if self.legends is not None else None
+        self.legends_info = self.legends.get_info() if self.legends is not None else None
         self.has_legend_list = isinstance(self.legends, LegendList)
 
     def _repr_html_(self):

@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..widget import Widget
 
 
-def category_widget(value, **kwargs):
+def category_widget(value, title='', description='', footer='', read_only=False):
     """Helper function for quickly creating a category widget.
 
     Args:
@@ -21,8 +21,7 @@ def category_widget(value, **kwargs):
 
         .. code::
 
-            from cartoframes.viz import Map, Layer
-            from cartoframes.viz import category_widget
+            from cartoframes.viz import Map, Layer, category_widget
 
             Map(
                 Layer(
@@ -38,8 +37,9 @@ def category_widget(value, **kwargs):
             )
     """
 
-    data = kwargs
-    data['type'] = 'category'
-    data['value'] = value
-    data['read_only'] = kwargs.get('read_only', False)
-    return Widget(data)
+    return Widget('category',
+                  value=value,
+                  title=title,
+                  description=description,
+                  footer=footer,
+                  read_only=read_only)

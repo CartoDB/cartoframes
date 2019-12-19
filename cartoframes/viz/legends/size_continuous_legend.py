@@ -3,7 +3,8 @@ from __future__ import absolute_import
 from ..legend import Legend
 
 
-def size_continuous_legend(**kwargs):
+def size_continuous_legend(title='', description='', footer='', prop='size',
+                           variable=None, dynamic=True):
     """Helper function for quickly creating a size continuous legend
 
     Args:
@@ -60,8 +61,4 @@ def size_continuous_legend(**kwargs):
             )
     """
 
-    data = kwargs
-    data['type'] = 'size-continuous'
-    data['prop'] = data.get('prop') if data.get('prop') else 'size'
-
-    return Legend(data)
+    return Legend('size-continuous', title, description, footer, prop, variable, dynamic)

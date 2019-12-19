@@ -34,7 +34,7 @@ LEGEND_PROPERTIES = [
     'stroke-width'
 ]
 
-LEGEND_PROPERTY_TYPE = {
+REPLACE_PROPERTY_TYPE = {
     'color': 'color',
     'stroke-color': 'strokeColor',
     'size': 'width',

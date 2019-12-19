@@ -34,10 +34,10 @@ class LegendList(object):
         else:
             return []
 
-    def get_info(self, geom_type=None):
+    def get_info(self):
         legends_info = []
         for legend in self._legends:
             if legend:
-                legends_info.append(legend.get_info(geom_type))
+                legends_info.append(legend.get_info())
 
         return legends_info

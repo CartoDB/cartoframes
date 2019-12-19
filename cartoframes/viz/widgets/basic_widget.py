@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..widget import Widget
 
 
-def basic_widget(**kwargs):
+def basic_widget(title='', description='', footer=''):
     """Helper function for quickly creating a default widget.
 
     The default widget is a general purpose widget that can be used to provide additional information about your map.
@@ -20,8 +20,7 @@ def basic_widget(**kwargs):
 
         .. code::
 
-            from cartoframes.viz import Map, Layer
-            from cartoframes.viz import basic_widget
+            from cartoframes.viz import Map, Layer, basic_widget
 
             Map(
                 Layer(
@@ -36,6 +35,7 @@ def basic_widget(**kwargs):
             )
     """
 
-    data = kwargs
-    data['type'] = 'default'
-    return Widget(data)
+    return Widget('default',
+                  title=title,
+                  description=description,
+                  footer=footer)

@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..legend import Legend
 
 
-def basic_legend(**kwargs):
+def basic_legend(title='', description='', footer=''):
     """Helper function for quickly creating a basic legend
 
     Args:
@@ -35,7 +35,4 @@ def basic_legend(**kwargs):
             )
     """
 
-    data = kwargs
-    data['type'] = 'default'
-
-    return Legend(data)
+    return Legend('default', title, description, footer)
