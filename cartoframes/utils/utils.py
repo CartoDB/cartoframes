@@ -15,9 +15,8 @@ import semantic_version
 
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
+from pyrestcli.exceptions import ServerErrorException
 
-from ..auth.credentials import Credentials
-from ..auth import defaults
 from ..core.logger import log
 
 GEOM_TYPE_POINT = 'point'
@@ -305,12 +304,14 @@ def is_table_name(data):
 
 
 def get_credentials(credentials=None):
+    from ..auth import defaults
     _credentials = credentials or defaults.get_default_credentials()
     check_credentials(_credentials)
     return _credentials
 
 
 def check_credentials(credentials):
+    from ..auth.credentials import Credentials
     if not isinstance(credentials, Credentials):
         raise AttributeError('Credentials attribute is required. '
                              'Please pass a `Credentials` instance '
@@ -405,3 +406,18 @@ def check_package(pkg_name, spec='*', is_optional=False):
         else:
             raise Exception('Package "{0}" is not installed. '.format(pkg_name) +
                             'Please run: pip install {0}'.format(pkg_name))
+
+
+def check_do_enabled(method):
+    def fn(*args, **kw):
+        try:
+            return method(*args, **kw)
+        except ServerErrorException as e:
+            if str(e) == "['The user does not have Data Observatory enabled']":
+                raise Exception(
+                    'We are sorry, the Data Observatory is not enabled for your account yet. '
+                    'Please contact your customer success manager or send an email to '
+                    'sales@carto.com to request access to it.')
+            else:
+                raise e
+    return fn

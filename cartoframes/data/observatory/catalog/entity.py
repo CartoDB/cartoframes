@@ -1,8 +1,6 @@
 import pandas as pd
 
 from abc import ABC
-from google.api_core.exceptions import NotFound
-
 from carto.exceptions import CartoException
 
 from ...clients.bigquery_client import BigQueryClient
@@ -123,14 +121,11 @@ class CatalogEntity(ABC):
 
         project, dataset, table = full_remote_table_name.split('.')
 
-        try:
-            column_names = bq_client.get_table_column_names(project, dataset, table)
-            query = 'SELECT * FROM `{}`'.format(full_remote_table_name)
-            job = bq_client.query(query)
+        column_names = bq_client.get_table_column_names(project, dataset, table)
+        query = 'SELECT * FROM `{}`'.format(full_remote_table_name)
+        job = bq_client.query(query)
 
-            bq_client.download_to_file(job, file_path, column_names=column_names)
-        except NotFound:
-            raise CartoException('You have not purchased the dataset `{}` yet'.format(self.id))
+        bq_client.download_to_file(job, file_path, column_names=column_names)
 
         log.info('Data saved: {}.'.format(file_path))
         log.info("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))

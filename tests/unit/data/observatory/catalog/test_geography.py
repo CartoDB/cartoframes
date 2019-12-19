@@ -2,8 +2,7 @@ import pytest
 import pandas as pd
 
 from unittest.mock import patch
-from carto.exceptions import CartoException
-from google.api_core.exceptions import NotFound
+from pyrestcli.exceptions import ServerErrorException
 
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory.catalog.entity import CatalogList
@@ -162,7 +161,7 @@ class TestGeography(object):
     def test_get_all_geographies_credentials(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geographies
-        credentials = Credentials('user', '1234')
+        credentials = Credentials('fake_user', '1234')
 
         # When
         geographies = Geography.get_all(credentials=credentials)
@@ -172,6 +171,24 @@ class TestGeography(object):
         assert isinstance(geographies, list)
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
+
+    @patch.object(GeographyRepository, 'get_all')
+    def test_get_all_geographies_credentials_without_do_enabled(self, mocked_repo):
+        # Given
+        def raise_exception(a, b):
+            raise ServerErrorException(['The user does not have Data Observatory enabled'])
+        mocked_repo.side_effect = raise_exception
+        credentials = Credentials('fake_user', '1234')
+
+        # When
+        with pytest.raises(Exception) as e:
+            Geography.get_all(credentials=credentials)
+
+        # Then
+        assert str(e.value) == (
+            'We are sorry, the Data Observatory is not enabled for your account yet. '
+            'Please contact your customer success manager or send an email to '
+            'sales@carto.com to request access to it.')
 
     def test_geography_list_is_printed_with_classname_and_slugs(self):
         # Given
@@ -227,101 +244,72 @@ class TestGeography(object):
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_geography_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
-        # mock geography
+        # Given
         get_by_id_mock.return_value = test_geography1
         geography = Geography.get(test_geography1.id)
-
-        # mock subscriptions
         get_all_mock.return_value = [geography]
-
-        # mock big query client
         mocked_bq_client.return_value = BigQueryClientMock()
-
-        # test
         credentials = Credentials('fake_user', '1234')
 
+        # Then
         geography.download('fake_path', credentials)
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_not_available_in_bq_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
-        # mock geography
+    def test_geography_download_not_subscribed(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+        # Given
         get_by_id_mock.return_value = test_geography2
         geography = Geography.get(test_geography2.id)
-
-        # mock subscriptions
-        get_all_mock.return_value = [geography]
-
-        # mock big query client
-        mocked_bq_client.return_value = BigQueryClientMock()
-
-        # test
-        credentials = Credentials('fake_user', '1234')
-
-        with pytest.raises(CartoException) as e:
-            geography.download('fake_path', credentials)
-
-        error = '{} is not ready for Download. Please, contact us for more information.'.format(geography)
-        assert str(e.value) == error
-
-    @patch.object(GeographyRepository, 'get_all')
-    @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_not_subscribed_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
-        # mock dataset
-        get_by_id_mock.return_value = test_geography2
-        geography = Geography.get(test_geography2.id)
-
-        # mock subscriptions
         get_all_mock.return_value = []
-
-        # mock big query client
         mocked_bq_client.return_value = BigQueryClientMock()
-
-        # test
         credentials = Credentials('fake_user', '1234')
 
-        with pytest.raises(CartoException) as e:
+        # When
+        with pytest.raises(Exception) as e:
             geography.download('fake_path', credentials)
 
-        error = 'You are not subscribed to this Geography yet. Please, use the subscribe method first.'
-        assert str(e.value) == error
+        # Then
+        assert str(e.value) == (
+            'You are not subscribed to this Geography yet. '
+            'Please, use the subscribe method first.')
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_not_subscribed_but_public_download_works(self, mocked_bq_client, get_by_id_mock, get_all_mock):
-        # mock dataset
+    def test_geography_download_not_subscribed_but_public(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+        # Given
         get_by_id_mock.return_value = test_geography1  # is public
         geography = Geography.get(test_geography1.id)
-
-        # mock subscriptions
         get_all_mock.return_value = []
-
-        # mock big query client
         mocked_bq_client.return_value = BigQueryClientMock()
-
-        # test
         credentials = Credentials('fake_user', '1234')
 
+        # Then
         geography.download('fake_path', credentials)
 
+    @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download_raises_without_do_active(self, mocked_bq_client, mocked_repo):
-        # mock geography
-        mocked_repo.return_value = test_geography1
-
-        # mock big query client
-        mocked_bq_client.return_value = BigQueryClientMock(NotFound('Fake error'))
-
-        # test
+    def test_geography_download_without_do_enabled(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+        # Given
+        get_by_id_mock.return_value = test_geography1
+        geography = Geography.get(test_geography1.id)
+        get_all_mock.return_value = []
+        mocked_bq_client.return_value = BigQueryClientMock(
+            ServerErrorException(['The user does not have Data Observatory enabled'])
+        )
         credentials = Credentials('fake_user', '1234')
 
-        geography = Geography.get(test_geography1.id)
-        with pytest.raises(CartoException):
+        # When
+        with pytest.raises(Exception) as e:
             geography.download('fake_path', credentials)
+
+        # Then
+        assert str(e.value) == (
+            'We are sorry, the Data Observatory is not enabled for your account yet. '
+            'Please contact your customer success manager or send an email to '
+            'sales@carto.com to request access to it.')
 
     @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
     @patch('cartoframes.data.observatory.catalog.utils.display_subscription_form')
@@ -331,7 +319,7 @@ class TestGeography(object):
         expected_id = db_geography1['id']
         expected_subscribed_ids = []
         mock_subscription_ids.return_value = expected_subscribed_ids
-        credentials = Credentials('user', '1234')
+        credentials = Credentials('fake_user', '1234')
         geography = Geography(db_geography1)
 
         # When
@@ -350,7 +338,7 @@ class TestGeography(object):
         expected_id = db_geography1['id']
         expected_subscribed_ids = [expected_id]
         mock_subscription_ids.return_value = expected_subscribed_ids
-        credentials = Credentials('user', '1234')
+        credentials = Credentials('fake_user', '1234')
         geography = Geography(db_geography1)
 
         # When
@@ -367,7 +355,7 @@ class TestGeography(object):
     def test_geography_subscribe_default_credentials(
       self, mocked_credentials, mock_display_form, mock_subscription_ids):
         # Given
-        expected_credentials = Credentials('user', '1234')
+        expected_credentials = Credentials('fake_user', '1234')
         mocked_credentials.return_value = expected_credentials
         geography = Geography(db_geography1)
 
@@ -392,11 +380,31 @@ class TestGeography(object):
                                 'Please pass a `Credentials` instance '
                                 'or use the `set_default_credentials` function.')
 
+    @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
+    @patch('cartoframes.data.observatory.catalog.utils.display_subscription_form')
+    def test_geography_subscribe_without_do_enabled(self, mock_display_form, mock_subscription_ids):
+        # Given
+        def raise_exception(a, b, c):
+            raise ServerErrorException(['The user does not have Data Observatory enabled'])
+        mock_display_form.side_effect = raise_exception
+        geography = Geography(db_geography1)
+        credentials = Credentials('fake_user', '1234')
+
+        # When
+        with pytest.raises(Exception) as e:
+            geography.subscribe(credentials)
+
+        # Then
+        assert str(e.value) == (
+            'We are sorry, the Data Observatory is not enabled for your account yet. '
+            'Please contact your customer success manager or send an email to '
+            'sales@carto.com to request access to it.')
+
     @patch('cartoframes.data.observatory.catalog.subscription_info.fetch_subscription_info')
     def test_geography_subscription_info(self, mock_fetch):
         # Given
         mock_fetch.return_value = test_subscription_info
-        credentials = Credentials('user', '1234')
+        credentials = Credentials('fake_user', '1234')
         geography = Geography(db_geography1)
 
         # When
@@ -421,7 +429,7 @@ class TestGeography(object):
     @patch('cartoframes.auth.defaults.get_default_credentials')
     def test_geography_subscription_info_default_credentials(self, mocked_credentials, mock_fetch):
         # Given
-        expected_credentials = Credentials('user', '1234')
+        expected_credentials = Credentials('fake_user', '1234')
         mocked_credentials.return_value = expected_credentials
         geography = Geography(db_geography1)
 
@@ -444,6 +452,25 @@ class TestGeography(object):
         assert str(e.value) == ('Credentials attribute is required. '
                                 'Please pass a `Credentials` instance '
                                 'or use the `set_default_credentials` function.')
+
+    @patch('cartoframes.data.observatory.catalog.subscription_info.fetch_subscription_info')
+    def test_geography_subscription_info_without_do_enabled(self, mock_fetch):
+        # Given
+        def raise_exception(a, b, c):
+            raise ServerErrorException(['The user does not have Data Observatory enabled'])
+        mock_fetch.side_effect = raise_exception
+        geography = Geography(db_geography1)
+        credentials = Credentials('fake_user', '1234')
+
+        # When
+        with pytest.raises(Exception) as e:
+            geography.subscription_info(credentials)
+
+        # Then
+        assert str(e.value) == (
+            'We are sorry, the Data Observatory is not enabled for your account yet. '
+            'Please contact your customer success manager or send an email to '
+            'sales@carto.com to request access to it.')
 
     def test_geography_is_available_in(self):
         geography_in_bq = Geography(db_geography1)
