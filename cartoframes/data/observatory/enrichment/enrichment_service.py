@@ -291,7 +291,7 @@ def _build_where_clausule(filters):
     where = ''
     if len(filters) > 0:
         where_clausules = ["enrichment_table.{} {}".format(f.variable.column_name, f.query) for f in filters]
-        where = 'WHERE {}'.format('AND '.join(where_clausules))
+        where = 'WHERE {}'.format(' AND '.join(where_clausules))
 
     return where
 
