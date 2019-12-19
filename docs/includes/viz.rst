@@ -4,17 +4,15 @@ Viz
 .. automodule:: cartoframes.viz
     :members:
     :member-order: bysource
+    :exclude-members: Widget, WidgetList, widgets
     :undoc-members:
     :show-inheritance:
 
 Widgets
 ^^^^^^^
 
-.. automodule:: cartoframes.viz.widgets
-    :members:
-    :member-order: bysource
-    :undoc-members:
-    :show-inheritance:
+.. automodule:: cartoframes.viz.Widget
+
 
 Helpers
 ^^^^^^^

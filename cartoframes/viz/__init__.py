@@ -15,6 +15,13 @@ from .themes import Themes as themes
 from .widget import Widget
 from .widget_list import WidgetList
 
+from .widgets import animation_widget
+from .widgets import category_widget
+from .widgets import default_widget
+from .widgets import formula_widget
+from .widgets import histogram_widget
+from .widgets import time_series_widget
+
 __all__ = [
     'basemaps',
     'themes',
@@ -27,5 +34,11 @@ __all__ = [
     'Legend',
     'LegendList',
     'Widget',
-    'WidgetList'
+    'WidgetList',
+    'animation_widget',
+    'category_widget',
+    'default_widget',
+    'formula_widget',
+    'histogram_widget',
+    'time_series_widget'
 ]

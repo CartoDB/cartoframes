@@ -5,23 +5,15 @@ from . import constants
 
 
 class Widget():
-    """Widget
+    """Widgets are added to each layer and displayed in the visualization
 
-    Args:
-        type: The widget type. It can be 'default', 'formula', time-series', 'animation', 'category', 'histogram'.
-        value: A constant value or a CARTO VL expression.
-        title (optional): Widget title.
-        description (optional): Description shown below the title.
-        footer (optional): Footer of widget. This is often used to attribute data sources.
-
-    Example:
-
-    .. code::
-
-        from cartoframes.viz import Widget
-
-        Widget('formula', value='viewportSum($amount)', title='Widget Title',
-               'description': '[description]', 'footer': '[footer]')
+    Available widgets are:
+        - :py:meth:`default_widget <cartoframes.viz.default_widget>`
+        - :py:meth:`formula_widget <cartoframes.viz.formula_widget>`
+        - :py:meth:`category_widget <cartoframes.viz.category_widget>`
+        - :py:meth:`histogram_widget <cartoframes.viz.histogram_widget>`
+        - :py:meth:`time_series_widget <cartoframes.viz.time_series_widget>`
+        - :py:meth:`animation_widget <cartoframes.viz.animation_widget>`
     """
 
     def __init__(self, f_arg, **kwargs):

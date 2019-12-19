@@ -30,7 +30,7 @@ def formula_widget(value, operation=None, **kwargs):
         .. code::
 
             from cartoframes.viz import Map, Layer
-            from cartoframes.viz.widgets import formula_widget
+            from cartoframes.viz import formula_widget
 
             Map(
                 Layer(
@@ -49,7 +49,7 @@ def formula_widget(value, operation=None, **kwargs):
         .. code::
 
             from cartoframes.viz import Map, Layer
-            from cartoframes.viz.widgets import formula_widget
+            from cartoframes.viz import formula_widget
 
             Map(
                 Layer(

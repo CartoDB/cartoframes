@@ -27,7 +27,7 @@ def time_series_widget(value, **kwargs):
         .. code::
 
             from cartoframes.viz import Map, Layer
-            from cartoframes.viz.widgets import time_series_widget
+            from cartoframes.viz import time_series_widget
 
             Map(
                 Layer(

@@ -22,7 +22,7 @@ def category_widget(value, **kwargs):
         .. code::
 
             from cartoframes.viz import Map, Layer
-            from cartoframes.viz.widgets import category_widget
+            from cartoframes.viz import category_widget
 
             Map(
                 Layer(
