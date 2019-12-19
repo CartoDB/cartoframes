@@ -165,7 +165,8 @@ class Enrichment(EnrichmentService):
                 aggregate the data (a variable could not have `agg_method` defined and in this case, the
                 variables will be skipped).
                 - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
-                You will receive a row of data from each polygon intersected.
+                You will receive a row of data from each polygon intersected. Also, you will receive the areas of the
+                polygons intersection and the polygons intersected.
                 - str: if you want to overwrite every default aggregation method, you can pass a string with the
                 aggregation method to use.
                 - dictionary: if you want to overwrite some default aggregation methods from your selected
@@ -315,6 +316,30 @@ class Enrichment(EnrichmentService):
 
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=aggregation)
+
+            Enrich a polygons dataframe without aggregating variables (because you want to it yourself, for example,
+                in case you want to use your custom function for aggregating the data):
+
+            .. code::
+
+                import pandas
+                from cartoframes.data.observatory import Enrichment, Catalog
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials('creds.json')
+
+                df = pandas.read_csv('...')
+
+                catalog = Catalog()
+                all_variables = catalog.country('usa').category('demographics').datasets[0].variables
+                variable1 = all_variables[0]
+                variable2 = all_variables[1]
+                variable3 = all_variables[2]
+
+                variables = [variable1, variable2, variable3]
+
+                enrichment = Enrichment()
+                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=Enrichment.AGGREGATION_NONE)
         """
         variables = prepare_variables(variables, self.credentials, aggregation)
 
