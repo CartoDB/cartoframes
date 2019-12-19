@@ -223,13 +223,9 @@ class TestPointsEnrichment(object):
 
         assert actual == expected
 
-    @patch('cartoframes.data.observatory.enrichment.enrichment_service._is_available_in_bq')
     @patch.object(Dataset, 'get')
     @patch.object(Geography, 'get')
-    def test_enrichment_query_by_points_with_filters(self, geography_get_mock, dataset_get_mock,
-                                                     _is_available_in_bq_mock):
-        _is_available_in_bq_mock.return_value = True
-
+    def test_enrichment_query_by_points_with_filters(self, geography_get_mock, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
