@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 from google.cloud import bigquery, storage
 
 from cartoframes.auth import Credentials
-from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geography, VariableFilter
+from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geography
 from enrichment_mock import CatalogEntityWithGeographyMock, GeographyMock
 from cartoframes.data.observatory.enrichment.enrichment_service import AGGREGATION_DEFAULT, AGGREGATION_NONE, \
     prepare_variables, _GEOM_COLUMN, _build_polygons_query_variables_without_aggregation, \
@@ -643,7 +643,7 @@ class TestPolygonEnrichment(object):
         })
         variables = [variable]
 
-        variable_filter = VariableFilter(variable, "= 'a string'")
+        variable_filter = {variable.id: "= 'a string'"}
         filters = [variable_filter]
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))

@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 from google.cloud import bigquery, storage
 
 from cartoframes.auth import Credentials
-from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geography, VariableFilter
+from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geography
 from cartoframes.data.observatory.enrichment.enrichment_service import _GEOM_COLUMN
 from enrichment_mock import CatalogEntityWithGeographyMock, GeographyMock
 
@@ -249,7 +249,7 @@ class TestPointsEnrichment(object):
         })
         variables = [variable]
 
-        variable_filter = VariableFilter(variable, "= 'a string'")
+        variable_filter = {variable.id: "= 'a string'"}
         filters = [variable_filter]
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
