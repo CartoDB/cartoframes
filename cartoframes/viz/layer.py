@@ -8,6 +8,7 @@ from .legend_list import LegendList
 from .popup import Popup
 from .source import Source
 from .style import Style
+from .widget import Widget
 from .widget_list import WidgetList
 
 from ..utils.utils import extract_viz_columns
@@ -28,12 +29,9 @@ class Layer(object):
             This option adds interactivity (click and hover) to a layer to show popups.
             The columns to be shown must be added in a list format for each event.
             See :py:class:`Popup <cartoframes.viz.Popup>` for more information.
-        legend (dict or :py:class:`Legend <cartoframes.viz.Legend>`, optional):
-            The legend definition for a layer. It contains the information
-            to show a legend "type" (``color-category``, ``color-bins``,
-            ``color-continuous``), "prop" (color) and also text information:
-            "title", "description" and "footer". See :py:class:`Legend
-            <cartoframes.viz.Legend>` for more information.
+        legends (:py:class:`Legend <cartoframes.viz.Legend>` list, optional):
+            The legends definition for a layer. It contains a list of legend helpers.
+            See :py:class:`Legend <cartoframes.viz.Legend>` for more information.
         widgets (dict, list, or :py:class:`WidgetList <cartoframes.viz.WidgetList>`, optional):
             Widget or list of widgets for a layer. It contains the information to display
             different widget types on the top right of the map. See
@@ -71,7 +69,7 @@ class Layer(object):
                     'hover': '$name',
                     'click': ['$name', '$pop_max', '$pop_min']
                 },
-                legend={
+                legends={
                     'type': 'color-category',
                     'title': 'Population'
                 },
@@ -116,7 +114,7 @@ class Layer(object):
             pop_layer = Layer(
                 'brooklyn_poverty',
                 'color: ramp($poverty_per_pop, sunset)',
-                legend={
+                legends={
                     'type': 'color-continuous',
                     'title': 'Poverty per pop'
                 }
@@ -128,7 +126,7 @@ class Layer(object):
                  source,
                  style=None,
                  popup=None,
-                 legend=None,
+                 legends=None,
                  widgets=None,
                  credentials=None,
                  bounds=None,
@@ -139,7 +137,7 @@ class Layer(object):
         self.source = _set_source(source, credentials, geom_col)
         self.style = _set_style(style)
         self.popup = _set_popup(popup)
-        self.legend = _set_legend(legend)
+        self.legends = _set_legends(legends)
         self.widgets = _set_widgets(widgets)
 
         geom_type = self.source.get_geom_type()
@@ -156,8 +154,8 @@ class Layer(object):
         self.credentials = self.source.get_credentials()
         self.interactivity = self.popup.get_interactivity()
         self.widgets_info = self.widgets.get_widgets_info()
-        self.legend_info = self.legend.get_info(geom_type) if self.legend is not None else None
-        self.has_legend_list = isinstance(self.legend, LegendList)
+        self.legends_info = self.legends.get_info(geom_type) if self.legends is not None else None
+        self.has_legend_list = isinstance(self.legends, LegendList)
 
     def _repr_html_(self):
         from .map import Map
@@ -194,19 +192,21 @@ def _set_popup(popup):
         return Popup()
 
 
-def _set_legend(legend):
-    if isinstance(legend, (Legend, LegendList)):
-        return legend
-    if isinstance(legend, dict):
-        return Legend(legend)
-    if isinstance(legend, (list)):
-        return LegendList(legend)
+def _set_legends(legends):
+    if isinstance(legends, Legend):
+        return LegendList(legends)
+    if isinstance(legends, LegendList):
+        return legends
+    if isinstance(legends, list):
+        return LegendList(legends)
     else:
-        return Legend('')
+        return LegendList()
 
 
 def _set_widgets(widgets):
-    if isinstance(widgets, (dict, list)):
+    if isinstance(widgets, Widget):
+        return WidgetList(widgets)
+    if isinstance(widgets, list):
         return WidgetList(widgets)
     if isinstance(widgets, WidgetList):
         return widgets

@@ -31,7 +31,7 @@ def category_widget(value, **kwargs):
                         category_widget(
                             'collisiontype',
                             title='Type of Collision',
-                            description='Select a category to filter',
+                            description='Select a category to filter'
                         )
                     ]
                 )

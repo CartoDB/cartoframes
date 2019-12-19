@@ -4,48 +4,16 @@ from . import constants
 
 
 class Legend(object):
-    """Legend
+    """Legends are added to each layer and displayed in the visualization
 
-    Args:
-        type (str):
-            'color-category', 'color-bins', 'color-continuous', 'size-bins',
-            or 'size-continuous'.
-        prop (str, optional):
-            'color', 'width', 'strokeColor', or 'strokeWidth'.
-        dynamic (boolean, optional):
-            Update and render the legend depending on viewport changes.
-            Defaults to ``True``.
-        title (str, optional):
-            Title of legend.
-        description (str, optional):
-            Description in legend.
-        footer (str, optional):
-            Footer of legend. This is often used to attribute data sources.
-        variable (str, optional):
-            If the information in the legend depends on a different value than the
-            information set to the style property, it is possible to set an independent
-            variable.
-
-    Example:
-
-        .. code::
-
-            from cartoframes.viz import Legend
-
-            Legend('color-category', title='Legend Title', 'description': '[description]', 'footer': '[footer]')
-
-        .. code::
-
-            from cartoframes.viz import Layer, Legend, Style
-
-            Layer(
-                "SELECT * FROM populated_places WHERE adm0name = 'Spain'",
-                Style('''
-                    color: ramp(globalQuantiles($pop_max, 5), reverse(purpor))
-                    @custom_legend: ramp($pop_max, reverse(purpor))
-                '''),
-                legend=Legend('color-category', title='Population', variable='custom_legend')
-            )
+    Available legends are:
+        - :py:meth:`basic_legend <cartoframes.viz.basic_legend>`
+        - :py:meth:`color_bins_legend <cartoframes.viz.color_bins_legend>`
+        - :py:meth:`color_category_legend <cartoframes.viz.color_category_legend>`
+        - :py:meth:`color_continuous_legend <cartoframes.viz.color_continuous_legend>`
+        - :py:meth:`size_bins_legend <cartoframes.viz.size_bins_legend>`
+        - :py:meth:`size_category_legend <cartoframes.viz.size_category_legend>`
+        - :py:meth:`size_continuous_legend <cartoframes.viz.size_continuous_legend>`
     """
 
     def __init__(self, f_arg, **kwargs):

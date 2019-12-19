@@ -82,7 +82,7 @@ class HTMLMap(object):
             airship_styles_path = _airship_path + constants.AIRSHIP_STYLES_DEV
             airship_icons_path = _airship_path + constants.AIRSHIP_ICONS_DEV
 
-        has_legends = any(layer['legend'] for layer in layers) or default_legend
+        has_legends = any(layer['legends'] for layer in layers) or default_legend
         has_widgets = any(len(layer['widgets']) != 0 for layer in layers)
 
         return self._template.render(

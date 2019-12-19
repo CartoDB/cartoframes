@@ -22,6 +22,14 @@ from .widgets import formula_widget
 from .widgets import histogram_widget
 from .widgets import time_series_widget
 
+from .legends import basic_legend
+from .legends import color_bins_legend
+from .legends import color_category_legend
+from .legends import color_continuous_legend
+from .legends import size_bins_legend
+from .legends import size_category_legend
+from .legends import size_continuous_legend
+
 __all__ = [
     'basemaps',
     'themes',
@@ -40,5 +48,12 @@ __all__ = [
     'default_widget',
     'formula_widget',
     'histogram_widget',
-    'time_series_widget'
+    'time_series_widget',
+    'basic_legend',
+    'color_bins_legend',
+    'color_category_legend',
+    'color_continuous_legend',
+    'size_bins_legend',
+    'size_category_legend',
+    'size_continuous_legend'
 ]
