@@ -204,12 +204,6 @@ class TestMapPublication(object):
             ]
         }
 
-    # def assert_kuviz(self, kuviz, name, privacy):
-    #     self.assertIsNotNone(kuviz.id)
-    #     self.assertIsNotNone(kuviz.url)
-    #     self.assertEqual(kuviz.name, name)
-    #     self.assertEqual(kuviz.privacy, privacy)
-
     def assert_kuviz_dict(self, kuviz_dict, name, privacy):
         assert kuviz_dict['id'] is not None
         assert kuviz_dict['url'] is not None

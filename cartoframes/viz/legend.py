@@ -77,7 +77,8 @@ class Legend(object):
             _prop = self._prop
 
         self._check_prop(_prop)
-        return _prop
+
+        return constants.LEGEND_PROPERTY_TYPE.get(_prop)
 
     def _check_type(self, _type):
         if _type and _type not in constants.LEGEND_TYPES:

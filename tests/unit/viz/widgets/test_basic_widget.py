@@ -1,14 +1,14 @@
 from cartoframes.viz import widgets
 
 
-class TestDefaultWidget(object):
+class TestBasicWidget(object):
     def test_widgets(self):
         "should be defined"
-        assert widgets.default_widget is not None
+        assert widgets.basic_widget is not None
 
     def test_factory(self):
-        "should create a default widget"
-        widget = widgets.default_widget(title='Default Widget')
+        "should create a basic widget"
+        widget = widgets.basic_widget(title='Default Widget')
         widget_info = widget.get_info()
         assert widget_info.get('type') == 'default'
         assert widget_info.get('title') == 'Default Widget'

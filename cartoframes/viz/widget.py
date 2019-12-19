@@ -8,7 +8,7 @@ class Widget():
     """Widgets are added to each layer and displayed in the visualization
 
     Available widgets are:
-        - :py:meth:`default_widget <cartoframes.viz.default_widget>`
+        - :py:meth:`basic_widget <cartoframes.viz.basic_widget>`
         - :py:meth:`formula_widget <cartoframes.viz.formula_widget>`
         - :py:meth:`category_widget <cartoframes.viz.category_widget>`
         - :py:meth:`histogram_widget <cartoframes.viz.histogram_widget>`
