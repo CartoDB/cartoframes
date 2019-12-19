@@ -6,8 +6,8 @@ import pandas as pd
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery, storage, bigquery_storage_v1beta1 as bigquery_storage
 from google.oauth2.credentials import Credentials as GoogleCredentials
-
 from carto.exceptions import CartoException
+
 from ...auth import get_default_credentials
 from ...core.logger import log
 from ...utils.utils import timelogger

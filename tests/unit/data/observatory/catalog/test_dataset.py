@@ -2,8 +2,7 @@ import pytest
 import pandas as pd
 
 from unittest.mock import patch
-from carto.exceptions import CartoException
-from google.api_core.exceptions import NotFound
+from pyrestcli.exceptions import ServerErrorException
 
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory.catalog.entity import CatalogList
@@ -236,7 +235,7 @@ class TestDataset(object):
     def test_get_all_datasets_credentials(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
-        credentials = Credentials('user', '1234')
+        credentials = Credentials('fake_user', '1234')
 
         # When
         datasets = Dataset.get_all(credentials=credentials)
@@ -246,6 +245,24 @@ class TestDataset(object):
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
+
+    @patch.object(DatasetRepository, 'get_all')
+    def test_get_all_datasets_credentials_without_do_enabled(self, mocked_repo):
+        # Given
+        def raise_exception(a, b):
+            raise ServerErrorException(['The user does not have Data Observatory enabled'])
+        mocked_repo.side_effect = raise_exception
+        credentials = Credentials('fake_user', '1234')
+
+        # When
+        with pytest.raises(Exception) as e:
+            Dataset.get_all(credentials=credentials)
+
+        # Then
+        assert str(e.value) == (
+            'We are sorry, the Data Observatory is not enabled for your account yet. '
+            'Please contact your customer success manager or send an email to '
+            'sales@carto.com to request access to it.')
 
     def test_dataset_list_is_printed_with_classname_and_slugs(self):
         # Given
@@ -300,25 +317,16 @@ class TestDataset(object):
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_not_available_in_bq_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
-        # mock dataset
-        get_by_id_mock.return_value = test_dataset2
-        dataset = Dataset.get(test_dataset2.id)
-
-        # mock subscriptions
+    def test_dataset_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+        # Given
+        get_by_id_mock.return_value = test_dataset1
+        dataset = Dataset.get(test_dataset1.id)
         get_all_mock.return_value = [dataset]
-
-        # mock big query client
         mocked_bq_client.return_value = BigQueryClientMock()
-
-        # test
         credentials = Credentials('fake_user', '1234')
 
-        with pytest.raises(CartoException) as e:
-            dataset.to_csv('fake_path', credentials)
-
-        error = '{} is not ready for Download. Please, contact us for more information.'.format(dataset)
-        assert str(e.value) == error
+        # Then
+        dataset.to_csv('fake_path', credentials)
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
@@ -327,40 +335,54 @@ class TestDataset(object):
         # mock dataset
         get_by_id_mock.return_value = test_dataset2  # is private
         dataset = Dataset.get(test_dataset2.id)
-
-        # mock subscriptions
         get_all_mock.return_value = []
-
-        # mock big query client
         mocked_bq_client.return_value = BigQueryClientMock()
-
-        # test
         credentials = Credentials('fake_user', '1234')
 
-        with pytest.raises(CartoException) as e:
+        # When
+        with pytest.raises(Exception) as e:
             dataset.to_csv('fake_path', credentials)
 
-        error = 'You are not subscribed to this Dataset yet. Please, use the subscribe method first.'
-        assert str(e.value) == error
+        # Then
+        assert str(e.value) == (
+            'You are not subscribed to this Dataset yet. '
+            'Please, use the subscribe method first.')
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_not_subscribed_but_public_download_works(self, mocked_bq_client, get_by_id_mock, get_all_mock):
-        # mock dataset
+    def test_dataset_download_not_subscribed_but_public(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+        # Given
         get_by_id_mock.return_value = test_dataset1  # is public
         dataset = Dataset.get(test_dataset1.id)
-
-        # mock subscriptions
         get_all_mock.return_value = []
-
-        # mock big query client
         mocked_bq_client.return_value = BigQueryClientMock()
-
-        # test
         credentials = Credentials('fake_user', '1234')
 
         dataset.to_csv('fake_path', credentials)
+
+    @patch.object(DatasetRepository, 'get_all')
+    @patch.object(DatasetRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
+    def test_dataset_download_without_do_enabled(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+        # Given
+        get_by_id_mock.return_value = test_dataset1
+        dataset = Dataset.get(test_dataset1.id)
+        get_all_mock.return_value = []
+        mocked_bq_client.return_value = BigQueryClientMock(
+            ServerErrorException(['The user does not have Data Observatory enabled'])
+        )
+        credentials = Credentials('fake_user', '1234')
+
+        # When
+        with pytest.raises(Exception) as e:
+            dataset.to_csv('fake_path', credentials)
+
+        # Then
+        assert str(e.value) == (
+            'We are sorry, the Data Observatory is not enabled for your account yet. '
+            'Please contact your customer success manager or send an email to '
+            'sales@carto.com to request access to it.')
 
     @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
     @patch('cartoframes.data.observatory.catalog.utils.display_subscription_form')
@@ -370,7 +392,7 @@ class TestDataset(object):
         expected_id = db_dataset1['id']
         expected_subscribed_ids = []
         mock_subscription_ids.return_value = expected_subscribed_ids
-        credentials = Credentials('user', '1234')
+        credentials = Credentials('fake_user', '1234')
         dataset = Dataset(db_dataset1)
 
         # When
@@ -389,7 +411,7 @@ class TestDataset(object):
         expected_id = db_dataset1['id']
         expected_subscribed_ids = [expected_id]
         mock_subscription_ids.return_value = expected_subscribed_ids
-        credentials = Credentials('user', '1234')
+        credentials = Credentials('fake_user', '1234')
         dataset = Dataset(db_dataset1)
 
         # When
@@ -405,7 +427,7 @@ class TestDataset(object):
     @patch('cartoframes.auth.defaults.get_default_credentials')
     def test_dataset_subscribe_default_credentials(self, mocked_credentials, mock_display_form, mock_subscription_ids):
         # Given
-        expected_credentials = Credentials('user', '1234')
+        expected_credentials = Credentials('fake_user', '1234')
         mocked_credentials.return_value = expected_credentials
         dataset = Dataset(db_dataset1)
 
@@ -430,11 +452,31 @@ class TestDataset(object):
                                 'Please pass a `Credentials` instance '
                                 'or use the `set_default_credentials` function.')
 
+    @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
+    @patch('cartoframes.data.observatory.catalog.utils.display_subscription_form')
+    def test_dataset_subscribe_without_do_enabled(self, mock_display_form, mock_subscription_ids):
+        # Given
+        def raise_exception(a, b, c):
+            raise ServerErrorException(['The user does not have Data Observatory enabled'])
+        mock_display_form.side_effect = raise_exception
+        dataset = Dataset(db_dataset1)
+        credentials = Credentials('fake_user', '1234')
+
+        # When
+        with pytest.raises(Exception) as e:
+            dataset.subscribe(credentials)
+
+        # Then
+        assert str(e.value) == (
+            'We are sorry, the Data Observatory is not enabled for your account yet. '
+            'Please contact your customer success manager or send an email to '
+            'sales@carto.com to request access to it.')
+
     @patch('cartoframes.data.observatory.catalog.subscription_info.fetch_subscription_info')
     def test_dataset_subscription_info(self, mock_fetch):
         # Given
         mock_fetch.return_value = test_subscription_info
-        credentials = Credentials('user', '1234')
+        credentials = Credentials('fake_user', '1234')
         dataset = Dataset(db_dataset1)
 
         # When
@@ -459,7 +501,7 @@ class TestDataset(object):
     @patch('cartoframes.auth.defaults.get_default_credentials')
     def test_dataset_subscription_info_default_credentials(self, mocked_credentials, mock_fetch):
         # Given
-        expected_credentials = Credentials('user', '1234')
+        expected_credentials = Credentials('fake_user', '1234')
         mocked_credentials.return_value = expected_credentials
         dataset = Dataset(db_dataset1)
 
@@ -483,15 +525,39 @@ class TestDataset(object):
                                 'Please pass a `Credentials` instance '
                                 'or use the `set_default_credentials` function.')
 
+    @patch('cartoframes.data.observatory.catalog.subscription_info.fetch_subscription_info')
+    def test_dataset_subscription_info_without_do_enabled(self, mock_fetch):
+        # Given
+        def raise_exception(a, b, c):
+            raise ServerErrorException(['The user does not have Data Observatory enabled'])
+        mock_fetch.side_effect = raise_exception
+        dataset = Dataset(db_dataset1)
+        credentials = Credentials('fake_user', '1234')
+
+        # When
+        with pytest.raises(Exception) as e:
+            dataset.subscription_info(credentials)
+
+        # Then
+        assert str(e.value) == (
+            'We are sorry, the Data Observatory is not enabled for your account yet. '
+            'Please contact your customer success manager or send an email to '
+            'sales@carto.com to request access to it.')
+
     def test_dataset_is_available_in(self):
+        # Given
         dataset_in_bq = Dataset(db_dataset1)
         dataset_not_in_bq = Dataset(db_dataset2)
 
+        # Then
         assert dataset_in_bq._is_available_in('bq')
         assert not dataset_not_in_bq._is_available_in('bq')
 
     def test_dataset_is_available_in_with_empty_field(self):
+        # Given
         db_dataset = dict(db_dataset1)
         db_dataset['available_in'] = None
         dataset_null = Dataset(db_dataset)
+
+        # Then
         assert not dataset_null._is_available_in('bq')

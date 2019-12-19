@@ -3,8 +3,6 @@ import geopandas as gpd
 
 from shapely import wkt
 
-from carto.exceptions import CartoException
-
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
@@ -16,7 +14,7 @@ from . import subscription_info
 from . import subscriptions
 from . import utils
 from ....core.logger import log
-from ....utils.utils import get_credentials, check_credentials
+from ....utils.utils import get_credentials, check_credentials, check_do_enabled
 
 DATASET_TYPE = 'dataset'
 
@@ -342,6 +340,7 @@ class Dataset(CatalogEntity):
         return dataset_describe(self.variables)
 
     @classmethod
+    @check_do_enabled
     def get_all(cls, filters=None, credentials=None):
         """Get all the Dataset instances that comply with the indicated filters (or all of them if no filters
         are passed). If credentials are given, only the datasets granted for those credentials are returned.
@@ -366,6 +365,7 @@ class Dataset(CatalogEntity):
 
         return cls._entity_repo.get_all(filters, credentials)
 
+    @check_do_enabled
     def to_csv(self, file_path, credentials=None):
         """Download dataset data as a local csv file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
@@ -386,10 +386,12 @@ class Dataset(CatalogEntity):
         _credentials = get_credentials(credentials)
 
         if not self._is_subscribed(_credentials):
-            raise CartoException('You are not subscribed to this Dataset yet. Please, use the subscribe method first.')
+            raise Exception('You are not subscribed to this Dataset yet. '
+                            'Please, use the subscribe method first.')
 
         self._download(_credentials, file_path)
 
+    @check_do_enabled
     def to_dataframe(self, credentials=None):
         """Download dataset data as a pandas.DataFrame. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
@@ -412,7 +414,8 @@ class Dataset(CatalogEntity):
         _credentials = get_credentials(credentials)
 
         if not self._is_subscribed(_credentials):
-            raise CartoException('You are not subscribed to this Dataset yet. Please, use the subscribe method first.')
+            raise Exception('You are not subscribed to this Dataset yet. '
+                            'Please, use the subscribe method first.')
 
         return self._download(_credentials)
 
@@ -446,6 +449,7 @@ class Dataset(CatalogEntity):
         join_gdf = gpd.sjoin(geographies_gdf1, geographies_gdf2, how='inner', op='intersects')
         return join_gdf['id'].unique()
 
+    @check_do_enabled
     def subscribe(self, credentials=None):
         """Subscribe to a dataset. You need Data Observatory enabled in your CARTO account, please contact us at
         support@carto.com for more information.
@@ -480,6 +484,7 @@ class Dataset(CatalogEntity):
         else:
             utils.display_subscription_form(self.id, DATASET_TYPE, _credentials)
 
+    @check_do_enabled
     def subscription_info(self, credentials=None):
         """Get the subscription information of a Dataset, which includes the license, Terms of Service, rights, price, and
         estimated time of delivery, among other metadata of interest during the :py:attr:`Dataset.subscription` process.

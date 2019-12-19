@@ -11,7 +11,7 @@ from .utils import TableGeocodingLock
 from .service import Service
 from ...core.logger import log
 from ...core.managers.source_manager import SourceManager
-from ...io.carto import read_carto, to_carto, has_table, delete_table, update_table, copy_table, create_table_from_query
+from ...io.carto import read_carto, to_carto, has_table, delete_table, rename_table, copy_table, create_table_from_query
 
 CARTO_INDEX_KEY = 'cartodb_id'
 
@@ -301,13 +301,11 @@ class Geocoding(Service):
                 hash_expr=hash_expr
             ))
 
-        delete_table(table_name, self._credentials, log_enabled=False)
-
-        update_table(
+        rename_table(
             table_name=tmp_table_name,
-            credentials=self._credentials,
             new_table_name=table_name,
-            privacy='private',
+            credentials=self._credentials,
+            if_exists='replace',
             log_enabled=False
         )
 
