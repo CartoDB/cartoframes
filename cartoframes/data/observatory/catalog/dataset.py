@@ -461,8 +461,9 @@ class Dataset(CatalogEntity):
         See :py:meth:`subscription_info <cartoframes.data.observatory.Dataset.subscription_info>` for more
         info
 
-        Once you subscribe to a dataset, you can :py:attr:`Dataset.download` its data and use the
-        :obj:`Enrichment` functions. See the enrichment guides for more info.
+        Once you subscribe to a dataset, you can download its data by :py:attr:`Dataset.to_csv` or
+        :py:attr:`Dataset.to_dataframe` and use the :obj:`Enrichment` functions.
+        See the enrichment guides for more info.
 
         You can check the status of your subscriptions by calling the
         :py:meth:`subscriptions <cartoframes.data.observatory.Catalog.subscriptions>` method in the :obj:`Catalog` with

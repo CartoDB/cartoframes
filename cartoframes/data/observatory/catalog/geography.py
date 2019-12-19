@@ -265,8 +265,8 @@ class Geography(CatalogEntity):
         See :py:meth:`subscription_info <cartoframes.data.observatory.Geography.subscription_info>` for more
         info
 
-        Once you :py:attr:`Geography.subscribe` to a geography you can :py:attr:`Geography.download` its data and
-        use the enrichment functions. See the enrichment guides for more info.
+        Once you :py:attr:`Geography.subscribe` to a geography you can download its data by :py:attr:`Geography.to_csv`
+        or :py:attr:`Geography.to_dataframe` and use the enrichment functions. See the enrichment guides for more info.
 
         You can check the status of your subscriptions by calling the
         :py:meth:`subscriptions <cartoframes.data.observatory.Catalog.subscriptions>` method in the :obj:`Catalog` with
