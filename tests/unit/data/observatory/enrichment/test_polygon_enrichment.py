@@ -439,7 +439,7 @@ class TestPolygonEnrichment(object):
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
         agg = 'SUM'
-        aggregation = Enrichment.AGGREGATION_DEFAULT
+        aggregation = AGGREGATION_DEFAULT
 
         variable = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),

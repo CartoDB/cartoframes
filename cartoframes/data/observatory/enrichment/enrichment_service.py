@@ -19,7 +19,7 @@ _ENRICHMENT_ID = 'enrichment_id'
 _GEOM_COLUMN = '__geojson_geom'
 
 AGGREGATION_DEFAULT = 'default'
-AGGREGATION_NONE = 'none'
+AGGREGATION_NONE = None
 
 MAX_VARIABLES_NUMBER = 50
 
@@ -419,7 +419,7 @@ def _is_subscribed(dataset, geography, credentials):
 
 
 def _get_aggregation(variable, aggregation):
-    if aggregation in [None, AGGREGATION_NONE]:
+    if aggregation is AGGREGATION_NONE:
         aggregation_method = None
     elif aggregation == AGGREGATION_DEFAULT:
         aggregation_method = variable.agg_method
