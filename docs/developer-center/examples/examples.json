@@ -76,14 +76,14 @@
             "file": "add_layer",
             "path": "layers"
         }, {
-            "title": "Add Default Widget",
-            "desc": "Add a default Widget",
-            "file": "add_default_widget_layer",
+            "title": "Add Basic Widget",
+            "desc": "Add a basic Widget",
+            "file": "add_basic_widget_layer",
             "path": "layers"
         }, {
-            "title": "Add Default Legend",
-            "desc": "Add a default Legend",
-            "file": "add_default_legend_layer",
+            "title": "Add Basic Legend",
+            "desc": "Add a basic Legend",
+            "file": "add_basic_legend_layer",
             "path": "layers"
         }, {
             "title": "Add Popup on Click",
@@ -192,7 +192,7 @@
         "samples": [{
             "title": "Default Legend",
             "desc": "Default Legend",
-            "file": "default_legend",
+            "file": "basic_legend",
             "path": "legends"
         }, {
             "title": "Color Category Legend",
@@ -230,9 +230,9 @@
             "file": "multiple_legends",
             "path": "legends"
         }, {
-            "title": "Legend Subtypes",
-            "desc": "Legend Subtypes",
-            "file": "legend_subtype",
+            "title": "Legend Line Geometry",
+            "desc": "Legend Line Geometry",
+            "file": "legend_line_geometry",
             "path": "legends"
         }, {
             "title": "Use Stroke Color in Legend",
@@ -248,9 +248,9 @@
     }, {
         "title": "Widgets",
         "samples": [{
-            "title": "Default Widget",
-            "desc": "Default Widget",
-            "file": "default_widget",
+            "title": "Basic Widget",
+            "desc": "Basic Widget",
+            "file": "basic_widget",
             "path": "widgets"
         }, {
             "title": "Category Widget",

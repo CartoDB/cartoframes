@@ -7,6 +7,7 @@ from . import setup_mocks
 from ..utils import build_cartodataframe
 
 
+@pytest.mark.skip(reason="This helper will be removed")
 class TestSizeBinsLayerHelper(object):
     def setup_method(self):
         self.source = build_cartodataframe([0], [0], ['name', 'time'])

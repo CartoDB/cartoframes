@@ -1,17 +1,14 @@
-from cartoframes.viz import Widget, WidgetList
+from cartoframes.viz import Widget, WidgetList, formula_widget, basic_widget
 
-WIDGET_A = {
-    'type': 'formula',
-    'value': 'viewportSum($amount)',
-    'title': '[TITLE]',
-    'description': '[description]',
-    'footer': '[footer]'
-}
+WIDGET_A = formula_widget(
+    'amount',
+    'sum',
+    title='[TITLE]',
+    description='[description]',
+    footer='[footer]'
+)
 
-WIDGET_B = {
-    'type': 'default',
-    'title': '"Custom Info"',
-}
+WIDGET_B = basic_widget(title='Custom Info')
 
 
 class TestWidgetList(object):
@@ -43,23 +40,20 @@ class TestWidgetList(object):
         assert isinstance(widget_list._widgets[0], Widget)
 
         assert widget_list._widgets[1]._type == 'default'
-        assert widget_list._widgets[1]._title == '"Custom Info"'
+        assert widget_list._widgets[1]._title == 'Custom Info'
         assert widget_list._widgets[1]._description == ''
         assert widget_list._widgets[1]._footer == ''
         assert isinstance(widget_list._widgets[1], Widget)
 
     def test_widget_list_init_with_a_widget(self):
         """WidgetList should be properly initialized"""
-        widget_list = WidgetList(Widget(WIDGET_A))
+        widget_list = WidgetList(WIDGET_A)
         assert isinstance(widget_list._widgets[0], Widget)
 
     def test_widget_list_init_with_a_list_of_widgets(self):
         """WidgetList should be properly initialized"""
 
-        widget_list = WidgetList([
-            Widget(WIDGET_A),
-            Widget(WIDGET_B)
-        ])
+        widget_list = WidgetList([WIDGET_A, WIDGET_B])
 
         assert isinstance(widget_list._widgets[0], Widget)
         assert isinstance(widget_list._widgets[1], Widget)
@@ -67,11 +61,7 @@ class TestWidgetList(object):
     def test_widget_list_get_widgets_info(self):
         """Widget List should return a proper widgets info object"""
 
-        widget_list = WidgetList([
-            Widget(WIDGET_A),
-            Widget(WIDGET_B)
-        ])
-
+        widget_list = WidgetList([WIDGET_A, WIDGET_B])
         widgets_info = widget_list.get_widgets_info()
         assert widgets_info == [
             {
@@ -89,7 +79,7 @@ class TestWidgetList(object):
                 }
             }, {
                 'type': 'default',
-                'title': '"Custom Info"',
+                'title': 'Custom Info',
                 'value': '',
                 'prop': '',
                 'description': '',

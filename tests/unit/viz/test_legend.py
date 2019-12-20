@@ -8,82 +8,38 @@ class TestLegend(object):
         """Legend"""
         assert Legend is not None
 
-    def test_legend_init_dict(self):
-        """Legend should be properly initialized when passing a dict"""
-        legend = Legend({
-            'type': 'color-category',
-            'prop': 'strokeColor',
-            'title': '[TITLE]',
-            'description': '[description]',
-            'footer': '[footer]'
-        })
-
-        assert legend._type == 'color-category'
-        assert legend._prop == 'strokeColor'
-        assert legend._title == '[TITLE]'
-        assert legend._description == '[description]'
-        assert legend._footer == '[footer]'
-        assert legend._dynamic is True
-
     def test_legend_init_properties(self):
         """Legend should be properly initialized when passing properties"""
         legend = Legend('color-category',
-                        prop='strokeColor',
-                        title='[TITLE]',
+                        prop='stroke-color',
+                        title='[title]',
                         description='[description]',
                         footer='[footer]',
                         dynamic=False)
 
         assert legend._type == 'color-category'
-        assert legend._prop == 'strokeColor'
-        assert legend._title == '[TITLE]'
+        assert legend._prop == 'stroke-color'
+        assert legend._title == '[title]'
         assert legend._description == '[description]'
         assert legend._footer == '[footer]'
         assert legend._dynamic is False
 
-    def test_legend_info(self):
+    def test_legends_info(self):
         """Legend should return a proper information object"""
-        legend = Legend({
-            'type': 'color-category',
-            'title': '[TITLE]',
-            'description': '[description]',
-            'footer': '[footer]'
-        })
+        legend = Legend('color-category',
+                        title='[title]',
+                        description='[description]',
+                        footer='[footer]')
 
         assert legend.get_info() == {
             'type': 'color-category',
             'prop': 'color',
-            'title': '[TITLE]',
+            'title': '[title]',
             'description': '[description]',
             'footer': '[footer]',
             'dynamic': True,
             'variable': ''
         }
-
-        legend = Legend({
-            'type': {
-                'point': 'color-category-point',
-                'line': 'color-category-line',
-                'polygon': 'color-category-polygon'
-            }
-        })
-
-        assert legend.get_info('line') == {
-            'type': 'color-category-line',
-            'prop': 'color',
-            'title': '',
-            'description': '',
-            'footer': '',
-            'dynamic': True,
-            'variable': ''
-        }
-
-    def test_wrong_input(self):
-        """Legend should raise an error if legend input is not valid"""
-        msg = 'Wrong legend input.'
-        with pytest.raises(ValueError) as e:
-            Legend(1234)
-        assert str(e.value) == msg
 
     def test_wrong_type(self):
         """Legend should raise an error if legend type is not valid"""
@@ -95,13 +51,13 @@ class TestLegend(object):
             'size-category, size-category-line, size-category-point, ' + \
             'size-continuous, size-continuous-line, size-continuous-point.'
         with pytest.raises(ValueError) as e:
-            Legend({'type': 'xxx'}).get_info()
+            Legend('xxx').get_info()
         assert str(e.value) == msg
 
     def test_wrong_prop(self):
         """Legend should raise an error if legend prop is not valid"""
         msg = 'Legend property "xxx" is not valid. Valid legend properties are: ' + \
-            'color, strokeColor, width, strokeWidth.'
+            'color, stroke-color, size, stroke-width.'
         with pytest.raises(ValueError) as e:
-            Legend({'type': 'color-category', 'prop': 'xxx'}).get_info()
+            Legend('color-category', prop='xxx').get_info()
         assert str(e.value) == msg

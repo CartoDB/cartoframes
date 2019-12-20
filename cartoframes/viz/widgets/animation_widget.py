@@ -1,9 +1,7 @@
-from __future__ import absolute_import
-
 from ..widget import Widget
 
 
-def animation_widget(**kwargs):
+def animation_widget(title='', description='', footer=''):
     """Helper function for quickly creating an animated widget.
     The animation widget includes an animation status bar as well as controls to play or pause animated data.
     The `filter` property of your map's style, applied to either a date or numeric field, drives both
@@ -24,8 +22,7 @@ def animation_widget(**kwargs):
 
         .. code::
 
-            from cartoframes.viz import Map, Layer
-            from cartoframes.viz import animation_widget
+            from cartoframes.viz import Map, Layer, animation_widget
 
             Map(
                 Layer(
@@ -41,7 +38,7 @@ def animation_widget(**kwargs):
 
     """
 
-    data = kwargs
-    data['type'] = 'animation'
-
-    return Widget(data)
+    return Widget('animation',
+                  title=title,
+                  description=description,
+                  footer=footer)

@@ -29,10 +29,17 @@ STYLE_PROPERTIES = [
 
 LEGEND_PROPERTIES = [
     'color',
-    'strokeColor',
-    'width',
-    'strokeWidth'
+    'stroke-color',
+    'size',
+    'stroke-width'
 ]
+
+REPLACE_PROPERTY_TYPE = {
+    'color': 'color',
+    'stroke-color': 'strokeColor',
+    'size': 'width',
+    'stroke-width': 'strokeWidth'
+}
 
 LEGEND_TYPES = [
     'default',

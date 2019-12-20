@@ -1,9 +1,7 @@
-from __future__ import absolute_import
-
 from ..widget import Widget
 
 
-def histogram_widget(value, **kwargs):
+def histogram_widget(value, title='', description='', footer='', read_only=False, buckets=20):
     """Helper function for quickly creating a histogram widget.
 
     Histogram widgets display the distribution of a numeric attribute, in buckets, to group
@@ -17,8 +15,8 @@ def histogram_widget(value, **kwargs):
         description (str, optional): Description text widget placed under widget title.
         footer (str, optional): Footer text placed on the widget bottom
         buckets (number, optional): Number of histogram buckets. Set to 20 by default.
-        read_only (boolean, optional): Interactively filter a range of numeric values by selecting them in the widget.
-          Set to "False" by default.
+        read_only (boolean, optional): Interactively filter a range of numeric values by
+            selecting them in the widget. Set to "False" by default.
 
     Returns:
         cartoframes.viz.Widget: Widget with type='histogram'
@@ -27,8 +25,7 @@ def histogram_widget(value, **kwargs):
 
         .. code::
 
-            from cartoframes.viz import Map, Layer
-            from cartoframes.viz import histogram_widget
+            from cartoframes.viz import Map, Layer, histogram_widget
 
             Map(
                 Layer(
@@ -45,8 +42,10 @@ def histogram_widget(value, **kwargs):
             )
     """
 
-    data = kwargs
-    data['type'] = 'histogram'
-    data['value'] = value
-    data['read_only'] = kwargs.get('read_only', False)
-    return Widget(data)
+    return Widget('histogram',
+                  value=value,
+                  title=title,
+                  description=description,
+                  footer=footer,
+                  read_only=read_only,
+                  buckets=buckets)

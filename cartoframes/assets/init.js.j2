@@ -5,7 +5,6 @@ document
     const basemap = '{{basemap}}';
     const bounds = {{ bounds }};
     const camera = {{ camera|tojson }};
-    const default_legend = '{{default_legend}}' === 'True';
     const has_legends = '{{has_legends}}' === 'True';
     const is_static = '{{is_static}}' === 'True';
     const layers = {{ layers|tojson }};
@@ -17,7 +16,6 @@ document
       basemap,
       bounds,
       camera,
-      default_legend,
       has_legends,
       is_static,
       layers,
