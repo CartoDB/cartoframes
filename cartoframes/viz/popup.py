@@ -3,39 +3,12 @@ from __future__ import absolute_import
 from ..utils.utils import gen_variable_name, gen_column_name
 
 
-class Popup(object):
-    """Popup
+class Popup():
+    """Popups can be added to each layer and displayed in the visualization when clicking or hovering
+    features.
 
-    Args:
-        event (str): Popup type. It can be 'hover' or 'click'
-        value (str): Column name to display the value for each feature
-        title (str, optional): Title for the given value. By default, it's the name of the value
-
-    Example:
-
-    .. code::
-
-        from cartoframes.viz import Map, Layer, Popup
-
-        Map(
-            Layer(
-                'buildings_table',
-                popups=Popup('hover', value='amount')
-            )
-        )
-
-    .. code::
-
-        from cartoframes.viz import Map, Layer, Popup
-
-        Map(
-            Layer(
-                'buildings_table',
-                popups=[
-                    Popup('click', value='amount', title='Price $')
-                ]
-            )
-        )
+    They should be added by using the :py:meth:`popup_element <cartoframes.viz.popup_element>` in each
+    Layer popup.
     """
 
     def __init__(self, event=None, value=None, title=None, operation=False):

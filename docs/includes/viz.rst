@@ -1,7 +1,7 @@
 Viz
 ---
 
-Viz namespace contains all the classes to create a visualization
+Viz namespace contains all the classes to create visualizations based on data
 
 Map
 ^^^
@@ -16,7 +16,6 @@ Basemaps
 .. automodule:: cartoframes.viz.basemaps.Basemaps
     :undoc-members:
     :show-inheritance:
-    :exclude-members: popups, PopupList, WidgetList, LegendList
 
 Themes
 ^^^^^^
@@ -69,6 +68,15 @@ Legends
               size_category_legend,
               size_bins_legend,
               size_continuous_legend
+
+Popups
+^^^^^^
+
+.. automodule:: cartoframes.viz.Popup
+
+.. automodule:: cartoframes.viz
+    :noindex:
+    :members: popup_element
 
 Helpers
 ^^^^^^^
