@@ -113,9 +113,6 @@ class EnrichmentService(object):
                     )
                 )
 
-            if 'dataset' not in tables_metadata[table_name].keys():
-                tables_metadata[table_name]['dataset'] = self.__get_dataset(variable, table_name)
-
             if 'geo_table' not in tables_metadata[table_name].keys():
                 tables_metadata[table_name]['geo_table'] = self.__get_geo_table(variable)
 
@@ -126,19 +123,15 @@ class EnrichmentService(object):
 
     def __get_enrichment_table_by_variable(self, variable):
         if variable.project_name != self.bq_public_project:
-            return 'view_{dataset}_{table}'.format(
+            table = 'view_{dataset}_{table}'.format(
                 dataset=variable.schema_name,
                 table=variable.dataset_name
             )
-        else:
-            return variable.dataset_name
 
-    def __get_dataset(self, variable, table_name):
-        if variable.project_name != self.bq_public_project:
-            return '{project}.{dataset}.{table_name}'.format(
+            return '{project}.{dataset}.{table}'.format(
                 project=self.bq_project,
                 dataset=self.bq_dataset,
-                table_name=table_name
+                table=table
             )
         else:
             return variable.dataset
@@ -173,13 +166,12 @@ class EnrichmentService(object):
     def _get_points_enrichment_sql(self, temp_table_name, variables, filters):
         tables_metadata = self._get_tables_metadata(variables, filters).items()
 
-        return [self._build_points_query(metadata, temp_table_name)
-                for _, metadata in tables_metadata]
+        return [self._build_points_query(metadata, enrichment_table, temp_table_name)
+                for enrichment_table, metadata in tables_metadata]
 
-    def _build_points_query(self, metadata, temp_table_name):
+    def _build_points_query(self, metadata, enrichment_table, temp_table_name):
         variables = ['enrichment_table.{}'.format(variable.column_name) for variable in metadata['variables']]
         filters = metadata['filters']
-        enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
             project=self.bq_project,
@@ -190,7 +182,7 @@ class EnrichmentService(object):
         return '''
             SELECT data_table.{enrichment_id}, {variables},
                 ST_Area(enrichment_geo_table.geom) AS do_geom_area
-            FROM `{enrichment_dataset}` enrichment_table
+            FROM `{enrichment_table}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
                 JOIN `{data_table}` data_table
@@ -199,7 +191,7 @@ class EnrichmentService(object):
         '''.format(
             variables=', '.join(variables),
             geom_column=_GEOM_COLUMN,
-            enrichment_dataset=enrichment_dataset,
+            enrichment_table=enrichment_table,
             enrichment_geo_table=enrichment_geo_table,
             enrichment_id=_ENRICHMENT_ID,
             where=_build_where_clausule(filters),
@@ -209,13 +201,12 @@ class EnrichmentService(object):
     def _get_polygon_enrichment_sql(self, temp_table_name, variables, filters, aggregation):
         tables_metadata = self._get_tables_metadata(variables, filters).items()
 
-        return [self._build_polygons_query(metadata, temp_table_name, aggregation)
-                for _, metadata in tables_metadata]
+        return [self._build_polygons_query(metadata, enrichment_table, temp_table_name, aggregation)
+                for enrichment_table, metadata in tables_metadata]
 
-    def _build_polygons_query(self, metadata, temp_table_name, aggregation):
+    def _build_polygons_query(self, metadata, enrichment_table, temp_table_name, aggregation):
         variables = metadata['variables']
         filters = metadata['filters']
-        enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
             project=self.bq_project,
@@ -232,7 +223,7 @@ class EnrichmentService(object):
 
         return '''
             SELECT data_table.{enrichment_id}, {columns}
-            FROM `{enrichment_dataset}` enrichment_table
+            FROM `{enrichment_table}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
                 JOIN `{data_table}` data_table
@@ -241,7 +232,7 @@ class EnrichmentService(object):
             {grouper};
         '''.format(
                 geom_column=_GEOM_COLUMN,
-                enrichment_dataset=enrichment_dataset,
+                enrichment_table=enrichment_table,
                 enrichment_geo_table=enrichment_geo_table,
                 enrichment_id=_ENRICHMENT_ID,
                 where=_build_where_clausule(filters),
