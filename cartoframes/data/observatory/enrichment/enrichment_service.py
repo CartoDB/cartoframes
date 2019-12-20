@@ -219,7 +219,7 @@ class EnrichmentService(object):
 
         return '''
             SELECT data_table.{enrichment_id}, {variables},
-                ST_Area(enrichment_geo_table.geom) AS do_geom_area
+                ST_AREA(enrichment_geo_table.geom) AS do_area
             FROM `{enrichment_dataset}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
@@ -295,18 +295,18 @@ def _build_polygons_query_variable_with_aggregation(variable, aggregation):
         return """
             {aggregation}(
                 enrichment_table.{column} * (
-                    ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                    ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
                     /
-                    ST_area(data_table.{geo_column})
+                    ST_AREA(data_table.{geo_column})
                 )
-            ) AS {aggregation}_{column}
+            ) AS {column}
             """.format(
                 column=variable.column_name,
                 geo_column=_GEOM_COLUMN,
                 aggregation=variable_agg)
     else:
         return """
-            {aggregation}(enrichment_table.{column}) AS {aggregation}_{column}
+            {aggregation}(enrichment_table.{column}) AS {column}
             """.format(
                 column=variable.column_name,
                 aggregation=variable_agg)
@@ -317,10 +317,10 @@ def _build_polygons_query_variables_without_aggregation(variables):
 
     return """
         {variables},
-        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column})) AS intersected_area,
-        ST_area(enrichment_geo_table.geom) AS do_area,
-        ST_area(data_table.{geom_column}) AS user_area,
-        enrichment_geo_table.geoid as do_geoid
+        ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geom_column})) AS intersected_area,
+        ST_AREA(enrichment_geo_table.geom) AS do_area,
+        ST_AREA(data_table.{geom_column}) AS user_area,
+        enrichment_geo_table.geoid AS do_geoid
         """.format(
             variables=', '.join(variables),
             geom_column=_GEOM_COLUMN)
