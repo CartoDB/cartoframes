@@ -243,7 +243,7 @@ At this point, take a few minutes to explore the map to see how the Widget value
 In order to aid this map-based exploration, import the [Popup](developers/cartoframes/examples/#example-popup-on-hover) class and use the hover option on the `iso_cdf` Layer to be able to quickly hover over stores and get their ID:
 
 ```python
-from cartoframes.viz import hover_popup
+from cartoframes.viz import popup_element
 
 Map([
     Layer(
@@ -274,9 +274,9 @@ Map([
                 title='Store ID'
             )
         ],
-        popups=[
-            hover_popup('id_store', title='Store ID')
-        ]})
+        hover_popup=[
+            popup_element('id_store', title='Store ID')
+        ]
     ),
     Layer(
         stores_cdf
@@ -323,8 +323,8 @@ Map([
                 title='Store ID'
             )
         ],
-        popups=[
-            hover_popup('id_store', title='Store ID')
+        hover_popup=[
+            popup_element('id_store', title='Store ID')
         ]
     ),
     size_continuous_layer(
@@ -414,8 +414,8 @@ Map([
     ),
     Layer(
         stores_cdf,
-        popups=[
-            hover_popup('id_store', title='Store ID')
+        hover_popup=[
+            popup_element('id_store', title='Store ID')
         ]
     )
 ], viewport={'zoom': 12, 'lat': 40.644417, 'lng': -73.934710})
