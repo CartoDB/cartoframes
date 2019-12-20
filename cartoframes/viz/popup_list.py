@@ -3,33 +3,49 @@ from __future__ import absolute_import
 from .popup import Popup
 
 
-class PopupList(object):
+class PopupList():
     """PopupList
 
      Args:
-        popups (list, Popup): List of popups for a layer.
+        popups (dict, PopupElement): List of popups for a layer classified by interactivity event
+
+    Example:
+
+        .. code::
+
+        popupList = PopupList({
+            'click': [popup_element('name')],
+            'hover': [popup_element('pop_max')]
+        })
     """
 
-    def __init__(self, popups=None):
+    def __init__(self, popups):
         self._popups = self._init_popups(popups)
 
     def _init_popups(self, popups):
-        if isinstance(popups, list):
-            popup_list = []
-            for popup in popups:
-                if isinstance(popup, Popup):
-                    popup_list.append(popup)
-                else:
-                    raise ValueError('All PopupList elements must be Popups')
-            return popup_list
-        elif isinstance(popups, Popup):
-            return [popups]
+        if isinstance(popups, dict):
+            return self.get_popup_elements(popups)
         else:
             return []
 
     @property
     def elements(self):
         return self._popups
+
+    def get_popup_elements(self, popups):
+        popup_elements = []
+        click_popup_elements = popups.get('click')
+        hover_popup_elements = popups.get('hover')
+
+        if click_popup_elements:
+            for popup in click_popup_elements:
+                popup_elements.append(Popup('click', value=popup.get('value'), title=popup.get('title')))
+
+        if hover_popup_elements:
+            for popup in hover_popup_elements:
+                popup_elements.append(Popup('hover', value=popup.get('value'), title=popup.get('title')))
+
+        return popup_elements
 
     def get_interactivity(self):
         popups_interactivity = []

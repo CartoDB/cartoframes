@@ -1,11 +1,9 @@
-from cartoframes.viz import click_popup, hover_popup, Popup, PopupList
+from cartoframes.viz import popup_element, Popup, PopupList
 
-popup_list = PopupList([
-  click_popup('value_1'),
-  click_popup('value_2'),
-  hover_popup('value_1'),
-  hover_popup('value_3')
-])
+popup_list = PopupList({
+  'click': [popup_element('value_1'), popup_element('value_2')],
+  'hover': [popup_element('value_1'), popup_element('value_3')]
+})
 
 
 class TestPopupList(object):

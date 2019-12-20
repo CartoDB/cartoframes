@@ -20,9 +20,7 @@ class Popup(object):
         Map(
             Layer(
                 'buildings_table',
-                popups=[
-                    Popup('hover', value='amount')
-                ]
+                popups=Popup('hover', value='amount')
             )
         )
 

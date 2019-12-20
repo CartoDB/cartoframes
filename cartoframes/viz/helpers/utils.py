@@ -1,7 +1,7 @@
 
 from .. import defaults
 from ..popup import Popup
-from ..popups import hover_popup
+from ..popups import popup_element
 
 
 def serialize_palette(palette):
@@ -23,4 +23,4 @@ def get_popup(popup, title=None, alt_title=None, value=None, alt_value=None, ope
     popup_value = alt_value or value
     popup_title = title or alt_title
 
-    return hover_popup(popup_value, popup_title, operation=operation)
+    return [popup_element(popup_value, popup_title, operation=operation)]

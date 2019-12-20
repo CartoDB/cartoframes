@@ -14,7 +14,7 @@ from .widget_list import WidgetList
 from ..utils.utils import extract_viz_columns
 
 
-class Layer(object):
+class Layer():
     """Layer to display data on a map. This class can be used as one or more
     layers in :py:class:`Map <cartoframes.viz.Map>` or on its own in a Jupyter
     notebook to get a preview of a Layer.
@@ -25,9 +25,6 @@ class Layer(object):
             table name, SQL query or a dataframe.
         style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
             The style of the visualization.
-        popups (list of :py:class:`Popup <cartoframes.viz.Popup>`, optional):
-            This option adds interactivity (click_popup and hover_popup) to a layer to show popups.
-            See :py:class:`Popup <cartoframes.viz.Popup>` for more information.
         legend (dict or :py:class:`Legend <cartoframes.viz.Legend>`, optional):
             The legend definition for a layer. It contains the information
             to show a legend "type" (``color-category``, ``color-bins``,
@@ -38,6 +35,10 @@ class Layer(object):
             Widget or list of widgets for a layer. It contains the information to display
             different widget types on the top right of the map. See
             :py:class:`WidgetList` for more information.
+        click_popup(`Popup <cartoframes.viz.Popup>`, optional): Set up a popup to be
+            displayed on a click event.
+        hover_popup(`Popup <cartoframes.viz.Popup>`, optional): Set up a popup to be
+            displayed on a hover event.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             A Credentials instance. This is only used for the simplified Source API.
             When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
@@ -57,7 +58,7 @@ class Layer(object):
         .. code::
 
             from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Layer
+            from cartoframes.viz import Layer, popup_element
 
             set_default_credentials(
                 base_url='https://cartovl.carto.com',
@@ -67,12 +68,6 @@ class Layer(object):
             Layer(
                 "SELECT * FROM populated_places WHERE adm0name = 'Spain'",
                 'color: ramp(globalQuantiles($pop_max, 5), reverse(purpor))',
-                popups=[
-                    hover_popup('name'),
-                    click_popup('name'),
-                    click_popup('pop_max'),
-                    click_popup('pop_min')
-                ],
                 legend={
                     'type': 'color-category',
                     'title': 'Population'
@@ -81,7 +76,15 @@ class Layer(object):
                     'type': 'formula',
                     'title': 'Avg $pop_max',
                     'value': 'viewportAvg($pop_max)'
-                }]
+                }],
+                click_popup=[
+                    popup_element('name')
+                ],
+                hover_popup=[
+                    popup_element('name'),
+                    popup_element('pop_max'),
+                    popup_element('pop_min')
+                ]
             )
 
         Create a layer specifically tied to a :py:class:`Credentials
@@ -129,9 +132,10 @@ class Layer(object):
     def __init__(self,
                  source,
                  style=None,
-                 popups=None,
                  legend=None,
                  widgets=None,
+                 click_popup=None,
+                 hover_popup=None,
                  credentials=None,
                  bounds=None,
                  geom_col=None):
@@ -140,7 +144,7 @@ class Layer(object):
 
         self.source = _set_source(source, credentials, geom_col)
         self.style = _set_style(style)
-        self.popups = _set_popups(popups)
+        self.popups = _set_popups({'click': click_popup, 'hover': hover_popup})
         self.legend = _set_legend(legend)
         self.widgets = _set_widgets(widgets)
 
@@ -189,7 +193,7 @@ def _set_style(style):
 def _set_popups(popups):
     """Set a Popup class from the input"""
 
-    if isinstance(popups, (list, Popup)):
+    if isinstance(popups, (dict, Popup)):
         return PopupList(popups)
     else:
         return PopupList()

@@ -15,24 +15,21 @@ from .themes import Themes as themes
 from .widget import Widget
 from .widget_list import WidgetList
 from .popup_list import PopupList
-from .popups import hover_popup
-from .popups import click_popup
-
+from .popups import popup_element
 
 __all__ = [
     'basemaps',
-    'themes',
-    'Map',
-    'Layout',
     'Layer',
-    'Source',
-    'Style',
-    'Popup',
+    'Layout',
     'Legend',
     'LegendList',
-    'Widget',
-    'WidgetList',
+    'Map',
+    'popup_element',
+    'Popup',
     'PopupList',
-    'hover_popup',
-    'click_popup'
+    'Source',
+    'Style',
+    'themes',
+    'Widget',
+    'WidgetList'
 ]
