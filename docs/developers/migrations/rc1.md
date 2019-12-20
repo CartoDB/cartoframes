@@ -5,6 +5,7 @@ Migration notes from `1.0b7` to `rc1`
 * [Popups](#Popups)
 * [Widgets](#Widgets)
 * [Legends](#Legends)
+* [Style](#Style)
 
 ## Popups
 
@@ -258,6 +259,43 @@ Map(
     'table_name',
     style='...',
     legends=color_category_legend('color-bins', title='Legend Title', prop='stroke-color')
+  )
+)
+```
+</p>
+</details>
+
+## Style
+
+* [Related Issue](https://github.com/CartoDB/cartoframes/issues/1345)
+
+<details><summary>Remove "string syntax"</summary>
+<p>
+
+Replace CARTO VL style syntax by using style helpers.
+
+* From:
+
+```python
+from cartoframes.viz import Map, Layer, Style
+
+Map(
+  Layer(
+    'table_name',
+    style='color: blue strokeColor: white'
+  )
+)
+```
+
+* To:
+
+```python
+from cartoframes.viz import Map, Layer, basic_style
+
+Map(
+  Layer(
+    'table_name',
+    style=basic_style(color='blue', stroke_color='white')
   )
 )
 ```
