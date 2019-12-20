@@ -1,5 +1,5 @@
 from cartoframes.auth import Credentials
-from cartoframes.viz import Map, Layer, Source, click_popup, hover_popup, constants
+from cartoframes.viz import Map, Layer, Source, popup_element, constants
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
 from cartoframes.core.managers.context_manager import ContextManager
 
@@ -88,10 +88,12 @@ class TestMapLayer(object):
         source_1 = Source(build_cartodataframe([-10, 0], [-10, 0], ['pop', 'name']))
         layer = Layer(
             source_1,
-            popups=[
-                click_popup('pop'),
-                click_popup('name'),
-                hover_popup('pop', 'Pop')
+            click_popup=[
+                popup_element('pop'),
+                popup_element('name')
+            ],
+            hover_popup=[
+                popup_element('pop', 'Pop')
             ]
         )
 
@@ -122,8 +124,7 @@ class TestMapLayer(object):
         """Map layer should get the default event if the interactivity is set to []"""
         source_1 = Source(build_cartodataframe([-10, 0], [-10, 0]))
         layer = Layer(
-            source_1,
-            popups=False
+            source_1
         )
 
         map = Map(layer)
