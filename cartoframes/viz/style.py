@@ -2,49 +2,11 @@ from ..utils.utils import merge_dicts, text_match
 from . import defaults
 
 
-class Style(object):
+class Style():
     """Style
 
     Args:
-        data (str, dict): The style for the layer. It can be a dictionary or a viz string.
-          More info at
-          `CARTO VL styling <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`
-
-    Example:
-
-        String API.
-
-        .. code::
-
-            from cartoframes.viz import Style
-
-            Style('color: blue')
-
-            Style('''
-                @sum: sqrt($pop_max) / 100
-                @grad: [red, blue, green]
-                color: ramp(globalEqIntervals($pop_min, 3), @grad)
-                filter: @sum > 20
-            ''')
-
-        Dict API.
-
-        .. code::
-
-            from cartoframes.viz import Style
-
-            Style({
-                'color': 'blue'
-            })
-
-            Style({
-                'vars': {
-                    'sum': 'sqrt($pop_max) / 100',
-                    'grad': '[red, blue, green]'
-                },
-                'color': 'ramp(globalEqIntervals($pop_min, 3), @grad)',
-                'filter': '@sum > 20'
-            })
+        data (str, dict): The style for the layer.
     """
 
     def __init__(self, data=None):

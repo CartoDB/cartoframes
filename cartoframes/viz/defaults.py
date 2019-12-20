@@ -18,3 +18,40 @@ STYLE = {
         'opacity': '0.9'
     }
 }
+
+COLOR_PALETTES = [
+    "BURG",
+    "BURGYL",
+    "REDOR",
+    "ORYEL",
+    "PEACH",
+    "PINKYL",
+    "MINT",
+    "BLUGRN",
+    "DARKMINT",
+    "EMRLD",
+    "AG_GRNYL",
+    "BLUYL",
+    "TEAL",
+    "TEALGRN",
+    "PURP",
+    "PURPOR",
+    "SUNSET",
+    "MAGENTA",
+    "SUNSETDARK",
+    "AG_SUNSET",
+    "BRWNYL",
+    "ARMYROSE",
+    "FALL",
+    "GEYSER",
+    "TEMPS",
+    "TEALROSE",
+    "TROPIC",
+    "EARTH",
+    "ANTIQUE",
+    "BOLD",
+    "PASTEL",
+    "PRISM",
+    "SAFE",
+    "VIVID"
+]

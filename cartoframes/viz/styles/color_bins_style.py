@@ -14,7 +14,8 @@ def color_bins_style(
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
         breaks (list<int>, optional): Assign manual class break values.
         palette (str, optional): Palette that can be a named cartocolor palette
-          or other valid CARTO VL palette expression. Default is `purpor`.
+          or other valid color palette. Use `help(cartoframes.viz.color_palettes)` to
+          get more information. Default is "purpor".
         size (int, optional): Size of point or line features.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.

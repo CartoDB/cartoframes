@@ -12,8 +12,9 @@ def isolines_layer(source, value=RANGE_LABEL_KEY, **kwargs):
         top (int, optional): Number of category for map. Default is 11. Values
           can range from 1 to 16.
         cat (list<str>, optional): Category list. Must be a valid list of categories.
-        palette (str, optional): Palette that can be a named CARTOColor palette
-          or other valid CARTO VL palette expression. Default is `bold`.
+        palette (str, optional): Palette that can be a named cartocolor palette
+          or other valid color palette. Use `help(cartoframes.viz.color_palettes)` to
+          get more information. Default is "bold".
         size (int, optional): Size of point or line features.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.

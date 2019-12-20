@@ -30,12 +30,15 @@ from .legends import size_bins_legend
 from .legends import size_category_legend
 from .legends import size_continuous_legend
 
+from .defaults import COLOR_PALETTES as color_palettes
+
 __all__ = [
     'Map',
     'Layer',
     'Layout',
     'basemaps',
     'themes',
+    'color_palettes',
     'basic_style',
     'color_bins_style',
     'color_category_style',

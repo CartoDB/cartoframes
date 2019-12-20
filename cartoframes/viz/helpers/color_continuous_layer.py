@@ -19,8 +19,9 @@ def color_continuous_layer(
           color ramp. Defaults to the globalMIN of the dataset.
         range_max (int, optional): The maximum value of the data range for the continuous
           color ramp. Defaults to the globalMAX of the dataset.
-        palette (str, optional): Palette that can be a named CARTOColor palette
-          or other valid CARTO VL palette expression. Default is `bluyl`.
+        palette (str, optional): Palette that can be a named cartocolor palette
+          or other valid color palette. Use `help(cartoframes.viz.color_palettes)` to
+          get more information. Default is "bluyl".
         size (int, optional): Size of point or line features.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.

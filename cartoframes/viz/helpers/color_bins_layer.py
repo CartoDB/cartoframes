@@ -20,7 +20,8 @@ def color_bins_layer(
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
         breaks (list<int>, optional): Assign manual class break values.
         palette (str, optional): Palette that can be a named cartocolor palette
-          or other valid CARTO VL palette expression. Default is `purpor`.
+          or other valid color palette. Use `help(cartoframes.viz.color_palettes)` to
+          get more information. Default is "purpor".
         size (int, optional): Size of point or line features.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
@@ -31,7 +32,7 @@ def color_bins_layer(
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
           Set to "True" by default.
-        popups (bool, list of :py:class:`Popup <cartoframes.viz.Popup>`, default False, optional):
+        popups (bool, list of :py:class:`Popup <cartoframes.viz.Popup>`, optional):
           Display popups on hover and click: "True" or "False". Set to "True" by default.
         widget (bool, optional): Display a widget for mapped data: "True" or "False".
           Set to "False" by default.
@@ -46,6 +47,7 @@ def color_bins_layer(
         cartoframes.viz.Layer: Layer styled by `value`.
         Includes a legend, popup and widget on `value`.
     """
+
     if method not in ('quantiles', 'equal', 'stdev'):
         raise ValueError('Available methods are: "quantiles", "equal", "stdev".')
 
