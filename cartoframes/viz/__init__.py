@@ -16,6 +16,11 @@ from .widget import Widget
 from .widget_list import WidgetList
 
 from .styles import color_bins_style
+from .styles import color_category_style
+from .styles import color_continuous_style
+from .styles import size_bins_style
+from .styles import size_category_style
+from .styles import size_continuous_style
 
 from .widgets import animation_widget
 from .widgets import category_widget
@@ -39,6 +44,11 @@ __all__ = [
     'WidgetList',
 
     'color_bins_style',
+    'color_category_style',
+    'color_continuous_style',
+    'size_bins_style',
+    'size_category_style',
+    'size_continuous_style',
 
     'animation_widget',
     'category_widget',

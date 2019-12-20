@@ -1,16 +1,15 @@
-from ..helpers.utils import serialize_palette, get_value
-
 from ..style import Style
+from ..helpers.utils import serialize_palette, get_value
 
 
 def color_category_style(
         value, top=11, cat=None, palette=None, size=None, opacity=None,
-        stroke_color=None, stroke_width=None, animate=None, credentials=None):
+        stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a color category style.
 
     Args:
         value (str): Column to symbolize by.
-        top (int, optional): Number of category for map. Default is 11. Values
+        top (int, optional): Number of categories. Default is 11. Values
           can range from 1 to 16.
         cat (list<str>, optional): Category list. Must be a valid list of categories.
         palette (str, optional): Palette that can be a named CARTOColor palette
@@ -22,14 +21,9 @@ def color_category_style(
         stroke_color (str, optional): Color of the stroke on point features.
           Default is '#222'.
         animate (str, optional): Animate features by date/time or other numeric field.
-        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-          A Credentials instance. This is only used for the simplified Source API.
-          When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
-          these credentials is simply ignored. If not provided the credentials will be
-          automatically obtained from the default credentials.
 
     Returns:
-        cartoframes.viz.Style
+        :py:class:`Style <cartoframes.viz.Style>`
     """
     func = 'buckets' if cat else 'top'
     default_palette = 'bold'

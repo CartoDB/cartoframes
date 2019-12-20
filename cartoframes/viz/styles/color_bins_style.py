@@ -1,11 +1,10 @@
-from ..helpers.utils import serialize_palette, get_value
-
 from ..style import Style
+from ..helpers.utils import serialize_palette, get_value
 
 
 def color_bins_style(
         value, method='quantiles', bins=5, breaks=None, palette=None, size=None,
-        opacity=None, stroke_color=None, stroke_width=None, animate=None, credentials=None):
+        opacity=None, stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a color bins style.
 
     Args:
@@ -23,14 +22,9 @@ def color_bins_style(
         stroke_color (str, optional): Color of the stroke on point features.
           Default is '#222'.
         animate (str, optional): Animate features by date/time or other numeric field.
-        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-          A Credentials instance. This is only used for the simplified Source API.
-          When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
-          these credentials is simply ignored. If not provided the credentials will be
-          automatically obtained from the default credentials.
 
     Returns:
-        cartoframes.viz.Style
+        :py:class:`Style <cartoframes.viz.Style>`
     """
     if method not in ('quantiles', 'equal', 'stdev'):
         raise ValueError('Available methods are: "quantiles", "equal", "stdev".')
