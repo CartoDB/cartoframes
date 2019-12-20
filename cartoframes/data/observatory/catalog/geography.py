@@ -126,8 +126,7 @@ class Geography(CatalogEntity):
 
     @property
     def geom_coverage(self):
-        """Shows a map to visualize the geographical coverage of the geography data.
-        """
+        """Geographical coverage geometry encoded in WKB."""
 
         return self.data['geom_coverage']
 
