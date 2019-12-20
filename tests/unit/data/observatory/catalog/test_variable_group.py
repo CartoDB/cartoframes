@@ -25,30 +25,6 @@ class TestVariableGroup(object):
         assert isinstance(variable_group, VariableGroup)
         assert variable_group == test_variable_group1
 
-    def test_get_variable_group_by_id_from_variables_groups_list(self):
-        # Given
-        variables_groups = CatalogList([test_variable_group1, test_variable_group2])
-
-        # When
-        variable_group = variables_groups.get(test_variable_group1.id)
-
-        # Then
-        assert isinstance(variable_group, object)
-        assert isinstance(variable_group, VariableGroup)
-        assert variable_group == test_variable_group1
-
-    def test_get_variable_group_by_slug_from_variables_groups_leist(self):
-        # Given
-        variables_groups = CatalogList([test_variable_group1, test_variable_group2])
-
-        # When
-        variable_group = variables_groups.get(test_variable_group1.slug)
-
-        # Then
-        assert isinstance(variable_group, object)
-        assert isinstance(variable_group, VariableGroup)
-        assert variable_group == test_variable_group1
-
     @patch.object(VariableRepository, 'get_all')
     def test_get_variables_by_variable_group(self, mocked_repo):
         # Given

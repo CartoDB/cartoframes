@@ -27,18 +27,6 @@ class TestCountry(object):
         assert isinstance(country, Country)
         assert country == test_country1
 
-    def test_get_country_by_id_from_countries_list(self):
-        # Given
-        countries = CatalogList([test_country1, test_country2])
-
-        # When
-        country = countries.get(test_country1.id)
-
-        # Then
-        assert isinstance(country, object)
-        assert isinstance(country, Country)
-        assert country == test_country1
-
     @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_country(self, mocked_repo):
         # Given
