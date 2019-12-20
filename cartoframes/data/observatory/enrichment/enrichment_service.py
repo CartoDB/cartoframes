@@ -98,12 +98,20 @@ class EnrichmentService(object):
             tablename=tablename
         )
 
-    def _get_tables_metadata(self, variables):
+    def _get_tables_metadata(self, variables, filters):
         tables_metadata = defaultdict(lambda: defaultdict(list))
 
         for variable in variables:
-            table_name = self.__get_enrichment_table(variable)
+            table_name = self.__get_enrichment_table_by_variable(variable)
             tables_metadata[table_name]['variables'].append(variable)
+
+            if variable.id in filters:
+                tables_metadata[table_name]['filters'].append(
+                    _build_where_condition(
+                        variable.column_name,
+                        filters[variable.id]
+                    )
+                )
 
             if 'dataset' not in tables_metadata[table_name].keys():
                 tables_metadata[table_name]['dataset'] = self.__get_dataset(variable, table_name)
@@ -116,7 +124,7 @@ class EnrichmentService(object):
 
         return tables_metadata
 
-    def __get_enrichment_table(self, variable):
+    def __get_enrichment_table_by_variable(self, variable):
         if variable.project_name != self.bq_public_project:
             return 'view_{dataset}_{table}'.format(
                 dataset=variable.schema_name,
@@ -163,13 +171,14 @@ class EnrichmentService(object):
         return project
 
     def _get_points_enrichment_sql(self, temp_table_name, variables, filters):
-        tables_metadata = self._get_tables_metadata(variables).items()
+        tables_metadata = self._get_tables_metadata(variables, filters).items()
 
-        return [self._build_points_query(metadata, temp_table_name, filters)
+        return [self._build_points_query(metadata, temp_table_name)
                 for _, metadata in tables_metadata]
 
-    def _build_points_query(self, metadata, temp_table_name, filters):
+    def _build_points_query(self, metadata, temp_table_name):
         variables = ['enrichment_table.{}'.format(variable.column_name) for variable in metadata['variables']]
+        filters = metadata['filters']
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
@@ -198,13 +207,14 @@ class EnrichmentService(object):
         )
 
     def _get_polygon_enrichment_sql(self, temp_table_name, variables, filters, aggregation):
-        tables_metadata = self._get_tables_metadata(variables).items()
+        tables_metadata = self._get_tables_metadata(variables, filters).items()
 
-        return [self._build_polygons_query(metadata, temp_table_name, filters, aggregation)
+        return [self._build_polygons_query(metadata, temp_table_name, aggregation)
                 for _, metadata in tables_metadata]
 
-    def _build_polygons_query(self, metadata, temp_table_name, filters, aggregation):
+    def _build_polygons_query(self, metadata, temp_table_name, aggregation):
         variables = metadata['variables']
+        filters = metadata['filters']
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
@@ -287,11 +297,14 @@ def _build_polygons_query_variables_without_aggregation(variables):
             geom_column=_GEOM_COLUMN)
 
 
+def _build_where_condition(column, condition):
+    return "enrichment_table.{} {}".format(column, condition)
+
+
 def _build_where_clausule(filters):
     where = ''
     if len(filters) > 0:
-        where_clausules = ["enrichment_table.{} {}".format(f.variable.column_name, f.query) for f in filters]
-        where = 'WHERE {}'.format(' AND '.join(where_clausules))
+        where = 'WHERE {}'.format(' AND '.join(filters))
 
     return where
 
