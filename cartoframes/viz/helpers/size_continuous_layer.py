@@ -18,10 +18,9 @@ def size_continuous_layer(
           size ramp. Defaults to the globalMIN of the dataset.
         range_max (int, optional): The maximum value of the data range for the continuous
           size ramp. Defaults to the globalMAX of the dataset.
-        size (str, optional): Min/max size array in CARTO VL syntax. Default is
+        size (str, optional): Min/max size array as a string. Default is
           '[2, 40]' for point geometries and '[1, 10]' for lines.
-        color (str, optional): Hex value, rgb expression, or other valid
-          CARTO VL color. Defaults is '#FFB927' for point geometries and
+        color (str, optional): Hex, rgb or named color value. Defaults is '#FFB927' for point geometries and
           '#4CC8A3' for lines.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.

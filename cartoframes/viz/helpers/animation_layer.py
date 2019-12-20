@@ -14,8 +14,7 @@ def animation_layer(
           or text representing a table or query associated with user account.
         value (str): Column to symbolize by.
         title (str, optional): Title of widget.
-        color (str, optional): Hex value, rgb expression, or other valid
-          CARTO VL color. Default is '#EE5D5A' for point geometries,
+        color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for point geometries,
           '#4CC8A3' for lines and #826DBA for polygons.
         size (int, optional): Size of point or line features.
         opacity (int, optional): Opacity value for point color and line features.

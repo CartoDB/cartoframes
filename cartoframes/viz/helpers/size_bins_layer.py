@@ -19,10 +19,9 @@ def size_bins_layer(
           Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
         breaks (list<int>, optional): Assign manual class break values.
-        size (int, optional): Min/max size array in CARTO VL syntax. Default is
+        size (str, optional): Min/max size array as a string. Default is
           '[2, 14]' for point geometries and '[1, 10]' for lines.
-        color (str, optional): Hex value, rgb expression, or other valid
-          CARTO VL color. Default is '#EE5D5A' for point geometries and
+        color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for point geometries and
           '#4CC8A3' for lines.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
