@@ -335,7 +335,7 @@ class Enrichment(EnrichmentService):
                 variables = [variable1, variable2, variable3]
 
                 enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=Enrichment.AGGREGATION_NONE)
+                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=None)
         """
         variables = prepare_variables(variables, self.credentials, aggregation)
 
