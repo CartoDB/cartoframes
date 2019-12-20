@@ -6,7 +6,7 @@ from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geograph
 from enrichment_mock import CatalogEntityWithGeographyMock, GeographyMock
 from cartoframes.data.observatory.enrichment.enrichment_service import AGGREGATION_DEFAULT, AGGREGATION_NONE, \
     prepare_variables, _GEOM_COLUMN, _build_polygons_query_variables_without_aggregation, \
-    _build_polygons_query_variables_with_aggregation
+    _build_polygons_query_variables_with_aggregation, _build_where_clausule, _build_where_condition
 
 _WORKING_PROJECT = 'carto-do-customers'
 _PUBLIC_PROJECT = 'carto-do-public-data'
@@ -643,8 +643,8 @@ class TestPolygonEnrichment(object):
         })
         variables = [variable]
 
-        variable_filter = {variable.id: "= 'a string'"}
-        filters = [variable_filter]
+        filters = {variable.id: "= 'a string'"}
+        expected_filters = [_build_where_condition(variable.column_name, filters[variable.id])]
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
@@ -655,11 +655,16 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            _get_query(agg, variables, self.username, view, geo_view, temp_table_name, filters)
+            _get_query(agg, variables, self.username, view, geo_view, temp_table_name, expected_filters)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
         expected = sorted(_clean_queries(expected_queries))
+
+        print(' ')
+        print(actual)
+        print(' ')
+        print(expected)
 
         assert actual == expected
 
@@ -736,7 +741,7 @@ def _get_query(agg, columns, username, view, geo_table, temp_table_name, filters
             geo_table=geo_table,
             temp_table_name=temp_table_name,
             data_geom_column=_GEOM_COLUMN,
-            where=_get_where(filters),
+            where=_build_where_clausule(filters),
             group=group)
 
 
@@ -763,16 +768,6 @@ def _get_column_sql(agg, column):
                 aggregation=agg)
 
 
-def _get_where(filters):
-    where = ''
-    if filters and len(filters) > 0:
-        where_clausules = ["enrichment_table.{} {}".format(f.variable.column_name, f.query)
-                           for f in filters]
-        where = 'WHERE {}'.format('AND '.join(where_clausules))
-
-    return where
-
-
 def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_table_name, filters=[]):
     columns = ', '.join(_get_column_sql(agg, column) for column in columns)
 
@@ -795,4 +790,4 @@ def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_ta
             geo_table=geo_table,
             temp_table_name=temp_table_name,
             data_geom_column=_GEOM_COLUMN,
-            where=_get_where(filters))
+            where=_build_where_clausule(filters))
