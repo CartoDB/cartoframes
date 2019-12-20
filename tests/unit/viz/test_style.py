@@ -1,4 +1,4 @@
-from cartoframes.viz import Style
+from cartoframes.viz.style import Style
 
 
 class TestStyle(object):

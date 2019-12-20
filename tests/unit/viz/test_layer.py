@@ -1,5 +1,10 @@
 from cartoframes.auth import Credentials
-from cartoframes.viz import Layer, LegendList, WidgetList, PopupList, Source, Style
+from cartoframes.viz.legend_list import LegendList
+from cartoframes.viz.widget_list import WidgetList
+from cartoframes.viz.popup_list import PopupList
+from cartoframes.viz.source import Source
+from cartoframes.viz.style import Style
+from cartoframes.viz import Layer
 from cartoframes.core.managers.context_manager import ContextManager
 
 

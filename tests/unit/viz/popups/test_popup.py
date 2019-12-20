@@ -1,6 +1,6 @@
 import pytest
 
-from cartoframes.viz import Popup
+from cartoframes.viz.popup import Popup
 
 
 class TestPopup(object):
