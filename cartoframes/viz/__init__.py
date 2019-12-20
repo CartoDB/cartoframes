@@ -1,9 +1,13 @@
-from .basemaps import Basemaps as basemaps
+from .map import Map
 from .layer import Layer
 from .layout import Layout
-from .map import Map
+
 from .themes import Themes as themes
+from .basemaps import Basemaps as basemaps
+
 from .popups import popup_element
+
+from .styles import basic_style
 from .styles import color_bins_style
 from .styles import color_category_style
 from .styles import color_continuous_style
@@ -32,6 +36,7 @@ __all__ = [
     'Layout',
     'basemaps',
     'themes',
+    'basic_style',
     'color_bins_style',
     'color_category_style',
     'color_continuous_style',
