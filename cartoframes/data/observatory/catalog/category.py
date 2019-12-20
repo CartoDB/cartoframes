@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from .entity import CatalogEntity
 from .repository.constants import CATEGORY_FILTER
 from .repository.category_repo import get_category_repo

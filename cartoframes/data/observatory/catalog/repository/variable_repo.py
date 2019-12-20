@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from .constants import DATASET_FILTER, VARIABLE_GROUP_FILTER
 from .entity_repo import EntityRepository
 

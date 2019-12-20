@@ -2,7 +2,7 @@ from numpy import ndarray
 from pandas import DataFrame, Series
 from geopandas import GeoDataFrame, points_from_xy
 
-from ..utils.geom_utils import decode_geometry_column
+from ..utils import utils, geom_utils
 
 
 class CartoDataFrame(GeoDataFrame):
@@ -181,7 +181,8 @@ class CartoDataFrame(GeoDataFrame):
         from ..io.carto import to_carto
         return to_carto(self, table_name, credentials, if_exists, geom_col, index, index_label)
 
-    def viz(self, style=None, popup=None, legend=None, widgets=None, credentials=None, bounds=None, geom_col=None):
+    def viz(self, style=None, legend=None, widgets=None, click_popup=None, hover_popup=None,
+            credentials=None, bounds=None, geom_col=None):
         """
         Creates a quick :py:class:`Map <cartoframes.viz.Map>` visualization.
         This is equivalent to `Map(Layer(cdf))`.
@@ -189,10 +190,6 @@ class CartoDataFrame(GeoDataFrame):
         Args:
             style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
                 The style of the visualization.
-            popup (dict or :py:class:`Popup <cartoframes.viz.Popup>`, optional):
-                This option adds interactivity (click and hover) to a layer to show popups.
-                The columns to be shown must be added in a list format for each event.
-                See :py:class:`Popup <cartoframes.viz.Popup>` for more information.
             legend (dict or :py:class:`Legend <cartoframes.viz.Legend>`, optional):
                 The legend definition for a layer. It contains the information
                 to show a legend "type" (``color-category``, ``color-bins``,
@@ -203,6 +200,10 @@ class CartoDataFrame(GeoDataFrame):
                 Widget or list of widgets for a layer. It contains the information to display
                 different widget types on the top right of the map. See
                 :py:class:`WidgetList` for more information.
+            click_popup(bool, `Popup <cartoframes.viz.Popup>`, default False, optional): Set up a popup
+                to be displayed on a click event.
+            hover_popup(bool, `Popup <cartoframes.viz.Popup>`, default False, optional): Set up a popup
+                to be displayed on a hover event.
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 A Credentials instance. This is only used for the simplified Source API.
                 When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
@@ -226,7 +227,7 @@ class CartoDataFrame(GeoDataFrame):
                 cdf.viz()
         """
         from ..viz import Map, Layer
-        return Map(Layer(self, style, popup, legend, widgets, credentials, bounds, geom_col))
+        return Map(Layer(self, style, legend, widgets, click_popup, hover_popup, credentials, bounds, geom_col))
 
     def has_geometry(self):
         """
@@ -269,10 +270,12 @@ class CartoDataFrame(GeoDataFrame):
             frame = self.copy()
 
         # Decode geometry
-        if isinstance(col, str) and col in frame:
-            frame[col] = decode_geometry_column(frame[col])
+        if isinstance(col, str):
+            if col not in frame:
+                raise Exception('Column "{0}" does not exist.'.format(col))
+            frame[col] = geom_utils.decode_geometry_column(frame[col])
         else:
-            col = decode_geometry_column(col)
+            col = geom_utils.decode_geometry_column(col)
 
         # Call super set_geometry with decoded column
         super(CartoDataFrame, frame).set_geometry(col, drop=drop, inplace=True, crs=crs)
@@ -356,6 +359,7 @@ class CartoDataFrame(GeoDataFrame):
         return result
 
     def plot(self, *args, **kwargs):
+        utils.check_package('matplotlib', is_optional=True)
         if self.has_geometry():
             return GeoDataFrame.plot(self, *args, **kwargs)
         else:

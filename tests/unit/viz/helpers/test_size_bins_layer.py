@@ -7,6 +7,7 @@ from . import setup_mocks
 from ..utils import build_cartodataframe
 
 
+@pytest.mark.skip(reason="This helper will be removed")
 class TestSizeBinsLayerHelper(object):
     def setup_method(self):
         self.source = build_cartodataframe([0], [0], ['name', 'time'])
@@ -30,11 +31,11 @@ class TestSizeBinsLayerHelper(object):
         assert layer.style._style['point']['color'] == 'opacity(#EE4D5A, 0.8)'
         assert layer.style._style['line']['color'] == 'opacity(#4CC8A3, 0.8)'
 
-        assert layer.popup is not None
-        assert layer.popup._hover == [{
-            'title': 'name',
-            'value': '$name'
-        }]
+        assert layer.popups is not None
+
+        popup = layer.popups.elements[0]
+        assert popup.title == 'name'
+        assert popup.value == '$name'
 
         assert layer.legend is not None
         assert layer.legend._type['point'] == 'size-bins-point'
@@ -155,21 +156,20 @@ class TestSizeBinsLayerHelper(object):
         layer = helpers.size_bins_layer(
             self.source,
             'name',
-            popup=False
+            popups=False
         )
 
-        assert layer.popup._hover == []
+        assert len(layer.popups.elements) == 0
 
         layer = helpers.size_bins_layer(
             self.source,
             'name',
-            popup=True
+            popups=True
         )
 
-        assert layer.popup._hover == [{
-            'title': 'name',
-            'value': '$name'
-        }]
+        popup = layer.popups.elements[0]
+        assert popup.title == 'name'
+        assert popup.value == '$name'
 
     def test_size_bins_layer_widget(self, mocker):
         "should show/hide the widget"
@@ -200,7 +200,7 @@ class TestSizeBinsLayerHelper(object):
             animate='time'
         )
 
-        assert layer.popup._hover == []
+        assert len(layer.popups.elements) == 0
         assert layer.widgets._widgets[0]._type == 'time-series'
         assert layer.widgets._widgets[0]._title == 'Animation'
         assert layer.widgets._widgets[0]._value == 'time'

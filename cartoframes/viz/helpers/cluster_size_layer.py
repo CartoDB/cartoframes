@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division
-
 from carto.exceptions import CartoException
 
 from .utils import get_value, get_popup
@@ -11,7 +9,7 @@ def cluster_size_layer(
         source, value=None, operation='count', resolution=32,
         title='', color=None, opacity=None,
         stroke_width=None, stroke_color=None, description='',
-        footer='', legend=True, popup=True, widget=False, animate=None, credentials=None):
+        footer='', legend=True, popups=True, widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a cluster map with
     continuously sized points.
 
@@ -34,8 +32,8 @@ def cluster_size_layer(
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
           Set to "True" by default.
-        popup (bool, optional): Display popups on hover and click: "True" or "False".
-          Set to "True" by default.
+        popups (bool, list of :py:class:`Popup <cartoframes.viz.Popup>`, default False, optional):
+          Display popups on hover and click: "True" or "False". Set to "True" by default.
         widget (bool, optional): Display a widget for mapped data.
           Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.
@@ -72,8 +70,8 @@ def cluster_size_layer(
                 'resolution': '{0}'.format(resolution)
             }
         },
-        popup=popup and not animate and get_popup(
-          popup, title, cluster_operation_title, None, cluster_operation),
+        popups=popups and not animate and get_popup(
+          popups, title, cluster_operation_title, None, cluster_operation, True),
         legend=legend and {
             'type': {
                 'point': 'size-continuous-point'

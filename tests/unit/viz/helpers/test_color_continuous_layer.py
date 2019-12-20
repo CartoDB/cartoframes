@@ -1,3 +1,5 @@
+import pytest
+
 from cartoframes.viz import helpers
 from cartoframes.auth import Credentials
 
@@ -5,6 +7,7 @@ from . import setup_mocks
 from ..utils import build_cartodataframe
 
 
+@pytest.mark.skip(reason="This helper will be removed")
 class TestColorContinuousLayerHelper(object):
     def setup_method(self):
         self.source = build_cartodataframe([0], [0], ['name', 'time'])
@@ -29,12 +32,12 @@ class TestColorContinuousLayerHelper(object):
             'globalMIN($name), globalMAX($name)), bluyl), 1)'
         assert layer.style._style['polygon']['color'] == 'opacity(ramp(linear($name, ' + \
             'globalMIN($name), globalMAX($name)), bluyl), 0.9)'
-        assert layer.popup, None
-        assert layer.popup._hover == [{
-            'title': 'name',
-            'value': '$name'
-        }]
+        assert layer.popups, None
 
+        popup = layer.popups.elements[0]
+
+        assert popup.title == 'name'
+        assert popup.value == '$name'
         assert layer.legend is not None
         assert layer.legend._type['point'] == 'color-continuous-point'
         assert layer.legend._type['line'] == 'color-continuous-line'
@@ -113,21 +116,20 @@ class TestColorContinuousLayerHelper(object):
         layer = helpers.color_continuous_layer(
             self.source,
             'name',
-            popup=False
+            popups=False
         )
 
-        assert layer.popup._hover == []
+        assert len(layer.popups.elements) == 0
 
         layer = helpers.color_continuous_layer(
             self.source,
             'name',
-            popup=True
+            popups=True
         )
 
-        assert layer.popup._hover == [{
-            'title': 'name',
-            'value': '$name'
-        }]
+        popup = layer.popups.elements[0]
+        assert popup.title == 'name'
+        assert popup.value == '$name'
 
     def test_color_continuous_layer_widget(self, mocker):
         "should show/hide the widget"
@@ -158,7 +160,7 @@ class TestColorContinuousLayerHelper(object):
             animate='time'
         )
 
-        assert layer.popup._hover == []
+        assert len(layer.popups.elements) == 0
         assert layer.widgets._widgets[0]._type == 'time-series'
         assert layer.widgets._widgets[0]._title == 'Animation'
         assert layer.widgets._widgets[0]._value == 'time'

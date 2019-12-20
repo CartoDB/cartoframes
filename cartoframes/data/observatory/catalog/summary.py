@@ -3,6 +3,8 @@ import geopandas as gpd
 
 from shapely import wkb
 
+from ....utils.utils import check_package
+
 
 def variable_describe(data):
     if not data or not data.get('stats'):
@@ -69,6 +71,7 @@ def quantiles(data):
 
 
 def top_values(data):
+    check_package('matplotlib', is_optional=True)
     import matplotlib.pyplot as plt
 
     if not data:
@@ -105,6 +108,7 @@ def geom_coverage(geography_id):
 
 
 def histogram(data):
+    check_package('matplotlib', is_optional=True)
     import matplotlib.pyplot as plt
 
     range_element = [round(element['min_range'], 2) for element in data['histogram']]

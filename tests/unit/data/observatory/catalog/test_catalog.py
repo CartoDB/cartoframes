@@ -1,5 +1,7 @@
 import pytest
 
+from unittest.mock import patch
+
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory.catalog.dataset import Dataset
 from cartoframes.data.observatory.catalog.geography import Geography
@@ -10,11 +12,6 @@ from cartoframes.data.observatory.catalog.subscriptions import Subscriptions
 from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
 from .examples import test_country2, test_country1, test_category1, test_category2, test_dataset1, test_dataset2, \
     test_geographies, test_datasets, test_categories, test_countries, test_geography1, test_geography2
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
 
 
 class TestCatalog(object):
@@ -197,8 +194,10 @@ class TestCatalog(object):
         catalog = Catalog()
 
         # When
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(AttributeError) as e:
             catalog.subscriptions(wrong_credentials)
 
         # Then
-        assert str(e.value) == '`credentials` must be a Credentials class instance'
+        assert str(e.value) == ('Credentials attribute is required. '
+                                'Please pass a `Credentials` instance '
+                                'or use the `set_default_credentials` function.')

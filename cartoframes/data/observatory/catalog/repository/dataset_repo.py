@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-
-
 from .constants import CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER
 from .entity_repo import EntityRepository
 from ..entity import CatalogList

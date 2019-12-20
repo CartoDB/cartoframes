@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from carto.api_keys import APIKeyManager
 
 from ...auth import get_default_credentials

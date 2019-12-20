@@ -9,7 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [Migration Docs](/docs/developers/migrations/rc1.md)
 
 ### Changed
-- Refactor widgets documentation (#1349)
+- Remove `popup` parameter and add `hover_popup` and `click_popup` in Layer (#1348)
+- Add `popup_element` helpers (#1348)
+- Refactor Widgets API (#1349)
+- Refactor Legends API (#1347)
 
 ## [1.0b7] - 2019-12-13
 ### Added

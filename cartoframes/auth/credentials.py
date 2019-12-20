@@ -1,24 +1,19 @@
 """Credentials management for CARTOframes usage."""
 
-import json
 import os
-import sys
-import warnings
-
+import json
 import appdirs
+
 from carto.auth import APIKeyAuthClient
 from carto.do_token import DoTokenManager
-from carto.exceptions import CartoException
 
 from .. import __version__
+from ..core.logger import log
+from ..utils.utils import check_do_enabled
 
+from urllib.parse import urlparse
 from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
-
-if sys.version_info >= (3, 0):
-    from urllib.parse import urlparse
-else:
-    from urlparse import urlparse
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 _DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR, 'cartocreds.json')
@@ -103,7 +98,7 @@ class Credentials(object):
         new_base_url = self._base_url_from_username()
         if new_base_url != self.base_url:
             self.base_url = self._base_url_from_username()
-            warnings.warn('`base_url` has been updated to {}'.format(self.base_url))
+            log.warning('`base_url` has been updated to {}'.format(self.base_url))
 
     @property
     def base_url(self):
@@ -167,7 +162,6 @@ class Credentials(object):
                 credentials = Credentials(username='johnsmith', api_key='abcdefg')
                 credentials.save('path/to/credentials/file.json')
         """
-
         if config_file is None:
             config_file = _DEFAULT_PATH
 
@@ -201,24 +195,19 @@ class Credentials(object):
                 Credentials(username='johnsmith', api_key='abcdefg', base_url='https://johnsmith.carto.com/')
 
         """
-
         path_to_remove = config_file or _DEFAULT_PATH
 
         try:
             os.remove(path_to_remove)
-            warnings.warn('Credentials at {} successfully removed.'.format(path_to_remove))
+            log.warning('Credentials at {} successfully removed.'.format(path_to_remove))
         except OSError:
-            warnings.warn('No credential file found at {}.'.format(path_to_remove))
+            log.warning('No credential file found at {}.'.format(path_to_remove))
 
+    @check_do_enabled
     def get_do_credentials(self):
         """Returns the Data Observatory v2 credentials"""
-
         do_token_manager = DoTokenManager(self.get_api_key_auth_client())
-        do_credentials = do_token_manager.get()
-        if not do_credentials:
-            raise CartoException('Authentication error: do you have permissions to access Data Observatory v2?')
-
-        return do_credentials
+        return do_token_manager.get()
 
     def get_api_key_auth_client(self):
         if not self._api_key_auth_client:

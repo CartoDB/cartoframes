@@ -2438,7 +2438,7 @@ dataset.geom_coverage()
   <!-- External libraries -->
 
   <!-- pako -->
-  <script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/pako/1.0.10/pako_inflate.min.js&quot;></script>
+  <script src=&quot;https://libs.cartocdn.com/cartoframes/dependencies/pako_inflate.min.js&quot;></script>
 
   <!-- html2canvas -->
 
