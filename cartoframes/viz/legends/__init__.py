@@ -2,8 +2,6 @@
 Legend helpers to generate legends faster.
 """
 
-from __future__ import absolute_import
-
 from .basic_legend import basic_legend
 from .color_bins_legend import color_bins_legend
 from .color_category_legend import color_category_legend
