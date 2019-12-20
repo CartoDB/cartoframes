@@ -1,5 +1,9 @@
-from .utils import serialize_palette, get_value, get_popup
+from .utils import get_popup
 
+from ..legends.color_bins_legend import color_bins_legend
+from ..styles.color_bins_style import color_bins_style
+from ..widgets.time_series_widget import time_series_widget
+from ..widgets.histogram_widget import histogram_widget
 from ..layer import Layer
 
 
@@ -7,7 +11,7 @@ def color_bins_layer(
         source, value, title='', method='quantiles', bins=5,
         breaks=None, palette=None, size=None, opacity=None,
         stroke_color=None, stroke_width=None, description='',
-        footer='', legend=True, popups=True, widget=False, animate=None, credentials=None):
+        footer='', legends=True, popups=True, widgets=False, animate=None, credentials=None):
     """Helper function for quickly creating a classed color map.
 
     Args:
@@ -30,11 +34,11 @@ def color_bins_layer(
           Default is '#222'.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
-        legend (bool, optional): Display map legend: "True" or "False".
+        legends (bool, optional): Display map legend: "True" or "False".
           Set to "True" by default.
         popups (bool, list of :py:class:`Popup <cartoframes.viz.Popup>`, optional):
           Display popups on hover and click: "True" or "False". Set to "True" by default.
-        widget (bool, optional): Display a widget for mapped data: "True" or "False".
+        widgets (bool, optional): Display a widget for mapped data: "True" or "False".
           Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
@@ -48,84 +52,24 @@ def color_bins_layer(
         Includes a legend, popup and widget on `value`.
     """
 
-    if method not in ('quantiles', 'equal', 'stdev'):
-        raise ValueError('Available methods are: "quantiles", "equal", "stdev".')
+    default_legends = [
+        color_bins_legend(title=title or value, description=description, footer=footer)
+    ]
 
-    if breaks is None:
-        func = {
-            'quantiles': 'globalQuantiles',
-            'equal': 'globalEqIntervals',
-            'stdev': 'globalStandardDev'
-        }.get(method)
-        default_palette = {
-            'quantiles': 'purpor',
-            'equal': 'purpor',
-            'stdev': 'temps'
-        }.get(method)
-    else:
-        func = 'buckets'
-        default_palette = 'purpor'
-        breaks = list(breaks)
+    default_widgets = [
+        time_series_widget(animate, title='Animation'),
+        histogram_widget(value, title='Distribution')
+    ]
 
-    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
+    default_popup = get_popup(popups, title, value, value)
 
     return Layer(
         source,
-        style={
-            'point': {
-                'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, breaks or bins,
-                    serialize_palette(palette) or default_palette,
-                    get_value(opacity, 'point', 'opacity')
-                ),
-                'width': get_value(size, 'point', 'width'),
-                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
-                'filter': animation_filter
-            },
-            'line': {
-                'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, breaks or bins,
-                    serialize_palette(palette) or default_palette,
-                    get_value(opacity, 'line', 'opacity')
-                ),
-                'width': get_value(size, 'line', 'width'),
-                'filter': animation_filter
-            },
-            'polygon': {
-                'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
-                    func, value, breaks or bins,
-                    serialize_palette(palette) or default_palette,
-                    get_value(opacity, 'polygon', 'opacity')
-                ),
-                'strokeColor': get_value(stroke_color, 'polygon', 'strokeColor'),
-                'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
-                'filter': animation_filter
-            }
-        },
-        popups=popups and not animate and get_popup(
-          popups, title, value, value),
-        legend=legend and {
-            'type': {
-                'point': 'color-bins-point',
-                'line': 'color-bins-line',
-                'polygon': 'color-bins-polygon'
-            },
-            'title': title or value,
-            'description': description,
-            'footer': footer
-        },
-        widgets=[
-            animate and {
-                'type': 'time-series',
-                'value': animate,
-                'title': 'Animation'
-            },
-            widget and {
-                'type': 'histogram',
-                'value': value,
-                'title': 'Distribution'
-            }
-        ],
+        style=color_bins_style(value, method=method, bins=bins, breaks=breaks, palette=palette,
+                               size=size, opacity=opacity, stroke_color=stroke_color,
+                               stroke_width=stroke_width, animate=animate),
+        hover_popup=popups and not animate and default_popup,
+        legends=legends and default_legends,
+        widgets=widgets and default_widgets,
         credentials=credentials
     )

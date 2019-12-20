@@ -26,11 +26,10 @@ def size_category_style(
     Returns:
         :py:class:`Style <cartoframes.viz.Style>`
     """
+
     func = 'buckets' if cat else 'top'
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
-
-    if opacity is None:
-        opacity = '0.8'
+    opacity = opacity if opacity else '0.8'
 
     return Style({
         'point': {
