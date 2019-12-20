@@ -746,18 +746,18 @@ def _get_column_sql(agg, column):
         return """
             {aggregation}(
                 enrichment_table.{column} * (
-                    ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                    ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
                     /
-                    ST_area(data_table.{geo_column})
+                    ST_AREA(data_table.{geo_column})
                 )
-            ) AS {aggregation}_{column}
+            ) AS {column}
             """.format(
                 column=column,
                 geo_column=_GEOM_COLUMN,
                 aggregation=agg)
     else:
         return """
-            {aggregation}(enrichment_table.{column}) AS {aggregation}_{column}
+            {aggregation}(enrichment_table.{column}) AS {column}
             """.format(
                 column=column,
                 aggregation=agg)
