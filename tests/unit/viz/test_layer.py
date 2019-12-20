@@ -37,7 +37,7 @@ class TestLayer(object):
     def test_initialization_simple(self, mocker):
         """Layer should initialize layer attributes"""
         setup_mocks(mocker, 'layer_source')
-        layer = Layer('layer_source', '', credentials=Credentials('fakeuser'))
+        layer = Layer('layer_source', {}, credentials=Credentials('fakeuser'))
 
         assert layer.is_basemap is False
         assert layer.source_data == 'SELECT * FROM "public"."layer_source"'
@@ -65,28 +65,6 @@ class TestLayerStyle(object):
                 'strokeColor': 'black',
                 'strokeWidth': 1
             },
-            credentials=Credentials('fakeuser')
-        )
-
-        assert isinstance(layer.style, Style)
-        assert '@grad: [red, green, blue]' in layer.viz
-        assert 'color: blue' in layer.viz
-        assert 'width: 10' in layer.viz
-        assert 'strokeColor: black' in layer.viz
-        assert 'strokeWidth: 1' in layer.viz
-
-    def test_style_str(self, mocker):
-        """Layer style should set the style when it is a dict"""
-        setup_mocks(mocker, 'layer_source')
-        layer = Layer(
-            'layer_source',
-            """
-                @grad: [red, green, blue]
-                color: blue
-                width: 10
-                strokeColor: black
-                strokeWidth: 1
-            """,
             credentials=Credentials('fakeuser')
         )
 

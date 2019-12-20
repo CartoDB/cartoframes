@@ -33,16 +33,6 @@ class TestStyle(object):
         assert 'strokeWidth: ramp(linear(zoom(),2,18),[0.5,1])' in viz
         assert 'strokeColor: opacity(#2c2c2c,ramp(linear(zoom(),2,18),[0.2,0.6]))' in viz
 
-    def test_style_string(self):
-        """Style.compute_viz should return the viz from a string with defaults"""
-        style = Style('@var: 1\ncolor: red')
-        viz = style.compute_viz('line')
-
-        assert '@var: 1' in viz
-        assert 'color: red' in viz
-        assert 'width: ramp(linear(zoom(),0,18),[0.5,4])' in viz
-        assert 'color: hex("#4CC8A3")' not in viz
-
     def test_style_dict(self):
         """Style.compute_viz should return the viz from a dict with defaults"""
         style = Style({
@@ -69,18 +59,6 @@ class TestStyle(object):
             'momo': 123
         })
 
-        assert '@mimi: $pop' in viz
-        assert '@momo: 123' in viz
-
-    def test_style_string_variables(self):
-        """Style.compute_viz should return the string viz with the variables"""
-        style = Style('@var: 1')
-        viz = style.compute_viz('line', {
-            'mimi': '$pop',
-            'momo': 123
-        })
-
-        assert '@var: 1' in viz
         assert '@mimi: $pop' in viz
         assert '@momo: 123' in viz
 
