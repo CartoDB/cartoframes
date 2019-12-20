@@ -18,7 +18,7 @@ class Style():
         elif isinstance(data, (str, dict)):
             return data
         else:
-            raise ValueError('`style` must be a string or a dictionary')
+            raise ValueError('`style` must be a dictionary')
 
     def compute_viz(self, geom_type, variables={}):
         style = self._style
@@ -28,10 +28,8 @@ class Style():
             if geom_type in style:
                 style = style.get(geom_type)
             return self._parse_style_dict(style, default_style, variables)
-        elif isinstance(style, str):
-            return self._parse_style_str(style, default_style, variables)
         else:
-            raise ValueError('`style` must be a string or a dictionary')
+            raise ValueError('`style` must be a dictionary')
 
     def _parse_style_dict(self, style, default_style, ext_vars):
         variables = merge_dicts(style.get('vars', {}), ext_vars)
