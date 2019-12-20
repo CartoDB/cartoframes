@@ -36,7 +36,8 @@ class Enrichment(EnrichmentService):
                 or :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
-                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
+                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`. The maximum number of
+                variables is 50.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (list, optional): list of :obj:`VariableFilter` to filter rows from
                 the enrichment data. Example: `[VariableFilter(variable1, "= 'a string'")]`
@@ -146,7 +147,8 @@ class Enrichment(EnrichmentService):
                 or :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
-                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
+                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`. The maximum number of
+                variables is 50.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (list, optional): list of :obj:`VariableFilter` to filter rows from
                 the enrichment data. Example: `[VariableFilter(variable1, "= 'a string'")]`

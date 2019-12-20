@@ -21,6 +21,8 @@ _GEOM_COLUMN = '__geojson_geom'
 AGGREGATION_DEFAULT = 'default'
 AGGREGATION_NONE = 'none'
 
+MAX_VARIABLES_NUMBER = 50
+
 
 class VariableFilter(object):
     """This class can be used for filtering the results of
@@ -337,6 +339,8 @@ def _build_where_clausule(filters):
 
 @timelogger
 def prepare_variables(variables, credentials, aggregation=None):
+    _validate_variables_input(variables)
+
     if isinstance(variables, list):
         variables = [_prepare_variable(var, aggregation) for var in variables]
     else:
@@ -366,6 +370,17 @@ def _prepare_variable(variable, aggregation=None):
             return None
 
     return variable
+
+
+def _validate_variables_input(variables):
+    if not isinstance(variables, Variable) and not isinstance(variables, str) and not isinstance(variables, list):
+        raise EnrichmentException('variables parameter should be a Variable instance, a list or a str.')
+
+    if not isinstance(variables, Variable) and len(variables) < 1:
+        raise EnrichmentException('You should add at least one variable to be used in enrichment.')
+
+    if isinstance(variables, list) and len(variables) > MAX_VARIABLES_NUMBER:
+        raise EnrichmentException('The maximum number of variables to be used in enrichment is 50.')
 
 
 def _validate_bq_operations(variables, credentials):
