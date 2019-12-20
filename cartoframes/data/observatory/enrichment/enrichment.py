@@ -38,9 +38,10 @@ class Enrichment(EnrichmentService):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
-            filters (dictionary, optional): dictionary to filter variables values. As a key it receives the variable id,
-                and as value receives a SQL operator, for example: {variable1.id: "> 30"}. It works by appending the
-                filter SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND` operator.
+            filters (dictionary, optional): dictionary to filter results by variable values. As a key it receives the
+                variable id, and as value receives a SQL operator, for example: {variable1.id: "> 30"}. It works by
+                appending the filter SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND`
+                operator (in the example: `WHERE {variable1.column_name} > 30`).
 
         Returns:
             A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` enriched with the variables passed as argument.
@@ -149,9 +150,10 @@ class Enrichment(EnrichmentService):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
-            filters (dictionary, optional): dictionary to filter variables values. As a key it receives the variable id,
-                and as value receives a SQL operator, for example: {variable1.id: "> 30"}. It works by appending the
-                filter SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND` operator.
+            filters (dictionary, optional): dictionary to filter results by variable values. As a key it receives the
+                variable id, and as value receives a SQL operator, for example: {variable1.id: "> 30"}. It works by
+                appending the filter SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND`
+                operator (in the example: `WHERE {variable1.column_name} > 30`).
             aggregation (str, list, optional): sets the data aggregation. The polygons in the source `DataFrame` can
                 intersect with one or more polygons from the Data Observatory. With this method you can select how to
                 aggregate the resulting data.
