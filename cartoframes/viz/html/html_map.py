@@ -25,19 +25,19 @@ class HTMLMap(object):
         self._template = self._env.get_template(template_path)
 
     def set_content(
-            self, size, layers, bounds, camera=None, basemap=None,
-            default_legend=None, show_info=None, theme=None, _carto_vl_path=None,
+            self, size, layers, bounds, camera=None, basemap=None, show_info=None,
+            theme=None, _carto_vl_path=None,
             _airship_path=None, title='CARTOframes', description=None,
             is_embed=False, is_static=False):
 
         self.html = self._parse_html_content(
-            size, layers, bounds, camera, basemap, default_legend,
+            size, layers, bounds, camera, basemap,
             show_info, theme, _carto_vl_path, _airship_path, title, description,
             is_embed, is_static)
 
     def _parse_html_content(
             self, size, layers, bounds, camera=None,
-            basemap=None, default_legend=None, show_info=None,
+            basemap=None, show_info=None,
             theme=None, _carto_vl_path=None, _airship_path=None,
             title=None, description=None, is_embed=False, is_static=False):
 
@@ -82,7 +82,7 @@ class HTMLMap(object):
             airship_styles_path = _airship_path + constants.AIRSHIP_STYLES_DEV
             airship_icons_path = _airship_path + constants.AIRSHIP_ICONS_DEV
 
-        has_legends = any(layer['legend'] for layer in layers) or default_legend
+        has_legends = any(layer['legends'] for layer in layers)
         has_widgets = any(len(layer['widgets']) != 0 for layer in layers)
 
         return self._template.render(
@@ -96,7 +96,6 @@ class HTMLMap(object):
             camera=camera,
             has_legends=has_legends,
             has_widgets=has_widgets,
-            default_legend=default_legend,
             show_info=show_info,
             theme=theme,
             carto_vl_path=carto_vl_path,

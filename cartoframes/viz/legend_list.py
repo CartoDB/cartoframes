@@ -6,7 +6,7 @@ from .legend import Legend
 class LegendList(object):
     """LegendList
      Args:
-        legends (dict, list, Legend): List of legends for a layer.
+        legends (list, Legend): List of legends for a layer.
 
     Example:
 
@@ -24,22 +24,20 @@ class LegendList(object):
         if isinstance(legends, list):
             legend_list = []
             for legend in legends:
-                if isinstance(legend, (dict, str)):
-                    legend_list.append(Legend(legend))
-                elif isinstance(legend, Legend):
+                if isinstance(legend, Legend):
                     legend_list.append(legend)
+                else:
+                    raise ValueError('Legends list contains invalid elements')
             return legend_list
-        if isinstance(legends, dict):
-            return [Legend(legends)]
         elif isinstance(legends, Legend):
             return [legends]
         else:
             return []
 
-    def get_info(self, geom_type=None):
+    def get_info(self):
         legends_info = []
         for legend in self._legends:
             if legend:
-                legends_info.append(legend.get_info(geom_type))
+                legends_info.append(legend.get_info())
 
         return legends_info

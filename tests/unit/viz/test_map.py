@@ -1,7 +1,3 @@
-import pytest
-
-from carto.exceptions import CartoException
-
 from cartoframes.auth import Credentials
 from cartoframes.viz import Map, Layer, Source, click_popup, hover_popup, constants
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
@@ -58,14 +54,6 @@ class TestMapInitialization(object):
         })
         assert map.bounds == [[-180, 90], [180, -90]]
 
-    def test_default_legend(self):
-        """Map should raise an error if default_legend is True but there is no title"""
-
-        msg = 'The default legend needs a map title to be displayed'
-        with pytest.raises(CartoException) as e:
-            Map(default_legend=True)
-        assert str(e.value) == msg
-
 
 class TestMapLayer(object):
     def test_one_layer(self):
@@ -78,7 +66,8 @@ class TestMapLayer(object):
         assert len(map.layer_defs) == 1
         assert map.layer_defs[0].get('interactivity') == []
         assert map.layer_defs[0].get('credentials') is None
-        assert map.layer_defs[0].get('legend') is not None
+        assert map.layer_defs[0].get('legends') is not None
+        assert map.layer_defs[0].get('widgets') is not None
         assert map.layer_defs[0].get('data') is not None
         assert map.layer_defs[0].get('type') == 'GeoJSON'
         assert map.layer_defs[0].get('viz') is not None
@@ -218,12 +207,6 @@ class TestMapPublication(object):
             ]
         }
 
-    # def assert_kuviz(self, kuviz, name, privacy):
-    #     self.assertIsNotNone(kuviz.id)
-    #     self.assertIsNotNone(kuviz.url)
-    #     self.assertEqual(kuviz.name, name)
-    #     self.assertEqual(kuviz.privacy, privacy)
-
     def assert_kuviz_dict(self, kuviz_dict, name, privacy):
         assert kuviz_dict['id'] is not None
         assert kuviz_dict['url'] is not None
@@ -245,7 +228,6 @@ class TestMapPublication(object):
             basemap='Positron',
             bounds=[[-180, -90], [180, 90]],
             camera=None,
-            default_legend=False,
             description=None,
             is_embed=True,
             is_static=None,
@@ -265,7 +247,6 @@ class TestMapPublication(object):
             basemap='yellow',
             bounds={'west': 1, 'east': 2, 'north': 3, 'south': 4},
             viewport={'zoom': 5, 'lat': 50, 'lng': -10},
-            default_legend=True,
             is_static=True,
             theme='dark',
             title='title',
@@ -281,7 +262,6 @@ class TestMapPublication(object):
             basemap='yellow',
             bounds=[[1, 2], [4, 3]],
             camera={'bearing': None, 'center': [-10, 50], 'pitch': None, 'zoom': 5},
-            default_legend=True,
             description='description',
             is_embed=True,
             is_static=True,

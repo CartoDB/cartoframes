@@ -1,5 +1,5 @@
 from cartoframes.auth import Credentials
-from cartoframes.viz import Layer, Legend, PopupList, Source, Style
+from cartoframes.viz import Layer, LegendList, WidgetList, PopupList, Source, Style
 from cartoframes.core.managers.context_manager import ContextManager
 
 
@@ -25,7 +25,8 @@ class TestLayer(object):
         assert isinstance(layer.source, Source)
         assert isinstance(layer.style, Style)
         assert isinstance(layer.popups, PopupList)
-        assert isinstance(layer.legend, Legend)
+        assert isinstance(layer.legends, LegendList)
+        assert isinstance(layer.widgets, WidgetList)
         assert layer.interactivity == []
 
     def test_initialization_simple(self, mocker):
@@ -38,7 +39,8 @@ class TestLayer(object):
         assert isinstance(layer.source, Source)
         assert isinstance(layer.style, Style)
         assert isinstance(layer.popups, PopupList)
-        assert isinstance(layer.legend, Legend)
+        assert isinstance(layer.legends, LegendList)
+        assert isinstance(layer.widgets, WidgetList)
         assert layer.interactivity == []
 
 

@@ -9,6 +9,7 @@ from . import setup_mocks
 from ..utils import build_cartodataframe
 
 
+@pytest.mark.skip(reason="This helper will be removed")
 class TestClusterSizeLayerHelper(object):
     def setup_method(self):
         self.source = build_cartodataframe([0], [0], ['name', 'time'])
@@ -41,11 +42,11 @@ class TestClusterSizeLayerHelper(object):
 
         assert popup.title == 'count'
         assert popup.value == 'clusterCount()'
-        assert layer.legend is not None
-        assert layer.legend._type['point'] == 'size-continuous-point'
-        assert layer.legend._title == 'count'
-        assert layer.legend._description == ''
-        assert layer.legend._footer == ''
+        assert layer.legends is not None
+        assert layer.legends._type['point'] == 'size-continuous-point'
+        assert layer.legends._title == 'count'
+        assert layer.legends._description == ''
+        assert layer.legends._footer == ''
 
     def test_valid_operation(self):
         """cluster_size_layer should raise an error if the operation is invalid"""

@@ -9,6 +9,7 @@ from .popup import Popup
 from .popup_list import PopupList
 from .source import Source
 from .style import Style
+from .widget import Widget
 from .widget_list import WidgetList
 
 from ..utils.utils import extract_viz_columns
@@ -25,12 +26,9 @@ class Layer():
             table name, SQL query or a dataframe.
         style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
             The style of the visualization.
-        legend (dict or :py:class:`Legend <cartoframes.viz.Legend>`, optional):
-            The legend definition for a layer. It contains the information
-            to show a legend "type" (``color-category``, ``color-bins``,
-            ``color-continuous``), "prop" (color) and also text information:
-            "title", "description" and "footer". See :py:class:`Legend
-            <cartoframes.viz.Legend>` for more information.
+        legends (:py:class:`Legend <cartoframes.viz.Legend>` list, optional):
+            The legends definition for a layer. It contains a list of legend helpers.
+            See :py:class:`Legend <cartoframes.viz.Legend>` for more information.
         widgets (dict, list, or :py:class:`WidgetList <cartoframes.viz.WidgetList>`, optional):
             Widget or list of widgets for a layer. It contains the information to display
             different widget types on the top right of the map. See
@@ -56,83 +54,26 @@ class Layer():
         Create a layer with a custom popup, legend, and widget.
 
         .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Layer, popup_element
-
-            set_default_credentials(
-                base_url='https://cartovl.carto.com',
-                api_key='default_public'
-            )
-
-            Layer(
-                "SELECT * FROM populated_places WHERE adm0name = 'Spain'",
-                'color: ramp(globalQuantiles($pop_max, 5), reverse(purpor))',
-                legend={
-                    'type': 'color-category',
-                    'title': 'Population'
-                },
-                widgets=[{
-                    'type': 'formula',
-                    'title': 'Avg $pop_max',
-                    'value': 'viewportAvg($pop_max)'
-                }],
-                click_popup=[
-                    popup_element('name')
-                ],
-                hover_popup=[
-                    popup_element('name'),
-                    popup_element('pop_max'),
-                    popup_element('pop_min')
-                ]
-            )
+            # FIXME
 
         Create a layer specifically tied to a :py:class:`Credentials
         <cartoframes.auth.Credentials>` and display it on a map.
 
         .. code::
-
-            from cartoframes.auth import Credentials
-            from cartoframes.viz import Layer, Map
-
-            credentials = Credentials(
-                base_url='https://cartovl.carto.com',
-                api_key='default_public'
-            )
-
-            pop_layer = Layer(
-                'populated_places',
-                'color: red',
-                credentials=credentials
-            )
-            Map(pop_layer)
+            # FIXME
 
         Preview a layer in a Jupyter notebook. Note: if in a Jupyter notebook,
         it is not required to explicitly add a Layer to a :py:class:`Map
         <cartoframes.viz.Map>` if only visualizing data as a single layer.
 
         .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Layer, Map
-
-            set_default_credentials('https://cartoframes.carto.com')
-
-            pop_layer = Layer(
-                'brooklyn_poverty',
-                'color: ramp($poverty_per_pop, sunset)',
-                legend={
-                    'type': 'color-continuous',
-                    'title': 'Poverty per pop'
-                }
-            )
-            pop_layer
+            #FIXME
     """
 
     def __init__(self,
                  source,
                  style=None,
-                 legend=None,
+                 legends=None,
                  widgets=None,
                  click_popup=None,
                  hover_popup=None,
@@ -145,7 +86,7 @@ class Layer():
         self.source = _set_source(source, credentials, geom_col)
         self.style = _set_style(style)
         self.popups = _set_popups({'click': click_popup, 'hover': hover_popup})
-        self.legend = _set_legend(legend)
+        self.legends = _set_legends(legends)
         self.widgets = _set_widgets(widgets)
 
         geom_type = self.source.get_geom_type()
@@ -162,8 +103,8 @@ class Layer():
         self.credentials = self.source.get_credentials()
         self.interactivity = self.popups.get_interactivity()
         self.widgets_info = self.widgets.get_widgets_info()
-        self.legend_info = self.legend.get_info(geom_type) if self.legend is not None else None
-        self.has_legend_list = isinstance(self.legend, LegendList)
+        self.legends_info = self.legends.get_info() if self.legends is not None else None
+        self.has_legend_list = isinstance(self.legends, LegendList)
 
     def _repr_html_(self):
         from .map import Map
@@ -199,19 +140,21 @@ def _set_popups(popups):
         return PopupList()
 
 
-def _set_legend(legend):
-    if isinstance(legend, (Legend, LegendList)):
-        return legend
-    if isinstance(legend, dict):
-        return Legend(legend)
-    if isinstance(legend, (list)):
-        return LegendList(legend)
+def _set_legends(legends):
+    if isinstance(legends, Legend):
+        return LegendList(legends)
+    if isinstance(legends, LegendList):
+        return legends
+    if isinstance(legends, list):
+        return LegendList(legends)
     else:
-        return Legend('')
+        return LegendList()
 
 
 def _set_widgets(widgets):
-    if isinstance(widgets, (dict, list)):
+    if isinstance(widgets, Widget):
+        return WidgetList(widgets)
+    if isinstance(widgets, list):
         return WidgetList(widgets)
     if isinstance(widgets, WidgetList):
         return widgets
