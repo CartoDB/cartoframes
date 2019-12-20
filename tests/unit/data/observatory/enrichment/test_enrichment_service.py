@@ -1,8 +1,10 @@
-from google.cloud import bigquery, storage
 import pytest
 import pandas as pd
+
+from unittest.mock import Mock, patch
 from shapely.geometry.point import Point
 from shapely.geometry.polygon import Polygon
+from google.cloud import bigquery, storage
 
 from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
@@ -11,14 +13,9 @@ from cartoframes.data.observatory import Variable, Dataset
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.repository.entity_repo import EntityRepository
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables, \
-    _ENRICHMENT_ID, _GEOJSON_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation
+    _ENRICHMENT_ID, _GEOM_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation
 from cartoframes.exceptions import EnrichmentException
 from cartoframes.utils.geom_utils import to_geojson
-
-try:
-    from unittest.mock import Mock, patch
-except ImportError:
-    from mock import Mock, patch
 
 _WORKING_PROJECT = 'carto-do-customers'
 _PUBLIC_PROJECT = 'carto-do-public-data'
@@ -76,7 +73,7 @@ class TestEnrichmentService(object):
             columns=['cartodb_id', geom_column])
         expected_cdf = CartoDataFrame(
             [[1, point, 0, to_geojson(point)]],
-            columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOJSON_COLUMN],
+            columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOM_COLUMN],
             geometry=geom_column
         )
 
@@ -95,7 +92,7 @@ class TestEnrichmentService(object):
 
         expected_cdf = CartoDataFrame(
             [[1, polygon, 0, to_geojson(polygon)]],
-            columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOJSON_COLUMN],
+            columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOM_COLUMN],
             geometry=geom_column
         )
 
@@ -110,14 +107,14 @@ class TestEnrichmentService(object):
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
             [[1, point, 0, to_geojson(point)]],
-            columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOJSON_COLUMN],
+            columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOM_COLUMN],
             geometry=geom_column
         )
 
-        expected_schema = {_ENRICHMENT_ID: 'INTEGER', _GEOJSON_COLUMN: 'GEOGRAPHY'}
+        expected_schema = {_ENRICHMENT_ID: 'INTEGER', _GEOM_COLUMN: 'GEOGRAPHY'}
         expected_cdf = CartoDataFrame(
             [[0, to_geojson(point)]],
-            columns=[_ENRICHMENT_ID, _GEOJSON_COLUMN])
+            columns=[_ENRICHMENT_ID, _GEOM_COLUMN])
 
         # mock
         def assert_upload_data(_, dataframe, schema, tablename):
@@ -147,10 +144,10 @@ class TestEnrichmentService(object):
         enrichment_service = EnrichmentService(credentials=self.credentials)
         input_cdf = enrichment_service._prepare_data(input_cdf, geom_column)
 
-        expected_schema = {_ENRICHMENT_ID: 'INTEGER', _GEOJSON_COLUMN: 'GEOGRAPHY'}
+        expected_schema = {_ENRICHMENT_ID: 'INTEGER', _GEOM_COLUMN: 'GEOGRAPHY'}
         expected_cdf = CartoDataFrame(
             [[0, to_geojson(point)], [1, None]],
-            columns=[_ENRICHMENT_ID, _GEOJSON_COLUMN])
+            columns=[_ENRICHMENT_ID, _GEOM_COLUMN])
 
         # mock
         def assert_upload_data(_, dataframe, schema, tablename):
@@ -171,7 +168,7 @@ class TestEnrichmentService(object):
         point = Point(1, 1)
         input_cdf = CartoDataFrame(
             [[point, 0, to_geojson(point)]],
-            columns=[geom_column, _ENRICHMENT_ID, _GEOJSON_COLUMN])
+            columns=[geom_column, _ENRICHMENT_ID, _GEOM_COLUMN])
         expected_cdf = CartoDataFrame(
             [[point, 'new data']],
             columns=[geom_column, 'var1'])

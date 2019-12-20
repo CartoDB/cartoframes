@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division
-
 from carto.exceptions import CartoException
 
 from .utils import get_value, get_popup

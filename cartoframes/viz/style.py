@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from ..utils.utils import merge_dicts, text_match
 from . import defaults
 

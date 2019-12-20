@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from . import color_category_layer
 from ...data.services.isolines import RANGE_LABEL_KEY
 

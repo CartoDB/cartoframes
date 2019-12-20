@@ -6,7 +6,7 @@
 pip install tox
 ```
 
-The following command runs the linter and all the unit tests for the selected versions of Python (py27, py35, py36, py37)
+The following command runs the linter and all the unit tests for the selected versions of Python (py35, py36, py37)
 
 ```
 tox
@@ -89,7 +89,8 @@ def test_ehlo(smtp_connection):
 # Note: the mocker is injected by pytest as a fixture
 def test_simple_mocking(mocker):
     mock_db_service = mocker.patch('other_code.services.db_service', autospec=True)
-    mock_db_service.return_value = [...]
+    mock_db_service.return_value = <value>
+    mock_db_service.side_effect = <function>
 
     # Calling service with the mock
     count_service('foo')

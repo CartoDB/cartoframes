@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import uuid
 from collections import namedtuple
 
@@ -41,6 +39,9 @@ class Service(object):
 
     def result(self, data, metadata=None):
         return Result(data=data, metadata=metadata)
+
+    def _schema(self):
+        return self._context_manager.get_schema()
 
     def _new_temporary_table_name(self, base=None):
         return (base or 'table') + '_' + uuid.uuid4().hex[:10]

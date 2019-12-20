@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from ..subscriptions import get_subscription_ids
 from .....auth import Credentials
 from .....core.managers.context_manager import ContextManager

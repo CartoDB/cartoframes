@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from cartoframes.auth import Credentials
 
 from .constants import COUNTRY_FILTER, CATEGORY_FILTER

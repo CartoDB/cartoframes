@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from ..utils.utils import camel_dictionary, gen_variable_name
 from . import constants
 

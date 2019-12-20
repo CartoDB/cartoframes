@@ -25,7 +25,7 @@ def get_version():
 
 REQUIRES = [
     'appdirs>=1.4.3,<2.0',
-    'carto>=1.8.2,<2.0',
+    'carto>=1.8.3,<2.0',
     'jinja2>=2.10.1,<3.0',
     'geopandas>=0.6.0,<1.0',
     'tqdm>=4.32.1,<5.0',
@@ -35,7 +35,7 @@ REQUIRES = [
     'google-cloud-bigquery>=1.22.0,<2.0',
     'google-cloud-bigquery-storage>=0.7.0,<1.0',
     'fastavro>=0.22.7,<1.0',
-    'mercantile>=1.1.2,<2.0'
+    'semantic_version>=2.8.0,<3',
     # 'Rtree>=0.8.3,<1.0'
 ]
 
@@ -85,8 +85,6 @@ setup(
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
@@ -103,5 +101,5 @@ setup(
     extras_requires={
         'tests': EXTRAS_REQUIRES_TESTS
     },
-    python_requires=">=2.6, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+    python_requires=">=3.5"
 )

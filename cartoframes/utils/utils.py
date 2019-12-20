@@ -1,42 +1,23 @@
 """general utility functions"""
 
-from __future__ import absolute_import
-
 import re
-import sys
 import gzip
 import json
+import time
 import base64
 import decimal
 import hashlib
 import requests
 import geopandas
 import numpy as np
-import time
+import pkg_resources
+import semantic_version
 
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
+from pyrestcli.exceptions import ServerErrorException
 
-from ..auth.credentials import Credentials
 from ..core.logger import log
-
-try:
-    basestring
-except NameError:
-    basestring = str
-
-if sys.version_info < (3, 0):
-    from io import BytesIO
-    from gzip import GzipFile
-
-    def compress(data):
-        buf = BytesIO()
-        with GzipFile(fileobj=buf, mode='wb') as f:
-            f.write(data)
-        return buf.getvalue()
-
-    gzip.compress = compress
-
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
@@ -62,9 +43,7 @@ def dict_items(indict):
     Args:
         indict (dict): Dictionary that will be turned into items iterator
     """
-    if sys.version_info >= (3, 0):
-        return indict.items()
-    return indict.iteritems()
+    return indict.items()
 
 
 def cssify(css_dict):
@@ -328,7 +307,15 @@ def is_table_name(data):
     return isinstance(data, str) and normalize_name(data) == data
 
 
+def get_credentials(credentials=None):
+    from ..auth import defaults
+    _credentials = credentials or defaults.get_default_credentials()
+    check_credentials(_credentials)
+    return _credentials
+
+
 def check_credentials(credentials):
+    from ..auth.credentials import Credentials
     if not isinstance(credentials, Credentials):
         raise AttributeError('Credentials attribute is required. '
                              'Please pass a `Credentials` instance '
@@ -368,7 +355,7 @@ def encode_row(row):
         row = row.decode('utf-8')
 
     special_keys = ['"', '|', '\n']
-    if isinstance(row, basestring) and any(key in row for key in special_keys):
+    if isinstance(row, str) and any(key in row for key in special_keys):
         # If the input contains any special key:
         # - replace " by ""
         # - cover the row with "..."
@@ -405,5 +392,36 @@ def timelogger(method):
         result = method(*args, **kw)
         log.debug('%s in %s s', method.__name__, round(time.time() - start, 2))
         return result
+    return fn
 
+
+def check_package(pkg_name, spec='*', is_optional=False):
+    try:
+        spec_pattern = semantic_version.SimpleSpec(spec)
+        pkg_version = pkg_resources.get_distribution(pkg_name).version
+        version = semantic_version.Version(pkg_version)
+        if not spec_pattern.match(version):
+            raise Exception('Package "{0}" version ({1}) does not match "{2}" '.format(pkg_name, version, spec) +
+                            'Please run: pip install -U {0}'.format(pkg_name))
+    except pkg_resources.DistributionNotFound:
+        if is_optional:
+            raise Exception('Optional package "{0}" is not installed. '.format(pkg_name) +
+                            'Please run: pip install {0}'.format(pkg_name))
+        else:
+            raise Exception('Package "{0}" is not installed. '.format(pkg_name) +
+                            'Please run: pip install {0}'.format(pkg_name))
+
+
+def check_do_enabled(method):
+    def fn(*args, **kw):
+        try:
+            return method(*args, **kw)
+        except ServerErrorException as e:
+            if str(e) == "['The user does not have Data Observatory enabled']":
+                raise Exception(
+                    'We are sorry, the Data Observatory is not enabled for your account yet. '
+                    'Please contact your customer success manager or send an email to '
+                    'sales@carto.com to request access to it.')
+            else:
+                raise e
     return fn
