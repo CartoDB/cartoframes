@@ -28,11 +28,10 @@ class Country(CatalogEntity):
 
         .. code::
 
-            from cartoframes.data.observatory import Catalog
+            from cartoframes.data.observatory import Country
 
-            catalog = Catalog()
             # country ID is a lowercase ISO Alpha 3 Code
-            category = catalog.countries.get('usa')
+            country = Country.get('usa')
     """
 
     _entity_repo = get_country_repo()
@@ -53,10 +52,9 @@ class Country(CatalogEntity):
 
             .. code::
 
-                from cartoframes.data.observatory import Catalog
+                from cartoframes.data.observatory import Country
 
-                catalog = Catalog()
-                country = catalog.countries.get('usa')
+                country = Country.get('usa')
                 datasets = country.datasets
 
             Same example as above but using nested filters:
@@ -101,10 +99,9 @@ class Country(CatalogEntity):
 
             .. code::
 
-                from cartoframes.data.observatory import Catalog
+                from cartoframes.data.observatory import Country
 
-                catalog = Catalog()
-                country = catalog.countries.get('usa')
+                country = Country.get('usa')
                 geographies = country.geographies
 
             Same example as above but using nested filters:
@@ -149,10 +146,9 @@ class Country(CatalogEntity):
 
             .. code::
 
-                from cartoframes.data.observatory import Catalog
+                from cartoframes.data.observatory import Country
 
-                catalog = Catalog()
-                country = catalog.countries.get('usa')
+                country = Country.get('usa')
                 categories = country.categories
 
             Same example as above but using nested filters:

@@ -28,10 +28,9 @@ class Category(CatalogEntity):
 
         .. code::
 
-            from cartoframes.data.observatory import Catalog
+            from cartoframes.data.observatory import Category
 
-            catalog = Catalog()
-            category = catalog.categories.get('demographics')
+            category = Category.get('demographics')
     """
 
     _entity_repo = get_category_repo()
@@ -52,10 +51,9 @@ class Category(CatalogEntity):
 
             .. code::
 
-                from cartoframes.data.observatory import Catalog
+                from cartoframes.data.observatory import Category
 
-                catalog = Catalog()
-                category = catalog.categories.get('demographics')
+                category = Category.get('demographics')
                 datasets = category.datasets
 
             Same example as above but using nested filters:
@@ -100,10 +98,9 @@ class Category(CatalogEntity):
 
             .. code::
 
-                from cartoframes.data.observatory import Catalog
+                from cartoframes.data.observatory import Category
 
-                catalog = Catalog()
-                category = catalog.categories.get('demographics')
+                category = Category.get('demographics')
                 geographies = category.geographies
 
             Same example as above but using nested filters:
