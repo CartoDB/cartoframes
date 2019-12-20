@@ -1,5 +1,5 @@
 from cartoframes.auth import Credentials
-from cartoframes.viz import Map, Layer, Source, constants
+from cartoframes.viz import Map, Layer, Source, popup_element, constants
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
 from cartoframes.core.managers.context_manager import ContextManager
 
@@ -88,39 +88,43 @@ class TestMapLayer(object):
         source_1 = Source(build_cartodataframe([-10, 0], [-10, 0], ['pop', 'name']))
         layer = Layer(
             source_1,
-            popup={
-                'click': ['$pop', '$name'],
-                'hover': [{
-                    'title': 'Pop',
-                    'value': '$pop'
-                }]
-            }
+            click_popup=[
+                popup_element('pop'),
+                popup_element('name')
+            ],
+            hover_popup=[
+                popup_element('pop', 'Pop')
+            ]
         )
 
         map = Map(layer)
-        assert map.layer_defs[0].get('interactivity') == [{
-            'event': 'click',
-            'attrs': [{
-                'name': 'v559339',
-                'title': '$pop'
+        assert map.layer_defs[0].get('interactivity') == [
+            {
+                'event': 'click',
+                'attrs': {
+                    'name': 'v559339',
+                    'title': 'pop'
+                }
             }, {
-                'name': 'v8e0f74',
-                'title': '$name'
-            }]
-        }, {
-            'event': 'hover',
-            'attrs': [{
-                'name': 'v559339',
-                'title': 'Pop'
-            }]
-        }]
+                'event': 'click',
+                'attrs': {
+                    'name': 'v8e0f74',
+                    'title': 'name'
+                }
+            }, {
+                'event': 'hover',
+                'attrs': {
+                    'name': 'v559339',
+                    'title': 'Pop'
+                }
+            }
+        ]
 
     def test_default_interactive_layer(self):
         """Map layer should get the default event if the interactivity is set to []"""
         source_1 = Source(build_cartodataframe([-10, 0], [-10, 0]))
         layer = Layer(
-            source_1,
-            popup={}
+            source_1
         )
 
         map = Map(layer)

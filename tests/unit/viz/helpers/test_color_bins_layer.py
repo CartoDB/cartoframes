@@ -25,16 +25,15 @@ class TestColorBinsLayerHelper(object):
             credentials=Credentials('fakeuser')
         )
 
+        popup = layer.popups.elements[0]
+
         assert layer.style is not None
         assert layer.style._style['point']['color'] == 'opacity(ramp(globalQuantiles($name, 5), purpor),1)'
         assert layer.style._style['line']['color'] == 'opacity(ramp(globalQuantiles($name, 5), purpor),1)'
         assert layer.style._style['polygon']['color'] == 'opacity(ramp(globalQuantiles($name, 5), purpor), 0.9)'
-        assert layer.popup is not None
-        assert layer.popup._hover == [{
-            'title': 'name',
-            'value': '$name'
-        }]
-
+        assert layer.popups is not None
+        assert popup.title == 'name'
+        assert popup.value == '$name'
         assert layer.legend is not None
         assert layer.legend._type['point'] == 'color-bins-point'
         assert layer.legend._type['line'] == 'color-bins-line'
@@ -168,21 +167,20 @@ class TestColorBinsLayerHelper(object):
         layer = helpers.color_bins_layer(
             self.source,
             'name',
-            popup=False
+            popups=False
         )
 
-        assert layer.popup._hover == []
+        assert len(layer.popups.elements) == 0
 
         layer = helpers.color_bins_layer(
             self.source,
             'name',
-            popup=True
+            popups=True
         )
 
-        assert layer.popup._hover == [{
-            'title': 'name',
-            'value': '$name'
-        }]
+        popup = layer.popups.elements[0]
+        assert popup.title == 'name'
+        assert popup.value == '$name'
 
     def test_color_bins_layer_widget(self, mocker):
         "should show/hide the widget"
@@ -213,7 +211,7 @@ class TestColorBinsLayerHelper(object):
             animate='time'
         )
 
-        assert layer.popup._hover == []
+        assert len(layer.popups.elements) == 0
         assert layer.widgets._widgets[0]._type == 'time-series'
         assert layer.widgets._widgets[0]._title == 'Animation'
         assert layer.widgets._widgets[0]._value == 'time'

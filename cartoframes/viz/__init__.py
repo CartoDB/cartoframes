@@ -10,6 +10,8 @@ from .style import Style
 from .themes import Themes as themes
 from .widget import Widget
 from .widget_list import WidgetList
+from .popup_list import PopupList
+from .popups import popup_element
 
 from .widgets import basic_widget
 from .widgets import animation_widget
@@ -28,15 +30,17 @@ from .legends import size_continuous_legend
 
 __all__ = [
     'basemaps',
-    'themes',
-    'Map',
-    'Layout',
     'Layer',
-    'Source',
-    'Style',
-    'Popup',
+    'Layout',
     'Legend',
     'LegendList',
+    'Map',
+    'popup_element',
+    'Popup',
+    'PopupList',
+    'Source',
+    'Style',
+    'themes',
     'Widget',
     'WidgetList',
     'basic_widget',

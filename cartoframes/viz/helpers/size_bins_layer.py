@@ -8,7 +8,7 @@ def size_bins_layer(
         source, value, title='', method='quantiles', bins=5,
         breaks=None, size=None, color=None, opacity=None,
         stroke_width=None, stroke_color=None, description='',
-        footer='', legend=True, popup=True, widget=False, animate=None, credentials=None):
+        footer='', legend=True, popups=True, widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a size symbol map with
     classification method/buckets.
 
@@ -35,8 +35,8 @@ def size_bins_layer(
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
           Set to "True" by default.
-        popup (bool, optional): Display popups on hover and click: "True" or "False".
-          Set to "True" by default.
+        popups (bool, list of :py:class:`Popup <cartoframes.viz.Popup>`, default False, optional):
+          Display popups on hover and click: "True" or "False". Set to "True" by default.
         widget (bool, optional): Display a widget for mapped data.
           Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.
@@ -88,8 +88,8 @@ def size_bins_layer(
                 'filter': animation_filter
             }
         },
-        popup=popup and not animate and get_popup(
-          popup, title, value, value),
+        popups=popups and not animate and get_popup(
+          popups, title, value, value),
         legend=legend and {
             'type': {
                 'point': 'size-bins-point',

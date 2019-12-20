@@ -34,8 +34,8 @@ class TestSizeContinuousLayerHelper(object):
         assert layer.style._style['point']['strokeColor'] == 'opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))'
         assert layer.style._style['line']['color'] == 'opacity(#4CC8A3, 0.8)'
 
-        assert layer.popup is not None
-        assert layer.popup._hover, [{
+        assert layer.popups is not None
+        assert layer.popups.elements[0], [{
             'title': 'name',
             'value': '$name'
         }]
@@ -108,21 +108,21 @@ class TestSizeContinuousLayerHelper(object):
         layer = helpers.size_continuous_layer(
             self.source,
             'name',
-            popup=False
+            popups=False
         )
 
-        assert layer.popup._hover == []
+        assert len(layer.popups.elements) == 0
 
         layer = helpers.size_continuous_layer(
             self.source,
             'name',
-            popup=True
+            popups=True
         )
 
-        assert layer.popup._hover == [{
-            'title': 'name',
-            'value': '$name'
-        }]
+        popup = layer.popups.elements[0]
+
+        assert popup.title == 'name'
+        assert popup.value == '$name'
 
     def test_size_continuous_layer_widget(self, mocker):
         "should show/hide the widget"
@@ -153,7 +153,7 @@ class TestSizeContinuousLayerHelper(object):
             animate='time'
         )
 
-        assert layer.popup._hover == []
+        assert len(layer.popups.elements) == 0
         assert layer.widgets._widgets[0]._type == 'time-series'
         assert layer.widgets._widgets[0]._title == 'Animation'
         assert layer.widgets._widgets[0]._value == 'time'

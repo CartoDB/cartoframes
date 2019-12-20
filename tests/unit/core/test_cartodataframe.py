@@ -82,7 +82,7 @@ class TestCartoDataFrame(object):
         mock_layer = mocker.patch('cartoframes.viz.Layer')
         cdf = CartoDataFrame(self.gdf)
         viz = cdf.viz('__style__')
-        mock_layer.assert_called_once_with(cdf, '__style__', None, None, None, None, None, None)
+        mock_layer.assert_called_once_with(cdf, '__style__', None, None, None, None, None, None, None)
         assert viz == '__map__'
 
     def test_getitem_series(self):

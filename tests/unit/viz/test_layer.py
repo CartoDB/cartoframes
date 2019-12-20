@@ -1,5 +1,5 @@
 from cartoframes.auth import Credentials
-from cartoframes.viz import Layer, LegendList, WidgetList, Popup, Source, Style
+from cartoframes.viz import Layer, LegendList, WidgetList, PopupList, Source, Style
 from cartoframes.core.managers.context_manager import ContextManager
 
 
@@ -24,7 +24,7 @@ class TestLayer(object):
         assert layer.source_data == 'SELECT * FROM "public"."layer_source"'
         assert isinstance(layer.source, Source)
         assert isinstance(layer.style, Style)
-        assert isinstance(layer.popup, Popup)
+        assert isinstance(layer.popups, PopupList)
         assert isinstance(layer.legends, LegendList)
         assert isinstance(layer.widgets, WidgetList)
         assert layer.interactivity == []
@@ -38,7 +38,7 @@ class TestLayer(object):
         assert layer.source_data == 'SELECT * FROM "public"."layer_source"'
         assert isinstance(layer.source, Source)
         assert isinstance(layer.style, Style)
-        assert isinstance(layer.popup, Popup)
+        assert isinstance(layer.popups, PopupList)
         assert isinstance(layer.legends, LegendList)
         assert isinstance(layer.widgets, WidgetList)
         assert layer.interactivity == []
