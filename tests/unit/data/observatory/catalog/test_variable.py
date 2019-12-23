@@ -24,30 +24,6 @@ class TestVariable(object):
         assert isinstance(variable, Variable)
         assert variable == test_variable1
 
-    def test_get_variable_by_id_from_variables_list(self):
-        # Given
-        variables = CatalogList([test_variable1, test_variable2])
-
-        # When
-        variable = variables.get(test_variable1.id)
-
-        # Then
-        assert isinstance(variable, object)
-        assert isinstance(variable, Variable)
-        assert variable == test_variable1
-
-    def test_get_variable_by_slug_from_variables_list(self):
-        # Given
-        variables = CatalogList([test_variable1, test_variable2])
-
-        # When
-        variable = variables.get(test_variable1.slug)
-
-        # Then
-        assert isinstance(variable, object)
-        assert isinstance(variable, Variable)
-        assert variable == test_variable1
-
     @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_variable(self, mocked_repo):
         # Given

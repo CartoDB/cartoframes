@@ -30,30 +30,6 @@ class TestGeography(object):
         assert isinstance(geography, Geography)
         assert geography == test_geography1
 
-    def test_get_geography_by_id_from_geographies_list(self):
-        # Given
-        geographies = CatalogList([test_geography1, test_geography2])
-
-        # When
-        geography = geographies.get(test_geography1.id)
-
-        # Then
-        assert isinstance(geography, object)
-        assert isinstance(geography, Geography)
-        assert geography == test_geography1
-
-    def test_get_geography_by_slug_from_geographies_list(self):
-        # Given
-        geographies = CatalogList([test_geography1, test_geography2])
-
-        # When
-        geography = geographies.get(test_geography1.slug)
-
-        # Then
-        assert isinstance(geography, object)
-        assert isinstance(geography, Geography)
-        assert geography == test_geography1
-
     @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_geography(self, mocked_repo):
         # Given

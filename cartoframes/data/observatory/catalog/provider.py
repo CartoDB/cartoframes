@@ -45,6 +45,15 @@ class Provider(CatalogEntity):
 
             .. code::
 
+                from cartoframes.data.observatory import Provider
+
+                provider = Provider.get('mrli')
+                datasets = provider.datasets
+
+            Same example as above but using nested filters:
+
+            .. code::
+
                 from cartoframes.data.observatory import Catalog
 
                 catalog = Catalog()
