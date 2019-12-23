@@ -71,14 +71,14 @@ class Country(CatalogEntity):
 
             .. code::
 
-                from cartoframes.data.observatory import Catalog
+                from cartoframes.data.observatory import Catalog, Dataset
 
                 datasets = catalog.country('usa').datasets
                 # convert the list of datasets into a pandas DataFrame
                 # for further filtering and exploration
                 dataframe = datasets.to_dataframe()
                 # get a dataset by ID or slug
-                dataset = datasets.get(A_VALID_ID_OR_SLUG)
+                dataset = Dataset.get(A_VALID_ID_OR_SLUG)
 
         """
         return get_dataset_repo().get_all({COUNTRY_FILTER: self.id})
@@ -118,14 +118,14 @@ class Country(CatalogEntity):
 
             .. code::
 
-                from cartoframes.data.observatory import Catalog
+                from cartoframes.data.observatory import Catalog, Geography
 
                 geographies = catalog.country('usa').geographies
                 # convert the list of geographies into a pandas DataFrame
                 # for further filtering and exploration
                 dataframe = geographies.to_dataframe()
                 # get a geography by ID or slug
-                geography = geographies.get(A_VALID_ID_OR_SLUG)
+                geography = Geography.get(A_VALID_ID_OR_SLUG)
 
         """
         return get_geography_repo().get_all({COUNTRY_FILTER: self.id})
