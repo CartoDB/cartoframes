@@ -2,13 +2,10 @@
 
 import re
 
-from carto.exceptions import CartoException
-
+from .service import Service
 from .utils import geocoding_utils
 from .utils import geocoding_constants
 from .utils import TableGeocodingLock
-
-from .service import Service
 from ...utils.logger import log
 from ...core.managers.source_manager import SourceManager
 from ...io.carto import read_carto, to_carto, has_table, delete_table, rename_table, copy_table, create_table_from_query
@@ -33,11 +30,9 @@ class Geocoding(Service):
     we advise to save the geocoding results immediately to the same store from where the data is originally taken,
     for example:
 
-    .. code:: python
-
-        dataframe = pandas.read_csv('my_data')
-        dataframe = Geocoding().geocode(dataframe, 'address').data
-        dataframe.to_csv('my_data')
+    >>> dataframe = pandas.read_csv('my_data')
+    >>> dataframe = Geocoding().geocode(dataframe, 'address').data
+    >>> dataframe.to_csv('my_data')
 
     As an alternative, you can use the ``cached`` option to store geocoding results in a CARTO table
     and reuse them in later geocodings. To do this, you need to use the ``table_name`` parameter with the name
@@ -46,10 +41,8 @@ class Geocoding(Service):
     If the same dataframe is geocoded repeatedly no credits will be spent, but note there is a time overhead
     related to uploading the dataframe to a temporary table for checking for changes.
 
-    .. code:: python
-
-        dataframe = pandas.read_csv('my_data')
-        dataframe = Geocoding().geocode(dataframe, 'address', table_name='my_data', cached=True).data
+    >>> dataframe = pandas.read_csv('my_data')
+    >>> dataframe = Geocoding().geocode(dataframe, 'address', table_name='my_data', cached=True).data
 
     If you execute the previous code multiple times it will only spend credits on the first geocoding;
     later ones will reuse the results stored in the ``my_data`` table. This will require extra processing
@@ -128,95 +121,82 @@ class Geocoding(Service):
             column and in general what attributes are added as columns can be configured by using a ``status``
             dictionary associating column names to status attribute.
 
-        Examples:
+        Raises:
+            ValueError: if `chached` param is set without `table_name`.
 
+        Examples:
             Geocode a DataFrame:
 
-            .. code::
-
-                import pandas
-                from data.services import Geocoding
-                from cartoframes.auth import set_default_credentials
-
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-
-                df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
-                gc = Geocoding()
-                geocoded_cdf, metadata = gc.geocode(df, street='address', city='city', country={'value': 'Spain'})
-
-                geocoded_cdf.head()
+            >>> import pandas
+            >>> from data.services import Geocoding
+            >>> from cartoframes.auth import set_default_credentials
+            >>>
+            >>> set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+            >>>
+            >>> df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
+            >>> gc = Geocoding()
+            >>> geocoded_cdf, metadata = gc.geocode(df, street='address', city='city', country={'value': 'Spain'})
+            >>> geocoded_cdf.head()
 
             Geocode a table from CARTO:
 
-            .. code::
-
-                from data.services import Geocoding
-                from cartoframes import CartoDataFrame
-                from cartoframes.auth import set_default_credentials
-
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-
-                cdf = CartoDataFrame.from_carto('table_name')
-                gc = Geocoding()
-                geocoded_cdf, metadata = gc.geocode(cdf, street='address')
-
-                geocoded_cdf.head()
+            >>> from data.services import Geocoding
+            >>> from cartoframes import CartoDataFrame
+            >>> from cartoframes.auth import set_default_credentials
+            >>>
+            >>> set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+            >>>
+            >>> cdf = CartoDataFrame.from_carto('table_name')
+            >>> gc = Geocoding()
+            >>> geocoded_cdf, metadata = gc.geocode(cdf, street='address')
+            >>> geocoded_cdf.head()
 
             Geocode a query against a table from CARTO:
 
-            .. code::
-
-                from data.services import Geocoding
-                from cartoframes import CartoDataFrame
-                from cartoframes.auth import set_default_credentials
-
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-
-                cdf = CartoDataFrame.from_carto('SELECT * FROM table_name WHERE value > 1000')
-                gc = Geocoding()
-                geocoded_cdf, metadata = gc.geocode(cdf, street='address')
-
-                geocoded_cdf.head()
+            >>> from data.services import Geocoding
+            >>> from cartoframes import CartoDataFrame
+            >>> from cartoframes.auth import set_default_credentials
+            >>>
+            >>> set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+            >>>
+            >>> cdf = CartoDataFrame.from_carto('SELECT * FROM table_name WHERE value > 1000')
+            >>> gc = Geocoding()
+            >>> geocoded_cdf, metadata = gc.geocode(cdf, street='address')
+            >>> geocoded_cdf.head()
 
             Obtain the number of credits needed to geocode a CARTO table:
 
-            .. code::
-
-                from data.services import Geocoding
-                from cartoframes import CartoDataFrame
-                from cartoframes.auth import set_default_credentials
-
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-
-                cdf = CartoDataFrame.from_carto('table_name')
-                gc = Geocoding()
-                geocoded_cdf, metadata = gc.geocode(cdf, street='address', dry_run=True)
-
-                print(metadata['required_quota'])
-
+            >>> from data.services import Geocoding
+            >>> from cartoframes import CartoDataFrame
+            >>> from cartoframes.auth import set_default_credentials
+            >>>
+            >>> set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+            >>>
+            >>> cdf = CartoDataFrame.from_carto('table_name')
+            >>> gc = Geocoding()
+            >>> geocoded_cdf, metadata = gc.geocode(cdf, street='address', dry_run=True)
+            >>>
+            >>> print(metadata['required_quota'])
 
             Filter results by relevance:
 
-            .. code::
-
-                import pandas
-                from data.services import Geocoding
-                from cartoframes.auth import set_default_credentials
-
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-
-                df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
-                gc = Geocoding()
-                geocoded_cdf, metadata = gc.geocode(
-                    df,
-                    street='address',
-                    city='city',
-                    country={'value': 'Spain'},
-                    status=['relevance']
-                )
-
-                # show rows with relevance greater than 0.7:
-                print(geocoded_cdf[geocoded_cdf['carto_geocode_relevance'] > 0.7, axis=1)])
+            >>> import pandas
+            >>> from data.services import Geocoding
+            >>> from cartoframes.auth import set_default_credentials
+            >>>
+            >>> set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+            >>>
+            >>> df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
+            >>> gc = Geocoding()
+            >>> geocoded_cdf, metadata = gc.geocode(
+            ...     df,
+            ...     street='address',
+            ...     city='city',
+            ...     country={'value': 'Spain'},
+            ...     status=['relevance'])
+            >>>
+            >>> # show rows with relevance greater than 0.7:
+            >>> print(geocoded_cdf[geocoded_cdf['carto_geocode_relevance'] > 0.7, axis=1)])
         """
 
         self._source_manager = SourceManager(source, self._credentials)
@@ -382,7 +362,7 @@ class Geocoding(Service):
         if not dry_run:
             available_quota = self.available_quota()
             if output['required_quota'] > available_quota:
-                raise CartoException('Your CARTO account does not have enough Geocoding quota: {}/{}'.format(
+                raise Exception('Your CARTO account does not have enough Geocoding quota: {}/{}'.format(
                     output['required_quota'],
                     available_quota
                 ))

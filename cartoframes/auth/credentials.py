@@ -28,7 +28,7 @@ class Credentials:
     One of the above scenarios needs to be met to successfully
     instantiate a :obj:`Credentials` object.
 
-    Attributes:
+    Args:
         username (str, optional): Username of CARTO account.
         api_key (str, optional): API key of user's CARTO account. If the dataset is
             public, it can be set to 'default_public'.

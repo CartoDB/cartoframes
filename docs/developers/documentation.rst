@@ -129,6 +129,8 @@ When adding a new notebook, if it needs to be published in the developer center,
 Errors and Exceptions
 ~~~~~~~~~~~~~~~~~~~~~
 
+- `Exception`: general exception.
+
 Built-in
 --------
 

@@ -1,5 +1,3 @@
-from carto.exceptions import CartoException
-
 from .service import Service
 from ...utils.logger import log
 from ...core.managers.source_manager import SourceManager
@@ -112,6 +110,10 @@ class Isolines(Service):
             geometry with the corresponding area. It will also contain a ``source_id`` column
             that identifies the source point corresponding to each area if the source has a
             ``cartodb_id`` column.
+
+        Raises:
+            Exception: if the available quota is less than the required quota.
+            ValueError: if there is no valid geometry found in the dataframe.
         """
         return self._iso_areas(source, ranges, function='isodistance', **args)
 
@@ -144,7 +146,7 @@ class Isolines(Service):
         else:
             available_quota = self.available_quota()
             if metadata['required_quota'] > available_quota:
-                raise CartoException('Your CARTO account does not have enough Isolines quota: {}/{}'.format(
+                raise Exception('Your CARTO account does not have enough Isolines quota: {}/{}'.format(
                     metadata['required_quota'],
                     available_quota
                 ))
@@ -161,8 +163,8 @@ class Isolines(Service):
                 source_cdf.set_geometry(geom_col, inplace=True)
 
             if not source_cdf.has_geometry():
-                raise Exception('No valid geometry found. Please provide an input source with ' +
-                                'a valid geometry or specify the "geom_col" param with a geometry column.')
+                raise ValueError('No valid geometry found. Please provide an input source with ' +
+                                 'a valid geometry or specify the "geom_col" param with a geometry column.')
 
             index_as_cartodbid = CARTO_INDEX_KEY not in source_cdf.columns
 
