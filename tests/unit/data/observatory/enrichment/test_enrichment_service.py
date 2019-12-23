@@ -14,7 +14,7 @@ from cartoframes.data.observatory.catalog.repository.dataset_repo import Dataset
 from cartoframes.data.observatory.catalog.repository.entity_repo import EntityRepository
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables, \
     _ENRICHMENT_ID, _GEOM_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation, _build_where_condition, \
-    _build_where_clausule
+    _build_where_clausule, _validate_variables_input
 from cartoframes.exceptions import EnrichmentException
 from cartoframes.utils.geom_utils import to_geojson
 
@@ -576,3 +576,44 @@ class TestEnrichmentService(object):
             column1, condition1, column2, condition2)
 
         assert sql == expected_sql
+
+    def test_validate_variables_input_invalid(self):
+        invalid_inputs = [
+            None,
+            True,
+            False,
+            1,
+            51
+        ]
+
+        for invalid_input in invalid_inputs:
+            with pytest.raises(EnrichmentException) as e:
+                _validate_variables_input(invalid_input)
+
+            error = ('variables parameter should be a Variable instance, a list or a str.')
+            assert str(e.value) == error
+
+    def test_validate_variables_input_invalid_str(self):
+        invalid_inputs = [
+            '',
+            []
+        ]
+
+        for invalid_input in invalid_inputs:
+            with pytest.raises(EnrichmentException) as e:
+                _validate_variables_input(invalid_input)
+
+            error = ('You should add at least one variable to be used in enrichment.')
+            assert str(e.value) == error
+
+    def test_validate_variables_input_invalid_list(self):
+        invalid_inputs = [
+            [i for i in range(51)]
+        ]
+
+        for invalid_input in invalid_inputs:
+            with pytest.raises(EnrichmentException) as e:
+                _validate_variables_input(invalid_input)
+
+            error = ('The maximum number of variables to be used in enrichment is 50.')
+            assert str(e.value) == error
