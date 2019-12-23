@@ -30,7 +30,7 @@ def refresh_clients(func):
     return wrapper
 
 
-class BigQueryClient(object):
+class BigQueryClient:
 
     def __init__(self, credentials):
         self._credentials = credentials or get_default_credentials()

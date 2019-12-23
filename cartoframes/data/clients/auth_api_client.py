@@ -3,15 +3,16 @@ from carto.api_keys import APIKeyManager
 from ...auth import get_default_credentials
 
 
-class AuthAPIClient(object):
+class AuthAPIClient:
     """AuthAPIClient class is a client of the CARTO Auth API.
-    More info: https://carto.com/developers/auth-api/
+    More info: https://carto.com/developers/auth-api/.
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
               credentials of user account. If not provided, a default credentials
               (if set with :py:meth:`set_default_credentials <cartoframes.auth.set_default_credentials>`)
               will attempted to be used.
+
     """
     def __init__(self, credentials=None):
         credentials = credentials or get_default_credentials()
@@ -32,11 +33,11 @@ class AuthAPIClient(object):
         return api_key.token
 
 
-def _get_table_dict(schema, table, permissions):
+def _get_table_dict(schema, name, permissions):
     return {
-        "schema": schema,
-        "name": table,
-        "permissions": permissions
+        'schema': schema,
+        'name': name,
+        'permissions': permissions
     }
 
 

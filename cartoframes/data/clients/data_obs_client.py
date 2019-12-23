@@ -12,9 +12,8 @@ from ...io.carto import read_carto, to_carto
 from ...utils import utils
 
 
-class DataObsClient(object):
-    """
-    Data Observatory v1 class. `Data Observatory documentation
+class DataObsClient:
+    """Data Observatory v1 class. `Data Observatory documentation
     <https://carto.com/developers/data-observatory/>`__.
 
     This class provides the following methods to interact with Data Observatory:

@@ -33,11 +33,13 @@ def set_default_credentials(
         The recommended way to authenticate in CARTOframes is to read user
         credentials from a JSON file that is structured like this:
 
-        {
-            "username": "your user name",
-            "api_key": "your api key",
-            "base_url": "https://your_username.carto.com"
-        }
+        .. code:: JSON
+
+            {
+                "username": "your user name",
+                "api_key": "your api key",
+                "base_url": "https://your_username.carto.com"
+            }
 
         *Note that the ``base_url`` will be different for on premises
         installations.*

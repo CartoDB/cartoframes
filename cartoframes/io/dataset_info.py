@@ -6,7 +6,7 @@ from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
 
 
-class DatasetInfo(object):
+class DatasetInfo:
     PRIVACY_PRIVATE = 'PRIVATE'
     """Dataset privacy for datasets that are private"""
 
