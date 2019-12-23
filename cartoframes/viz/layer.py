@@ -112,7 +112,7 @@ class Layer():
 
     def _init_legends(self, legends):
         if legends is True:
-            return LegendList(self.style.default_legends(self._title, self._description, self._footer))
+            return self.style.default_legends(self._title, self._description, self._footer)
 
         if legends:
             return _set_legends(legends)

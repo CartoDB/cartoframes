@@ -3,11 +3,11 @@ from . import defaults
 
 from .popups import popup_element
 from .widgets import basic_widget
-# from .widgets import animation_widget
 from .widgets import category_widget
 from .widgets import histogram_widget
 from .widgets import time_series_widget
 
+from .legend_list import LegendList
 from .legends import basic_legend
 from .legends import color_bins_legend
 from .legends import color_category_legend
@@ -42,7 +42,10 @@ class Style():
         return self._get_default_popups(title)
 
     def default_legends(self, title='', description='', footer=''):
-        return self._get_default_legends(title, description, footer)
+        if self._value is None and title == '':
+            return None
+
+        return LegendList(self._get_default_legends(title, description, footer))
 
     def default_widgets(self, title='', description='', footer=''):
         return self._get_default_widgets(title, description, footer)
@@ -59,10 +62,13 @@ class Style():
             raise ValueError('`style` must be a dictionary')
 
     def _get_default_popups(self, title):
-        if self._popups:
-            return self._popups
+        if self._value:
+            if self._popups:
+                return self._popups
 
-        return {'hover': [popup_element(self._value, title)]}
+            return {'hover': [popup_element(self._value, title)]}
+
+        return None
 
     def _get_default_legends(self, title, description, footer):
         if self._style_type == 'default':
