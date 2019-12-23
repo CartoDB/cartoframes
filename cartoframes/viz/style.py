@@ -43,7 +43,7 @@ class Style():
 
     def default_legends(self, title='', description='', footer=''):
         if self._value is None and title == '':
-            return None
+            return LegendList()
 
         return LegendList(self._get_default_legends(title, description, footer))
 

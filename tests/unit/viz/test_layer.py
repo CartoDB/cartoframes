@@ -47,30 +47,3 @@ class TestLayer(object):
         assert isinstance(layer.legends, LegendList)
         assert isinstance(layer.widgets, WidgetList)
         assert layer.interactivity == []
-
-
-class TestLayerStyle(object):
-
-    def test_style_dict(self, mocker):
-        """Layer style should set the style when it is a dict"""
-        setup_mocks(mocker, 'layer_source')
-        layer = Layer(
-            'layer_source',
-            {
-                'vars': {
-                    'grad': '[red, green, blue]'
-                },
-                'color': 'blue',
-                'width': 10,
-                'strokeColor': 'black',
-                'strokeWidth': 1
-            },
-            credentials=Credentials('fakeuser')
-        )
-
-        assert isinstance(layer.style, Style)
-        assert '@grad: [red, green, blue]' in layer.viz
-        assert 'color: blue' in layer.viz
-        assert 'width: 10' in layer.viz
-        assert 'strokeColor: black' in layer.viz
-        assert 'strokeWidth: 1' in layer.viz
