@@ -19,7 +19,9 @@ _ENRICHMENT_ID = 'enrichment_id'
 _GEOM_COLUMN = '__geojson_geom'
 
 AGGREGATION_DEFAULT = 'default'
-AGGREGATION_NONE = 'none'
+AGGREGATION_NONE = None
+
+MAX_VARIABLES_NUMBER = 50
 
 
 class VariableFilter(object):
@@ -219,7 +221,7 @@ class EnrichmentService(object):
 
         return '''
             SELECT data_table.{enrichment_id}, {variables},
-                ST_Area(enrichment_geo_table.geom) AS do_geom_area
+                ST_AREA(enrichment_geo_table.geom) AS do_area
             FROM `{enrichment_dataset}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
@@ -295,18 +297,18 @@ def _build_polygons_query_variable_with_aggregation(variable, aggregation):
         return """
             {aggregation}(
                 enrichment_table.{column} * (
-                    ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                    ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
                     /
-                    ST_area(data_table.{geo_column})
+                    ST_AREA(data_table.{geo_column})
                 )
-            ) AS {aggregation}_{column}
+            ) AS {column}
             """.format(
                 column=variable.column_name,
                 geo_column=_GEOM_COLUMN,
                 aggregation=variable_agg)
     else:
         return """
-            {aggregation}(enrichment_table.{column}) AS {aggregation}_{column}
+            {aggregation}(enrichment_table.{column}) AS {column}
             """.format(
                 column=variable.column_name,
                 aggregation=variable_agg)
@@ -317,10 +319,10 @@ def _build_polygons_query_variables_without_aggregation(variables):
 
     return """
         {variables},
-        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column})) AS intersected_area,
-        ST_area(enrichment_geo_table.geom) AS do_area,
-        ST_area(data_table.{geom_column}) AS user_area,
-        enrichment_geo_table.geoid as do_geoid
+        ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geom_column})) AS intersected_area,
+        ST_AREA(enrichment_geo_table.geom) AS do_area,
+        ST_AREA(data_table.{geom_column}) AS user_area,
+        enrichment_geo_table.geoid AS do_geoid
         """.format(
             variables=', '.join(variables),
             geom_column=_GEOM_COLUMN)
@@ -337,6 +339,8 @@ def _build_where_clausule(filters):
 
 @timelogger
 def prepare_variables(variables, credentials, aggregation=None):
+    _validate_variables_input(variables)
+
     if isinstance(variables, list):
         variables = [_prepare_variable(var, aggregation) for var in variables]
     else:
@@ -366,6 +370,17 @@ def _prepare_variable(variable, aggregation=None):
             return None
 
     return variable
+
+
+def _validate_variables_input(variables):
+    if not isinstance(variables, Variable) and not isinstance(variables, str) and not isinstance(variables, list):
+        raise EnrichmentException('variables parameter should be a Variable instance, a list or a str.')
+
+    if not isinstance(variables, Variable) and len(variables) < 1:
+        raise EnrichmentException('You should add at least one variable to be used in enrichment.')
+
+    if isinstance(variables, list) and len(variables) > MAX_VARIABLES_NUMBER:
+        raise EnrichmentException('The maximum number of variables to be used in enrichment is 50.')
 
 
 def _validate_bq_operations(variables, credentials):
@@ -404,7 +419,7 @@ def _is_subscribed(dataset, geography, credentials):
 
 
 def _get_aggregation(variable, aggregation):
-    if aggregation in [None, AGGREGATION_NONE]:
+    if aggregation is AGGREGATION_NONE:
         aggregation_method = None
     elif aggregation == AGGREGATION_DEFAULT:
         aggregation_method = variable.agg_method

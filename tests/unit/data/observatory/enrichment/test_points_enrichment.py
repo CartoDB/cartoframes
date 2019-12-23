@@ -282,7 +282,7 @@ def get_query(columns, username, view, geo_table, temp_table_name, filters=[]):
     columns = ', '.join(get_column_sql(column) for column in columns)
 
     return '''
-        SELECT data_table.enrichment_id, {columns}, ST_Area(enrichment_geo_table.geom) AS do_geom_area
+        SELECT data_table.enrichment_id, {columns}, ST_AREA(enrichment_geo_table.geom) AS do_area
         FROM `carto-do-customers.{username}.{view}` enrichment_table
         JOIN `carto-do-customers.{username}.{geo_table}` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
