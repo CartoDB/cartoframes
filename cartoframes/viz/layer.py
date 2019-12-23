@@ -115,7 +115,7 @@ class Layer():
             return self.style.default_legends(self._title, self._description, self._footer)
 
         if legends:
-            return _set_legends(legends)
+            return _set_legends(legends, self._title, self._description, self._footer)
 
         return LegendList()
 
@@ -172,13 +172,13 @@ def _set_popups(popups):
         return PopupList()
 
 
-def _set_legends(legends):
+def _set_legends(legends, title='', description='', footer=''):
     if isinstance(legends, Legend):
-        return LegendList(legends)
+        return LegendList(legends, title=title, description=description, footer=footer)
     if isinstance(legends, LegendList):
         return legends
     if isinstance(legends, list):
-        return LegendList(legends)
+        return LegendList(legends, title=title, description=description, footer=footer)
     else:
         return LegendList()
 

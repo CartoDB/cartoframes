@@ -15,10 +15,10 @@ class LegendList(object):
             LegendList([])
     """
 
-    def __init__(self, legends=None):
-        self._legends = self._init_legends(legends)
+    def __init__(self, legends=None, title='', description='', footer=''):
+        self._legends = self._init_legends(legends, title, description, footer)
 
-    def _init_legends(self, legends):
+    def _init_legends(self, legends, title, description, footer):
         if isinstance(legends, list):
             legend_list = []
             for legend in legends:
@@ -26,8 +26,11 @@ class LegendList(object):
                     legend_list.append(legend)
                 else:
                     raise ValueError('Legends list contains invalid elements')
+
+            legend_list[0].add_defaults(title, description, footer)
             return legend_list
         elif isinstance(legends, Legend):
+            legends.add_defaults(title, description, footer)
             return [legends]
         else:
             return []

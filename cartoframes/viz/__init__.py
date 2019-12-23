@@ -7,6 +7,7 @@ from .basemaps import Basemaps as basemaps
 
 from .popups import popup_element
 
+from .styles import animation_style
 from .styles import basic_style
 from .styles import color_bins_style
 from .styles import color_category_style
@@ -40,6 +41,7 @@ __all__ = [
     'basemaps',
     'themes',
     'color_palettes',
+    'animation_style',
     'basic_style',
     'color_bins_style',
     'color_category_style',
