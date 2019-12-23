@@ -2,7 +2,7 @@ import pytest
 
 from unittest.mock import patch
 
-from cartoframes.exceptions import DiscoveryException
+from cartoframes.exceptions import DiscoveryError
 from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.provider import Provider
 from cartoframes.data.observatory.catalog.repository.provider_repo import ProviderRepository
@@ -62,7 +62,7 @@ class TestProviderRepo(object):
         repo = ProviderRepository()
 
         # Then
-        with pytest.raises(DiscoveryException):
+        with pytest.raises(DiscoveryError):
             repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_providers')

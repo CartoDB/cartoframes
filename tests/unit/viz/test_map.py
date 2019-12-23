@@ -1,7 +1,5 @@
 import pytest
 
-from carto.exceptions import CartoException
-
 from cartoframes.auth import Credentials
 from cartoframes.viz import Map, Layer, Source, constants
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
@@ -62,7 +60,7 @@ class TestMapInitialization(object):
         """Map should raise an error if default_legend is True but there is no title"""
 
         msg = 'The default legend needs a map title to be displayed'
-        with pytest.raises(CartoException) as e:
+        with pytest.raises(Exception) as e:
             Map(default_legend=True)
         assert str(e.value) == msg
 

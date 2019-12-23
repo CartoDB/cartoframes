@@ -2,7 +2,7 @@ import pytest
 
 from unittest.mock import patch
 
-from cartoframes.exceptions import DiscoveryException
+from cartoframes.exceptions import DiscoveryError
 from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.variable_group import VariableGroup
 from cartoframes.data.observatory.catalog.repository.variable_group_repo import VariableGroupRepository
@@ -87,7 +87,7 @@ class TestVariableGroupRepo(object):
         repo = VariableGroupRepository()
 
         # Then
-        with pytest.raises(DiscoveryException):
+        with pytest.raises(DiscoveryError):
             repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_variables_groups')

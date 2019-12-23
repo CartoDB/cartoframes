@@ -2,7 +2,7 @@ import pytest
 
 from unittest.mock import patch
 
-from cartoframes.exceptions import DiscoveryException
+from cartoframes.exceptions import DiscoveryError
 from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.country import Country
 from cartoframes.data.observatory.catalog.repository.country_repo import CountryRepository
@@ -85,7 +85,7 @@ class TestCountryRepo(object):
         repo = CountryRepository()
 
         # Then
-        with pytest.raises(DiscoveryException):
+        with pytest.raises(DiscoveryError):
             repo.get_by_id(requested_iso_code)
 
     @patch.object(RepoClient, 'get_countries')
