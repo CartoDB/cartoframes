@@ -24,9 +24,10 @@ class Style():
     """
 
     def __init__(self, style_type='default', value=None, data=None,
-                 animate=None):
+                 popup=None, animate=None):
         self._style_type = style_type
         self._value = value
+        self._popup = popup
         self._style = self._init_style(data)
 
     def _init_style(self, data):
@@ -36,6 +37,9 @@ class Style():
             return data
         else:
             raise ValueError('`style` must be a dictionary')
+
+    def default_popup(self):
+        return self._popup
 
     def default_legends(self, title='', description='', footer=''):
         return self._get_default_legends(title, description, footer)

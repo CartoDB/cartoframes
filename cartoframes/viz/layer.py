@@ -88,7 +88,10 @@ class Layer():
         self._footer = footer
         self.source = _set_source(source, credentials, geom_col)
         self.style = _set_style(style)
-        self.popups = _set_popups({'click': click_popup, 'hover': hover_popup})
+        self.popups = _set_popups({
+            'click': click_popup,
+            'hover': hover_popup if hover_popup else self.style.default_popup()
+        })
         self.legends = self._init_legends(legends)
         self.widgets = self._init_widgets(widgets)
         geom_type = self.source.get_geom_type()

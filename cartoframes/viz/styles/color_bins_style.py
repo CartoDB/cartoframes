@@ -1,5 +1,5 @@
 from ..style import Style
-from ..helpers.utils import serialize_palette, get_value
+from ..helpers.utils import serialize_palette, get_value, get_popup
 
 
 def color_bins_style(
@@ -81,4 +81,6 @@ def color_bins_style(
         }
     }
 
-    return Style('color-bins', value, style)
+    popup = get_popup(title=value, value=value)
+
+    return Style('color-bins', value, style, popup)
