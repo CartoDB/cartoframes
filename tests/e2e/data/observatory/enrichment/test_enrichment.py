@@ -108,3 +108,17 @@ class TestEnrichment(object):
         expected_gdf = clean_gdf(expected_gdf, self.private_variable1.column_name)
 
         assert enriched_gdf.equals(expected_gdf)
+
+    def test_polygons_public_data_and_agg_custom(self):
+        enriched_gdf = self.enrichment.enrich_polygons(
+            self.polygons_gdf,
+            variables=[self.public_variable1, self.public_variable2],
+            aggregation='SUM'
+        )
+
+        expected_gdf = CartoDataFrame.from_file(file_path('files/polygon-public-sum.geojson'))
+
+        enriched_gdf = clean_gdf(enriched_gdf)
+        expected_gdf = clean_gdf(expected_gdf)
+
+        assert enriched_gdf.equals(expected_gdf)
