@@ -38,7 +38,7 @@ class Enrichment(EnrichmentService):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
-            filters (dictionary, optional): dictionary to filter results by variable values. As a key it receives the
+            filters (dict, optional): dictionary to filter results by variable values. As a key it receives the
                 variable id, and as value receives a SQL operator, for example: {variable1.id: "> 30"}. It works by
                 appending the filter SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND`
                 operator (in the example: `WHERE {variable1.column_name} > 30`). The variables used to filter results
@@ -151,7 +151,7 @@ class Enrichment(EnrichmentService):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
-            filters (dictionary, optional): dictionary to filter results by variable values. As a key it receives the
+            filters (dict, optional): dictionary to filter results by variable values. As a key it receives the
                 variable id, and as value receives a SQL operator, for example: {variable1.id: "> 30"}. It works by
                 appending the filter SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND`
                 operator (in the example: `WHERE {variable1.column_name} > 30`). The variables used to filter results
@@ -266,27 +266,10 @@ class Enrichment(EnrichmentService):
 
                 catalog = Catalog()
                 variable = catalog.country('usa').category('demographics').datasets[0].variables[0]
-                filter = {variable.id: "= '2019-09-01'"}
+                filters = {variable.id: "= '2019-09-01'"}
 
                 enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_polygons(df, variables=[variable], filters=[filter])
-
-
-            The next example uses filters to calculate the `SUM` of car-free households
-            :obj:`Variable` of the :obj:`Catalog` for each polygon of `my_local_dataframe` pandas `DataFrame` only for
-            areas with more than 100 car-free households:
-
-            .. code::
-
-                from cartoframes.data.observatory import Enrichment, Variable
-
-                variable = Variable.get('no_cars_d19dfd10')
-                enriched_dataset_cdf = Enrichment().enrich_polygons(
-                    my_local_dataframe,
-                    variables=[variable],
-                    aggregation=[VariableAggregation(variable, 'SUM')]
-                    filters={variable.id: '> 100'}
-                )
+                cdf_enrich = enrichment.enrich_polygons(df, variables=[variable], filters=filters)
 
             Enrich a polygons dataframe overwriting every variables aggregation method to use `SUM` function:
 
@@ -362,6 +345,22 @@ class Enrichment(EnrichmentService):
 
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=Enrichment.AGGREGATION_NONE)
+
+            The next example uses filters to calculate the `SUM` of car-free households
+            :obj:`Variable` of the :obj:`Catalog` for each polygon of `my_local_dataframe` pandas `DataFrame` only for
+            areas with more than 100 car-free households:
+
+            .. code::
+
+                from cartoframes.data.observatory import Enrichment, Variable
+
+                variable = Variable.get('no_cars_d19dfd10')
+                enriched_dataset_cdf = Enrichment().enrich_polygons(
+                    my_local_dataframe,
+                    variables=[variable],
+                    aggregation={variable.id: 'SUM'}
+                    filters={variable.id: '> 100'}
+                )
         """
         variables = prepare_variables(variables, self.credentials, aggregation)
 
