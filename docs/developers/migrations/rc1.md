@@ -299,5 +299,28 @@ Map(
   )
 )
 ```
+
+</p>
+</details>
+
+<details><summary>Replace layer helpers with style helpers</summary>
+<p>
+
+* From:
+
+```python
+from cartoframes.viz.helpers import size_category_layer
+
+size_category_layer('roads', 'type', 'Roads sized by category')
+```
+
+* To:
+
+```python
+from cartoframes.viz import Layer, size_category_style
+
+Layer('roads', size_category_style('type'), title='Roads sized by category')
+```
+
 </p>
 </details>
