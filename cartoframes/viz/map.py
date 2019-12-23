@@ -2,7 +2,6 @@ import collections
 from warnings import warn
 
 import numpy as np
-from carto.exceptions import CartoException
 
 from . import constants
 from .basemaps import Basemaps
@@ -357,7 +356,7 @@ class Map(object):
 
     def _validate_default_legend(self, default_legend, title):
         if default_legend and not title:
-            raise CartoException('The default legend needs a map title to be displayed')
+            raise Exception('The default legend needs a map title to be displayed')
 
 
 def _get_publisher(self, credentials):

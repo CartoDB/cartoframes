@@ -3,9 +3,7 @@ from .subscription_info import fetch_subscription_info
 
 
 def is_ipython_notebook():
-    """
-    Detect whether we are in a Jupyter notebook.
-    """
+    """Detect whether we are in a Jupyter notebook."""
     try:
         cfg = get_ipython().config
         if 'IPKernelApp' in cfg:

@@ -6,7 +6,6 @@ import pandas as pd
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery, storage, bigquery_storage_v1beta1 as bigquery_storage
 from google.oauth2.credentials import Credentials as GoogleCredentials
-from carto.exceptions import CartoException
 
 from ...auth import get_default_credentials
 from ...utils.logger import log
@@ -25,8 +24,8 @@ def refresh_clients(func):
             try:
                 return func(self, *args, **kwargs)
             except RefreshError:
-                raise CartoException('Something went wrong accessing data. '
-                                     'Please, try again in a few seconds or contact support for help.')
+                raise Exception('Something went wrong accessing data. '
+                                'Please, try again in a few seconds or contact support for help.')
     return wrapper
 
 
@@ -83,7 +82,7 @@ class BigQueryClient:
     @timelogger
     def download_to_file(self, job, file_path, fail_if_exists=False, column_names=None, progress_bar=True):
         if fail_if_exists and os.path.isfile(file_path):
-            raise CartoException('The file `{}` already exists.'.format(file_path))
+            raise Exception('The file `{}` already exists.'.format(file_path))
 
         try:
             rows = self._download_by_bq_storage_api(job)
@@ -96,7 +95,7 @@ class BigQueryClient:
                 if job.errors:
                     log.error([error['message'] for error in job.errors if 'message' in error])
 
-                raise CartoException('Error downloading data')
+                raise Exception('Error downloading data')
 
         _rows_to_file(rows, file_path, column_names, progress_bar)
 
@@ -115,7 +114,7 @@ class BigQueryClient:
                 if job.errors:
                     log.error([error['message'] for error in job.errors if 'message' in error])
 
-                raise CartoException('Error downloading data')
+                raise Exception('Error downloading data')
 
     def _download_by_bq_storage_api(self, job):
         table_ref = job.destination.to_bqstorage()
@@ -173,7 +172,7 @@ class BigQueryClient:
             if job.errors:
                 log.error([error['message'] for error in job.errors if 'message' in error])
 
-            raise CartoException('Error uploading data')
+            raise Exception('Error uploading data')
 
     def get_table_column_names(self, project, dataset, table):
         table_info = self._get_table(project, dataset, table)

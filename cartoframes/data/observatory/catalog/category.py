@@ -12,7 +12,6 @@ class Category(CatalogEntity):
     are grouped by `categories`, so you can filter available `datasets` and
     `geographies` that belong (or are related) to a given `Category`.
 
-
     Examples:
         List the available categories in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
 
@@ -31,8 +30,8 @@ class Category(CatalogEntity):
             from cartoframes.data.observatory import Category
 
             category = Category.get('demographics')
-    """
 
+    """
     _entity_repo = get_category_repo()
 
     @property
@@ -42,8 +41,9 @@ class Category(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            DiscoveryError: when no datasets are found.
+            Exception: if there's a problem when connecting to the catalog.
 
         Examples:
             Get all the `datasets` :py:class:`Dataset <cartoframes.data.observatory.Dataset>` available
@@ -79,6 +79,7 @@ class Category(CatalogEntity):
                 dataframe = datasets.to_dataframe()
                 # get a dataset by ID or slug
                 dataset = Dataset.get(A_VALID_ID_OR_SLUG)
+
         """
         return get_dataset_repo().get_all({CATEGORY_FILTER: self.id})
 
@@ -89,8 +90,9 @@ class Category(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Geography instances.
 
-        :raises DiscoveryException: When no geographies found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            DiscoveryError: when no geographies are found.
+            Exception: if there's a problem when connecting to the catalog.
 
         Examples:
             Get all the `geographies` :py:class:`Dataset <cartoframes.data.observatory.Dataset>` available
@@ -126,11 +128,11 @@ class Category(CatalogEntity):
                 dataframe = geographies.to_dataframe()
                 # get a geography by ID or slug
                 dataset = Geography.get(A_VALID_ID_OR_SLUG)
+
         """
         return get_geography_repo().get_all({CATEGORY_FILTER: self.id})
 
     @property
     def name(self):
         """Name of this category instance."""
-
         return self.data['name']

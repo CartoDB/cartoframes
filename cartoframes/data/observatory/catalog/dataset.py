@@ -74,7 +74,6 @@ class Dataset(CatalogEntity):
             catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
 
     """
-
     _entity_repo = get_dataset_repo()
 
     @property
@@ -86,9 +85,10 @@ class Dataset(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Variable instances.
 
-        :raises CartoException: If there's a problem when connecting to the catalog.
-        """
+        Raises:
+            Exception: if there's a problem when connecting to the catalog.
 
+        """
         return get_variable_repo().get_all({DATASET_FILTER: self.id})
 
     @property
@@ -98,86 +98,70 @@ class Dataset(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of VariableGroup instances.
 
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            Exception: if there's a problem when connecting to the catalog.
+
         """
         return get_variable_group_repo().get_all({DATASET_FILTER: self.id})
 
     @property
     def name(self):
         """Name of this dataset."""
-
         return self.data['name']
 
     @property
     def description(self):
         """Description of this dataset."""
-
         return self.data['description']
 
     @property
     def provider(self):
-        """Id of the :obj:`Provider` of this dataset.
-        """
-
+        """Id of the :obj:`Provider` of this dataset."""
         return self.data['provider_id']
 
     @property
     def provider_name(self):
         """Name of the :obj:`Provider` of this dataset."""
-
         return self.data['provider_name']
 
     @property
     def category(self):
-        """Get the :obj:`Category` ID assigned to this dataset.sets
-        """
-
+        """Get the :obj:`Category` ID assigned to this dataset.sets"""
         return self.data['category_id']
 
     @property
     def category_name(self):
         """Name of the :obj:`Category` assigned to this dataset."""
-
         return self.data['category_name']
 
     @property
     def data_source(self):
         """Id of the data source of this dataset."""
-
         return self.data['data_source_id']
 
     @property
     def country(self):
-        """ISO 3166-1 alpha-3 code of the :obj:`Country`
-        of this dataset.
-        """
-
+        """ISO 3166-1 alpha-3 code of the :obj:`Country` of this dataset."""
         return self.data['country_id']
 
     @property
     def language(self):
-        """ISO 639-3 code of the language that corresponds to the data
-        of this dataset.
-        """
-
+        """ISO 639-3 code of the language that corresponds to the data of this dataset."""
         return self.data['lang']
 
     @property
     def geography(self):
         """Get the :obj:`Geography` ID associated to this dataset."""
-
         return self.data['geography_id']
 
     @property
     def geography_name(self):
         """Get the name of the :obj:`Geography` associated to this dataset."""
-
         return self.data['geography_name']
 
     @property
     def geography_description(self):
         """Description of the :obj:`Geography` associated to this dataset."""
-
         return self.data['geography_description']
 
     @property
@@ -185,8 +169,8 @@ class Dataset(CatalogEntity):
         """Time amount in which data is aggregated in this dataset.
 
         This is a free text field in this form: seconds, daily, hourly, monthly, yearly, etc.
-        """
 
+        """
         return self.data['temporal_aggregation']
 
     @property
@@ -199,7 +183,6 @@ class Dataset(CatalogEntity):
         Example: [2015-01-01,2016-01-01)
 
         """
-
         return self.data['time_coverage']
 
     @property
@@ -210,8 +193,8 @@ class Dataset(CatalogEntity):
             str
 
         Example: monthly, yearly, etc.
-        """
 
+        """
         return self.data['update_frequency']
 
     @property
@@ -220,8 +203,8 @@ class Dataset(CatalogEntity):
 
         Returns:
             str
-        """
 
+        """
         return self.data['version']
 
     @property
@@ -235,14 +218,13 @@ class Dataset(CatalogEntity):
                 * ``True`` if the dataset is public
                 * ``False`` if the dataset is premium
                     (it requires to :py:attr:`Dataset.subscribe`)
-        """
 
+        """
         return self.data['is_public_data']
 
     @property
     def summary(self):
         """JSON object with extra metadata that summarizes different properties of the dataset content."""
-
         return self._get_summary_data()
 
     def head(self):
@@ -252,8 +234,8 @@ class Dataset(CatalogEntity):
 
         Returns:
             pandas.DataFrame
-        """
 
+        """
         data = self._get_summary_data()
         return head(self.__class__, data) if data else None
 
@@ -264,8 +246,8 @@ class Dataset(CatalogEntity):
 
         Returns:
             pandas.DataFrame
-        """
 
+        """
         data = self._get_summary_data()
         return tail(self.__class__, data) if data else None
 
@@ -283,8 +265,8 @@ class Dataset(CatalogEntity):
                 # cells:        number of cells in the dataset (rows * columns)
                 # null_cells:   number of cells with null value in the dataset
                 # null_cells_percent:   percent of cells with null value in the dataset
-        """
 
+        """
         data = self._get_summary_data()
         return counts(data) if data else None
 
@@ -301,8 +283,8 @@ class Dataset(CatalogEntity):
                 # float        number of columns with type float in the dataset
                 # string       number of columns with type string in the dataset
                 # integer      number of columns with type integer in the dataset
-        """
 
+        """
         data = self._get_summary_data()
         return fields_by_type(data) if data else None
 
@@ -311,6 +293,7 @@ class Dataset(CatalogEntity):
 
         Returns:
             :py:class:`Map <cartoframes.viz.Map>`
+
         """
         return geom_coverage(self.geography)
 
@@ -336,6 +319,7 @@ class Dataset(CatalogEntity):
                 # q3                     third quantile
                 # median                 median value
                 # interquartile_range
+
         """
         return dataset_describe(self.variables)
 
@@ -357,8 +341,10 @@ class Dataset(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            DiscoveryError: when no datasets are found.
+            Exception: if there's a problem when connecting to the catalog or DO is not enabled.
+
         """
         if credentials is not None:
             check_credentials(credentials)
@@ -413,8 +399,10 @@ class Dataset(CatalogEntity):
         Returns:
             os.path with the local file path with the file downloaded
 
-        :raises Exception: If you have not a valid license for the dataset being downloaded.
-        :raises ValueError: If the credentials argument is not valid.
+        Raises:
+            Exception: if you have not a valid license for the dataset being downloaded or DO is not enabled.
+            ValueError: if the credentials argument is not valid.
+
         """
         _credentials = get_credentials(credentials)
 
@@ -449,7 +437,9 @@ class Dataset(CatalogEntity):
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
 
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            Exception: if there's a problem when connecting to the catalog or DO is not enabled.
+
         """
         _credentials = get_credentials(credentials)
         _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
@@ -473,7 +463,9 @@ class Dataset(CatalogEntity):
         Returns:
             :py:class:`SubscriptionInfo <cartoframes.data.observatory.SubscriptionInfo>` SubscriptionInfo instance.
 
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            Exception: if there's a problem when connecting to the catalog or DO is not enabled.
+
         """
         _credentials = get_credentials(credentials)
 

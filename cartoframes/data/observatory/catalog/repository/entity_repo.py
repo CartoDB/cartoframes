@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from .repo_client import RepoClient
 from ..entity import CatalogList, is_slug_value
-from .....exceptions import DiscoveryException
+from .....exceptions import DiscoveryError
 
 
 class EntityRepository(ABC):
@@ -24,8 +24,8 @@ class EntityRepository(ABC):
         result = self._get_rows(self._get_id_filter(id_))
 
         if len(result) == 0:
-            raise DiscoveryException('The id does not correspond with any existing entity in the catalog. '
-                                     'You can check the full list of available values with get_all() method')
+            raise DiscoveryError('The id does not correspond with any existing entity in the catalog. '
+                                 'You can check the full list of available values with get_all() method')
 
         data = self._map_row(result[0])
         return self._to_catalog_entity(data)

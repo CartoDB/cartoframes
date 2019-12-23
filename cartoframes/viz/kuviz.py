@@ -2,7 +2,6 @@ import time
 from warnings import filterwarnings
 
 from carto.kuvizs import KuvizManager
-from carto.exceptions import CartoException
 
 from .source import Source
 from ..auth import get_default_credentials
@@ -47,7 +46,7 @@ class KuvizPublisher(object):
 
     def update(self, data, name, password):
         if not self.kuviz:
-            raise CartoException('The map has not been published yet. Use the `publish` method instead.')
+            raise Exception('The map has not been published yet. Use the `publish` method instead.')
 
         self.kuviz.data = data
         self.kuviz.name = name

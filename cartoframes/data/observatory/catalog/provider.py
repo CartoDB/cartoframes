@@ -27,8 +27,8 @@ class Provider(CatalogEntity):
 
             catalog = Catalog()
             provider = catalog.provider('mrli')
-    """
 
+    """
     _entity_repo = get_provider_repo()
 
     @property
@@ -38,8 +38,9 @@ class Provider(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            DiscoveryError: when no datasets are found.
+            Exception: if there's a problem when connecting to the catalog.
 
         Examples:
 
@@ -60,11 +61,9 @@ class Provider(CatalogEntity):
                 datasets = catalog.provider('mrli').datasets
 
         """
-
         return get_dataset_repo().get_all({PROVIDER_FILTER: self.id})
 
     @property
     def name(self):
         """Name of this provider."""
-
         return self.data['name']

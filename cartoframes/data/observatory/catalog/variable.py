@@ -25,8 +25,8 @@ class Variable(CatalogEntity):
 
             dataset = Dataset.get('mbi_retail_turn_705247a')
             dataset.variables
-    """
 
+    """
     _entity_repo = get_variable_repo()
 
     @property
@@ -36,22 +36,21 @@ class Variable(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
-        """
+        Raises:
+            DiscoveryError: when no datasets are found.
+            Exception: if there's a problem when connecting to the catalog.
 
+        """
         return get_dataset_repo().get_all({VARIABLE_FILTER: self.id})
 
     @property
     def name(self):
         """Name of this variable."""
-
         return self.data['name']
 
     @property
     def description(self):
         """Description of this variable."""
-
         return self.data['description']
 
     @property
@@ -67,13 +66,13 @@ class Variable(CatalogEntity):
             str
 
         Examples: INTEGER, STRING, FLOAT, GEOGRAPHY, JSON, BOOL, etc.
+
         """
         return self.data['db_type']
 
     @property
     def dataset(self):
         """ID of the :obj:`Dataset` to which this variable belongs."""
-
         return self.data['dataset_id']
 
     @property
@@ -84,19 +83,16 @@ class Variable(CatalogEntity):
     @property
     def variable_group(self):
         """If any, ID of the variable group to which this variable belongs."""
-
         return self.data['variable_group_id']
 
     @property
     def starred(self):
         """Boolean indicating whether this variable is a starred one or not. Internal usage only"""
-
         return self.data['starred']
 
     @property
     def summary(self):
         """JSON object with extra metadata that summarizes different properties of this variable."""
-
         return self.data['summary_json']
 
     @property
@@ -133,6 +129,7 @@ class Variable(CatalogEntity):
                 # q3                     third quantile
                 # median                 median value
                 # interquartile_range
+
         """
         data = self.data['summary_json']
         return variable_describe(data)
@@ -142,6 +139,7 @@ class Variable(CatalogEntity):
 
         For the cases of datasets with a content fewer than 10 rows
         (i.e. zip codes of small countries), this method won't return anything
+
         """
         data = self.data['summary_json']
         return head(self.__class__, data)
@@ -151,6 +149,7 @@ class Variable(CatalogEntity):
 
         For the cases of datasets with a content fewer than 10 rows
         (i.e. zip codes of small countries), this method won't return anything
+
         """
         data = self.data['summary_json']
         return tail(self.__class__, data)
@@ -170,13 +169,13 @@ class Variable(CatalogEntity):
                 # outliers          number of outliers (outside 1.5stdev the interquartile range
                 # zero_percent      percent of values that are zero
                 # distinct_percent  percent of values that are distinct
+
         """
         data = self.data['summary_json']
         return counts(data)
 
     def quantiles(self):
-        """Returns the quantiles of the variable data.
-        """
+        """Returns the quantiles of the variable data."""
         data = self.data['summary_json']
         return quantiles(data)
 

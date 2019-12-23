@@ -1,7 +1,6 @@
 import pandas as pd
 
 from abc import ABC
-from carto.exceptions import CartoException
 
 from ...clients.bigquery_client import BigQueryClient
 from ....utils.logger import log
@@ -11,8 +10,7 @@ _PLATFORM_BQ = 'bq'
 
 
 class CatalogEntity(ABC):
-    """
-    This is an internal class the rest of the classes related to the catalog discovery extend.
+    """This is an internal class the rest of the classes related to the catalog discovery extend.
 
     It contains:
       - Properties: `id`, `slug` (a shorter ID).
@@ -21,8 +19,8 @@ class CatalogEntity(ABC):
       - Instance methods to convert to pandas Series, Python dict, compare instances, etc.
 
     As a rule of thumb you don't directly use this class, it is documented for inheritance purposes.
-    """
 
+    """
     id_field = 'id'
     _entity_repo = None
     export_excluded_fields = ['summary_json', 'available_in', 'geom_coverage']
@@ -51,8 +49,10 @@ class CatalogEntity(ABC):
             id_ (str):
                 ID or slug of a catalog entity.
 
-        :raises DiscoveryException: When no entities found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            DiscoveryError: when no entities are found.
+            Exception: if there's a problem when connecting to the catalog.
+
         """
         return cls._entity_repo.get_by_id(id_)
 
@@ -64,6 +64,7 @@ class CatalogEntity(ABC):
             filters (dict, optional):
                 Dict containing pairs of entity properties and its value to be used as filters to query the available
                 entities. If none is provided, no filters will be applied to the query.
+
         """
         return cls._entity_repo.get_all(filters)
 
@@ -75,8 +76,10 @@ class CatalogEntity(ABC):
             id_list (list):
                 List of sD or slugs of entities in the catalog to retrieve instances.
 
-        :raises DiscoveryException: When no entities found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            DiscoveryError: when no entities are found.
+            Exception: if there's a problem when connecting to the catalog.
+
         """
         return cls._entity_repo.get_by_id_list(id_list)
 
@@ -109,7 +112,7 @@ class CatalogEntity(ABC):
 
     def _download(self, file_path, credentials):
         if not self._is_available_in('bq'):
-            raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
+            raise Exception('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
         bq_client = _get_bigquery_client(credentials)
 
@@ -155,16 +158,15 @@ def is_slug_value(id_value):
 
 
 class CatalogList(list):
-    """
-    This is an internal class that represents a list of entities in the catalog of the same type.
+    """This is an internal class that represents a list of entities in the catalog of the same type.
 
     It contains:
       - Instance methods to convert to get an instance of the entity by ID and to convert the list to a pandas
         DataFrame for further filtering and exploration.
 
     As a rule of thumb you don't directly use this class, it is documented for inheritance purposes.
-    """
 
+    """
     def __init__(self, data):
         super(CatalogList, self).__init__(data)
 
@@ -179,8 +181,8 @@ class CatalogList(list):
 
                 catalog = Catalog()
                 catalog.categories.to_dataframe()
-        """
 
+        """
         df = pd.DataFrame([item.data for item in self])
 
         if 'available_in' in df:

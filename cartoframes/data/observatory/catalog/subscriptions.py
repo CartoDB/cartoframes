@@ -2,13 +2,13 @@
 from carto.do_subscriptions import DOSubscriptionManager, DOSubscriptionCreationManager
 
 
-class Subscriptions(object):
+class Subscriptions:
     """This class is used to list the datasets and geographies you have acquired a subscription (or valid license) for.
 
     This class won't show any dataset or geography tagged in the catalog as `is_public_data` since those data do not
     require a subscription.
-    """
 
+    """
     def __init__(self, datasets, geographies):
         self._subscriptions_datasets = datasets
         self._subscriptions_geographies = geographies
@@ -23,7 +23,9 @@ class Subscriptions(object):
     def datasets(self):
         """List of :obj:`Dataset` you have a subscription for.
 
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            Exception: if there's a problem when connecting to the catalog.
+
         """
         return self._subscriptions_datasets
 
@@ -31,7 +33,9 @@ class Subscriptions(object):
     def geographies(self):
         """List of :obj:`Geography` you have a subscription for.
 
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            Exception: if there's a problem when connecting to the catalog.
+
         """
         return self._subscriptions_geographies
 

@@ -1,5 +1,3 @@
-from carto.exceptions import CartoException
-
 from ..utils.utils import get_center
 from . import constants
 from .html import HTMLLayout
@@ -125,7 +123,7 @@ def _init_layout(maps, is_static, viewport):
 
     for _, viz in enumerate(maps):
         if not isinstance(viz, Map):
-            raise CartoException('All the elements in the Layout should be an instance of Map')
+            raise Exception('All the elements in the Layout should be an instance of Map')
         map_settings = _get_map_settings(viz, is_static, viewport)
         layout.append(map_settings)
 

@@ -1,5 +1,3 @@
-from carto.exceptions import CartoException
-
 from .utils import get_value, get_popup
 from ..constants import CLUSTER_KEYS, CLUSTER_OPERATIONS
 from ..layer import Layer
@@ -129,4 +127,4 @@ def _check_valid_operation(operation):
 
     if operation not in valid_operations:
         err = '"{0}" is not a valid operation. Valid operations are {1}'
-        raise CartoException(err.format(operation, ', '.join(valid_operations)))
+        raise Exception(err.format(operation, ', '.join(valid_operations)))

@@ -9,7 +9,7 @@ from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FIL
 from ....utils.utils import get_credentials
 
 
-class Catalog(object):
+class Catalog:
     """This class represents the Data Observatory metadata
     :py:class:`Catalog <cartoframes.data.observatory.Catalog>`.
 
@@ -136,8 +136,8 @@ class Catalog(object):
     See the Catalog guides and examples in our
     `public documentation website <https://carto.com/developers/cartoframes/guides/Introduction/>`__
     for more information.
-    """
 
+    """
     def __init__(self):
         self.filters = {}
 
@@ -148,10 +148,11 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
-        """
+        Raises:
+            DiscoveryError: when no datasets are found.
+            Exception: if there's a problem when connecting to the catalog.
 
+        """
         return Country.get_all(self.filters)
 
     @property
@@ -161,10 +162,11 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
-        """
+        Raises:
+            DiscoveryError: when no datasets are found.
+            Exception: if there's a problem when connecting to the catalog.
 
+        """
         return Category.get_all(self.filters)
 
     @property
@@ -174,10 +176,11 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
-        """
+        Raises:
+            DiscoveryError: when no datasets are found.
+            Exception: if there's a problem when connecting to the catalog.
 
+        """
         return Dataset.get_all(self.filters)
 
     @property
@@ -187,10 +190,11 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
-        """
+        Raises:
+            DiscoveryError: when no datasets are found.
+            Exception: if there's a problem when connecting to the catalog.
 
+        """
         return Geography.get_all(self.filters)
 
     def country(self, country_id):
@@ -204,7 +208,6 @@ class Catalog(object):
             :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
 
         """
-
         self.filters[COUNTRY_FILTER] = country_id
         return self
 
@@ -219,7 +222,6 @@ class Catalog(object):
             :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
 
         """
-
         self.filters[CATEGORY_FILTER] = category_id
         return self
 
@@ -234,7 +236,6 @@ class Catalog(object):
             :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
 
         """
-
         filter_value = geography_id
 
         if is_slug_value(geography_id):
@@ -255,13 +256,11 @@ class Catalog(object):
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         """
-
         self.filters[PROVIDER_FILTER] = provider_id
         return self
 
     def clear_filters(self):
         """Remove the current filters from this Catalog instance."""
-
         self.filters = {}
 
     def subscriptions(self, credentials=None):
@@ -276,8 +275,12 @@ class Catalog(object):
 
         Returns:
             :py:class:`Subscriptions <cartoframes.data.observatory.Subscriptions>`
-        """
 
+        Raises:
+            DiscoveryError: when no datasets are found.
+            Exception: if there's a problem when connecting to the catalog.
+
+        """
         _no_filters = {}
         _credentials = get_credentials(credentials)
 
@@ -290,6 +293,6 @@ class Catalog(object):
         """Get all the datasets in the Catalog filtered
         Returns:
             :py:class:`Dataset <cartoframes.data.observatory.Dataset>`
-        """
 
+        """
         return Dataset.get_datasets_spatial_filtered(filter_dataset)

@@ -32,8 +32,8 @@ class Country(CatalogEntity):
 
             # country ID is a lowercase ISO Alpha 3 Code
             country = Country.get('usa')
-    """
 
+    """
     _entity_repo = get_country_repo()
 
     @property
@@ -43,8 +43,9 @@ class Country(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            DiscoveryError: when no datasets are found.
+            Exception: if there's a problem when connecting to the catalog.
 
         Examples:
             Get all the `datasets` :py:class:`Dataset <cartoframes.data.observatory.Dataset>` available
@@ -90,8 +91,9 @@ class Country(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Geography instances.
 
-        :raises DiscoveryException: When no geographies are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            DiscoveryError: when no geographies are found.
+            Exception: if there's a problem when connecting to the catalog.
 
         Examples:
             Get all the `geographies` :py:class:`Geography <cartoframes.data.observatory.Geography>` available
@@ -137,8 +139,9 @@ class Country(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Category instances.
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            DiscoveryError: when no datasets are found.
+            Exception: if there's a problem when connecting to the catalog.
 
         Examples:
             Get all the `categories` :py:class:`Category <cartoframes.data.observatory.Category>` available

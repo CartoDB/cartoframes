@@ -73,8 +73,8 @@ class Geography(CatalogEntity):
 
             catalog = Catalog()
             catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
-    """
 
+    """
     _entity_repo = get_geography_repo()
 
     @property
@@ -84,39 +84,36 @@ class Geography(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            DiscoveryError: when no datasets are found.
+            Exception: if there's a problem when connecting to the catalog.
+
         """
         return get_dataset_repo().get_all({GEOGRAPHY_FILTER: self.id})
 
     @property
     def name(self):
         """Name of this geography."""
-
         return self.data['name']
 
     @property
     def description(self):
         """Description of this geography."""
-
         return self.data['description']
 
     @property
     def country(self):
         """Code (ISO 3166-1 alpha-3) of the country of this geography."""
-
         return self.data['country_id']
 
     @property
     def language(self):
-        """Code (ISO 639-3) of the language that corresponds to the data of this geography. """
-
+        """Code (ISO 639-3) of the language that corresponds to the data of this geography."""
         return self.data['lang']
 
     @property
     def provider(self):
         """Id of the Provider of this geography."""
-
         return self.data['provider_id']
 
     @property
@@ -127,13 +124,11 @@ class Geography(CatalogEntity):
     @property
     def geom_coverage(self):
         """Geographical coverage geometry encoded in WKB."""
-
         return self.data['geom_coverage']
 
     @property
     def geom_type(self):
         """Info about the type of geometry of this geography."""
-
         return self.data['geom_type']
 
     @property
@@ -141,14 +136,13 @@ class Geography(CatalogEntity):
         """Frequency in which the geography data is updated.
 
         Example: monthly, yearly, etc.
-        """
 
+        """
         return self.data['update_frequency']
 
     @property
     def version(self):
         """Internal version info of this geography."""
-
         return self.data['version']
 
     @property
@@ -162,14 +156,13 @@ class Geography(CatalogEntity):
                 * ``True`` if the geography is public
                 * ``False`` if the geography is premium
                     (it requires to :py:attr:`Geography.subscribe`)
-        """
 
+        """
         return self.data['is_public_data']
 
     @property
     def summary(self):
         """dict with extra metadata that summarizes different properties of the geography content."""
-
         return self.data['summary_json']
 
     @classmethod
@@ -190,8 +183,10 @@ class Geography(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Geography instances.
 
-        :raises DiscoveryException: When no geographies are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            DiscoveryError: when no geographies are found.
+            Exception: if there's a problem when connecting to the catalog or DO is not enabled.
+
         """
         if credentials is not None:
             check_credentials(credentials)
@@ -216,8 +211,10 @@ class Geography(CatalogEntity):
         Returns:
             A string with the local file path with the file downloaded
 
-        :raises CartoException: If you have not a valid license for the dataset being downloaded.
-        :raises ValueError: If the credentials argument is not valud.
+        Raises:
+            Exception: if you have not a valid license for the dataset being downloaded or DO is not enabled.
+            ValueError: if the credentials argument is not valud.
+
         """
         _credentials = get_credentials(credentials)
 
@@ -252,7 +249,9 @@ class Geography(CatalogEntity):
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
 
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            Exception: if there's a problem when connecting to the catalog or DO is not enabled.
+
         """
         _credentials = get_credentials(credentials)
         _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
@@ -276,7 +275,9 @@ class Geography(CatalogEntity):
         Returns:
             :py:class:`SubscriptionInfo <cartoframes.data.observatory.SubscriptionInfo>` SubscriptionInfo instance.
 
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            Exception: if there's a problem when connecting to the catalog or DO is not enabled.
+
         """
         _credentials = get_credentials(credentials)
 
