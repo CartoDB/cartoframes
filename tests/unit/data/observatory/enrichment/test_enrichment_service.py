@@ -13,7 +13,8 @@ from cartoframes.data.observatory import Variable, Dataset
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.repository.entity_repo import EntityRepository
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables, \
-    _ENRICHMENT_ID, _GEOM_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation, _validate_variables_input
+    _ENRICHMENT_ID, _GEOM_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation, _build_where_condition, \
+    _build_where_clausule, _validate_variables_input
 from cartoframes.exceptions import EnrichmentError
 from cartoframes.utils.geom_utils import to_geojson
 
@@ -549,6 +550,32 @@ class TestEnrichmentService(object):
         assert _get_aggregation(variable_agg_none, custom_agg) == 'avg'
         custom_agg = {}
         assert _get_aggregation(variable_agg_none, custom_agg) is None
+
+    def test_where_condition(self):
+        column = 'column'
+        condition = '> 3'
+
+        sql = _build_where_condition(column, condition)
+        expected_sql = "enrichment_table.{} {}".format(column, condition)
+
+        assert sql == expected_sql
+
+    def test_where_clausule(self):
+        column1 = 'column1'
+        condition1 = '> 1'
+        filter1 = _build_where_condition(column1, condition1)
+
+        column2 = 'column2'
+        condition2 = '> 2'
+        filter2 = _build_where_condition(column2, condition2)
+
+        filters = [filter1, filter2]
+
+        sql = _build_where_clausule(filters)
+        expected_sql = 'WHERE enrichment_table.{} {} AND enrichment_table.{} {}'.format(
+            column1, condition1, column2, condition2)
+
+        assert sql == expected_sql
 
     def test_validate_variables_input_invalid(self):
         invalid_inputs = [
