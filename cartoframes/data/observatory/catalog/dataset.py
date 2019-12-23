@@ -45,33 +45,21 @@ class Dataset(CatalogEntity):
 
         You can just list all the available datasets:
 
-        .. code::
-
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            datasets = catalog.datasets
+        >>> catalog = Catalog()
+        >>> datasets = catalog.datasets
 
         Since the catalog contains thousands of datasets, you can convert the
         list of `datasets` to a pandas DataFrame for further filtering:
 
-        .. code::
-
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            dataframe = catalog.datasets.to_dataframe()
+        >>> catalog = Catalog()
+        >>> dataframe = catalog.datasets.to_dataframe()
 
         The catalog supports nested filters for a hierarchical exploration.
         This way you could list the datasets available for different hierarchies:
         country, provider, category, geography, or a combination of them.
 
-        .. code::
-
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
+        >>> catalog = Catalog()
+        >>> catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
 
     """
     _entity_repo = get_dataset_repo()

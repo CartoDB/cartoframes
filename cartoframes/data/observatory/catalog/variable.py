@@ -19,12 +19,8 @@ class Variable(CatalogEntity):
         List the variables of a :py:class:`Dataset <cartoframes.data.observatory.Dataset>`
         in combination with nested filters (categories, countries, etc.)
 
-        .. code::
-
-            from cartoframes.data.observatory import Dataset
-
-            dataset = Dataset.get('mbi_retail_turn_705247a')
-            dataset.variables
+        >>> dataset = Dataset.get('mbi_retail_turn_705247a')
+        >>> dataset.variables
 
     """
     _entity_repo = get_variable_repo()

@@ -174,13 +174,8 @@ class CatalogList(list):
         """Converts a list to a pandas DataFrame.
 
         Examples:
-
-            .. code::
-
-                from cartoframes.data.observatory import Catalog
-
-                catalog = Catalog()
-                catalog.categories.to_dataframe()
+            >>> catalog = Catalog()
+            >>> catalog.categories.to_dataframe()
 
         """
         df = pd.DataFrame([item.data for item in self])

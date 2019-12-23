@@ -10,18 +10,11 @@ class SQLClient:
             instance can be used in place of a `username`|`base_url` / `api_key` combination.
 
     Example:
-        >>> from cartoframes.auth import Credentials
-        >>> from cartoframes.data.clients import SQLClient
-        >>>
-        >>> credentials = Credentials(username='<USER NAME>', api_key='<API KEY>')
         >>> sql = SQLClient(credentials)
-        >>>
         >>> sql.query('SELECT * FROM table_name')
         >>> sql.execute('DROP TABLE table_name')
-        >>>
         >>> sql.distinct('table_name', 'column_name')
         >>> sql.count('table_name')
-        >>> ...
 
     """
     def __init__(self, credentials=None):

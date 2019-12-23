@@ -36,43 +36,27 @@ class Geography(CatalogEntity):
 
         You can just list all the available geographies:
 
-        .. code::
-
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            geographies = catalog.geographies
+        >>> catalog = Catalog()
+        >>> geographies = catalog.geographies
 
         Since the catalog contains thousands of geographies, you can convert the
         list of `geographies` to a pandas DataFrame for further filtering:
 
-        .. code::
-
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            dataframe = catalog.geographies.to_dataframe()
+        >>> catalog = Catalog()
+        >>> dataframe = catalog.geographies.to_dataframe()
 
         The catalog supports nested filters for a hierarchical exploration.
         This way you could list the geographies available for different hierarchies:
         country, provider, category or a combination of them.
 
-        .. code::
-
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            catalog.country('usa').category('demographics').geographies
+        >>> catalog = Catalog()
+        >>> catalog.country('usa').category('demographics').geographies
 
         Usually you use a geography ID as an intermediate filter to get a list
         of datasets with aggregate data for that geographical resolution
 
-        .. code::
-
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
+        >>> catalog = Catalog()
+        >>> catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
 
     """
     _entity_repo = get_geography_repo()

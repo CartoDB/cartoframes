@@ -51,13 +51,11 @@ def set_default_credentials(
 
         This file can then be read in the following ways:
 
-        >>> from cartoframes.auth import set_default_credentials
         >>> set_default_credentials('./carto-project-credentials.json')
 
     Example:
         Create Credentials from a ``username``, ``api_key`` pair.
 
-        >>> from cartoframes.auth import set_default_credentials
         >>> set_default_credentials('johnsmith', 'your api key')
 
         Create credentials from only a ``username`` (only works with public
@@ -67,23 +65,19 @@ def set_default_credentials(
         maps, reading data from the Data Observatory, or creating new hosted
         datasets).
 
-        >>> from cartoframes.auth import set_default_credentials
         >>> set_default_credentials('johnsmith')
 
         From a pair ``base_url``, ``api_key``.
 
-        >>> from cartoframes.auth import set_default_credentials
         >>> set_default_credentials('https://johnsmith.carto.com', 'your api key')
 
         From a ``base_url`` (for public datasets). The API key `default_public`
         is used by default.
 
-        >>> from cartoframes.auth import set_default_credentials
         >>> set_default_credentials('https://johnsmith.carto.com')
 
         From a :py:class:`Credentials <cartoframes.auth.Credentials>` class.
 
-        >>> from cartoframes.auth import Credentials, set_default_credentials
         >>> credentials = Credentials(
         ...     base_url='https://johnsmith.carto.com',
         ...     api_key='your api key')
@@ -122,9 +116,6 @@ def get_default_credentials():
     :func:`cartoframes.auth.set_default_credentials` in Python session.
 
     Example:
-        Retrieve default credentials.
-
-        >>> from cartoframes.auth import set_default_credentials, get_default_credentials
         >>> set_default_credentials('creds.json')
         >>> current_creds = get_default_credentials()
 

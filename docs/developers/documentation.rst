@@ -142,3 +142,6 @@ Built-in
 
 Custom
 ------
+
+- DiscoveryError.
+- EnrichmentError.

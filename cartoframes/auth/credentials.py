@@ -45,9 +45,6 @@ class Credentials:
         ValueError: if not available `username` or `base_url` are found.
 
     Example:
-        Setting basic credentials:
-
-        >>> from cartoframes.auth import Credentials
         >>> creds = Credentials(username='johnsmith', api_key='abcdefg')
 
     """
@@ -117,7 +114,6 @@ class Credentials:
             A (:obj:`Credentials`) instance.
 
         Example:
-            >>> from cartoframes.auth import Credentials
             >>> creds = Credentials.from_file('creds.json')
 
         """
@@ -147,7 +143,6 @@ class Credentials:
             ValueError: if the credentials argument is not an instance of Credentials.
 
         Example:
-            >>> from cartoframes.auth import Credentials
             >>> creds = Credentials.from_credentials(orig_creds)
 
         """
@@ -168,7 +163,6 @@ class Credentials:
                 default location.
 
         Example:
-            >>> from cartoframes.auth import Credentials
             >>> credentials = Credentials(username='johnsmith', api_key='abcdefg')
             >>> credentials.save('creds.json')
             User credentials for `johnsmith` were successfully saved to `creds.json`
