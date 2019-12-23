@@ -1,8 +1,9 @@
-Utils
------
+Data I/O
+---------
 
-.. automodule:: cartoframes.io.carto
+.. automodule:: cartoframes
     :members:
+    :exclude-members: CartoDataFrame
     :member-order: bysource
     :undoc-members:
     :show-inheritance:
