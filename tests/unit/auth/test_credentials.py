@@ -139,7 +139,7 @@ class TestCredentialsFromFile:
             os.rmdir(_USER_CONFIG_DIR)
 
     def test_credentials_without_file(self, mocker):
-        mocker_log = mocker.patch('cartoframes.core.logger.log.info')
+        mocker_log = mocker.patch('cartoframes.utils.logger.log.info')
 
         credentials1 = Credentials(self.username, self.api_key)
         credentials1.save()
@@ -157,7 +157,7 @@ class TestCredentialsFromFile:
             Credentials.from_file()
 
     def test_credentials_with_file(self, mocker):
-        mocker_log = mocker.patch('cartoframes.core.logger.log.info')
+        mocker_log = mocker.patch('cartoframes.utils.logger.log.info')
 
         filepath = '/tmp/credentials.json'
         credentials1 = Credentials(self.username, self.api_key)

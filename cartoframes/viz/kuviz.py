@@ -8,7 +8,7 @@ from .source import Source
 from ..auth import get_default_credentials
 from ..utils.columns import normalize_name
 from ..data.clients.auth_api_client import AuthAPIClient
-from ..core.logger import log
+from ..utils.logger import log
 
 filterwarnings("ignore", category=FutureWarning, module="carto")
 

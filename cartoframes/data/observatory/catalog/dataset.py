@@ -13,7 +13,7 @@ from .summary import dataset_describe, head, tail, counts, fields_by_type, geom_
 from . import subscription_info
 from . import subscriptions
 from . import utils
-from ....core.logger import log
+from ....utils.logger import log
 from ....utils.utils import get_credentials, check_credentials, check_do_enabled
 
 DATASET_TYPE = 'dataset'

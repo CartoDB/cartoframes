@@ -17,7 +17,7 @@ from functools import wraps
 from warnings import catch_warnings, filterwarnings
 from pyrestcli.exceptions import ServerErrorException
 
-from ..core.logger import log
+from .logger import log
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'

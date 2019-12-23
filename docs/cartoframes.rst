@@ -6,4 +6,5 @@
 .. include:: includes/data_services.rst
 .. include:: includes/data_clients.rst
 .. include:: includes/viz.rst
+.. include:: includes/utils.rst
 .. include:: includes/exceptions.rst

@@ -10,7 +10,7 @@ from ...clients import bigquery_client
 from ....auth import get_default_credentials
 from ....exceptions import EnrichmentException
 from ....core.cartodataframe import CartoDataFrame
-from ....core.logger import log
+from ....utils.logger import log
 from ....utils.geom_utils import to_geojson
 from ....utils.utils import timelogger
 

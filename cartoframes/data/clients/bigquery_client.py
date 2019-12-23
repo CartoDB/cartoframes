@@ -9,7 +9,7 @@ from google.oauth2.credentials import Credentials as GoogleCredentials
 from carto.exceptions import CartoException
 
 from ...auth import get_default_credentials
-from ...core.logger import log
+from ...utils.logger import log
 from ...utils.utils import timelogger
 
 

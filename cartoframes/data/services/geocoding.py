@@ -9,7 +9,7 @@ from .utils import geocoding_constants
 from .utils import TableGeocodingLock
 
 from .service import Service
-from ...core.logger import log
+from ...utils.logger import log
 from ...core.managers.source_manager import SourceManager
 from ...io.carto import read_carto, to_carto, has_table, delete_table, rename_table, copy_table, create_table_from_query
 

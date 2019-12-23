@@ -4,7 +4,7 @@ from abc import ABC
 from carto.exceptions import CartoException
 
 from ...clients.bigquery_client import BigQueryClient
-from ....core.logger import log
+from ....utils.logger import log
 
 
 _PLATFORM_BQ = 'bq'

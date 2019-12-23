@@ -1,7 +1,7 @@
 from carto.exceptions import CartoException
 
 from .service import Service
-from ...core.logger import log
+from ...utils.logger import log
 from ...core.managers.source_manager import SourceManager
 from ...io.carto import read_carto, to_carto, delete_table
 

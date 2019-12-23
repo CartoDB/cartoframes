@@ -4,7 +4,7 @@ import pandas as pd
 
 from carto.exceptions import CartoException
 
-from ..core.logger import log
+from ..utils.logger import log
 from ..core.cartodataframe import CartoDataFrame
 from ..core.managers.context_manager import ContextManager
 from ..utils.utils import is_valid_str, is_sql_query

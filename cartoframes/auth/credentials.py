@@ -8,7 +8,7 @@ from carto.auth import APIKeyAuthClient
 from carto.do_token import DoTokenManager
 
 from .. import __version__
-from ..core.logger import log
+from ..utils.logger import log
 from ..utils.utils import is_valid_str, check_do_enabled
 
 from warnings import filterwarnings
