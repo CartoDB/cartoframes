@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 from google.cloud import bigquery, storage
 
 from cartoframes.auth import Credentials
-from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geography, VariableFilter
+from cartoframes.data.observatory import Enrichment, Variable, Dataset, Geography
 from cartoframes.data.observatory.enrichment.enrichment_service import _GEOM_COLUMN
 from enrichment_mock import CatalogEntityWithGeographyMock, GeographyMock
 
@@ -249,8 +249,8 @@ class TestPointsEnrichment(object):
         })
         variables = [variable]
 
-        variable_filter = VariableFilter(variable, "= 'a string'")
-        filters = [variable_filter]
+        filters = {variable.id: "= 'a string'"}
+        expected_filters = ["{} = 'a string'".format(variable.column_name)]
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
@@ -261,7 +261,7 @@ class TestPointsEnrichment(object):
         )
 
         expected_queries = [
-            get_query([column], self.username, view, geo_view, temp_table_name, filters)
+            get_query([column], self.username, view, geo_view, temp_table_name, expected_filters)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -308,8 +308,7 @@ def get_column_sql(column):
 def _get_where(filters):
     where = ''
     if filters and len(filters) > 0:
-        where_clausules = ["enrichment_table.{} {}".format(f.variable.column_name, f.query)
-                           for f in filters]
-        where = 'WHERE {}'.format('AND '.join(where_clausules))
+        where_clausules = ["enrichment_table.{}".format(f) for f in filters]
+        where = 'WHERE {}'.format(' AND '.join(where_clausules))
 
     return where
