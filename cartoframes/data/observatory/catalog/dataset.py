@@ -365,6 +365,36 @@ class Dataset(CatalogEntity):
 
         return cls._entity_repo.get_all(filters, credentials)
 
+    @classmethod
+    def get_datasets_spatial_filtered(cls, filter_dataset):
+        user_gdf = cls._get_user_geodataframe(filter_dataset)
+
+        # TODO: check if the dataframe has a geometry column if not exception
+        # Saving memory
+        user_gdf = user_gdf[[user_gdf.geometry.name]]
+        catalog_geographies_gdf = get_geography_repo().get_geographies_gdf()
+        matched_geographies_ids = cls._join_geographies_geodataframes(catalog_geographies_gdf, user_gdf)
+
+        # Get Dataset objects
+        return get_dataset_repo().get_all({'geography_id': list(matched_geographies_ids)})
+
+    @staticmethod
+    def _get_user_geodataframe(filter_dataset):
+        if isinstance(filter_dataset, gpd.GeoDataFrame):
+            # Geopandas dataframe
+            return filter_dataset
+
+        if isinstance(filter_dataset, str):
+            # String WKT
+            df = pd.DataFrame([{'geometry': filter_dataset}])
+            df['geometry'] = df['geometry'].apply(wkt.loads)
+            return gpd.GeoDataFrame(df)
+
+    @staticmethod
+    def _join_geographies_geodataframes(geographies_gdf1, geographies_gdf2):
+        join_gdf = gpd.sjoin(geographies_gdf1, geographies_gdf2, how='inner', op='intersects')
+        return join_gdf['id'].unique()
+
     @check_do_enabled
     def to_csv(self, file_path, credentials=None):
         """Download dataset data as a local csv file. You need Data Observatory enabled in your CARTO
@@ -418,36 +448,6 @@ class Dataset(CatalogEntity):
                             'Please, use the subscribe method first.')
 
         return self._download(_credentials)
-
-    @classmethod
-    def get_datasets_spatial_filtered(cls, filter_dataset):
-        user_gdf = cls._get_user_geodataframe(filter_dataset)
-
-        # TODO: check if the dataframe has a geometry column if not exception
-        # Saving memory
-        user_gdf = user_gdf[[user_gdf.geometry.name]]
-        catalog_geographies_gdf = get_geography_repo().get_geographies_gdf()
-        matched_geographies_ids = cls._join_geographies_geodataframes(catalog_geographies_gdf, user_gdf)
-
-        # Get Dataset objects
-        return get_dataset_repo().get_all({'geography_id': list(matched_geographies_ids)})
-
-    @staticmethod
-    def _get_user_geodataframe(filter_dataset):
-        if isinstance(filter_dataset, gpd.GeoDataFrame):
-            # Geopandas dataframe
-            return filter_dataset
-
-        if isinstance(filter_dataset, str):
-            # String WKT
-            df = pd.DataFrame([{'geometry': filter_dataset}])
-            df['geometry'] = df['geometry'].apply(wkt.loads)
-            return gpd.GeoDataFrame(df)
-
-    @staticmethod
-    def _join_geographies_geodataframes(geographies_gdf1, geographies_gdf2):
-        join_gdf = gpd.sjoin(geographies_gdf1, geographies_gdf2, how='inner', op='intersects')
-        return join_gdf['id'].unique()
 
     @check_do_enabled
     def subscribe(self, credentials=None):
