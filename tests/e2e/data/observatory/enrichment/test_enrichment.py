@@ -58,3 +58,13 @@ class TestEnrichment(object):
         expected_gdf = CartoDataFrame.from_file(file_path('files/points-private.geojson'))
 
         assert enriched_gdf.sort_index(axis=1).equals(expected_gdf.sort_index(axis=1))
+
+    def test_points_public_data_and_filters(self):
+        enriched_gdf = self.enrichment.enrich_points(
+            self.points_gdf,
+            variables=self.private_variables
+        )
+
+        expected_gdf = CartoDataFrame.from_file(file_path('files/points-private.geojson'))
+
+        assert enriched_gdf.sort_index(axis=1).equals(expected_gdf.sort_index(axis=1))
