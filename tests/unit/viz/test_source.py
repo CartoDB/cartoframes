@@ -40,7 +40,7 @@ class TestSource(object):
 
     def test_source_no_credentials(self):
         """Source should raise an exception if there are no credentials"""
-        with pytest.raises(AttributeError) as e:
+        with pytest.raises(ValueError) as e:
             Source('faketable')
 
         assert str(e.value) == ('Credentials attribute is required. '

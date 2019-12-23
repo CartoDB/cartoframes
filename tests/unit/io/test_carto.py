@@ -53,7 +53,7 @@ def test_read_carto_wrong_source(mocker):
 
 def test_read_carto_wrong_credentials(mocker):
     # When
-    with pytest.raises(AttributeError) as e:
+    with pytest.raises(ValueError) as e:
         read_carto('__source__', 1234)
 
     # Then
@@ -203,7 +203,7 @@ def test_to_carto_wrong_credentials(mocker):
     df = GeoDataFrame({'geometry': [Point([0, 0])]})
 
     # When
-    with pytest.raises(AttributeError) as e:
+    with pytest.raises(ValueError) as e:
         to_carto(df, '__table_name__', 1234)
 
     # Then
@@ -243,7 +243,7 @@ def test_copy_table_wrong_new_table_name(mocker):
 
 def test_copy_table_wrong_credentials(mocker):
     # When
-    with pytest.raises(AttributeError) as e:
+    with pytest.raises(ValueError) as e:
         copy_table('__table_name__', '__new_table_name__', 1234)
 
     # Then
@@ -280,7 +280,7 @@ def test_create_table_from_query_wrong_new_table_name(mocker):
 
 def test_create_table_from_query_wrong_credentials(mocker):
     # When
-    with pytest.raises(AttributeError) as e:
+    with pytest.raises(ValueError) as e:
         create_table_from_query('SELECT * FROM table', '__new_table_name__', 1234)
 
     # Then
