@@ -1,7 +1,6 @@
 import time
 
 from carto.datasets import DatasetManager
-from carto.exceptions import CartoException
 
 from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
@@ -40,8 +39,8 @@ class DatasetInfo(object):
                 self._get_metadata(auth_client=auth_client, table_name=table_name,
                                    retries=retries-1, retry_wait_time=retry_wait_time*2)
             else:
-                raise CartoException('We could not get the table metadata. '
-                                     'Please, try again in a few seconds or contact support for help')
+                raise Exception('We could not get the table metadata. '
+                                'Please, try again in a few seconds or contact support for help')
 
     def _save_metadata(self):
         self._metadata.privacy = self._privacy

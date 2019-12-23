@@ -7,7 +7,7 @@ from carto.exceptions import CartoException
 from ..core.logger import log
 from ..core.cartodataframe import CartoDataFrame
 from ..core.managers.context_manager import ContextManager
-from ..utils.utils import is_sql_query
+from ..utils.utils import is_valid_str, is_sql_query
 
 
 GEOM_COLUMN_NAME = 'the_geom'
@@ -16,8 +16,7 @@ IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
 
 
 def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True):
-    """
-    Read a table or a SQL query from the CARTO account.
+    """Read a table or a SQL query from the CARTO account.
 
     Args:
         source (str): table name or SQL query.
@@ -35,8 +34,11 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
     Returns:
         :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`
 
+    Raises:
+        ValueError: if the source is not a valid table_name or SQL query.
+
     """
-    if not isinstance(source, str):
+    if not is_valid_str(source):
         raise ValueError('Wrong source. You should provide a valid table_name or SQL query.')
 
     context_manager = ContextManager(credentials)
@@ -60,8 +62,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
              force_cartodbfy=False, log_enabled=True):
-    """
-    Upload a Dataframe to CARTO.
+    """Upload a Dataframe to CARTO.
 
     Args:
         dataframe (DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
@@ -76,14 +77,13 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             uses the name of the index from the dataframe.
 
     Raises:
-        ValueError:
-            When the dataframe or table name provided is wrong or the if_exists param is not valid.
+        ValueError: if the dataframe or table name provided are wrong or the if_exists param is not valid.
 
     """
     if not isinstance(dataframe, pd.DataFrame):
         raise ValueError('Wrong dataframe. You should provide a valid DataFrame instance.')
 
-    if not isinstance(table_name, str):
+    if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
     if if_exists not in IF_EXISTS_OPTIONS:
@@ -120,8 +120,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
 
 def has_table(table_name, credentials=None, schema=None):
-    """
-    Check if the table exists in the CARTO account.
+    """Check if the table exists in the CARTO account.
 
     Args:
         table_name (str): name of the table.
@@ -129,8 +128,15 @@ def has_table(table_name, credentials=None, schema=None):
             instance of Credentials (username, api_key, etc).
         schema (str, optional): prefix of the table. By default, it gets the
             `current_schema()` using the credentials.
+
+    Returns:
+        bool: True if the table exists, False otherwise.
+
+    Raises:
+        ValueError: if the table name is not a valid table name.
+
     """
-    if not isinstance(table_name, str):
+    if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
     context_manager = ContextManager(credentials)
@@ -138,15 +144,18 @@ def has_table(table_name, credentials=None, schema=None):
 
 
 def delete_table(table_name, credentials=None, log_enabled=True):
-    """
-    Delete the table from the CARTO account.
+    """Delete the table from the CARTO account.
 
     Args:
         table_name (str): name of the table.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
+
+    Raises:
+        ValueError: if the table name is not a valid table name.
+
     """
-    if not isinstance(table_name, str):
+    if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
     context_manager = ContextManager(credentials)
@@ -160,8 +169,7 @@ def delete_table(table_name, credentials=None, log_enabled=True):
 
 
 def rename_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
-    """
-    Rename a table in the CARTO account.
+    """Rename a table in the CARTO account.
 
     Args:
         table_name (str): name of the table.
@@ -171,13 +179,13 @@ def rename_table(table_name, new_table_name, credentials=None, if_exists='fail',
         if_exists (str, optional): 'fail', 'replace'. Default is 'fail'.
 
     Raises:
-        ValueError:
-            When the table name provided is wrong or the if_exists param is not valid.
+        ValueError: if the table names provided are wrong or the if_exists param is not valid.
+
     """
-    if not isinstance(table_name, str):
+    if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
-    if not isinstance(new_table_name, str):
+    if not is_valid_str(new_table_name):
         raise ValueError('Wrong new table name. You should provide a valid table name.')
 
     IF_EXISTS_OPTIONS = ['fail', 'replace']
@@ -193,8 +201,7 @@ def rename_table(table_name, new_table_name, credentials=None, if_exists='fail',
 
 
 def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
-    """
-    Copy a table into a new table in the CARTO account.
+    """Copy a table into a new table in the CARTO account.
 
     Args:
         table_name (str): name of the original table.
@@ -204,13 +211,13 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
         if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
 
     Raises:
-        ValueError:
-            When the table name provided is wrong or the if_exists param is not valid.
+        ValueError: if the table names provided are wrong or the if_exists param is not valid.
+
     """
-    if not isinstance(table_name, str):
+    if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
-    if not isinstance(new_table_name, str):
+    if not is_valid_str(new_table_name):
         raise ValueError('Wrong new table name. You should provide a valid table name.')
 
     if if_exists not in IF_EXISTS_OPTIONS:
@@ -227,8 +234,7 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
 
 
 def create_table_from_query(query, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
-    """
-    Create a new table from an SQL query in the CARTO account.
+    """Create a new table from an SQL query in the CARTO account.
 
     Args:
         query (str): SQL query
@@ -238,13 +244,13 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
         if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
 
     Raises:
-        ValueError:
-            When the query or table name provided is wrong or the if_exists param is not valid.
+        ValueError: if the query or table name provided is wrong or the if_exists param is not valid.
+
     """
     if not is_sql_query(query):
         raise ValueError('Wrong query. You should provide a valid SQL query.')
 
-    if not isinstance(new_table_name, str):
+    if not is_valid_str(new_table_name):
         raise ValueError('Wrong new table name. You should provide a valid table name.')
 
     if if_exists not in IF_EXISTS_OPTIONS:
@@ -259,8 +265,7 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
 
 
 def describe_table(table_name, credentials=None, schema=None):
-    """
-    Describe the table in the CARTO account.
+    """Describe the table in the CARTO account.
 
     Args:
         table_name (str): name of the table.
@@ -273,11 +278,10 @@ def describe_table(table_name, credentials=None, schema=None):
         A dict with the `privacy`, `num_rows` and `geom_type` of the table.
 
     Raises:
-        ValueError:
-            If the table name is not a string.
-    """
+        ValueError: if the table name is not a valid table name.
 
-    if not isinstance(table_name, str):
+    """
+    if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
     context_manager = ContextManager(credentials)
@@ -299,8 +303,7 @@ def describe_table(table_name, credentials=None, schema=None):
 
 
 def update_privacy_table(table_name, privacy, credentials=None, log_enabled=True):
-    """
-    Update the table information in the CARTO account.
+    """Update the table information in the CARTO account.
 
     Args:
         table_name (str): name of the table.
@@ -309,13 +312,11 @@ def update_privacy_table(table_name, privacy, credentials=None, log_enabled=True
             instance of Credentials (username, api_key, etc).
 
     Raises:
-        ValueError:
-            If the table name is not a string.
-        ValueError:
-            If the privacy name is not 'private', 'public', or 'link'.
-    """
+        ValueError: if the table name is wrong or the privacy name
+            is not 'private', 'public', or 'link'.
 
-    if not isinstance(table_name, str):
+    """
+    if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
     valid_privacy_values = ['PRIVATE', 'PUBLIC', 'LINK']
