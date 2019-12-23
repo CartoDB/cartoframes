@@ -88,12 +88,11 @@ class Layer():
         self._footer = footer
         self.source = _set_source(source, credentials, geom_col)
         self.style = _set_style(style)
-        self.popups = _set_popups({
-            'click': click_popup,
-            'hover': hover_popup if hover_popup else self.style.default_popup()
-        })
+
+        self.popups = self._init_popups(title, click_popup, hover_popup)
         self.legends = self._init_legends(legends)
         self.widgets = self._init_widgets(widgets)
+
         geom_type = self.source.get_geom_type()
         popups_variables = self.popups.get_variables()
         widget_variables = self.widgets.get_variables()
@@ -128,6 +127,16 @@ class Layer():
             return _set_widgets(widgets)
 
         return WidgetList()
+
+    def _init_popups(self, title, click_popup, hover_popup):
+        if click_popup is None and hover_popup is None:
+            popups = self.style.default_popups(title)
+            return _set_popups(popups)
+        else:
+            return _set_popups({
+                'click': click_popup,
+                'hover': hover_popup
+            })
 
     def _repr_html_(self):
         from .map import Map

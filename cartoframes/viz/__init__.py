@@ -11,6 +11,7 @@ from .styles import basic_style
 from .styles import color_bins_style
 from .styles import color_category_style
 from .styles import color_continuous_style
+from .styles import cluster_size_style
 from .styles import size_bins_style
 from .styles import size_category_style
 from .styles import size_continuous_style
@@ -56,6 +57,7 @@ __all__ = [
     'color_bins_legend',
     'color_category_legend',
     'color_continuous_legend',
+    'cluster_size_style',
     'size_bins_legend',
     'size_category_legend',
     'size_continuous_legend',

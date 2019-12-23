@@ -16,11 +16,11 @@ def get_value(value, geom_type, prop):
     return value
 
 
-def get_popup(popup=None, title=None, alt_title=None, value=None, alt_value=None):
+def get_popup(popup=None, title=None, alt_title=None, value=None, alt_value=None, operation=None):
     if isinstance(popup, Popup):
         return popup
 
     popup_value = alt_value or value
     popup_title = title or alt_title
 
-    return [popup_element(popup_value, popup_title)]
+    return [popup_element(popup_value, popup_title, operation)]

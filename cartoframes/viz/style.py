@@ -1,6 +1,7 @@
 from ..utils.utils import merge_dicts, text_match
 from . import defaults
 
+from .popups import popup_element
 from .widgets import basic_widget
 # from .widgets import animation_widget
 from .widgets import category_widget
@@ -23,12 +24,11 @@ class Style():
         data (str, dict): The style for the layer.
     """
 
-    def __init__(self, style_type='default', value=None, data=None,
-                 popup=None, animate=None):
+    def __init__(self, style_type='default', value=None, data=None, popups=None, animate=None):
         self._style_type = style_type
         self._value = value
-        self._popup = popup
-        self._style = self._init_style(data)
+        self._popups = popups
+        self._style = self._init_style(data=data)
 
     def _init_style(self, data):
         if data is None:
@@ -38,8 +38,8 @@ class Style():
         else:
             raise ValueError('`style` must be a dictionary')
 
-    def default_popup(self):
-        return self._popup
+    def default_popups(self, title):
+        return self._get_default_popups(title)
 
     def default_legends(self, title='', description='', footer=''):
         return self._get_default_legends(title, description, footer)
@@ -57,6 +57,12 @@ class Style():
             return self._parse_style_dict(style, default_style, variables)
         else:
             raise ValueError('`style` must be a dictionary')
+
+    def _get_default_popups(self, title):
+        if self._popups:
+            return self._popups
+
+        return {'hover': [popup_element(self._value, title)]}
 
     def _get_default_legends(self, title, description, footer):
         if self._style_type == 'default':
