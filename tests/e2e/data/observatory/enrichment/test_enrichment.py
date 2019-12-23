@@ -122,3 +122,21 @@ class TestEnrichment(object):
         expected_gdf = clean_gdf(expected_gdf)
 
         assert enriched_gdf.equals(expected_gdf)
+
+    def test_polygons_public_data_and_agg_custom_by_var(self):
+        enriched_gdf = self.enrichment.enrich_polygons(
+            self.polygons_gdf,
+            variables=self.public_variables,
+            aggregation={
+                self.public_variable1.id: 'SUM',
+                self.public_variable2.id: 'COUNT',
+                self.public_variable3.id: 'STRING_AGG'
+            }
+        )
+
+        expected_gdf = CartoDataFrame.from_file(file_path('files/polygon-public-agg-custom-by-var.geojson'))
+
+        enriched_gdf = clean_gdf(enriched_gdf)
+        expected_gdf = clean_gdf(expected_gdf)
+
+        assert enriched_gdf.equals(expected_gdf)
