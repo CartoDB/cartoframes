@@ -18,8 +18,8 @@ class Enrichment(EnrichmentService):
             a default credentials (if set with :py:meth:`set_default_credentials
             <cartoframes.auth.set_default_credentials>`) will attempted to be
             used.
-    """
 
+    """
     def __init__(self, credentials=None):
         super(Enrichment, self).__init__(credentials)
 
@@ -47,6 +47,9 @@ class Enrichment(EnrichmentService):
 
         Returns:
             A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` enriched with the variables passed as argument.
+
+        Raises:
+            EnrichmentError: if there is an error in the enrichment process.
 
         *Note that if the points of the `dataframe` you provide are contained in more than one geometry
         in the enrichment dataset, the number of rows of the returned `CartoDataFrame` could be different
@@ -116,6 +119,7 @@ class Enrichment(EnrichmentService):
 
                 enrichment = Enrichment()
                 cdf_enrich = enrichment.enrich_points(df, variables=[variable], filters=filters)
+
         """
         variables = prepare_variables(variables, self.credentials)
         cartodataframe = self._prepare_data(dataframe, geom_col)
@@ -177,6 +181,9 @@ class Enrichment(EnrichmentService):
 
         Returns:
             A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` enriched with the variables passed as argument.
+
+        Raises:
+            EnrichmentError: if there is an error in the enrichment process.
 
         *Note that if the geometry of the `dataframe` you provide intersects with more than one geometry
         in the enrichment dataset, the number of rows of the returned `CartoDataFrame` could be different
@@ -357,6 +364,7 @@ class Enrichment(EnrichmentService):
                     aggregation={variable.id: 'SUM'}
                     filters={variable.id: '> 100'}
                 )
+
         """
         variables = prepare_variables(variables, self.credentials, aggregation)
 

@@ -58,7 +58,7 @@ class EnrichmentService(object):
             time.sleep(0.5)
 
         if len(errors) > 0:
-            raise Exception(errors)
+            raise EnrichmentError(errors)
 
         for df in dfs_enriched:
             cartodataframe = cartodataframe.merge(df, on=_ENRICHMENT_ID, how='left')
