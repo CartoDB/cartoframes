@@ -1,4 +1,5 @@
-"""Auth namespace contains the class to manage authentication: Credentials.
+"""Auth namespace contains the class to manage authentication:
+:class:`cartoframes.auth.Credentials`.
 It also includes the utility functions
 :func:`cartoframes.auth.set_default_credentials` and
 :func:`cartoframes.auth.get_default_credentials`."""

@@ -303,6 +303,10 @@ def is_table_name(data):
     return isinstance(data, str) and normalize_name(data) == data
 
 
+def is_valid_str(value):
+    return isinstance(value, str) and value != ''
+
+
 def get_credentials(credentials=None):
     from ..auth import defaults
     _credentials = credentials or defaults.get_default_credentials()
@@ -313,9 +317,9 @@ def get_credentials(credentials=None):
 def check_credentials(credentials):
     from ..auth.credentials import Credentials
     if not isinstance(credentials, Credentials):
-        raise AttributeError('Credentials attribute is required. '
-                             'Please pass a `Credentials` instance '
-                             'or use the `set_default_credentials` function.')
+        raise ValueError('Credentials attribute is required. '
+                         'Please pass a `Credentials` instance '
+                         'or use the `set_default_credentials` function.')
 
 
 def get_center(center):

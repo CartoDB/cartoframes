@@ -9,17 +9,17 @@ from carto.do_token import DoTokenManager
 
 from .. import __version__
 from ..core.logger import log
-from ..utils.utils import check_do_enabled
+from ..utils.utils import is_valid_str, check_do_enabled
 
 from urllib.parse import urlparse
 from warnings import filterwarnings
-filterwarnings("ignore", category=FutureWarning, module="carto")
+filterwarnings('ignore', category=FutureWarning, module='carto')
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 _DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR, 'cartocreds.json')
 
 
-class Credentials(object):
+class Credentials:
     """Credentials class is used for managing and storing user CARTO credentials. The
     arguments are listed in order of precedence: :obj:`Credentials` instances
     are first, `key` and `base_url`/`username` are taken next, and
@@ -29,10 +29,10 @@ class Credentials(object):
     One of the above scenarios needs to be met to successfully
     instantiate a :obj:`Credentials` object.
 
-    Args:
+    Attributes:
+        username (str, optional): Username of CARTO account.
         api_key (str, optional): API key of user's CARTO account. If the dataset is
             public, it can be set to 'default_public'.
-        username (str, optional): Username of CARTO account
         base_url (str, optional): Base URL used for API calls. This is usually
             of the form `https://johnsmith.carto.com/` for user `johnsmith`.
             On premises installations (and others) have a different URL
@@ -42,31 +42,32 @@ class Credentials(object):
             <http://docs.python-requests.org/en/master/user/advanced/>`__
             for more information.
 
-    Example:
+    Raises:
+        ValueError: if not available `username` or `base_url` are found.
 
+    Example:
         Setting basic credentials:
 
-        .. code::
-
-            from cartoframes.auth import Credentials
-            credentials = Credentials(username='johnsmith', api_key='abcdefg')
-
+        >>> from cartoframes.auth import Credentials
+        >>> creds = Credentials(username='johnsmith', api_key='abcdefg')
     """
 
     def __init__(self, username=None, api_key='default_public', base_url=None, session=None):
-        if username is None and base_url is None:
+        if not is_valid_str(username) and not is_valid_str(base_url):
             raise ValueError('You must set at least a `username` or a `base_url` parameters')
 
         self._api_key = api_key
         self._username = username
-        self.base_url = base_url or self._base_url_from_username()
+        self._base_url = base_url or self._base_url_from_username()
         self._session = session
         self._api_key_auth_client = None
 
         self._norm_credentials()
 
     def __eq__(self, obj):
-        return self._api_key == obj._api_key and self._username == obj._username and self._base_url == obj._base_url
+        return self._api_key == obj._api_key and \
+               self._username == obj._username and \
+               self._base_url == obj._base_url
 
     def __repr__(self):
         return ("Credentials(username='{username}', "
@@ -96,9 +97,9 @@ class Credentials(object):
         self._username = username
 
         new_base_url = self._base_url_from_username()
-        if new_base_url != self.base_url:
-            self.base_url = self._base_url_from_username()
-            log.warning('`base_url` has been updated to {}'.format(self.base_url))
+        if new_base_url != self._base_url:
+            self._base_url = self._base_url_from_username()
+            log.warning('`base_url` has been updated to {}'.format(self._base_url))
 
     @property
     def base_url(self):
@@ -134,11 +135,17 @@ class Credentials(object):
 
     @classmethod
     def from_credentials(cls, credentials):
-        """Retrives credentials from another Credentials object"""
-        if isinstance(credentials, Credentials):
-            return cls(credentials.username, credentials.api_key, credentials.base_url, credentials.session)
+        """Retrives credentials from another Credentials object
 
-        raise ValueError('`credentials` must be a Credentials class instance')
+        Args:
+            credentials (:obj:`Credentials`)
+
+        Raises:
+            ValueError: if the credentials argument is not an instance of Credentials.
+        """
+        if not isinstance(credentials, Credentials):
+            raise ValueError('`credentials` must be a Credentials class instance')
+        return cls(credentials.username, credentials.api_key, credentials.base_url, credentials.session)
 
     def save(self, config_file=None):
         """Saves current user credentials to user directory.
@@ -149,18 +156,17 @@ class Credentials(object):
                 default location.
 
         Example:
+            .. code::
+
+                >>> from cartoframes.auth import Credentials
+                >>> credentials = Credentials(username='johnsmith', api_key='abcdefg')
+                >>> credentials.save()  # save to default location
 
             .. code::
 
-                from cartoframes.auth import Credentials
-                credentials = Credentials(username='johnsmith', api_key='abcdefg')
-                credentials.save()  # save to default location
-
-            .. code::
-
-                from cartoframes.auth import Credentials
-                credentials = Credentials(username='johnsmith', api_key='abcdefg')
-                credentials.save('path/to/credentials/file.json')
+                >>> from cartoframes.auth import Credentials
+                >>> credentials = Credentials(username='johnsmith', api_key='abcdefg')
+                >>> credentials.save('path/to/credentials/file.json')
         """
         if config_file is None:
             config_file = _DEFAULT_PATH
@@ -171,7 +177,7 @@ class Credentials(object):
 
         with open(config_file, 'w') as _file:
             json.dump({'username': self._username, 'api_key': self._api_key, 'base_url': self._base_url}, _file)
-            print('User credentials for `{0}` were successfully saved to `{1}`'.format(
+            log.info('User credentials for `{0}` were successfully saved to `{1}`'.format(
                 self._username or self._base_url, config_file))
 
     @classmethod
@@ -181,19 +187,15 @@ class Credentials(object):
         (`cartocreds.json`)
 
         Args:
-
-            config_file (str): Path to configuration file.
-                Defaults to delete the user default location if `None`.
+            config_file (str): Path to configuration file. Defaults to delete
+                the user default location if `None`.
 
         .. Tip::
 
             To see if there is a default user credential file stored, do the
             following:
-
-                >>> credentials = Credentials.from_file()
-                >>> print(credentials)
-                Credentials(username='johnsmith', api_key='abcdefg', base_url='https://johnsmith.carto.com/')
-
+            >>> print(Credentials.from_file())
+            Credentials(username='johnsmith', api_key='abcdefg', base_url='https://johnsmith.carto.com/')
         """
         path_to_remove = config_file or _DEFAULT_PATH
 
@@ -212,7 +214,7 @@ class Credentials(object):
     def get_api_key_auth_client(self):
         if not self._api_key_auth_client:
             self._api_key_auth_client = APIKeyAuthClient(
-                base_url=self.base_url,
+                base_url=self._base_url,
                 api_key=self.api_key,
                 session=self.session,
                 client_id='cartoframes_{}'.format(__version__),
