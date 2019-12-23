@@ -310,7 +310,7 @@ class Dataset(CatalogEntity):
         """Shows a map to visualize the geographical coverage of the dataset.
 
         Returns:
-            cartoframes.viz.Map
+            :py:class:`Map <cartoframes.viz.Map>`
         """
         return geom_coverage(self.geography)
 
