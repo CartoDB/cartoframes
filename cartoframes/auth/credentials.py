@@ -49,6 +49,7 @@ class Credentials:
 
         >>> from cartoframes.auth import Credentials
         >>> creds = Credentials(username='johnsmith', api_key='abcdefg')
+
     """
 
     def __init__(self, username=None, api_key='default_public', base_url=None, session=None):
@@ -95,6 +96,11 @@ class Credentials:
         """Credentials session"""
         return self._session
 
+    @session.setter
+    def session(self, session):
+        """Set session"""
+        self._session = session
+
     @classmethod
     def from_file(cls, config_file=None, session=None):
         """Retrives credentials from a file. Defaults to the user config directory.
@@ -113,14 +119,19 @@ class Credentials:
         Example:
             >>> from cartoframes.auth import Credentials
             >>> creds = Credentials.from_file('creds.json')
+
         """
-        with open(config_file or _DEFAULT_PATH, 'r') as f:
-            credentials = json.load(f)
-        return cls(
-            credentials.get('username'),
-            credentials.get('api_key'),
-            credentials.get('base_url'),
-            session)
+        try:
+            with open(config_file or _DEFAULT_PATH, 'r') as f:
+                credentials = json.load(f)
+            return cls(
+                credentials.get('username'),
+                credentials.get('api_key'),
+                credentials.get('base_url'),
+                session)
+        except FileNotFoundError:
+            raise FileNotFoundError('There is no default credentials file. '
+                                    'Run `Credentials(...).save()` to create a credentials file.')
 
     @classmethod
     def from_credentials(cls, credentials):
@@ -138,6 +149,7 @@ class Credentials:
         Example:
             >>> from cartoframes.auth import Credentials
             >>> creds = Credentials.from_credentials(orig_creds)
+
         """
         if not isinstance(credentials, Credentials):
             raise ValueError('`credentials` must be a Credentials class instance.')
@@ -160,6 +172,7 @@ class Credentials:
             >>> credentials = Credentials(username='johnsmith', api_key='abcdefg')
             >>> credentials.save('creds.json')
             User credentials for `johnsmith` were successfully saved to `creds.json`
+
         """
         if config_file is None:
             config_file = _DEFAULT_PATH
@@ -190,9 +203,11 @@ class Credentials:
 
             To see if there is a default user credential file stored, do the
             following:
+
             >>> print(Credentials.from_file())
             Credentials(username='johnsmith', api_key='abcdefg',
             base_url='https://johnsmith.carto.com/')
+
         """
         path_to_remove = config_file or _DEFAULT_PATH
 

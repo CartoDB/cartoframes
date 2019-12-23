@@ -307,6 +307,14 @@ def is_valid_str(value):
     return isinstance(value, str) and value != ''
 
 
+def is_url(text):
+    return re.match(r'^https?://.*$', text)
+
+
+def is_json_filepath(text):
+    return re.match(r'^.*\.json\s*$', text, re.IGNORECASE)
+
+
 def get_credentials(credentials=None):
     from ..auth import defaults
     _credentials = credentials or defaults.get_default_credentials()
