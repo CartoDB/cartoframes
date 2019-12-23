@@ -31,7 +31,7 @@ def size_category_style(
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
     opacity = opacity if opacity else '0.8'
 
-    return Style({
+    style = {
         'point': {
             'width': 'ramp({0}(${1}, {2}), {3})'.format(
                 func, value, cat or top, size or [2, 20]),
@@ -48,4 +48,6 @@ def size_category_style(
                 color or '#4CC8A3', opacity),
             'filter': animation_filter
         }
-    })
+    }
+
+    return Style('size-category', value, style)

@@ -24,10 +24,10 @@ class Layer():
             table name, SQL query or a dataframe.
         style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
             The style of the visualization.
-        legends (:py:class:`Legend <cartoframes.viz.Legend>` list, optional):
+        legends (bool, :py:class:`Legend <cartoframes.viz.Legend>` list, optional):
             The legends definition for a layer. It contains a list of legend helpers.
             See :py:class:`Legend <cartoframes.viz.Legend>` for more information.
-        widgets (dict, list, or :py:class:`WidgetList <cartoframes.viz.WidgetList>`, optional):
+        widgets (bool, list, or :py:class:`WidgetList <cartoframes.viz.WidgetList>`, optional):
             Widget or list of widgets for a layer. It contains the information to display
             different widget types on the top right of the map. See
             :py:class:`WidgetList` for more information.
@@ -71,22 +71,26 @@ class Layer():
     def __init__(self,
                  source,
                  style=None,
-                 legends=None,
-                 widgets=None,
+                 legends=True,
+                 widgets=False,
                  click_popup=None,
                  hover_popup=None,
                  credentials=None,
                  bounds=None,
-                 geom_col=None):
+                 geom_col=None,
+                 title='',
+                 description='',
+                 footer=''):
 
         self.is_basemap = False
-
+        self._title = title
+        self._description = description
+        self._footer = footer
         self.source = _set_source(source, credentials, geom_col)
         self.style = _set_style(style)
         self.popups = _set_popups({'click': click_popup, 'hover': hover_popup})
-        self.legends = _set_legends(legends)
-        self.widgets = _set_widgets(widgets)
-
+        self.legends = self._init_legends(legends)
+        self.widgets = self._init_widgets(widgets)
         geom_type = self.source.get_geom_type()
         popups_variables = self.popups.get_variables()
         widget_variables = self.widgets.get_variables()
@@ -103,6 +107,24 @@ class Layer():
         self.widgets_info = self.widgets.get_widgets_info()
         self.legends_info = self.legends.get_info() if self.legends is not None else None
         self.has_legend_list = isinstance(self.legends, LegendList)
+
+    def _init_legends(self, legends):
+        if legends is True:
+            return LegendList(self.style.default_legends(self._title, self._description, self._footer))
+
+        if legends:
+            return _set_legends(legends)
+
+        return LegendList()
+
+    def _init_widgets(self, widgets):
+        if widgets is True:
+            return WidgetList(self.style.default_widgets(self._title, self._description, self._footer))
+
+        if widgets:
+            return _set_widgets(widgets)
+
+        return WidgetList()
 
     def _repr_html_(self):
         from .map import Map

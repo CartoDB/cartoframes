@@ -26,4 +26,4 @@ def basic_style(color=None, size=None, opacity=None, stroke_color=None, stroke_w
         }
     }
 
-    return Style(default_style)
+    return Style('default', None, default_style)

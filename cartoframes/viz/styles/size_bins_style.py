@@ -46,7 +46,7 @@ def size_bins_style(
     if opacity is None:
         opacity = '0.8'
 
-    return Style({
+    style = {
         'point': {
             'width': 'ramp({0}(${1}, {2}), {3})'.format(
                 func, value, breaks or bins, size or [2, 14]),
@@ -63,4 +63,6 @@ def size_bins_style(
                 color or '#4CC8A3', opacity),
             'filter': animation_filter
         }
-    })
+    }
+
+    return Style('size-bins', value, style)

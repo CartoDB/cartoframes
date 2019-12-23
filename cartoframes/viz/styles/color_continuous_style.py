@@ -36,7 +36,7 @@ def color_continuous_style(
     if range_max is None:
         range_max = 'globalMAX(${0})'.format(value)
 
-    return Style({
+    style = {
         'point': {
             'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
                 value, range_min, range_max,
@@ -67,4 +67,6 @@ def color_continuous_style(
             'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
             'filter': animation_filter
         }
-    })
+    }
+
+    return Style('color-continuous', value, style)

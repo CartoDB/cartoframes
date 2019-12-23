@@ -2,8 +2,8 @@ from ..style import Style
 from ..helpers.utils import get_value
 
 
-def animation_style(source, value, title='', duration=20, color=None,
-                    size=None, opacity=None, stroke_color=None, stroke_width=None):
+def animation_style(value, duration=20, color=None, size=None, opacity=None,
+                    stroke_color=None, stroke_width=None):
     """Helper function for quickly creating an animated layer
     """
 
@@ -30,7 +30,7 @@ def animation_style(source, value, title='', duration=20, color=None,
         }
     }
 
-    return Style(style)
+    return Style('animation', value, style)
 
 
 def _animation_filter(value, duration, fade):

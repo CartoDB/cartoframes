@@ -48,7 +48,7 @@ def color_bins_style(
 
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
-    return Style({
+    style = {
         'point': {
             'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
                 func, value, breaks or bins,
@@ -79,4 +79,6 @@ def color_bins_style(
             'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
             'filter': animation_filter
         }
-    })
+    }
+
+    return Style('color-bins', value, style)

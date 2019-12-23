@@ -1,7 +1,7 @@
 from .utils import get_popup
 
 from ..legends.color_bins_legend import color_bins_legend
-from ..styles.color_bins_style import color_bins_style
+from ..styles import color_bins_style
 from ..widgets.time_series_widget import time_series_widget
 from ..widgets.histogram_widget import histogram_widget
 from ..layer import Layer

@@ -1,6 +1,20 @@
 from ..utils.utils import merge_dicts, text_match
 from . import defaults
 
+from .widgets import basic_widget
+# from .widgets import animation_widget
+from .widgets import category_widget
+from .widgets import histogram_widget
+from .widgets import time_series_widget
+
+from .legends import basic_legend
+from .legends import color_bins_legend
+from .legends import color_category_legend
+from .legends import color_continuous_legend
+from .legends import size_bins_legend
+from .legends import size_category_legend
+from .legends import size_continuous_legend
+
 
 class Style():
     """Style
@@ -9,7 +23,10 @@ class Style():
         data (str, dict): The style for the layer.
     """
 
-    def __init__(self, data=None):
+    def __init__(self, style_type='default', value=None, data=None,
+                 animate=None):
+        self._style_type = style_type
+        self._value = value
         self._style = self._init_style(data)
 
     def _init_style(self, data):
@@ -19,6 +36,12 @@ class Style():
             return data
         else:
             raise ValueError('`style` must be a dictionary')
+
+    def default_legends(self, title='', description='', footer=''):
+        return self._get_default_legends(title, description, footer)
+
+    def default_widgets(self, title='', description='', footer=''):
+        return self._get_default_widgets(title, description, footer)
 
     def compute_viz(self, geom_type, variables={}):
         style = self._style
@@ -30,6 +53,70 @@ class Style():
             return self._parse_style_dict(style, default_style, variables)
         else:
             raise ValueError('`style` must be a dictionary')
+
+    def _get_default_legends(self, title, description, footer):
+        if self._style_type == 'default':
+            return basic_legend(title, description, footer)
+
+        if self._style_type == 'animation':
+            return None
+
+        if self._style_type == 'color-bins':
+            return color_bins_legend(title, description, footer)
+
+        if self._style_type == 'color-category':
+            return color_category_legend(title, description, footer)
+
+        if self._style_type == 'color-continuous':
+            return color_continuous_legend(title, description, footer)
+
+        if self._style_type == 'size-bins':
+            return size_bins_legend(title, description, footer)
+
+        if self._style_type == 'size-category':
+            return size_category_legend(title, description, footer)
+
+        if self._style_type == 'size-continuous':
+            return size_continuous_legend(title, description, footer)
+
+        if self._style_type == 'cluster-size':
+            return size_continuous_legend(title, description, footer)
+
+        if self._style_type == 'isolines':
+            return color_category_legend(title, description, footer)
+
+    def _get_default_widgets(self, title, description, footer):
+        if self._style_type == 'default':
+            return basic_widget(title, description, footer)
+
+        if self._style_type == 'animation':
+            return time_series_widget(self._value, title, description, footer)
+
+        if self._style_type == 'color-bins':
+            title = title or 'Distribution'
+            return histogram_widget(self._value, title, description, footer)
+
+        if self._style_type == 'color-category':
+            return category_widget(self._value, title, description, footer)
+
+        if self._style_type == 'color-continuous':
+            return histogram_widget(self._value, title, description, footer)
+
+        if self._style_type == 'size-bins':
+            return histogram_widget(self._value, title, description, footer)
+
+        if self._style_type == 'size-category':
+            return category_widget(self._value, title, description, footer)
+
+        if self._style_type == 'size-continuous':
+            return histogram_widget(self._value, title, description, footer)
+
+        if self._style_type == 'cluster-size':
+            title = title or 'Distribution'
+            return histogram_widget(self._value, title, description, footer)
+
+        if self._style_type == 'isolines':
+            return None
 
     def _parse_style_dict(self, style, default_style, ext_vars):
         variables = merge_dicts(style.get('vars', {}), ext_vars)

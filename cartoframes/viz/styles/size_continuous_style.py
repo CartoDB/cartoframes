@@ -38,7 +38,7 @@ def size_continuous_style(
     if opacity is None:
         opacity = '0.8'
 
-    return Style({
+    style = {
         'point': {
             '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
                 value, range_min, range_max, size or [2, 40]),
@@ -59,4 +59,6 @@ def size_continuous_style(
                 color or '#4CC8A3', opacity),
             'filter': animation_filter
         }
-    })
+    }
+
+    return Style('size-continuous', value, style)
