@@ -11,7 +11,6 @@ from .. import __version__
 from ..core.logger import log
 from ..utils.utils import is_valid_str, check_do_enabled
 
-from urllib.parse import urlparse
 from warnings import filterwarnings
 filterwarnings('ignore', category=FutureWarning, module='carto')
 
@@ -81,71 +80,72 @@ class Credentials:
         """Credentials api_key"""
         return self._api_key
 
-    @api_key.setter
-    def api_key(self, api_key):
-        """Set api_key"""
-        self._api_key = api_key
-
     @property
     def username(self):
         """Credentials username"""
         return self._username
-
-    @username.setter
-    def username(self, username):
-        """Set username"""
-        self._username = username
-
-        new_base_url = self._base_url_from_username()
-        if new_base_url != self._base_url:
-            self._base_url = self._base_url_from_username()
-            log.warning('`base_url` has been updated to {}'.format(self._base_url))
 
     @property
     def base_url(self):
         """Credentials base_url"""
         return self._base_url
 
-    @base_url.setter
-    def base_url(self, base_url):
-        """Set base_url"""
-        if urlparse(base_url).scheme != 'https':
-            raise ValueError('`base_url`s need to be over `https`. Update your `base_url`.')
-
-        self._base_url = base_url
-        self._norm_credentials()
-
     @property
     def session(self):
         """Credentials session"""
         return self._session
 
-    @session.setter
-    def session(self, session):
-        """Set session"""
-        self._session = session
-
     @classmethod
     def from_file(cls, config_file=None, session=None):
-        """Retrives credentials from a file. Defaults to the user config directory"""
+        """Retrives credentials from a file. Defaults to the user config directory.
+
+        Args:
+            config_file (str, optional): Location where credentials are loaded from.
+                If no argument is provided, it will be loaded from the default location.
+            session (requests.Session, optional): requests session. See `requests
+                documentation
+                <http://docs.python-requests.org/en/master/user/advanced/>`__
+                for more information.
+
+        Returns:
+            A (:obj:`Credentials`) instance.
+
+        Example:
+            >>> from cartoframes.auth import Credentials
+            >>> creds = Credentials.from_file('creds.json')
+        """
         with open(config_file or _DEFAULT_PATH, 'r') as f:
             credentials = json.load(f)
-
-        return cls(credentials.get('username'), credentials.get('api_key'), credentials.get('base_url'), session)
+        return cls(
+            credentials.get('username'),
+            credentials.get('api_key'),
+            credentials.get('base_url'),
+            session)
 
     @classmethod
     def from_credentials(cls, credentials):
-        """Retrives credentials from another Credentials object
+        """Retrives credentials from another Credentials object.
 
         Args:
             credentials (:obj:`Credentials`)
 
+        Returns:
+            A (:obj:`Credentials`) instance.
+
         Raises:
             ValueError: if the credentials argument is not an instance of Credentials.
+
+        Example:
+            >>> from cartoframes.auth import Credentials
+            >>> creds = Credentials.from_credentials(orig_creds)
         """
         if not isinstance(credentials, Credentials):
-            raise ValueError('`credentials` must be a Credentials class instance')
-        return cls(credentials.username, credentials.api_key, credentials.base_url, credentials.session)
+            raise ValueError('`credentials` must be a Credentials class instance.')
+        return cls(
+            credentials.username,
+            credentials.api_key,
+            credentials.base_url,
+            credentials.session)
 
     def save(self, config_file=None):
         """Saves current user credentials to user directory.
@@ -156,17 +156,10 @@ class Credentials:
                 default location.
 
         Example:
-            .. code::
-
-                >>> from cartoframes.auth import Credentials
-                >>> credentials = Credentials(username='johnsmith', api_key='abcdefg')
-                >>> credentials.save()  # save to default location
-
-            .. code::
-
-                >>> from cartoframes.auth import Credentials
-                >>> credentials = Credentials(username='johnsmith', api_key='abcdefg')
-                >>> credentials.save('path/to/credentials/file.json')
+            >>> from cartoframes.auth import Credentials
+            >>> credentials = Credentials(username='johnsmith', api_key='abcdefg')
+            >>> credentials.save('creds.json')
+            User credentials for `johnsmith` were successfully saved to `creds.json`
         """
         if config_file is None:
             config_file = _DEFAULT_PATH
@@ -176,7 +169,10 @@ class Credentials:
                 os.makedirs(_USER_CONFIG_DIR)
 
         with open(config_file, 'w') as _file:
-            json.dump({'username': self._username, 'api_key': self._api_key, 'base_url': self._base_url}, _file)
+            json.dump({
+                'username': self._username,
+                'api_key': self._api_key,
+                'base_url': self._base_url}, _file)
             log.info('User credentials for `{0}` were successfully saved to `{1}`'.format(
                 self._username or self._base_url, config_file))
 
@@ -195,13 +191,14 @@ class Credentials:
             To see if there is a default user credential file stored, do the
             following:
             >>> print(Credentials.from_file())
-            Credentials(username='johnsmith', api_key='abcdefg', base_url='https://johnsmith.carto.com/')
+            Credentials(username='johnsmith', api_key='abcdefg',
+            base_url='https://johnsmith.carto.com/')
         """
         path_to_remove = config_file or _DEFAULT_PATH
 
         try:
             os.remove(path_to_remove)
-            log.warning('Credentials at {} successfully removed.'.format(path_to_remove))
+            log.info('Credentials at {} successfully removed.'.format(path_to_remove))
         except OSError:
             log.warning('No credential file found at {}.'.format(path_to_remove))
 
