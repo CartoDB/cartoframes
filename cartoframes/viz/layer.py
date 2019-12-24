@@ -13,7 +13,7 @@ from .widget_list import WidgetList
 from ..utils.utils import extract_viz_columns
 
 
-class Layer():
+class Layer:
     """Layer to display data on a map. This class can be used as one or more
     layers in :py:class:`Map <cartoframes.viz.Map>` or on its own in a Jupyter
     notebook to get a preview of a Layer.
