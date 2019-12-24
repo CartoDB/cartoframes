@@ -201,22 +201,24 @@ Map(
 
 
 ```python
-from cartoframes.viz import Map, Layer, color_bins_legend
+from cartoframes.viz import Map, Layer, color_bins_legend, color_bins_style
 Map(
   Layer(
     'table_name',
-    style='...',
+    style=color_bins_style('column_name'),
     legends=color_bins_legend(title='Legend Title')
   )
 )
 ```
 
+Using multiple legends:
+
 ```python
-from cartoframes.viz import Map, Layer, color_bins_legend, color_continuous_legend
+from cartoframes.viz import Map, Layer, color_bins_style, color_bins_legend, color_continuous_legend
 Map(
   Layer(
     'table_name',
-    style='...'
+    style=color_bins_style('column_name')
     legends=[
       color_bins_legend(title='Legend Title 1'),
       color_continuous_legend(title='Legend Title 2')
@@ -253,11 +255,11 @@ Map(
 * To:
 
 ```python
-from cartoframes.viz import color_category_legend
+from cartoframes.viz import color_category_style, color_category_legend
 Map(
   Layer(
     'table_name',
-    style='...',
+    style=color_category_style('column_name'),
     legends=color_category_legend('color-bins', title='Legend Title', prop='stroke-color')
   )
 )
@@ -319,7 +321,7 @@ size_category_layer('roads', 'type', 'Roads sized by category')
 ```python
 from cartoframes.viz import Layer, size_category_style
 
-Layer('roads', size_category_style('type'), title='Roads sized by category')
+Layer('roads', size_category_style('type'), legends=size_category_style(title='Roads sized by category'))
 ```
 
 </p>
