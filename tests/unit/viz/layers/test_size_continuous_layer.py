@@ -1,6 +1,6 @@
 import pytest
 
-from cartoframes.viz import helpers
+from cartoframes.viz import layers
 from cartoframes.auth import Credentials
 
 from . import setup_mocks
@@ -14,12 +14,12 @@ class TestSizeContinuousLayerHelper(object):
 
     def test_helpers(self):
         "should be defined"
-        assert helpers.size_continuous_layer is not None
+        assert layers.size_continuous_layer is not None
 
     def test_size_continuous_layer(self, mocker):
         "should create a layer with the proper attributes"
         setup_mocks(mocker)
-        layer = helpers.size_continuous_layer(
+        layer = layers.size_continuous_layer(
             source='SELECT * FROM faketable',
             value='name',
             credentials=Credentials('fakeuser')
@@ -50,7 +50,7 @@ class TestSizeContinuousLayerHelper(object):
     def test_size_continuous_layer_point(self, mocker):
         "should create a point type layer"
         setup_mocks(mocker)
-        layer = helpers.size_continuous_layer(
+        layer = layers.size_continuous_layer(
             self.source,
             'name',
             'Neighborhoods',
@@ -65,7 +65,7 @@ class TestSizeContinuousLayerHelper(object):
     def test_size_continuous_layer_line(self, mocker):
         "should create a line type layer"
         setup_mocks(mocker, 'line')
-        layer = helpers.size_continuous_layer(
+        layer = layers.size_continuous_layer(
             self.source,
             'name',
             'Neighborhoods',
@@ -80,7 +80,7 @@ class TestSizeContinuousLayerHelper(object):
     def test_size_continuous_layer_legend(self, mocker):
         "should show/hide the legend"
         setup_mocks(mocker)
-        layer = helpers.size_continuous_layer(
+        layer = layers.size_continuous_layer(
             self.source,
             'name',
             legend=False
@@ -89,7 +89,7 @@ class TestSizeContinuousLayerHelper(object):
         assert layer.legend._type == ''
         assert layer.legend._title == ''
 
-        layer = helpers.size_continuous_layer(
+        layer = layers.size_continuous_layer(
             self.source,
             'name',
             legend=True
@@ -105,7 +105,7 @@ class TestSizeContinuousLayerHelper(object):
     def test_size_continuous_layer_popup(self, mocker):
         "should show/hide the popup"
         setup_mocks(mocker)
-        layer = helpers.size_continuous_layer(
+        layer = layers.size_continuous_layer(
             self.source,
             'name',
             popups=False
@@ -113,7 +113,7 @@ class TestSizeContinuousLayerHelper(object):
 
         assert len(layer.popups.elements) == 0
 
-        layer = helpers.size_continuous_layer(
+        layer = layers.size_continuous_layer(
             self.source,
             'name',
             popups=True
@@ -127,7 +127,7 @@ class TestSizeContinuousLayerHelper(object):
     def test_size_continuous_layer_widget(self, mocker):
         "should show/hide the widget"
         setup_mocks(mocker)
-        layer = helpers.size_continuous_layer(
+        layer = layers.size_continuous_layer(
             self.source,
             'name',
             widget=False
@@ -135,7 +135,7 @@ class TestSizeContinuousLayerHelper(object):
 
         assert layer.widgets._widgets == []
 
-        layer = helpers.size_continuous_layer(
+        layer = layers.size_continuous_layer(
             self.source,
             'name',
             widget=True
@@ -147,7 +147,7 @@ class TestSizeContinuousLayerHelper(object):
     def test_size_continuous_layer_animate(self, mocker):
         "should animate a property and disable the popups"
         setup_mocks(mocker)
-        layer = helpers.size_continuous_layer(
+        layer = layers.size_continuous_layer(
             self.source,
             'name',
             animate='time'
