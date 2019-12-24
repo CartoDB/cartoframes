@@ -107,7 +107,7 @@ class CatalogEntity(ABC):
 
         return self.id
 
-    def _download(self, credentials, file_path=None):
+    def _download(self, credentials, file_path=None, limit=None):
         if not self._is_available_in('bq'):
             raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
@@ -122,7 +122,11 @@ class CatalogEntity(ABC):
         project, dataset, table = full_remote_table_name.split('.')
 
         column_names = bq_client.get_table_column_names(project, dataset, table)
+
         query = 'SELECT * FROM `{}`'.format(full_remote_table_name)
+        if limit:
+            query = '{} LIMIT {}'.format(limit)
+
         job = bq_client.query(query)
 
         if file_path:
