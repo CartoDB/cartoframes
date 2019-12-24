@@ -1,6 +1,5 @@
 from ..layer import Layer
 from ..styles import size_bins_style
-from ..styles.utils import get_popup
 
 
 def size_bins_layer(
@@ -53,8 +52,6 @@ def size_bins_layer(
         source,
         style=size_bins_style(
           value, method, bins, breaks, ranges, color, opacity, stroke_width, stroke_color, animate),
-        popups=popups and not animate and get_popup(
-          popups, title, value, value),
         legend=legend and {
             'type': {
                 'point': 'size-bins-point',

@@ -1,6 +1,5 @@
 from ..layer import Layer
 from ..styles import color_category_style
-from ..styles.utils import get_popup
 
 
 def color_category_layer(
@@ -51,8 +50,6 @@ def color_category_layer(
         source,
         style=color_category_style(
           value, top, cat, palette, size, opacity, stroke_color, stroke_width, animate),
-        popups=popups and not animate and get_popup(
-          popups, title, value, value),
         legend=legend and {
             'type': {
                 'point': 'color-category-point',

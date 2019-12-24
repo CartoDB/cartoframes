@@ -1,6 +1,5 @@
 from ..layer import Layer
 from ..styles import color_continuous_style
-from ..styles.utils import get_popup
 
 
 def color_continuous_layer(
@@ -53,8 +52,6 @@ def color_continuous_layer(
         source,
         style=color_continuous_style(
           value, range_min, range_max, palette, size, opacity, stroke_color, stroke_width),
-        popups=popups and not animate and get_popup(
-          popups, title, value, value),
         legend=legend and {
             'type': {
                 'point': 'color-continuous-point',

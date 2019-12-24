@@ -3,7 +3,6 @@ from ..widgets.time_series_widget import time_series_widget
 from ..widgets.histogram_widget import histogram_widget
 from ..layer import Layer
 from ..styles import color_bins_style
-from ..styles.utils import get_popup
 
 
 def color_bins_layer(
@@ -60,13 +59,10 @@ def color_bins_layer(
         histogram_widget(value, title='Distribution')
     ]
 
-    default_popup = get_popup(popups, title, value, value)
-
     return Layer(
         source,
         style=color_bins_style(
           value, method, bins, breaks, palette, size, opacity, stroke_color, stroke_width, animate),
-        hover_popup=popups and not animate and default_popup,
         legends=legends and default_legends,
         widgets=widgets and default_widgets,
         credentials=credentials

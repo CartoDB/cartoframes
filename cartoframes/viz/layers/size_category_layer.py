@@ -1,6 +1,5 @@
 from ..layer import Layer
 from ..styles import size_category_style
-from ..styles.utils import get_popup
 
 
 def size_category_layer(
@@ -51,8 +50,6 @@ def size_category_layer(
         source,
         style=size_category_style(
           value, top, cat, ranges, color, opacity, stroke_color, stroke_width, animate),
-        popups=popups and not animate and get_popup(
-          popups, title, value, value),
         legend=legend and {
             'type': {
                 'point': 'size-category-point',
