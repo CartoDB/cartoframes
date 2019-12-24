@@ -38,17 +38,21 @@ class Style():
         else:
             raise ValueError('`style` must be a dictionary')
 
-    def default_popups(self, title):
-        return self._get_default_popups(title)
+    @property
+    def value(self):
+        return self._value
 
-    def default_legends(self, title='', description='', footer=''):
-        if self._value is None and title == '':
+    def default_popups(self):
+        return self._get_default_popups()
+
+    def default_legends(self):
+        if self._value is None:
             return LegendList()
 
-        return LegendList(self._get_default_legends(title, description, footer))
+        return LegendList(self._get_default_legends())
 
-    def default_widgets(self, title='', description='', footer=''):
-        return self._get_default_widgets(title, description, footer)
+    def default_widgets(self):
+        return self._get_default_widgets()
 
     def compute_viz(self, geom_type, variables={}):
         style = self._style
@@ -61,75 +65,76 @@ class Style():
         else:
             raise ValueError('`style` must be a dictionary')
 
-    def _get_default_popups(self, title):
+    def _get_default_popups(self):
         if self._value:
-            if self._popups:
-                return self._popups
-
-            return {'hover': [popup_element(self._value, title)]}
+            return self._popups if self._popups else {'hover': [popup_element(self._value, self._value)]}
 
         return None
 
-    def _get_default_legends(self, title, description, footer):
+    def _get_default_legends(self):
+        title = self._value
+
         if self._style_type == 'default':
-            return basic_legend(title, description, footer)
+            return basic_legend(title)
 
         if self._style_type == 'animation':
             return None
 
         if self._style_type == 'color-bins':
-            return color_bins_legend(title, description, footer)
+            return color_bins_legend(title)
 
         if self._style_type == 'color-category':
-            return color_category_legend(title, description, footer)
+            return color_category_legend(title)
 
         if self._style_type == 'color-continuous':
-            return color_continuous_legend(title, description, footer)
+            return color_continuous_legend(title)
 
         if self._style_type == 'size-bins':
-            return size_bins_legend(title, description, footer)
+            return size_bins_legend(title)
 
         if self._style_type == 'size-category':
-            return size_category_legend(title, description, footer)
+            return size_category_legend(title)
 
         if self._style_type == 'size-continuous':
-            return size_continuous_legend(title, description, footer)
+            return size_continuous_legend(title)
 
         if self._style_type == 'cluster-size':
-            return size_continuous_legend(title, description, footer)
+            return size_continuous_legend(title)
 
         if self._style_type == 'isolines':
-            return color_category_legend(title, description, footer)
+            return color_category_legend(title)
 
-    def _get_default_widgets(self, title, description, footer):
+    def _get_default_widgets(self):
+        title = self._value
+
         if self._style_type == 'default':
-            return basic_widget(title, description, footer)
+            return basic_widget(title)
 
         if self._style_type == 'animation':
-            return time_series_widget(self._value, title, description, footer)
+            return time_series_widget(self._value, title)
 
         if self._style_type == 'color-bins':
             title = title or 'Distribution'
-            return histogram_widget(self._value, title, description, footer)
+            return histogram_widget(self._value, title)
 
         if self._style_type == 'color-category':
-            return category_widget(self._value, title, description, footer)
+            return category_widget(self._value, title)
 
         if self._style_type == 'color-continuous':
-            return histogram_widget(self._value, title, description, footer)
+            return histogram_widget(self._value, title)
 
         if self._style_type == 'size-bins':
-            return histogram_widget(self._value, title, description, footer)
+            return histogram_widget(self._value, title)
 
         if self._style_type == 'size-category':
-            return category_widget(self._value, title, description, footer)
+            return category_widget(self._value, title)
 
         if self._style_type == 'size-continuous':
-            return histogram_widget(self._value, title, description, footer)
+            return histogram_widget(self._value, title)
 
         if self._style_type == 'cluster-size':
             title = title or 'Distribution'
-            return histogram_widget(self._value, title, description, footer)
+            return histogram_widget(self._value, title)
 
         if self._style_type == 'isolines':
             return None

@@ -22,7 +22,7 @@ class Layer():
         source (str, pandas.DataFrame, geopandas.GeoDataFrame,
             :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): The source data:
             table name, SQL query or a dataframe.
-        style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
+        style (dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
             The style of the visualization.
         legends (bool, :py:class:`Legend <cartoframes.viz.Legend>` list, optional):
             The legends definition for a layer. It contains a list of legend helpers.
@@ -31,10 +31,11 @@ class Layer():
             Widget or list of widgets for a layer. It contains the information to display
             different widget types on the top right of the map. See
             :py:class:`WidgetList` for more information.
-        click_popup(`Popup <cartoframes.viz.Popup>`, optional): Set up a popup to be
-            displayed on a click event.
-        hover_popup(`Popup <cartoframes.viz.Popup>`, optional): Set up a popup to be
-            displayed on a hover event.
+        click_popup(`popup_element <cartoframes.viz.popup_element>` list, optional):
+            Set up a popup to be displayed on a click event.
+        hover_popup(bool, `popup_element <cartoframes.viz.popup_element>` list, optional):
+            Set up a popup to be displayed on a hover event. Style helpers include a default hover popup,
+            set it to `hover_popup=False` to remove it.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             A Credentials instance. This is only used for the simplified Source API.
             When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
@@ -77,19 +78,13 @@ class Layer():
                  hover_popup=None,
                  credentials=None,
                  bounds=None,
-                 geom_col=None,
-                 title='',
-                 description='',
-                 footer=''):
+                 geom_col=None):
 
         self.is_basemap = False
-        self._title = title
-        self._description = description
-        self._footer = footer
         self.source = _set_source(source, credentials, geom_col)
         self.style = _set_style(style)
 
-        self.popups = self._init_popups(title, click_popup, hover_popup)
+        self.popups = self._init_popups(click_popup, hover_popup)
         self.legends = self._init_legends(legends)
         self.widgets = self._init_widgets(widgets)
 
@@ -112,25 +107,25 @@ class Layer():
 
     def _init_legends(self, legends):
         if legends is True:
-            return self.style.default_legends(self._title, self._description, self._footer)
+            return self.style.default_legends()
 
         if legends:
-            return _set_legends(legends, self._title, self._description, self._footer)
+            return _set_legends(legends)
 
         return LegendList()
 
     def _init_widgets(self, widgets):
         if widgets is True:
-            return WidgetList(self.style.default_widgets(self._title, self._description, self._footer))
+            return WidgetList(self.style.default_widgets())
 
         if widgets:
             return _set_widgets(widgets)
 
         return WidgetList()
 
-    def _init_popups(self, title, click_popup, hover_popup):
+    def _init_popups(self, click_popup, hover_popup):
         if click_popup is None and hover_popup is None:
-            popups = self.style.default_popups(title)
+            popups = self.style.default_popups()
             return _set_popups(popups)
         else:
             return _set_popups({
@@ -172,13 +167,13 @@ def _set_popups(popups):
         return PopupList()
 
 
-def _set_legends(legends, title='', description='', footer=''):
+def _set_legends(legends):
     if isinstance(legends, Legend):
-        return LegendList(legends, title=title, description=description, footer=footer)
+        return LegendList(legends)
     if isinstance(legends, LegendList):
         return legends
     if isinstance(legends, list):
-        return LegendList(legends, title=title, description=description, footer=footer)
+        return LegendList(legends)
     else:
         return LegendList()
 
