@@ -4,7 +4,7 @@ from ..style import Style
 
 def size_category_style(
         value, top=5, cat=None,  ranges=None, color=None, opacity=None,
-        stroke_width=None, stroke_color=None, animate=None):
+        stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a size category style.
 
     Args:
@@ -18,8 +18,8 @@ def size_category_style(
           Default is '#F46D43' for point geometries and '#4CC8A3' for lines.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
-        stroke_width (int, optional): Size of the stroke on point features.
         stroke_color (str, optional): Color of the stroke on point features.
+        stroke_width (int, optional): Size of the stroke on point features.
           Default is '#222'.
         animate (str, optional): Animate features by date/time or other numeric field.
 

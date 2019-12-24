@@ -27,7 +27,7 @@ def animation_style(value, duration=20, color=None, size=None, opacity=None,
         'polygon': {
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'polygon'),
-                get_value(opacity, 0.9)),
+                get_value(opacity, 0.8)),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon'),
             'filter': _animation_filter(value, duration, fade)

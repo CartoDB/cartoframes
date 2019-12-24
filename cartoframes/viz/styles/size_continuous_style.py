@@ -4,7 +4,7 @@ from ..style import Style
 
 def size_continuous_style(
         value, range_min=None, range_max=None, ranges=None, color=None, opacity=None,
-        stroke_width=None, stroke_color=None, animate=None, credentials=None):
+        stroke_color=None, stroke_width=None, animate=None, credentials=None):
     """Helper function for quickly creating a size continuous style.
 
     Args:
@@ -19,8 +19,8 @@ def size_continuous_style(
           Defaults is '#FFB927' for point geometries and '#4CC8A3' for lines.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
-        stroke_width (int, optional): Size of the stroke on point features.
         stroke_color (str, optional): Color of the stroke on point features.
+        stroke_width (int, optional): Size of the stroke on point features.
           Default is '#222'.
         animate (str, optional): Animate features by date/time or other numeric field.
 
@@ -35,16 +35,13 @@ def size_continuous_style(
     if range_max is None:
         range_max = 'globalMAX(${0})'.format(value)
 
-    if opacity is None:
-        opacity = '0.8'
-
     style = {
         'point': {
             '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
                 value, range_min, range_max, ranges or [2, 40]),
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'point'),
-                get_value(opacity, 1)),
+                get_value(opacity, 0.8)),
             'width': 'ramp(linear(sqrt(${0}), sqrt({1}), sqrt({2})), {3})'.format(
                 value, range_min, range_max, ranges or [2, 40]),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
@@ -56,7 +53,7 @@ def size_continuous_style(
                 value, range_min, range_max, ranges or [1, 10]),
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'line'),
-                get_value(opacity, 1)),
+                get_value(opacity, 0.8)),
             'width': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
                 value, range_min, range_max, ranges or [1, 10]),
             'filter': animation_filter

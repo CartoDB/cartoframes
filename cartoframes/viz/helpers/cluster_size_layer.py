@@ -1,8 +1,9 @@
 from carto.exceptions import CartoException
 
-from .utils import get_value, get_popup
 from ..constants import CLUSTER_KEYS, CLUSTER_OPERATIONS
 from ..layer import Layer
+from ..styles import cluster_size_style
+from ..styles.utils import get_popup
 
 
 def cluster_size_layer(
@@ -49,26 +50,11 @@ def cluster_size_layer(
 
     cluster_operation = _get_cluster_operation(operation, value)
     cluster_operation_title = _get_cluster_operation_title(operation, value)
-    breakpoints = _get_breakpoints(resolution)
-    animation_filter = _get_animation(animate, cluster_operation)
-
-    if opacity is None:
-        opacity = '0.8'
 
     return Layer(
         source,
-        style={
-            'point': {
-                'width': 'ramp(linear({0}, viewportMIN({0}), viewportMAX({0})), [{1}])'.format(
-                    cluster_operation, breakpoints),
-                'color': 'opacity({0}, {1})'.format(
-                    color or '#FFB927', opacity),
-                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
-                'filter': animation_filter,
-                'resolution': '{0}'.format(resolution)
-            }
-        },
+        style=cluster_size_style(
+            value, operation, resolution, color, opacity, stroke_color, stroke_width),
         popups=popups and not animate and get_popup(
           popups, title, cluster_operation_title, None, cluster_operation, True),
         legend=legend and {

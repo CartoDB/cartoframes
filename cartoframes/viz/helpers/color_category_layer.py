@@ -1,6 +1,6 @@
-from .utils import serialize_palette, get_value, get_popup
-
 from ..layer import Layer
+from ..styles import color_category_style
+from ..styles.utils import get_popup
 
 
 def color_category_layer(
@@ -45,45 +45,12 @@ def color_category_layer(
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`.
         Includes a legend, popup and widget on `value`.
-    """
-    func = 'buckets' if cat else 'top'
-    default_palette = 'bold'
-    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
+    """
     return Layer(
         source,
-        style={
-            'point': {
-                'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, cat or top,
-                    serialize_palette(palette) or default_palette,
-                    get_value(opacity, 'opacity', 'point')
-                ),
-                'width': get_value(size, 'width', 'point'),
-                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
-                'filter': animation_filter
-            },
-            'line': {
-                'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, cat or top,
-                    serialize_palette(palette) or default_palette,
-                    get_value(opacity, 'opacity', 'line')
-                ),
-                'width': get_value(size, 'width', 'line'),
-                'filter': animation_filter
-            },
-            'polygon': {
-                'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
-                    func, value, cat or top,
-                    serialize_palette(palette) or default_palette,
-                    get_value(opacity, 'opacity', 'polygon')
-                ),
-                'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
-                'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon'),
-                'filter': animation_filter
-            }
-        },
+        style=color_category_style(
+          value, top, cat, palette, size, opacity, stroke_color, stroke_width, animate),
         popups=popups and not animate and get_popup(
           popups, title, value, value),
         legend=legend and {

@@ -43,14 +43,11 @@ def size_bins_style(
 
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
-    if opacity is None:
-        opacity = '0.8'
-
     style = {
         'point': {
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'point'),
-                get_value(opacity, 1)),
+                get_value(opacity, 0.8)),
             'width': 'ramp({0}(${1}, {2}), {3})'.format(
                 func, value, breaks or bins, ranges or [2, 14]),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
@@ -60,7 +57,7 @@ def size_bins_style(
         'line': {
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'line'),
-                get_value(opacity, 1)),
+                get_value(opacity, 0.8)),
             'width': 'ramp({0}(${1}, {2}), {3})'.format(
                 func, value, breaks or bins, ranges or [1, 10]),
             'filter': animation_filter
