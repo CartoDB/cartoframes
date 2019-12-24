@@ -10,9 +10,11 @@ def serialize_palette(palette):
     return palette
 
 
-def get_value(value, geom_type, prop):
+def get_value(value, default, geom_type=None):
     if value is None:
-        return defaults.STYLE.get(geom_type, {}).get(prop)
+        if geom_type:
+            return defaults.STYLE.get(geom_type, {}).get(default)
+        return default
     return value
 
 

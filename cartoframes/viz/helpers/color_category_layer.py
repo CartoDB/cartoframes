@@ -57,9 +57,9 @@ def color_category_layer(
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
                     func, value, cat or top,
                     serialize_palette(palette) or default_palette,
-                    get_value(opacity, 'point', 'opacity')
+                    get_value(opacity, 'opacity', 'point')
                 ),
-                'width': get_value(size, 'point', 'width'),
+                'width': get_value(size, 'width', 'point'),
                 'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
                 'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': animation_filter
@@ -68,19 +68,19 @@ def color_category_layer(
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
                     func, value, cat or top,
                     serialize_palette(palette) or default_palette,
-                    get_value(opacity, 'line', 'opacity')
+                    get_value(opacity, 'opacity', 'line')
                 ),
-                'width': get_value(size, 'line', 'width'),
+                'width': get_value(size, 'width', 'line'),
                 'filter': animation_filter
             },
             'polygon': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
                     func, value, cat or top,
                     serialize_palette(palette) or default_palette,
-                    get_value(opacity, 'polygon', 'opacity')
+                    get_value(opacity, 'opacity', 'polygon')
                 ),
-                'strokeColor': get_value(stroke_color, 'polygon', 'strokeColor'),
-                'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
+                'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
+                'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon'),
                 'filter': animation_filter
             }
         },
