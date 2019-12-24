@@ -302,14 +302,14 @@ class TestDataset(object):
         credentials = Credentials('fake_user', '1234')
 
         # Then
-        dataset.download('fake_path', credentials)
+        dataset.to_csv('fake_path', credentials)
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_download_not_subscribed(self, mocked_bq_client, get_by_id_mock, get_all_mock):
-        # Given
-        get_by_id_mock.return_value = test_dataset2
+    def test_dataset_not_subscribed_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+        # mock dataset
+        get_by_id_mock.return_value = test_dataset2  # is private
         dataset = Dataset.get(test_dataset2.id)
         get_all_mock.return_value = []
         mocked_bq_client.return_value = BigQueryClientMock()
@@ -317,7 +317,7 @@ class TestDataset(object):
 
         # When
         with pytest.raises(Exception) as e:
-            dataset.download('fake_path', credentials)
+            dataset.to_csv('fake_path', credentials)
 
         # Then
         assert str(e.value) == (
@@ -335,8 +335,7 @@ class TestDataset(object):
         mocked_bq_client.return_value = BigQueryClientMock()
         credentials = Credentials('fake_user', '1234')
 
-        # Then
-        dataset.download('fake_path', credentials)
+        dataset.to_csv('fake_path', credentials)
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
@@ -353,7 +352,7 @@ class TestDataset(object):
 
         # When
         with pytest.raises(Exception) as e:
-            dataset.download('fake_path', credentials)
+            dataset.to_csv('fake_path', credentials)
 
         # Then
         assert str(e.value) == (

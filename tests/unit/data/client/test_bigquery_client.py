@@ -1,5 +1,6 @@
 import os
 import csv
+import pandas as pd
 
 from unittest.mock import Mock, patch
 
@@ -39,7 +40,7 @@ class TestBigQueryClient(object):
 
     @patch.object(BigQueryClient, 'get_table_column_names')
     @patch.object(BigQueryClient, '_download_by_bq_storage_api')
-    def test_download_full(self, download_mock, column_names_mock):
+    def test_download_to_file_full(self, download_mock, column_names_mock):
         data = [{'0': 'word', '1': 'word word'}]
         columns = ['column1', 'column2']
 
@@ -60,3 +61,20 @@ class TestBigQueryClient(object):
 
         assert rows[0] == columns
         assert rows[1] == list(data[0].values())
+
+    @patch.object(BigQueryClient, 'get_table_column_names')
+    @patch.object(BigQueryClient, '_download_by_bq_storage_api')
+    def test_download_to_dataframe_full(self, download_mock, column_names_mock):
+        data = [{'column1': 'word', 'column2': 'word word'}]
+        columns = ['column1', 'column2']
+
+        column_names_mock.return_value = Mock(return_value=columns)
+        download_mock.return_value = data
+
+        expected_df = pd.DataFrame(data, columns=columns)
+
+        bq_client = BigQueryClient(self.credentials)
+        job = QueryJobMock(data)
+        df = bq_client.download_to_dataframe(job)
+
+        assert df.equals(expected_df)
