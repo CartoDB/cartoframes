@@ -74,8 +74,8 @@ class Layer:
                  style=None,
                  legends=True,
                  widgets=False,
-                 click_popup=None,
-                 hover_popup=None,
+                 click_popup=False,
+                 hover_popup=True,
                  credentials=None,
                  bounds=None,
                  geom_col=None):
@@ -124,13 +124,21 @@ class Layer:
         return WidgetList()
 
     def _init_popups(self, click_popup, hover_popup):
-        if click_popup is None and hover_popup is None:
-            return _set_popups(self.style.default_popups)
-        else:
-            return _set_popups({
-                'click': click_popup,
-                'hover': hover_popup
-            })
+        popups = {}
+
+        if click_popup is True and self.style.default_popups is not None:
+            click_popup = self.style.default_popups.get('click')
+
+        if hover_popup is True and self.style.default_popups is not None:
+            hover_popup = self.style.default_popups.get('hover')
+
+        if click_popup:
+            popups['click'] = click_popup
+
+        if hover_popup:
+            popups['hover'] = hover_popup
+
+        return _set_popups(popups)
 
     def _repr_html_(self):
         from .map import Map

@@ -41,23 +41,25 @@ class PopupList:
             if not isinstance(click_popup_elements, list):
                 click_popup_elements = [click_popup_elements]
             for popup in click_popup_elements:
-                popup_elements.append(
-                    Popup('click',
-                          value=popup.get('value'),
-                          title=popup.get('title'),
-                          operation=popup.get('operation', False))
-                )
+                if isinstance(popup, dict):
+                    popup_elements.append(
+                        Popup('click',
+                              value=popup.get('value'),
+                              title=popup.get('title'),
+                              operation=popup.get('operation', False))
+                    )
 
         if hover_popup_elements is not None:
             if not isinstance(hover_popup_elements, list):
                 hover_popup_elements = [hover_popup_elements]
             for popup in hover_popup_elements:
-                popup_elements.append(
-                    Popup('hover',
-                          value=popup.get('value'),
-                          title=popup.get('title'),
-                          operation=popup.get('operation', False))
-                )
+                if isinstance(popup, dict):
+                    popup_elements.append(
+                        Popup('hover',
+                              value=popup.get('value'),
+                              title=popup.get('title'),
+                              operation=popup.get('operation', False))
+                    )
 
         return popup_elements
 
