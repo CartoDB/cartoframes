@@ -25,10 +25,8 @@ class Legend():
         self._variable = variable
         self._dynamic = dynamic
 
-    def add_defaults(self, title='', description='', footer=''):
+    def add_defaults(self, title=None):
         self._title = self._title or title
-        self._description = self._description or description
-        self._footer = self._footer or footer
 
     def get_info(self):
         if self._type or self._title or self._description or self._footer:
