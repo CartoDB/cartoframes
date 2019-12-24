@@ -54,9 +54,6 @@ class TestEnrichment(object):
             self.private_variable3
         ]
 
-    def teardown_method(self):
-        pass
-
     def test_points_and_private_data(self):
         enriched_gdf = self.enrichment.enrich_points(
             self.points_gdf,
@@ -65,7 +62,10 @@ class TestEnrichment(object):
 
         expected_gdf = CartoDataFrame.from_file(file_path('files/points-private.geojson'))
 
-        assert enriched_gdf.sort_index(axis=1).equals(expected_gdf.sort_index(axis=1))
+        enriched_gdf = clean_gdf(enriched_gdf)
+        expected_gdf = clean_gdf(expected_gdf)
+
+        assert enriched_gdf.equals(expected_gdf)
 
     def test_points_public_data_and_filters(self):
         enriched_gdf = self.enrichment.enrich_points(
@@ -79,7 +79,10 @@ class TestEnrichment(object):
 
         expected_gdf = CartoDataFrame.from_file(file_path('files/points-public-filter.geojson'))
 
-        assert enriched_gdf.sort_index(axis=1).equals(expected_gdf.sort_index(axis=1))
+        enriched_gdf = clean_gdf(enriched_gdf)
+        expected_gdf = clean_gdf(expected_gdf)
+
+        assert enriched_gdf.equals(expected_gdf)
 
     def test_polygons_and_public_data(self):
         enriched_gdf = self.enrichment.enrich_polygons(
@@ -89,7 +92,10 @@ class TestEnrichment(object):
 
         expected_gdf = CartoDataFrame.from_file(file_path('files/polygon-public.geojson'))
 
-        assert enriched_gdf.sort_index(axis=1).round(5).equals(expected_gdf.sort_index(axis=1).round(5))
+        enriched_gdf = clean_gdf(enriched_gdf)
+        expected_gdf = clean_gdf(expected_gdf)
+
+        assert enriched_gdf.equals(expected_gdf)
 
     def test_polygons_private_data_and_agg_none(self):
         enriched_gdf = self.enrichment.enrich_polygons(
@@ -139,4 +145,13 @@ class TestEnrichment(object):
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
 
+        # geoid comes with different order in each execution
+        enriched_geoids = enriched_gdf["geoid"].values[0].split(',')
+        enriched_geoids.sort()
+        enriched_gdf["geoid"] = None
+        expected_geoids = expected_gdf["geoid"].values[0].split(',')
+        expected_geoids.sort()
+        expected_gdf["geoid"] = None
+
         assert enriched_gdf.equals(expected_gdf)
+        assert enriched_geoids == expected_geoids
