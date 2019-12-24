@@ -173,7 +173,8 @@ class Enrichment(EnrichmentService):
                 aggregation method to use.
                 - dictionary: if you want to overwrite some default aggregation methods from your selected
                 variables, use a dict as :py:attr:`Variable.id`: aggregation method pairs, for example:
-                `{variable1.id: 'SUM', variable3.id: 'AVG'}`.
+                `{variable1.id: 'SUM', variable3.id: 'AVG'}`. Or if you want to use several aggregation method for one
+                variable, you can use a list as a dict value: `{variable1.id: ['SUM', 'AVG'], variable3.id: 'AVG'}`
 
         Returns:
             A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` enriched with the variables passed as argument.
@@ -312,6 +313,34 @@ class Enrichment(EnrichmentService):
 
                 aggregation = {
                     variable1.id: 'SUM',
+                    variable3.id: 'AVG'
+                }
+
+                enrichment = Enrichment()
+                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=aggregation)
+
+            Enrich a polygons dataframe using several aggregation methods for a variable:
+
+            .. code::
+
+                import pandas
+                from cartoframes.data.observatory import Enrichment, Catalog
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials('creds.json')
+
+                df = pandas.read_csv('...')
+
+                catalog = Catalog()
+                all_variables = catalog.country('usa').category('demographics').datasets[0].variables
+                variable1 = all_variables[0] // variable1.agg_method is 'AVG' but you want 'SUM'
+                variable2 = all_variables[1] // variable2.agg_method is 'AVG' and it is what you want
+                variable3 = all_variables[2] // variable3.agg_method is 'SUM' but you want 'AVG'
+
+                variables = [variable1, variable2, variable3]
+
+                aggregation = {
+                    variable1.id: ['SUM', 'AVG'],
                     variable3.id: 'AVG'
                 }
 
