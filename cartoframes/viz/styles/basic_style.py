@@ -12,18 +12,18 @@ def basic_style(color=None, size=None, opacity=None, stroke_color=None, stroke_w
             'width': get_value(size, 'width', 'point'),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
-            'opacity': get_value(opacity, '1')
+            'filter': get_value(opacity, 1)
         },
         'line': {
             'color': get_value(color, 'color', 'line'),
             'width': get_value(size, 'width', 'line'),
-            'opacity': get_value(opacity, '1')
+            'filter': get_value(opacity, 1)
         },
         'polygon': {
             'color': get_value(color, 'color', 'polygon'),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon'),
-            'opacity': get_value(opacity, '0.9')
+            'filter': get_value(opacity, 0.9)
         }
     }
 
