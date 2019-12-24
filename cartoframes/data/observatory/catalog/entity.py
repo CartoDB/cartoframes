@@ -125,7 +125,7 @@ class CatalogEntity(ABC):
 
         query = 'SELECT * FROM `{}`'.format(full_remote_table_name)
         if limit:
-            query = '{} LIMIT {}'.format(limit)
+            query = '{} LIMIT {}'.format(query, limit)
 
         job = bq_client.query(query)
 
