@@ -37,9 +37,9 @@ class Legend():
                 'prop': _prop,
                 'variable': self._variable,
                 'dynamic': self._dynamic,
-                'title': self._title,
-                'description': self._description,
-                'footer': self._footer
+                'title': self._title or '',
+                'description': self._description or '',
+                'footer': self._footer or ''
             }
         else:
             return {}

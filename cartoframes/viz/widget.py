@@ -37,9 +37,9 @@ class Widget():
                 'prop': self._prop,
                 'value': self._value,
                 'variable_name': self._variable_name,
-                'title': self._title,
-                'description': self._description,
-                'footer': self._footer,
+                'title': self._title or '',
+                'description': self._description or '',
+                'footer': self._footer or '',
                 'has_bridge': self.has_bridge(),
                 'options': self._options
             }
