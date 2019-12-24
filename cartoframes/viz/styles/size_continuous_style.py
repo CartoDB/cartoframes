@@ -1,5 +1,8 @@
 from .utils import get_value
 from ..style import Style
+from ..legends import size_continuous_legend
+from ..widgets import histogram_widget
+from ..popups import popup_element
 
 
 def size_continuous_style(
@@ -25,7 +28,8 @@ def size_continuous_style(
         animate (str, optional): Animate features by date/time or other numeric field.
 
     Returns:
-        :py:class:`Style <cartoframes.viz.Style>`
+        cartoframes.viz.style.Style
+
     """
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
@@ -60,4 +64,10 @@ def size_continuous_style(
         }
     }
 
-    return Style(data, 'size-continuous', value)
+    return Style(
+        data,
+        value,
+        default_legends=size_continuous_legend(title=value),
+        default_widgets=histogram_widget(value, title=value),
+        default_popups={'hover': popup_element(value, title=value)}
+    )

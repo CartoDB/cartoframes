@@ -1,6 +1,9 @@
-from .utils import get_value, get_popup
-from ..style import Style
+from .utils import get_value
 from ..constants import CLUSTER_KEYS, CLUSTER_OPERATIONS
+from ..style import Style
+from ..legends import size_continuous_legend
+from ..widgets import histogram_widget
+from ..popups import popup_element
 
 
 def cluster_size_style(
@@ -23,9 +26,9 @@ def cluster_size_style(
         animate (str, optional): Animate features by date/time or other numeric field.
 
     Returns:
-        :py:class:`Style <cartoframes.viz.Style>`
-    """
+        cartoframes.viz.style.Style
 
+    """
     cluster_operation = _get_cluster_operation(operation, value)
     cluster_operation_title = _get_cluster_operation_title(operation, value)
     breakpoints = _get_breakpoints(resolution)
@@ -44,11 +47,13 @@ def cluster_size_style(
         }
     }
 
-    popups = {
-        'hover': get_popup(True, alt_title=cluster_operation_title, alt_value=cluster_operation, operation=True)
-    }
-
-    return Style(data, 'cluster-size', value, popups)
+    return Style(
+        data,
+        value,
+        default_legends=size_continuous_legend(title=value),
+        default_widgets=histogram_widget(value, title=value or 'Distribution'),
+        default_popups={'hover': popup_element(cluster_operation, title=cluster_operation_title, operation=True)}
+    )
 
 
 def _get_animation(animate, cluster_operation):

@@ -1,5 +1,8 @@
 from .utils import serialize_palette, get_value
 from ..style import Style
+from ..legends import color_bins_legend
+from ..widgets import histogram_widget
+from ..popups import popup_element
 
 
 def color_bins_style(
@@ -25,7 +28,8 @@ def color_bins_style(
         animate (str, optional): Animate features by date/time or other numeric field.
 
     Returns:
-        :py:class:`Style <cartoframes.viz.Style>`
+        cartoframes.viz.style.Style
+
     """
     if method not in ('quantiles', 'equal', 'stdev'):
         raise ValueError('Available methods are: "quantiles", "equal", "stdev".')
@@ -78,4 +82,10 @@ def color_bins_style(
         }
     }
 
-    return Style(data, 'color-bins', value)
+    return Style(
+        data,
+        value,
+        default_legends=color_bins_legend(title=value),
+        default_widgets=histogram_widget(value, title=value),
+        default_popups={'hover': popup_element(value, title=value)}
+    )

@@ -1,5 +1,7 @@
 from .utils import get_value
 from ..style import Style
+from ..legends import basic_legend
+from ..widgets import basic_widget
 
 
 def basic_style(color=None, size=None, opacity=None, stroke_color=None, stroke_width=None):
@@ -26,4 +28,8 @@ def basic_style(color=None, size=None, opacity=None, stroke_color=None, stroke_w
         }
     }
 
-    return Style(data, 'default')
+    return Style(
+        data,
+        default_legends=basic_legend(),
+        default_widgets=basic_widget()
+    )

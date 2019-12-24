@@ -1,5 +1,7 @@
 from .utils import get_value
 from ..style import Style
+from ..widgets import time_series_widget
+from ..popups import popup_element
 
 
 def animation_style(value, duration=20, color=None, size=None, opacity=None,
@@ -34,7 +36,12 @@ def animation_style(value, duration=20, color=None, size=None, opacity=None,
         }
     }
 
-    return Style(data, 'animation', value)
+    return Style(
+        data,
+        value,
+        default_widgets=time_series_widget(value, title=value),
+        default_popups={'hover': popup_element(value, title=value)}
+    )
 
 
 def _animation_filter(value, duration, fade):

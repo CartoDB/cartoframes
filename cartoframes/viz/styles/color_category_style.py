@@ -1,5 +1,8 @@
 from .utils import serialize_palette, get_value
 from ..style import Style
+from ..legends import color_category_legend
+from ..widgets import category_widget
+from ..popups import popup_element
 
 
 def color_category_style(
@@ -24,7 +27,8 @@ def color_category_style(
         animate (str, optional): Animate features by date/time or other numeric field.
 
     Returns:
-        :py:class:`Style <cartoframes.viz.Style>`
+        cartoframes.viz.style.Style
+
     """
     func = 'buckets' if cat else 'top'
     default_palette = 'bold'
@@ -61,4 +65,10 @@ def color_category_style(
           }
     }
 
-    return Style(data, 'color-category', value)
+    return Style(
+        data,
+        value,
+        default_legends=color_category_legend(title=value),
+        default_widgets=category_widget(value, title=value),
+        default_popups={'hover': popup_element(value, title=value)}
+    )

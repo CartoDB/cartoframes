@@ -1,5 +1,8 @@
 from .utils import get_value
 from ..style import Style
+from ..legends import size_category_legend
+from ..widgets import category_widget
+from ..popups import popup_element
 
 
 def size_category_style(
@@ -24,9 +27,9 @@ def size_category_style(
         animate (str, optional): Animate features by date/time or other numeric field.
 
     Returns:
-        :py:class:`Style <cartoframes.viz.Style>`
-    """
+        cartoframes.viz.style.Style
 
+    """
     func = 'buckets' if cat else 'top'
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
     opacity = opacity if opacity else '0.8'
@@ -52,4 +55,10 @@ def size_category_style(
         }
     }
 
-    return Style(data, 'size-category', value)
+    return Style(
+        data,
+        value,
+        default_legends=size_category_legend(title=value),
+        default_widgets=category_widget(value, title=value),
+        default_popups={'hover': popup_element(value, title=value)}
+    )
