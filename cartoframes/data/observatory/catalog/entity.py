@@ -170,21 +170,6 @@ class CatalogList(list):
     def __init__(self, data):
         super(CatalogList, self).__init__(data)
 
-    def get(self, item_id):
-        """Gets an entity by ID or slug
-
-        Examples:
-
-            .. code::
-
-                from cartoframes.data.observatory import Catalog
-
-                catalog = Catalog()
-                category = catalog.categories.get('demographics')
-
-        """
-        return next(iter(filter(lambda item: item.id == item_id or item.slug == item_id, self)), None)
-
     def to_dataframe(self):
         """Converts a list to a pandas DataFrame.
 

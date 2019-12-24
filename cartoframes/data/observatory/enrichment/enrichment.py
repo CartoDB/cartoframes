@@ -1,4 +1,4 @@
-from .enrichment_service import EnrichmentService, prepare_variables, AGGREGATION_DEFAULT, AGGREGATION_NONE
+from .enrichment_service import EnrichmentService, prepare_variables, AGGREGATION_DEFAULT
 from ....utils.utils import timelogger
 
 
@@ -23,7 +23,7 @@ class Enrichment(EnrichmentService):
     def __init__(self, credentials=None):
         super(Enrichment, self).__init__(credentials)
 
-    def enrich_points(self, dataframe, variables, geom_col=None, filters=[]):
+    def enrich_points(self, dataframe, variables, geom_col=None, filters={}):
         """Enrich your points `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset`
         in the Data Observatory, intersecting the points in the source `DataFrame` with the geographies in the
         Data Observatory.
@@ -36,10 +36,14 @@ class Enrichment(EnrichmentService):
                 or :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
-                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
+                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`. The maximum number of
+                variables is 50.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
-            filters (list, optional): list of :obj:`VariableFilter` to filter rows from
-                the enrichment data. Example: `[VariableFilter(variable1, "= 'a string'")]`
+            filters (dict, optional): dictionary to filter results by variable values. As a key it receives the
+                variable id, and as value receives a SQL operator, for example: {variable1.id: "> 30"}. It works by
+                appending the filter SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND`
+                operator (in the example: `WHERE {variable1.column_name} > 30`). The variables used to filter results
+                should exists in `variables` property list.
 
         Returns:
             A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` enriched with the variables passed as argument.
@@ -100,7 +104,7 @@ class Enrichment(EnrichmentService):
 
                 import pandas
                 from cartoframes.auth import set_default_credentials
-                from cartoframes.data.observatory import Enrichment, Catalog, VariableFilter
+                from cartoframes.data.observatory import Enrichment, Catalog
 
                 set_default_credentials('creds.json')
 
@@ -108,10 +112,10 @@ class Enrichment(EnrichmentService):
 
                 catalog = Catalog()
                 variable = catalog.country('usa').category('demographics').datasets[0].variables[0]
-                filter = VariableFilter(variable, "= '2019-09-01'")
+                filters = {variable.id: "= '2019-09-01'"}
 
                 enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_points(df, variables=[variable], filters=[filter])
+                cdf_enrich = enrichment.enrich_points(df, variables=[variable], filters=filters)
         """
         variables = prepare_variables(variables, self.credentials)
         cartodataframe = self._prepare_data(dataframe, geom_col)
@@ -122,14 +126,8 @@ class Enrichment(EnrichmentService):
         queries = self._get_points_enrichment_sql(temp_table_name, variables, filters)
         return self._execute_enrichment(queries, cartodataframe)
 
-    AGGREGATION_DEFAULT = AGGREGATION_DEFAULT
-    """Use default aggregation method for polygons enrichment. More info in :py:attr:`Enrichment.enrich_polygons`"""
-
-    AGGREGATION_NONE = AGGREGATION_NONE
-    """Do not aggregate data in polygons enrichment. More info in :py:attr:`Enrichment.enrich_polygons`"""
-
     @timelogger
-    def enrich_polygons(self, dataframe, variables, geom_col=None, filters=[], aggregation=AGGREGATION_DEFAULT):
+    def enrich_polygons(self, dataframe, variables, geom_col=None, filters={}, aggregation=AGGREGATION_DEFAULT):
         """Enrich your polygons `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset` in
         the Data Observatory by intersecting the polygons in the source `DataFrame` with geographies in the
         Data Observatory.
@@ -146,13 +144,17 @@ class Enrichment(EnrichmentService):
                 or :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
-                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
+                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`. The maximum number of
+                variables is 50.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
-            filters (list, optional): list of :obj:`VariableFilter` to filter rows from
-                the enrichment data. Example: `[VariableFilter(variable1, "= 'a string'")]`
-            aggregation (str, list, optional): sets the data aggregation. The polygons in the source `DataFrame` can
-                intersect with one or more polygons from the Data Observatory. With this method you can select how to
-                aggregate the resulting data.
+            filters (dict, optional): dictionary to filter results by variable values. As a key it receives the
+                variable id, and as value receives a SQL operator, for example: {variable1.id: "> 30"}. It works by
+                appending the filter SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND`
+                operator (in the example: `WHERE {variable1.column_name} > 30`). The variables used to filter results
+                should exists in `variables` property list.
+            aggregation (None, str, list, optional): sets the data aggregation. The polygons in the source `DataFrame`
+                can intersect with one or more polygons from the Data Observatory. With this method you can select how
+                to aggregate the resulting data.
 
                 An aggregation method can be one of these values: 'MIN', 'MAX', 'SUM', 'AVG', 'COUNT',
                 'ARRAY_AGG', 'ARRAY_CONCAT_AGG', 'STRING_AGG' but check this
@@ -160,11 +162,11 @@ class Enrichment(EnrichmentService):
                 for a complete list of aggregate functions.
 
                 The options are:
-                - :py:attr:`Enrichment.AGGREGATION_DEFAULT` (default): Every :obj:`Variable` has a default
+                - str (default): 'default'. Most :obj:`Variable`s has a default
                 aggregation method in the :py:attr:`Variable.agg_method` property and it will be used to
                 aggregate the data (a variable could not have `agg_method` defined and in this case, the
-                variables will be skipped).
-                - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
+                variable will be skipped).
+                - `None`: use this option to do the aggregation locally by yourself.
                 You will receive a row of data from each polygon intersected. Also, you will receive the areas of the
                 polygons intersection and the polygons intersected.
                 - str: if you want to overwrite every default aggregation method, you can pass a string with the
@@ -251,7 +253,7 @@ class Enrichment(EnrichmentService):
             .. code::
 
                 import pandas
-                from cartoframes.data.observatory import Enrichment, Catalog, VariableFilter
+                from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials
 
                 set_default_credentials('creds.json')
@@ -260,11 +262,10 @@ class Enrichment(EnrichmentService):
 
                 catalog = Catalog()
                 variable = catalog.country('usa').category('demographics').datasets[0].variables[0]
-                filter = VariableFilter(variable, "= '2019-09-01'")
+                filters = {variable.id: "= '2019-09-01'"}
 
                 enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_polygons(df, variables=[variable], filters=[filter])
-
+                cdf_enrich = enrichment.enrich_polygons(df, variables=[variable], filters=filters)
 
             Enrich a polygons dataframe overwriting every variables aggregation method to use `SUM` function:
 
@@ -339,7 +340,23 @@ class Enrichment(EnrichmentService):
                 variables = [variable1, variable2, variable3]
 
                 enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=Enrichment.AGGREGATION_NONE)
+                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=None)
+
+            The next example uses filters to calculate the `SUM` of car-free households
+            :obj:`Variable` of the :obj:`Catalog` for each polygon of `my_local_dataframe` pandas `DataFrame` only for
+            areas with more than 100 car-free households:
+
+            .. code::
+
+                from cartoframes.data.observatory import Enrichment, Variable
+
+                variable = Variable.get('no_cars_d19dfd10')
+                enriched_dataset_cdf = Enrichment().enrich_polygons(
+                    my_local_dataframe,
+                    variables=[variable],
+                    aggregation={variable.id: 'SUM'}
+                    filters={variable.id: '> 100'}
+                )
         """
         variables = prepare_variables(variables, self.credentials, aggregation)
 

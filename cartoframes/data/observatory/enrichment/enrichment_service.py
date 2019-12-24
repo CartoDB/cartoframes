@@ -19,46 +19,9 @@ _ENRICHMENT_ID = 'enrichment_id'
 _GEOM_COLUMN = '__geojson_geom'
 
 AGGREGATION_DEFAULT = 'default'
-AGGREGATION_NONE = 'none'
+AGGREGATION_NONE = None
 
-
-class VariableFilter(object):
-    """This class can be used for filtering the results of
-    :py:class:`Enrichment <cartoframes.data.observatory.Enrichment>` functions. It works by appending the
-    `VariableFilter` SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND` operator.
-
-        Args:
-            variable (str or :obj:`Variable`):
-                The variable name or :obj:`Variable` instance
-
-            query (str):
-                The SQL query filter to be appended to the enrichment SQL query.
-
-        Examples:
-
-            - Equal to number: `VariableFilter(variable, '= 3')`
-            - Equal to string: `VariableFilter(variable, "= 'the string'")`
-            - Greater that 3: `VariableFilter(variable, '> 3')`
-
-            The next example uses a `VariableFilter` instance to calculate the `SUM` of car-free households
-            :obj:`Variable` of the :obj:`Catalog` for each polygon of `my_local_dataframe` pandas `DataFrame` only for
-            areas with more than 100 car-free households,
-
-            .. code::
-
-                from cartoframes.data.observatory import Enrichment, Variable, VariableFilter
-
-                variable = Variable.get('no_cars_d19dfd10')
-                enriched_dataset_cdf = Enrichment().enrich_polygons(
-                    my_local_dataframe,
-                    variables=[variable],
-                    aggregation=[VariableAggregation(variable, 'SUM')]
-                    filters=[VariableFilter(variable, '> 100')]
-                )
-    """
-    def __init__(self, variable, query):
-        self.variable = _prepare_variable(variable)
-        self.query = query
+MAX_VARIABLES_NUMBER = 50
 
 
 class EnrichmentService(object):
@@ -137,15 +100,20 @@ class EnrichmentService(object):
             tablename=tablename
         )
 
-    def _get_tables_metadata(self, variables):
+    def _get_tables_metadata(self, variables, filters):
         tables_metadata = defaultdict(lambda: defaultdict(list))
 
         for variable in variables:
-            table_name = self.__get_enrichment_table(variable)
+            table_name = self.__get_enrichment_table_by_variable(variable)
             tables_metadata[table_name]['variables'].append(variable)
 
-            if 'dataset' not in tables_metadata[table_name].keys():
-                tables_metadata[table_name]['dataset'] = self.__get_dataset(variable, table_name)
+            if variable.id in filters:
+                tables_metadata[table_name]['filters'].append(
+                    _build_where_condition(
+                        variable.column_name,
+                        filters[variable.id]
+                    )
+                )
 
             if 'geo_table' not in tables_metadata[table_name].keys():
                 tables_metadata[table_name]['geo_table'] = self.__get_geo_table(variable)
@@ -155,21 +123,17 @@ class EnrichmentService(object):
 
         return tables_metadata
 
-    def __get_enrichment_table(self, variable):
+    def __get_enrichment_table_by_variable(self, variable):
         if variable.project_name != self.bq_public_project:
-            return 'view_{dataset}_{table}'.format(
+            table = 'view_{dataset}_{table}'.format(
                 dataset=variable.schema_name,
                 table=variable.dataset_name
             )
-        else:
-            return variable.dataset_name
 
-    def __get_dataset(self, variable, table_name):
-        if variable.project_name != self.bq_public_project:
-            return '{project}.{dataset}.{table_name}'.format(
+            return '{project}.{dataset}.{table}'.format(
                 project=self.bq_project,
                 dataset=self.bq_dataset,
-                table_name=table_name
+                table=table
             )
         else:
             return variable.dataset
@@ -202,14 +166,14 @@ class EnrichmentService(object):
         return project
 
     def _get_points_enrichment_sql(self, temp_table_name, variables, filters):
-        tables_metadata = self._get_tables_metadata(variables).items()
+        tables_metadata = self._get_tables_metadata(variables, filters).items()
 
-        return [self._build_points_query(metadata, temp_table_name, filters)
-                for _, metadata in tables_metadata]
+        return [self._build_points_query(metadata, enrichment_table, temp_table_name)
+                for enrichment_table, metadata in tables_metadata]
 
-    def _build_points_query(self, metadata, temp_table_name, filters):
+    def _build_points_query(self, metadata, enrichment_table, temp_table_name):
         variables = ['enrichment_table.{}'.format(variable.column_name) for variable in metadata['variables']]
-        enrichment_dataset = metadata['dataset']
+        filters = metadata['filters']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
             project=self.bq_project,
@@ -219,8 +183,8 @@ class EnrichmentService(object):
 
         return '''
             SELECT data_table.{enrichment_id}, {variables},
-                ST_Area(enrichment_geo_table.geom) AS do_geom_area
-            FROM `{enrichment_dataset}` enrichment_table
+                ST_AREA(enrichment_geo_table.geom) AS do_area
+            FROM `{enrichment_table}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
                 JOIN `{data_table}` data_table
@@ -229,7 +193,7 @@ class EnrichmentService(object):
         '''.format(
             variables=', '.join(variables),
             geom_column=_GEOM_COLUMN,
-            enrichment_dataset=enrichment_dataset,
+            enrichment_table=enrichment_table,
             enrichment_geo_table=enrichment_geo_table,
             enrichment_id=_ENRICHMENT_ID,
             where=_build_where_clausule(filters),
@@ -237,14 +201,14 @@ class EnrichmentService(object):
         )
 
     def _get_polygon_enrichment_sql(self, temp_table_name, variables, filters, aggregation):
-        tables_metadata = self._get_tables_metadata(variables).items()
+        tables_metadata = self._get_tables_metadata(variables, filters).items()
 
-        return [self._build_polygons_query(metadata, temp_table_name, filters, aggregation)
-                for _, metadata in tables_metadata]
+        return [self._build_polygons_query(metadata, enrichment_table, temp_table_name, aggregation)
+                for enrichment_table, metadata in tables_metadata]
 
-    def _build_polygons_query(self, metadata, temp_table_name, filters, aggregation):
+    def _build_polygons_query(self, metadata, enrichment_table, temp_table_name, aggregation):
         variables = metadata['variables']
-        enrichment_dataset = metadata['dataset']
+        filters = metadata['filters']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
             project=self.bq_project,
@@ -261,7 +225,7 @@ class EnrichmentService(object):
 
         return '''
             SELECT data_table.{enrichment_id}, {columns}
-            FROM `{enrichment_dataset}` enrichment_table
+            FROM `{enrichment_table}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
                 JOIN `{data_table}` data_table
@@ -270,7 +234,7 @@ class EnrichmentService(object):
             {grouper};
         '''.format(
                 geom_column=_GEOM_COLUMN,
-                enrichment_dataset=enrichment_dataset,
+                enrichment_table=enrichment_table,
                 enrichment_geo_table=enrichment_geo_table,
                 enrichment_id=_ENRICHMENT_ID,
                 where=_build_where_clausule(filters),
@@ -295,18 +259,18 @@ def _build_polygons_query_variable_with_aggregation(variable, aggregation):
         return """
             {aggregation}(
                 enrichment_table.{column} * (
-                    ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geo_column}))
+                    ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
                     /
-                    ST_area(data_table.{geo_column})
+                    ST_AREA(data_table.{geo_column})
                 )
-            ) AS {aggregation}_{column}
+            ) AS {column}
             """.format(
                 column=variable.column_name,
                 geo_column=_GEOM_COLUMN,
                 aggregation=variable_agg)
     else:
         return """
-            {aggregation}(enrichment_table.{column}) AS {aggregation}_{column}
+            {aggregation}(enrichment_table.{column}) AS {column}
             """.format(
                 column=variable.column_name,
                 aggregation=variable_agg)
@@ -317,26 +281,31 @@ def _build_polygons_query_variables_without_aggregation(variables):
 
     return """
         {variables},
-        ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column})) AS intersected_area,
-        ST_area(enrichment_geo_table.geom) AS do_area,
-        ST_area(data_table.{geom_column}) AS user_area,
-        enrichment_geo_table.geoid as do_geoid
+        ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geom_column})) AS intersected_area,
+        ST_AREA(enrichment_geo_table.geom) AS do_area,
+        ST_AREA(data_table.{geom_column}) AS user_area,
+        enrichment_geo_table.geoid AS do_geoid
         """.format(
             variables=', '.join(variables),
             geom_column=_GEOM_COLUMN)
 
 
+def _build_where_condition(column, condition):
+    return "enrichment_table.{} {}".format(column, condition)
+
+
 def _build_where_clausule(filters):
     where = ''
     if len(filters) > 0:
-        where_clausules = ["enrichment_table.{} {}".format(f.variable.column_name, f.query) for f in filters]
-        where = 'WHERE {}'.format('AND '.join(where_clausules))
+        where = 'WHERE {}'.format(' AND '.join(filters))
 
     return where
 
 
 @timelogger
 def prepare_variables(variables, credentials, aggregation=None):
+    _validate_variables_input(variables)
+
     if isinstance(variables, list):
         variables = [_prepare_variable(var, aggregation) for var in variables]
     else:
@@ -366,6 +335,17 @@ def _prepare_variable(variable, aggregation=None):
             return None
 
     return variable
+
+
+def _validate_variables_input(variables):
+    if not isinstance(variables, Variable) and not isinstance(variables, str) and not isinstance(variables, list):
+        raise EnrichmentException('variables parameter should be a Variable instance, a list or a str.')
+
+    if not isinstance(variables, Variable) and len(variables) < 1:
+        raise EnrichmentException('You should add at least one variable to be used in enrichment.')
+
+    if isinstance(variables, list) and len(variables) > MAX_VARIABLES_NUMBER:
+        raise EnrichmentException('The maximum number of variables to be used in enrichment is 50.')
 
 
 def _validate_bq_operations(variables, credentials):
@@ -404,7 +384,7 @@ def _is_subscribed(dataset, geography, credentials):
 
 
 def _get_aggregation(variable, aggregation):
-    if aggregation in [None, AGGREGATION_NONE]:
+    if aggregation is AGGREGATION_NONE:
         aggregation_method = None
     elif aggregation == AGGREGATION_DEFAULT:
         aggregation_method = variable.agg_method

@@ -6,7 +6,6 @@ from .catalog.geography import Geography
 from .catalog.provider import Provider
 from .catalog.variable import Variable
 from .enrichment.enrichment import Enrichment
-from .enrichment.enrichment_service import VariableFilter
 from .catalog.entity import CatalogEntity, CatalogList
 from .catalog.subscriptions import Subscriptions
 from .catalog.subscription_info import SubscriptionInfo
@@ -20,7 +19,6 @@ __all__ = [
     'Provider',
     'Variable',
     'Enrichment',
-    'VariableFilter',
     'Subscriptions',
     'SubscriptionInfo',
     'CatalogEntity',
