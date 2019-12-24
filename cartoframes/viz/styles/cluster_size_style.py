@@ -1,7 +1,6 @@
+from .utils import get_value, get_popup
 from ..style import Style
 from ..constants import CLUSTER_KEYS, CLUSTER_OPERATIONS
-from ..helpers.utils import get_value, get_popup
-from carto.exceptions import CartoException
 
 
 def cluster_size_style(
@@ -59,8 +58,8 @@ def cluster_size_style(
                 cluster_operation, breakpoints),
             'color': 'opacity({0}, {1})'.format(
                 color or '#FFB927', opacity),
-            'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-            'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
+            'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
+            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
             'filter': animation_filter,
             'resolution': '{0}'.format(resolution)
         }
@@ -106,4 +105,4 @@ def _check_valid_operation(operation):
 
     if operation not in valid_operations:
         err = '"{0}" is not a valid operation. Valid operations are {1}'
-        raise CartoException(err.format(operation, ', '.join(valid_operations)))
+        raise Exception(err.format(operation, ', '.join(valid_operations)))

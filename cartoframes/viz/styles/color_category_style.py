@@ -1,5 +1,5 @@
+from .utils import serialize_palette, get_value
 from ..style import Style
-from ..helpers.utils import serialize_palette, get_value
 
 
 def color_category_style(
@@ -35,30 +35,28 @@ def color_category_style(
               'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
                   func, value, cat or top,
                   serialize_palette(palette) or default_palette,
-                  get_value(opacity, 'point', 'opacity')
-              ),
-              'width': get_value(size, 'point', 'width'),
-              'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-              'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
+                  get_value(opacity, 1)),
+              'width': get_value(size, 'width', 'point'),
+              'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
+              'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
               'filter': animation_filter
           },
           'line': {
               'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
                   func, value, cat or top,
                   serialize_palette(palette) or default_palette,
-                  get_value(opacity, 'line', 'opacity')
-              ),
-              'width': get_value(size, 'line', 'width'),
+                  get_value(opacity, 1)),
+              'width': get_value(size, 'width', 'line'),
               'filter': animation_filter
           },
           'polygon': {
               'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
                   func, value, cat or top,
                   serialize_palette(palette) or default_palette,
-                  get_value(opacity, 'polygon', 'opacity')
+                  get_value(opacity, 0.9)
               ),
-              'strokeColor': get_value(stroke_color, 'polygon', 'strokeColor'),
-              'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
+              'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
+              'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon'),
               'filter': animation_filter
           }
     }
