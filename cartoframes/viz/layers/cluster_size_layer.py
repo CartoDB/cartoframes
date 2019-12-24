@@ -1,8 +1,5 @@
-from carto.exceptions import CartoException
-
-from .utils import get_value, get_popup
-from ..constants import CLUSTER_KEYS, CLUSTER_OPERATIONS
 from ..layer import Layer
+from ..styles import cluster_size_style
 
 
 def cluster_size_layer(
@@ -47,35 +44,15 @@ def cluster_size_layer(
         Includes a legend, popup and widget on `value`.
     """
 
-    cluster_operation = _get_cluster_operation(operation, value)
-    cluster_operation_title = _get_cluster_operation_title(operation, value)
-    breakpoints = _get_breakpoints(resolution)
-    animation_filter = _get_animation(animate, cluster_operation)
-
-    if opacity is None:
-        opacity = '0.8'
-
     return Layer(
         source,
-        style={
-            'point': {
-                'width': 'ramp(linear({0}, viewportMIN({0}), viewportMAX({0})), [{1}])'.format(
-                    cluster_operation, breakpoints),
-                'color': 'opacity({0}, {1})'.format(
-                    color or '#FFB927', opacity),
-                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
-                'filter': animation_filter,
-                'resolution': '{0}'.format(resolution)
-            }
-        },
-        popups=popups and not animate and get_popup(
-          popups, title, cluster_operation_title, None, cluster_operation, True),
+        style=cluster_size_style(
+            value, operation, resolution, color, opacity, stroke_color, stroke_width),
         legend=legend and {
             'type': {
                 'point': 'size-continuous-point'
             },
-            'title': title or cluster_operation_title,
+            'title': title,
             'description': description,
             'footer': footer
         },
@@ -93,39 +70,3 @@ def cluster_size_layer(
         ],
         credentials=credentials
     )
-
-
-def _get_animation(animate, cluster_operation):
-    return 'animation(linear({0}), 5, fade(1,1))'.format(cluster_operation) if animate else '1'
-
-
-def _get_breakpoints(resolution):
-    return ', '.join([
-        '{0}'.format(resolution / 8),
-        '{0}'.format(resolution / 2),
-        '{0}'.format(resolution)
-    ])
-
-
-def _get_cluster_operation_title(operation, value):
-    if value is not None and operation != 'count':
-        return '{0} ({1})'.format(value, operation)
-
-    return operation
-
-
-def _get_cluster_operation(operation, value):
-    _check_valid_operation(operation)
-
-    if value is not None and operation != 'count':
-        return '{0}(${1})'.format(CLUSTER_OPERATIONS[operation], value)
-
-    return '{0}()'.format(CLUSTER_OPERATIONS[operation])
-
-
-def _check_valid_operation(operation):
-    valid_operations = CLUSTER_KEYS
-
-    if operation not in valid_operations:
-        err = '"{0}" is not a valid operation. Valid operations are {1}'
-        raise CartoException(err.format(operation, ', '.join(valid_operations)))

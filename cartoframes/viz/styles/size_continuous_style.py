@@ -1,10 +1,13 @@
+from .utils import get_value
 from ..style import Style
-from ..helpers.utils import get_value
+from ..legends import size_continuous_legend
+from ..widgets import histogram_widget
+from ..popups import popup_element
 
 
 def size_continuous_style(
-        value, range_min=None, range_max=None, size=None, color=None, opacity=None,
-        stroke_width=None, stroke_color=None, animate=None, credentials=None):
+        value, range_min=None, range_max=None, ranges=None, color=None, opacity=None,
+        stroke_color=None, stroke_width=None, animate=None, credentials=None):
     """Helper function for quickly creating a size continuous style.
 
     Args:
@@ -13,19 +16,20 @@ def size_continuous_style(
           size ramp. Defaults to the globalMIN of the dataset.
         range_max (int, optional): The maximum value of the data range for the continuous
           size ramp. Defaults to the globalMAX of the dataset.
-        size (str, optional): Min/max size array as a string. Default is
+        ranges (str, optional): Min/max size array as a string. Default is
           '[2, 40]' for point geometries and '[1, 10]' for lines.
         color (str, optional): hex, rgb or named color value.
           Defaults is '#FFB927' for point geometries and '#4CC8A3' for lines.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
-        stroke_width (int, optional): Size of the stroke on point features.
         stroke_color (str, optional): Color of the stroke on point features.
+        stroke_width (int, optional): Size of the stroke on point features.
           Default is '#222'.
         animate (str, optional): Animate features by date/time or other numeric field.
 
     Returns:
-        :py:class:`Style <cartoframes.viz.Style>`
+        cartoframes.viz.style.Style
+
     """
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
@@ -35,30 +39,35 @@ def size_continuous_style(
     if range_max is None:
         range_max = 'globalMAX(${0})'.format(value)
 
-    if opacity is None:
-        opacity = '0.8'
-
-    style = {
+    data = {
         'point': {
             '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                value, range_min, range_max, size or [2, 40]),
-            'width': 'ramp(linear(sqrt(${0}), sqrt({1}), sqrt({2})), {3})'.format(
-                value, range_min, range_max, size or [2, 40]),
+                value, range_min, range_max, ranges or [2, 40]),
             'color': 'opacity({0}, {1})'.format(
-                color or '#FFB927', opacity),
-            'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-            'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
+                get_value(color, 'color', 'point'),
+                get_value(opacity, 0.8)),
+            'width': 'ramp(linear(sqrt(${0}), sqrt({1}), sqrt({2})), {3})'.format(
+                value, range_min, range_max, ranges or [2, 40]),
+            'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
+            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
             'filter': animation_filter
         },
         'line': {
             '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                value, range_min, range_max, size or [1, 10]),
-            'width': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                value, range_min, range_max, size or [1, 10]),
+                value, range_min, range_max, ranges or [1, 10]),
             'color': 'opacity({0}, {1})'.format(
-                color or '#4CC8A3', opacity),
+                get_value(color, 'color', 'line'),
+                get_value(opacity, 0.8)),
+            'width': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
+                value, range_min, range_max, ranges or [1, 10]),
             'filter': animation_filter
         }
     }
 
-    return Style('size-continuous', value, style)
+    return Style(
+        data,
+        value,
+        default_legends=size_continuous_legend(title=value),
+        default_widgets=histogram_widget(value, title=value),
+        default_popups={'hover': popup_element(value, title=value)}
+    )

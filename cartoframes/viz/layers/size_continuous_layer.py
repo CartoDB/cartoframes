@@ -1,9 +1,9 @@
-from .utils import get_value, get_popup
 from ..layer import Layer
+from ..styles import size_continuous_style
 
 
 def size_continuous_layer(
-        source, value, title='', range_min=None, range_max=None, size=None, color=None,
+        source, value, title='', range_min=None, range_max=None, ranges=None, color=None,
         opacity=None, stroke_width=None, stroke_color=None, description='', footer='',
         legend=True, popups=True, widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a size symbol map with
@@ -18,7 +18,7 @@ def size_continuous_layer(
           size ramp. Defaults to the globalMIN of the dataset.
         range_max (int, optional): The maximum value of the data range for the continuous
           size ramp. Defaults to the globalMAX of the dataset.
-        size (str, optional): Min/max size array as a string. Default is
+        ranges (str, optional): Min/max size array as a string. Default is
           '[2, 40]' for point geometries and '[1, 10]' for lines.
         color (str, optional): Hex, rgb or named color value. Defaults is '#FFB927' for point geometries and
           '#4CC8A3' for lines.
@@ -45,44 +45,12 @@ def size_continuous_layer(
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`.
         Includes a legend, popup and widget on `value`.
+
     """
-    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
-
-    if range_min is None:
-        range_min = 'globalMIN(${0})'.format(value)
-
-    if range_max is None:
-        range_max = 'globalMAX(${0})'.format(value)
-
-    if opacity is None:
-        opacity = '0.8'
-
     return Layer(
         source,
-        style={
-            'point': {
-                '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                    value, range_min, range_max, size or [2, 40]),
-                'width': 'ramp(linear(sqrt(${0}), sqrt({1}), sqrt({2})), {3})'.format(
-                    value, range_min, range_max, size or [2, 40]),
-                'color': 'opacity({0}, {1})'.format(
-                    color or '#FFB927', opacity),
-                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
-                'filter': animation_filter
-            },
-            'line': {
-                '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                    value, range_min, range_max, size or [1, 10]),
-                'width': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                    value, range_min, range_max, size or [1, 10]),
-                'color': 'opacity({0}, {1})'.format(
-                    color or '#4CC8A3', opacity),
-                'filter': animation_filter
-            }
-        },
-        popups=popups and not animate and get_popup(
-          popups, title, value, value),
+        style=size_continuous_style(
+          value, range_min, range_max, ranges, color, opacity, stroke_color, stroke_width, animate),
         legend=legend and {
             'type': {
                 'point': 'size-continuous-point',

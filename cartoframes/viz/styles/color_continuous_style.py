@@ -1,5 +1,8 @@
+from .utils import serialize_palette, get_value
 from ..style import Style
-from ..helpers.utils import serialize_palette, get_value
+from ..legends import color_continuous_legend
+from ..widgets import histogram_widget
+from ..popups import popup_element
 
 
 def color_continuous_style(
@@ -25,7 +28,8 @@ def color_continuous_style(
         animate (str, optional): Animate features by date/time or other numeric field.
 
     Returns:
-        :py:class:`Style <cartoframes.viz.Style>`
+        cartoframes.viz.style.Style
+
     """
     default_palette = 'bluyl'
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
@@ -36,37 +40,40 @@ def color_continuous_style(
     if range_max is None:
         range_max = 'globalMAX(${0})'.format(value)
 
-    style = {
+    data = {
         'point': {
             'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
                 value, range_min, range_max,
                 serialize_palette(palette) or default_palette,
-                get_value(opacity, 'point', 'opacity')
-            ),
-            'width': get_value(size, 'point', 'width'),
-            'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-            'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
+                get_value(opacity, 1)),
+            'width': get_value(size, 'width', 'point'),
+            'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
+            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
             'filter': animation_filter
         },
         'line': {
             'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
                 value, range_min, range_max,
                 serialize_palette(palette) or default_palette,
-                get_value(opacity, 'line', 'opacity')
-            ),
-            'width': get_value(size, 'line', 'width'),
+                get_value(opacity, 1)),
+            'width': get_value(size, 'width', 'line'),
             'filter': animation_filter
         },
         'polygon': {
             'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
                 value, range_min, range_max,
                 serialize_palette(palette) or default_palette,
-                get_value(opacity, 'polygon', 'opacity')
-            ),
-            'strokeColor': get_value(stroke_color, 'polygon', 'strokeColor'),
-            'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
+                get_value(opacity, 0.9)),
+            'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
+            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon'),
             'filter': animation_filter
         }
     }
 
-    return Style('color-continuous', value, style)
+    return Style(
+        data,
+        value,
+        default_legends=color_continuous_legend(title=value),
+        default_widgets=histogram_widget(value, title=value),
+        default_popups={'hover': popup_element(value, title=value)}
+    )

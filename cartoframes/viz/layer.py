@@ -107,7 +107,7 @@ class Layer():
 
     def _init_legends(self, legends):
         if legends is True:
-            return self.style.default_legends()
+            return _set_legends(self.style.default_legends)
 
         if legends:
             return _set_legends(legends)
@@ -116,7 +116,7 @@ class Layer():
 
     def _init_widgets(self, widgets):
         if widgets is True:
-            return WidgetList(self.style.default_widgets())
+            return _set_widgets(self.style.default_widgets)
 
         if widgets:
             return _set_widgets(widgets)
@@ -125,8 +125,7 @@ class Layer():
 
     def _init_popups(self, click_popup, hover_popup):
         if click_popup is None and hover_popup is None:
-            popups = self.style.default_popups()
-            return _set_popups(popups)
+            return _set_popups(self.style.default_popups)
         else:
             return _set_popups({
                 'click': click_popup,
