@@ -1,9 +1,9 @@
+from .utils import get_value
 from ..style import Style
-from ..helpers.utils import get_value
 
 
 def size_bins_style(
-        value, method='quantiles', bins=5, breaks=None, size=None, color=None,
+        value, method='quantiles', bins=5, breaks=None, ranges=None, color=None,
         opacity=None, stroke_width=None, stroke_color=None, animate=None):
     """Helper function for quickly creating a size bind style with
     classification method/buckets.
@@ -14,7 +14,7 @@ def size_bins_style(
           Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
         breaks (list<int>, optional): Assign manual class break values.
-        size (int, optional): Min/max size array as a string. Default is
+        ranges (int, optional): Min/max size array as a string. Default is
           '[2, 14]' for point geometries and '[1, 10]' for lines.
         color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for point geometries and
           '#4CC8A3' for lines.
@@ -48,19 +48,21 @@ def size_bins_style(
 
     style = {
         'point': {
-            'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                func, value, breaks or bins, size or [2, 14]),
             'color': 'opacity({0}, {1})'.format(
-                color or '#EE4D5A', opacity),
-            'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-            'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
+                get_value(color, 'color', 'point'),
+                get_value(opacity, 1)),
+            'width': 'ramp({0}(${1}, {2}), {3})'.format(
+                func, value, breaks or bins, ranges or [2, 14]),
+            'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
+            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
             'filter': animation_filter
         },
         'line': {
-            'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                func, value, breaks or bins, size or [1, 10]),
             'color': 'opacity({0}, {1})'.format(
-                color or '#4CC8A3', opacity),
+                get_value(color, 'color', 'line'),
+                get_value(opacity, 1)),
+            'width': 'ramp({0}(${1}, {2}), {3})'.format(
+                func, value, breaks or bins, ranges or [1, 10]),
             'filter': animation_filter
         }
     }

@@ -1,9 +1,9 @@
+from .utils import get_value
 from ..style import Style
-from ..helpers.utils import get_value
 
 
 def size_continuous_style(
-        value, range_min=None, range_max=None, size=None, color=None, opacity=None,
+        value, range_min=None, range_max=None, ranges=None, color=None, opacity=None,
         stroke_width=None, stroke_color=None, animate=None, credentials=None):
     """Helper function for quickly creating a size continuous style.
 
@@ -13,7 +13,7 @@ def size_continuous_style(
           size ramp. Defaults to the globalMIN of the dataset.
         range_max (int, optional): The maximum value of the data range for the continuous
           size ramp. Defaults to the globalMAX of the dataset.
-        size (str, optional): Min/max size array as a string. Default is
+        ranges (str, optional): Min/max size array as a string. Default is
           '[2, 40]' for point geometries and '[1, 10]' for lines.
         color (str, optional): hex, rgb or named color value.
           Defaults is '#FFB927' for point geometries and '#4CC8A3' for lines.
@@ -41,22 +41,24 @@ def size_continuous_style(
     style = {
         'point': {
             '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                value, range_min, range_max, size or [2, 40]),
-            'width': 'ramp(linear(sqrt(${0}), sqrt({1}), sqrt({2})), {3})'.format(
-                value, range_min, range_max, size or [2, 40]),
+                value, range_min, range_max, ranges or [2, 40]),
             'color': 'opacity({0}, {1})'.format(
-                color or '#FFB927', opacity),
-            'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-            'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
+                get_value(color, 'color', 'point'),
+                get_value(opacity, 1)),
+            'width': 'ramp(linear(sqrt(${0}), sqrt({1}), sqrt({2})), {3})'.format(
+                value, range_min, range_max, ranges or [2, 40]),
+            'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
+            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
             'filter': animation_filter
         },
         'line': {
             '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                value, range_min, range_max, size or [1, 10]),
-            'width': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                value, range_min, range_max, size or [1, 10]),
+                value, range_min, range_max, ranges or [1, 10]),
             'color': 'opacity({0}, {1})'.format(
-                color or '#4CC8A3', opacity),
+                get_value(color, 'color', 'line'),
+                get_value(opacity, 1)),
+            'width': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
+                value, range_min, range_max, ranges or [1, 10]),
             'filter': animation_filter
         }
     }
