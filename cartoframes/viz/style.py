@@ -58,7 +58,10 @@ class Style():
         style = self._style
         default_style = defaults.STYLE[geom_type]
 
-        if isinstance(style, dict):
+        if isinstance(style, str):
+            # Only for testing purposes
+            return self._parse_style_str(style, default_style, variables)
+        elif isinstance(style, dict):
             if geom_type in style:
                 style = style.get(geom_type)
             return self._parse_style_dict(style, default_style, variables)

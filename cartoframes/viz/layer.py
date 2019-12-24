@@ -150,7 +150,7 @@ def _set_source(source, credentials, geom_col):
 
 def _set_style(style):
     """Set a Style class from the input"""
-    if isinstance(style, (str, dict)):
+    if isinstance(style, dict):
         return Style(style)
     elif isinstance(style, Style):
         return style
