@@ -30,30 +30,6 @@ class TestGeography(object):
         assert isinstance(geography, Geography)
         assert geography == test_geography1
 
-    def test_get_geography_by_id_from_geographies_list(self):
-        # Given
-        geographies = CatalogList([test_geography1, test_geography2])
-
-        # When
-        geography = geographies.get(test_geography1.id)
-
-        # Then
-        assert isinstance(geography, object)
-        assert isinstance(geography, Geography)
-        assert geography == test_geography1
-
-    def test_get_geography_by_slug_from_geographies_list(self):
-        # Given
-        geographies = CatalogList([test_geography1, test_geography2])
-
-        # When
-        geography = geographies.get(test_geography1.slug)
-
-        # Then
-        assert isinstance(geography, object)
-        assert isinstance(geography, Geography)
-        assert geography == test_geography1
-
     @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_geography(self, mocked_repo):
         # Given
@@ -243,6 +219,29 @@ class TestGeography(object):
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
+    def test_geography_not_available_in_bq_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+        # mock geography
+        get_by_id_mock.return_value = test_geography2
+        geography = Geography.get(test_geography2.id)
+
+        # mock subscriptions
+        get_all_mock.return_value = [geography]
+
+        # mock big query client
+        mocked_bq_client.return_value = BigQueryClientMock()
+
+        # test
+        credentials = Credentials('fake_user', '1234')
+
+        with pytest.raises(Exception) as e:
+            geography.to_csv('fake_path', credentials)
+
+        error = '{} is not ready for Download. Please, contact us for more information.'.format(geography)
+        assert str(e.value) == error
+
+    @patch.object(GeographyRepository, 'get_all')
+    @patch.object(GeographyRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_geography_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography1
@@ -252,22 +251,22 @@ class TestGeography(object):
         credentials = Credentials('fake_user', '1234')
 
         # Then
-        geography.download('fake_path', credentials)
+        geography.to_csv('fake_path', credentials)
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_geography_download_not_subscribed(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # Given
+        get_by_id_mock.return_value = test_geography2  # is private
         get_by_id_mock.return_value = test_geography2
         geography = Geography.get(test_geography2.id)
         get_all_mock.return_value = []
         mocked_bq_client.return_value = BigQueryClientMock()
         credentials = Credentials('fake_user', '1234')
 
-        # When
         with pytest.raises(Exception) as e:
-            geography.download('fake_path', credentials)
+            geography.to_csv('fake_path', credentials)
 
         # Then
         assert str(e.value) == (
@@ -285,8 +284,7 @@ class TestGeography(object):
         mocked_bq_client.return_value = BigQueryClientMock()
         credentials = Credentials('fake_user', '1234')
 
-        # Then
-        geography.download('fake_path', credentials)
+        geography.to_csv('fake_path', credentials)
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
@@ -303,7 +301,7 @@ class TestGeography(object):
 
         # When
         with pytest.raises(Exception) as e:
-            geography.download('fake_path', credentials)
+            geography.to_csv('fake_path', credentials)
 
         # Then
         assert str(e.value) == (

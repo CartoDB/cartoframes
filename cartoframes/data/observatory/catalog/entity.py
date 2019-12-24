@@ -107,7 +107,7 @@ class CatalogEntity(ABC):
 
         return self.id
 
-    def _download(self, file_path, credentials):
+    def _download(self, credentials, file_path=None):
         if not self._is_available_in('bq'):
             raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
@@ -125,10 +125,12 @@ class CatalogEntity(ABC):
         query = 'SELECT * FROM `{}`'.format(full_remote_table_name)
         job = bq_client.query(query)
 
-        bq_client.download_to_file(job, file_path, column_names=column_names)
-
-        log.info('Data saved: {}.'.format(file_path))
-        log.info("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
+        if file_path:
+            bq_client.download_to_file(job, file_path, column_names=column_names)
+            log.info('Data saved: {}.'.format(file_path))
+            log.info("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
+        else:
+            return bq_client.download_to_dataframe(job)
 
     def _is_available_in(self, platform=_PLATFORM_BQ):
         return self.data['available_in'] and platform in self.data['available_in']
@@ -167,21 +169,6 @@ class CatalogList(list):
 
     def __init__(self, data):
         super(CatalogList, self).__init__(data)
-
-    def get(self, item_id):
-        """Gets an entity by ID or slug
-
-        Examples:
-
-            .. code::
-
-                from cartoframes.data.observatory import Catalog
-
-                catalog = Catalog()
-                category = catalog.categories.get('demographics')
-
-        """
-        return next(iter(filter(lambda item: item.id == item_id or item.slug == item_id, self)), None)
 
     def to_dataframe(self):
         """Converts a list to a pandas DataFrame.

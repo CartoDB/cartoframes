@@ -21,10 +21,9 @@ class Variable(CatalogEntity):
 
         .. code::
 
-            from cartoframes.data.observatory import Catalog
+            from cartoframes.data.observatory import Dataset
 
-            catalog = new Catalog()
-            dataset = catalog.country('usa').category('demographics').datasets.get('mbi_retail_turn_705247a')
+            dataset = Dataset.get('mbi_retail_turn_705247a')
             dataset.variables
     """
 

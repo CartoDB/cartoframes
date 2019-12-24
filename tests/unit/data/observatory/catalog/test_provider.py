@@ -24,18 +24,6 @@ class TestProvider(object):
         assert isinstance(provider, Provider)
         assert provider == test_provider1
 
-    def test_get_provider_by_id_from_providers_list(self):
-        # Given
-        providers = CatalogList([test_provider1, test_provider2])
-
-        # When
-        provider = providers.get(test_provider1.id)
-
-        # Then
-        assert isinstance(provider, object)
-        assert isinstance(provider, Provider)
-        assert provider == test_provider1
-
     @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_provider(self, mocked_repo):
         # Given

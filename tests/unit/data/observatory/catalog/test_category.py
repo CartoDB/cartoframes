@@ -26,18 +26,6 @@ class TestCategory(object):
         assert isinstance(category, Category)
         assert category == test_category1
 
-    def test_get_category_by_id_from_categories_list(self):
-        # Given
-        categories = CatalogList([test_category1, test_category2])
-
-        # When
-        category = categories.get(test_category1.id)
-
-        # Then
-        assert isinstance(category, object)
-        assert isinstance(category, Category)
-        assert category == test_category1
-
     @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_category(self, mocked_repo):
         # Given
