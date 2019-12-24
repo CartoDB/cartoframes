@@ -1,6 +1,6 @@
 import pytest
 
-from cartoframes.viz import helpers
+from cartoframes.viz import layers
 from cartoframes.auth import Credentials
 
 from . import setup_mocks
@@ -14,12 +14,12 @@ class TestColorBinsLayerHelper(object):
 
     def test_helpers(self):
         "should be defined"
-        assert helpers.color_bins_layer is not None
+        assert layers.color_bins_layer is not None
 
     def test_color_bins_layer(self, mocker):
         "should create a layer with the proper attributes"
         setup_mocks(mocker)
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             source='SELECT * FROM faketable',
             value='name',
             credentials=Credentials('fakeuser')
@@ -45,7 +45,7 @@ class TestColorBinsLayerHelper(object):
     def test_color_bins_layer_point(self, mocker):
         "should create a point type layer"
         setup_mocks(mocker)
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             'Neighborhoods',
@@ -58,7 +58,7 @@ class TestColorBinsLayerHelper(object):
     def test_color_bins_layer_line(self, mocker):
         "should create a line type layer"
         setup_mocks(mocker, 'line')
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             'Neighborhoods',
@@ -71,7 +71,7 @@ class TestColorBinsLayerHelper(object):
     def test_color_bins_layer_polygon(self, mocker):
         "should create a polygon type layer"
         setup_mocks(mocker, 'polygon')
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             'Neighborhoods',
@@ -84,7 +84,7 @@ class TestColorBinsLayerHelper(object):
     def test_color_bins_layer_method(self, mocker):
         "should apply the classification method"
         setup_mocks(mocker)
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             method='quantiles'
@@ -94,7 +94,7 @@ class TestColorBinsLayerHelper(object):
         assert layer.style._style['line']['color'] == 'opacity(ramp(globalQuantiles($name, 5), purpor),1)'
         assert layer.style._style['polygon']['color'] == 'opacity(ramp(globalQuantiles($name, 5), purpor), 0.9)'
 
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             method='equal'
@@ -104,7 +104,7 @@ class TestColorBinsLayerHelper(object):
         assert layer.style._style['line']['color'] == 'opacity(ramp(globalEqIntervals($name, 5), purpor),1)'
         assert layer.style._style['polygon']['color'] == 'opacity(ramp(globalEqIntervals($name, 5), purpor), 0.9)'
 
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             method='stdev'
@@ -116,7 +116,7 @@ class TestColorBinsLayerHelper(object):
 
         msg = 'Available methods are: "quantiles", "equal", "stdev".'
         with pytest.raises(ValueError) as e:
-            helpers.color_bins_layer(
+            layers.color_bins_layer(
                 self.source,
                 'name',
                 method='wrong_method'
@@ -126,7 +126,7 @@ class TestColorBinsLayerHelper(object):
     def test_color_bins_layer_breaks(self, mocker):
         "should apply buckets if breaks are passed"
         setup_mocks(mocker)
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             breaks=[0, 1, 2]
@@ -139,7 +139,7 @@ class TestColorBinsLayerHelper(object):
     def test_color_bins_layer_legend(self, mocker):
         "should show/hide the legend"
         setup_mocks(mocker)
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             legend=False
@@ -148,7 +148,7 @@ class TestColorBinsLayerHelper(object):
         assert layer.legend._type == ''
         assert layer.legend._title == ''
 
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             legend=True
@@ -164,7 +164,7 @@ class TestColorBinsLayerHelper(object):
     def test_color_bins_layer_popup(self, mocker):
         "should show/hide the popup"
         setup_mocks(mocker)
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             popups=False
@@ -172,7 +172,7 @@ class TestColorBinsLayerHelper(object):
 
         assert len(layer.popups.elements) == 0
 
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             popups=True
@@ -185,7 +185,7 @@ class TestColorBinsLayerHelper(object):
     def test_color_bins_layer_widget(self, mocker):
         "should show/hide the widget"
         setup_mocks(mocker)
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             widget=False
@@ -193,7 +193,7 @@ class TestColorBinsLayerHelper(object):
 
         assert layer.widgets._widgets == []
 
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             widget=True
@@ -205,7 +205,7 @@ class TestColorBinsLayerHelper(object):
     def test_color_bins_layer_animate(self, mocker):
         "should animate a property and disable the popups"
         setup_mocks(mocker)
-        layer = helpers.color_bins_layer(
+        layer = layers.color_bins_layer(
             self.source,
             'name',
             animate='time'

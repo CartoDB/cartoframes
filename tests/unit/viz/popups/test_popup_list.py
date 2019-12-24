@@ -1,4 +1,6 @@
-from cartoframes.viz import popup_element, Popup, PopupList
+from cartoframes.viz import popup_element
+from cartoframes.viz.popup import Popup
+from cartoframes.viz.popup_list import PopupList
 
 popup_list = PopupList({
   'click': [popup_element('value_1'), popup_element('value_2')],

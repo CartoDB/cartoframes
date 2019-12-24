@@ -1,17 +1,21 @@
-from .basemaps import Basemaps as basemaps
+from .map import Map
 from .layer import Layer
 from .layout import Layout
-from .legend import Legend
-from .legend_list import LegendList
-from .map import Map
-from .popup import Popup
-from .source import Source
-from .style import Style
+
 from .themes import Themes as themes
-from .widget import Widget
-from .widget_list import WidgetList
-from .popup_list import PopupList
+from .basemaps import Basemaps as basemaps
+
 from .popups import popup_element
+
+from .styles import animation_style
+from .styles import basic_style
+from .styles import color_bins_style
+from .styles import color_category_style
+from .styles import color_continuous_style
+from .styles import cluster_size_style
+from .styles import size_bins_style
+from .styles import size_category_style
+from .styles import size_continuous_style
 
 from .widgets import basic_widget
 from .widgets import animation_widget
@@ -28,21 +32,23 @@ from .legends import size_bins_legend
 from .legends import size_category_legend
 from .legends import size_continuous_legend
 
+from .defaults import COLOR_PALETTES as color_palettes
+
 __all__ = [
-    'basemaps',
+    'Map',
     'Layer',
     'Layout',
-    'Legend',
-    'LegendList',
-    'Map',
-    'popup_element',
-    'Popup',
-    'PopupList',
-    'Source',
-    'Style',
+    'basemaps',
     'themes',
-    'Widget',
-    'WidgetList',
+    'color_palettes',
+    'animation_style',
+    'basic_style',
+    'color_bins_style',
+    'color_category_style',
+    'color_continuous_style',
+    'size_bins_style',
+    'size_category_style',
+    'size_continuous_style',
     'basic_widget',
     'animation_widget',
     'category_widget',
@@ -53,7 +59,9 @@ __all__ = [
     'color_bins_legend',
     'color_category_legend',
     'color_continuous_legend',
+    'cluster_size_style',
     'size_bins_legend',
     'size_category_legend',
-    'size_continuous_legend'
+    'size_continuous_legend',
+    'popup_element'
 ]

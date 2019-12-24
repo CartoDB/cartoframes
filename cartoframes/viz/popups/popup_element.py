@@ -1,4 +1,4 @@
-def popup_element(value=None, title=None):
+def popup_element(value=None, title=None, operation=None):
     """Helper function for quickly adding a popup element to a layer
 
     Args:
@@ -23,5 +23,6 @@ def popup_element(value=None, title=None):
 
     return {
       'value': value,
-      'title': title
+      'title': title,
+      'operation': operation
     }

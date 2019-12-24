@@ -1,4 +1,6 @@
-from cartoframes.viz import Widget, WidgetList, formula_widget, basic_widget
+from cartoframes.viz.widget import Widget
+from cartoframes.viz.widget_list import WidgetList
+from cartoframes.viz import formula_widget, basic_widget
 
 WIDGET_A = formula_widget(
     'amount',

@@ -19,7 +19,7 @@ class PopupList():
         })
     """
 
-    def __init__(self, popups):
+    def __init__(self, popups=None):
         self._popups = self._init_popups(popups)
 
     def _init_popups(self, popups):
@@ -39,11 +39,21 @@ class PopupList():
 
         if click_popup_elements:
             for popup in click_popup_elements:
-                popup_elements.append(Popup('click', value=popup.get('value'), title=popup.get('title')))
+                popup_elements.append(
+                    Popup('click',
+                          value=popup.get('value'),
+                          title=popup.get('title'),
+                          operation=popup.get('operation', False))
+                )
 
         if hover_popup_elements:
             for popup in hover_popup_elements:
-                popup_elements.append(Popup('hover', value=popup.get('value'), title=popup.get('title')))
+                popup_elements.append(
+                    Popup('hover',
+                          value=popup.get('value'),
+                          title=popup.get('title'),
+                          operation=popup.get('operation', False))
+                )
 
         return popup_elements
 

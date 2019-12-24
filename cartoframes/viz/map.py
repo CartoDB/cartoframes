@@ -21,7 +21,7 @@ class Map(object):
         basemap (str, optional):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class, or a
-            hex value, rgb string, or other color expression from CARTO VL.
+            hex, rgb or named color value.
           - if a `dict`, Mapbox or other style as the value of the `style` key.
             If a Mapbox style, the access token is the value of the `token`
             key.

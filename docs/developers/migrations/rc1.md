@@ -5,6 +5,7 @@ Migration notes from `1.0b7` to `rc1`
 * [Popups](#Popups)
 * [Widgets](#Widgets)
 * [Legends](#Legends)
+* [Style](#Style)
 
 ## Popups
 
@@ -261,5 +262,65 @@ Map(
   )
 )
 ```
+</p>
+</details>
+
+## Style
+
+* [Related Issue](https://github.com/CartoDB/cartoframes/issues/1345)
+
+<details><summary>Remove "string syntax"</summary>
+<p>
+
+Replace CARTO VL style syntax by using style helpers.
+
+* From:
+
+```python
+from cartoframes.viz import Map, Layer, Style
+
+Map(
+  Layer(
+    'table_name',
+    style='color: blue strokeColor: white'
+  )
+)
+```
+
+* To:
+
+```python
+from cartoframes.viz import Map, Layer, basic_style
+
+Map(
+  Layer(
+    'table_name',
+    style=basic_style(color='blue', stroke_color='white')
+  )
+)
+```
+
+</p>
+</details>
+
+<details><summary>Replace layer helpers with style helpers</summary>
+<p>
+
+* From:
+
+```python
+from cartoframes.viz.helpers import size_category_layer
+
+size_category_layer('roads', 'type', 'Roads sized by category')
+```
+
+* To:
+
+```python
+from cartoframes.viz import Layer, size_category_style
+
+Layer('roads', size_category_style('type'), title='Roads sized by category')
+```
+
 </p>
 </details>

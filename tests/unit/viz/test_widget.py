@@ -1,6 +1,6 @@
 import pytest
 
-from cartoframes.viz import Widget
+from cartoframes.viz.widget import Widget
 
 
 class TestWidget(object):

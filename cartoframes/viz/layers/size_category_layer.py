@@ -1,10 +1,10 @@
-from .utils import get_value, get_popup
 from ..layer import Layer
+from ..styles import size_category_style
 
 
 def size_category_layer(
         source, value, title='', top=5, cat=None,
-        size=None, color=None, opacity=None, stroke_width=None,
+        ranges=None, color=None, opacity=None, stroke_width=None,
         stroke_color=None, description='', footer='',
         legend=True, popups=True, widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a size category layer.
@@ -16,12 +16,10 @@ def size_category_layer(
         title (str, optional): Title of legend.
         top (int, optional): Number of size categories for layer. Default is
           5. Valid values range from 1 to 16.
-        cat (list<str>, optional): Category list. Must be a valid CARTO VL category
-          list.
-        size (str, optional): Min/max size array in CARTO VL syntax. Default is
+        cat (str, optional): Category list as a string.
+        ranges (str, optional): Min/max size array. Default is
           '[2, 20]' for point geometries and '[1, 10]' for lines.
-        color (str, optional): Hex value, rgb expression, or other valid
-          CARTO VL color. Default is '#F46D43' for point geometries and
+        color (str, optional): Hex, rgb or named color value. Default is '#F46D43' for point geometries and
           '#4CC8A3' for lines.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
@@ -46,35 +44,12 @@ def size_category_layer(
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`.
         Includes a legend, popup and widget on `value`.
+
     """
-    func = 'buckets' if cat else 'top'
-    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
-
-    if opacity is None:
-        opacity = '0.8'
-
     return Layer(
         source,
-        style={
-            'point': {
-                'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, cat or top, size or [2, 20]),
-                'color': 'opacity({0}, {1})'.format(
-                    color or '#F46D43', opacity),
-                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
-                'filter': animation_filter
-            },
-            'line': {
-                'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, cat or top, size or [1, 10]),
-                'color': 'opacity({0}, {1})'.format(
-                    color or '#4CC8A3', opacity),
-                'filter': animation_filter
-            }
-        },
-        popups=popups and not animate and get_popup(
-          popups, title, value, value),
+        style=size_category_style(
+          value, top, cat, ranges, color, opacity, stroke_color, stroke_width, animate),
         legend=legend and {
             'type': {
                 'point': 'size-category-point',

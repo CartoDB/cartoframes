@@ -1,6 +1,5 @@
-from .utils import serialize_palette, get_value, get_popup
-
 from ..layer import Layer
+from ..styles import color_category_style
 
 
 def color_category_layer(
@@ -18,8 +17,9 @@ def color_category_layer(
         top (int, optional): Number of category for map. Default is 11. Values
           can range from 1 to 16.
         cat (list<str>, optional): Category list. Must be a valid list of categories.
-        palette (str, optional): Palette that can be a named CARTOColor palette
-          or other valid CARTO VL palette expression. Default is `bold`.
+        palette (str, optional): Palette that can be a named cartocolor palette
+          or other valid color palette. Use `help(cartoframes.viz.color_palettes)` to
+          get more information. Default is "bold".
         size (int, optional): Size of point or line features.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
@@ -44,47 +44,12 @@ def color_category_layer(
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`.
         Includes a legend, popup and widget on `value`.
-    """
-    func = 'buckets' if cat else 'top'
-    default_palette = 'bold'
-    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
+    """
     return Layer(
         source,
-        style={
-            'point': {
-                'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, cat or top,
-                    serialize_palette(palette) or default_palette,
-                    get_value(opacity, 'point', 'opacity')
-                ),
-                'width': get_value(size, 'point', 'width'),
-                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
-                'filter': animation_filter
-            },
-            'line': {
-                'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, cat or top,
-                    serialize_palette(palette) or default_palette,
-                    get_value(opacity, 'line', 'opacity')
-                ),
-                'width': get_value(size, 'line', 'width'),
-                'filter': animation_filter
-            },
-            'polygon': {
-                'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
-                    func, value, cat or top,
-                    serialize_palette(palette) or default_palette,
-                    get_value(opacity, 'polygon', 'opacity')
-                ),
-                'strokeColor': get_value(stroke_color, 'polygon', 'strokeColor'),
-                'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
-                'filter': animation_filter
-            }
-        },
-        popups=popups and not animate and get_popup(
-          popups, title, value, value),
+        style=color_category_style(
+          value, top, cat, palette, size, opacity, stroke_color, stroke_width, animate),
         legend=legend and {
             'type': {
                 'point': 'color-category-point',

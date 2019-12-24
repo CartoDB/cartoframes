@@ -1,6 +1,6 @@
 import pytest
 
-from cartoframes.viz import helpers
+from cartoframes.viz import layers
 from cartoframes.auth import Credentials
 
 from . import setup_mocks
@@ -14,12 +14,12 @@ class TestSizeBinsLayerHelper(object):
 
     def test_helpers(self):
         "should be defined"
-        assert helpers.size_bins_layer is not None
+        assert layers.size_bins_layer is not None
 
     def test_size_bins_layer(self, mocker):
         "should create a layer with the proper attributes"
         setup_mocks(mocker)
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             source='SELECT * FROM faketable',
             value='name',
             credentials=Credentials('fakeuser')
@@ -47,7 +47,7 @@ class TestSizeBinsLayerHelper(object):
     def test_size_bins_layer_point(self, mocker):
         "should create a point type layer"
         setup_mocks(mocker)
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             'Neighborhoods',
@@ -62,7 +62,7 @@ class TestSizeBinsLayerHelper(object):
     def test_size_bins_layer_line(self, mocker):
         "should create a line type layer"
         setup_mocks(mocker, 'line')
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             'Neighborhoods',
@@ -77,7 +77,7 @@ class TestSizeBinsLayerHelper(object):
     def test_size_bins_layer_method(self, mocker):
         "should apply the classification method"
         setup_mocks(mocker)
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             method='quantiles'
@@ -86,7 +86,7 @@ class TestSizeBinsLayerHelper(object):
         assert layer.style._style['point']['width'] == 'ramp(globalQuantiles($name, 5), [2, 14])'
         assert layer.style._style['line']['width'] == 'ramp(globalQuantiles($name, 5), [1, 10])'
 
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             method='equal'
@@ -95,7 +95,7 @@ class TestSizeBinsLayerHelper(object):
         assert layer.style._style['point']['width'] == 'ramp(globalEqIntervals($name, 5), [2, 14])'
         assert layer.style._style['line']['width'] == 'ramp(globalEqIntervals($name, 5), [1, 10])'
 
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             method='stdev'
@@ -106,7 +106,7 @@ class TestSizeBinsLayerHelper(object):
 
         msg = 'Available methods are: "quantiles", "equal", "stdev".'
         with pytest.raises(ValueError) as e:
-            helpers.size_bins_layer(
+            layers.size_bins_layer(
                 self.source,
                 'name',
                 method='wrong'
@@ -116,7 +116,7 @@ class TestSizeBinsLayerHelper(object):
     def test_size_bins_layer_breaks(self, mocker):
         "should apply buckets if breaks are passed"
         setup_mocks(mocker)
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             breaks=[0, 1, 2]
@@ -128,7 +128,7 @@ class TestSizeBinsLayerHelper(object):
     def test_size_bins_layer_legend(self, mocker):
         "should show/hide the legend"
         setup_mocks(mocker)
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             legend=False
@@ -137,7 +137,7 @@ class TestSizeBinsLayerHelper(object):
         assert layer.legend._type == ''
         assert layer.legend._title == ''
 
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             legend=True
@@ -153,7 +153,7 @@ class TestSizeBinsLayerHelper(object):
     def test_size_bins_layer_popup(self, mocker):
         "should show/hide the popup"
         setup_mocks(mocker)
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             popups=False
@@ -161,7 +161,7 @@ class TestSizeBinsLayerHelper(object):
 
         assert len(layer.popups.elements) == 0
 
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             popups=True
@@ -174,7 +174,7 @@ class TestSizeBinsLayerHelper(object):
     def test_size_bins_layer_widget(self, mocker):
         "should show/hide the widget"
         setup_mocks(mocker)
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             widget=False
@@ -182,7 +182,7 @@ class TestSizeBinsLayerHelper(object):
 
         assert layer.widgets._widgets == []
 
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             widget=True
@@ -194,7 +194,7 @@ class TestSizeBinsLayerHelper(object):
     def test_size_bins_layer_animate(self, mocker):
         "should animate a property and disable the popups"
         setup_mocks(mocker)
-        layer = helpers.size_bins_layer(
+        layer = layers.size_bins_layer(
             self.source,
             'name',
             animate='time'

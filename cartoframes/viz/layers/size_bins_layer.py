@@ -1,10 +1,10 @@
-from .utils import get_value, get_popup
 from ..layer import Layer
+from ..styles import size_bins_style
 
 
 def size_bins_layer(
         source, value, title='', method='quantiles', bins=5,
-        breaks=None, size=None, color=None, opacity=None,
+        breaks=None, ranges=None, color=None, opacity=None,
         stroke_width=None, stroke_color=None, description='',
         footer='', legend=True, popups=True, widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a size symbol map with
@@ -19,10 +19,9 @@ def size_bins_layer(
           Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
         breaks (list<int>, optional): Assign manual class break values.
-        size (int, optional): Min/max size array in CARTO VL syntax. Default is
+        ranges (str, optional): Min/max size array as a string. Default is
           '[2, 14]' for point geometries and '[1, 10]' for lines.
-        color (str, optional): Hex value, rgb expression, or other valid
-          CARTO VL color. Default is '#EE5D5A' for point geometries and
+        color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for point geometries and
           '#4CC8A3' for lines.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
@@ -47,47 +46,12 @@ def size_bins_layer(
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`.
         Includes a legend, popup and widget on `value`.
+
     """
-    if method not in ('quantiles', 'equal', 'stdev'):
-        raise ValueError('Available methods are: "quantiles", "equal", "stdev".')
-
-    if breaks is None:
-        func = {
-            'quantiles': 'globalQuantiles',
-            'equal': 'globalEqIntervals',
-            'stdev': 'globalStandardDev'
-        }.get(method)
-    else:
-        func = 'buckets'
-        breaks = list(breaks)
-
-    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
-
-    if opacity is None:
-        opacity = '0.8'
-
     return Layer(
         source,
-        style={
-            'point': {
-                'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, breaks or bins, size or [2, 14]),
-                'color': 'opacity({0}, {1})'.format(
-                    color or '#EE4D5A', opacity),
-                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
-                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
-                'filter': animation_filter
-            },
-            'line': {
-                'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, breaks or bins, size or [1, 10]),
-                'color': 'opacity({0}, {1})'.format(
-                    color or '#4CC8A3', opacity),
-                'filter': animation_filter
-            }
-        },
-        popups=popups and not animate and get_popup(
-          popups, title, value, value),
+        style=size_bins_style(
+          value, method, bins, breaks, ranges, color, opacity, stroke_width, stroke_color, animate),
         legend=legend and {
             'type': {
                 'point': 'size-bins-point',

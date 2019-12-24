@@ -1,4 +1,4 @@
-from cartoframes.viz import Source
+from cartoframes.viz.source import Source
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.auth_api_client import AuthAPIClient
 from cartoframes.core.managers.context_manager import ContextManager

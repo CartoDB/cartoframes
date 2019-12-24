@@ -1,6 +1,6 @@
 import pytest
 
-from cartoframes.viz import Legend
+from cartoframes.viz.legend import Legend
 
 
 class TestLegend(object):
