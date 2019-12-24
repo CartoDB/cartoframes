@@ -100,29 +100,29 @@ class TestEnrichment(object):
     def test_polygons_private_data_and_agg_none(self):
         enriched_gdf = self.enrichment.enrich_polygons(
             self.polygons_gdf,
-            variables=self.private_variables,
+            variables=self.public_variables,
             aggregation=None,
             filters={
-                self.private_variable1.id: '> 0',
-                self.private_variable2.id: '< 100000'
+                self.public_variable1.id: '> 300',
+                self.public_variable2.id: '< 800'
             }
         )
 
-        expected_gdf = CartoDataFrame.from_file(file_path('files/polygon-private-none.geojson'))
+        expected_gdf = CartoDataFrame.from_file(file_path('files/polygon-public-none.geojson'))
 
-        enriched_gdf = clean_gdf(enriched_gdf, self.private_variable1.column_name)
-        expected_gdf = clean_gdf(expected_gdf, self.private_variable1.column_name)
+        enriched_gdf = clean_gdf(enriched_gdf, self.public_variable1.column_name)
+        expected_gdf = clean_gdf(expected_gdf, self.public_variable1.column_name)
 
         assert enriched_gdf.equals(expected_gdf)
 
-    def test_polygons_public_data_and_agg_custom(self):
+    def test_polygons_private_data_and_agg_custom(self):
         enriched_gdf = self.enrichment.enrich_polygons(
             self.polygons_gdf,
-            variables=[self.public_variable1, self.public_variable2],
-            aggregation='SUM'
+            variables=[self.private_variable1, self.private_variable2],
+            aggregation='AVG'
         )
 
-        expected_gdf = CartoDataFrame.from_file(file_path('files/polygon-public-sum.geojson'))
+        expected_gdf = CartoDataFrame.from_file(file_path('files/polygon-private-avg.geojson'))
 
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
