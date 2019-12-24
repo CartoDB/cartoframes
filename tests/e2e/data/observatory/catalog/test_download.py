@@ -3,7 +3,6 @@ import json
 import pandas
 from pathlib import Path
 
-from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory import Dataset, Geography
 
