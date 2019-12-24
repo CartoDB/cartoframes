@@ -27,17 +27,6 @@ STYLE_PROPERTIES = [
     'resolution'
 ]
 
-STYLE_TYPES = [
-    'default',
-    'animation',
-    'color-category',
-    'color-bins',
-    'color-continuous',
-    'size-category',
-    'size-bins',
-    'size-continuous',
-]
-
 LEGEND_PROPERTIES = [
     'color',
     'stroke-color',
