@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from .popup import Popup
 
 
-class PopupList():
+class PopupList:
     """PopupList
 
      Args:
@@ -37,7 +37,9 @@ class PopupList():
         click_popup_elements = popups.get('click')
         hover_popup_elements = popups.get('hover')
 
-        if click_popup_elements:
+        if click_popup_elements is not None:
+            if not isinstance(click_popup_elements, list):
+                click_popup_elements = [click_popup_elements]
             for popup in click_popup_elements:
                 popup_elements.append(
                     Popup('click',
@@ -46,7 +48,9 @@ class PopupList():
                           operation=popup.get('operation', False))
                 )
 
-        if hover_popup_elements:
+        if hover_popup_elements is not None:
+            if not isinstance(hover_popup_elements, list):
+                hover_popup_elements = [hover_popup_elements]
             for popup in hover_popup_elements:
                 popup_elements.append(
                     Popup('hover',

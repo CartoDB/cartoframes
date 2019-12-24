@@ -1,7 +1,7 @@
 from ..widget import Widget
 
 
-def animation_widget(title='', description='', footer=''):
+def animation_widget(title='', description='', footer='', prop=''):
     """Helper function for quickly creating an animated widget.
     The animation widget includes an animation status bar as well as controls to play or pause animated data.
     The `filter` property of your map's style, applied to either a date or numeric field, drives both
@@ -41,4 +41,5 @@ def animation_widget(title='', description='', footer=''):
     return Widget('animation',
                   title=title,
                   description=description,
-                  footer=footer)
+                  footer=footer,
+                  prop=prop)
