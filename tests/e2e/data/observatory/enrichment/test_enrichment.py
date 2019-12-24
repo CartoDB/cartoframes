@@ -18,6 +18,14 @@ def clean_gdf(gdf, sort_column=None):
         return gdf.sort_index(axis=1).round(5).reset_index(drop=True)
 
 
+public_variable1 = Variable.get('poverty_a86da569')   # FLOAT, AVG
+public_variable2 = Variable.get('one_car_f7f299a7')   # FLOAT, SUM
+public_variable3 = Variable.get('geoid_e99a58c1')     # STRING, NONE
+private_variable1 = Variable.get('RSGCY7224_cb77b41d')   # INTEGER, SUM
+private_variable2 = Variable.get('MLTCY7224_4ba39c69')   # INTEGER, SUM
+private_variable3 = Variable.get('BLOCKGROUP_f1b3a750')  # STRING, NONE
+
+
 class TestEnrichment(object):
     def setup_method(self):
         if (os.environ.get('APIKEY') and os.environ.get('USERNAME')):
@@ -35,9 +43,9 @@ class TestEnrichment(object):
         self.polygons_gdf = CartoDataFrame.from_file(file_path('files/polygon.geojson'))
 
         # from carto-do-public-data.usa_acs.demographics_sociodemographics_usa_censustract_2015_5yrs_20132017
-        self.public_variable1 = Variable.get('poverty_a86da569')   # FLOAT, AVG
-        self.public_variable2 = Variable.get('one_car_f7f299a7')   # FLOAT, SUM
-        self.public_variable3 = Variable.get('geoid_e99a58c1')     # STRING, NONE
+        self.public_variable1 = public_variable1
+        self.public_variable2 = public_variable2
+        self.public_variable3 = public_variable3
         self.public_variables = [
             self.public_variable1,
             self.public_variable2,
@@ -45,9 +53,9 @@ class TestEnrichment(object):
         ]
 
         # from carto-do.ags.demographics_retailpotential_usa_blockgroup_2015_yearly_2019
-        self.private_variable1 = Variable.get('RSGCY7224_cb77b41d')   # INTEGER, SUM
-        self.private_variable2 = Variable.get('MLTCY7224_4ba39c69')   # INTEGER, SUM
-        self.private_variable3 = Variable.get('BLOCKGROUP_f1b3a750')  # STRING, NONE
+        self.private_variable1 = private_variable1
+        self.private_variable2 = private_variable2
+        self.private_variable3 = private_variable3
         self.private_variables = [
             self.private_variable1,
             self.private_variable2,
