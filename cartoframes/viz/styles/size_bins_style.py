@@ -43,7 +43,7 @@ def size_bins_style(
 
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
-    style = {
+    data = {
         'point': {
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'point'),
@@ -64,4 +64,4 @@ def size_bins_style(
         }
     }
 
-    return Style('size-bins', value, style)
+    return Style(data, 'size-bins', value)

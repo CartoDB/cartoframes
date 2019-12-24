@@ -5,8 +5,7 @@ from ..style import Style
 def basic_style(color=None, size=None, opacity=None, stroke_color=None, stroke_width=None):
     """Helper function for quickly creating a layer with the basic style"""
 
-    value = None
-    style = {
+    data = {
         'point': {
             'color': get_value(color, 'color', 'point'),
             'width': get_value(size, 'width', 'point'),
@@ -27,4 +26,4 @@ def basic_style(color=None, size=None, opacity=None, stroke_color=None, stroke_w
         }
     }
 
-    return Style('default', value, style)
+    return Style(data, 'default')

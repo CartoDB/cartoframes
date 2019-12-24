@@ -31,7 +31,7 @@ def size_category_style(
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
     opacity = opacity if opacity else '0.8'
 
-    style = {
+    data = {
         'point': {
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'point'),
@@ -52,4 +52,4 @@ def size_category_style(
         }
     }
 
-    return Style('size-category', value, style)
+    return Style(data, 'size-category', value)

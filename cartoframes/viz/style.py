@@ -17,18 +17,18 @@ from .legends import size_category_legend
 from .legends import size_continuous_legend
 
 
-class Style():
+class Style:
     """Style
 
     Args:
         data (str, dict): The style for the layer.
     """
 
-    def __init__(self, style_type='default', value=None, data=None, popups=None, animate=None):
+    def __init__(self, data=None, style_type='default', value=None, popups=None, animate=None):
+        self._style = self._init_style(data=data)
         self._style_type = style_type
         self._value = value
         self._popups = popups
-        self._style = self._init_style(data=data)
 
     def _init_style(self, data):
         if data is None:

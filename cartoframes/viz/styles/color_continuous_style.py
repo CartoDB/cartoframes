@@ -36,7 +36,7 @@ def color_continuous_style(
     if range_max is None:
         range_max = 'globalMAX(${0})'.format(value)
 
-    style = {
+    data = {
         'point': {
             'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
                 value, range_min, range_max,
@@ -66,4 +66,4 @@ def color_continuous_style(
         }
     }
 
-    return Style('color-continuous', value, style)
+    return Style(data, 'color-continuous', value)

@@ -35,7 +35,7 @@ def size_continuous_style(
     if range_max is None:
         range_max = 'globalMAX(${0})'.format(value)
 
-    style = {
+    data = {
         'point': {
             '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
                 value, range_min, range_max, ranges or [2, 40]),
@@ -60,4 +60,4 @@ def size_continuous_style(
         }
     }
 
-    return Style('size-continuous', value, style)
+    return Style(data, 'size-continuous', value)

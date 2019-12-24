@@ -7,7 +7,7 @@ def animation_style(value, duration=20, color=None, size=None, opacity=None,
     """Helper function for quickly creating an animated layer"""
 
     fade = '(1, 1)'
-    style = {
+    data = {
         'point': {
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'point'),
@@ -34,7 +34,7 @@ def animation_style(value, duration=20, color=None, size=None, opacity=None,
         }
     }
 
-    return Style('animation', value, style)
+    return Style(data, 'animation', value)
 
 
 def _animation_filter(value, duration, fade):

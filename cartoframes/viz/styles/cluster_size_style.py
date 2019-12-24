@@ -31,7 +31,7 @@ def cluster_size_style(
     breakpoints = _get_breakpoints(resolution)
     animation_filter = _get_animation(animate, cluster_operation)
 
-    style = {
+    data = {
         'point': {
             'width': 'ramp(linear({0}, viewportMIN({0}), viewportMAX({0})), [{1}])'.format(
                 cluster_operation, breakpoints),
@@ -48,7 +48,7 @@ def cluster_size_style(
         'hover': get_popup(True, alt_title=cluster_operation_title, alt_value=cluster_operation, operation=True)
     }
 
-    return Style('cluster-size', value, style, popups)
+    return Style(data, 'cluster-size', value, popups)
 
 
 def _get_animation(animate, cluster_operation):
