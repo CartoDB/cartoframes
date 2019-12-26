@@ -15,7 +15,7 @@ from cartoframes.data.observatory.catalog.repository.entity_repo import EntityRe
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables, \
     _ENRICHMENT_ID, _GEOM_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation, _build_where_condition, \
     _build_where_clausule, _validate_variables_input, _build_polygons_query_variables_with_aggregation, \
-    _build_polygons_column_with_aggregation
+    _build_polygons_column_with_aggregation, _build_where_conditions_by_variable
 from cartoframes.exceptions import EnrichmentException
 from cartoframes.utils.geom_utils import to_geojson
 
@@ -716,3 +716,32 @@ class TestEnrichmentService(object):
             column_name='avg_{}'.format(variable.column_name))
         sql = _build_polygons_column_with_aggregation(variable, aggregation, True)
         assert sql.strip() == expected_sql.strip()
+
+    def test_build_where_conditions_by_variable(self):
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': 'sum'
+        })
+
+        filters = {}
+        result = _build_where_conditions_by_variable(variable, filters)
+        assert result is None
+
+        filters = {'unexistingid': ''}
+        result = _build_where_conditions_by_variable(variable, filters)
+        assert result is None
+
+        filters = {variable.id: '> 50'}
+        expected = ["enrichment_table.{} > 50".format(variable.column_name)]
+        result = _build_where_conditions_by_variable(variable, filters)
+        assert result == expected
+
+        filters = {variable.id: ['> 50', '< 100']}
+        expected = [
+            "enrichment_table.{} > 50".format(variable.column_name),
+            "enrichment_table.{} < 100".format(variable.column_name)
+        ]
+        result = _build_where_conditions_by_variable(variable, filters)
+        assert result == expected
