@@ -245,17 +245,22 @@ class EnrichmentService(object):
 
 
 def _build_polygons_query_variables_with_aggregation(variables, aggregation):
-    return ', '.join([
-        _build_polygons_query_variable_with_aggregation(
-            variable,
-            aggregation
-        ) for variable in variables])
+    sql = []
+    for variable in variables:
+        variable_aggregation = _get_aggregation(variable, aggregation)
+        if isinstance(variable_aggregation, list):
+            for agg in variable_aggregation:
+                sql.append(_build_polygons_column_with_aggregation(variable, agg, True))
+        else:
+            sql.append(_build_polygons_column_with_aggregation(variable, variable_aggregation))
+
+    return ', '.join(sql)
 
 
-def _build_polygons_query_variable_with_aggregation(variable, aggregation):
-    variable_agg = _get_aggregation(variable, aggregation)
+def _build_polygons_column_with_aggregation(variable, aggregation, column_sufix=False):
+    column = _get_polygons_agg_column_name(variable.column_name, aggregation, column_sufix)
 
-    if (variable_agg == 'sum'):
+    if (aggregation == 'sum'):
         return """
             {aggregation}(
                 enrichment_table.{column} * (
@@ -265,15 +270,22 @@ def _build_polygons_query_variable_with_aggregation(variable, aggregation):
                 )
             ) AS {column}
             """.format(
-                column=variable.column_name,
+                column=column,
                 geo_column=_GEOM_COLUMN,
-                aggregation=variable_agg)
+                aggregation=aggregation)
     else:
         return """
             {aggregation}(enrichment_table.{column}) AS {column}
             """.format(
-                column=variable.column_name,
-                aggregation=variable_agg)
+                column=column,
+                aggregation=aggregation)
+
+
+def _get_polygons_agg_column_name(column, aggregation, column_sufix):
+    if column_sufix:
+        return '{}_{}'.format(column, aggregation)
+    else:
+        return column
 
 
 def _build_polygons_query_variables_without_aggregation(variables):
@@ -384,16 +396,22 @@ def _is_subscribed(dataset, geography, credentials):
 
 
 def _get_aggregation(variable, aggregation):
-    if aggregation is AGGREGATION_NONE:
-        aggregation_method = None
-    elif aggregation == AGGREGATION_DEFAULT:
-        aggregation_method = variable.agg_method
-    elif isinstance(aggregation, str):
-        aggregation_method = aggregation
-    elif isinstance(aggregation, dict):
+    if isinstance(aggregation, dict):
         aggregation_method = aggregation.get(variable.id, variable.agg_method)
-    else:
-        raise ValueError('The `aggregation` parameter is invalid.')
 
-    if aggregation_method is not None:
-        return aggregation_method.lower()
+        if isinstance(aggregation_method, list):
+            return [_get_aggregation(variable, agg) for agg in aggregation_method]
+
+        return _get_aggregation(variable, aggregation_method)
+    else:
+        if aggregation is AGGREGATION_NONE:
+            aggregation_method = None
+        elif aggregation == AGGREGATION_DEFAULT:
+            aggregation_method = variable.agg_method
+        elif isinstance(aggregation, str):
+            aggregation_method = aggregation
+        else:
+            raise ValueError('The `aggregation` parameter is invalid.')
+
+        if aggregation_method is not None:
+            return aggregation_method.lower()
