@@ -14,7 +14,8 @@ from cartoframes.data.observatory.catalog.repository.dataset_repo import Dataset
 from cartoframes.data.observatory.catalog.repository.entity_repo import EntityRepository
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables, \
     _ENRICHMENT_ID, _GEOM_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation, _build_where_condition, \
-    _build_where_clausule, _validate_variables_input, _build_polygons_query_variables_with_aggregation
+    _build_where_clausule, _validate_variables_input, _build_polygons_query_variables_with_aggregation, \
+    _build_polygons_column_with_aggregation
 from cartoframes.exceptions import EnrichmentException
 from cartoframes.utils.geom_utils import to_geojson
 
@@ -660,3 +661,58 @@ class TestEnrichmentService(object):
         expected_result = '{}_{}, {}_{}'.format(variable.column_name, 'True', variable.column_name, 'True')
         agg = {variable.id: ['AVG', 'SUM']}
         assert _build_polygons_query_variables_with_aggregation([variable], agg) == expected_result
+
+    def test_build_polygons_column_with_aggregation(self):
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': 'sum'
+        })
+
+        aggregation = 'sum'
+        expected_sql = """
+            sum(
+                enrichment_table.{column} * (
+                    ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
+                    /
+                    ST_AREA(data_table.{geo_column})
+                )
+            ) AS {column_name}
+            """.format(
+                column=variable.column_name,
+                column_name=variable.column_name,
+                geo_column=_GEOM_COLUMN)
+        sql = _build_polygons_column_with_aggregation(variable, aggregation)
+        assert sql == expected_sql
+
+        aggregation = 'sum'
+        expected_sql = """
+            sum(
+                enrichment_table.{column} * (
+                    ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
+                    /
+                    ST_AREA(data_table.{geo_column})
+                )
+            ) AS {column_name}
+            """.format(
+                column=variable.column_name,
+                column_name='sum_{}'.format(variable.column_name),
+                geo_column=_GEOM_COLUMN)
+        sql = _build_polygons_column_with_aggregation(variable, aggregation, True)
+        assert sql == expected_sql
+
+        aggregation = 'avg'
+        expected_sql = 'avg(enrichment_table.{column}) AS {column_name}'.format(
+            column=variable.column_name,
+            column_name=variable.column_name)
+
+        sql = _build_polygons_column_with_aggregation(variable, aggregation)
+        assert sql.strip() == expected_sql.strip()
+
+        aggregation = 'avg'
+        expected_sql = 'avg(enrichment_table.{column}) AS {column_name}'.format(
+            column=variable.column_name,
+            column_name='avg_{}'.format(variable.column_name))
+        sql = _build_polygons_column_with_aggregation(variable, aggregation, True)
+        assert sql.strip() == expected_sql.strip()
