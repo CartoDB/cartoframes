@@ -40,10 +40,11 @@ class Enrichment(EnrichmentService):
                 variables is 50.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (dict, optional): dictionary to filter results by variable values. As a key it receives the
-                variable id, and as value receives a SQL operator, for example: {variable1.id: "> 30"}. It works by
+                variable id, and as value receives a SQL operator, for example: `{variable1.id: "> 30"}`. It works by
                 appending the filter SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND`
-                operator (in the example: `WHERE {variable1.column_name} > 30`). The variables used to filter results
-                should exists in `variables` property list.
+                operator (in the example: `WHERE {variable1.column_name} > 30`). If you want to filter the same
+                variable several times you can use a list as a dict value: `{variable1.id: ["> 30", "< 100"]}`. The
+                variables used to filter results should exist in `variables` property list.
 
         Returns:
             A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` enriched with the variables passed as argument.
@@ -148,10 +149,11 @@ class Enrichment(EnrichmentService):
                 variables is 50.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (dict, optional): dictionary to filter results by variable values. As a key it receives the
-                variable id, and as value receives a SQL operator, for example: {variable1.id: "> 30"}. It works by
+                variable id, and as value receives a SQL operator, for example: `{variable1.id: "> 30"}`. It works by
                 appending the filter SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND`
-                operator (in the example: `WHERE {variable1.column_name} > 30`). The variables used to filter results
-                should exists in `variables` property list.
+                operator (in the example: `WHERE {variable1.column_name} > 30`). If you want to filter the same
+                variable several times you can use a list as a dict value: `{variable1.id: ["> 30", "< 100"]}`. The
+                variables used to filter results should exist in `variables` property list.
             aggregation (None, str, list, optional): sets the data aggregation. The polygons in the source `DataFrame`
                 can intersect with one or more polygons from the Data Observatory. With this method you can select how
                 to aggregate the resulting data.
