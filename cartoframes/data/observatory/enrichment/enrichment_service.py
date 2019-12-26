@@ -258,7 +258,7 @@ def _build_polygons_query_variables_with_aggregation(variables, aggregation):
 
 
 def _build_polygons_column_with_aggregation(variable, aggregation, column_sufix=False):
-    column = _get_polygons_agg_column_name(variable.column_name, aggregation, column_sufix)
+    column_name = _get_polygons_agg_column_name(variable.column_name, aggregation, column_sufix)
 
     if (aggregation == 'sum'):
         return """
@@ -268,22 +268,24 @@ def _build_polygons_column_with_aggregation(variable, aggregation, column_sufix=
                     /
                     ST_AREA(data_table.{geo_column})
                 )
-            ) AS {column}
+            ) AS {column_name}
             """.format(
-                column=column,
+                column=variable.column_name,
+                column_name=column_name,
                 geo_column=_GEOM_COLUMN,
                 aggregation=aggregation)
     else:
         return """
-            {aggregation}(enrichment_table.{column}) AS {column}
+            {aggregation}(enrichment_table.{column}) AS {column_name}
             """.format(
-                column=column,
+                column=variable.column_name,
+                column_name=column_name,
                 aggregation=aggregation)
 
 
 def _get_polygons_agg_column_name(column, aggregation, column_sufix):
     if column_sufix:
-        return '{}_{}'.format(column, aggregation)
+        return '{}_{}'.format(aggregation, column)
     else:
         return column
 
