@@ -770,12 +770,12 @@ def _clean_query(query):
     return query.replace('\n', '').replace(' ', '').lower()
 
 
-def _get_query(agg, columns, username, view, geo_table, temp_table_name, filters=[]):
+def _get_query(agg, variables, username, view, geo_table, temp_table_name, filters=[]):
     if agg:
-        columns = _build_polygons_query_variables_with_aggregation(columns, agg)
+        columns = _build_polygons_query_variables_with_aggregation(variables, agg)
         group = 'group by data_table.enrichment_id'
     else:
-        columns = _build_polygons_query_variables_without_aggregation(columns)
+        columns = _build_polygons_query_variables_without_aggregation(variables)
         group = ''
 
     return '''
