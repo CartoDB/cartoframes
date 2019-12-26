@@ -107,13 +107,9 @@ class EnrichmentService(object):
             table_name = self.__get_enrichment_table_by_variable(variable)
             tables_metadata[table_name]['variables'].append(variable)
 
-            if variable.id in filters:
-                tables_metadata[table_name]['filters'].append(
-                    _build_where_condition(
-                        variable.column_name,
-                        filters[variable.id]
-                    )
-                )
+            variable_filters = _build_where_conditions_by_variable(variable, filters)
+            if variable_filters:
+                tables_metadata[table_name]['filters'] = variable_filters
 
             if 'geo_table' not in tables_metadata[table_name].keys():
                 tables_metadata[table_name]['geo_table'] = self.__get_geo_table(variable)
@@ -302,6 +298,30 @@ def _build_polygons_query_variables_without_aggregation(variables):
         """.format(
             variables=', '.join(variables),
             geom_column=_GEOM_COLUMN)
+
+
+def _build_where_conditions_by_variable(variable, filters):
+    if variable.id in filters:
+        conditions = []
+        variable_filter = filters[variable.id]
+
+        if isinstance(variable_filter, list):
+            for f in variable_filter:
+                conditions.append(
+                    _build_where_condition(
+                        variable.column_name,
+                        f
+                    )
+                )
+        else:
+            conditions.append(
+                _build_where_condition(
+                    variable.column_name,
+                    variable_filter
+                )
+            )
+
+        return conditions
 
 
 def _build_where_condition(column, condition):
