@@ -48,7 +48,6 @@ class Credentials:
         >>> creds = Credentials(username='johnsmith', api_key='abcdefg')
 
     """
-
     def __init__(self, username=None, api_key='default_public', base_url=None, session=None):
         if not is_valid_str(username) and not is_valid_str(base_url):
             raise ValueError('You must set at least a `username` or a `base_url` parameters')

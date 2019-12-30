@@ -3,7 +3,7 @@ from ..legend import Legend
 
 def color_continuous_legend(title='', description='', footer='', prop='color',
                             variable=None, dynamic=True):
-    """Helper function for quickly creating a color continuous legend
+    """Helper function for quickly creating a color continuous legend.
 
     Args:
         title (str, optional):
@@ -23,41 +23,14 @@ def color_continuous_legend(title='', description='', footer='', prop='color',
             Defaults to ``True``.
 
     Returns:
-        A 'color-continuous' :py:class:`Legend <cartoframes.viz.Legend>`
+        cartoframes.viz.legend.Legend
 
-    Examples:
+    Example:
+        >>> color_continuous_legend(
+        ...     title='Legend title',
+        ...     description='Legend description',
+        ...     footer='Legend footer',
+        ...     dynamic=False)
 
-        Default legend:
-
-        .. code::
-
-            from cartoframes.viz import Map, Layer, color_continuous_legend
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    style=color_continuous_style('collisiontype')
-                    legends=color_continuous_legend()
-                )
-            )
-
-        Legend with custom parameters:
-
-        .. code::
-
-            from cartoframes.viz import Map, Layer, color_continuous_legend
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    style=color_continuous_style('amount')
-                    legends=color_continuous_legend(
-                      title='Collision Type',
-                      description="Seattle Collisions"
-                      dynamic=False
-                    )
-                )
-            )
     """
-
     return Legend('color-continuous', title, description, footer, prop, variable, dynamic)
