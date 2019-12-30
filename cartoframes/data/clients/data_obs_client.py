@@ -2,9 +2,9 @@
 
 import json
 import collections
-import pandas as pd
 
 from warnings import warn
+from pandas import DataFrame
 from carto.exceptions import CartoException
 
 from ...core.managers.context_manager import ContextManager
@@ -17,10 +17,10 @@ class DataObsClient:
     <https://carto.com/developers/data-observatory/>`__.
 
     This class provides the following methods to interact with Data Observatory:
-        - boundaries: returns a :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with
+        - boundaries: returns a geopandas.GeoDataFrame with
             the geographic boundaries (geometries) or their metadata.
         - discovery: returns a pandas.DataFrame with the measures found.
-        - augment: returns a :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with the augmented data.
+        - augment: returns a geopandas.GeoDataFrame with the augmented data.
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
@@ -123,7 +123,7 @@ class DataObsClient:
                 US Census Tiger.
 
         Returns:
-            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`:
+            geopandas.GeoDataFrame:
                 If `boundary` is specified, then all available
                 boundaries and accompanying `geom_refs` in `region` (or the world
                 if `region` is ``None`` or not specified) are returned. If
@@ -457,7 +457,7 @@ class DataObsClient:
                 numers=numers,
                 quantiles=quantiles).strip()
         utils.debug_print(self._verbose, query=query)
-        return pd.DataFrame(self._fetch(query, decode_geom=True))
+        return DataFrame(self._fetch(query, decode_geom=True))
 
     def augment(self, table_name, metadata, persist_as=None, how='the_geom'):
         """Get an augmented CARTO dataset with `Data Observatory
@@ -513,7 +513,7 @@ class DataObsClient:
                 metadata.
 
         Returns:
-            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`:
+            geopandas.GeoDataFrame:
                 A CartoDataFrame representation of `table_name` which
                 has new columns for each measure in `metadata`.
 
@@ -528,7 +528,7 @@ class DataObsClient:
                 If user account consumes all of Data Observatory quota
         """
 
-        if isinstance(metadata, pd.DataFrame):
+        if isinstance(metadata, DataFrame):
             _meta = metadata.copy().reset_index()
         elif isinstance(metadata, collections.Iterable):
             query = utils.minify_sql((
@@ -567,7 +567,7 @@ class DataObsClient:
                 '      numeric, timespan_rownum numeric)',
             )).format(table_name=table_name,
                       meta=json.dumps(metadata).replace('\'', '\'\''))
-            _meta = pd.DataFrame(self._fetch(query))
+            _meta = DataFrame(self._fetch(query))
 
         if _meta.shape[0] == 0:
             raise ValueError('There are no valid metadata entries. Check '
@@ -629,11 +629,11 @@ class DataObsClient:
         return self._fetch(query, decode_geom=False, table_name=persist_as)
 
     def _fetch(self, query, decode_geom=False, table_name=None):
-        cdf = read_carto(query, self._credentials, decode_geom=decode_geom)
+        gdf = read_carto(query, self._credentials, decode_geom=decode_geom)
         if table_name:
-            to_carto(cdf, table_name, self._credentials,
+            to_carto(gdf, table_name, self._credentials,
                      geom_col='the_geom', if_exists='replace', log_enabled=False)
-        return cdf
+        return gdf
 
     def _geom_type(self, table):
         """gets geometry type(s) of specified layer"""

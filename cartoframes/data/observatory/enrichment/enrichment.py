@@ -32,8 +32,7 @@ class Enrichment(EnrichmentService):
         purposes.
 
         Args:
-            dataframe (pandas `DataFrame`, geopandas `GeoDataFrame`
-                or :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): a `DataFrame` instance to be enriched.
+            dataframe (pandas.DataFrame, geopandas.GeoDataFrame: a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`. The maximum number of
@@ -46,13 +45,13 @@ class Enrichment(EnrichmentService):
                 should exists in `variables` property list.
 
         Returns:
-            A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` enriched with the variables passed as argument.
+            A geopandas.GeoDataFrame enriched with the variables passed as argument.
 
         Raises:
             EnrichmentError: if there is an error in the enrichment process.
 
         *Note that if the points of the `dataframe` you provide are contained in more than one geometry
-        in the enrichment dataset, the number of rows of the returned `CartoDataFrame` could be different
+        in the enrichment dataset, the number of rows of the returned `GeoDataFrame` could be different
         than the `dataframe` argument number of rows.*
 
         Examples:
@@ -60,31 +59,35 @@ class Enrichment(EnrichmentService):
 
             >>> df = pandas.read_csv('...')
             >>> variables = Catalog().country('usa').category('demographics').datasets[0].variables
-            >>> cdf_enrich = Enrichment().enrich_points(df, variables)
+            >>> gdf_enrich = Enrichment().enrich_points(df, variables, geom_col='the_geom')
 
             Enrich a points dataframe with several Variables using their ids:
 
             >>> df = pandas.read_csv('...')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:2]
-            >>> cdf_enrich = Enrichment().enrich_points(df, variables)
+            >>> gdf_enrich = Enrichment().enrich_points(df, variables, geom_col='the_geom')
 
             Enrich a points dataframe with filters:
 
             >>> df = pandas.read_csv('...')
             >>> variable = Catalog().country('usa').category('demographics').datasets[0].variables[0]
             >>> filters = {variable.id: "= '2019-09-01'"}
-            >>> cdf_enrich = Enrichment().enrich_points(df, variables=[variable], filters=filters)
+            >>> gdf_enrich = Enrichment().enrich_points(
+            ...     df,
+            ...     variables=[variable],
+            ...     filters=filters,
+            ...     geom_col='the_geom')
 
         """
         variables = prepare_variables(variables, self.credentials)
-        cartodataframe = self._prepare_data(dataframe, geom_col)
+        geodataframe = self._prepare_data(dataframe, geom_col)
 
         temp_table_name = self._get_temp_table_name()
-        self._upload_data(temp_table_name, cartodataframe)
+        self._upload_data(temp_table_name, geodataframe)
 
         queries = self._get_points_enrichment_sql(temp_table_name, variables, filters)
-        return self._execute_enrichment(queries, cartodataframe)
+        return self._execute_enrichment(queries, geodataframe)
 
     @timelogger
     def enrich_polygons(self, dataframe, variables, geom_col=None, filters={}, aggregation=AGGREGATION_DEFAULT):
@@ -100,8 +103,7 @@ class Enrichment(EnrichmentService):
         variable column will be skipped from the enrichment.
 
         Args:
-            dataframe (pandas `DataFrame`, geopandas `GeoDataFrame`
-                or :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): a `DataFrame` instance to be enriched.
+            dataframe (pandas.DataFrame, geopandas.GeoDataFrame): a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`. The maximum number of
@@ -136,13 +138,13 @@ class Enrichment(EnrichmentService):
                 `{variable1.id: 'SUM', variable3.id: 'AVG'}`.
 
         Returns:
-            A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` enriched with the variables passed as argument.
+            A geopandas.GeoDataFrame enriched with the variables passed as argument.
 
         Raises:
             EnrichmentError: if there is an error in the enrichment process.
 
         *Note that if the geometry of the `dataframe` you provide intersects with more than one geometry
-        in the enrichment dataset, the number of rows of the returned `CartoDataFrame` could be different
+        in the enrichment dataset, the number of rows of the returned `GeoDataFrame` could be different
         than the `dataframe` argument number of rows.*
 
         Examples:
@@ -151,34 +153,42 @@ class Enrichment(EnrichmentService):
             >>> df = pandas.read_csv('...')
             >>> variable = Catalog().country('usa').category('demographics').datasets[0].variables[0]
             >>> variables = [variable]
-            >>> cdf_enrich = Enrichment().enrich_polygons(df, variables)
+            >>> gdf_enrich = Enrichment().enrich_polygons(df, variables, geom_col='the_geom')
 
             Enrich a polygons dataframe with all Variables from a Catalog Dataset:
 
             >>> df = pandas.read_csv('...')
             >>> variables = Catalog().country('usa').category('demographics').datasets[0].variables
-            >>> cdf_enrich = Enrichment().enrich_polygons(df, variables)
+            >>> gdf_enrich = Enrichment().enrich_polygons(df, variables, geom_col='the_geom')
 
             Enrich a polygons dataframe with several Variables using their ids:
 
             >>> df = pandas.read_csv('...')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:2]
-            >>> cdf_enrich = Enrichment().enrich_polygons(df, variables)
+            >>> gdf_enrich = Enrichment().enrich_polygons(df, variables, geom_col='the_geom')
 
             Enrich a polygons dataframe with filters:
 
             >>> df = pandas.read_csv('...')
             >>> variable = Catalog().country('usa').category('demographics').datasets[0].variables[0]
             >>> filters = {variable.id: "= '2019-09-01'"}
-            >>> cdf_enrich = Enrichment().enrich_polygons(df, variables=[variable], filters=filters)
+            >>> gdf_enrich = Enrichment().enrich_polygons(
+            ...     df,
+            ...     variables=[variable],
+            ...     filters=filters,
+            ...     geom_col='the_geom')
 
             Enrich a polygons dataframe overwriting every variables aggregation method to use `SUM` function:
 
             >>> df = pandas.read_csv('...')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:3]
-            >>> cdf_enrich = Enrichment().enrich_polygons(df, variables, aggregation='SUM')
+            >>> gdf_enrich = Enrichment().enrich_polygons(
+            ...     df,
+            ...     variables,
+            ...     aggregation='SUM',
+            ...     geom_col='the_geom')
 
             Enrich a polygons dataframe overwriting some of the variables aggregation methods:
 
@@ -189,7 +199,11 @@ class Enrichment(EnrichmentService):
             ...     variable1.id: 'SUM',
             ...     variable3.id: 'AVG'
             >>> }
-            >>> cdf_enrich = Enrichment().enrich_polygons(df, variables, aggregation=aggregation)
+            >>> gdf_enrich = Enrichment().enrich_polygons(
+            ...     df,
+            ...     variables,
+            ...     aggregation=aggregation,
+            ...     geom_col='the_geom')
 
             Enrich a polygons dataframe without aggregating variables (because you want to it yourself, for example,
                 in case you want to use your custom function for aggregating the data):
@@ -197,26 +211,31 @@ class Enrichment(EnrichmentService):
             >>> df = pandas.read_csv('...')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:3]
-            >>> cdf_enrich = Enrichment().enrich_polygons(df, variables, aggregation=None)
+            >>> gdf_enrich = Enrichment().enrich_polygons(
+            ...     df,
+            ...     variables,
+            ...     aggregation=None,
+            ...     geom_col='the_geom')
 
             The next example uses filters to calculate the `SUM` of car-free households
             :obj:`Variable` of the :obj:`Catalog` for each polygon of `my_local_dataframe` pandas `DataFrame` only for
             areas with more than 100 car-free households:
 
             >>> variable = Variable.get('no_cars_d19dfd10')
-            >>> enriched_dataset_cdf = Enrichment().enrich_polygons(
+            >>> gdf_enrich = Enrichment().enrich_polygons(
             ...     my_local_dataframe,
             ...     variables=[variable],
-            ...     aggregation={variable.id: 'SUM'}
-            ...     filters={variable.id: '> 100'})
+            ...     aggregation={variable.id: 'SUM'},
+            ...     filters={variable.id: '> 100'},
+            ...     geom_col='the_geom')
 
         """
         variables = prepare_variables(variables, self.credentials, aggregation)
 
-        cartodataframe = self._prepare_data(dataframe, geom_col)
+        geodataframe = self._prepare_data(dataframe, geom_col)
         temp_table_name = self._get_temp_table_name()
 
-        self._upload_data(temp_table_name, cartodataframe)
+        self._upload_data(temp_table_name, geodataframe)
 
         queries = self._get_polygon_enrichment_sql(temp_table_name, variables, filters, aggregation)
-        return self._execute_enrichment(queries, cartodataframe)
+        return self._execute_enrichment(queries, geodataframe)
