@@ -1,7 +1,7 @@
 from .service import Service
 from ...utils.logger import log
 from ...utils.geom_utils import set_geometry, has_geometry
-from ...core.managers.source_manager import SourceManager
+from ...utils.managers.source_manager import SourceManager
 from ...io.carto import read_carto, to_carto, delete_table
 
 QUOTA_SERVICE = 'isolines'

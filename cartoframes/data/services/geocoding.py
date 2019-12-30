@@ -7,7 +7,7 @@ from .utils import geocoding_utils
 from .utils import geocoding_constants
 from .utils import TableGeocodingLock
 from ...utils.logger import log
-from ...core.managers.source_manager import SourceManager
+from ...utils.managers.source_manager import SourceManager
 from ...io.carto import read_carto, to_carto, has_table, delete_table, rename_table, copy_table, create_table_from_query
 
 CARTO_INDEX_KEY = 'cartodb_id'

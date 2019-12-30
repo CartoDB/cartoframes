@@ -2,7 +2,7 @@ from pandas import DataFrame
 from geopandas import GeoDataFrame
 
 from .context_manager import ContextManager
-from ...utils.utils import is_sql_query
+from ..utils import is_sql_query
 
 
 class SourceManager:

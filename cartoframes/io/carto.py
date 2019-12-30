@@ -5,7 +5,7 @@ from geopandas import GeoDataFrame
 
 from carto.exceptions import CartoException
 
-from ..core.managers.context_manager import ContextManager
+from ..utils.managers.context_manager import ContextManager
 from ..utils.geom_utils import set_geometry, has_geometry
 from ..utils.logger import log
 from ..utils.utils import is_valid_str, is_sql_query

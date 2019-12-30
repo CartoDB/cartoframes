@@ -7,9 +7,9 @@ from warnings import warn
 from pandas import DataFrame
 from carto.exceptions import CartoException
 
-from ...core.managers.context_manager import ContextManager
 from ...io.carto import read_carto, to_carto
 from ...utils import utils
+from ...utils.managers.context_manager import ContextManager
 
 
 class DataObsClient:
