@@ -1,5 +1,4 @@
 from .enrichment_service import EnrichmentService, prepare_variables, AGGREGATION_DEFAULT
-from ....utils.utils import timelogger
 
 
 class Enrichment(EnrichmentService):
@@ -86,7 +85,6 @@ class Enrichment(EnrichmentService):
         queries = self._get_points_enrichment_sql(temp_table_name, variables, filters)
         return self._execute_enrichment(queries, cartodataframe)
 
-    @timelogger
     def enrich_polygons(self, dataframe, variables, geom_col=None, filters={}, aggregation=AGGREGATION_DEFAULT):
         """Enrich your polygons `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset` in
         the Data Observatory by intersecting the polygons in the source `DataFrame` with geographies in the
