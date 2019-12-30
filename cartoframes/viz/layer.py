@@ -21,8 +21,7 @@ class Layer:
         :py:class:`Map <cartoframes.viz.Map>` if only visualizing data as a single layer.
 
     Args:
-        source (str, pandas.DataFrame, geopandas.GeoDataFrame,
-            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): The source data:
+        source (str, pandas.DataFrame, geopandas.GeoDataFrame): The source data:
             table name, SQL query or a dataframe.
         style (dict, or :py:class:`Style <cartoframes.viz.style.Style>`, optional):
             The style of the visualization.
