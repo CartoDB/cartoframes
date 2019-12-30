@@ -34,7 +34,7 @@ LEGEND_PROPERTIES = [
     'stroke-width'
 ]
 
-REPLACE_PROPERTY_TYPE = {
+VIZ_PROPERTIES_MAP = {
     'color': 'color',
     'stroke-color': 'strokeColor',
     'size': 'width',

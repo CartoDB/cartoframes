@@ -52,7 +52,7 @@ class Legend():
 
         self._check_prop(_prop)
 
-        return constants.REPLACE_PROPERTY_TYPE.get(_prop)
+        return constants.VIZ_PROPERTIES_MAP.get(_prop)
 
     def _check_type(self, _type):
         if _type and _type not in constants.LEGEND_TYPES:

@@ -53,7 +53,7 @@ class Widget():
         if not prop:
             return ''
 
-        return constants.REPLACE_PROPERTY_TYPE.get(prop)
+        return constants.VIZ_PROPERTIES_MAP.get(prop)
 
     def has_bridge(self):
         return self._type not in ('formula', 'default')

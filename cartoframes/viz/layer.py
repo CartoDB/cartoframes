@@ -18,6 +18,9 @@ class Layer:
     layers in :py:class:`Map <cartoframes.viz.Map>` or on its own in a Jupyter
     notebook to get a preview of a Layer.
 
+    Note: in a Jupyter notebook, it is not required to explicitly add a Layer to a
+        :py:class:`Map <cartoframes.viz.Map>` if only visualizing data as a single layer.
+
     Args:
         source (str, pandas.DataFrame, geopandas.GeoDataFrame,
             :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): The source data:
@@ -47,28 +50,32 @@ class Layer:
             calculated to fit all features.
         geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
 
-
     Example:
 
-        Create a layer with a custom popup, legend, and widget.
+        Create a layer with the defaults (style, legend).
 
-        .. code::
-            # FIXME
+        >>> Layer('table_name')  # or Layer(gdf)
+
+        Create a layer with a custom style, legend, widget and popups.
+
+        >>> Layer(
+        ...     'table_name',
+        ...     style=color_bins_style('column_name'),
+        ...     legends=color_bins_legend(title='Legend title'),
+        ...     widgets=histogram_widget('column_name', title='Widget title'),
+        ...     click_popup=popup_element('column_name', title='Popup title')
+        ...     hover_popup=popup_element('column_name', title='Popup title')
+        >>> )
 
         Create a layer specifically tied to a :py:class:`Credentials
-        <cartoframes.auth.Credentials>` and display it on a map.
+        <cartoframes.auth.Credentials>`.
 
-        .. code::
-            # FIXME
+        >>> Layer(
+        ...     'table_name',
+        ...     credentials=Credentials.from_file('creds.json')
+        >>> )
 
-        Preview a layer in a Jupyter notebook. Note: if in a Jupyter notebook,
-        it is not required to explicitly add a Layer to a :py:class:`Map
-        <cartoframes.viz.Map>` if only visualizing data as a single layer.
-
-        .. code::
-            #FIXME
     """
-
     def __init__(self,
                  source,
                  style=None,
@@ -108,36 +115,27 @@ class Layer:
     def _init_legends(self, legends):
         if legends is True:
             return _set_legends(self.style.default_legends)
-
         if legends:
             return _set_legends(legends)
-
         return LegendList()
 
     def _init_widgets(self, widgets):
         if widgets is True:
             return _set_widgets(self.style.default_widgets)
-
         if widgets:
             return _set_widgets(widgets)
-
         return WidgetList()
 
     def _init_popups(self, click_popup, hover_popup):
         popups = {}
-
         if click_popup is True and self.style.default_popups is not None:
             click_popup = self.style.default_popups.get('click')
-
         if hover_popup is True and self.style.default_popups is not None:
             hover_popup = self.style.default_popups.get('hover')
-
         if click_popup:
             popups['click'] = click_popup
-
         if hover_popup:
             popups['hover'] = hover_popup
-
         return _set_popups(popups)
 
     def _repr_html_(self):
@@ -146,7 +144,6 @@ class Layer:
 
 
 def _set_source(source, credentials, geom_col):
-    """Set a Source class from the input"""
     if isinstance(source, (str, pandas.DataFrame)):
         return Source(source, credentials, geom_col)
     elif isinstance(source, Source):
@@ -156,7 +153,6 @@ def _set_source(source, credentials, geom_col):
 
 
 def _set_style(style):
-    """Set a Style class from the input"""
     if isinstance(style, str):
         # Only for testing purposes
         return Style(data=style)
@@ -166,15 +162,6 @@ def _set_style(style):
         return style
     else:
         return Style()
-
-
-def _set_popups(popups):
-    """Set a Popup class from the input"""
-
-    if isinstance(popups, (dict, Popup)):
-        return PopupList(popups)
-    else:
-        return PopupList()
 
 
 def _set_legends(legends):
@@ -197,3 +184,10 @@ def _set_widgets(widgets):
         return widgets
     else:
         return WidgetList()
+
+
+def _set_popups(popups):
+    if isinstance(popups, (dict, Popup)):
+        return PopupList(popups)
+    else:
+        return PopupList()

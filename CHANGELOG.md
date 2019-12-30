@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add legend helpers (#1345)
 - Add style helpers (#1345)
 
+### Removed
+- Remove default_legend param in Map
+
 ## [1.0b7] - 2019-12-13
 ### Added
 - Add logger (#1328)
