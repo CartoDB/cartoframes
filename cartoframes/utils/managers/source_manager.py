@@ -3,6 +3,7 @@ from geopandas import GeoDataFrame
 
 from .context_manager import ContextManager
 from ..utils import is_sql_query
+from ..geom_utils import has_geometry
 
 
 class SourceManager:
@@ -18,6 +19,8 @@ class SourceManager:
             # DataFrame, GeoDataFrame
             self._remote_data = False
             self._gdf = GeoDataFrame(source, copy=True)
+            if has_geometry(source):
+                self._gdf.set_geometry(source.geometry.name, inplace=True)
         else:
             raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 

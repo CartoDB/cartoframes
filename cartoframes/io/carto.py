@@ -94,6 +94,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     gdf = GeoDataFrame(dataframe, copy=True)
 
+    if has_geometry(dataframe):
+        gdf.set_geometry(dataframe.geometry.name, inplace=True)
+
     if index:
         index_name = index_label or gdf.index.name
         if index_name is not None and index_name != '':

@@ -73,6 +73,9 @@ class EnrichmentService(object):
     def _prepare_data(self, dataframe, geom_col):
         geodataframe = GeoDataFrame(dataframe, copy=True)
 
+        if has_geometry(dataframe):
+            geodataframe.set_geometry(dataframe.geometry.name, inplace=True)
+
         if geom_col in geodataframe:
             set_geometry(geodataframe, geom_col, inplace=True)
 

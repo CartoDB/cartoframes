@@ -107,7 +107,7 @@ def has_geometry(gdf):
         - `set_geometry`: to create a decoded geometry column from any raw geometry column.
         - `set_geometry_from_xy`: to create a geometry column from `longitude` and `latitude` columns.
     """
-    return gdf._geometry_column_name in gdf
+    return hasattr(gdf, '_geometry_column_name') and gdf._geometry_column_name in gdf
 
 
 def decode_geometry(geom_col):

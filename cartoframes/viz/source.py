@@ -63,6 +63,9 @@ class Source:
             self.type = SourceType.GEOJSON
             self.gdf = GeoDataFrame(source, copy=True)
 
+            if has_geometry(source):
+                self.gdf.set_geometry(source.geometry.name, inplace=True)
+
             if geom_col in self.gdf:
                 set_geometry(self.gdf, geom_col, inplace=True)
 
