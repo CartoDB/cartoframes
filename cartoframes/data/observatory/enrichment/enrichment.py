@@ -57,20 +57,20 @@ class Enrichment(EnrichmentService):
         Examples:
             Enrich a points `DataFrame` with Catalog classes:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> cdf_enrich = Enrichment().enrich_points(df, variables)
 
             Enrich a points dataframe with several Variables using their ids:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:2]
             >>> cdf_enrich = Enrichment().enrich_points(df, variables)
 
             Enrich a points dataframe with filters:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> variable = Catalog().country('usa').category('demographics').datasets[0].variables[0]
             >>> filters = {variable.id: "= '2019-09-01'"}
             >>> cdf_enrich = Enrichment().enrich_points(df, variables=[variable], filters=filters)
@@ -146,41 +146,41 @@ class Enrichment(EnrichmentService):
         Examples:
             Enrich a polygons dataframe with one Variable:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> variable = Catalog().country('usa').category('demographics').datasets[0].variables[0]
             >>> variables = [variable]
             >>> cdf_enrich = Enrichment().enrich_polygons(df, variables)
 
             Enrich a polygons dataframe with all Variables from a Catalog Dataset:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> cdf_enrich = Enrichment().enrich_polygons(df, variables)
 
             Enrich a polygons dataframe with several Variables using their ids:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:2]
             >>> cdf_enrich = Enrichment().enrich_polygons(df, variables)
 
             Enrich a polygons dataframe with filters:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> variable = Catalog().country('usa').category('demographics').datasets[0].variables[0]
             >>> filters = {variable.id: "= '2019-09-01'"}
             >>> cdf_enrich = Enrichment().enrich_polygons(df, variables=[variable], filters=filters)
 
             Enrich a polygons dataframe overwriting every variables aggregation method to use `SUM` function:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:3]
             >>> cdf_enrich = Enrichment().enrich_polygons(df, variables, aggregation='SUM')
 
             Enrich a polygons dataframe overwriting some of the variables aggregation methods:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:3]
             >>> aggregation = {
@@ -192,7 +192,7 @@ class Enrichment(EnrichmentService):
             Enrich a polygons dataframe without aggregating variables (because you want to it yourself, for example,
                 in case you want to use your custom function for aggregating the data):
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:3]
             >>> cdf_enrich = Enrichment().enrich_polygons(df, variables, aggregation=None)

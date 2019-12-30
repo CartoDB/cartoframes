@@ -1,6 +1,6 @@
 from cartoframes.auth import Credentials
 
-from .constants import COUNTRY_FILTER, CATEGORY_FILTER
+from .constants import COUNTRY_FILTER, CATEGORY_FILTER, PROVIDER_FILTER
 from .entity_repo import EntityRepository
 
 from .....io.carto import read_carto
@@ -8,7 +8,7 @@ from .....io.carto import read_carto
 
 _GEOGRAPHY_ID_FIELD = 'id'
 _GEOGRAPHY_SLUG_FIELD = 'slug'
-_ALLOWED_FILTERS = [COUNTRY_FILTER, CATEGORY_FILTER]
+_ALLOWED_FILTERS = [COUNTRY_FILTER, CATEGORY_FILTER, PROVIDER_FILTER]
 
 _DO_CREDENTIALS = Credentials('do-metadata', 'default_public')
 
