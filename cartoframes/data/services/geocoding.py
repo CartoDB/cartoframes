@@ -58,10 +58,10 @@ class Geocoding(Service):
                 status=geocoding_constants.DEFAULT_STATUS,
                 table_name=None, if_exists='fail',
                 dry_run=False, cached=None):
-        """Geocode method
+        """Geocode method.
 
         Args:
-            source (str, DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
+            source (str, pandas.DataFrame, geopandas.GeoDataFrame):
                 table, SQL query or DataFrame object to be geocoded.
             street (str): name of the column containing postal addresses
             city (dict, optional): dictionary with either a `column` key
@@ -94,8 +94,8 @@ class Geocoding(Service):
                 check the needed quota)
 
         Returns:
-            A named-tuple ``(data, metadata)`` containing  either a ``data`` :py:class:`CartoDataFrame
-            <cartoframes.CartoDataFrame>` and a ``metadata`` dictionary with global information about
+            A named-tuple ``(data, metadata)`` containing  either a ``data`` geopandas.GeoDataFrame
+            and a ``metadata`` dictionary with global information about
             the geocoding process.
 
             The ``data`` contains a ``geometry`` column with point locations for the geocoded addresses
@@ -128,39 +128,39 @@ class Geocoding(Service):
             Geocode a DataFrame:
 
             >>> df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
-            >>> geocoded_cdf, metadata = Geocoding().geocode(
+            >>> geocoded_gdf, metadata = Geocoding().geocode(
             ...     df, street='address', city='city', country={'value': 'Spain'})
-            >>> geocoded_cdf.head()
+            >>> geocoded_gdf.head()
 
             Geocode a table from CARTO:
 
-            >>> cdf = CartoDataFrame.from_carto('table_name')
-            >>> geocoded_cdf, metadata = Geocoding().geocode(cdf, street='address')
-            >>> geocoded_cdf.head()
+            >>> gdf = read_carto('table_name')
+            >>> geocoded_gdf, metadata = Geocoding().geocode(gdf, street='address')
+            >>> geocoded_gdf.head()
 
             Geocode a query against a table from CARTO:
 
-            >>> cdf = CartoDataFrame.from_carto('SELECT * FROM table_name WHERE value > 1000')
-            >>> geocoded_cdf, metadata = Geocoding().geocode(cdf, street='address')
-            >>> geocoded_cdf.head()
+            >>> gdf = read_carto('SELECT * FROM table_name WHERE value > 1000')
+            >>> geocoded_gdf, metadata = Geocoding().geocode(gdf, street='address')
+            >>> geocoded_gdf.head()
 
             Obtain the number of credits needed to geocode a CARTO table:
 
-            >>> cdf = CartoDataFrame.from_carto('table_name')
-            >>> geocoded_cdf, metadata = Geocoding().geocode(cdf, street='address', dry_run=True)
+            >>> gdf = read_carto('table_name')
+            >>> geocoded_gdf, metadata = Geocoding().geocode(gdf, street='address', dry_run=True)
             >>> print(metadata['required_quota'])
 
             Filter results by relevance:
 
             >>> df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
-            >>> geocoded_cdf, metadata = Geocoding().geocode(
+            >>> geocoded_gdf, metadata = Geocoding().geocode(
             ...     df,
             ...     street='address',
             ...     city='city',
             ...     country={'value': 'Spain'},
             ...     status=['relevance'])
             >>> # show rows with relevance greater than 0.7:
-            >>> print(geocoded_cdf[geocoded_cdf['carto_geocode_relevance'] > 0.7, axis=1)])
+            >>> print(geocoded_gdf[geocoded_gdf['carto_geocode_relevance'] > 0.7, axis=1)])
         """
 
         self._source_manager = SourceManager(source, self._credentials)
@@ -184,15 +184,15 @@ class Geocoding(Service):
         if dry_run:
             return self.result(data=None, metadata=metadata)
 
-        cdf = read_carto(input_table_name, self._credentials)
+        gdf = read_carto(input_table_name, self._credentials)
 
-        if self._source_manager.is_dataframe() and CARTO_INDEX_KEY in cdf:
-            del cdf[CARTO_INDEX_KEY]
+        if self._source_manager.is_dataframe() and CARTO_INDEX_KEY in gdf:
+            del gdf[CARTO_INDEX_KEY]
 
         if is_temporary:
             delete_table(input_table_name, self._credentials, log_enabled=False)
 
-        result = self.result(data=cdf, metadata=metadata)
+        result = self.result(data=gdf, metadata=metadata)
 
         log.info('Success! Data geocoded correctly')
 
@@ -257,9 +257,9 @@ class Geocoding(Service):
         # TODO: refactor to share code with geocode() and call self._geocode() here instead
         # actually to keep hashing knowledge encapsulated (AFW) this should be handled by
         # _geocode using an additional parameter for an input table
-        cdf, metadata = self.geocode(table_name, street=street, city=city,
+        gdf, metadata = self.geocode(table_name, street=street, city=city,
                                      state=state, country=country, dry_run=dry_run)
-        return self.result(data=cdf, metadata=metadata)
+        return self.result(data=gdf, metadata=metadata)
 
     def _table_for_geocoding(self, source, table_name, if_exists, dry_run):
         is_temporary = False

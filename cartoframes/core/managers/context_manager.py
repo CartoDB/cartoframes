@@ -43,10 +43,10 @@ class ContextManager:
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
-    def copy_from(self, cdf, table_name, if_exists='fail', cartodbfy=True):
+    def copy_from(self, gdf, table_name, if_exists='fail', cartodbfy=True):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
-        columns = get_dataframe_columns_info(cdf)
+        columns = get_dataframe_columns_info(gdf)
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
             log.debug('Creating table "{}"'.format(table_name))
@@ -59,7 +59,7 @@ class ContextManager:
         else:  # 'append'
             pass
 
-        self._copy_from(cdf, table_name, columns)
+        self._copy_from(gdf, table_name, columns)
         return table_name
 
     def create_table_from_query(self, query, table_name, if_exists, cartodbfy=True):
