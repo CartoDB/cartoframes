@@ -4,6 +4,7 @@ from .layout import Layout
 
 from .themes import Themes as themes
 from .basemaps import Basemaps as basemaps
+from .defaults import COLOR_PALETTES as palettes
 
 from .styles import animation_style
 from .styles import basic_style
@@ -32,7 +33,6 @@ from .widgets import time_series_widget
 
 from .popups import popup_element
 
-from .defaults import COLOR_PALETTES as palettes
 
 __all__ = [
     'Map',

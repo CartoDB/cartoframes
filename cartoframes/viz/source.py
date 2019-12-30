@@ -10,71 +10,41 @@ class SourceType:
     GEOJSON = 'GeoJSON'
 
 
-class Source(object):
+class Source:
     """Source
 
     Args:
         data (str, pandas.DataFrame, geopandas.GeoDataFrame,
-          :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` ): a table name,
-          SQL query, DataFrame, GeoDataFrame or CartoDataFrame instance.
+            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` ): a table name,
+            SQL query, DataFrame, GeoDataFrame or CartoDataFrame instance.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-          A Credentials instance. If not provided, the credentials will be automatically
-          obtained from the default credentials if available.
+            A Credentials instance. If not provided, the credentials will be automatically
+            obtained from the default credentials if available.
         bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
-          keys, or an array of floats in the following structure: [[west,
-          south], [east, north]]. If not provided the bounds will be automatically
-          calculated to fit all features.
+            keys, or an array of floats in the following structure: [[west,
+            south], [east, north]]. If not provided the bounds will be automatically
+            calculated to fit all features.
         geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
 
     Example:
 
         Table name.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Source
-
-            set_default_credentials('your_user_name', 'your api key')
-
-            Source('table_name')
+        >>> Source('table_name')
 
         SQL query.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Source
-
-            set_default_credentials('your_user_name', 'your api key')
-
-            Source('SELECT * FROM table_name')
+        >>> Source('SELECT * FROM table_name')
 
         CartoDataFrame object.
 
-        .. code::
-
-            from cartoframes.viz import Source
-            from cartoframes import CartoDataFrame
-
-            set_default_credentials('your_user_name', 'your api key')
-
-            cdf = CartoDataFrame.from_carto('table_name')
-
-            Source(cdf)
+        >>> Source(cdf)
 
         Setting the credentials.
 
-        .. code::
+        >>> Source('table_name', credentials)
 
-            from cartoframes.auth import Credentials
-            from cartoframes.viz import Source
-
-            credentials = Credentials('your_user_name', 'your api key')
-
-            Source('table_name', credentials)
     """
-
     def __init__(self, source, credentials=None, geom_col=None):
         self.credentials = None
 

@@ -21,4 +21,4 @@ def basic_widget(title='', description='', footer=''):
         ...     footer='Widget footer')
 
     """
-    return Widget('default', None, title, description, footer)
+    return Widget('default', '', title, description, footer)

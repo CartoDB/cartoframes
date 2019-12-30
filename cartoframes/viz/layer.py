@@ -1,6 +1,5 @@
 import pandas
 
-from ..utils.utils import merge_dicts
 from .legend import Legend
 from .legend_list import LegendList
 from .popup import Popup
@@ -10,7 +9,7 @@ from .style import Style
 from .widget import Widget
 from .widget_list import WidgetList
 
-from ..utils.utils import extract_viz_columns
+from ..utils.utils import merge_dicts, extract_viz_columns
 
 
 class Layer:
@@ -50,8 +49,11 @@ class Layer:
             calculated to fit all features.
         geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
 
-    Example:
 
+    Raises:
+        ValueError: if the source is not valid.
+
+    Examples:
         Create a layer with the defaults (style, legend).
 
         >>> Layer('table_name')  # or Layer(gdf)
@@ -64,16 +66,14 @@ class Layer:
         ...     legends=color_bins_legend(title='Legend title'),
         ...     widgets=histogram_widget('column_name', title='Widget title'),
         ...     click_popup=popup_element('column_name', title='Popup title')
-        ...     hover_popup=popup_element('column_name', title='Popup title')
-        >>> )
+        ...     hover_popup=popup_element('column_name', title='Popup title'))
 
         Create a layer specifically tied to a :py:class:`Credentials
         <cartoframes.auth.Credentials>`.
 
         >>> Layer(
         ...     'table_name',
-        ...     credentials=Credentials.from_file('creds.json')
-        >>> )
+        ...     credentials=Credentials.from_file('creds.json'))
 
     """
     def __init__(self,
@@ -149,7 +149,7 @@ def _set_source(source, credentials, geom_col):
     elif isinstance(source, Source):
         return source
     else:
-        raise ValueError('Wrong source')
+        raise ValueError('Wrong source. Valid sources are string, DataFrame or GeoDataFrame.')
 
 
 def _set_style(style):

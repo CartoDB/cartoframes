@@ -14,7 +14,7 @@ filterwarnings("ignore", category=FutureWarning, module="carto")
 DEFAULT_PUBLIC = 'default_public'
 
 
-class KuvizPublisher(object):
+class KuvizPublisher:
     def __init__(self, credentials=None):
         self.kuviz = None
         self._maps_api_key = DEFAULT_PUBLIC

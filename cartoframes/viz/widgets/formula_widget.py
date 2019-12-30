@@ -38,13 +38,14 @@ def formula_widget(value, title='', description='', footer='', operation=None, i
         ...     footer='Widget footer')
 
     """
-    operation = operation.lower()
+    if isinstance(operation, str):
+        operation = operation.lower()
     value = _get_value_expression(operation, value, is_global)
     return Widget('formula', value, title, description, footer)
 
 
 def _get_value_expression(operation, value, is_global):
-    if operation == 'count':
+    if value == 'count':
         formula_operation = _get_formula_operation(value, is_global)
         return formula_operation + '()'
     elif operation in ['avg', 'max', 'min', 'sum']:

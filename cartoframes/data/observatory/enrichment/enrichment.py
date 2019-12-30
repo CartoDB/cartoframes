@@ -208,8 +208,7 @@ class Enrichment(EnrichmentService):
             ...     my_local_dataframe,
             ...     variables=[variable],
             ...     aggregation={variable.id: 'SUM'}
-            ...     filters={variable.id: '> 100'}
-            >>> )
+            ...     filters={variable.id: '> 100'})
 
         """
         variables = prepare_variables(variables, self.credentials, aggregation)
