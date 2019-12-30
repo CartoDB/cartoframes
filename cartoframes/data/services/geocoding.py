@@ -278,7 +278,7 @@ class Geocoding(Service):
         if self._source_manager.is_table():
             raise ValueError('cached geocoding cannot be used with tables')
 
-        to_carto(source, tmp_table_name, self._credentials, force_cartodbfy=True, log_enabled=False)
+        to_carto(source, tmp_table_name, self._credentials, log_enabled=False)
 
         self._execute_query(
             """
@@ -334,7 +334,7 @@ class Geocoding(Service):
             if not input_table_name:
                 input_table_name = self._new_temporary_table_name()
                 is_temporary = True
-            to_carto(source, input_table_name, self._credentials, if_exists, force_cartodbfy=True, log_enabled=False)
+            to_carto(source, input_table_name, self._credentials, if_exists, log_enabled=False)
         return (input_table_name, is_temporary)
 
     # Note that this can be optimized for non in-place cases (table_name is not None), e.g.
