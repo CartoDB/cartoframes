@@ -316,7 +316,7 @@ class Enrichment(EnrichmentService):
 
                 catalog = Catalog()
                 all_variables = catalog.country('usa').category('demographics').datasets[0].variables
-                # aggregation methods can be overridden 
+                # aggregation methods can be overridden
                 variable1 = all_variables[0] # variable1.agg_method is 'AVG' but you want 'SUM'
                 variable2 = all_variables[1] # variable2.agg_method is 'AVG' and want to keep it that way
                 variable3 = all_variables[2] # variable3.agg_method is 'SUM' but you want 'AVG'
