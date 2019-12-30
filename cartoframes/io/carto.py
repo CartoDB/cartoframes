@@ -1,12 +1,13 @@
 """Functions to interact with the CARTO platform"""
 
-import pandas as pd
+from pandas import DataFrame
+from geopandas import GeoDataFrame
 
 from carto.exceptions import CartoException
 
-from ..utils.logger import log
-from ..core.cartodataframe import CartoDataFrame
 from ..core.managers.context_manager import ContextManager
+from ..utils.geom_utils import set_geometry, has_geometry
+from ..utils.logger import log
 from ..utils.utils import is_valid_str, is_sql_query
 
 
@@ -32,7 +33,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
         decode_geom (bool, optional): convert the "the_geom" column into a valid geometry column.
 
     Returns:
-        :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`
+        geopandas.GeoDataFrame
 
     Raises:
         ValueError: if the source is not a valid table_name or SQL query.
@@ -45,28 +46,27 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
     df = context_manager.copy_to(source, schema, limit, retry_times)
 
-    cdf = CartoDataFrame(df, crs='epsg:4326')
+    gdf = GeoDataFrame(df, crs='epsg:4326')
 
     if index_col:
-        if index_col in cdf:
-            cdf.set_index(index_col, inplace=True)
+        if index_col in gdf:
+            gdf.set_index(index_col, inplace=True)
         else:
-            cdf.index.name = index_col
+            gdf.index.name = index_col
 
-    if decode_geom and GEOM_COLUMN_NAME in cdf:
+    if decode_geom and GEOM_COLUMN_NAME in gdf:
         # Decode geometry column
-        cdf.set_geometry(GEOM_COLUMN_NAME, inplace=True)
+        set_geometry(gdf, GEOM_COLUMN_NAME, inplace=True)
 
-    return cdf
+    return gdf
 
 
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
              force_cartodbfy=False, log_enabled=True):
-    """Upload a Dataframe to CARTO.
+    """Upload a DataFrame to CARTO.
 
     Args:
-        dataframe (DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
-            data to be uploaded.
+        dataframe (pandas.DataFrame, geopandas.GeoDataFrame`): data to be uploaded.
         table_name (str): name of the table to upload the data.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
@@ -80,7 +80,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         ValueError: if the dataframe or table name provided are wrong or the if_exists param is not valid.
 
     """
-    if not isinstance(dataframe, pd.DataFrame):
+    if not isinstance(dataframe, DataFrame):
         raise ValueError('Wrong dataframe. You should provide a valid DataFrame instance.')
 
     if not is_valid_str(table_name):
@@ -92,28 +92,28 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     context_manager = ContextManager(credentials)
 
-    cdf = CartoDataFrame(dataframe, copy=True)
+    gdf = GeoDataFrame(dataframe, copy=True)
 
     if index:
-        index_name = index_label or cdf.index.name
+        index_name = index_label or gdf.index.name
         if index_name is not None and index_name != '':
             # Append the index as a column
-            cdf[index_name] = cdf.index
+            gdf[index_name] = gdf.index
         else:
             raise ValueError('Wrong index name. You should provide a valid index label.')
 
-    if geom_col in cdf:
+    if geom_col in gdf:
         # Decode geometry column
-        cdf.set_geometry(geom_col, inplace=True)
+        set_geometry(gdf, geom_col, inplace=True)
 
-    has_geometry = cdf.has_geometry()
-    if has_geometry:
+    gdf_has_geometry = has_geometry(gdf)
+    if gdf_has_geometry:
         # Prepare geometry column for the upload
-        cdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
+        gdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
 
-    cartodbfy = force_cartodbfy or has_geometry
+    cartodbfy = force_cartodbfy or gdf_has_geometry
 
-    table_name = context_manager.copy_from(cdf, table_name, if_exists, cartodbfy)
+    table_name = context_manager.copy_from(gdf, table_name, if_exists, cartodbfy)
 
     if log_enabled:
         log.info('Success! Data uploaded to table "{}" correctly'.format(table_name))

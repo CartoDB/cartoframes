@@ -1,7 +1,7 @@
 from pandas import DataFrame
+from geopandas import GeoDataFrame
 
 from .context_manager import ContextManager
-from ..cartodataframe import CartoDataFrame
 from ...utils.utils import is_sql_query
 
 
@@ -15,15 +15,15 @@ class SourceManager:
             self._context_manager = ContextManager(credentials)
             self._query = self._context_manager.compute_query(source)
         elif isinstance(source, DataFrame):
-            # DataFrame, GeoDataFrame, CartoDataFrame
+            # DataFrame, GeoDataFrame
             self._remote_data = False
-            self._cdf = CartoDataFrame(source, copy=True)
+            self._gdf = GeoDataFrame(source, copy=True)
         else:
             raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 
     @property
-    def cdf(self):
-        return self._cdf
+    def gdf(self):
+        return self._gdf
 
     def is_remote(self):
         return self._remote_data
@@ -48,10 +48,10 @@ class SourceManager:
         if self.is_remote():
             return self._context_manager.get_num_rows(self._query)
         else:
-            return len(self._cdf)
+            return len(self._gdf)
 
     def get_column_names(self):
         if self.is_remote():
             return self._context_manager.get_column_names(self._query)
         else:
-            return list(self._cdf.columns)
+            return list(self._gdf.columns)
