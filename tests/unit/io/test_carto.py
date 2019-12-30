@@ -4,9 +4,8 @@ from pandas import Index
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
 
-from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
-from cartoframes.core.managers.context_manager import ContextManager
+from cartoframes.utils.managers.context_manager import ContextManager
 from cartoframes.io.carto import read_carto, to_carto, copy_table, create_table_from_query
 
 
@@ -63,7 +62,7 @@ def test_read_carto_wrong_credentials(mocker):
 
 def test_read_carto_limit(mocker):
     # Given
-    mocker.patch.object(CartoDataFrame, 'set_geometry')
+    mocker.patch('cartoframes.utils.set_geometry')
     cm_mock = mocker.patch.object(ContextManager, 'copy_to')
 
     # When
@@ -75,7 +74,7 @@ def test_read_carto_limit(mocker):
 
 def test_read_carto_retry_times(mocker):
     # Given
-    mocker.patch.object(CartoDataFrame, 'set_geometry')
+    mocker.patch('cartoframes.utils.set_geometry')
     cm_mock = mocker.patch.object(ContextManager, 'copy_to')
 
     # When
@@ -87,7 +86,7 @@ def test_read_carto_retry_times(mocker):
 
 def test_read_carto_schema(mocker):
     # Given
-    mocker.patch.object(CartoDataFrame, 'set_geometry')
+    mocker.patch('cartoframes.utils.set_geometry')
     cm_mock = mocker.patch.object(ContextManager, 'copy_to')
 
     # When

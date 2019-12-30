@@ -1,12 +1,12 @@
 import pytest
-import pandas as pd
 
+from pandas import DataFrame
+from geopandas import GeoDataFrame
 from unittest.mock import Mock, patch
 from shapely.geometry.point import Point
 from shapely.geometry.polygon import Polygon
 from google.cloud import bigquery, storage
 
-from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory import Variable, Dataset
@@ -54,7 +54,7 @@ class TestEnrichmentService(object):
         geom_column = 'the_geom'
         enrichment_service = EnrichmentService(credentials=self.credentials)
         point = Point(1, 1)
-        df = pd.DataFrame(
+        df = DataFrame(
             [[1, point]],
             columns=['cartodb_id', geom_column])
 
@@ -69,10 +69,10 @@ class TestEnrichmentService(object):
         geom_column = 'the_geom'
         enrichment_service = EnrichmentService(credentials=self.credentials)
         point = Point(1, 1)
-        df = pd.DataFrame(
+        df = DataFrame(
             [[1, point]],
             columns=['cartodb_id', geom_column])
-        expected_cdf = CartoDataFrame(
+        expected_gdf = GeoDataFrame(
             [[1, point, 0, to_geojson(point)]],
             columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOM_COLUMN],
             geometry=geom_column
@@ -80,18 +80,18 @@ class TestEnrichmentService(object):
 
         result = enrichment_service._prepare_data(df, geom_column)
 
-        assert result.equals(expected_cdf)
+        assert result.equals(expected_gdf)
 
     def test_prepare_data_polygon_with_close_vertex(self):
         geom_column = 'the_geom'
         enrichment_service = EnrichmentService(credentials=self.credentials)
 
         polygon = Polygon([(10, 2), (1.12345688, 1), (1.12345677, 1), (10, 2)])
-        df = pd.DataFrame(
+        df = DataFrame(
             [[1, polygon]],
             columns=['cartodb_id', geom_column])
 
-        expected_cdf = CartoDataFrame(
+        expected_gdf = GeoDataFrame(
             [[1, polygon, 0, to_geojson(polygon)]],
             columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOM_COLUMN],
             geometry=geom_column
@@ -99,27 +99,27 @@ class TestEnrichmentService(object):
 
         result = enrichment_service._prepare_data(df, geom_column)
 
-        assert result.equals(expected_cdf)
+        assert result.equals(expected_gdf)
 
     def test_upload_data(self):
         geom_column = 'the_geom'
         user_dataset = 'test_dataset'
 
         point = Point(1, 1)
-        input_cdf = CartoDataFrame(
+        input_gdf = GeoDataFrame(
             [[1, point, 0, to_geojson(point)]],
             columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOM_COLUMN],
             geometry=geom_column
         )
 
         expected_schema = {_ENRICHMENT_ID: 'INTEGER', _GEOM_COLUMN: 'GEOGRAPHY'}
-        expected_cdf = CartoDataFrame(
+        expected_gdf = GeoDataFrame(
             [[0, to_geojson(point)]],
             columns=[_ENRICHMENT_ID, _GEOM_COLUMN])
 
         # mock
         def assert_upload_data(_, dataframe, schema, tablename):
-            assert dataframe.equals(expected_cdf)
+            assert dataframe.equals(expected_gdf)
             assert schema == expected_schema
             assert isinstance(tablename, str) and len(tablename) > 0
             assert tablename == user_dataset
@@ -127,7 +127,7 @@ class TestEnrichmentService(object):
         enrichment_service = EnrichmentService(credentials=self.credentials)
         original = BigQueryClient.upload_dataframe
         BigQueryClient.upload_dataframe = assert_upload_data
-        enrichment_service._upload_data(user_dataset, input_cdf)
+        enrichment_service._upload_data(user_dataset, input_gdf)
 
         BigQueryClient.upload_dataframe = original
 
@@ -136,23 +136,23 @@ class TestEnrichmentService(object):
         user_dataset = 'test_dataset'
 
         point = Point(1, 1)
-        input_cdf = CartoDataFrame(
+        input_gdf = GeoDataFrame(
             [[1, point, 0], [2, None, 1]],
             columns=['cartodb_id', geom_column, _ENRICHMENT_ID],
             geometry=geom_column
         )
 
         enrichment_service = EnrichmentService(credentials=self.credentials)
-        input_cdf = enrichment_service._prepare_data(input_cdf, geom_column)
+        input_gdf = enrichment_service._prepare_data(input_gdf, geom_column)
 
         expected_schema = {_ENRICHMENT_ID: 'INTEGER', _GEOM_COLUMN: 'GEOGRAPHY'}
-        expected_cdf = CartoDataFrame(
+        expected_gdf = GeoDataFrame(
             [[0, to_geojson(point)], [1, None]],
             columns=[_ENRICHMENT_ID, _GEOM_COLUMN])
 
         # mock
         def assert_upload_data(_, dataframe, schema, tablename):
-            assert dataframe.equals(expected_cdf)
+            assert dataframe.equals(expected_gdf)
             assert schema == expected_schema
             assert isinstance(tablename, str) and len(tablename) > 0
             assert tablename == user_dataset
@@ -160,17 +160,17 @@ class TestEnrichmentService(object):
         enrichment_service = EnrichmentService(credentials=self.credentials)
         original = BigQueryClient.upload_dataframe
         BigQueryClient.upload_dataframe = assert_upload_data
-        enrichment_service._upload_data(user_dataset, input_cdf)
+        enrichment_service._upload_data(user_dataset, input_gdf)
 
         BigQueryClient.upload_dataframe = original
 
     def test_execute_enrichment(self):
         geom_column = 'the_geom'
         point = Point(1, 1)
-        input_cdf = CartoDataFrame(
+        input_gdf = GeoDataFrame(
             [[point, 0, to_geojson(point)]],
             columns=[geom_column, _ENRICHMENT_ID, _GEOM_COLUMN])
-        expected_cdf = CartoDataFrame(
+        expected_gdf = GeoDataFrame(
             [[point, 'new data']],
             columns=[geom_column, 'var1'])
 
@@ -180,7 +180,7 @@ class TestEnrichmentService(object):
                 self.errors = None
 
             def to_dataframe(self):
-                return pd.DataFrame([[0, 'new data']], columns=[_ENRICHMENT_ID, 'var1'])
+                return DataFrame([[0, 'new data']], columns=[_ENRICHMENT_ID, 'var1'])
 
             def add_done_callback(self, callback):
                 return callback(self)
@@ -189,9 +189,9 @@ class TestEnrichmentService(object):
         BigQueryClient.query = Mock(return_value=JobMock())
         enrichment_service = EnrichmentService(credentials=self.credentials)
 
-        result = enrichment_service._execute_enrichment(['fake_query'], input_cdf)
+        result = enrichment_service._execute_enrichment(['fake_query'], input_gdf)
 
-        assert result.equals(expected_cdf)
+        assert result.equals(expected_gdf)
 
         BigQueryClient.query = original
 

@@ -1,7 +1,7 @@
 """Unit tests for cartoframes.client.SQLClient"""
 
 from cartoframes.auth import Credentials
-from cartoframes.core.managers.context_manager import ContextManager
+from cartoframes.utils.managers.context_manager import ContextManager
 from cartoframes.data.clients import SQLClient
 
 SQL_SELECT_RESPONSE = {
