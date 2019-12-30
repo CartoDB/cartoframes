@@ -28,11 +28,12 @@ def display_existing_subscription_message(entity_id, entity_type):
 
 def display_subscription_form(entity_id, entity_type, credentials):
     info = fetch_subscription_info(entity_id, entity_type, credentials)
+    instant_licensing = credentials.get_do_credentials().instant_licensing
 
     if is_ipython_notebook():
-        _display_subscription_form_notebook(entity_id, entity_type, info, credentials)
+        _display_subscription_form_notebook(entity_id, entity_type, info, instant_licensing, credentials)
     else:
-        _display_subscription_form_cli(entity_id, entity_type, info, credentials)
+        _display_subscription_form_cli(entity_id, entity_type, info, instant_licensing, credentials)
 
 
 def _display_existing_subscription_message_notebook(entity_id, entity_type):
@@ -49,8 +50,9 @@ def _display_existing_subscription_message_cli(entity_id, entity_type):
     print(message)
 
 
-def _display_subscription_form_notebook(entity_id, entity_type, info, credentials):
-    if info.get('estimated_delivery_days') == 0:
+def _display_subscription_form_notebook(entity_id, entity_type, info, instant_licensing, credentials):
+    delivery_days = info.get('estimated_delivery_days')
+    if instant_licensing and delivery_days == 0:
         delivery_message = '''
         This {type} is available for Instant Subscription for your organization,
         so it will automatically process the order and you will get immediate access to the {type}.
@@ -59,7 +61,7 @@ def _display_subscription_form_notebook(entity_id, entity_type, info, credential
         delivery_message = '''
         This {type} will be available in your account in about {days} days.
         We will contact you shortly to complete the subscription details.
-        '''.format(type=entity_type, days=info.get('estimated_delivery_days'))
+        '''.format(type=entity_type, days=delivery_days)
 
     message = '''
     <h3>Subscription contract</h3>
@@ -128,8 +130,9 @@ def _create_notebook_form(entity_id, entity_type, message, responses, credential
     return (text, buttons)
 
 
-def _display_subscription_form_cli(entity_id, entity_type, info, credentials):
-    if info.get('estimated_delivery_days') == 0:
+def _display_subscription_form_cli(entity_id, entity_type, info, instant_licensing, credentials):
+    delivery_days = info.get('estimated_delivery_days')
+    if instant_licensing and delivery_days == 0:
         delivery_message = (
             'This {type} is available for Instant Subscription for your organization, '
             'so it will automatically process the order and you will get immediate access to the {type}.'
@@ -138,7 +141,7 @@ def _display_subscription_form_cli(entity_id, entity_type, info, credentials):
         delivery_message = (
             'This {type} will be available in your account in about {days} days. '
             'We will contact you shortly to complete the subscription details.'
-        ).format(type=entity_type, days=info.get('estimated_delivery_days'))
+        ).format(type=entity_type, days=delivery_days)
 
     message = (
         'Subscription contract:\n'

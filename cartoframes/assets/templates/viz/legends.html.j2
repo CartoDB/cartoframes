@@ -3,19 +3,11 @@
 {%- endmacro %}
 
 <div class="as-panel__element" id="legends">
-  {% if default_legend and title %}
-    <as-legend
-      id="default-legend-container"
-      heading="{{ title }}"
-      description="{{ description or '' }}">
-    </as-legend>
-  {% endif %}
-
   {% for layer in layers|reverse %}
-    {% if layer.legend %}
+    {% if layer.legends %}
     {% set layer_index = loop.index0 %}
       {% if layer.has_legend_list %}
-        {% for legend in layer.legend %}
+        {% for legend in layer.legends %}
           <as-legend
             heading="{{legend.title}}"
             description="{{legend.description}}">
@@ -27,11 +19,11 @@
         {% endfor %}
       {% else %}
         <as-legend
-          heading="{{layer.legend.title}}"
-          description="{{layer.legend.description}}">
-          {{ createLegend(layer.legend, 'layer%d_map%d_legend%d' | format(layer_index, 0, 0)) }}
-          {% if layer.legend.footer %}
-            <span slot="footer">{{layer.legend.footer}}</span>
+          heading="{{layer.legends.title}}"
+          description="{{layer.legends.description}}">
+          {{ createLegend(layer.legends, 'layer%d_map%d_legend%d' | format(layer_index, 0, 0)) }}
+          {% if layer.legends.footer %}
+            <span slot="footer">{{layer.legends.footer}}</span>
           {% endif %}
         </as-legend>
       {% endif %}

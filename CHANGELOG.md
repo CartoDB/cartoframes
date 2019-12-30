@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Next
+[Migration Docs](/docs/developers/migrations/rc1.md)
+
+### Changed
+- Remove `popup` parameter and add `hover_popup` and `click_popup` in Layer (#1348)
+- Add `popup_element` helpers (#1348)
+- Refactor Widgets API (#1349)
+- Add widget helpers (#1349)
+- Refactor Legends API (#1347)
+- Add legend helpers (#1345)
+- Add style helpers (#1345)
+
+### Removed
+- Remove default_legend param in Map
+
 ## [1.0b7] - 2019-12-13
 ### Added
 - Add logger (#1328)

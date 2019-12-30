@@ -1,10 +1,10 @@
 import { format } from './utils';
 
-export function createLegend(layer, legendData, layerIndex, mapIndex=0) {
-  if (legendData.length) {
-    legendData.forEach((legend, legendIndex) => _createLegend(layer, legend, layerIndex, legendIndex, mapIndex));
+export function createLegends(layer, legends, layerIndex, mapIndex=0) {
+  if (legends.length) {
+    legends.forEach((legend, legendIndex) => _createLegend(layer, legend, layerIndex, legendIndex, mapIndex));
   } else {
-    _createLegend(layer, legendData, layerIndex, 0, mapIndex);
+    _createLegend(layer, legends, layerIndex, 0, mapIndex);
   }
 }
 
@@ -22,7 +22,7 @@ function _createLegend(layer, legend, layerIndex, legendIndex, mapIndex=0) {
     if (legend.type.startsWith('size-continuous')) {
       config.samples = 4;
     }
-    
+
     AsBridge.VL.Legends.rampLegend(element, layer, prop, options);
   } else {
     // TODO: we don't have a bridge for this case, should this even be a case?

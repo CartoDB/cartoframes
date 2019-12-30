@@ -370,8 +370,8 @@ class Dataset(CatalogEntity):
         return join_gdf['id'].unique()
 
     @check_do_enabled
-    def download(self, file_path, credentials=None):
-        """Download dataset data as a local file. You need Data Observatory enabled in your CARTO
+    def to_csv(self, file_path, credentials=None):
+        """Download dataset data as a local csv file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
         For premium datasets (those with `is_public_data` set to False), you need a subscription to the dataset.
@@ -384,8 +384,33 @@ class Dataset(CatalogEntity):
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
 
+        :raises CartoException: If you have not a valid license for the dataset being downloaded.
+        :raises ValueError: If the credentials argument is not valid.
+        """
+        _credentials = get_credentials(credentials)
+
+        if not self._is_subscribed(_credentials):
+            raise Exception('You are not subscribed to this Dataset yet. '
+                            'Please, use the subscribe method first.')
+
+        self._download(_credentials, file_path)
+
+    @check_do_enabled
+    def to_dataframe(self, credentials=None):
+        """Download dataset data as a pandas.DataFrame. You need Data Observatory enabled in your CARTO
+        account, please contact us at support@carto.com for more information.
+
+        For premium datasets (those with `is_public_data` set to False), you need a subscription to the dataset.
+        Check the subscription guides for more information.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+
         Returns:
-            os.path with the local file path with the file downloaded
+            pandas.DataFrame
 
         Raises:
             Exception: if you have not a valid license for the dataset being downloaded or DO is not enabled.
@@ -398,7 +423,7 @@ class Dataset(CatalogEntity):
             raise Exception('You are not subscribed to this Dataset yet. '
                             'Please, use the subscribe method first.')
 
-        self._download(file_path, _credentials)
+        return self._download(_credentials)
 
     @check_do_enabled
     def subscribe(self, credentials=None):
@@ -412,8 +437,9 @@ class Dataset(CatalogEntity):
         See :py:meth:`subscription_info <cartoframes.data.observatory.Dataset.subscription_info>` for more
         info
 
-        Once you subscribe to a dataset, you can :py:attr:`Dataset.download` its data and use the
-        :obj:`Enrichment` functions. See the enrichment guides for more info.
+        Once you subscribe to a dataset, you can download its data by :py:attr:`Dataset.to_csv` or
+        :py:attr:`Dataset.to_dataframe` and use the :obj:`Enrichment` functions.
+        See the enrichment guides for more info.
 
         You can check the status of your subscriptions by calling the
         :py:meth:`subscriptions <cartoframes.data.observatory.Catalog.subscriptions>` method in the :obj:`Catalog` with

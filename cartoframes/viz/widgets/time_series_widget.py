@@ -1,7 +1,7 @@
 from ..widget import Widget
 
 
-def time_series_widget(value, **kwargs):
+def time_series_widget(value, title='', description='', footer='', read_only=False, buckets=20):
     """Helper function for quickly creating a time series widget.
 
     The time series widget enables you to display animated data (by aggregation) over a specified date or numeric field.
@@ -24,8 +24,7 @@ def time_series_widget(value, **kwargs):
 
         .. code::
 
-            from cartoframes.viz import Map, Layer
-            from cartoframes.viz.widgets import time_series_widget
+            from cartoframes.viz import Map, Layer, time_series_widget
 
             Map(
                 Layer(
@@ -41,8 +40,11 @@ def time_series_widget(value, **kwargs):
                 )
             )
     """
-    data = kwargs
-    data['type'] = 'time-series'
-    data['value'] = value
-    data['read_only'] = kwargs.get('read_only', False)
-    return Widget(data)
+
+    return Widget('time-series',
+                  value=value,
+                  title=title,
+                  description=description,
+                  footer=footer,
+                  read_only=read_only,
+                  buckets=buckets)

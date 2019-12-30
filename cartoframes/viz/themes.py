@@ -1,4 +1,4 @@
-class Themes(object):  # pylint: disable=too-few-public-methods
+class Themes():  # pylint: disable=too-few-public-methods
     """UI color theme applied to Widgets and Legends.
     When selecting the DarkMatter basemap, the Dark theme is used by default.
 
@@ -11,5 +11,6 @@ class Themes(object):  # pylint: disable=too-few-public-methods
 
             Map(basemap=basemaps.positron, theme=themes.dark)
     """
+
     dark = 'dark'
     light = 'light'

@@ -385,11 +385,11 @@ var init = (function () {
       : null;
   }
 
-  function createLegend(layer, legendData, layerIndex, mapIndex=0) {
-    if (legendData.length) {
-      legendData.forEach((legend, legendIndex) => _createLegend(layer, legend, layerIndex, legendIndex, mapIndex));
+  function createLegends(layer, legends, layerIndex, mapIndex=0) {
+    if (legends.length) {
+      legends.forEach((legend, legendIndex) => _createLegend(layer, legend, layerIndex, legendIndex, mapIndex));
     } else {
-      _createLegend(layer, legendData, layerIndex, 0, mapIndex);
+      _createLegend(layer, legends, layerIndex, 0, mapIndex);
     }
   }
 
@@ -407,7 +407,7 @@ var init = (function () {
       if (legend.type.startsWith('size-continuous')) {
         config.samples = 4;
       }
-      
+
       AsBridge.VL.Legends.rampLegend(element, layer, prop, options);
     }
   }
@@ -483,8 +483,8 @@ var init = (function () {
   }
 
   function setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends) {
-    if (hasLegends && layer.legend) {
-      createLegend(mapLayer, layer.legend, mapLayerIndex, mapIndex);
+    if (hasLegends && layer.legends) {
+      createLegends(mapLayer, layer.legends, mapLayerIndex, mapIndex);
     }
   }
 

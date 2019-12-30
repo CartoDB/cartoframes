@@ -1,6 +1,7 @@
 import pytest
 
-from cartoframes.viz import Layer, Layout, Map, Source
+from cartoframes.viz import Layer, Layout, Map
+from cartoframes.viz.source import Source
 
 from .utils import build_cartodataframe
 

@@ -3,7 +3,8 @@
 import pytest
 
 from cartoframes.auth import Credentials
-from cartoframes.viz import Map, Layer, Source
+from cartoframes.viz import Map, Layer
+from cartoframes.viz.source import Source
 from cartoframes.viz.kuviz import KuvizPublisher, DEFAULT_PUBLIC, kuviz_to_dict
 from cartoframes.core.managers.context_manager import ContextManager
 
