@@ -21,8 +21,8 @@ def cluster_size_style(
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
         stroke_color (str, optional): Color of the stroke on point features.
-        stroke_width (int, optional): Size of the stroke on point features.
           Default is '#222'.
+        stroke_width (int, optional): Size of the stroke on point features.
         animate (str, optional): Animate features by date/time or other numeric field.
 
     Returns:
