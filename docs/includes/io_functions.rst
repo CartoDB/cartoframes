@@ -1,5 +1,5 @@
-Data I/O
----------
+I/O functions
+-------------
 
 .. automodule:: cartoframes
     :members:

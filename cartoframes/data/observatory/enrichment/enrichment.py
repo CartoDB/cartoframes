@@ -1,5 +1,4 @@
 from .enrichment_service import EnrichmentService, prepare_variables, AGGREGATION_DEFAULT
-from ....utils.utils import timelogger
 
 
 class Enrichment(EnrichmentService):
@@ -57,20 +56,20 @@ class Enrichment(EnrichmentService):
         Examples:
             Enrich a points `DataFrame` with Catalog classes:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> gdf_enrich = Enrichment().enrich_points(df, variables, geom_col='the_geom')
 
             Enrich a points dataframe with several Variables using their ids:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:2]
             >>> gdf_enrich = Enrichment().enrich_points(df, variables, geom_col='the_geom')
 
             Enrich a points dataframe with filters:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> variable = Catalog().country('usa').category('demographics').datasets[0].variables[0]
             >>> filters = {variable.id: "= '2019-09-01'"}
             >>> gdf_enrich = Enrichment().enrich_points(
@@ -89,7 +88,6 @@ class Enrichment(EnrichmentService):
         queries = self._get_points_enrichment_sql(temp_table_name, variables, filters)
         return self._execute_enrichment(queries, geodataframe)
 
-    @timelogger
     def enrich_polygons(self, dataframe, variables, geom_col=None, filters={}, aggregation=AGGREGATION_DEFAULT):
         """Enrich your polygons `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset` in
         the Data Observatory by intersecting the polygons in the source `DataFrame` with geographies in the
@@ -150,27 +148,27 @@ class Enrichment(EnrichmentService):
         Examples:
             Enrich a polygons dataframe with one Variable:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> variable = Catalog().country('usa').category('demographics').datasets[0].variables[0]
             >>> variables = [variable]
             >>> gdf_enrich = Enrichment().enrich_polygons(df, variables, geom_col='the_geom')
 
             Enrich a polygons dataframe with all Variables from a Catalog Dataset:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> gdf_enrich = Enrichment().enrich_polygons(df, variables, geom_col='the_geom')
 
             Enrich a polygons dataframe with several Variables using their ids:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:2]
             >>> gdf_enrich = Enrichment().enrich_polygons(df, variables, geom_col='the_geom')
 
             Enrich a polygons dataframe with filters:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> variable = Catalog().country('usa').category('demographics').datasets[0].variables[0]
             >>> filters = {variable.id: "= '2019-09-01'"}
             >>> gdf_enrich = Enrichment().enrich_polygons(
@@ -181,7 +179,7 @@ class Enrichment(EnrichmentService):
 
             Enrich a polygons dataframe overwriting every variables aggregation method to use `SUM` function:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:3]
             >>> gdf_enrich = Enrichment().enrich_polygons(
@@ -192,7 +190,7 @@ class Enrichment(EnrichmentService):
 
             Enrich a polygons dataframe overwriting some of the variables aggregation methods:
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:3]
             >>> aggregation = {
@@ -208,7 +206,7 @@ class Enrichment(EnrichmentService):
             Enrich a polygons dataframe without aggregating variables (because you want to it yourself, for example,
                 in case you want to use your custom function for aggregating the data):
 
-            >>> df = pandas.read_csv('...')
+            >>> df = pandas.read_csv('path/to/local/csv')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
             >>> variables = all_variables[:3]
             >>> gdf_enrich = Enrichment().enrich_polygons(

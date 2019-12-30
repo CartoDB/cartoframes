@@ -1,6 +1,6 @@
 .. include:: includes/introduction.rst
 .. include:: includes/auth.rst
-.. include:: includes/data_io.rst
+.. include:: includes/io_functions.rst
 .. include:: includes/data_observatory.rst
 .. include:: includes/data_services.rst
 .. include:: includes/data_clients.rst

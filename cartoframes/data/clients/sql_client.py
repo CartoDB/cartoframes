@@ -25,7 +25,13 @@ class SQLClient:
         If the `verbose` param is True it returns the full SQL response in a `dict`.
         For more information check the `SQL API
         documentation
-        <https://carto.com/developers/sql-api/reference/#tag/Single-SQL-Statement>`."""
+        <https://carto.com/developers/sql-api/reference/#tag/Single-SQL-Statement>`.
+
+        Args:
+            query (str): SQL query.
+            verbose (bool, optional): flag to return all the response. Default False.
+
+        """
         response = self._context_manager.execute_query(query.strip())
         if not verbose:
             return response.get('rows')
@@ -36,12 +42,23 @@ class SQLClient:
         """Run a long running query. It returns an object with the
         status and information of the job. For more information check the `Batch API
         documentation
-        <https://carto.com/developers/sql-api/reference/#tag/Batch-Queries>`."""
+        <https://carto.com/developers/sql-api/reference/#tag/Batch-Queries>`.
+
+        Args:
+            query (str): SQL query.
+
+        """
         return self._context_manager.execute_long_running_query(query.strip())
 
     def distinct(self, table_name, column_name):
         """Get the distict values and their count in a table
-        for a specific column."""
+        for a specific column.
+
+        Args:
+            table_name (str): name of the table.
+            column_name (str): name of the column.
+
+        """
         query = '''
             SELECT {0}, COUNT(*) FROM {1}
             GROUP BY 1 ORDER BY 2 DESC
@@ -50,13 +67,23 @@ class SQLClient:
         return [(x.get(column_name), x.get('count')) for x in output]
 
     def count(self, table_name):
-        """Get the number of elements of a table."""
+        """Get the number of elements of a table.
+
+        Args:
+            table_name (str): name of the table.
+
+        """
         query = 'SELECT COUNT(*) FROM {};'.format(table_name)
         output = self.query(query)
         return output[0].get('count')
 
     def bounds(self, query):
-        """Get the bounds of the geometries in a table."""
+        """Get the bounds of the geometries in a table.
+
+        Args:
+            query (str): SQL query containing a "the_geom" column.
+
+        """
         query = '''
             SELECT ARRAY[
                 ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
@@ -71,7 +98,13 @@ class SQLClient:
 
     def schema(self, table_name, raw=False):
         """Show information about the schema of a table.
-        Setting raw=True is returns a Python dict with the data."""
+
+        Args:
+            table_name (str): name of the table.
+            raw (bool, optional): return raw dict data if set to True.
+                Default False.
+
+        """
         query = 'SELECT * FROM {0} LIMIT 0;'.format(table_name)
         output = self.query(query, verbose=True)
         fields = output.get('fields')
@@ -84,7 +117,15 @@ class SQLClient:
             return None
 
     def describe(self, table_name, column_name):
-        """Show information about a column in a specific table."""
+        """Show information about a column in a specific table.
+        It returns the COUNT of the table. If the column type is number
+        it also returns the AVG, MIN and MAX.
+
+        Args:
+            table_name (str): name of the table.
+            column_name (str): name of the column.
+
+        """
         column_type = self._get_column_type(table_name, column_name)
         stats = ['COUNT(*)']
         if column_type == 'number':
@@ -103,8 +144,14 @@ class SQLClient:
 
     def create_table(self, table_name, columns, cartodbfy=True):
         """Create a table with a specific table name and columns.
-        By default, geometry columns are added to the table.
-        To disable this pass `cartodbfy=False`.
+
+        Args:
+            table_name (str): name of the table.
+            column_name (str): name of the column.
+            cartodbfy (bool, optional): convert the table to CARTO format.
+                Default True. More info `here
+                <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
+
         """
         columns = ','.join(' '.join(x) for x in columns)
         schema = self._context_manager.get_schema()
@@ -122,28 +169,59 @@ class SQLClient:
         )
         return self.execute(query)
 
-    def insert_table(self, table_name, columns, values):
-        sql_values = [self._sql_format(x) for x in values]
+    def insert_table(self, table_name, column_names, column_values):
+        """Insert a row to the table.
+
+        Args:
+            table_name (str): name of the table.
+            column_names (str, list of str): names of the columns.
+            column_values (str, list of str): values of the columns.
+
+        """
+        if isinstance(column_names, str):
+            column_names = [column_names]
+        if isinstance(column_values, str):
+            column_names = [column_values]
+        sql_values = [self._sql_format(x) for x in column_values]
         query = '''
             INSERT INTO {0} ({1}) VALUES({2});
-        '''.format(table_name, ','.join(columns), ','.join(sql_values))
+        '''.format(table_name, ','.join(column_names), ','.join(sql_values))
         return self.execute(query)
 
-    def update_table(self, table_name, column_name, value, condition):
-        """Update the column's value for the rows that match the condition."""
-        value = self._sql_format(value)
+    def update_table(self, table_name, column_name, column_value, condition):
+        """Update the column's value for the rows that match the condition.
+
+        Args:
+            table_name (str): name of the table.
+            column_name (str): name of the column.
+            column_value (str): value of the column.
+            condition (str): "where" condition of the request.
+
+        """
+        value = self._sql_format(column_value)
         query = '''
             UPDATE {0} SET {1}={2} WHERE {3};
         '''.format(table_name, column_name, value, condition)
         return self.execute(query)
 
     def rename_table(self, table_name, new_table_name):
-        """Rename a table from its table name."""
+        """Rename a table from its table name.
+
+        Args:
+            table_name (str): name of the original table.
+            new_table_name (str): name of the new table.
+
+        """
         query = 'ALTER TABLE {0} RENAME TO {1};'.format(table_name, new_table_name)
         return self.execute(query)
 
     def drop_table(self, table_name):
-        """Remove a table from its table name."""
+        """Remove a table from its table name.
+
+        Args:
+            table_name (str): name of the table.
+
+        """
         query = 'DROP TABLE IF EXISTS {0};'.format(table_name)
         return self.execute(query)
 
