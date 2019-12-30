@@ -14,17 +14,17 @@ def size_bins_style(
     Args:
         value (str): Column to symbolize by.
         method (str, optional): Classification method of data: "quantiles", "equal", "stdev".
-          Default is "quantiles".
+            Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
         breaks (list<int>, optional): Assign manual class break values.
         ranges (int, optional): Min/max size array as a string. Default is
-          '[2, 14]' for point geometries and '[1, 10]' for lines.
+            '[2, 14]' for point geometries and '[1, 10]' for lines.
         color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for point geometries and
-          '#4CC8A3' for lines.
+            '#4CC8A3' for lines.
         opacity (int, optional): Opacity value for point color and line features.
-          Default is '0.8'.
+            Default is 0.8.
         stroke_color (str, optional): Color of the stroke on point features.
-          Default is '#222'.
+            Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.
         animate (str, optional): Animate features by date/time or other numeric field.
 

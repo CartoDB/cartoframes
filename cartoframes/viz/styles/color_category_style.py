@@ -13,16 +13,16 @@ def color_category_style(
     Args:
         value (str): Column to symbolize by.
         top (int, optional): Number of categories. Default is 11. Values
-          can range from 1 to 16.
+            can range from 1 to 16.
         cat (list<str>, optional): Category list. Must be a valid list of categories.
         palette (str, optional): Palette that can be a named cartocolor palette
-          or other valid color palette. Use `help(cartoframes.viz.color_palettes)` to
-          get more information. Default is "bold".
+            or other valid color palette. Use `help(cartoframes.viz.palettes)` to
+            get more information. Default is "bold".
         size (int, optional): Size of point or line features.
         opacity (int, optional): Opacity value for point color and line features.
-          Default is '0.8'.
+            Default is 0.8.
         stroke_color (str, optional): Color of the stroke on point features.
-          Default is '#222'.
+            Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.
         animate (str, optional): Animate features by date/time or other numeric field.
 

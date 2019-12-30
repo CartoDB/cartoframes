@@ -13,17 +13,17 @@ def size_continuous_style(
     Args:
         value (str): Column to symbolize by.
         range_min (int, optional): The minimum value of the data range for the continuous
-          size ramp. Defaults to the globalMIN of the dataset.
+            size ramp. Defaults to the globalMIN of the dataset.
         range_max (int, optional): The maximum value of the data range for the continuous
-          size ramp. Defaults to the globalMAX of the dataset.
+            size ramp. Defaults to the globalMAX of the dataset.
         ranges (str, optional): Min/max size array as a string. Default is
-          '[2, 40]' for point geometries and '[1, 10]' for lines.
+            '[2, 40]' for point geometries and '[1, 10]' for lines.
         color (str, optional): hex, rgb or named color value.
-          Defaults is '#FFB927' for point geometries and '#4CC8A3' for lines.
+            Defaults is '#FFB927' for point geometries and '#4CC8A3' for lines.
         opacity (int, optional): Opacity value for point color and line features.
-          Default is '0.8'.
+            Default is 0.8.
         stroke_color (str, optional): Color of the stroke on point features.
-          Default is '#222'.
+            Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.
         animate (str, optional): Animate features by date/time or other numeric field.
 

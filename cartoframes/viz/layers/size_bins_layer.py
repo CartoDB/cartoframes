@@ -24,7 +24,7 @@ def size_bins_layer(
         color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for point geometries and
           '#4CC8A3' for lines.
         opacity (int, optional): Opacity value for point color and line features.
-          Default is '0.8'.
+          Default is 0.8.
         stroke_width (int, optional): Size of the stroke on point features.
         stroke_color (str, optional): Color of the stroke on point features.
           Default is '#222'.
@@ -44,8 +44,7 @@ def size_bins_layer(
           automatically obtained from the default credentials.
 
     Returns:
-        cartoframes.viz.Layer: Layer styled by `value`.
-        Includes a legend, popup and widget on `value`.
+        cartoframes.viz.Layer
 
     """
     return Layer(
