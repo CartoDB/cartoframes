@@ -5,7 +5,7 @@ from ..core.cartodataframe import CartoDataFrame
 from ..utils.utils import check_package
 
 
-class QuadGrid():
+class QuadGrid:
 
     def polyfill(self, input_gdf, zoom_level):
         check_package('mercantile', is_optional=True)

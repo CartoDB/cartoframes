@@ -2,53 +2,20 @@ from ..utils.utils import merge_dicts, text_match
 from . import defaults
 
 
-class Style(object):
+class Style:
     """Style
 
     Args:
-        data (str, dict): The style for the layer. It can be a dictionary or a viz string.
-          More info at
-          `CARTO VL styling <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`
-
-    Example:
-
-        String API.
-
-        .. code::
-
-            from cartoframes.viz import Style
-
-            Style('color: blue')
-
-            Style('''
-                @sum: sqrt($pop_max) / 100
-                @grad: [red, blue, green]
-                color: ramp(globalEqIntervals($pop_min, 3), @grad)
-                filter: @sum > 20
-            ''')
-
-        Dict API.
-
-        .. code::
-
-            from cartoframes.viz import Style
-
-            Style({
-                'color': 'blue'
-            })
-
-            Style({
-                'vars': {
-                    'sum': 'sqrt($pop_max) / 100',
-                    'grad': '[red, blue, green]'
-                },
-                'color': 'ramp(globalEqIntervals($pop_min, 3), @grad)',
-                'filter': '@sum > 20'
-            })
+        data (str, dict): The style for the layer.
     """
 
-    def __init__(self, data=None):
-        self._style = self._init_style(data)
+    def __init__(self, data=None, value=None, default_legends=None,
+                 default_widgets=None, default_popups=None):
+        self._style = self._init_style(data=data)
+        self._value = value
+        self._default_legends = default_legends
+        self._default_widgets = default_widgets
+        self._default_popups = default_popups
 
     def _init_style(self, data):
         if data is None:
@@ -56,20 +23,37 @@ class Style(object):
         elif isinstance(data, (str, dict)):
             return data
         else:
-            raise ValueError('`style` must be a string or a dictionary')
+            raise ValueError('`style` must be a dictionary')
+
+    @property
+    def value(self):
+        return self._value
+
+    @property
+    def default_legends(self):
+        return self._default_legends
+
+    @property
+    def default_widgets(self):
+        return self._default_widgets
+
+    @property
+    def default_popups(self):
+        return self._default_popups
 
     def compute_viz(self, geom_type, variables={}):
         style = self._style
         default_style = defaults.STYLE[geom_type]
 
-        if isinstance(style, dict):
+        if isinstance(style, str):
+            # Only for testing purposes
+            return self._parse_style_str(style, default_style, variables)
+        elif isinstance(style, dict):
             if geom_type in style:
                 style = style.get(geom_type)
             return self._parse_style_dict(style, default_style, variables)
-        elif isinstance(style, str):
-            return self._parse_style_str(style, default_style, variables)
         else:
-            raise ValueError('`style` must be a string or a dictionary')
+            raise ValueError('`style` must be a dictionary')
 
     def _parse_style_dict(self, style, default_style, ext_vars):
         variables = merge_dicts(style.get('vars', {}), ext_vars)

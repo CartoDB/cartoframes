@@ -29,10 +29,17 @@ STYLE_PROPERTIES = [
 
 LEGEND_PROPERTIES = [
     'color',
-    'strokeColor',
-    'width',
-    'strokeWidth'
+    'stroke-color',
+    'size',
+    'stroke-width'
 ]
+
+VIZ_PROPERTIES_MAP = {
+    'color': 'color',
+    'stroke-color': 'strokeColor',
+    'size': 'width',
+    'stroke-width': 'strokeWidth'
+}
 
 LEGEND_TYPES = [
     'default',

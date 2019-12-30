@@ -461,7 +461,7 @@ Finally, we can visualize the precision of the geocoded results using a CARTOfra
 
 ```python
 from cartoframes.viz.helpers import color_bins_layer
-from cartoframes.viz import Popup
+from cartoframes.viz import hover_popup
 
 color_bins_layer(
     geo_cdf,
@@ -469,15 +469,10 @@ color_bins_layer(
     method='equal',
     bins=geo_cdf.gc_status_rel.unique().size,
     title='Geocoding Precision',
-    popup=Popup({
-        'hover': [{
-                'title': 'Address',
-                'value': '$address'
-            }, {
-                'title': 'Precision',
-                'value': '$gc_status_rel'
-            }]
-    })
+    popups=[
+      hover_popup('address', title='Address'),
+      hover_popup('gc_status_rel', title='Precision'),
+    ]})
 )
 ```
 
@@ -753,18 +748,11 @@ Map([
         opacity='0.2',
         stroke_color='blue',
         size=[20, 80],
-        popup=Popup({
-            'hover': [{
-                    'title': 'Address',
-                    'value': '$address'
-                }, {
-                    'title': 'Precision',
-                    'value': '$gc_status_rel'
-                }, {
-                    'title': 'Revenue',
-                    'value': '$revenue'
-                }]
-        })
+        popups=[
+          hover_popup('address', title='Address'),
+          hover_popup('gc_status_rel', title='Precision'),
+          hover_popup('revenue', title='Revenue'),
+        ]
     )
 ])
 ```
@@ -832,18 +820,11 @@ Map([
         opacity='0.2',
         stroke_color='blue',
         size=[20, 80],
-        popup=Popup({
-            'hover': [{
-                    'title': 'Address',
-                    'value': '$address'
-                }, {
-                    'title': 'Precision',
-                    'value': '$gc_status_rel'
-                }, {
-                    'title': 'Revenue',
-                    'value': '$revenue'
-                }]
-        })
+        popups=[
+          hover_popup('address', title='Address'),
+          hover_popup('gc_status_rel', title='Precision'),
+          hover_popup('revenue', title='Revenue'),
+        ]
     )
 ])
 ```
