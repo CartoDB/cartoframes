@@ -3,6 +3,7 @@ from ..widget import Widget
 
 def animation_widget(title='', description='', footer='', prop=''):
     """Helper function for quickly creating an animated widget.
+
     The animation widget includes an animation status bar as well as controls to play or pause animated data.
     The `filter` property of your map's style, applied to either a date or numeric field, drives both
     the animation and the widget. Only **one** animation can be controlled per layer.
@@ -13,33 +14,18 @@ def animation_widget(title='', description='', footer='', prop=''):
     Args:
         title (str, optional): Title of widget.
         description (str, optional): Description text widget placed under widget title.
-        footer (str, optional): Footer text placed on the widget bottom
+        footer (str, optional): Footer text placed on the widget bottom.
+        prop (str, optional): Property of the style to get the animation. Default "filter".
 
     Returns:
-        cartoframes.viz.Widget: Widget with type='animation'
+        cartoframes.viz.widget.Widget
 
     Example:
-
-        .. code::
-
-            from cartoframes.viz import Map, Layer, animation_widget
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    'filter: animation($incdate, 20, fade(0.5,0.5))',
-                    widgets=[
-                        animation_widget(
-                            title='Collision Date',
-                            description= 'Play, pause, or select the range of the animation'
-                        )]
-                )
-            )
+        >>> animation_widget(
+        ...     title='Widget title',
+        ...     description='Widget description',
+        ...     footer='Widget footer')
 
     """
-
-    return Widget('animation',
-                  title=title,
-                  description=description,
-                  footer=footer,
+    return Widget('animation', None, title, description, footer,
                   prop=prop)

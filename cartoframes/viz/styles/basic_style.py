@@ -20,6 +20,7 @@ def basic_style(color=None, size=None, opacity=None, stroke_color=None, stroke_w
         cartoframes.viz.style.Style
 
     """
+    value = None
     data = {
         'point': {
             'color': get_value(color, 'color', 'point'),
@@ -43,6 +44,7 @@ def basic_style(color=None, size=None, opacity=None, stroke_color=None, stroke_w
 
     return Style(
         data,
+        value,
         default_legends=basic_legend(),
         default_widgets=basic_widget()
     )
