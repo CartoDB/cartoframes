@@ -409,7 +409,7 @@ class Dataset(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
-            limit (number): number of rows to be downloaded.
+            limit (int, optional): number of rows to be downloaded.
 
         :raises CartoException: If you have not a valid license for the dataset being downloaded.
         :raises ValueError: If the credentials argument is not valid.
@@ -435,7 +435,7 @@ class Dataset(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
-            limit (number): number of rows to be downloaded.
+            limit (int, optional): number of rows to be downloaded.
 
         Returns:
             pandas.DataFrame
