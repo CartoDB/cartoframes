@@ -8,7 +8,7 @@ from pandas import read_csv
 from geopandas import GeoDataFrame
 from shapely.geometry import box, shape
 
-from cartoframes.utils import decode_geometry
+from cartoframes.utils import set_geometry
 from cartoframes.analysis.grid import QuadGrid
 
 from geopandas.testing import assert_geodataframe_equal
@@ -72,8 +72,9 @@ class TestGrid(object):
     def _load_test_gdf(self, fname):
         fname = os.path.join(BASE_FOLDER, fname)
         df = read_csv(fname, dtype={'id': np.int64, 'geom': object, 'quadkey': object})
-        gdf_test = GeoDataFrame(df, geometry=decode_geometry(df['geom']), crs='epsg:4326')
-        return gdf_test
+        gdf = GeoDataFrame(df, crs='epsg:4326')
+        set_geometry(gdf, 'geom', inplace=True)
+        return gdf
 
     @pytest.mark.skip()
     def test_quadgrid_polyfill_box(self, mocker):
