@@ -1,5 +1,6 @@
 from .map import Map
 from .layer import Layer
+from .source import Source
 from .layout import Layout
 
 from .themes import Themes as themes
@@ -12,6 +13,7 @@ from .styles import color_bins_style
 from .styles import color_category_style
 from .styles import color_continuous_style
 from .styles import cluster_size_style
+from .styles import isolines_style
 from .styles import size_bins_style
 from .styles import size_category_style
 from .styles import size_continuous_style
@@ -37,6 +39,7 @@ from .popups import popup_element
 __all__ = [
     'Map',
     'Layer',
+    'Source',
     'Layout',
     'basemaps',
     'themes',
@@ -47,6 +50,8 @@ __all__ = [
     'color_bins_style',
     'color_category_style',
     'color_continuous_style',
+    'cluster_size_style',
+    'isolines_style',
     'size_bins_style',
     'size_category_style',
     'size_continuous_style',
@@ -55,13 +60,12 @@ __all__ = [
     'color_bins_legend',
     'color_category_legend',
     'color_continuous_legend',
-    'cluster_size_style',
     'size_bins_legend',
     'size_category_legend',
     'size_continuous_legend',
 
-    'basic_widget',
     'animation_widget',
+    'basic_widget',
     'category_widget',
     'formula_widget',
     'histogram_widget',

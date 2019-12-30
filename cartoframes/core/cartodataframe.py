@@ -188,7 +188,7 @@ class CartoDataFrame(GeoDataFrame):
         This is equivalent to `Map(Layer(cdf))`.
 
         Args:
-            style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
+            style (str, dict, or :py:class:`Style <cartoframes.viz.style.Style>`, optional):
                 The style of the visualization.
             legend (dict or :py:class:`Legend <cartoframes.viz.Legend>`, optional):
                 The legend definition for a layer. It contains the information

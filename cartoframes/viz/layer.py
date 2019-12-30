@@ -24,12 +24,12 @@ class Layer:
         source (str, pandas.DataFrame, geopandas.GeoDataFrame,
             :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): The source data:
             table name, SQL query or a dataframe.
-        style (dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
+        style (dict, or :py:class:`Style <cartoframes.viz.style.Style>`, optional):
             The style of the visualization.
-        legends (bool, :py:class:`Legend <cartoframes.viz.Legend>` list, optional):
+        legends (bool, :py:class:`Legend <cartoframes.viz.legend.Legend>` list, optional):
             The legends definition for a layer. It contains a list of legend helpers.
-            See :py:class:`Legend <cartoframes.viz.Legend>` for more information.
-        widgets (bool, list, or :py:class:`WidgetList <cartoframes.viz.WidgetList>`, optional):
+            See :py:class:`Legend <cartoframes.viz.legend.Legend>` for more information.
+        widgets (bool, list, or :py:class:`WidgetList <cartoframes.viz.widget_list.WidgetList>`, optional):
             Widget or list of widgets for a layer. It contains the information to display
             different widget types on the top right of the map. See
             :py:class:`WidgetList` for more information.
