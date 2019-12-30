@@ -33,12 +33,12 @@ def test_read_carto(mocker):
     }, geometry='the_geom')
 
     # When
-    cdf = read_carto('__source__', CREDENTIALS)
+    gdf = read_carto('__source__', CREDENTIALS)
 
     # Then
     cm_mock.assert_called_once_with('__source__', None, None, 3)
-    assert expected.equals(cdf)
-    assert cdf.crs == 'epsg:4326'
+    assert expected.equals(gdf)
+    assert gdf.crs == 'epsg:4326'
 
 
 def test_read_carto_wrong_source(mocker):
@@ -116,10 +116,10 @@ def test_read_carto_index_col_exists(mocker):
     }, geometry='the_geom', index=Index([1, 2, 3], 'cartodb_id'))
 
     # When
-    cdf = read_carto('__source__', CREDENTIALS, index_col='cartodb_id')
+    gdf = read_carto('__source__', CREDENTIALS, index_col='cartodb_id')
 
     # Then
-    assert expected.equals(cdf)
+    assert expected.equals(gdf)
 
 
 def test_read_carto_index_col_not_exists(mocker):
@@ -143,10 +143,10 @@ def test_read_carto_index_col_not_exists(mocker):
     }, geometry='the_geom', index=Index([0, 1, 2], 'rename_index'))
 
     # When
-    cdf = read_carto('__source__', CREDENTIALS, index_col='rename_index')
+    gdf = read_carto('__source__', CREDENTIALS, index_col='rename_index')
 
     # Then
-    assert expected.equals(cdf)
+    assert expected.equals(gdf)
 
 
 def test_read_carto_decode_geom_false(mocker):
@@ -170,10 +170,10 @@ def test_read_carto_decode_geom_false(mocker):
     })
 
     # When
-    cdf = read_carto('__source__', CREDENTIALS, decode_geom=False)
+    gdf = read_carto('__source__', CREDENTIALS, decode_geom=False)
 
     # Then
-    assert expected.equals(cdf)
+    assert expected.equals(gdf)
 
 
 def test_to_carto_wrong_dataframe(mocker):
