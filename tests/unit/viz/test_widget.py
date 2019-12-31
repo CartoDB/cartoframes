@@ -39,7 +39,7 @@ class TestWidget(object):
     def test_wrong_type(self):
         """Widget should raise an error if widget type is not valid"""
         msg = 'Widget type is not valid. Valid widget types are: ' + \
-            'default, formula, histogram, category, animation, time-series.'
+            'basic, default, formula, histogram, category, animation, time-series.'
 
         with pytest.raises(ValueError) as e:
             Widget({'type': 'xxx'}).get_info()

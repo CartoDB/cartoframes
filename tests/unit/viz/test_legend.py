@@ -43,7 +43,7 @@ class TestLegend(object):
 
     def test_wrong_type(self):
         """Legend should raise an error if legend type is not valid"""
-        msg = 'Legend type "xxx" is not valid. Valid legend types are: default, ' +\
+        msg = 'Legend type "xxx" is not valid. Valid legend types are: basic, default, ' +\
             'color-bins, color-bins-line, color-bins-point, color-bins-polygon, ' + \
             'color-category, color-category-line, color-category-point, color-category-polygon, ' + \
             'color-continuous, color-continuous-line, color-continuous-point, color-continuous-polygon, ' + \

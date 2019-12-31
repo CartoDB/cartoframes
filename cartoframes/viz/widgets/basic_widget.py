@@ -12,7 +12,7 @@ def basic_widget(title='', description='', footer=''):
         footer (str, optional): Footer text placed on the widget bottom
 
     Returns:
-        cartoframes.viz.Widget: Widget with type='default'
+        cartoframes.viz.Widget: Widget with type='basic'
 
     Example:
 
