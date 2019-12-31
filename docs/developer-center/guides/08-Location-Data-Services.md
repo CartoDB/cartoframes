@@ -12,7 +12,7 @@ Given a set of ten simulated Starbucks store addresses, this guide walks through
 
 ### Data
 
-This guide uses the same dataset of simulated Starbucks locations that has been used in the other guides and can be downloaded [here](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn.csv).
+This guide uses the same dataset of simulated Starbucks locations that has been used in the other guides and can be downloaded [here](https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn.csv).
 
 ### Authentication
 
@@ -31,7 +31,7 @@ To get started, let's read in and explore the Starbucks location data we have. W
 ```python
 import pandas
 
-df = pandas.read_csv('../files/starbucks_brooklyn.csv')
+df = pandas.read_csv('https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn.csv')
 df
 ```
 

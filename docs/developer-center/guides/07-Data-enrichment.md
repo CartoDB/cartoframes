@@ -295,7 +295,7 @@ Let's start by loading those geocoded Starbucks stores:
 
 ```python
 from cartoframes import CartoDataFrame
-stores_cdf = CartoDataFrame.from_file('../files/starbucks_brooklyn_geocoded.geojson')
+stores_cdf = CartoDataFrame.from_file('https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.geojson')
 stores_cdf.head(5)
 ```
 
@@ -493,7 +493,7 @@ Next, let's do a second enrichment, but this time using a DataFrame with areas o
 
 
 ```python
-aoi_cdf = CartoDataFrame.from_file('../files/starbucks_brooklyn_isolines.geojson')
+aoi_cdf = CartoDataFrame.from_file('https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_isolines.geojson')
 aoi_cdf.head(5)
 ```
 
