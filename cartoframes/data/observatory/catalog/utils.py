@@ -70,8 +70,6 @@ def _display_subscription_form_notebook(entity_id, entity_type, info, instant_li
         message = '''
         <h3>Data request</h3>
         You are about to request the {type} <b>{id}</b>.
-        If you want to proceed, a Request will be sent to CARTO who will
-        order the data and load it into your account.
         <br>Do you want to proceed?
         '''.format(
             id=entity_id,
@@ -174,9 +172,7 @@ def _display_subscription_form_cli(entity_id, entity_type, info, instant_licensi
     if price is None:
         message = (
             'Data request:\n'
-            'You are about to request the {type} "{id}". '
-            'If you want to proceed, a Request will be sent to CARTO who will '
-            'order the data and load it into your account.\n'
+            'You are about to request the {type} "{id}".\n'
             'Do you want to proceed?').format(
                 id=entity_id,
                 type=entity_type)
