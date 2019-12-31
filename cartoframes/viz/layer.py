@@ -82,7 +82,7 @@ class Layer:
                  legends=True,
                  widgets=False,
                  click_popup=False,
-                 hover_popup=True,
+                 hover_popup=False,
                  credentials=None,
                  bounds=None,
                  geom_col=None,
@@ -94,7 +94,7 @@ class Layer:
         self.source = _set_source(source, credentials, geom_col)
         self.style = _set_style(style)
 
-        self.popups = self._init_popups(click_popup, hover_popup)
+        self.popups = self._init_popups(click_popup, hover_popup, title)
         self.legends = self._init_legends(legends, title, description, footer)
         self.widgets = self._init_widgets(widgets)
 
@@ -131,12 +131,14 @@ class Layer:
             return _set_widgets(widgets)
         return WidgetList()
 
-    def _init_popups(self, click_popup, hover_popup):
+    def _init_popups(self, click_popup, hover_popup, title):
         popups = {}
         if click_popup is True and self.style.default_popups is not None:
             click_popup = self.style.default_popups.get('click')
+            click_popup['title'] = title
         if hover_popup is True and self.style.default_popups is not None:
             hover_popup = self.style.default_popups.get('hover')
+            hover_popup['title'] = title
         if click_popup:
             popups['click'] = click_popup
         if hover_popup:
