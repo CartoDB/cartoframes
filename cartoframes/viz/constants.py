@@ -42,6 +42,7 @@ VIZ_PROPERTIES_MAP = {
 }
 
 LEGEND_TYPES = [
+    'basic',
     'default',
     'color-bins',
     'color-bins-line',
@@ -67,6 +68,7 @@ LEGEND_TYPES = [
 ]
 
 WIDGET_TYPES = [
+    'basic',
     'default',
     'formula',
     'histogram',

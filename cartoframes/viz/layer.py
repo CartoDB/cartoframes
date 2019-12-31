@@ -116,12 +116,12 @@ class Layer:
         self.has_legend_list = isinstance(self.legends, LegendList)
 
     def _init_legends(self, legends, title, description, footer):
+        default_legend = self.style.default_legend
         if legends is True:
-            legend = self.style.default_legend
-            legend.set_labels(title, description, footer)
-            return _set_legends(legend)
+            default_legend.set_labels(title, description, footer)
+            return _set_legends(default_legend)
         if legends:
-            return _set_legends(legends)
+            return _set_legends(legends, default_legend)
         return LegendList()
 
     def _init_widgets(self, widgets):
@@ -171,11 +171,11 @@ def _set_style(style):
         return Style()
 
 
-def _set_legends(legends):
+def _set_legends(legends, default_legend=None):
     if isinstance(legends, list):
-        return LegendList(legends)
+        return LegendList(legends, default_legend)
     if isinstance(legends, Legend):
-        return LegendList([legends])
+        return LegendList([legends], default_legend)
     if isinstance(legends, LegendList):
         return legends
     else:

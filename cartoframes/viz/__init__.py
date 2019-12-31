@@ -22,6 +22,7 @@ from .legends import color_continuous_legend
 from .legends import size_bins_legend
 from .legends import size_category_legend
 from .legends import size_continuous_legend
+from .legends import default_legend
 
 from .widgets import basic_widget
 from .widgets import animation_widget
@@ -59,6 +60,7 @@ __all__ = [
     'size_bins_legend',
     'size_category_legend',
     'size_continuous_legend',
+    'default_legend',
 
     'basic_widget',
     'animation_widget',
