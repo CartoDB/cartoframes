@@ -118,17 +118,19 @@ class Layer:
     def _init_legends(self, legends, title, description, footer):
         default_legend = self.style.default_legend
         if legends is True:
-            default_legend.set_labels(title, description, footer)
+            if default_legend is not None:
+                default_legend.set_labels(title, description, footer)
             return _set_legends(default_legend)
         if legends:
             return _set_legends(legends, default_legend)
         return LegendList()
 
     def _init_widgets(self, widgets):
+        default_widget = self.style.default_widget
         if widgets is True:
-            return _set_widgets(self.style.default_widgets)
+            return _set_widgets(default_widget)
         if widgets:
-            return _set_widgets(widgets)
+            return _set_widgets(widgets, default_widget)
         return WidgetList()
 
     def _init_popups(self, click_popup, hover_popup, title):
@@ -182,11 +184,11 @@ def _set_legends(legends, default_legend=None):
         return LegendList()
 
 
-def _set_widgets(widgets):
-    if isinstance(widgets, Widget):
-        return WidgetList(widgets)
+def _set_widgets(widgets, default_widget=None):
     if isinstance(widgets, list):
-        return WidgetList(widgets)
+        return WidgetList(widgets, default_widget)
+    if isinstance(widgets, Widget):
+        return WidgetList([widgets], default_widget)
     if isinstance(widgets, WidgetList):
         return widgets
     else:

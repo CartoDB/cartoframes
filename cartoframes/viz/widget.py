@@ -56,7 +56,7 @@ class Widget():
         return constants.VIZ_PROPERTIES_MAP.get(prop)
 
     def has_bridge(self):
-        return self._type not in ('formula', 'default')
+        return self._type not in ('formula', 'basic')
 
     def _check_type(self, widget_type):
         if widget_type and widget_type not in constants.WIDGET_TYPES:

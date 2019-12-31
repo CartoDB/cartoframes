@@ -33,7 +33,7 @@ def basic_widget(title='', description='', footer=''):
             )
     """
 
-    return Widget('default',
+    return Widget('basic',
                   title=title,
                   description=description,
                   footer=footer)

@@ -30,6 +30,7 @@ from .widgets import category_widget
 from .widgets import formula_widget
 from .widgets import histogram_widget
 from .widgets import time_series_widget
+from .widgets import default_widget
 
 from .popups import popup_element
 
@@ -68,6 +69,7 @@ __all__ = [
     'formula_widget',
     'histogram_widget',
     'time_series_widget',
+    'default_widget',
 
     'popup_element'
 ]

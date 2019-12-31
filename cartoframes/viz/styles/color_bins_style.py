@@ -86,7 +86,7 @@ def color_bins_style(
         data,
         value,
         default_legend=color_bins_legend(title=value),
-        default_widgets=histogram_widget(value, title='Distribution'),
+        default_widget=histogram_widget(value, title='Distribution'),
         default_popups={'hover': popup_element(value, title=value),
                         'click': popup_element(value, title=value)}
     )

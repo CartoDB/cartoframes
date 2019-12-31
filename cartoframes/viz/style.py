@@ -10,11 +10,11 @@ class Style:
     """
 
     def __init__(self, data=None, value=None, default_legend=None,
-                 default_widgets=None, default_popups=None):
+                 default_widget=None, default_popups=None):
         self._style = self._init_style(data=data)
         self._value = value
         self._default_legend = default_legend
-        self._default_widgets = default_widgets
+        self._default_widget = default_widget
         self._default_popups = default_popups
 
     def _init_style(self, data):
@@ -34,8 +34,8 @@ class Style:
         return self._default_legend
 
     @property
-    def default_widgets(self):
-        return self._default_widgets
+    def default_widget(self):
+        return self._default_widget
 
     @property
     def default_popups(self):
