@@ -67,7 +67,7 @@ def size_continuous_style(
     return Style(
         data,
         value,
-        default_legends=size_continuous_legend(title=value),
+        default_legend=size_continuous_legend(title=value),
         default_widgets=histogram_widget(value, title=value),
         default_popups={'hover': popup_element(value, title=value),
                         'click': popup_element(value, title=value)}

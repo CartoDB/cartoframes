@@ -68,7 +68,7 @@ def color_category_style(
     return Style(
         data,
         value,
-        default_legends=color_category_legend(title=value),
+        default_legend=color_category_legend(title=value),
         default_widgets=category_widget(value, title=value),
         default_popups={'hover': popup_element(value, title=value),
                         'click': popup_element(value, title=value)}

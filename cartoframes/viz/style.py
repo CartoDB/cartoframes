@@ -9,11 +9,11 @@ class Style:
         data (str, dict): The style for the layer.
     """
 
-    def __init__(self, data=None, value=None, default_legends=None,
+    def __init__(self, data=None, value=None, default_legend=None,
                  default_widgets=None, default_popups=None):
         self._style = self._init_style(data=data)
         self._value = value
-        self._default_legends = default_legends
+        self._default_legend = default_legend
         self._default_widgets = default_widgets
         self._default_popups = default_popups
 
@@ -30,8 +30,8 @@ class Style:
         return self._value
 
     @property
-    def default_legends(self):
-        return self._default_legends
+    def default_legend(self):
+        return self._default_legend
 
     @property
     def default_widgets(self):

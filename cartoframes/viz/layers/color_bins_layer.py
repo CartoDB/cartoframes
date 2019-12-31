@@ -50,7 +50,7 @@ def color_bins_layer(
         Includes a legend, popup and widget on `value`.
     """
 
-    default_legends = [
+    default_legend = [
         color_bins_legend(title=title or value, description=description, footer=footer)
     ]
 
@@ -63,7 +63,7 @@ def color_bins_layer(
         source,
         style=color_bins_style(
           value, method, bins, breaks, palette, size, opacity, stroke_color, stroke_width, animate),
-        legends=legends and default_legends,
+        legends=legends and default_legend,
         widgets=widgets and default_widgets,
         credentials=credentials
     )

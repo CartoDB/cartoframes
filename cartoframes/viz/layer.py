@@ -85,14 +85,17 @@ class Layer:
                  hover_popup=True,
                  credentials=None,
                  bounds=None,
-                 geom_col=None):
+                 geom_col=None,
+                 title=None,
+                 description=None,
+                 footer=None):
 
         self.is_basemap = False
         self.source = _set_source(source, credentials, geom_col)
         self.style = _set_style(style)
 
         self.popups = self._init_popups(click_popup, hover_popup)
-        self.legends = self._init_legends(legends)
+        self.legends = self._init_legends(legends, title, description, footer)
         self.widgets = self._init_widgets(widgets)
 
         geom_type = self.source.get_geom_type()
@@ -112,9 +115,11 @@ class Layer:
         self.legends_info = self.legends.get_info() if self.legends is not None else None
         self.has_legend_list = isinstance(self.legends, LegendList)
 
-    def _init_legends(self, legends):
+    def _init_legends(self, legends, title, description, footer):
         if legends is True:
-            return _set_legends(self.style.default_legends)
+            legend = self.style.default_legend
+            legend.set_labels(title, description, footer)
+            return _set_legends(legend)
         if legends:
             return _set_legends(legends)
         return LegendList()
@@ -165,12 +170,12 @@ def _set_style(style):
 
 
 def _set_legends(legends):
-    if isinstance(legends, Legend):
-        return LegendList(legends)
-    if isinstance(legends, LegendList):
-        return legends
     if isinstance(legends, list):
         return LegendList(legends)
+    if isinstance(legends, Legend):
+        return LegendList([legends])
+    if isinstance(legends, LegendList):
+        return legends
     else:
         return LegendList()
 
