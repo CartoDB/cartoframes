@@ -59,7 +59,7 @@ def size_category_style(
         data,
         value,
         default_legend=size_category_legend(title=value),
-        default_widgets=category_widget(value, title=value),
+        default_widgets=category_widget(value, title='Categories'),
         default_popups={'hover': popup_element(value, title=value),
                         'click': popup_element(value, title=value)}
     )
