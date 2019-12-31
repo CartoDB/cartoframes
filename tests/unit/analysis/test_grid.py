@@ -8,8 +8,8 @@ from pandas import read_csv
 from geopandas import GeoDataFrame
 from shapely.geometry import box, shape
 
-from cartoframes.utils import set_geometry
 from cartoframes.analysis.grid import QuadGrid
+from cartoframes.utils.geom_utils import set_geometry
 
 from geopandas.testing import assert_geodataframe_equal
 

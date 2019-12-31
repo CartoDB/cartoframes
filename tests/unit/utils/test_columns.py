@@ -5,7 +5,7 @@
 from pandas import DataFrame
 from geopandas import GeoDataFrame
 
-from cartoframes.utils import set_geometry
+from cartoframes.utils.geom_utils import set_geometry
 from cartoframes.utils.columns import Column, ColumnInfo, get_dataframe_columns_info, normalize_names
 
 

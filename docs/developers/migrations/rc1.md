@@ -30,6 +30,23 @@ from cartoframes.utils import decode_geometry
 gdf = GeoDataFrame(df, geometry=decode_geometry(df['the_geom']))
 ```
 
+* From:
+
+```python
+from cartoframes import CartoDataFrame
+
+cdf = CartoDataFrame(df)
+cdf.set_geometry_from_xy('lng', 'lat', inplace=True)
+```
+
+* To:
+
+```python
+from geopandas import GeoDataFrame, points_from_xy
+
+gdf = GeoDataFrame(df, geometry=points_from_xy(df['lng'], df['lat']))
+```
+
 </p>
 </details>
 
