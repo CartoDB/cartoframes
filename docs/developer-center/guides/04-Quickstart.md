@@ -95,14 +95,14 @@ from cartoframes.auth import set_default_credentials
 set_default_credentials('creds.json')
 ```
 
-Now that your credentials are set, we are ready to geocode the dataframe. The resulting data will be a [CartoDataFrame](/developers/cartoframes/reference#heading-CartoDataFrame), a dataframe that integrates with CARTO services that extends on the functionality of [GeoDataFrames](http://geopandas.org/data_structures.html#geodataframe). CARTOframes is built on top of [GeoPandas](http://geopandas.org/) to guarantee compatibility between both libraries, and all [GeoDataFrame](http://geopandas.org/data_structures.html#geodataframe) operations are available.
+Now that your credentials are set, we are ready to geocode the dataframe. The resulting data will be a [GeoDataFrame](http://geopandas.org/data_structures.html#geodataframe).
 
 
 ```python
 from cartoframes.data.services import Geocoding
 
-stores_cdf, _ = Geocoding().geocode(stores_df, street='address')
-stores_cdf.head()
+stores_gdf, _ = Geocoding().geocode(stores_df, street='address')
+stores_gdf.head()
 ```
 
 <div>
@@ -175,7 +175,7 @@ You can quickly visualize your geocoded dataframe using the Map and Layer classe
 ```python
 from cartoframes.viz import Map, Layer
 
-Map(Layer(stores_cdf))
+Map(Layer(stores_gdf))
 ```
 
 <div class="example-map">
@@ -196,7 +196,7 @@ With the stores plotted on the map, you now have a better sense about where each
 ```python
 from cartoframes.viz.helpers import size_continuous_layer
 
-Map(size_continuous_layer(stores_cdf, 'revenue', 'Annual Revenue ($)'))
+Map(size_continuous_layer(stores_gdf, 'revenue', 'Annual Revenue ($)'))
 ```
 
 <div class="example-map">
@@ -224,8 +224,8 @@ To do this you will use the Isolines data service:
 ```python
 from cartoframes.data.services import Isolines
 
-isochrones_cdf, _ = Isolines().isochrones(stores_cdf, [15*60], mode='walk')
-isochrones_cdf.head()
+isochrones_gdf, _ = Isolines().isochrones(stores_gdf, [15*60], mode='walk')
+isochrones_gdf.head()
 ```
 <div>
 <table border="1" class="dataframe">
@@ -287,8 +287,8 @@ isochrones_cdf.head()
 
 ```python
 map = Map([
-    Layer(isochrones_cdf),
-    Layer(stores_cdf)]
+    Layer(isochrones_gdf),
+    Layer(stores_gdf)]
 )
 map
 ```
@@ -2123,8 +2123,8 @@ from cartoframes.data.observatory import Enrichment
 
 variable = Variable.get('total_pop_3cf008b3')
 
-isochrones_cdf = Enrichment().enrich_polygons(isochrones_cdf, [variable])
-isochrones_cdf.head()
+isochrones_gdf = Enrichment().enrich_polygons(isochrones_gdf, [variable])
+isochrones_gdf.head()
 ```
 
 <div>
@@ -2195,7 +2195,7 @@ Great! Let's see the result on a map:
 ```python
 from cartoframes.viz.helpers import color_continuous_layer
 
-Map(color_continuous_layer(isochrones_cdf, 'sum_total_pop', 'Population'))
+Map(color_continuous_layer(isochrones_gdf, 'sum_total_pop', 'Population'))
 ```
 
 <div class="example-map">
@@ -2212,8 +2212,8 @@ Map(color_continuous_layer(isochrones_cdf, 'sum_total_pop', 'Population'))
 We can see that the area of influence of the store on the right, is the one with the highest population. Let's go a bit further and calculate and visualize the average revenue per person.
 
 ```python
-stores_cdf['rev_pop'] = stores_cdf['revenue']/isochrones_cdf['sum_total_pop']
-Map(size_continuous_layer(stores_cdf, 'rev_pop', 'Revenue per person ($)'))
+stores_gdf['rev_pop'] = stores_gdf['revenue']/isochrones_gdf['sum_total_pop']
+Map(size_continuous_layer(stores_gdf, 'rev_pop', 'Revenue per person ($)'))
 ```
 
 <div class="example-map">
@@ -2235,11 +2235,13 @@ To learn more about discovering the data you want, check out the [data discovery
 ### Publish and share your results
 The final step in the workflow is to share this interactive map with your colleagues so they can explore the information on their own. Let's do it!
 
-First, let's upload the data to CARTO to see how we can visualize CARTO tables and how it helps you to publish your maps. To upload your data, you just need to call `to_carto` from your CartoDataFrames:
+First, let's upload the data to CARTO to see how we can visualize CARTO tables and how it helps you to publish your maps. To upload your data, you just need to call `to_carto` with your GeoDataFrame:
 
 ```python
-stores_cdf.to_carto('starbucks_stores', if_exists='replace')
-isochrones_cdf.to_carto('starbucks_isochrones', if_exists='replace')
+from cartoframes import to_carto
+
+to_carto(stores_gdf, 'starbucks_stores', if_exists='replace')
+to_carto(isochrones_gdf, 'starbucks_isochrones', if_exists='replace')
 ```
 
 Now, let's visualize them and add widgets to them so people are able to see some graphs of the information and filter it. To do this, we only have to add `widget=True` to the visualization layers.

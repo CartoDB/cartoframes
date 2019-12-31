@@ -151,7 +151,7 @@ geo_service.available_quota()
 ```
 
 ```python
-geo_cdf, geo_metadata = geo_service.geocode(
+geo_gdf, geo_metadata = geo_service.geocode(
     df,
     street='address',
     city={'value': 'New York'},
@@ -165,7 +165,7 @@ records, and new geocoding will be performed only on _new or changed records_.
 In order to use cached results, we have to save the results to a CARTO table using the `table_name` and `cached=True` parameters.
 
 ```python
-geo_cdf, geo_metadata = geo_service.geocode(
+geo_gdf, geo_metadata = geo_service.geocode(
     df,
     street='address',
     city={'value': 'New York'},
@@ -193,14 +193,14 @@ geo_metadata
   'failed_geocodings': 0}
 ```
 
-The resulting data is a `CartoDataFrame` that contains three new columns:
+The resulting data is a `GeoDataFrame` that contains three new columns:
 
 * `geometry`: The resulting geometry
 * `gc_status_rel`: The percentage of accuracy of each location
 * `carto_geocode_hash`: Geocode information
 
 ```python
-geo_cdf.head()
+geo_gdf.head()
 ```
 
 <div>
@@ -277,7 +277,7 @@ If you try to geocode this DataFrame now, that contains both ``the_geom`` and th
 
 ```python
 _, repeat_geo_metadata = geo_service.geocode(
-    geo_cdf,
+    geo_gdf,
     street='address',
     city={'value': 'New York'},
     country={'value': 'USA'},
@@ -296,7 +296,7 @@ repeat_geo_metadata.get('required_quota')
 The `address` column is more complete than the `name` column, and therefore, the resulting coordinates calculated by the service will be more accurate. If we check this, the accuracy values using the `name` column (`0.95, 0.93, 0.96, 0.83, 0.78, 0.9`) are lower than the ones we get by using the `address` column for geocoding (`0.97, 0.99, 0.98`).
 
 ```python
-geo_name_cdf, geo_name_metadata = geo_service.geocode(
+geo_name_gdf, geo_name_metadata = geo_service.geocode(
     df,
     street='name',
     city={'value': 'New York'},
@@ -305,7 +305,7 @@ geo_name_cdf, geo_name_metadata = geo_service.geocode(
 ```
 
 ```python
-geo_name_cdf.head()
+geo_name_gdf.head()
 ```
 
 <div>
@@ -373,7 +373,7 @@ geo_name_cdf.head()
 
 
 ```python
-geo_name_cdf.gc_status_rel.unique()
+geo_name_gdf.gc_status_rel.unique()
 ```
 
 ```
@@ -381,7 +381,7 @@ array([0.95, 0.93, 0.96, 0.83, 0.78, 0.9 ])
 ```
 
 ```python
-geo_cdf.head()
+geo_gdf.head()
 ```
 
 <div>
@@ -448,7 +448,7 @@ geo_cdf.head()
 </div>
 
 ```python
-geo_cdf.gc_status_rel.unique()
+geo_gdf.gc_status_rel.unique()
 ```
 
 ```
@@ -464,10 +464,10 @@ from cartoframes.viz.helpers import color_bins_layer
 from cartoframes.viz import hover_popup
 
 color_bins_layer(
-    geo_cdf,
+    geo_gdf,
     'gc_status_rel',
     method='equal',
-    bins=geo_cdf.gc_status_rel.unique().size,
+    bins=geo_gdf.gc_status_rel.unique().size,
     title='Geocoding Precision',
     popups=[
       hover_popup('address', title='Address'),
@@ -505,7 +505,7 @@ from cartoframes.data.services import Isolines
 
 iso_service = Isolines()
 
-_, isochrones_dry_metadata = iso_service.isochrones(geo_cdf, [300, 900, 1800], mode='walk', dry_run=True)
+_, isochrones_dry_metadata = iso_service.isochrones(geo_gdf, [300, 900, 1800], mode='walk', dry_run=True)
 ```
 
 Remember to always **check the quota** using `dry_run` parameter and `available_quota` method before running the service!
@@ -522,11 +522,11 @@ available 1437, required 30
 ```
 
 ```python
-isochrones_cdf, isochrones_metadata = iso_service.isochrones(geo_cdf, [300, 900, 1800], mode='walk')
+isochrones_gdf, isochrones_metadata = iso_service.isochrones(geo_gdf, [300, 900, 1800], mode='walk')
 ```
 
 ```python
-isochrones_cdf.head()
+isochrones_gdf.head()
 ```
 
 <div>
@@ -594,7 +594,7 @@ The most straightforward way of visualizing the resulting geometries is to use t
 ```python
 from cartoframes.viz.helpers import isolines_layer
 
-isolines_layer(isochrones_cdf)
+isolines_layer(isochrones_gdf)
 ```
 
 <div class="example-map">
@@ -614,8 +614,8 @@ The isoline services accepts several options to manually change the `resolution`
 
 
 ```python
-isodistances_cdf, isodistances_dry_metadata = iso_service.isodistances(
-    geo_cdf,
+isodistances_gdf, isodistances_dry_metadata = iso_service.isodistances(
+    geo_gdf,
     [900, 1800, 3600],
     mode='walk',
     resolution=16.0,
@@ -637,8 +637,8 @@ print('available {0}, required {1}'.format(
 
 
 ```python
-isodistances_cdf, isodistances_metadata = iso_service.isodistances(
-    geo_cdf,
+isodistances_gdf, isodistances_metadata = iso_service.isodistances(
+    geo_gdf,
     [900, 1800, 3600],
     mode='walk',
     mode_traffic='enabled',
@@ -649,7 +649,7 @@ isodistances_cdf, isodistances_metadata = iso_service.isodistances(
 
 
 ```python
-isodistances_cdf.head()
+isodistances_gdf.head()
 ```
 
 <div>
@@ -712,7 +712,7 @@ isodistances_cdf.head()
 ```python
 from cartoframes.viz.helpers import isolines_layer
 
-isolines_layer(isodistances_cdf)
+isolines_layer(isodistances_gdf)
 ```
 
 <div class="example-map">
@@ -737,11 +737,11 @@ from cartoframes.viz.helpers import size_continuous_layer
 
 Map([
     isolines_layer(
-        isochrones_cdf,
+        isochrones_gdf,
         title='Walking Time'
     ),
     size_continuous_layer(
-        geo_cdf,
+        geo_gdf,
         'revenue',
         title='Revenue $',
         color='white',
@@ -778,25 +778,23 @@ Now, let's calculate the **centroid** of three different stores that we've ident
 from shapely import geometry
 
 new_store_location = [
-    geo_cdf.iloc[6].the_geom,
-    geo_cdf.iloc[9].the_geom,
-    geo_cdf.iloc[1].the_geom
+    geo_gdf.iloc[6].the_geom,
+    geo_gdf.iloc[9].the_geom,
+    geo_gdf.iloc[1].the_geom
 ]
 
-# Create a polygon using three points from the geo_cdf
+# Create a polygon using three points from the geo_gdf
 polygon = geometry.Polygon([[p.x, p.y] for p in new_store_location])
 ```
 
 ```python
-from cartoframes import CartoDataFrame
+from geopandas import GeoDataFrame, points_from_xy
 
-new_store_cdf = CartoDataFrame(
-    [['New Store', polygon.centroid.y, polygon.centroid.x]],
-    columns=['name', 'lat', 'lon'])
+new_store_gdf = GeoDataFrame(
+    [['New Store', points_from_xy(polygon.centroid.x, polygon.centroid.y)]],
+    columns=['name', 'geometry'])
 
-new_store_cdf.set_geometry_from_xy('lon', 'lat', inplace=True)
-
-isochrones_new_cdf, isochrones_new_metadata = iso_service.isochrones(new_store_cdf, [300, 900, 1800], mode='walk')
+isochrones_new_gdf, isochrones_new_metadata = iso_service.isochrones(new_store_gdf, [300, 900, 1800], mode='walk')
 ```
 
 ```python
@@ -804,16 +802,16 @@ from cartoframes.viz import Layer
 
 Map([
     isolines_layer(
-        isochrones_cdf,
+        isochrones_gdf,
         title='Walking Time - Current',
         opacity='0.2'
     ),
     isolines_layer(
-        isochrones_new_cdf,
+        isochrones_new_gdf,
         title='Walking Time - New',
     ),
     size_continuous_layer(
-        geo_cdf,
+        geo_gdf,
         'revenue',
         title='Revenue $',
         color='white',
