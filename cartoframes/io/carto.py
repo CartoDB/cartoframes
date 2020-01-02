@@ -61,7 +61,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
-             cartodbfy=False, log_enabled=True):
+             cartodbfy=None, log_enabled=True):
     """Upload a Dataframe to CARTO.
 
     Args:
@@ -112,9 +112,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         # Prepare geometry column for the upload
         cdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
 
-    cartodbfy = cartodbfy or cdf.has_geometry()
+    force_cartodbfy = cdf.has_geometry() if cartodbfy is None else cartodbfy
 
-    table_name = context_manager.copy_from(cdf, table_name, if_exists, cartodbfy)
+    table_name = context_manager.copy_from(cdf, table_name, if_exists, force_cartodbfy)
 
     if log_enabled:
         log.info('Success! Data uploaded to table "{}" correctly'.format(table_name))
