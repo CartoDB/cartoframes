@@ -75,5 +75,6 @@ def color_continuous_style(
         value,
         default_legends=color_continuous_legend(title=value),
         default_widgets=histogram_widget(value, title=value),
-        default_popups={'hover': popup_element(value, title=value)}
+        default_popups={'hover': popup_element(value, title=value),
+                        'click': popup_element(value, title=value)}
     )

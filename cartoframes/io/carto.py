@@ -75,6 +75,8 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         index (bool, optional): write the index in the table. Default is False.
         index_label (str, optional): name of the index column in the table. By default it
             uses the name of the index from the dataframe.
+        cartodbfy (bool, optional): convert the table to CARTO format. Default True. More info
+            `here <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
 
     Raises:
         ValueError: if the dataframe or table name provided are wrong or the if_exists param is not valid.
@@ -106,12 +108,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         # Decode geometry column
         cdf.set_geometry(geom_col, inplace=True)
 
-    has_geometry = cdf.has_geometry()
-    if has_geometry:
+    if cdf.has_geometry():
         # Prepare geometry column for the upload
         cdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
-
-    cartodbfy = force_cartodbfy or has_geometry
 
     table_name = context_manager.copy_from(cdf, table_name, if_exists, cartodbfy)
 
