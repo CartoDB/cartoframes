@@ -111,9 +111,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         # Prepare geometry column for the upload
         cdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
 
-    cartodbfy = force_cartodbfy or has_geometry
+    force_cartodbfy = force_cartodbfy or has_geometry
 
-    table_name = context_manager.copy_from(cdf, table_name, if_exists, cartodbfy)
+    table_name = context_manager.copy_from(cdf, table_name, if_exists, force_cartodbfy)
 
     if log_enabled:
         log.info('Success! Data uploaded to table "{}" correctly'.format(table_name))
