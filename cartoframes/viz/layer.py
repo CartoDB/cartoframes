@@ -49,6 +49,8 @@ class Layer:
             south], [east, north]]. If not provided the bounds will be automatically
             calculated to fit all features.
         geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
+        date_col (str, list, optional): column name or list of column names that have a date format. Needed to
+            manage dates properly when using a Dataframe.
 
     Example:
 
@@ -85,7 +87,8 @@ class Layer:
                  hover_popup=True,
                  credentials=None,
                  bounds=None,
-                 geom_col=None):
+                 geom_col=None,
+                 date_col=None):
 
         self.is_basemap = False
         self.source = _set_source(source, credentials, geom_col)
@@ -110,6 +113,7 @@ class Layer:
         self.interactivity = self.popups.get_interactivity()
         self.widgets_info = self.widgets.get_widgets_info()
         self.legends_info = self.legends.get_info() if self.legends is not None else None
+        self.options = _set_options(date_col)
         self.has_legend_list = isinstance(self.legends, LegendList)
 
     def _init_legends(self, legends):
@@ -191,3 +195,16 @@ def _set_popups(popups):
         return PopupList(popups)
     else:
         return PopupList()
+
+
+def _set_options(date_col):
+    if date_col is None:
+        return {}
+
+    if isinstance(date_col, str):
+        return {'dateColumns': [date_col]}
+
+    if isinstance(date_col, list):
+        return {'dateColumns': date_col}
+
+    return {}

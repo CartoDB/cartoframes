@@ -381,6 +381,7 @@ def _get_layer_def(layer):
         'widgets': layer.widgets_info,
         'data': layer.source_data,
         'type': layer.source_type,
+        'options': layer.options,
         'viz': layer.viz
     }
 

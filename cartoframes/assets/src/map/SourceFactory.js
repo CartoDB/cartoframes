@@ -7,7 +7,7 @@ export default function SourceFactory() {
 }
 
 function GeoJSON(layer) {
-  return new carto.source.GeoJSON(_decodeJSONData(layer.data));
+  return new carto.source.GeoJSON(_decodeJSONData(layer.data), layer.options);
 }
 
 function Query(layer) {
