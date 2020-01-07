@@ -9,7 +9,7 @@ from google.oauth2.credentials import Credentials as GoogleCredentials
 
 from ...auth import get_default_credentials
 from ...utils.logger import log
-from ...utils.utils import timelogger
+from ...utils.utils import timelogger, is_ipython_notebook
 
 
 _GCS_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB. This must be a multiple of 256 KB per the API specification.
@@ -185,7 +185,9 @@ class BigQueryClient:
 
 
 def _rows_to_file(rows, file_path, column_names=None, progress_bar=True):
-    if progress_bar:
+    show_progress_bar = progress_bar and is_ipython_notebook()
+
+    if show_progress_bar:
         pb = tqdm.tqdm_notebook(total=rows.total_rows)
 
     with open(file_path, 'w') as csvfile:
@@ -196,5 +198,5 @@ def _rows_to_file(rows, file_path, column_names=None, progress_bar=True):
 
         for row in rows:
             csvwriter.writerow(row.values())
-            if progress_bar:
+            if show_progress_bar:
                 pb.update(1)

@@ -370,7 +370,7 @@ class Dataset(CatalogEntity):
         return join_gdf['id'].unique()
 
     @check_do_enabled
-    def to_csv(self, file_path, credentials=None):
+    def to_csv(self, file_path, credentials=None, limit=None):
         """Download dataset data as a local csv file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
@@ -383,6 +383,7 @@ class Dataset(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+            limit (int, optional): number of rows to be downloaded.
 
         :raises CartoException: If you have not a valid license for the dataset being downloaded.
         :raises ValueError: If the credentials argument is not valid.
@@ -393,10 +394,10 @@ class Dataset(CatalogEntity):
             raise Exception('You are not subscribed to this Dataset yet. '
                             'Please, use the subscribe method first.')
 
-        self._download(_credentials, file_path)
+        self._download(_credentials, file_path, limit)
 
     @check_do_enabled
-    def to_dataframe(self, credentials=None):
+    def to_dataframe(self, credentials=None, limit=None):
         """Download dataset data as a pandas.DataFrame. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
@@ -408,6 +409,7 @@ class Dataset(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+            limit (int, optional): number of rows to be downloaded.
 
         Returns:
             pandas.DataFrame
@@ -423,7 +425,7 @@ class Dataset(CatalogEntity):
             raise Exception('You are not subscribed to this Dataset yet. '
                             'Please, use the subscribe method first.')
 
-        return self._download(_credentials)
+        return self._download(_credentials, limit=limit)
 
     @check_do_enabled
     def subscribe(self, credentials=None):

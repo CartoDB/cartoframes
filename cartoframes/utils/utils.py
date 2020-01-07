@@ -437,3 +437,17 @@ def check_do_enabled(method):
             else:
                 raise e
     return fn
+
+
+def is_ipython_notebook():
+    """
+    Detect whether we are in a Jupyter notebook.
+    """
+    try:
+        cfg = get_ipython().config
+        if 'IPKernelApp' in cfg:
+            return True
+        else:
+            return False
+    except NameError:
+        return False
