@@ -437,6 +437,7 @@ def get_datetime_column_names(df):
 
     return column_names
 
+
 def is_ipython_notebook():
     """
     Detect whether we are in a Jupyter notebook.
