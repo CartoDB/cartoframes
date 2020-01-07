@@ -16,7 +16,7 @@ def isolines_layer(source, value=RANGE_LABEL_KEY, **kwargs):
           or other valid color palette. Use `help(cartoframes.viz.color_palettes)` to
           get more information. Default is "bold".
         size (int, optional): Size of point or line features.
-        opacity (int, optional): Opacity value for point color and line features.
+        opacity (float, optional): Opacity value for point color and line features.
           Default is '0.8'.
         stroke_width (int, optional): Size of the stroke on point features.
         stroke_color (str, optional): Color of the stroke on point features.
