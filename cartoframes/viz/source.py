@@ -2,7 +2,8 @@ import pandas
 
 from ..core.cartodataframe import CartoDataFrame
 from ..core.managers.context_manager import ContextManager
-from ..utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type
+from ..utils.utils import (encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type,
+                           get_datetime_column_names)
 
 
 class SourceType:
@@ -107,6 +108,11 @@ class Source(object):
                 'api_key': self.credentials.api_key,
                 'base_url': self.credentials.base_url
             }
+
+    def get_date_column_names(self):
+        if self.type == SourceType.GEOJSON:
+            return get_datetime_column_names(self.cdf)
+        return None
 
     def get_geom_type(self):
         if self.type == SourceType.QUERY:
