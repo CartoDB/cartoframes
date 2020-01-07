@@ -436,3 +436,16 @@ def get_datetime_column_names(df):
             column_names.append(column)
 
     return column_names
+
+def is_ipython_notebook():
+    """
+    Detect whether we are in a Jupyter notebook.
+    """
+    try:
+        cfg = get_ipython().config
+        if 'IPKernelApp' in cfg:
+            return True
+        else:
+            return False
+    except NameError:
+        return False

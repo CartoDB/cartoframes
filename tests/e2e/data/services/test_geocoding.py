@@ -5,25 +5,28 @@ import unittest
 import os
 import sys
 import json
+import pytest
 import warnings
 import pandas as pd
 import geopandas as gpd
 
 from carto.exceptions import CartoException
 
-from cartoframes.io import delete_table
+from cartoframes import delete_table
 from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
 from cartoframes.data.clients import SQLClient
 from cartoframes.data.services import Geocoding
 from cartoframes.utils.columns import normalize_name
-from cartoframes.utils.geom_utils import RESERVED_GEO_COLUMN_NAME
 
 from ...helpers import _UserUrlLoader, _ReportQuotas
 
 warnings.filterwarnings('ignore')
 
+RESERVED_GEO_COLUMN_NAME = 'the_geom'
 
+
+@pytest.mark.skip()
 class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
     """Tests for cartoframes.data.service.Geocoding"""
 

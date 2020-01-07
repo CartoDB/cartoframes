@@ -57,6 +57,7 @@ node_modules
 htmlcov
 test_*.json
 .pytest_cache
+tmp_file.csv
 
 # Sphinx documentation
 docs/build/
