@@ -6,12 +6,12 @@ from ..utils.utils import (encode_geodataframe, get_geodataframe_bounds, get_geo
                            get_datetime_column_names)
 
 
+RFC_2822_DATETIME_FORMAT = "%a, %d %b %Y %T %z"
+
+
 class SourceType:
     QUERY = 'Query'
     GEOJSON = 'GeoJSON'
-
-
-DEFAULT_DATETIME_FORMAT = "%d-%b-%Y (%H:%M:%S.%f)"
 
 
 class Source(object):
@@ -81,6 +81,7 @@ class Source(object):
 
     def __init__(self, source, credentials=None, geom_col=None):
         self.credentials = None
+        self.datetime_column_names = None
 
         if isinstance(source, str):
             # Table, SQL query
@@ -119,7 +120,7 @@ class Source(object):
 
             if self.datetime_column_names:
                 for column in self.datetime_column_names:
-                    self.cdf[column] = self.cdf[column].dt.strftime(DEFAULT_DATETIME_FORMAT)
+                    self.cdf[column] = self.cdf[column].dt.strftime(RFC_2822_DATETIME_FORMAT)
 
     def get_datetime_column_names(self):
         return self.datetime_column_names

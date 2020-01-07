@@ -39,6 +39,11 @@
             "desc": "Change table privacy",
             "file": "change_dataset_privacy",
             "path": "data_workflows"
+        }, {
+            "title": "Animate a DataFrame by date",
+            "desc": "Animate a DataFrame by date",
+            "file": "date_columns_in_dataframes",
+            "path": "data_workflows"
         }]
     }, {
         "title": "Data Enrichment",
