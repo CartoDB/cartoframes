@@ -433,7 +433,6 @@ def get_datetime_column_names(df):
     column_names = []
     for column in df.columns:
         if is_datetime(df[column]):
-            column_names.add(column)
+            column_names.append(column)
 
-    print(column_names)
     return column_names

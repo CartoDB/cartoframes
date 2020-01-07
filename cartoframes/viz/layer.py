@@ -110,7 +110,7 @@ class Layer:
         self.interactivity = self.popups.get_interactivity()
         self.widgets_info = self.widgets.get_widgets_info()
         self.legends_info = self.legends.get_info() if self.legends is not None else None
-        date_column_names = self.source.get_date_column_names()
+        date_column_names = self.source.get_datetime_column_names()
         self.options = _set_options(date_column_names)
         self.has_legend_list = isinstance(self.legends, LegendList)
 

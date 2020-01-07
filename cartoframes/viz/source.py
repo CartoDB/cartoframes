@@ -11,6 +11,9 @@ class SourceType:
     GEOJSON = 'GeoJSON'
 
 
+DEFAULT_DATETIME_FORMAT = "%d-%b-%Y (%H:%M:%S.%f)"
+
+
 class Source(object):
     """Source
 
@@ -89,6 +92,7 @@ class Source(object):
             # DataFrame, GeoDataFrame, CartoDataFrame
             self.type = SourceType.GEOJSON
             self.cdf = CartoDataFrame(source, copy=True)
+            self.set_datetime_columns()
 
             if geom_col:
                 self.cdf.set_geometry(geom_col, inplace=True)
@@ -109,10 +113,16 @@ class Source(object):
                 'base_url': self.credentials.base_url
             }
 
-    def get_date_column_names(self):
+    def set_datetime_columns(self):
         if self.type == SourceType.GEOJSON:
-            return get_datetime_column_names(self.cdf)
-        return None
+            self.datetime_column_names = get_datetime_column_names(self.cdf)
+
+            if self.datetime_column_names:
+                for column in self.datetime_column_names:
+                    self.cdf[column] = self.cdf[column].dt.strftime(DEFAULT_DATETIME_FORMAT)
+
+    def get_datetime_column_names(self):
+        return self.datetime_column_names
 
     def get_geom_type(self):
         if self.type == SourceType.QUERY:
