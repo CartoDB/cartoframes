@@ -6,7 +6,7 @@ from ..popups import popup_element
 
 
 def size_category_style(
-        value, top=5, cat=None,  ranges=None, color=None, opacity=None,
+        value, top=5, cat=None, size=None, color=None, opacity=None,
         stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a size category style.
 
@@ -15,7 +15,7 @@ def size_category_style(
         top (int, optional): Number of size categories. Default is 5. Values
           can range from 1 to 16.
         cat (list<str>, optional): Category list as a string.
-        ranges (str, optional): Min/max size array as a string. Default is
+        size (str, optional): Min/max size array as a string. Default is
           '[2, 20]' for point geometries and '[1, 10]' for lines.
         color (str, optional): hex, rgb or named color value.
           Default is '#F46D43' for point geometries and '#4CC8A3' for lines.
@@ -40,7 +40,7 @@ def size_category_style(
                 get_value(color, 'color', 'point'),
                 get_value(opacity, 1)),
             'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                func, value, cat or top, ranges or [2, 20]),
+                func, value, cat or top, size or [2, 20]),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
             'filter': animation_filter
@@ -50,7 +50,7 @@ def size_category_style(
                 get_value(color, 'color', 'line'),
                 get_value(opacity, 1)),
             'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                func, value, cat or top, ranges or [1, 10]),
+                func, value, cat or top, size or [1, 10]),
             'filter': animation_filter
         }
     }
