@@ -262,7 +262,7 @@ def _build_polygons_column_with_aggregation(variable, aggregation, column_sufix=
                 enrichment_table.{column} * (
                     ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
                     /
-                    ST_AREA(data_table.{geo_column})
+                    ST_AREA(enrichment_geo_table.geom)
                 )
             ) AS {column_name}
             """.format(
