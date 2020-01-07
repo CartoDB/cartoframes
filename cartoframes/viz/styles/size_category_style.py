@@ -19,7 +19,7 @@ def size_category_style(
           '[2, 20]' for point geometries and '[1, 10]' for lines.
         color (str, optional): hex, rgb or named color value.
           Default is '#F46D43' for point geometries and '#4CC8A3' for lines.
-        opacity (int, optional): Opacity value for point color and line features.
+        opacity (float, optional): Opacity value for point color and line features.
           Default is '0.8'.
         stroke_color (str, optional): Color of the stroke on point features.
           Default is '#222'.
