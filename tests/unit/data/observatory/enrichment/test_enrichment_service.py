@@ -58,7 +58,7 @@ class TestEnrichmentService(object):
             [[1, point]],
             columns=['cartodb_id', geom_column])
 
-        with pytest.raises(EnrichmentError) as e:
+        with pytest.raises(ValueError) as e:
             enrichment_service._prepare_data(df, None)
 
         error = ('No valid geometry found. Please provide an input source with ' +

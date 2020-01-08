@@ -160,7 +160,7 @@ class Isolines(Service):
             temporary_table_name = self._new_temporary_table_name()
             source_gdf = source_manager.gdf
 
-            if geom_col:
+            if geom_col in source_gdf:
                 set_geometry(source_gdf, geom_col, inplace=True)
 
             if not has_geometry(source_gdf):

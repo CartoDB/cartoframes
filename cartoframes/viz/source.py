@@ -63,13 +63,11 @@ class Source:
             self.type = SourceType.GEOJSON
             self.gdf = GeoDataFrame(source, copy=True)
 
-            if has_geometry(source):
-                self.gdf.set_geometry(source.geometry.name, inplace=True)
-
             if geom_col in self.gdf:
                 set_geometry(self.gdf, geom_col, inplace=True)
-
-            if not has_geometry(self.gdf):
+            elif has_geometry(source):
+                self.gdf.set_geometry(source.geometry.name, inplace=True)
+            else:
                 raise ValueError('No valid geometry found. Please provide an input source with ' +
                                  'a valid geometry or specify the "geom_col" param with a geometry column.')
         else:

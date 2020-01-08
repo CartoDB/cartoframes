@@ -96,9 +96,6 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     gdf = GeoDataFrame(dataframe, copy=True)
 
-    if has_geometry(dataframe):
-        gdf.set_geometry(dataframe.geometry.name, inplace=True)
-
     if index:
         index_name = index_label or gdf.index.name
         if index_name is not None and index_name != '':
@@ -108,8 +105,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             raise ValueError('Wrong index name. You should provide a valid index label.')
 
     if geom_col in gdf:
-        # Decode geometry column
         set_geometry(gdf, geom_col, inplace=True)
+    elif has_geometry(dataframe):
+        gdf.set_geometry(dataframe.geometry.name, inplace=True)
 
     if has_geometry(gdf):
         # Prepare geometry column for the upload

@@ -73,15 +73,13 @@ class EnrichmentService(object):
     def _prepare_data(self, dataframe, geom_col):
         geodataframe = GeoDataFrame(dataframe, copy=True)
 
-        if has_geometry(dataframe):
-            geodataframe.set_geometry(dataframe.geometry.name, inplace=True)
-
         if geom_col in geodataframe:
             set_geometry(geodataframe, geom_col, inplace=True)
-
-        if not has_geometry(geodataframe):
-            raise EnrichmentError('No valid geometry found. Please provide an input source with ' +
-                                  'a valid geometry or specify the "geom_col" param with a geometry column.')
+        elif has_geometry(dataframe):
+            geodataframe.set_geometry(dataframe.geometry.name, inplace=True)
+        else:
+            raise ValueError('No valid geometry found. Please provide an input source with ' +
+                             'a valid geometry or specify the "geom_col" param with a geometry column.')
 
         # Add extra columns for the enrichment
         geodataframe[_ENRICHMENT_ID] = range(geodataframe.shape[0])
@@ -236,15 +234,15 @@ class EnrichmentService(object):
             {where}
             {grouper};
         '''.format(
-                geom_column=_GEOM_COLUMN,
-                enrichment_table=enrichment_table,
-                enrichment_geo_table=enrichment_geo_table,
-                enrichment_id=_ENRICHMENT_ID,
-                where=_build_where_clausule(filters),
-                data_table=data_table,
-                grouper=grouper or '',
-                columns=columns
-            )
+            geom_column=_GEOM_COLUMN,
+            enrichment_table=enrichment_table,
+            enrichment_geo_table=enrichment_geo_table,
+            enrichment_id=_ENRICHMENT_ID,
+            where=_build_where_clausule(filters),
+            data_table=data_table,
+            grouper=grouper or '',
+            columns=columns
+        )
 
 
 def _build_polygons_query_variables_with_aggregation(variables, aggregation):
