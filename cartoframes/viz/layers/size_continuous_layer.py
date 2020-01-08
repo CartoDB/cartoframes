@@ -3,7 +3,7 @@ from ..styles import size_continuous_style
 
 
 def size_continuous_layer(
-        source, value, title='', range_min=None, range_max=None, ranges=None, color=None,
+        source, value, title='', range_min=None, range_max=None, size=None, color=None,
         opacity=None, stroke_width=None, stroke_color=None, description='', footer='',
         legend=True, popups=True, widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a size symbol map with
@@ -14,14 +14,14 @@ def size_continuous_layer(
           or text representing a table or query associated with user account.
         value (str): Column to symbolize by.
         title (str, optional): Title of legend and popup hover.
+        color (str, optional): Hex, rgb or named color value. Defaults is '#FFB927' for point geometries and
+          '#4CC8A3' for lines.
+        size (str, optional): Min/max size array as a string. Default is
+          '[2, 40]' for point geometries and '[1, 10]' for lines.
         range_min (int, optional): The minimum value of the data range for the continuous
           size ramp. Defaults to the globalMIN of the dataset.
         range_max (int, optional): The maximum value of the data range for the continuous
           size ramp. Defaults to the globalMAX of the dataset.
-        ranges (str, optional): Min/max size array as a string. Default is
-          '[2, 40]' for point geometries and '[1, 10]' for lines.
-        color (str, optional): Hex, rgb or named color value. Defaults is '#FFB927' for point geometries and
-          '#4CC8A3' for lines.
         opacity (float, optional): Opacity value for point color and line features.
           Default is '0.8'.
         stroke_width (int, optional): Size of the stroke on point features.
@@ -50,7 +50,7 @@ def size_continuous_layer(
     return Layer(
         source,
         style=size_continuous_style(
-          value, range_min, range_max, ranges, color, opacity, stroke_color, stroke_width, animate),
+          value, range_min, range_max, size, color, opacity, stroke_color, stroke_width, animate),
         legend=legend and {
             'type': {
                 'point': 'size-continuous-point',
