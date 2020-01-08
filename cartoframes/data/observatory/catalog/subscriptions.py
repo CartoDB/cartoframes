@@ -24,7 +24,7 @@ class Subscriptions:
         """List of :obj:`Dataset` you have a subscription for.
 
         Raises:
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         """
         return self._subscriptions_datasets
@@ -34,7 +34,7 @@ class Subscriptions:
         """List of :obj:`Geography` you have a subscription for.
 
         Raises:
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         """
         return self._subscriptions_geographies

@@ -15,6 +15,7 @@ from . import subscriptions
 from . import utils
 from ....utils.logger import log
 from ....utils.utils import get_credentials, check_credentials, check_do_enabled
+from ....exceptions import DOError
 
 DATASET_TYPE = 'dataset'
 
@@ -74,7 +75,7 @@ class Dataset(CatalogEntity):
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Variable instances.
 
         Raises:
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         """
         return get_variable_repo().get_all({DATASET_FILTER: self.id})
@@ -87,7 +88,7 @@ class Dataset(CatalogEntity):
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of VariableGroup instances.
 
         Raises:
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         """
         return get_variable_group_repo().get_all({DATASET_FILTER: self.id})
@@ -104,7 +105,7 @@ class Dataset(CatalogEntity):
 
     @property
     def provider(self):
-        """Id of the :obj:`Provider` of this dataset."""
+        """Id of the :py:class:`Provider` of this dataset."""
         return self.data['provider_id']
 
     @property
@@ -114,7 +115,7 @@ class Dataset(CatalogEntity):
 
     @property
     def category(self):
-        """Get the :obj:`Category` ID assigned to this dataset.sets"""
+        """Get the :py:class:`Category` ID assigned to this dataset.sets"""
         return self.data['category_id']
 
     @property
@@ -129,12 +130,16 @@ class Dataset(CatalogEntity):
 
     @property
     def country(self):
-        """ISO 3166-1 alpha-3 code of the :obj:`Country` of this dataset."""
+        """ISO 3166-1 alpha-3 code of the :obj:`Country` of this dataset.
+        More info in: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3.
+        """
         return self.data['country_id']
 
     @property
     def language(self):
-        """ISO 639-3 code of the language that corresponds to the data of this dataset."""
+        """ISO 639-3 code of the language that corresponds to the data of this dataset.
+        More info in: https://en.wikipedia.org/wiki/ISO_639-3.
+        """
         return self.data['lang']
 
     @property
@@ -330,8 +335,9 @@ class Dataset(CatalogEntity):
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
         Raises:
+            CatalogError: if there's a problem when connecting to the catalog.
             DiscoveryError: when no datasets are found.
-            Exception: if there's a problem when connecting to the catalog or DO is not enabled.
+            DOError: if DO is not enabled.
 
         """
         if credentials is not None:
@@ -385,14 +391,17 @@ class Dataset(CatalogEntity):
                 <cartoframes.auth.set_default_credentials>`) will be used.
             limit (int, optional): number of rows to be downloaded.
 
-        :raises CartoException: If you have not a valid license for the dataset being downloaded.
-        :raises ValueError: If the credentials argument is not valid.
+        Raises:
+            DOError: if you have not a valid license for the dataset being downloaded,
+                DO is not enabled or there is an issue downloading the data.
+            ValueError: if the credentials argument is not valid.
+
         """
         _credentials = get_credentials(credentials)
 
         if not self._is_subscribed(_credentials):
-            raise Exception('You are not subscribed to this Dataset yet. '
-                            'Please, use the subscribe method first.')
+            raise DOError('You are not subscribed to this Dataset yet. '
+                          'Please, use the subscribe method first.')
 
         self._download(_credentials, file_path, limit)
 
@@ -415,15 +424,16 @@ class Dataset(CatalogEntity):
             pandas.DataFrame
 
         Raises:
-            Exception: if you have not a valid license for the dataset being downloaded or DO is not enabled.
+            DOError: if you have not a valid license for the dataset being downloaded,
+                DO is not enabled or there is an issue downloading the data.
             ValueError: if the credentials argument is not valid.
 
         """
         _credentials = get_credentials(credentials)
 
         if not self._is_subscribed(_credentials):
-            raise Exception('You are not subscribed to this Dataset yet. '
-                            'Please, use the subscribe method first.')
+            raise DOError('You are not subscribed to this Dataset yet. '
+                          'Please, use the subscribe method first.')
 
         return self._download(_credentials, limit=limit)
 
@@ -454,7 +464,8 @@ class Dataset(CatalogEntity):
                 <cartoframes.auth.set_default_credentials>`) will be used.
 
         Raises:
-            Exception: if there's a problem when connecting to the catalog or DO is not enabled.
+            CatalogError: if there's a problem when connecting to the catalog.
+            DOError: if DO is not enabled.
 
         """
         _credentials = get_credentials(credentials)
@@ -480,7 +491,8 @@ class Dataset(CatalogEntity):
             :py:class:`SubscriptionInfo <cartoframes.data.observatory.SubscriptionInfo>` SubscriptionInfo instance.
 
         Raises:
-            Exception: if there's a problem when connecting to the catalog or DO is not enabled.
+            CatalogError: if there's a problem when connecting to the catalog.
+            DOError: if DO is not enabled.
 
         """
         _credentials = get_credentials(credentials)

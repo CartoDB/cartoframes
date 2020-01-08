@@ -18,6 +18,7 @@ from warnings import catch_warnings, filterwarnings
 from pyrestcli.exceptions import ServerErrorException
 
 from .logger import log
+from ..exceptions import DOError
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
@@ -430,7 +431,7 @@ def check_do_enabled(method):
             return method(*args, **kw)
         except ServerErrorException as e:
             if str(e) == "['The user does not have Data Observatory enabled']":
-                raise Exception(
+                raise DOError(
                     'We are sorry, the Data Observatory is not enabled for your account yet. '
                     'Please contact your customer success manager or send an email to '
                     'sales@carto.com to request access to it.')

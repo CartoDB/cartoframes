@@ -4,6 +4,7 @@ from abc import ABC
 
 from ...clients.bigquery_client import BigQueryClient
 from ....utils.logger import log
+from ....exceptions import DOError
 
 
 _PLATFORM_BQ = 'bq'
@@ -51,7 +52,7 @@ class CatalogEntity(ABC):
 
         Raises:
             DiscoveryError: when no entities are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         """
         return cls._entity_repo.get_by_id(id_)
@@ -78,7 +79,7 @@ class CatalogEntity(ABC):
 
         Raises:
             DiscoveryError: when no entities are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         """
         return cls._entity_repo.get_by_id_list(id_list)
@@ -112,7 +113,7 @@ class CatalogEntity(ABC):
 
     def _download(self, credentials, file_path=None, limit=None):
         if not self._is_available_in('bq'):
-            raise Exception('{} is not ready for Download. Please, contact us for more information.'.format(self))
+            raise DOError('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
         bq_client = _get_bigquery_client(credentials)
 

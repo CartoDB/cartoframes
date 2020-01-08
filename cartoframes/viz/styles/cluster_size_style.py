@@ -89,4 +89,4 @@ def _check_valid_operation(operation):
 
     if operation not in valid_operations:
         err = '"{0}" is not a valid operation. Valid operations are {1}'
-        raise Exception(err.format(operation, ', '.join(valid_operations)))
+        raise ValueError(err.format(operation, ', '.join(valid_operations)))

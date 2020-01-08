@@ -272,7 +272,7 @@ class CartoDataFrame(GeoDataFrame):
         # Decode geometry
         if isinstance(col, str):
             if col not in frame:
-                raise Exception('Column "{0}" does not exist.'.format(col))
+                raise ValueError('Column "{0}" does not exist.'.format(col))
             frame[col] = geom_utils.decode_geometry_column(frame[col])
         else:
             col = geom_utils.decode_geometry_column(col)

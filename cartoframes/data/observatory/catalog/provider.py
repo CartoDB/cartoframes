@@ -32,7 +32,7 @@ class Provider(CatalogEntity):
 
         Raises:
             DiscoveryError: when no datasets are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         Examples:
             >>> provider = Provider.get('mrli')

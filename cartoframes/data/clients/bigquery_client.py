@@ -10,6 +10,7 @@ from google.oauth2.credentials import Credentials as GoogleCredentials
 from ...auth import get_default_credentials
 from ...utils.logger import log
 from ...utils.utils import timelogger, is_ipython_notebook
+from ...exceptions import DOError
 
 
 _GCS_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB. This must be a multiple of 256 KB per the API specification.
@@ -24,8 +25,8 @@ def refresh_clients(func):
             try:
                 return func(self, *args, **kwargs)
             except RefreshError:
-                raise Exception('Something went wrong accessing data. '
-                                'Please, try again in a few seconds or contact support for help.')
+                raise DOError('Something went wrong accessing data. '
+                              'Please, try again in a few seconds or contact support for help.')
     return wrapper
 
 
@@ -82,7 +83,7 @@ class BigQueryClient:
     @timelogger
     def download_to_file(self, job, file_path, fail_if_exists=False, column_names=None, progress_bar=True):
         if fail_if_exists and os.path.isfile(file_path):
-            raise Exception('The file `{}` already exists.'.format(file_path))
+            raise OSError('The file `{}` already exists.'.format(file_path))
 
         try:
             rows = self._download_by_bq_storage_api(job)
@@ -95,7 +96,7 @@ class BigQueryClient:
                 if job.errors:
                     log.error([error['message'] for error in job.errors if 'message' in error])
 
-                raise Exception('Error downloading data')
+                raise DOError('Error downloading data')
 
         _rows_to_file(rows, file_path, column_names, progress_bar)
 
@@ -114,7 +115,7 @@ class BigQueryClient:
                 if job.errors:
                     log.error([error['message'] for error in job.errors if 'message' in error])
 
-                raise Exception('Error downloading data')
+                raise DOError('Error downloading data')
 
     def _download_by_bq_storage_api(self, job):
         table_ref = job.destination.to_bqstorage()
@@ -172,7 +173,7 @@ class BigQueryClient:
             if job.errors:
                 log.error([error['message'] for error in job.errors if 'message' in error])
 
-            raise Exception('Error uploading data')
+            raise DOError('Error uploading data')
 
     def get_table_column_names(self, project, dataset, table):
         table_info = self._get_table(project, dataset, table)

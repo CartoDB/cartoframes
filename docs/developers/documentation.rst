@@ -137,11 +137,15 @@ Built-in
 - `AttributeError`: raised on the attribute assignment or reference fails: `c.wrong`
 - `IndexError`: raised when the index of a sequence is out of range: `l[n+1]`
 - `KeyError`: raised when a key is not found in a dictionary: `d['wrong']`
+- `OSError`: raised when a system function returns a system-related error, including I/O failures such as "file not found" or "disk full".
 - `TypeError`: raised when a function or operation is applied to an object of an incorrect type: `'2'+2`
 - `ValueError`: raised when a function gets an argument of correct type but improper value: `int('xyz')`
 
 Custom
 ------
 
-- DiscoveryError.
-- EnrichmentError.
+- DOError.
+    - CatalogError.
+    - DiscoveryError.
+    - EnrichmentError.
+- PublishError.

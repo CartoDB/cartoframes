@@ -63,8 +63,8 @@ class Source:
                 self.cdf.set_geometry(geom_col, inplace=True)
 
             if not self.cdf.has_geometry():
-                raise Exception('No valid geometry found. Please provide an input source with ' +
-                                'a valid geometry or specify the "geom_col" param with a geometry column.')
+                raise ValueError('No valid geometry found. Please provide an input source with ' +
+                                 'a valid geometry or specify the "geom_col" param with a geometry column.')
         else:
             raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 

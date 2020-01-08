@@ -2,7 +2,17 @@ from abc import ABC, abstractmethod
 
 from .repo_client import RepoClient
 from ..entity import CatalogList, is_slug_value
-from .....exceptions import DiscoveryError
+from .....exceptions import DiscoveryError, CatalogError
+
+
+def check_catalog_error(method):
+    def fn(*args, **kw):
+        try:
+            return method(*args, **kw)
+        except Exception as e:
+            raise CatalogError(
+                'We are sorry, There\'s a problem when connecting to the catalog: {}'.format(e))
+    return fn
 
 
 class EntityRepository(ABC):
@@ -17,9 +27,11 @@ class EntityRepository(ABC):
         if slug_field:
             self.allowed_filters.append(slug_field)
 
+    @check_catalog_error
     def get_all(self, filters=None):
         return self._get_filtered_entities(filters)
 
+    @check_catalog_error
     def get_by_id(self, id_):
         result = self._get_rows(self._get_id_filter(id_))
 
@@ -30,6 +42,7 @@ class EntityRepository(ABC):
         data = self._map_row(result[0])
         return self._to_catalog_entity(data)
 
+    @check_catalog_error
     def get_by_id_list(self, id_list):
         return self._get_filtered_entities(self._get_id_list_filters(id_list))
 

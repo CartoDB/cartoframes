@@ -198,15 +198,10 @@ class Map:
                 publication and also to save local data (if exists) into your CARTO account.
 
         Example:
+            Publishing the map visualization.
 
-            Publishing the map visualization
-
-            .. code::
-
-                from cartoframes.viz import Map, Layer
-
-                tmap = Map(Layer('tablename'))
-                tmap.publish('Custom Map Title', password=None)
+            >>> tmap = Map(Layer('tablename'))
+            >>> tmap.publish('Custom Map Title', password=None)
 
         """
         self._publisher = _get_publisher(table_name, credentials)
@@ -226,8 +221,11 @@ class Map:
             name (str): The visualization name on CARTO.
             password (str): setting it your visualization will be protected by
                 password and using `None` the visualization will be public.
-        """
 
+        Raises:
+            PublishError: if the map has not been published yet.
+
+        """
         html = self._get_publication_html(name)
         return self._publisher.update(html, name, password)
 
@@ -239,6 +237,7 @@ class Map:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 A Credentials instance. If not provided, the credentials will be automatically
                 obtained from the default credentials if available.
+
         """
         return KuvizPublisher.all(credentials)
 

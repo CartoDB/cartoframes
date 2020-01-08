@@ -21,6 +21,7 @@ class Variable(CatalogEntity):
 
         >>> dataset = Dataset.get('mbi_retail_turn_705247a')
         >>> dataset.variables
+        [<Variable.get('RT_CI_95050c10')> #'Retail Turnover: index (country eq.100)', ...]
 
     """
     _entity_repo = get_variable_repo()
@@ -34,7 +35,7 @@ class Variable(CatalogEntity):
 
         Raises:
             DiscoveryError: when no datasets are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         """
         return get_dataset_repo().get_all({VARIABLE_FILTER: self.id})

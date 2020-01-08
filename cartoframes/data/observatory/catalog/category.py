@@ -35,7 +35,7 @@ class Category(CatalogEntity):
 
         Raises:
             DiscoveryError: when no datasets are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         Examples:
             Get all the `datasets` :py:class:`Dataset <cartoframes.data.observatory.Dataset>` available
@@ -72,7 +72,7 @@ class Category(CatalogEntity):
 
         Raises:
             DiscoveryError: when no geographies are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         Examples:
             Get all the `geographies` :py:class:`Dataset <cartoframes.data.observatory.Dataset>` available

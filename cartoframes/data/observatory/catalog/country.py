@@ -37,7 +37,7 @@ class Country(CatalogEntity):
 
         Raises:
             DiscoveryError: when no datasets are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         Examples:
             Get all the `datasets` :py:class:`Dataset <cartoframes.data.observatory.Dataset>` available
@@ -73,7 +73,7 @@ class Country(CatalogEntity):
 
         Raises:
             DiscoveryError: when no geographies are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         Examples:
             Get all the `geographies` :py:class:`Geography <cartoframes.data.observatory.Geography>` available
@@ -109,7 +109,7 @@ class Country(CatalogEntity):
 
         Raises:
             DiscoveryError: when no datasets are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog.
 
         Examples:
             Get all the `categories` :py:class:`Category <cartoframes.data.observatory.Category>` available
