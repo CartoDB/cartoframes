@@ -124,3 +124,27 @@ Examples
 Examples are placed in the `/examples` directory. These examples are Jupyter Notebooks, that are converted to `html` to be rendered in the developer center.
 The `examples.json` file placed in `/docs/developer-center/examples` is used to select and organize the examples to expose in the developer center.
 When adding a new notebook, if it needs to be published in the developer center, it must be included in this config file.
+
+
+Errors and Exceptions
+~~~~~~~~~~~~~~~~~~~~~
+
+- `Exception`: general exception.
+
+Built-in
+--------
+
+- `AttributeError`: raised on the attribute assignment or reference fails: `c.wrong`
+- `IndexError`: raised when the index of a sequence is out of range: `l[n+1]`
+- `KeyError`: raised when a key is not found in a dictionary: `d['wrong']`
+- `OSError`: raised when a system function returns a system-related error, including I/O failures such as "file not found" or "disk full".
+- `TypeError`: raised when a function or operation is applied to an object of an incorrect type: `'2'+2`
+- `ValueError`: raised when a function gets an argument of correct type but improper value: `int('xyz')`
+
+Custom
+------
+
+- DOError.
+    - CatalogError.
+    - EnrichmentError.
+- PublishError.

@@ -2,20 +2,20 @@ import time
 from warnings import filterwarnings
 
 from carto.kuvizs import KuvizManager
-from carto.exceptions import CartoException
 
 from .source import Source
 from ..auth import get_default_credentials
 from ..utils.columns import normalize_name
 from ..data.clients.auth_api_client import AuthAPIClient
-from ..core.logger import log
+from ..utils.logger import log
+from ..exceptions import PublishError
 
-filterwarnings("ignore", category=FutureWarning, module="carto")
+filterwarnings('ignore', category=FutureWarning, module='carto')
 
 DEFAULT_PUBLIC = 'default_public'
 
 
-class KuvizPublisher(object):
+class KuvizPublisher:
     def __init__(self, credentials=None):
         self.kuviz = None
         self._maps_api_key = DEFAULT_PUBLIC
@@ -47,7 +47,7 @@ class KuvizPublisher(object):
 
     def update(self, data, name, password):
         if not self.kuviz:
-            raise CartoException('The map has not been published yet. Use the `publish` method instead.')
+            raise PublishError('The map has not been published yet. Use the `publish` method instead.')
 
         self.kuviz.data = data
         self.kuviz.name = name

@@ -11,11 +11,11 @@ def size_category_layer(
 
     Args:
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
-          or text representing a table or query associated with user account.
+            or text representing a table or query associated with user account.
         value (str): Column to symbolize by.
         title (str, optional): Title of legend.
         top (int, optional): Number of size categories for layer. Default is
-          5. Valid values range from 1 to 16.
+            5. Valid values range from 1 to 16.
         cat (str, optional): Category list as a string.
         color (str, optional): Hex, rgb or named color value. Default is '#F46D43' for point geometries and
           '#4CC8A3' for lines.
@@ -25,25 +25,24 @@ def size_category_layer(
         stroke_color (str, optional): Color of the stroke on point features.
           Default is '#222'.
         opacity (float, optional): Opacity value for point color and line features.
-          Default is '0.8'.
+          Default is 0.8.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
-          Set to "True" by default.
+            Set to "True" by default.
         popups (bool, list of :py:class:`Popup <cartoframes.viz.Popup>`, default False, optional):
-          Display popups on hover and click: "True" or "False". Set to "True" by default.
+            Display popups on hover and click: "True" or "False". Set to "True" by default.
         widget (bool, optional): Display a widget for mapped data.
-          Set to "False" by default.
+            Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-          A Credentials instance. This is only used for the simplified Source API.
-          When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
-          these credentials is simply ignored. If not provided the credentials will be
-          automatically obtained from the default credentials.
+            A Credentials instance. This is only used for the simplified Source API.
+            When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
+            these credentials is simply ignored. If not provided the credentials will be
+            automatically obtained from the default credentials.
 
     Returns:
-        cartoframes.viz.Layer: Layer styled by `value`.
-        Includes a legend, popup and widget on `value`.
+        cartoframes.viz.Layer
 
     """
     return Layer(

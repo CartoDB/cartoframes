@@ -8,9 +8,9 @@ from ..catalog.dataset import Dataset
 from ..catalog.geography import Geography
 from ...clients import bigquery_client
 from ....auth import get_default_credentials
-from ....exceptions import EnrichmentException
+from ....exceptions import EnrichmentError
 from ....core.cartodataframe import CartoDataFrame
-from ....core.logger import log
+from ....utils.logger import log
 from ....utils.geom_utils import to_geojson
 from ....utils.utils import timelogger
 
@@ -58,7 +58,7 @@ class EnrichmentService(object):
             time.sleep(0.5)
 
         if len(errors) > 0:
-            raise Exception(errors)
+            raise EnrichmentError(errors)
 
         for df in dfs_enriched:
             cartodataframe = cartodataframe.merge(df, on=_ENRICHMENT_ID, how='left')
@@ -77,8 +77,8 @@ class EnrichmentService(object):
             cartodataframe.set_geometry(geom_col, inplace=True)
 
         if not cartodataframe.has_geometry():
-            raise EnrichmentException('No valid geometry found. Please provide an input source with ' +
-                                      'a valid geometry or specify the "geom_col" param with a geometry column.')
+            raise EnrichmentError('No valid geometry found. Please provide an input source with ' +
+                                  'a valid geometry or specify the "geom_col" param with a geometry column.')
 
         # Add extra columns for the enrichment
         cartodataframe[_ENRICHMENT_ID] = range(cartodataframe.shape[0])
@@ -323,7 +323,7 @@ def _prepare_variable(variable, aggregation=None):
         variable = Variable.get(variable)
 
     if not isinstance(variable, Variable):
-        raise EnrichmentException("""
+        raise EnrichmentError("""
             variable should be a `<cartoframes.data.observatory> Variable` instance,
             Variable `id` property or Variable `slug` property
         """)
@@ -339,13 +339,13 @@ def _prepare_variable(variable, aggregation=None):
 
 def _validate_variables_input(variables):
     if not isinstance(variables, Variable) and not isinstance(variables, str) and not isinstance(variables, list):
-        raise EnrichmentException('variables parameter should be a Variable instance, a list or a str.')
+        raise EnrichmentError('variables parameter should be a Variable instance, a list or a str.')
 
     if not isinstance(variables, Variable) and len(variables) < 1:
-        raise EnrichmentException('You should add at least one variable to be used in enrichment.')
+        raise EnrichmentError('You should add at least one variable to be used in enrichment.')
 
     if isinstance(variables, list) and len(variables) > MAX_VARIABLES_NUMBER:
-        raise EnrichmentException('The maximum number of variables to be used in enrichment is 50.')
+        raise EnrichmentError('The maximum number of variables to be used in enrichment is 50.')
 
 
 def _validate_bq_operations(variables, credentials):
@@ -361,24 +361,24 @@ def _validate_bq_operations(variables, credentials):
 
 def _is_available_in_bq(dataset, geography):
     if not dataset._is_available_in('bq'):
-        raise EnrichmentException("""
+        raise EnrichmentError("""
             The Dataset '{}' is not ready for Enrichment. Please, contact us for more information.
         """.format(dataset))
 
     if not geography._is_available_in('bq'):
-        raise EnrichmentException("""
+        raise EnrichmentError("""
             The Geography '{}' is not ready for Enrichment. Please, contact us for more information.
         """.format(geography))
 
 
 def _is_subscribed(dataset, geography, credentials):
     if not dataset._is_subscribed(credentials):
-        raise EnrichmentException("""
+        raise EnrichmentError("""
             You are not subscribed to the Dataset '{}' yet. Please, use the subscribe method first.
         """.format(dataset.id))
 
     if not geography._is_subscribed(credentials):
-        raise EnrichmentException("""
+        raise EnrichmentError("""
             You are not subscribed to the Geography '{}' yet. Please, use the subscribe method first.
         """.format(geography.id))
 

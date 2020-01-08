@@ -12,9 +12,8 @@ from ...io.carto import read_carto, to_carto
 from ...utils import utils
 
 
-class DataObsClient(object):
-    """
-    Data Observatory v1 class. `Data Observatory documentation
+class DataObsClient:
+    """Data Observatory v1 class. `Data Observatory documentation
     <https://carto.com/developers/data-observatory/>`__.
 
     This class provides the following methods to interact with Data Observatory:
@@ -49,57 +48,43 @@ class DataObsClient(object):
         section for more).
 
         Examples:
-
             Find all boundaries available for Australia. The columns
             `geom_name` gives us the name of the boundary and `geom_id`
             is what we need for the `boundary` argument.
 
-            .. code:: python
-
-                from cartoframes.auth import Credentials
-                from cartoframes.data.clients import DataObsClient
-                creds = Credentials('user name', 'api key')
-                do = DataObsClient(creds)
-                au_boundaries = do.boundaries(region='Australia')
-                au_boundaries[['geom_name', 'geom_id']]
+            >>> do = DataObsClient(credentials)
+            >>> au_boundaries = do.boundaries(region='Australia')
+            >>> au_boundaries[['geom_name', 'geom_id']]
 
             Get the boundaries for Australian Postal Areas and map them.
 
-            .. code:: python
-
-                from cartoframes.viz import Layer
-                au_postal_areas = do.boundaries(boundary='au.geo.POA')
-                Layer(au_postal_areas)
+            >>> au_postal_areas = do.boundaries(boundary='au.geo.POA')
+            >>> Map(Layer(au_postal_areas))
 
             Get census tracts around Idaho Falls, Idaho, USA, and add median
             income from the US census. Without limiting the metadata, we get
             median income measures for each census in the Data Observatory.
 
-            .. code:: python
-
-                from cartoframes.auth import Credentials
-                from cartoframes.data.clients import DataObsClient
-                credentials = Credentials('user name', 'api key')
-                # Note: default credentials will be supported in a future release
-                do = DataObsClient(credentials)
-                # will return CartoDataFrame with columns `the_geom` and `geom_ref`
-                tracts = do.boundaries(
-                    boundary='us.census.tiger.census_tract',
-                    region=[-112.096642,43.429932,-111.974213,43.553539])
-                # write geometries to a CARTO table
-                tracts.upload('idaho_falls_tracts')
-                # gather metadata needed to look up median income
-                median_income_meta = do.discovery(
-                    'idaho_falls_tracts',
-                    keywords='median income',
-                    boundaries='us.census.tiger.census_tract')
-                # get median income data and original table as new CartoDataFrame
-                idaho_falls_income = do.augment(
-                    'idaho_falls_tracts',
-                    median_income_meta,
-                    how='geom_refs')
-                # overwrite existing table with newly-enriched CartoDataFrame
-                idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')
+            >>> # Note: default credentials will be supported in a future release
+            >>> do = DataObsClient(credentials)
+            >>> # will return CartoDataFrame with columns `the_geom` and `geom_ref`
+            >>> tracts = do.boundaries(
+            ...     boundary='us.census.tiger.census_tract',
+            ...     region=[-112.096642,43.429932,-111.974213,43.553539])
+            >>> # write geometries to a CARTO table
+            >>> tracts.upload('idaho_falls_tracts')
+            >>> # gather metadata needed to look up median income
+            >>> median_income_meta = do.discovery(
+            ...     'idaho_falls_tracts',
+            ...     keywords='median income',
+            ...     boundaries='us.census.tiger.census_tract')
+            >>> # get median income data and original table as new CartoDataFrame
+            >>> idaho_falls_income = do.augment(
+            ...     'idaho_falls_tracts',
+            ...     median_income_meta,
+            ...     how='geom_refs')
+            >>> # overwrite existing table with newly-enriched CartoDataFrame
+            >>> idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')
 
         Args:
             boundary (str, optional):
@@ -262,15 +247,12 @@ class DataObsClient(object):
             no filter values set will result in many thousands of measures.
 
         Examples:
-
             Get all European Union measures that mention ``freight``.
 
-            .. code::
-
-                freight_meta = do.discovery('European Union',
-                                       keywords='freight',
-                                       time='2010')
-                freight_meta['numer_name'].head()
+            >>> freight_meta = do.discovery('European Union',
+            ...                        keywords='freight',
+            ...                        time='2010')
+            >>> freight_meta['numer_name'].head()
 
         Args:
             region (str or list of float):
@@ -490,29 +472,22 @@ class DataObsClient(object):
             Get a DataFrame with Data Observatory measures based on the
             geometries in a CARTO table.
 
-            .. code::
-
-                from cartoframes.auth import Credentials
-                from cartoframes.data.clients import DataObsClient
-                creds = Credentials('user name', 'api key')
-                do = DataObsClient(creds)
-                median_income = do.discovery(
-                    'transaction_events',
-                    regex='.*median income.*',
-                    time='2011 - 2015')
-                ds = do.augment('transaction_events', median_income)
+            >>> do = DataObsClient(credentials)
+            >>> median_income = do.discovery(
+            ...     'transaction_events',
+            ...     regex='.*median income.*',
+            ...     time='2011 - 2015')
+            >>> ds = do.augment('transaction_events', median_income)
 
             Pass in cherry-picked measures from the Data Observatory catalog.
             The rest of the metadata will be filled in, but it's important to
             specify the geographic level as this will not show up in the column
             name.
 
-            .. code::
-
-                median_income = [{'numer_id': 'us.census.acs.B19013001',
-                                  'geom_id': 'us.census.tiger.block_group',
-                                  'numer_timespan': '2011 - 2015'}]
-                ds = do.augment('transaction_events', median_income)
+            >>> median_income = [{'numer_id': 'us.census.acs.B19013001',
+            ...                   'geom_id': 'us.census.tiger.block_group',
+            ...                   'numer_timespan': '2011 - 2015'}]
+            >>> ds = do.augment('transaction_events', median_income)
 
         Args:
             table_name (str):

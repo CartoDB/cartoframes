@@ -1,34 +1,34 @@
 import collections
-from warnings import warn
-
 import numpy as np
 
+from warnings import warn
+
 from . import constants
-from .basemaps import Basemaps
 from .html import HTMLMap
+from .basemaps import Basemaps
 from .kuviz import KuvizPublisher
 from ..utils.utils import get_center
 
 WORLD_BOUNDS = [[-180, -90], [180, 90]]
 
 
-class Map(object):
-    """Map
+class Map:
+    """Map to display a data visualization. It must contain a one or multiple :py:class:`Map <cartoframes.viz.Layer>`
+    instances. It provides control of the basemap, bounds and properties of the visualization.
 
     Args:
         layers (list of :py:class:`Layer <cartoframes.viz.Layer>`): List of
-          layers. Zero or more of :py:class:`Layer <cartoframes.viz.Layer>`.
+            layers. Zero or more of :py:class:`Layer <cartoframes.viz.Layer>`.
         basemap (str, optional):
-          - if a `str`, name of a CARTO vector basemap. One of `positron`,
-            `voyager`, or `darkmatter` from the :obj:`BaseMaps` class, or a
-            hex, rgb or named color value.
-          - if a `dict`, Mapbox or other style as the value of the `style` key.
-            If a Mapbox style, the access token is the value of the `token`
-            key.
+            - if a `str`, name of a CARTO vector basemap. One of `positron`,
+                `voyager`, or `darkmatter` from the :obj:`BaseMaps` class, or a
+                hex, rgb or named color value.
+            - if a `dict`, Mapbox or other style as the value of the `style` key.
+                If a Mapbox style, the access token is the value of the `token` key.
         bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
-          keys, or an array of floats in the following structure: [[west,
-          south], [east, north]]. If not provided the bounds will be automatically
-          calculated to fit all features.
+            keys, or an array of floats in the following structure: [[west,
+            south], [east, north]]. If not provided the bounds will be automatically
+            calculated to fit all features.
         size (tuple, optional): a (width, height) pair for the size of the map.
           Default is (1024, 632).
         viewport (dict, optional): Properties for display of the map viewport.
@@ -46,138 +46,54 @@ class Map(object):
         description (string, optional): Text that describes the map and will be displayed in the
           default legend after the title.
 
-    Examples:
+    Raises:
+        ValueError: if input parameters are not valid.
 
+    Examples:
         Basic usage.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Map, Layer
-
-            set_default_credentials(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
-            )
-
-            Map(Layer('table in your account'))
+        >>> Map(Layer('table in your account'))
 
         Display more than one layer on a map.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Map, Layer
-
-            set_default_credentials(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
-            )
-
-            Map(layers=[
-                Layer('table1'),
-                Layer('table2')
-            ])
+        >>> Map(layers=[
+        ...     Layer('table1'),
+        ...     Layer('table2')
+        >>> ])
 
         Change the CARTO basemap style.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Map, Layer, basemaps
-
-            set_default_credentials(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
-            )
-
-            Map(
-                Layer('table in your account'),
-                basemaps.darkmatter
-            )
+        >>> Map(Layer('table in your account'), basemap=basemaps.darkmatter)
 
         Choose a custom basemap style. Here we use the Mapbox streets style,
         which requires an access token.
 
-        .. code::
+        >>> basemap = {
+        ...     'style': 'mapbox://styles/mapbox/streets-v9',
+        ...     'token': 'your Mapbox token'
+        >>> }
 
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Map, Layer
-
-            set_default_credentials(
-                base_url='https://your_user_name.carto.com',
-                api_key='your CARTO API key'
-            )
-
-            basemap = {
-                'style': 'mapbox://styles/mapbox/streets-v9',
-                'token': 'your Mapbox token'
-            }
-
-            Map(
-                Layer('table in your account'),
-                basemap
-            )
+        >>> Map(Layer('table in your account'), basemap=basemap)
 
         Remove basemap and show a custom color.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Map, Layer
-
-            set_default_credentials(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
-            )
-
-            Map(
-                Layer('table in your account'),
-                basemap='yellow'  # None, False, 'white', 'rgb(255, 255, 0)'
-            )
+        >>> Map(Layer('table in your account'), basemap='yellow')  # None, False, 'white', 'rgb(255, 255, 0)'
 
         Set custom bounds.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Map, Layer
-
-            set_default_credentials(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
-            )
-
-            bounds = {
-                'west': -10,
-                'east': 10,
-                'north': -10,
-                'south': 10
-            }
-
-            # or bounds = [[-10, 10], [10, -10]]
-
-            Map(
-                Layer('table in your account'),
-                bounds=bounds
-            )
+        >>> bounds = {
+        ...     'west': -10,
+        ...     'east': 10,
+        ...     'north': -10,
+        ...     'south': 10
+        >>> } # or bounds = [[-10, 10], [10, -10]]
+        >>> Map(Layer('table in your account'), bounds=bounds)
 
         Show the map center and zoom value on the map (lower left-hand corner).
 
-        .. code::
+        >>> Map(Layer('table in your account'), show_info=True)
 
-            from cartoframes.auth import Credentials, set_default_credentials
-            from cartoframes.viz import Map, Layer
-
-            credentials = Credentials(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
-            )
-            set_default_credentials(credentials)
-
-            Map(Layer('table in your account'), show_info=True)
     """
-
     def __init__(self,
                  layers=None,
                  basemap=Basemaps.positron,
@@ -282,15 +198,10 @@ class Map(object):
                 publication and also to save local data (if exists) into your CARTO account.
 
         Example:
+            Publishing the map visualization.
 
-            Publishing the map visualization
-
-            .. code::
-
-                from cartoframes.viz import Map, Layer
-
-                tmap = Map(Layer('tablename'))
-                tmap.publish('Custom Map Title', password=None)
+            >>> tmap = Map(Layer('tablename'))
+            >>> tmap.publish('Custom Map Title', password=None)
 
         """
         self._publisher = _get_publisher(table_name, credentials)
@@ -310,8 +221,11 @@ class Map(object):
             name (str): The visualization name on CARTO.
             password (str): setting it your visualization will be protected by
                 password and using `None` the visualization will be public.
-        """
 
+        Raises:
+            PublishError: if the map has not been published yet.
+
+        """
         html = self._get_publication_html(name)
         return self._publisher.update(html, name, password)
 
@@ -323,6 +237,7 @@ class Map(object):
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 A Credentials instance. If not provided, the credentials will be automatically
                 obtained from the default credentials if available.
+
         """
         return KuvizPublisher.all(credentials)
 

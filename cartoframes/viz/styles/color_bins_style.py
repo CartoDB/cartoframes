@@ -13,17 +13,17 @@ def color_bins_style(
     Args:
         value (str): Column to symbolize by.
         method (str, optional): Classification method of data: "quantiles", "equal", "stdev".
-          Default is "quantiles".
+            Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
         breaks (list<int>, optional): Assign manual class break values.
         palette (str, optional): Palette that can be a named cartocolor palette
-          or other valid color palette. Use `help(cartoframes.viz.color_palettes)` to
-          get more information. Default is "purpor".
+            or other valid color palette. Use `help(cartoframes.viz.palettes)` to
+            get more information. Default is "purpor".
         size (int, optional): Size of point or line features.
-        opacity (float, optional): Opacity value for point color and line features.
-          Default is '0.8'.
+        opacity (float, optional): Opacity value. Default is 1 for points and lines and
+            0.9 for polygons.
         stroke_color (str, optional): Color of the stroke on point features.
-          Default is '#222'.
+            Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.
         animate (str, optional): Animate features by date/time or other numeric field.
 

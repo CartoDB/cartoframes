@@ -3,16 +3,9 @@ class Basemaps:  # pylint: disable=too-few-public-methods
     `CARTO Basemaps repository <https://github.com/CartoDB/basemap-styles>`__.
 
     Example:
+        >>> Map(basemap=basemaps.positron)
 
-        Create an embedded map using CARTO's Positron style with no data layers
-
-        .. code::
-
-            from cartoframes.viz import Map, basemaps
-
-            Map(basemap=basemaps.positron)
     """
-
     positron = 'Positron'
     darkmatter = 'DarkMatter'
     voyager = 'Voyager'

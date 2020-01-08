@@ -194,7 +194,7 @@ class TestCatalog(object):
         catalog = Catalog()
 
         # When
-        with pytest.raises(AttributeError) as e:
+        with pytest.raises(ValueError) as e:
             catalog.subscriptions(wrong_credentials)
 
         # Then

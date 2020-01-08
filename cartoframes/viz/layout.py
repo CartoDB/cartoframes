@@ -1,97 +1,62 @@
-from carto.exceptions import CartoException
-
-from ..utils.utils import get_center
 from . import constants
-from .html import HTMLLayout
 from .map import Map
+from .html import HTMLLayout
+from ..utils.utils import get_center
 
 
-class Layout(object):
+class Layout:
     """Create a layout of visualizations in order to compare them.
 
     Args:
         maps (list of :py:class:`Map <cartoframes.viz.Map>`): List of
-          maps. Zero or more of :py:class:`Map <cartoframes.viz.Map>`.
+            maps. Zero or more of :py:class:`Map <cartoframes.viz.Map>`.
         N_SIZE (number, optional): Number of columns of the layout
         M_SIZE (number, optional): Number of rows of the layout
         viewport (dict, optional): Properties for display of the maps viewport.
-          Keys can be `bearing` or `pitch`.
+            Keys can be `bearing` or `pitch`.
+
+    Raises:
+        ValueError: if the input elements are not instances of :py:class:`Map <cartoframes.viz.Map>`.
 
     Examples:
-
         Basic usage.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Map, Layer, Layout
-
-            set_default_credentials('your_account')
-
-            Layout([
-                Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account')),
-                Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account'))
-            ])
+        >>> Layout([
+        ...    Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account')),
+        ...    Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account'))
+        >>> ])
 
         Display a 2x2 layout.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Map, Layer, Layout
-
-            set_default_credentials('your_account')
-
-            Layout([
-                Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account')),
-                Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account'))
-            ], 2, 2)
+        >>> Layout([
+        ...     Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account')),
+        ...     Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account'))
+        >>> ], 2, 2)
 
         Custom Titles.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Map, Layer, Layout
-
-            set_default_credentials('your_account')
-
-            Layout([
-                Map(Layer('table_in_your_account'), title="Visualization 1 custom title"),
-                Map(Layer('table_in_your_account'), title="Visualization 2 custom title")),
-            ])
+        >>> Layout([
+        ...     Map(Layer('table_in_your_account'), title="Visualization 1 custom title"),
+        ...     Map(Layer('table_in_your_account'), title="Visualization 2 custom title")),
+        >>> ])
 
         Viewport.
 
-        .. code::
+        >>> Layout([
+        ...     Map(Layer('table_in_your_account')),
+        ...     Map(Layer('table_in_your_account')),
+        ...     Map(Layer('table_in_your_account')),
+        ...     Map(Layer('table_in_your_account'))
+        >>> ], viewport={ 'zoom': 2 })
 
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Map, Layer, Layout
+        >>> Layout([
+        ...     Map(Layer('table_in_your_account'), viewport={ 'zoom': 0.5 }),
+        ...     Map(Layer('table_in_your_account')),
+        ...     Map(Layer('table_in_your_account')),
+        ...     Map(Layer('table_in_your_account'))
+        >>> ], viewport={ 'zoom': 2 })
 
-            set_default_credentials('your_account')
-
-            Layout([
-                Map(Layer('table_in_your_account')),
-                Map(Layer('table_in_your_account')),
-                Map(Layer('table_in_your_account')),
-                Map(Layer('table_in_your_account'))
-            ], viewport={ 'zoom': 2 })
-
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Map, Layer, Layout
-
-            set_default_credentials('your_account')
-
-            Layout([
-                Map(Layer('table_in_your_account'), viewport={ 'zoom': 0.5 }),
-                Map(Layer('table_in_your_account')),
-                Map(Layer('table_in_your_account')),
-                Map(Layer('table_in_your_account'))
-            ], viewport={ 'zoom': 2 })
     """
-
     def __init__(self,
                  maps,
                  n_size=None,
@@ -125,7 +90,7 @@ def _init_layout(maps, is_static, viewport):
 
     for _, viz in enumerate(maps):
         if not isinstance(viz, Map):
-            raise CartoException('All the elements in the Layout should be an instance of Map')
+            raise ValueError('All the elements in the Layout should be an instance of Map.')
         map_settings = _get_map_settings(viz, is_static, viewport)
         layout.append(map_settings)
 

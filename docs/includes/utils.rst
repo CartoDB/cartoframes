@@ -1,7 +1,7 @@
 Utils
 -----
 
-.. automodule:: cartoframes.io.carto
+.. automodule:: cartoframes.utils
     :members:
     :member-order: bysource
     :undoc-members:

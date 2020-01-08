@@ -19,7 +19,7 @@ def set_log_level(level):
 
     Args:
         level (str): log level name. By default it's set to "info". Valid log levels are:
-        critical, error, warning, info, debug, notset.
+        "critical", "error", "warning", "info", "debug", "notset".
 
     """
     levels = {

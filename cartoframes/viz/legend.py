@@ -1,7 +1,7 @@
 from . import constants
 
 
-class Legend():
+class Legend:
     """Legends are added to each layer and displayed in the visualization
 
     Available legends are:
@@ -12,8 +12,8 @@ class Legend():
         - :py:meth:`size_bins_legend <cartoframes.viz.size_bins_legend>`
         - :py:meth:`size_category_legend <cartoframes.viz.size_category_legend>`
         - :py:meth:`size_continuous_legend <cartoframes.viz.size_continuous_legend>`
-    """
 
+    """
     def __init__(self, legend_type=None, title='', description='',
                  footer='', prop=None, variable='', dynamic=True):
         self._check_type(legend_type)

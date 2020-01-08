@@ -15,13 +15,12 @@ def cluster_size_style(
     Args:
         value (str): Numeric column to aggregate.
         operation (str, optional): Cluster operation, defaults to 'count'. Other options
-          available are 'avg', 'min', 'max', and 'sum'.
+            available are 'avg', 'min', 'max', and 'sum'.
         resolution (int, optional): Resolution of aggregation grid cell. Set to 32 by default.
         color (str, optional): Hex, rgb or named color value. Defaults is '#FFB927' for point geometries.
-        opacity (float, optional): Opacity value for point color and line features.
-          Default is '0.8'.
+        opacity (float, optional): Opacity value. Default is 0.8.
         stroke_color (str, optional): Color of the stroke on point features.
-          Default is '#222'.
+            Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.
         animate (str, optional): Animate features by date/time or other numeric field.
 
@@ -90,4 +89,4 @@ def _check_valid_operation(operation):
 
     if operation not in valid_operations:
         err = '"{0}" is not a valid operation. Valid operations are {1}'
-        raise Exception(err.format(operation, ', '.join(valid_operations)))
+        raise ValueError(err.format(operation, ', '.join(valid_operations)))

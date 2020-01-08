@@ -5,7 +5,7 @@ from ..cartodataframe import CartoDataFrame
 from ...utils.utils import is_sql_query
 
 
-class SourceManager(object):
+class SourceManager:
 
     def __init__(self, source, credentials):
         self._source = source
