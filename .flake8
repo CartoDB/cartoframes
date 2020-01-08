@@ -1,2 +1,6 @@
 [flake8]
 max-line-length = 120
+
+# Ignore rules from the "black" formatter. This is added
+# to avoid "Black would make changes." in houndci-bot.
+ignore = BLK, W503, W504, E121, E126, E226
