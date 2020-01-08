@@ -110,8 +110,7 @@ class Layer:
         self.interactivity = self.popups.get_interactivity()
         self.widgets_info = self.widgets.get_widgets_info()
         self.legends_info = self.legends.get_info() if self.legends is not None else None
-        date_column_names = self.source.get_datetime_column_names()
-        self.options = _set_options(date_column_names)
+        self.options = self._set_options()
         self.has_legend_list = isinstance(self.legends, LegendList)
 
     def _init_legends(self, legends):
@@ -139,6 +138,14 @@ class Layer:
         if hover_popup:
             popups['hover'] = hover_popup
         return _set_popups(popups)
+
+    def _set_options(self):
+        date_column_names = self.source.get_datetime_column_names()
+
+        if isinstance(date_column_names, list):
+            return {'dateColumns': date_column_names}
+
+        return {}
 
     def _repr_html_(self):
         from .map import Map
@@ -193,10 +200,3 @@ def _set_popups(popups):
         return PopupList(popups)
     else:
         return PopupList()
-
-
-def _set_options(date_column_names):
-    if isinstance(date_column_names, list):
-        return {'dateColumns': date_column_names}
-
-    return {}
