@@ -3,7 +3,10 @@ from geopandas import GeoDataFrame
 
 from ..io.managers.context_manager import ContextManager
 from ..utils.geom_utils import set_geometry, has_geometry
-from ..utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type
+from ..utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type, \
+                          get_datetime_column_names
+
+RFC_2822_DATETIME_FORMAT = "%a, %d %b %Y %T %z"
 
 
 class SourceType:
@@ -51,6 +54,7 @@ class Source:
     """
     def __init__(self, source, credentials=None, geom_col=None):
         self.credentials = None
+        self.datetime_column_names = None
 
         if isinstance(source, str):
             # Table, SQL query
@@ -62,6 +66,7 @@ class Source:
             # DataFrame, GeoDataFrame
             self.type = SourceType.GEOJSON
             self.gdf = GeoDataFrame(source, copy=True)
+            self.set_datetime_columns()
 
             if geom_col in self.gdf:
                 set_geometry(self.gdf, geom_col, inplace=True)
@@ -82,6 +87,17 @@ class Source:
                 'api_key': self.credentials.api_key,
                 'base_url': self.credentials.base_url
             }
+
+    def set_datetime_columns(self):
+        if self.type == SourceType.GEOJSON:
+            self.datetime_column_names = get_datetime_column_names(self.gdf)
+
+            if self.datetime_column_names:
+                for column in self.datetime_column_names:
+                    self.gdf[column] = self.gdf[column].dt.strftime(RFC_2822_DATETIME_FORMAT)
+
+    def get_datetime_column_names(self):
+        return self.datetime_column_names
 
     def get_geom_type(self):
         if self.type == SourceType.QUERY:
