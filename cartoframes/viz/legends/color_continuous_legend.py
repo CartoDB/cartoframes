@@ -12,7 +12,7 @@ def color_continuous_legend(title='', description='', footer='', prop='color',
             Description in legend.
         footer (str, optional):
             Footer of legend. This is often used to attribute data sources.
-        prop (str, optional): Allowed properties are 'color' and 'stroke-color'.
+        prop (str, optional): Allowed properties are 'color' and 'stroke_color'.
             It is 'color' by default.
         variable (str, optional):
             If the information in the legend depends on a different value than the
