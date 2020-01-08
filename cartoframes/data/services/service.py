@@ -1,7 +1,7 @@
 import uuid
 from collections import namedtuple
 
-from ...utils.managers.context_manager import ContextManager
+from ...io.managers.context_manager import ContextManager
 
 SERVICE_KEYS = ('hires_geocoder', 'isolines')
 QUOTA_INFO_KEYS = ('monthly_quota', 'used_quota', 'soft_limit', 'provider')

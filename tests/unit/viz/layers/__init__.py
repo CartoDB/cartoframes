@@ -1,4 +1,4 @@
-from cartoframes.utils.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager
 
 
 def setup_mocks(mocker, geom_type='point'):

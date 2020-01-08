@@ -9,7 +9,7 @@ from carto.exceptions import CartoException
 
 from ...io.carto import read_carto, to_carto
 from ...utils import utils
-from ...utils.managers.context_manager import ContextManager
+from ...io.managers.context_manager import ContextManager
 
 
 class DataObsClient:

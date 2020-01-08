@@ -6,7 +6,7 @@ from cartoframes.auth import Credentials
 from cartoframes.viz import Map, Layer
 from cartoframes.viz.source import Source
 from cartoframes.viz.kuviz import KuvizPublisher, DEFAULT_PUBLIC, kuviz_to_dict
-from cartoframes.utils.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager
 
 from ..mocks.kuviz_mock import CartoKuvizMock
 from ..mocks.api_key_mock import APIKeyManagerMock

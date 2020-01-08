@@ -1,7 +1,7 @@
 from pandas import DataFrame
 from geopandas import GeoDataFrame
 
-from ..utils.managers.context_manager import ContextManager
+from ..io.managers.context_manager import ContextManager
 from ..utils.geom_utils import set_geometry, has_geometry
 from ..utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type
 

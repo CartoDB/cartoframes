@@ -2,8 +2,8 @@ from pandas import DataFrame
 from geopandas import GeoDataFrame
 
 from .context_manager import ContextManager
-from ..utils import is_sql_query
-from ..geom_utils import has_geometry
+from ...utils.utils import is_sql_query
+from ...utils.geom_utils import has_geometry
 
 
 class SourceManager:

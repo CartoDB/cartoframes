@@ -3,7 +3,7 @@ from cartoframes.viz import Map, Layer, popup_element, constants
 from cartoframes.viz.source import Source
 
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
-from cartoframes.utils.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager
 
 from .utils import build_geodataframe
 

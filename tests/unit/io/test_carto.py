@@ -5,7 +5,7 @@ from geopandas import GeoDataFrame
 from shapely.geometry import Point
 
 from cartoframes.auth import Credentials
-from cartoframes.utils.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager
 from cartoframes.io.carto import read_carto, to_carto, copy_table, create_table_from_query
 
 

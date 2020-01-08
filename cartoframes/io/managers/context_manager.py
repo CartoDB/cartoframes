@@ -7,16 +7,14 @@ from carto.auth import APIKeyAuthClient
 from carto.exceptions import CartoException, CartoRateLimitException
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
-from ..logger import log
-from ..geom_utils import encode_geometry_ewkb
-from ..utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
-from ..columns import Column, get_dataframe_columns_info, obtain_converters, \
-                      date_columns_names, normalize_name
-
+from ..dataset_info import DatasetInfo
 from ... import __version__
-from ...io.dataset_info import DatasetInfo
 from ...auth.defaults import get_default_credentials
-
+from ...utils.logger import log
+from ...utils.geom_utils import encode_geometry_ewkb
+from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
+from ...utils.columns import Column, get_dataframe_columns_info, obtain_converters, \
+                      date_columns_names, normalize_name
 
 DEFAULT_RETRY_TIMES = 3
 

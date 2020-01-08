@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from cartoframes.utils.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 
 from ..examples import db_dataset1, db_dataset2

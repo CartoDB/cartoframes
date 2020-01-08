@@ -2,7 +2,7 @@ import pytest
 
 from cartoframes.auth import Credentials
 from cartoframes.viz.source import Source
-from cartoframes.utils.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager
 
 
 def setup_mocks(mocker):

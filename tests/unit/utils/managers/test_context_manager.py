@@ -5,7 +5,7 @@ from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 from pandas import DataFrame
 from geopandas import GeoDataFrame
 from cartoframes.auth import Credentials
-from cartoframes.utils.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager
 from cartoframes.utils.columns import ColumnInfo
 
 
@@ -16,7 +16,7 @@ class TestContextManager(object):
 
     def test_execute_query(self, mocker):
         # Given
-        mocker.patch('cartoframes.utils.managers.context_manager._create_auth_client')
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mock = mocker.patch.object(SQLClient, 'send')
 
         # When
@@ -28,7 +28,7 @@ class TestContextManager(object):
 
     def test_execute_long_running_query(self, mocker):
         # Given
-        mocker.patch('cartoframes.utils.managers.context_manager._create_auth_client')
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mock = mocker.patch.object(BatchSQLClient, 'create_and_wait_for_completion')
 
         # When
@@ -40,7 +40,7 @@ class TestContextManager(object):
 
     def test_copy_from(self, mocker):
         # Given
-        mocker.patch('cartoframes.utils.managers.context_manager._create_auth_client')
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mocker.patch.object(ContextManager, 'has_table', return_value=False)
         mock = mocker.patch.object(ContextManager, '_copy_from')
         df = DataFrame({'A': [1]})
@@ -55,7 +55,7 @@ class TestContextManager(object):
 
     def test_copy_from_exists_fail(self, mocker):
         # Given
-        mocker.patch('cartoframes.utils.managers.context_manager._create_auth_client')
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mocker.patch.object(ContextManager, 'has_table', return_value=True)
         mocker.patch.object(ContextManager, 'get_schema', return_value='schema')
         df = DataFrame({'A': [1]})
@@ -72,7 +72,7 @@ class TestContextManager(object):
 
     def test_copy_from_exists_replace(self, mocker):
         # Given
-        mocker.patch('cartoframes.utils.managers.context_manager._create_auth_client')
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mocker.patch.object(ContextManager, 'has_table', return_value=True)
         mocker.patch.object(ContextManager, 'get_schema', return_value='schema')
         mock = mocker.patch.object(ContextManager, '_create_table_from_columns')
@@ -89,7 +89,7 @@ class TestContextManager(object):
     def test_internal_copy_from(self, mocker):
         # Given
         from shapely.geometry import Point
-        mocker.patch('cartoframes.utils.managers.context_manager._create_auth_client')
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mock = mocker.patch.object(CopySQLClient, 'copyfrom')
         gdf = GeoDataFrame({'A': [1, 2], 'B': [Point(0, 0), Point(1, 1)]})
         columns = [
@@ -117,7 +117,7 @@ class TestContextManager(object):
                 return True
             elif table_name == 'new_table_name':
                 return False
-        mocker.patch('cartoframes.utils.managers.context_manager._create_auth_client')
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mocker.patch.object(ContextManager, 'has_table', side_effect=has_table)
         mock = mocker.patch.object(ContextManager, '_rename_table')
 
@@ -143,7 +143,7 @@ class TestContextManager(object):
         def has_table(table_name):
             if table_name == 'table_name':
                 return False
-        mocker.patch('cartoframes.utils.managers.context_manager._create_auth_client')
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mocker.patch.object(ContextManager, 'has_table', side_effect=has_table)
 
         # When
@@ -161,7 +161,7 @@ class TestContextManager(object):
                 return True
             elif table_name == 'new_table_name':
                 return True
-        mocker.patch('cartoframes.utils.managers.context_manager._create_auth_client')
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mocker.patch.object(ContextManager, 'has_table', side_effect=has_table)
 
         # When
@@ -181,7 +181,7 @@ class TestContextManager(object):
                 return True
             elif table_name == 'new_table_name':
                 return True
-        mocker.patch('cartoframes.utils.managers.context_manager._create_auth_client')
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mocker.patch.object(ContextManager, 'has_table', side_effect=has_table)
         mock = mocker.patch.object(ContextManager, '_rename_table')
 
