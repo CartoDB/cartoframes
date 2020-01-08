@@ -27,7 +27,7 @@ def size_bins_layer(
         stroke_color (str, optional): Color of the stroke on point features.
           Default is '#222'.
         opacity (float, optional): Opacity value for point color and line features.
-          Default is '0.8'.
+          Default is 0.8.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
@@ -44,8 +44,7 @@ def size_bins_layer(
           automatically obtained from the default credentials.
 
     Returns:
-        cartoframes.viz.Layer: Layer styled by `value`.
-        Includes a legend, popup and widget on `value`.
+        cartoframes.viz.Layer
 
     """
     return Layer(

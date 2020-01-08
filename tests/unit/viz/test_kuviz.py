@@ -2,8 +2,6 @@
 
 import pytest
 
-from carto.exceptions import CartoException
-
 from cartoframes.auth import Credentials
 from cartoframes.viz import Map, Layer
 from cartoframes.viz.source import Source
@@ -162,7 +160,7 @@ class TestKuvizPublisher(object):
         kuviz_publisher = KuvizPublisher(None)
         kuviz_publisher.set_layers(vmap.layers, kuviz_name, 'fake_table_name')
 
-        with pytest.raises(CartoException):
+        with pytest.raises(Exception):
             kuviz_publisher.update(html, kuviz_name, None)
 
     def test_kuviz_publisher_update(self, mocker):

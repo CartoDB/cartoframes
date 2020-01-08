@@ -12,23 +12,15 @@ class Provider(CatalogEntity):
         List the available providers in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
         in combination with nested filters (categories, countries, etc.)
 
-        .. code::
-
-            from cartoframes.data.observatory import Provider
-
-            providers = Provider.get_all()
+        >>> providers = Provider.get_all()
 
         Get a :py:class:`Provider <cartoframes.data.observatory.Provider>` from the
         :py:class:`Catalog <cartoframes.data.observatory.Catalog>` given its ID
 
-        .. code::
+        >>> catalog = Catalog()
+        >>> provider = catalog.provider('mrli')
 
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            provider = catalog.provider('mrli')
     """
-
     _entity_repo = get_provider_repo()
 
     @property
@@ -38,33 +30,22 @@ class Provider(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         Examples:
-
-            .. code::
-
-                from cartoframes.data.observatory import Provider
-
-                provider = Provider.get('mrli')
-                datasets = provider.datasets
+            >>> provider = Provider.get('mrli')
+            >>> datasets = provider.datasets
 
             Same example as above but using nested filters:
 
-            .. code::
-
-                from cartoframes.data.observatory import Catalog
-
-                catalog = Catalog()
-                datasets = catalog.provider('mrli').datasets
+            >>> catalog = Catalog()
+            >>> datasets = catalog.provider('mrli').datasets
 
         """
-
         return get_dataset_repo().get_all({PROVIDER_FILTER: self.id})
 
     @property
     def name(self):
         """Name of this provider."""
-
         return self.data['name']

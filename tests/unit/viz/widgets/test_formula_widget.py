@@ -28,12 +28,12 @@ class TestFormulaWidget(object):
 
     def test_formula_viewport(self):
         "should create a formula widget to get a viewport operation"
-        widget = widgets.formula_widget('value', 'avg')
+        widget = widgets.formula_widget('value', operation='avg')
         widget_info = widget.get_info()
         assert widget_info.get('value') == 'viewportAvg($value)'
 
     def test_formula_global(self):
         "should create a formula widget to get a global operation"
-        widget = widgets.formula_widget('value', 'avg', is_global=True)
+        widget = widgets.formula_widget('value', operation='avg', is_global=True)
         widget_info = widget.get_info()
         assert widget_info.get('value') == 'globalAvg($value)'

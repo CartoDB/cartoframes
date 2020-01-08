@@ -8,10 +8,9 @@ from carto.exceptions import CartoException, CartoRateLimitException
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
 from ... import __version__
-from ...core.logger import log
+from ...utils.logger import log
 from ...io.dataset_info import DatasetInfo
 from ...auth.defaults import get_default_credentials
-
 from ...utils.geom_utils import encode_geometry_ewkb
 from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
 from ...utils.columns import Column, get_dataframe_columns_info, obtain_converters, \
@@ -21,7 +20,7 @@ from ...utils.columns import Column, get_dataframe_columns_info, obtain_converte
 DEFAULT_RETRY_TIMES = 3
 
 
-class ContextManager(object):
+class ContextManager:
 
     def __init__(self, credentials):
         self.credentials = credentials or get_default_credentials()

@@ -13,17 +13,17 @@ def color_continuous_style(
     Args:
         value (str): Column to symbolize by.
         range_min (int, optional): The minimum value of the data range for the continuous
-          color ramp. Defaults to the globalMIN of the dataset.
+            color ramp. Defaults to the globalMIN of the dataset.
         range_max (int, optional): The maximum value of the data range for the continuous
-          color ramp. Defaults to the globalMAX of the dataset.
+            color ramp. Defaults to the globalMAX of the dataset.
         palette (str, optional): Palette that can be a named cartocolor palette
-          or other valid color palette. Use `help(cartoframes.viz.color_palettes)` to
-          get more information. Default is "bluyl".
+            or other valid color palette. Use `help(cartoframes.viz.palettes)` to
+            get more information. Default is "bluyl".
         size (int, optional): Size of point or line features.
-        opacity (float, optional): Opacity value for point color and line features.
-          Default is '0.8'.
+        opacity (float, optional): Opacity value. Default is 1 for points and lines and
+            0.9 for polygons.
         stroke_color (str, optional): Color of the stroke on point features.
-          Default is '#222'.
+            Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.
         animate (str, optional): Animate features by date/time or other numeric field.
 

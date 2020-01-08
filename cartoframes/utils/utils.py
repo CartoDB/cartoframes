@@ -17,7 +17,8 @@ from functools import wraps
 from warnings import catch_warnings, filterwarnings
 from pyrestcli.exceptions import ServerErrorException
 
-from ..core.logger import log
+from .logger import log
+from ..exceptions import DOError
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
@@ -307,6 +308,18 @@ def is_table_name(data):
     return isinstance(data, str) and normalize_name(data) == data
 
 
+def is_valid_str(value):
+    return isinstance(value, str) and value != ''
+
+
+def is_url(text):
+    return re.match(r'^https?://.*$', text)
+
+
+def is_json_filepath(text):
+    return re.match(r'^.*\.json\s*$', text, re.IGNORECASE)
+
+
 def get_credentials(credentials=None):
     from ..auth import defaults
     _credentials = credentials or defaults.get_default_credentials()
@@ -317,9 +330,9 @@ def get_credentials(credentials=None):
 def check_credentials(credentials):
     from ..auth.credentials import Credentials
     if not isinstance(credentials, Credentials):
-        raise AttributeError('Credentials attribute is required. '
-                             'Please pass a `Credentials` instance '
-                             'or use the `set_default_credentials` function.')
+        raise ValueError('Credentials attribute is required. '
+                         'Please pass a `Credentials` instance '
+                         'or use the `set_default_credentials` function.')
 
 
 def get_center(center):
@@ -418,7 +431,7 @@ def check_do_enabled(method):
             return method(*args, **kw)
         except ServerErrorException as e:
             if str(e) == "['The user does not have Data Observatory enabled']":
-                raise Exception(
+                raise DOError(
                     'We are sorry, the Data Observatory is not enabled for your account yet. '
                     'Please contact your customer success manager or send an email to '
                     'sales@carto.com to request access to it.')

@@ -9,7 +9,7 @@ from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FIL
 from ....utils.utils import get_credentials
 
 
-class Catalog(object):
+class Catalog:
     """This class represents the Data Observatory metadata
     :py:class:`Catalog <cartoframes.data.observatory.Catalog>`.
 
@@ -58,58 +58,41 @@ class Catalog(object):
     You can just list all the grouping entities. Take into account this is not the preferred way
     to discover the catalog metadata, since there can be thousands of entities on it:
 
-        .. code::
-
-            from cartoframes.data.observatory import Category
-            from cartoframes.data.observatory import Country
-            from cartoframes.data.observatory import Provider
-
-            Category.get_all()
-            Country.get_all()
-            Provider.get_all()
+    >>> Category.get_all()
+    [<Category.get('demographics')>, ...]
+    >>> Country.get_all()
+    [<Country.get('usa')>, ...]
+    >>> Provider.get_all()
+    [<Provider.get('mrli')>, ...]
 
     Or you can get them by ID:
 
-        .. code::
-
-            from cartoframes.data.observatory import Category
-            from cartoframes.data.observatory import Country
-            from cartoframes.data.observatory import Provider
-
-            Category.get('demographics')
-            Country.get('usa')
-            Provider.get('mrli')
+    >>> Category.get('demographics')
+    <Category.get('demographics')>
+    >>> Country.get('usa')
+    <Country.get('usa')>
+    >>> Provider.get('mrli')
+    <Provider.get('mrli')>
 
     Examples:
         The preferred way of discover the available datasets in the Catalog is through nested filters
 
-        .. code::
-
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            catalog.country('usa').category('demographics').datasets
+        >>> catalog = Catalog()
+        >>> catalog.country('usa').category('demographics').datasets
+        [<Dataset.get('acs_sociodemogr_b758e778')>, ...]
 
         You can include the geography as part of the nested filter like this:
 
-        .. code::
-
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
+        >>> catalog = Catalog()
+        >>> catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
 
         If a filter is already applied to a Catalog instance and you want to do a new hierarchical search,
         clear the previous filters with the `Catalog().clear_filters()` method:
 
-        .. code::
-
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
-            catalog.clear_filters()
-            catalog.country('esp').category('demographics').datasets
+        >>> catalog = Catalog()
+        >>> catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
+        >>> catalog.clear_filters()
+        >>> catalog.country('esp').category('demographics').datasets
 
         Otherwise the filters accumulate and you'll get unexpected results.
 
@@ -117,27 +100,20 @@ class Catalog(object):
         A useful way of reading or filtering by metadata values consists on converting the entities to a pandas
         DataFrame:
 
-        .. code::
-
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets.to_dataframe()
+        >>> catalog = Catalog()
+        >>> catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets.to_dataframe()
 
         For each dataset in the Catalog, you can explore its variables, get a summary of its stats, etc.
 
-        .. code::
-
-            from cartoframes.data.observatory import Dataset
-
-            dataset = Dataset.get('od_acs_13345497')
-            dataset.variables()
+        >>> dataset = Dataset.get('od_acs_13345497')
+        >>> dataset.variables
+        [<Variable.get('dwellings_2_uni_fb8f6cfb')> #'Two-family (two unit) dwellings', ...]
 
     See the Catalog guides and examples in our
     `public documentation website <https://carto.com/developers/cartoframes/guides/Introduction/>`__
     for more information.
-    """
 
+    """
     def __init__(self):
         self.filters = {}
 
@@ -148,10 +124,10 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
-        """
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
+        """
         return Country.get_all(self.filters)
 
     @property
@@ -161,10 +137,10 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
-        """
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
+        """
         return Category.get_all(self.filters)
 
     @property
@@ -174,10 +150,10 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
-        """
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
+        """
         return Dataset.get_all(self.filters)
 
     @property
@@ -187,10 +163,10 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
-        """
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
+        """
         return Geography.get_all(self.filters)
 
     def country(self, country_id):
@@ -204,7 +180,6 @@ class Catalog(object):
             :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
 
         """
-
         self.filters[COUNTRY_FILTER] = country_id
         return self
 
@@ -219,7 +194,6 @@ class Catalog(object):
             :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
 
         """
-
         self.filters[CATEGORY_FILTER] = category_id
         return self
 
@@ -234,7 +208,6 @@ class Catalog(object):
             :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
 
         """
-
         filter_value = geography_id
 
         if is_slug_value(geography_id):
@@ -255,13 +228,11 @@ class Catalog(object):
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         """
-
         self.filters[PROVIDER_FILTER] = provider_id
         return self
 
     def clear_filters(self):
         """Remove the current filters from this Catalog instance."""
-
         self.filters = {}
 
     def subscriptions(self, credentials=None):
@@ -276,8 +247,11 @@ class Catalog(object):
 
         Returns:
             :py:class:`Subscriptions <cartoframes.data.observatory.Subscriptions>`
-        """
 
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
+
+        """
         _no_filters = {}
         _credentials = get_credentials(credentials)
 
@@ -290,6 +264,6 @@ class Catalog(object):
         """Get all the datasets in the Catalog filtered
         Returns:
             :py:class:`Dataset <cartoframes.data.observatory.Dataset>`
-        """
 
+        """
         return Dataset.get_datasets_spatial_filtered(filter_dataset)

@@ -1,7 +1,5 @@
 import pytest
 
-from carto.exceptions import CartoException
-
 from cartoframes.viz import layers
 from cartoframes.auth import Credentials
 
@@ -52,7 +50,7 @@ class TestClusterSizeLayerHelper(object):
         """cluster_size_layer should raise an error if the operation is invalid"""
 
         msg = '"invalid" is not a valid operation. Valid operations are count, avg, min, max, sum'
-        with pytest.raises(CartoException) as e:
+        with pytest.raises(Exception) as e:
             layers.cluster_size_layer(
                 source=self.source,
                 value='name',

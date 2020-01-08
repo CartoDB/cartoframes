@@ -3,7 +3,7 @@ from ..legend import Legend
 
 def color_category_legend(title='', description='', footer='', prop='color',
                           variable=None, dynamic=True):
-    """Helper function for quickly creating a color category legend
+    """Helper function for quickly creating a color category legend.
 
     Args:
         title (str, optional):
@@ -23,41 +23,14 @@ def color_category_legend(title='', description='', footer='', prop='color',
             Defaults to ``True``.
 
     Returns:
-        A 'color-category' :py:class:`Legend <cartoframes.viz.Legend>`
+        cartoframes.viz.legend.Legend
 
-    Examples:
+    Example:
+        >>> color_category_legend(
+        ...     title='Legend title',
+        ...     description='Legend description',
+        ...     footer='Legend footer',
+        ...     dynamic=False)
 
-        Default legend:
-
-        .. code::
-
-            from cartoframes.viz import Map, Layer, color_category_legend
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    style=color_category_style('collisiontype')
-                    legends=color_category_legend()
-                )
-            )
-
-        Legend with custom parameters:
-
-        .. code::
-
-            from cartoframes.viz import Map, Layer, color_category_legend
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    style=color_category_style('collisiontype')
-                    legends=color_category_legend(
-                      title='Collision Type',
-                      description="Seattle Collisions"
-                      dynamic=False
-                    )
-                )
-            )
     """
-
     return Legend('color-category', title, description, footer, prop, variable, dynamic)

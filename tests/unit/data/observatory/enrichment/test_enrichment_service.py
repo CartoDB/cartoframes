@@ -16,7 +16,7 @@ from cartoframes.data.observatory.enrichment.enrichment_service import Enrichmen
     _ENRICHMENT_ID, _GEOM_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation, _build_where_condition, \
     _build_where_clausule, _validate_variables_input, _build_polygons_query_variables_with_aggregation, \
     _build_polygons_column_with_aggregation, _build_where_conditions_by_variable
-from cartoframes.exceptions import EnrichmentException
+from cartoframes.exceptions import EnrichmentError
 from cartoframes.utils.geom_utils import to_geojson
 
 _WORKING_PROJECT = 'carto-do-customers'
@@ -59,7 +59,7 @@ class TestEnrichmentService(object):
             [[1, point]],
             columns=['cartodb_id', geom_column])
 
-        with pytest.raises(EnrichmentException) as e:
+        with pytest.raises(EnrichmentError) as e:
             enrichment_service._prepare_data(df, None)
 
         error = ('No valid geometry found. Please provide an input source with ' +
@@ -324,7 +324,7 @@ class TestEnrichmentService(object):
 
         credentials = Credentials('fake_user', '1234')
 
-        with pytest.raises(EnrichmentException) as e:
+        with pytest.raises(EnrichmentError) as e:
             prepare_variables(variable, credentials)
 
         error = """
@@ -363,7 +363,7 @@ class TestEnrichmentService(object):
 
         credentials = Credentials('fake_user', '1234')
 
-        with pytest.raises(EnrichmentException) as e:
+        with pytest.raises(EnrichmentError) as e:
             prepare_variables(variable, credentials)
 
         error = """
@@ -436,7 +436,7 @@ class TestEnrichmentService(object):
 
         credentials = Credentials('fake_user', '1234')
 
-        with pytest.raises(EnrichmentException) as e:
+        with pytest.raises(EnrichmentError) as e:
             prepare_variables(variable, credentials)
 
         error = """
@@ -596,7 +596,7 @@ class TestEnrichmentService(object):
         ]
 
         for invalid_input in invalid_inputs:
-            with pytest.raises(EnrichmentException) as e:
+            with pytest.raises(EnrichmentError) as e:
                 _validate_variables_input(invalid_input)
 
             error = ('variables parameter should be a Variable instance, a list or a str.')
@@ -609,7 +609,7 @@ class TestEnrichmentService(object):
         ]
 
         for invalid_input in invalid_inputs:
-            with pytest.raises(EnrichmentException) as e:
+            with pytest.raises(EnrichmentError) as e:
                 _validate_variables_input(invalid_input)
 
             error = ('You should add at least one variable to be used in enrichment.')
@@ -621,7 +621,7 @@ class TestEnrichmentService(object):
         ]
 
         for invalid_input in invalid_inputs:
-            with pytest.raises(EnrichmentException) as e:
+            with pytest.raises(EnrichmentError) as e:
                 _validate_variables_input(invalid_input)
 
             error = ('The maximum number of variables to be used in enrichment is 50.')

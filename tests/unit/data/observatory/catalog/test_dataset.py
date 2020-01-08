@@ -420,7 +420,7 @@ class TestDataset(object):
         dataset = Dataset(db_dataset1)
 
         # When
-        with pytest.raises(AttributeError) as e:
+        with pytest.raises(ValueError) as e:
             dataset.subscribe(wrong_credentials)
 
         # Then
@@ -493,7 +493,7 @@ class TestDataset(object):
         dataset = Dataset(db_dataset1)
 
         # When
-        with pytest.raises(AttributeError) as e:
+        with pytest.raises(ValueError) as e:
             dataset.subscription_info(wrong_credentials)
 
         # Then

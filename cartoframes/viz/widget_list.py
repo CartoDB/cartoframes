@@ -1,13 +1,13 @@
 from .widget import Widget
 
 
-class WidgetList(object):
+class WidgetList:
     """WidgetList
 
     Args:
         widgets (list, Widget): The list of widgets for a layer.
-    """
 
+    """
     def __init__(self, widgets=None):
         self._widgets = self._init_widgets(widgets)
 

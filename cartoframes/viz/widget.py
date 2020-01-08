@@ -1,8 +1,8 @@
-from ..utils.utils import camel_dictionary, gen_variable_name
 from . import constants
+from ..utils.utils import camel_dictionary, gen_variable_name
 
 
-class Widget():
+class Widget:
     """Widgets are added to each layer and displayed in the visualization
 
     Available widgets are:
@@ -12,8 +12,8 @@ class Widget():
         - :py:meth:`histogram_widget <cartoframes.viz.histogram_widget>`
         - :py:meth:`time_series_widget <cartoframes.viz.time_series_widget>`
         - :py:meth:`animation_widget <cartoframes.viz.animation_widget>`
-    """
 
+    """
     def __init__(self, widget_type=None, value='', title='', description='',
                  footer='', prop='', read_only=False, buckets=20):
         self._check_type(widget_type)

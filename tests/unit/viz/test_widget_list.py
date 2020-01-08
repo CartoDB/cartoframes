@@ -4,7 +4,7 @@ from cartoframes.viz import formula_widget, basic_widget
 
 WIDGET_A = formula_widget(
     'amount',
-    'sum',
+    operation='sum',
     title='[TITLE]',
     description='[description]',
     footer='[footer]'

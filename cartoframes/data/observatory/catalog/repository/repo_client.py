@@ -3,7 +3,7 @@ from .....auth import Credentials
 from .....core.managers.context_manager import ContextManager
 
 
-class RepoClient(object):
+class RepoClient:
 
     __instance = None
 

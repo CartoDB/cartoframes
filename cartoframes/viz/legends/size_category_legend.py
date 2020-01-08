@@ -3,7 +3,7 @@ from ..legend import Legend
 
 def size_category_legend(title='', description='', footer='', prop='size',
                          variable=None, dynamic=True):
-    """Helper function for quickly creating a size category legend
+    """Helper function for quickly creating a size category legend.
 
     Args:
         title (str, optional):
@@ -24,41 +24,14 @@ def size_category_legend(title='', description='', footer='', prop='size',
 
 
     Returns:
-        A 'size-category' :py:class:`Legend <cartoframes.viz.Legend>`
+        cartoframes.viz.legend.Legend
 
-    Examples:
+    Example:
+        >>> size_category_legend(
+        ...     title='Legend title',
+        ...     description='Legend description',
+        ...     footer='Legend footer',
+        ...     dynamic=False)
 
-        Default legend:
-
-        .. code::
-
-            from cartoframes.viz import Map, Layer, size_category_legend
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    style=size_category_style('collisiontype')
-                    legends=size_category_legend()
-                )
-            )
-
-        Legend with custom parameters:
-
-        .. code::
-
-            from cartoframes.viz import Map, Layer, size_category_legend
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    style=size_category_style('collisiontype')
-                    legends=size_category_legend(
-                      title='Collision Type',
-                      description="Seattle Collisions"
-                      dynamic=False
-                    )
-                )
-            )
     """
-
     return Legend('size-category', title, description, footer, prop, variable, dynamic)

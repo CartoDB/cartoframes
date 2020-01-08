@@ -1,5 +1,4 @@
 import pytest
-from carto.exceptions import CartoException
 
 from cartoframes.viz import Layer, Layout, Map
 from cartoframes.viz.source import Source
@@ -35,8 +34,8 @@ class TestLayoutInitialization(object):
     def test__init_maps_valid(self):
         """Layout should raise an error if any element in the map list is not a Map"""
 
-        msg = 'All the elements in the Layout should be an instance of Map'
-        with pytest.raises(CartoException) as e:
+        msg = 'All the elements in the Layout should be an instance of Map.'
+        with pytest.raises(Exception) as e:
             Layout([Layer(Source(SOURCE))])
         assert str(e.value) == msg
 
