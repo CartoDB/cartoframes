@@ -1,8 +1,8 @@
 import os
 import json
 from pathlib import Path
+from geopandas import read_file
 
-from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory import Enrichment, Variable
 
@@ -39,8 +39,8 @@ class TestEnrichment(object):
         self.credentials = Credentials(self.username, self.apikey)
         self.enrichment = Enrichment(self.credentials)
 
-        self.points_gdf = CartoDataFrame.from_file(file_path('files/points.geojson'))
-        self.polygons_gdf = CartoDataFrame.from_file(file_path('files/polygon.geojson'))
+        self.points_gdf = read_file(file_path('files/points.geojson'))
+        self.polygons_gdf = read_file(file_path('files/polygon.geojson'))
 
         # from carto-do-public-data.usa_acs.demographics_sociodemographics_usa_censustract_2015_5yrs_20132017
         self.public_variable1 = public_variable1
@@ -68,7 +68,7 @@ class TestEnrichment(object):
             variables=self.private_variables
         )
 
-        expected_gdf = CartoDataFrame.from_file(file_path('files/points-private.geojson'))
+        expected_gdf = read_file(file_path('files/points-private.geojson'))
 
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
@@ -85,7 +85,7 @@ class TestEnrichment(object):
             }
         )
 
-        expected_gdf = CartoDataFrame.from_file(file_path('files/points-public-filter.geojson'))
+        expected_gdf = read_file(file_path('files/points-public-filter.geojson'))
 
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
@@ -98,7 +98,7 @@ class TestEnrichment(object):
             variables=self.public_variables
         )
 
-        expected_gdf = CartoDataFrame.from_file(file_path('files/polygon-public.geojson'))
+        expected_gdf = read_file(file_path('files/polygon-public.geojson'))
 
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
@@ -116,7 +116,7 @@ class TestEnrichment(object):
             }
         )
 
-        expected_gdf = CartoDataFrame.from_file(file_path('files/polygon-public-none.geojson'))
+        expected_gdf = read_file(file_path('files/polygon-public-none.geojson'))
 
         enriched_gdf = clean_gdf(enriched_gdf, self.public_variable1.column_name)
         expected_gdf = clean_gdf(expected_gdf, self.public_variable1.column_name)
@@ -130,7 +130,7 @@ class TestEnrichment(object):
             aggregation='AVG'
         )
 
-        expected_gdf = CartoDataFrame.from_file(file_path('files/polygon-private-avg.geojson'))
+        expected_gdf = read_file(file_path('files/polygon-private-avg.geojson'))
 
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
@@ -145,7 +145,7 @@ class TestEnrichment(object):
             filters={self.public_variable1.id: '> 500'}
         )
 
-        expected_gdf = CartoDataFrame.from_file(file_path('files/polygon-public-agg-custom-filter.geojson'))
+        expected_gdf = read_file(file_path('files/polygon-public-agg-custom-filter.geojson'))
 
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
@@ -163,7 +163,7 @@ class TestEnrichment(object):
             }
         )
 
-        expected_gdf = CartoDataFrame.from_file(file_path('files/polygon-public-agg-custom-by-var.geojson'))
+        expected_gdf = read_file(file_path('files/polygon-public-agg-custom-by-var.geojson'))
 
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
