@@ -65,7 +65,7 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('creds.json')
 
-                df = pandas.read_csv('...')
+                df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 variables = catalog.country('usa').category('demographics').datasets[0].variables
@@ -84,7 +84,7 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('creds.json')
 
-                df = pandas.read_csv('...')
+                df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 all_variables = catalog.country('usa').category('demographics').datasets[0].variables
@@ -109,7 +109,7 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('creds.json')
 
-                df = pandas.read_csv('...')
+                df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 variable = catalog.country('usa').category('demographics').datasets[0].variables[0]
@@ -197,7 +197,7 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('creds.json')
 
-                df = pandas.read_csv('...')
+                df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 variable = catalog.country('usa').category('demographics').datasets[0].variables[0]
@@ -217,7 +217,7 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('creds.json')
 
-                df = pandas.read_csv('...')
+                df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 variables = catalog.country('usa').category('demographics').datasets[0].variables
@@ -236,7 +236,7 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('creds.json')
 
-                df = pandas.read_csv('...')
+                df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 all_variables = catalog.country('usa').category('demographics').datasets[0].variables
@@ -261,7 +261,7 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('creds.json')
 
-                df = pandas.read_csv('...')
+                df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 variable = catalog.country('usa').category('demographics').datasets[0].variables[0]
@@ -280,7 +280,7 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('creds.json')
 
-                df = pandas.read_csv('...')
+                df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 all_variables = catalog.country('usa').category('demographics').datasets[0].variables
@@ -303,7 +303,7 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('creds.json')
 
-                df = pandas.read_csv('...')
+                df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 all_variables = catalog.country('usa').category('demographics').datasets[0].variables
@@ -331,7 +331,7 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('creds.json')
 
-                df = pandas.read_csv('...')
+                df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 all_variables = catalog.country('usa').category('demographics').datasets[0].variables
@@ -360,7 +360,7 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('creds.json')
 
-                df = pandas.read_csv('...')
+                df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 all_variables = catalog.country('usa').category('demographics').datasets[0].variables
