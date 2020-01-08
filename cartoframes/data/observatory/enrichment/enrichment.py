@@ -166,7 +166,7 @@ class Enrichment(EnrichmentService):
 
             >>> df = pandas.read_csv('path/to/local/csv')
             >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
-            >>> variables = variables = [all_variables[0].id, all_variables[1].id]
+            >>> variables = [all_variables[0].id, all_variables[1].id]
             >>> cdf_enrich = Enrichment().enrich_polygons(df, variables, geom_col='the_geom')
 
             Enrich a polygons dataframe with filters:
