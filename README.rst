@@ -86,7 +86,7 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
 
 .. code:: python
 
-    from cartoframes import CartoDataFrame
+    from cartoframes import read_carto, to_carto
     from cartoframes.auth import set_default_credentials
 
     # set your credentials
@@ -96,16 +96,13 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
     )
 
     # read a table from your CARTO account
-    cdf = CartoDataFrame.from_carto('brooklyn_poverty_census_tracts')
+    gdf = read_carto('brooklyn_poverty_census_tracts')
 
     # perform operations on you dataframe
-    cdf['poverty_per_pop'] = cdf['poverty_count'] / cdf['total_population']
+    gdf['poverty_per_pop'] = gdf['poverty_count'] / gdf['total_population']
 
     # update CARTO table with all changes from this session
-    cdf.to_carto(
-        table_name='brooklyn_poverty_census_tracts',
-        if_exists='replace'
-    )
+    to_carto(gdf, table_name='brooklyn_poverty_census_tracts', if_exists='replace')
 
 Map workflow
 ------------

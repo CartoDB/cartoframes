@@ -1,7 +1,7 @@
-import pandas as pd
-
+from pandas import DataFrame, concat
+from geopandas import GeoDataFrame
 from shapely.geometry import box
-from ..core.cartodataframe import CartoDataFrame
+
 from ..utils.utils import check_package
 
 
@@ -29,8 +29,8 @@ class QuadGrid:
                     new_row[geometry_name] = new_geometry
                     new_row['quadkey'] = mercantile.quadkey(tile)
                     new_rows.append(new_row)
-            dfs.append(pd.DataFrame(new_rows))
+            dfs.append(DataFrame(new_rows))
 
-        df = pd.concat(dfs).reset_index(drop=True)
+        df = concat(dfs).reset_index(drop=True)
 
-        return CartoDataFrame(df, geometry=geometry_name, crs='epsg:4326')
+        return GeoDataFrame(df, geometry=geometry_name, crs='epsg:4326')

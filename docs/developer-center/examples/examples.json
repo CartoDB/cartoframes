@@ -5,39 +5,39 @@
     "categories": [{
         "title": "Data Workflows",
         "samples": [{
-            "title": "CartoDataFrame from CSV",
-            "desc": "Create a CartoDataFrame from a CSV file",
-            "file": "create_cdf_from_csv",
+            "title": "Load data from CSV",
+            "desc": "Load data from a CSV file",
+            "file": "load_data_from_csv",
             "path": "data_workflows"
         }, {
-            "title": "CartoDataFrame from JSON",
-            "desc": "Create a CartoDataFrame from a JSON file",
-            "file": "create_cdf_from_json",
+            "title": "Load data from JSON",
+            "desc": "Load data from a JSON file",
+            "file": "load_data_from_json",
             "path": "data_workflows"
         }, {
-            "title": "CartoDataFrame from GeoJSON",
-            "desc": "Create a CartoDataFrame from a GeoJSON file",
-            "file": "create_cdf_from_geojson",
+            "title": "Load data from GeoJSON",
+            "desc": "Load data from a GeoJSON file",
+            "file": "load_data_from_geojson",
             "path": "data_workflows"
         }, {
-            "title": "CartoDataFrame from Table Name",
-            "desc": "Create a CartoDataFrame from a table name",
-            "file": "create_cdf_from_table",
+            "title": "Load data from CARTO Table",
+            "desc": "Load data from a CARTO Table",
+            "file": "load_data_from_carto_table",
             "path": "data_workflows"
         }, {
-            "title": "CartoDataFrame from SQL Query",
-            "desc": "Create a CartoDataFrame from a SQL query",
-            "file": "create_cdf_from_query",
+            "title": "Load data from CARTO SQL Query",
+            "desc": "Load data from a CARTO SQL query",
+            "file": "load_data_from_carto_query",
             "path": "data_workflows"
         }, {
-            "title": "Upload CartoDataFrame to CARTO",
-            "desc": "Upload a CartoDataFrame to CARTO",
-            "file": "upload_cdf_to_carto",
+            "title": "Upload data to CARTO",
+            "desc": "Upload data to CARTO",
+            "file": "upload_data_to_carto",
             "path": "data_workflows"
         }, {
-            "title": "Change Table Privacy",
-            "desc": "Change table privacy",
-            "file": "change_dataset_privacy",
+            "title": "Change CARTO Table Privacy",
+            "desc": "Change CARTO Table Privacy",
+            "file": "change_carto_table_privacy",
             "path": "data_workflows"
         }, {
             "title": "Animate a DataFrame by date",

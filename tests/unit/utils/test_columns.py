@@ -2,7 +2,10 @@
 
 """Unit tests for cartoframes.data.columns"""
 
-from cartoframes import CartoDataFrame
+from pandas import DataFrame
+from geopandas import GeoDataFrame
+
+from cartoframes.utils.geom_utils import set_geometry
 from cartoframes.utils.columns import Column, ColumnInfo, get_dataframe_columns_info, normalize_names
 
 
@@ -71,13 +74,12 @@ class TestColumns(object):
         assert normalize_names(self.cols_ans) == self.cols_ans
 
     def test_column_info_with_geom(self):
-        cdf = CartoDataFrame(
+        gdf = GeoDataFrame(
             [['Gran Vía 46', 'Madrid', 'POINT (0 0)'], ['Ebro 1', 'Sevilla', 'POINT (1 1)']],
-            columns=['Address', 'City', 'the_geom'],
-            geometry='the_geom'
-        )
+            columns=['Address', 'City', 'the_geom'])
+        set_geometry(gdf, 'the_geom', inplace=True)
 
-        dataframe_columns_info = get_dataframe_columns_info(cdf)
+        dataframe_columns_info = get_dataframe_columns_info(gdf)
 
         assert dataframe_columns_info == [
             ColumnInfo('Address', 'address', 'text', False),
@@ -86,12 +88,12 @@ class TestColumns(object):
         ]
 
     def test_column_info_without_geom(self):
-        cdf = CartoDataFrame(
+        df = DataFrame(
             [['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']],
             columns=['Address', 'City']
         )
 
-        dataframe_columns_info = get_dataframe_columns_info(cdf)
+        dataframe_columns_info = get_dataframe_columns_info(df)
 
         assert dataframe_columns_info == [
             ColumnInfo('Address', 'address', 'text', False),
@@ -99,13 +101,12 @@ class TestColumns(object):
         ]
 
     def test_column_info_basic_troubled_names(self):
-        cdf = CartoDataFrame(
+        gdf = GeoDataFrame(
             [[1, 'POINT (1 1)', 'fake_geom']],
-            columns=['cartodb_id', 'the_geom', 'the_geom_webmercator'],
-            geometry='the_geom'
-        )
+            columns=['cartodb_id', 'the_geom', 'the_geom_webmercator'])
+        set_geometry(gdf, 'the_geom', inplace=True)
 
-        dataframe_columns_info = get_dataframe_columns_info(cdf)
+        dataframe_columns_info = get_dataframe_columns_info(gdf)
 
         assert dataframe_columns_info == [
             ColumnInfo('cartodb_id', 'cartodb_id', 'bigint', False),
@@ -113,13 +114,12 @@ class TestColumns(object):
         ]
 
     def test_column_info_geometry_troubled_names(self):
-        cdf = CartoDataFrame(
+        gdf = GeoDataFrame(
             [['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']],
-            columns=['Geom', 'the_geom', 'g-e-o-m-e-t-r-y'],
-            geometry='the_geom'
-        )
+            columns=['Geom', 'the_geom', 'g-e-o-m-e-t-r-y'])
+        set_geometry(gdf, 'the_geom', inplace=True)
 
-        dataframe_columns_info = get_dataframe_columns_info(cdf)
+        dataframe_columns_info = get_dataframe_columns_info(gdf)
 
         assert dataframe_columns_info == [
             ColumnInfo('Geom', 'geom', 'text', False),

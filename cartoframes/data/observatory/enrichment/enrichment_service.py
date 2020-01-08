@@ -1,6 +1,7 @@
 import uuid
 import time
 
+from geopandas import GeoDataFrame
 from collections import defaultdict
 
 from ..catalog.variable import Variable
@@ -9,9 +10,8 @@ from ..catalog.geography import Geography
 from ...clients import bigquery_client
 from ....auth import get_default_credentials
 from ....exceptions import EnrichmentError
-from ....core.cartodataframe import CartoDataFrame
 from ....utils.logger import log
-from ....utils.geom_utils import to_geojson
+from ....utils.geom_utils import to_geojson, set_geometry, has_geometry
 from ....utils.utils import timelogger
 
 
@@ -35,7 +35,7 @@ class EnrichmentService(object):
         self.bq_public_project = self.bq_client.bq_public_project
 
     @timelogger
-    def _execute_enrichment(self, queries, cartodataframe):
+    def _execute_enrichment(self, queries, geodataframe):
 
         dfs_enriched = list()
         awaiting_jobs = set()
@@ -61,37 +61,38 @@ class EnrichmentService(object):
             raise EnrichmentError(errors)
 
         for df in dfs_enriched:
-            cartodataframe = cartodataframe.merge(df, on=_ENRICHMENT_ID, how='left')
+            geodataframe = geodataframe.merge(df, on=_ENRICHMENT_ID, how='left')
 
         # Remove extra columns
-        cartodataframe.drop(_ENRICHMENT_ID, axis=1, inplace=True)
-        cartodataframe.drop(_GEOM_COLUMN, axis=1, inplace=True)
+        geodataframe.drop(_ENRICHMENT_ID, axis=1, inplace=True)
+        geodataframe.drop(_GEOM_COLUMN, axis=1, inplace=True)
 
-        return cartodataframe
+        return geodataframe
 
     @timelogger
     def _prepare_data(self, dataframe, geom_col):
-        cartodataframe = CartoDataFrame(dataframe, copy=True)
+        geodataframe = GeoDataFrame(dataframe, copy=True)
 
-        if geom_col:
-            cartodataframe.set_geometry(geom_col, inplace=True)
-
-        if not cartodataframe.has_geometry():
-            raise EnrichmentError('No valid geometry found. Please provide an input source with ' +
-                                  'a valid geometry or specify the "geom_col" param with a geometry column.')
+        if geom_col in geodataframe:
+            set_geometry(geodataframe, geom_col, inplace=True)
+        elif has_geometry(dataframe):
+            geodataframe.set_geometry(dataframe.geometry.name, inplace=True)
+        else:
+            raise ValueError('No valid geometry found. Please provide an input source with ' +
+                             'a valid geometry or specify the "geom_col" param with a geometry column.')
 
         # Add extra columns for the enrichment
-        cartodataframe[_ENRICHMENT_ID] = range(cartodataframe.shape[0])
-        cartodataframe[_GEOM_COLUMN] = cartodataframe.geometry.apply(to_geojson)
+        geodataframe[_ENRICHMENT_ID] = range(geodataframe.shape[0])
+        geodataframe[_GEOM_COLUMN] = geodataframe.geometry.apply(to_geojson)
 
-        return cartodataframe
+        return geodataframe
 
     def _get_temp_table_name(self):
         id_tablename = uuid.uuid4().hex
         return 'temp_{id}'.format(id=id_tablename)
 
-    def _upload_data(self, tablename, cartodataframe):
-        bq_dataframe = cartodataframe[[_ENRICHMENT_ID, _GEOM_COLUMN]]
+    def _upload_data(self, tablename, geodataframe):
+        bq_dataframe = geodataframe[[_ENRICHMENT_ID, _GEOM_COLUMN]]
         schema = {_ENRICHMENT_ID: 'INTEGER', _GEOM_COLUMN: 'GEOGRAPHY'}
 
         self.bq_client.upload_dataframe(
@@ -233,15 +234,15 @@ class EnrichmentService(object):
             {where}
             {grouper};
         '''.format(
-                geom_column=_GEOM_COLUMN,
-                enrichment_table=enrichment_table,
-                enrichment_geo_table=enrichment_geo_table,
-                enrichment_id=_ENRICHMENT_ID,
-                where=_build_where_clausule(filters),
-                data_table=data_table,
-                grouper=grouper or '',
-                columns=columns
-            )
+            geom_column=_GEOM_COLUMN,
+            enrichment_table=enrichment_table,
+            enrichment_geo_table=enrichment_geo_table,
+            enrichment_id=_ENRICHMENT_ID,
+            where=_build_where_clausule(filters),
+            data_table=data_table,
+            grouper=grouper or '',
+            columns=columns
+        )
 
 
 def _build_polygons_query_variables_with_aggregation(variables, aggregation):

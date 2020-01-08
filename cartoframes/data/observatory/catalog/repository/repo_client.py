@@ -1,6 +1,6 @@
 from ..subscriptions import get_subscription_ids
 from .....auth import Credentials
-from .....core.managers.context_manager import ContextManager
+from .....io.managers.context_manager import ContextManager
 
 
 class RepoClient:

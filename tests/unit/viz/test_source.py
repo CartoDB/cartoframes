@@ -1,11 +1,11 @@
 import pytest
+import numpy as np
+import pandas as pd
+import geopandas as gpd
 
 from cartoframes.auth import Credentials
 from cartoframes.viz.source import Source
-from cartoframes.core.managers.context_manager import ContextManager
-import pandas as pd
-import geopandas as gpd
-import numpy as np
+from cartoframes.io.managers.context_manager import ContextManager
 
 
 def setup_mocks(mocker):
@@ -64,4 +64,4 @@ class TestSource(object):
         source = Source(gdf)
 
         assert source.datetime_column_names == ['date_column']
-        assert source.cdf.dtypes['date_column'] == np.object
+        assert source.gdf.dtypes['date_column'] == np.object

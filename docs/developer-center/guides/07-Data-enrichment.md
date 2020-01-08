@@ -294,9 +294,10 @@ Let's start by loading those geocoded Starbucks stores:
 
 
 ```python
-from cartoframes import CartoDataFrame
-stores_cdf = CartoDataFrame.from_file('../files/starbucks_brooklyn_geocoded.geojson')
-stores_cdf.head(5)
+from geopandas import read_file
+
+stores_gdf = read_file('http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.geojson')
+stores_gdf.head(5)
 ```
 
 
@@ -359,15 +360,15 @@ stores_cdf.head(5)
 
 As we can see, for each store we have its name, address, the total revenue by year and a `geometry` column indicating the location of the store. This is important because for the enrichment service to work, we need a DataFrame with a geometry column encoded as a [shapely](https://pypi.org/project/Shapely/) object.
 
-We can now create a new `Enrichment` instance, and since the `stores_cdf` dataset represents store locations (points), we can use the `enrich_points` function passing as arguments, the stores DataFrame and a list of `Variables` (that we have a valid subscription from the Data Observatory catalog for).
+We can now create a new `Enrichment` instance, and since the `stores_gdf` dataset represents store locations (points), we can use the `enrich_points` function passing as arguments, the stores DataFrame and a list of `Variables` (that we have a valid subscription from the Data Observatory catalog for).
 
 In this case we are only enriching one variable (the total population), but we could enrich a list of them.
 
 
 ```python
 from cartoframes.data.observatory import Enrichment
-enriched_stores_cdf = Enrichment().enrich_points(stores_cdf, [variable])
-enriched_stores_cdf.head(5)
+enriched_stores_gdf = Enrichment().enrich_points(stores_gdf, [variable])
+enriched_stores_gdf.head(5)
 ```
 
 
@@ -493,8 +494,8 @@ Next, let's do a second enrichment, but this time using a DataFrame with areas o
 
 
 ```python
-aoi_cdf = CartoDataFrame.from_file('../files/starbucks_brooklyn_isolines.geojson')
-aoi_cdf.head(5)
+aoi_gdf = read_file('http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_isolines.geojson')
+aoi_gdf.head(5)
 ```
 
 
@@ -553,15 +554,15 @@ aoi_cdf.head(5)
 
 
 
-In this case we have a DataFrame which, for each index in the `stores_cdf`, contains a polygon of the areas of influence around each store at 8, 17 and 25 minute walking intervals. Again the `geometry` is encoded as a `shapely` object.
+In this case we have a DataFrame which, for each index in the `stores_gdf`, contains a polygon of the areas of influence around each store at 8, 17 and 25 minute walking intervals. Again the `geometry` is encoded as a `shapely` object.
 
 In this case, the `Enrichment` service provides an `enrich_polygons` function, which in its basic version, works in the same way as the `enrich_points` function. It just needs a DataFrame with polygon geometries and a list of variables to enrich:
 
 
 ```python
 from cartoframes.data.observatory import Enrichment
-enriched_aoi_cdf = Enrichment().enrich_polygons(aoi_cdf, [variable])
-enriched_aoi_cdf.head(5)
+enriched_aoi_gdf = Enrichment().enrich_polygons(aoi_gdf, [variable])
+enriched_aoi_gdf.head(5)
 ```
 
 

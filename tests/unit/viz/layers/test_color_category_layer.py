@@ -4,13 +4,13 @@ from cartoframes.viz import layers
 from cartoframes.auth import Credentials
 
 from . import setup_mocks
-from ..utils import build_cartodataframe
+from ..utils import build_geodataframe
 
 
 @pytest.mark.skip(reason="This helper will be removed")
 class TestColorCategoryLayerHelper(object):
     def setup_method(self):
-        self.source = build_cartodataframe([0], [0], ['name', 'time'])
+        self.source = build_geodataframe([0], [0], ['name', 'time'])
 
     def test_helpers(self):
         "should be defined"

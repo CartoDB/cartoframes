@@ -2,10 +2,127 @@
 
 Migration notes from `1.0b7` to `rc1`
 
+* [Data](#Data)
 * [Popups](#Popups)
 * [Widgets](#Widgets)
 * [Legends](#Legends)
 * [Style](#Style)
+
+## Data
+
+<details><summary>Geometry management</summary>
+<p>
+
+* From:
+
+```python
+from cartoframes import CartoDataFrame
+
+cdf = CartoDataFrame(df, geometry='the_geom')
+```
+
+* To:
+
+```python
+from geopandas import GeoDataFrame
+from cartoframes.utils import decode_geometry
+
+gdf = GeoDataFrame(df, geometry=decode_geometry(df['the_geom']))
+```
+
+* From:
+
+```python
+from cartoframes import CartoDataFrame
+
+cdf = CartoDataFrame(df)
+cdf.set_geometry_from_xy('lng', 'lat', inplace=True)
+```
+
+* To:
+
+```python
+from geopandas import GeoDataFrame, points_from_xy
+
+gdf = GeoDataFrame(df, geometry=points_from_xy(df['lng'], df['lat']))
+```
+
+</p>
+</details>
+
+
+<details><summary>Load data from CARTO</summary>
+<p>
+
+* From:
+
+```python
+from cartoframes import CartoDataFrame
+
+cdf = CartoDataFrame.from_carto('global_power_plants', limit=100)
+```
+
+* To (as we already could):
+
+```python
+from cartoframes import read_carto
+
+gdf = read_carto('global_power_plants', limit=100)
+```
+
+</p>
+</details>
+
+
+<details><summary>Upload data to CARTO</summary>
+<p>
+
+* From:
+
+```python
+cdf.to_carto(
+    table_name='global_power_plants',
+    if_exists='replace'
+)
+```
+
+* To (as we already could):
+
+```python
+from cartoframes import to_carto
+
+to_carto(
+    gdf,
+    table_name='global_power_plants',
+    if_exists='replace'
+)
+```
+
+</p>
+</details>
+
+
+<details><summary>Visualization</summary>
+<p>
+
+* From:
+
+```python
+cdf.viz()
+```
+
+* To (as we already could):
+
+```python
+from cartoframes.viz import Map, Layer
+
+Map(Layer(gdf))
+
+# or Layer(gdf)
+```
+
+</p>
+</details>
 
 ## Popups
 
