@@ -676,7 +676,7 @@ class TestEnrichmentService(object):
                 enrichment_table.{column} * (
                     ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
                     /
-                    ST_AREA(data_table.{geo_column})
+                    NULLIF(ST_AREA(enrichment_geo_table.geom), 0)
                 )
             ) AS {column_name}
             """.format(
@@ -692,7 +692,7 @@ class TestEnrichmentService(object):
                 enrichment_table.{column} * (
                     ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
                     /
-                    ST_AREA(data_table.{geo_column})
+                    NULLIF(ST_AREA(enrichment_geo_table.geom), 0)
                 )
             ) AS {column_name}
             """.format(
