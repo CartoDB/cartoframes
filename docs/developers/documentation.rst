@@ -146,6 +146,5 @@ Custom
 
 - DOError.
     - CatalogError.
-    - DiscoveryError.
     - EnrichmentError.
 - PublishError.

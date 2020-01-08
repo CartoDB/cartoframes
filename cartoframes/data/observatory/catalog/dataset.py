@@ -335,8 +335,7 @@ class Dataset(CatalogEntity):
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
         Raises:
-            CatalogError: if there's a problem when connecting to the catalog.
-            DiscoveryError: when no datasets are found.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
             DOError: if DO is not enabled.
 
         """

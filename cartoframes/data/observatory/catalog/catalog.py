@@ -125,8 +125,7 @@ class Catalog:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         Raises:
-            DiscoveryError: when no datasets are found.
-            CatalogError: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
         return Country.get_all(self.filters)
@@ -139,8 +138,7 @@ class Catalog:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         Raises:
-            DiscoveryError: when no datasets are found.
-            CatalogError: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
         return Category.get_all(self.filters)
@@ -153,8 +151,7 @@ class Catalog:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         Raises:
-            DiscoveryError: when no datasets are found.
-            CatalogError: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
         return Dataset.get_all(self.filters)
@@ -167,8 +164,7 @@ class Catalog:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         Raises:
-            DiscoveryError: when no datasets are found.
-            CatalogError: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
         return Geography.get_all(self.filters)
@@ -253,8 +249,7 @@ class Catalog:
             :py:class:`Subscriptions <cartoframes.data.observatory.Subscriptions>`
 
         Raises:
-            DiscoveryError: when no datasets are found.
-            CatalogError: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
         _no_filters = {}

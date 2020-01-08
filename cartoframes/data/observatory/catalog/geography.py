@@ -70,8 +70,7 @@ class Geography(CatalogEntity):
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
         Raises:
-            DiscoveryError: when no datasets are found.
-            CatalogError: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
         return get_dataset_repo().get_all({GEOGRAPHY_FILTER: self.id})
@@ -169,8 +168,7 @@ class Geography(CatalogEntity):
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Geography instances.
 
         Raises:
-            CatalogError: if there's a problem when connecting to the catalog.
-            DiscoveryError: when no geographies are found.
+            CatalogError: if there's a problem when connecting to the catalog or no geographies are found.
             DOError: if DO is not enabled.
 
         """

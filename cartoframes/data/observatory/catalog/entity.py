@@ -51,8 +51,7 @@ class CatalogEntity(ABC):
                 ID or slug of a catalog entity.
 
         Raises:
-            DiscoveryError: when no entities are found.
-            CatalogError: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no entities are found.
 
         """
         return cls._entity_repo.get_by_id(id_)
@@ -78,8 +77,7 @@ class CatalogEntity(ABC):
                 List of sD or slugs of entities in the catalog to retrieve instances.
 
         Raises:
-            DiscoveryError: when no entities are found.
-            CatalogError: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no entities are found.
 
         """
         return cls._entity_repo.get_by_id_list(id_list)
