@@ -4,6 +4,7 @@
 import json
 import os
 import sys
+import pytest
 import unittest
 import warnings
 import pandas as pd
@@ -11,7 +12,7 @@ import geopandas as gpd
 
 from carto.exceptions import CartoException
 
-from cartoframes.io import delete_table
+from cartoframes import delete_table
 from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
 from cartoframes.data.clients import SQLClient
@@ -23,6 +24,7 @@ from ...helpers import _ReportQuotas, _UserUrlLoader
 warnings.filterwarnings('ignore')
 
 
+@pytest.mark.skip()
 class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
     """Tests for cartoframes.data.service.Geocode"""
 

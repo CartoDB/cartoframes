@@ -2,7 +2,7 @@ from ..constants import FORMULA_OPERATIONS_GLOBAL, FORMULA_OPERATIONS_VIEWPORT
 from ..widget import Widget
 
 
-def formula_widget(value, operation=None, **kwargs):
+def formula_widget(value, operation=None, title='', description='', footer='', is_global=False):
     """Helper function for quickly creating a formula widget.
 
     Formula widgets calculate aggregated values ('Avg', 'Max', 'Min', 'Sum') from numeric columns
@@ -27,8 +27,7 @@ def formula_widget(value, operation=None, **kwargs):
 
         .. code::
 
-            from cartoframes.viz import Map, Layer
-            from cartoframes.viz.widgets import formula_widget
+            from cartoframes.viz import Map, Layer, formula_widget
 
             Map(
                 Layer(
@@ -46,8 +45,7 @@ def formula_widget(value, operation=None, **kwargs):
 
         .. code::
 
-            from cartoframes.viz import Map, Layer
-            from cartoframes.viz.widgets import formula_widget
+            from cartoframes.viz import Map, Layer, formula_widget
 
             Map(
                 Layer(
@@ -66,12 +64,11 @@ def formula_widget(value, operation=None, **kwargs):
             )
     """
 
-    data = kwargs
-    data['type'] = 'formula'
-    is_global = kwargs.get('is_global', False)
-    data['value'] = get_value_expression(operation, value, is_global)
-
-    return Widget(data)
+    return Widget('formula',
+                  value=get_value_expression(operation, value, is_global),
+                  title=title,
+                  description=description,
+                  footer=footer)
 
 
 def get_formula_operation(operation, is_global):

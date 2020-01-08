@@ -1,20 +1,6 @@
 from .subscriptions import trigger_subscription
 from .subscription_info import fetch_subscription_info
-
-
-def is_ipython_notebook():
-    """
-    Detect whether we are in a Jupyter notebook.
-    """
-    try:
-        cfg = get_ipython().config
-        if 'IPKernelApp' in cfg:
-            return True
-        else:
-            return False
-    except NameError:
-        return False
-
+from ....utils.utils import is_ipython_notebook
 
 if is_ipython_notebook():
     from IPython.display import display
@@ -30,11 +16,12 @@ def display_existing_subscription_message(entity_id, entity_type):
 
 def display_subscription_form(entity_id, entity_type, credentials):
     info = fetch_subscription_info(entity_id, entity_type, credentials)
+    instant_licensing = credentials.get_do_credentials().instant_licensing
 
     if is_ipython_notebook():
-        _display_subscription_form_notebook(entity_id, entity_type, info, credentials)
+        _display_subscription_form_notebook(entity_id, entity_type, info, instant_licensing, credentials)
     else:
-        _display_subscription_form_cli(entity_id, entity_type, info, credentials)
+        _display_subscription_form_cli(entity_id, entity_type, info, instant_licensing, credentials)
 
 
 def _display_existing_subscription_message_notebook(entity_id, entity_type):
@@ -51,8 +38,9 @@ def _display_existing_subscription_message_cli(entity_id, entity_type):
     print(message)
 
 
-def _display_subscription_form_notebook(entity_id, entity_type, info, credentials):
-    if info.get('estimated_delivery_days') == 0:
+def _display_subscription_form_notebook(entity_id, entity_type, info, instant_licensing, credentials):
+    delivery_days = info.get('estimated_delivery_days')
+    if instant_licensing and delivery_days == 0:
         delivery_message = '''
         This {type} is available for Instant Subscription for your organization,
         so it will automatically process the order and you will get immediate access to the {type}.
@@ -61,35 +49,58 @@ def _display_subscription_form_notebook(entity_id, entity_type, info, credential
         delivery_message = '''
         This {type} will be available in your account in about {days} days.
         We will contact you shortly to complete the subscription details.
-        '''.format(type=entity_type, days=info.get('estimated_delivery_days'))
+        '''.format(type=entity_type, days=delivery_days)
 
-    message = '''
-    <h3>Subscription contract</h3>
-    You are about to subscribe to <b>{id}</b>.
-    The cost of this {type} is <b>${price}</b>.
-    If you want to proceed, a Request will be sent to CARTO who will
-    order the data and load it into your account.
-    {delivery_message}
-    In order to proceed we need you to agree to the License of the {type}
-    available at <b><a href="{link}" target="_blank">this link</a></b>.
-    <br>Do you want to proceed?
-    '''.format(
-        id=entity_id,
-        type=entity_type,
-        price=info.get('subscription_list_price'),
-        delivery_message=delivery_message,
-        link=info.get('tos_link'))
+    price = info.get('subscription_list_price')
+    if price is None:
+        message = '''
+        <h3>Data request</h3>
+        You are about to request the {type} <b>{id}</b>.
+        <br>Do you want to proceed?
+        '''.format(
+            id=entity_id,
+            type=entity_type)
 
-    responses = {
-        'ok': '''
-        <b>Congrats!</b><br>The {type} <b>{id}</b> has been requested and it will be available in your account soon.
-        '''.format(id=entity_id, type=entity_type),
-        'cancel': '''
-        The {type} <b>{id}</b> has not been purchased.
-        '''.format(id=entity_id, type=entity_type),
-        'error': '''
-        Subscription error. Please contact to support@carto.com.
-        '''}
+        responses = {
+            'ok': '''
+            <b>Thanks!</b><br>The {type} <b>{id}</b> has been requested.
+            We will contact you shortly to complete the subscription details.
+            '''.format(id=entity_id, type=entity_type),
+            'cancel': '''
+            The {type} <b>{id}</b> has not been requested.
+            '''.format(id=entity_id, type=entity_type),
+            'error': '''
+            Request error. Please contact to support@carto.com.
+            '''}
+    else:
+        message = '''
+        <h3>Subscription contract</h3>
+        You are about to subscribe to <b>{id}</b>.
+        The cost of this {type} is <b>${price}</b>.
+        If you want to proceed, a Request will be sent to CARTO who will
+        order the data and load it into your account.
+        {delivery_message}
+        In order to proceed we need you to agree to the License of the {type}
+        available at <b><a href="{link}" target="_blank">this link</a></b>.
+        <br>Do you want to proceed?
+        '''.format(
+            id=entity_id,
+            type=entity_type,
+            price=price,
+            delivery_message=delivery_message,
+            link=info.get('tos_link'))
+
+        responses = {
+            'ok': '''
+            <b>Congrats!</b><br>The {type} <b>{id}</b> has been requested and it
+            will be available in your account soon.
+            '''.format(id=entity_id, type=entity_type),
+            'cancel': '''
+            The {type} <b>{id}</b> has not been purchased.
+            '''.format(id=entity_id, type=entity_type),
+            'error': '''
+            Subscription error. Please contact to support@carto.com.
+            '''}
 
     text, buttons = _create_notebook_form(entity_id, entity_type, message, responses, credentials)
 
@@ -130,8 +141,9 @@ def _create_notebook_form(entity_id, entity_type, message, responses, credential
     return (text, buttons)
 
 
-def _display_subscription_form_cli(entity_id, entity_type, info, credentials):
-    if info.get('estimated_delivery_days') == 0:
+def _display_subscription_form_cli(entity_id, entity_type, info, instant_licensing, credentials):
+    delivery_days = info.get('estimated_delivery_days')
+    if instant_licensing and delivery_days == 0:
         delivery_message = (
             'This {type} is available for Instant Subscription for your organization, '
             'so it will automatically process the order and you will get immediate access to the {type}.'
@@ -140,29 +152,44 @@ def _display_subscription_form_cli(entity_id, entity_type, info, credentials):
         delivery_message = (
             'This {type} will be available in your account in about {days} days. '
             'We will contact you shortly to complete the subscription details.'
-        ).format(type=entity_type, days=info.get('estimated_delivery_days'))
+        ).format(type=entity_type, days=delivery_days)
 
-    message = (
-        'Subscription contract:\n'
-        'You are about to subscribe to "{id}". '
-        'The cost of this {type} is ${price}. '
-        'If you want to proceed, a Request will be sent to CARTO who will '
-        'order the data and load it into your account. '
-        '{delivery_message} '
-        'In order to proceed we need you to agree to the License of the {type} '
-        'available at this link: {link}.\n'
-        'Do you want to proceed?').format(
-            id=entity_id,
-            type=entity_type,
-            price=info.get('subscription_list_price'),
-            delivery_message=delivery_message,
-            link=info.get('tos_link'))
+    price = info.get('subscription_list_price')
+    if price is None:
+        message = (
+            'Data request:\n'
+            'You are about to request the {type} "{id}".\n'
+            'Do you want to proceed?').format(
+                id=entity_id,
+                type=entity_type)
 
-    responses = {
-        'ok': ('Congrats! The {type} "{id}" has been requested and '
-               'it will be available in your account soon.').format(id=entity_id, type=entity_type),
-        'cancel': 'The {type} "{id}" has not been purchased'.format(id=entity_id, type=entity_type),
-        'error': 'Subscription error. Please contact to support@carto.com.'}
+        responses = {
+            'ok': ('Thanks! The {type} "{id}" has been requested. We will contact you shortly to '
+                   'complete the subscription details.').format(id=entity_id, type=entity_type),
+            'cancel': 'The {type} "{id}" has not been requested'.format(id=entity_id, type=entity_type),
+            'error': 'Request error. Please contact to support@carto.com.'}
+    else:
+        message = (
+            'Subscription contract:\n'
+            'You are about to subscribe to "{id}". '
+            'The cost of this {type} is ${price}. '
+            'If you want to proceed, a Request will be sent to CARTO who will '
+            'order the data and load it into your account. '
+            '{delivery_message} '
+            'In order to proceed we need you to agree to the License of the {type} '
+            'available at this link: {link}.\n'
+            'Do you want to proceed?').format(
+                id=entity_id,
+                type=entity_type,
+                price=price,
+                delivery_message=delivery_message,
+                link=info.get('tos_link'))
+
+        responses = {
+            'ok': ('Congrats! The {type} "{id}" has been requested and '
+                   'it will be available in your account soon.').format(id=entity_id, type=entity_type),
+            'cancel': 'The {type} "{id}" has not been purchased'.format(id=entity_id, type=entity_type),
+            'error': 'Subscription error. Please contact to support@carto.com.'}
 
     response = _create_cli_form(entity_id, entity_type, message, responses, credentials)
 

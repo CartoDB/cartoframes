@@ -79,7 +79,8 @@ class TestGeographyRepo(object):
         # Then
         mocked_repo.assert_called_once_with({
             'country_id': 'usa',
-            'category_id': 'demographics'
+            'category_id': 'demographics',
+            'provider_id': 'open_data'
         })
         assert geographies == test_geographies
 

@@ -1,5 +1,10 @@
 from cartoframes.auth import Credentials
-from cartoframes.viz import Layer, Legend, Popup, Source, Style
+from cartoframes.viz.legend_list import LegendList
+from cartoframes.viz.widget_list import WidgetList
+from cartoframes.viz.popup_list import PopupList
+from cartoframes.viz.source import Source
+from cartoframes.viz.style import Style
+from cartoframes.viz import Layer
 from cartoframes.core.managers.context_manager import ContextManager
 
 
@@ -24,68 +29,21 @@ class TestLayer(object):
         assert layer.source_data == 'SELECT * FROM "public"."layer_source"'
         assert isinstance(layer.source, Source)
         assert isinstance(layer.style, Style)
-        assert isinstance(layer.popup, Popup)
-        assert isinstance(layer.legend, Legend)
+        assert isinstance(layer.popups, PopupList)
+        assert isinstance(layer.legends, LegendList)
+        assert isinstance(layer.widgets, WidgetList)
         assert layer.interactivity == []
 
     def test_initialization_simple(self, mocker):
         """Layer should initialize layer attributes"""
         setup_mocks(mocker, 'layer_source')
-        layer = Layer('layer_source', '', credentials=Credentials('fakeuser'))
+        layer = Layer('layer_source', {}, credentials=Credentials('fakeuser'))
 
         assert layer.is_basemap is False
         assert layer.source_data == 'SELECT * FROM "public"."layer_source"'
         assert isinstance(layer.source, Source)
         assert isinstance(layer.style, Style)
-        assert isinstance(layer.popup, Popup)
-        assert isinstance(layer.legend, Legend)
+        assert isinstance(layer.popups, PopupList)
+        assert isinstance(layer.legends, LegendList)
+        assert isinstance(layer.widgets, WidgetList)
         assert layer.interactivity == []
-
-
-class TestLayerStyle(object):
-
-    def test_style_dict(self, mocker):
-        """Layer style should set the style when it is a dict"""
-        setup_mocks(mocker, 'layer_source')
-        layer = Layer(
-            'layer_source',
-            {
-                'vars': {
-                    'grad': '[red, green, blue]'
-                },
-                'color': 'blue',
-                'width': 10,
-                'strokeColor': 'black',
-                'strokeWidth': 1
-            },
-            credentials=Credentials('fakeuser')
-        )
-
-        assert isinstance(layer.style, Style)
-        assert '@grad: [red, green, blue]' in layer.viz
-        assert 'color: blue' in layer.viz
-        assert 'width: 10' in layer.viz
-        assert 'strokeColor: black' in layer.viz
-        assert 'strokeWidth: 1' in layer.viz
-
-    def test_style_str(self, mocker):
-        """Layer style should set the style when it is a dict"""
-        setup_mocks(mocker, 'layer_source')
-        layer = Layer(
-            'layer_source',
-            """
-                @grad: [red, green, blue]
-                color: blue
-                width: 10
-                strokeColor: black
-                strokeWidth: 1
-            """,
-            credentials=Credentials('fakeuser')
-        )
-
-        assert isinstance(layer.style, Style)
-        assert '@grad: [red, green, blue]' in layer.viz
-        assert 'color: blue' in layer.viz
-        assert 'width: 10' in layer.viz
-        assert 'strokeColor: black' in layer.viz
-        assert 'strokeWidth: 1' in layer.viz

@@ -63,6 +63,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.auth import set_default_credentials
                 from cartoframes.data.observatory import Enrichment, Catalog
 
+                # load credentials from local file
                 set_default_credentials('creds.json')
 
                 df = pandas.read_csv('path/to/local/csv')
@@ -82,6 +83,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.auth import set_default_credentials
                 from cartoframes.data.observatory import Enrichment, Catalog
 
+                # load credentials from local file
                 set_default_credentials('creds.json')
 
                 df = pandas.read_csv('path/to/local/csv')
@@ -107,6 +109,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.auth import set_default_credentials
                 from cartoframes.data.observatory import Enrichment, Catalog
 
+                # load credentials from local file
                 set_default_credentials('creds.json')
 
                 df = pandas.read_csv('path/to/local/csv')
@@ -195,6 +198,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.auth import set_default_credentials
                 from cartoframes.data.observatory import Enrichment, Catalog
 
+                # load credentials from local file
                 set_default_credentials('creds.json')
 
                 df = pandas.read_csv('path/to/local/csv')
@@ -215,6 +219,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.auth import set_default_credentials
                 from cartoframes.data.observatory import Enrichment, Catalog
 
+                # load credentials from local file
                 set_default_credentials('creds.json')
 
                 df = pandas.read_csv('path/to/local/csv')
@@ -234,6 +239,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.auth import set_default_credentials
                 from cartoframes.data.observatory import Enrichment, Catalog
 
+                # load credentials from local file
                 set_default_credentials('creds.json')
 
                 df = pandas.read_csv('path/to/local/csv')
@@ -259,6 +265,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials
 
+                # load local credentials file
                 set_default_credentials('creds.json')
 
                 df = pandas.read_csv('path/to/local/csv')
@@ -278,20 +285,24 @@ class Enrichment(EnrichmentService):
                 from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials
 
+                # load credentials from local file
                 set_default_credentials('creds.json')
 
                 df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 all_variables = catalog.country('usa').category('demographics').datasets[0].variables
-                variable1 = all_variables[0] // variable1.agg_method is 'AVG' but you want 'SUM'
-                variable2 = all_variables[1] // variable2.agg_method is 'AVG' and it is what you want
-                variable3 = all_variables[2] // variable3.agg_method is 'SUM' but you want 'AVG'
+
+                variable1 = all_variables[0] # variable1.agg_method is 'AVG' but you want 'SUM'
+                variable2 = all_variables[1] # variable2.agg_method is 'AVG' but you want 'SUM'
+                variable3 = all_variables[2] # variable3.agg_method is 'SUM' and you want to keep it
 
                 variables = [variable1, variable2, variable3]
 
                 enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation='SUM')
+                # override default aggregation of all variables with `SUM`
+                cdf_enrich = enrichment.enrich_polygons(df, variables,
+                                                        aggregation='SUM')
 
             Enrich a polygons dataframe overwriting some of the variables aggregation methods:
 
@@ -301,18 +312,21 @@ class Enrichment(EnrichmentService):
                 from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials
 
+                # load credentials from local file
                 set_default_credentials('creds.json')
 
                 df = pandas.read_csv('path/to/local/csv')
 
                 catalog = Catalog()
                 all_variables = catalog.country('usa').category('demographics').datasets[0].variables
-                variable1 = all_variables[0] // variable1.agg_method is 'AVG' but you want 'SUM'
-                variable2 = all_variables[1] // variable2.agg_method is 'AVG' and it is what you want
-                variable3 = all_variables[2] // variable3.agg_method is 'SUM' but you want 'AVG'
+                # aggregation methods can be overridden
+                variable1 = all_variables[0] # variable1.agg_method is 'AVG' but you want 'SUM'
+                variable2 = all_variables[1] # variable2.agg_method is 'AVG' and want to keep it that way
+                variable3 = all_variables[2] # variable3.agg_method is 'SUM' but you want 'AVG'
 
                 variables = [variable1, variable2, variable3]
 
+                # override default aggregations
                 aggregation = {
                     variable1.id: 'SUM',
                     variable3.id: 'AVG'
@@ -358,6 +372,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials
 
+                # load credentials from local file
                 set_default_credentials('creds.json')
 
                 df = pandas.read_csv('path/to/local/csv')
@@ -371,6 +386,7 @@ class Enrichment(EnrichmentService):
                 variables = [variable1, variable2, variable3]
 
                 enrichment = Enrichment()
+                # disable aggregation for all variables
                 cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=None)
 
             The next example uses filters to calculate the `SUM` of car-free households

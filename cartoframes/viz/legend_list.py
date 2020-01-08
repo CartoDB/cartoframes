@@ -4,7 +4,7 @@ from .legend import Legend
 class LegendList(object):
     """LegendList
      Args:
-        legends (dict, list, Legend): List of legends for a layer.
+        legends (list, Legend): List of legends for a layer.
 
     Example:
 
@@ -15,29 +15,30 @@ class LegendList(object):
             LegendList([])
     """
 
-    def __init__(self, legends=None):
-        self._legends = self._init_legends(legends)
+    def __init__(self, legends=None, title=None):
+        self._legends = self._init_legends(legends, title)
 
-    def _init_legends(self, legends):
+    def _init_legends(self, legends, title):
         if isinstance(legends, list):
             legend_list = []
             for legend in legends:
-                if isinstance(legend, (dict, str)):
-                    legend_list.append(Legend(legend))
-                elif isinstance(legend, Legend):
+                if isinstance(legend, Legend):
                     legend_list.append(legend)
+                else:
+                    raise ValueError('Legends list contains invalid elements')
+
+            legend_list[0].add_defaults(title)
             return legend_list
-        if isinstance(legends, dict):
-            return [Legend(legends)]
         elif isinstance(legends, Legend):
+            legends.add_defaults(title)
             return [legends]
         else:
             return []
 
-    def get_info(self, geom_type=None):
+    def get_info(self):
         legends_info = []
         for legend in self._legends:
             if legend:
-                legends_info.append(legend.get_info(geom_type))
+                legends_info.append(legend.get_info())
 
         return legends_info

@@ -140,6 +140,10 @@ def gen_variable_name(value):
     return 'v' + get_hash(value)[:6]
 
 
+def gen_column_name(value, operation=False):
+    return value if operation else '$' + value
+
+
 def get_hash(text):
     h = hashlib.sha1()
     h.update(text.encode('utf-8'))
@@ -421,3 +425,17 @@ def check_do_enabled(method):
             else:
                 raise e
     return fn
+
+
+def is_ipython_notebook():
+    """
+    Detect whether we are in a Jupyter notebook.
+    """
+    try:
+        cfg = get_ipython().config
+        if 'IPKernelApp' in cfg:
+            return True
+        else:
+            return False
+    except NameError:
+        return False

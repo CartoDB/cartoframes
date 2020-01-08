@@ -177,6 +177,20 @@ def test_read_carto_decode_geom_false(mocker):
     assert expected.equals(cdf)
 
 
+def test_to_carto(mocker):
+    # Given
+    cm_mock = mocker.patch.object(ContextManager, 'copy_from')
+    df = GeoDataFrame({'geometry': [Point([0, 0])]})
+
+    # When
+    to_carto(df, '__table_name__', CREDENTIALS)
+
+    # Then
+    assert cm_mock.call_args[0][1] == '__table_name__'
+    assert cm_mock.call_args[0][2] == 'fail'
+    assert cm_mock.call_args[0][3] is True
+
+
 def test_to_carto_wrong_dataframe(mocker):
     # When
     with pytest.raises(ValueError) as e:
@@ -221,6 +235,30 @@ def test_to_carto_wrong_if_exists(mocker):
 
     # Then
     assert str(e.value) == 'Wrong option for the `if_exists` param. You should provide: fail, replace, append.'
+
+
+def test_to_carto_if_exists_replace(mocker):
+    # Given
+    cm_mock = mocker.patch.object(ContextManager, 'copy_from')
+    df = GeoDataFrame({'geometry': [Point([0, 0])]})
+
+    # When
+    to_carto(df, '__table_name__', CREDENTIALS, if_exists='replace')
+
+    # Then
+    assert cm_mock.call_args[0][2] == 'replace'
+
+
+def test_to_carto_no_cartodbfy(mocker):
+    # Given
+    cm_mock = mocker.patch.object(ContextManager, 'copy_from')
+    df = GeoDataFrame({'geometry': [Point([0, 0])]})
+
+    # When
+    to_carto(df, '__table_name__', CREDENTIALS, cartodbfy=False)
+
+    # Then
+    assert cm_mock.call_args[0][3] is False
 
 
 def test_copy_table_wrong_table_name(mocker):

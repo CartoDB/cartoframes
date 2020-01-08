@@ -22,6 +22,7 @@ from tests.e2e.helpers import _UserUrlLoader
 warnings.filterwarnings('ignore')
 
 
+@pytest.mark.skip()
 class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.client.DataObsClient"""
 
