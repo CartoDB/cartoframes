@@ -6,7 +6,7 @@ from ..popups import popup_element
 
 
 def color_continuous_style(
-        value, range_min=None, range_max=None, palette=None, size=None, opacity=None,
+        value, size=None, range_min=None, range_max=None, palette=None, opacity=None,
         stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a color continuous style.
 
@@ -20,8 +20,8 @@ def color_continuous_style(
             or other valid color palette. Use `help(cartoframes.viz.palettes)` to
             get more information. Default is "bluyl".
         size (int, optional): Size of point or line features.
-        opacity (int, optional): Opacity value for point color and line features.
-            Default is 0.8.
+        opacity (float, optional): Opacity value. Default is 1 for points and lines and
+            0.9 for polygons.
         stroke_color (str, optional): Color of the stroke on point features.
             Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.

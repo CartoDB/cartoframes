@@ -18,8 +18,7 @@ def cluster_size_style(
             available are 'avg', 'min', 'max', and 'sum'.
         resolution (int, optional): Resolution of aggregation grid cell. Set to 32 by default.
         color (str, optional): Hex, rgb or named color value. Defaults is '#FFB927' for point geometries.
-        opacity (int, optional): Opacity value for point color and line features.
-            Default is 0.8.
+        opacity (float, optional): Opacity value. Default is 0.8.
         stroke_color (str, optional): Color of the stroke on point features.
             Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.

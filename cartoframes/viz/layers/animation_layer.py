@@ -16,8 +16,8 @@ def animation_layer(
         color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for point geometries,
             '#4CC8A3' for lines and #826DBA for polygons.
         size (int, optional): Size of point or line features.
-        opacity (int, optional): Opacity value for point color and line features.
-            Default is 0.8.
+        opacity (float, optional): Opacity value for point color and line features.
+          Default is 0.8.
         stroke_width (int, optional): Size of the stroke on point features.
         stroke_color (str, optional): Color of the stroke on point features.
             Default is '#222'.
