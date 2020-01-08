@@ -4,8 +4,8 @@ from ..styles import size_category_style
 
 def size_category_layer(
         source, value, title='', top=5, cat=None,
-        ranges=None, color=None, opacity=None, stroke_width=None,
-        stroke_color=None, description='', footer='',
+        color=None, size=None, stroke_width=None,
+        stroke_color=None, opacity=None, description='', footer='',
         legend=True, popups=True, widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a size category layer.
 
@@ -17,15 +17,15 @@ def size_category_layer(
         top (int, optional): Number of size categories for layer. Default is
             5. Valid values range from 1 to 16.
         cat (str, optional): Category list as a string.
-        ranges (str, optional): Min/max size array. Default is
-            '[2, 20]' for point geometries and '[1, 10]' for lines.
         color (str, optional): Hex, rgb or named color value. Default is '#F46D43' for point geometries and
-             '#4CC8A3' for lines.
-        opacity (int, optional): Opacity value for point color and line features.
-            Default is 0.8.
+          '#4CC8A3' for lines.
+        size (str, optional): Min/max size array. Default is
+          '[2, 20]' for point geometries and '[1, 10]' for lines.
         stroke_width (int, optional): Size of the stroke on point features.
         stroke_color (str, optional): Color of the stroke on point features.
-            Default is '#222'.
+          Default is '#222'.
+        opacity (float, optional): Opacity value for point color and line features.
+          Default is 0.8.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
@@ -48,7 +48,7 @@ def size_category_layer(
     return Layer(
         source,
         style=size_category_style(
-          value, top, cat, ranges, color, opacity, stroke_color, stroke_width, animate),
+          value, top, cat, size, color, opacity, stroke_color, stroke_width, animate),
         legend=legend and {
             'type': {
                 'point': 'size-category-point',

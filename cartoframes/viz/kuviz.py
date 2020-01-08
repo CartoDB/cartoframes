@@ -8,8 +8,9 @@ from ..auth import get_default_credentials
 from ..utils.columns import normalize_name
 from ..data.clients.auth_api_client import AuthAPIClient
 from ..utils.logger import log
+from ..exceptions import PublishError
 
-filterwarnings("ignore", category=FutureWarning, module="carto")
+filterwarnings('ignore', category=FutureWarning, module='carto')
 
 DEFAULT_PUBLIC = 'default_public'
 
@@ -46,7 +47,7 @@ class KuvizPublisher:
 
     def update(self, data, name, password):
         if not self.kuviz:
-            raise Exception('The map has not been published yet. Use the `publish` method instead.')
+            raise PublishError('The map has not been published yet. Use the `publish` method instead.')
 
         self.kuviz.data = data
         self.kuviz.name = name

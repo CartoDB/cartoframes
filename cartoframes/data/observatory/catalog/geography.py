@@ -6,6 +6,7 @@ from . import subscription_info
 from . import subscriptions
 from . import utils
 from ....utils.utils import get_credentials, check_credentials, check_do_enabled
+from ....exceptions import DOError
 
 GEOGRAPHY_TYPE = 'geography'
 
@@ -69,8 +70,7 @@ class Geography(CatalogEntity):
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
         Raises:
-            DiscoveryError: when no datasets are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
         return get_dataset_repo().get_all({GEOGRAPHY_FILTER: self.id})
@@ -168,8 +168,8 @@ class Geography(CatalogEntity):
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Geography instances.
 
         Raises:
-            DiscoveryError: when no geographies are found.
-            Exception: if there's a problem when connecting to the catalog or DO is not enabled.
+            CatalogError: if there's a problem when connecting to the catalog or no geographies are found.
+            DOError: if DO is not enabled.
 
         """
         if credentials is not None:
@@ -178,7 +178,7 @@ class Geography(CatalogEntity):
         return cls._entity_repo.get_all(filters, credentials)
 
     @check_do_enabled
-    def to_csv(self, file_path, credentials=None):
+    def to_csv(self, file_path, credentials=None, limit=None):
         """Download geography data as a local csv file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
@@ -191,20 +191,24 @@ class Geography(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+            limit (int, optional): number of rows to be downloaded.
 
-        :raises CartoException: If you have not a valid license for the dataset being downloaded.
-        :raises ValueError: If the credentials argument is not valud.
+        Raises:
+            DOError: if you have not a valid license for the geography being downloaded,
+                DO is not enabled or there is an issue downloading the data.
+            ValueError: if the credentials argument is not valid.
+
         """
         _credentials = get_credentials(credentials)
 
         if not self._is_subscribed(_credentials):
-            raise Exception('You are not subscribed to this Geography yet. '
-                            'Please, use the subscribe method first.')
+            raise DOError('You are not subscribed to this Geography yet. '
+                          'Please, use the subscribe method first.')
 
-        self._download(_credentials, file_path)
+        self._download(_credentials, file_path, limit)
 
     @check_do_enabled
-    def to_dataframe(self, credentials=None):
+    def to_dataframe(self, credentials=None, limit=None):
         """Download geography data as a pandas.DataFrame. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
@@ -216,22 +220,24 @@ class Geography(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+            limit (int, optional): number of rows to be downloaded.
 
         Returns:
             pandas.DataFrame
 
         Raises:
-            Exception: if you have not a valid license for the dataset being downloaded or DO is not enabled.
-            ValueError: if the credentials argument is not valud.
+            DOError: if you have not a valid license for the geography being downloaded,
+                DO is not enabled or there is an issue downloading the data.
+            ValueError: if the credentials argument is not valid.
 
         """
         _credentials = get_credentials(credentials)
 
         if not self._is_subscribed(_credentials):
-            raise Exception('You are not subscribed to this Geography yet. '
-                            'Please, use the subscribe method first.')
+            raise DOError('You are not subscribed to this Geography yet. '
+                          'Please, use the subscribe method first.')
 
-        return self._download(_credentials)
+        return self._download(_credentials, limit=limit)
 
     @check_do_enabled
     def subscribe(self, credentials=None):
@@ -259,7 +265,8 @@ class Geography(CatalogEntity):
                 <cartoframes.auth.set_default_credentials>`) will be used.
 
         Raises:
-            Exception: if there's a problem when connecting to the catalog or DO is not enabled.
+            CatalogError: if there's a problem when connecting to the catalog.
+            DOError: if DO is not enabled.
 
         """
         _credentials = get_credentials(credentials)
@@ -285,7 +292,8 @@ class Geography(CatalogEntity):
             :py:class:`SubscriptionInfo <cartoframes.data.observatory.SubscriptionInfo>` SubscriptionInfo instance.
 
         Raises:
-            Exception: if there's a problem when connecting to the catalog or DO is not enabled.
+            CatalogError: if there's a problem when connecting to the catalog.
+            DOError: if DO is not enabled.
 
         """
         _credentials = get_credentials(credentials)

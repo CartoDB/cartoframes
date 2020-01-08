@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import patch, call
 
 from cartoframes.auth import Credentials
-from cartoframes.exceptions import DiscoveryError
+from cartoframes.exceptions import CatalogError
 from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.geography import Geography
 from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
@@ -107,7 +107,7 @@ class TestGeographyRepo(object):
         repo = GeographyRepository()
 
         # Then
-        with pytest.raises(DiscoveryError):
+        with pytest.raises(CatalogError):
             repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_geographies')

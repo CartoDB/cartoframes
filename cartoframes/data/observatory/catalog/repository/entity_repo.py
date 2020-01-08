@@ -2,7 +2,17 @@ from abc import ABC, abstractmethod
 
 from .repo_client import RepoClient
 from ..entity import CatalogList, is_slug_value
-from .....exceptions import DiscoveryError
+from .....exceptions import CatalogError
+
+
+def check_catalog_connection(method):
+    def fn(*args, **kw):
+        try:
+            return method(*args, **kw)
+        except Exception as e:
+            raise CatalogError(
+                'We are sorry, There\'s a problem when connecting to the catalog: {}'.format(e))
+    return fn
 
 
 class EntityRepository(ABC):
@@ -20,12 +30,12 @@ class EntityRepository(ABC):
     def get_all(self, filters=None):
         return self._get_filtered_entities(filters)
 
-    def get_by_id(self, id_):
-        result = self._get_rows(self._get_id_filter(id_))
+    def get_by_id(self, entity_id):
+        result = self._get_filtered_entity(entity_id)
 
         if len(result) == 0:
-            raise DiscoveryError('The id does not correspond with any existing entity in the catalog. '
-                                 'You can check the full list of available values with get_all() method')
+            raise CatalogError('The id does not correspond with any existing entity in the catalog. '
+                               'You can check the full list of available values with get_all() method.')
 
         data = self._map_row(result[0])
         return self._to_catalog_entity(data)
@@ -33,7 +43,12 @@ class EntityRepository(ABC):
     def get_by_id_list(self, id_list):
         return self._get_filtered_entities(self._get_id_list_filters(id_list))
 
-    def _get_filtered_entities(self, filters=None):
+    @check_catalog_connection
+    def _get_filtered_entity(self, entity_id):
+        return self._get_rows(self._get_id_filter(entity_id))
+
+    @check_catalog_connection
+    def _get_filtered_entities(self, filters):
         cleaned_filters = self._get_filters(filters)
         rows = self._get_rows(cleaned_filters)
 

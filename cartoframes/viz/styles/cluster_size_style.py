@@ -18,8 +18,7 @@ def cluster_size_style(
             available are 'avg', 'min', 'max', and 'sum'.
         resolution (int, optional): Resolution of aggregation grid cell. Set to 32 by default.
         color (str, optional): Hex, rgb or named color value. Defaults is '#FFB927' for point geometries.
-        opacity (int, optional): Opacity value for point color and line features.
-            Default is 0.8.
+        opacity (float, optional): Opacity value. Default is 0.8.
         stroke_color (str, optional): Color of the stroke on point features.
             Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.
@@ -52,7 +51,8 @@ def cluster_size_style(
         value,
         default_legends=size_continuous_legend(title=value),
         default_widgets=histogram_widget(value, title=value or 'Distribution'),
-        default_popups={'hover': popup_element(cluster_operation, title=cluster_operation_title, operation=True)}
+        default_popups={'hover': popup_element(cluster_operation, title=cluster_operation_title, operation=True),
+                        'click': popup_element(cluster_operation, title=cluster_operation_title, operation=True)}
     )
 
 
@@ -89,4 +89,4 @@ def _check_valid_operation(operation):
 
     if operation not in valid_operations:
         err = '"{0}" is not a valid operation. Valid operations are {1}'
-        raise Exception(err.format(operation, ', '.join(valid_operations)))
+        raise ValueError(err.format(operation, ', '.join(valid_operations)))

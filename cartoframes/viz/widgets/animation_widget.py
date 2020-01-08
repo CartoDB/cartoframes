@@ -8,9 +8,6 @@ def animation_widget(title='', description='', footer='', prop=''):
     The `filter` property of your map's style, applied to either a date or numeric field, drives both
     the animation and the widget. Only **one** animation can be controlled per layer.
 
-    To learn more about creating animations visit:
-      - https://carto.com/developers/carto-vl/guides/animated-visualizations.
-
     Args:
         title (str, optional): Title of widget.
         description (str, optional): Description text widget placed under widget title.

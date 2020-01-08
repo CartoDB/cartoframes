@@ -4,6 +4,7 @@
 import os
 import sys
 import json
+import pytest
 import unittest
 import warnings
 
@@ -23,6 +24,7 @@ from ...helpers import _ReportQuotas, _UserUrlLoader
 warnings.filterwarnings('ignore')
 
 
+@pytest.mark.skip()
 class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
     """Tests for cartoframes.data.service.Geocode"""
 

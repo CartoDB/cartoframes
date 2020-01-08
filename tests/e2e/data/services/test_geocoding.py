@@ -5,6 +5,7 @@ import unittest
 import os
 import sys
 import json
+import pytest
 import warnings
 
 from pandas import DataFrame
@@ -24,6 +25,7 @@ warnings.filterwarnings('ignore')
 RESERVED_GEO_COLUMN_NAME = 'the_geom'
 
 
+@pytest.mark.skip()
 class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
     """Tests for cartoframes.data.service.Geocoding"""
 

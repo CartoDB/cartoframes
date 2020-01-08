@@ -62,8 +62,8 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
-             force_cartodbfy=False, log_enabled=True):
-    """Upload a DataFrame to CARTO.
+             cartodbfy=True, log_enabled=True):
+    """Upload a Dataframe to CARTO.
 
     Args:
         dataframe (pandas.DataFrame, geopandas.GeoDataFrame`): data to be uploaded.
@@ -75,6 +75,8 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         index (bool, optional): write the index in the table. Default is False.
         index_label (str, optional): name of the index column in the table. By default it
             uses the name of the index from the dataframe.
+        cartodbfy (bool, optional): convert the table to CARTO format. Default True. More info
+            `here <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
 
     Raises:
         ValueError: if the dataframe or table name provided are wrong or the if_exists param is not valid.
@@ -109,12 +111,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         # Decode geometry column
         set_geometry(gdf, geom_col, inplace=True)
 
-    gdf_has_geometry = has_geometry(gdf)
-    if gdf_has_geometry:
+    if has_geometry(gdf):
         # Prepare geometry column for the upload
         gdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
-
-    cartodbfy = force_cartodbfy or gdf_has_geometry
 
     table_name = context_manager.copy_from(gdf, table_name, if_exists, cartodbfy)
 

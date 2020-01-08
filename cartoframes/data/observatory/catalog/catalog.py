@@ -59,20 +59,27 @@ class Catalog:
     to discover the catalog metadata, since there can be thousands of entities on it:
 
     >>> Category.get_all()
+    [<Category.get('demographics')>, ...]
     >>> Country.get_all()
+    [<Country.get('usa')>, ...]
     >>> Provider.get_all()
+    [<Provider.get('mrli')>, ...]
 
     Or you can get them by ID:
 
     >>> Category.get('demographics')
+    <Category.get('demographics')>
     >>> Country.get('usa')
+    <Country.get('usa')>
     >>> Provider.get('mrli')
+    <Provider.get('mrli')>
 
     Examples:
         The preferred way of discover the available datasets in the Catalog is through nested filters
 
         >>> catalog = Catalog()
         >>> catalog.country('usa').category('demographics').datasets
+        [<Dataset.get('acs_sociodemogr_b758e778')>, ...]
 
         You can include the geography as part of the nested filter like this:
 
@@ -99,7 +106,8 @@ class Catalog:
         For each dataset in the Catalog, you can explore its variables, get a summary of its stats, etc.
 
         >>> dataset = Dataset.get('od_acs_13345497')
-        >>> dataset.variables()
+        >>> dataset.variables
+        [<Variable.get('dwellings_2_uni_fb8f6cfb')> #'Two-family (two unit) dwellings', ...]
 
     See the Catalog guides and examples in our
     `public documentation website <https://carto.com/developers/cartoframes/guides/Introduction/>`__
@@ -117,8 +125,7 @@ class Catalog:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         Raises:
-            DiscoveryError: when no datasets are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
         return Country.get_all(self.filters)
@@ -131,8 +138,7 @@ class Catalog:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         Raises:
-            DiscoveryError: when no datasets are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
         return Category.get_all(self.filters)
@@ -145,8 +151,7 @@ class Catalog:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         Raises:
-            DiscoveryError: when no datasets are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
         return Dataset.get_all(self.filters)
@@ -159,8 +164,7 @@ class Catalog:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         Raises:
-            DiscoveryError: when no datasets are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
         return Geography.get_all(self.filters)
@@ -245,8 +249,7 @@ class Catalog:
             :py:class:`Subscriptions <cartoframes.data.observatory.Subscriptions>`
 
         Raises:
-            DiscoveryError: when no datasets are found.
-            Exception: if there's a problem when connecting to the catalog.
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
         _no_filters = {}

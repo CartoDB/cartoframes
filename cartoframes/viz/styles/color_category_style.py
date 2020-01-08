@@ -19,8 +19,8 @@ def color_category_style(
             or other valid color palette. Use `help(cartoframes.viz.palettes)` to
             get more information. Default is "bold".
         size (int, optional): Size of point or line features.
-        opacity (int, optional): Opacity value for point color and line features.
-            Default is 0.8.
+        opacity (float, optional): Opacity value. Default is 1 for points and lines and
+            0.9 for polygons.
         stroke_color (str, optional): Color of the stroke on point features.
             Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.
@@ -70,5 +70,6 @@ def color_category_style(
         value,
         default_legends=color_category_legend(title=value),
         default_widgets=category_widget(value, title=value),
-        default_popups={'hover': popup_element(value, title=value)}
+        default_popups={'hover': popup_element(value, title=value),
+                        'click': popup_element(value, title=value)}
     )
