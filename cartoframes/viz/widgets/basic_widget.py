@@ -9,31 +9,17 @@ def basic_widget(title='', description='', footer=''):
     Args:
         title (str, optional): Title of widget.
         description (str, optional): Description text widget placed under widget title.
-        footer (str, optional): Footer text placed on the widget bottom
+        footer (str, optional): Footer text placed on the widget bottom.
 
     Returns:
-        cartoframes.viz.Widget: Widget with type='basic'
+        cartoframes.viz.widget.Widget
 
     Example:
+        >>> basic_widget(
+        ...     title='Widget title',
+        ...     description='Widget description',
+        ...     footer='Widget footer')
 
-        .. code::
-
-            from cartoframes.viz import Map, Layer, basic_widget
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    widgets=[
-                        basic_widget(
-                            title='Road Collisions in 2018',
-                            description='An analysis of collisions in Seattle, WA',
-                            footer='Data source: City of Seattle'
-                        )]
-                )
-            )
     """
 
-    return Widget('basic',
-                  title=title,
-                  description=description,
-                  footer=footer)
+    return Widget('basic', '', title, description, footer)

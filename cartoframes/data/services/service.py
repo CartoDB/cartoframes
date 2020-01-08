@@ -1,7 +1,7 @@
 import uuid
 from collections import namedtuple
 
-from ...core.managers.context_manager import ContextManager
+from ...io.managers.context_manager import ContextManager
 
 SERVICE_KEYS = ('hires_geocoder', 'isolines')
 QUOTA_INFO_KEYS = ('monthly_quota', 'used_quota', 'soft_limit', 'provider')
@@ -10,7 +10,7 @@ QUOTA_INFO_KEYS = ('monthly_quota', 'used_quota', 'soft_limit', 'provider')
 Result = namedtuple('Result', ['data', 'metadata'])
 
 
-class Service(object):
+class Service:
 
     def __init__(self, credentials=None, quota_service=None):
         self._context_manager = ContextManager(credentials)

@@ -10,22 +10,22 @@ In this guide you are introduced to the Map and Layer classes, how to explore da
 
 ### Data
 
-This guide uses two datasets: a point dataset of simulated Starbucks locations in Brooklyn, New York and 15 minute walk time polygons (isochrones) around each store augmented with demographic variables from CARTO's [Data Observatory](). To follow along, you can get the [point dataset here](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn_geocoded.csv) and the [polygon dataset here](https://github.com/CartoDB/cartoframes/blob/develop/examples/files/starbucks_brooklyn_iso_enriched.csv).
+This guide uses two datasets: a point dataset of simulated Starbucks locations in Brooklyn, New York and 15 minute walk time polygons (isochrones) around each store augmented with demographic variables from CARTO's [Data Observatory](). To follow along, you can get the [point dataset here](http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.csv) and the [polygon dataset here](http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_iso_enriched.csv).
 
-As a first step, load both datasets as [pandas DataFrames](https://pandas.pydata.org/pandas-docs/stable/getting_started/dsintro.html#dataframe) into the notebook:
+As a first step, load both datasets as [pandas.DataFrame](https://pandas.pydata.org/pandas-docs/stable/getting_started/dsintro.html#dataframe) into the notebook:
 
 ```python
-import pandas
-
-from cartoframes import CartoDataFrame
+from pandas import read_csv
+from geopandas import GeoDataFrame
+from cartoframes.utils import decode_geometry
 
 # store point locations
-stores_df = pandas.read_csv('../files/starbucks_brooklyn_geocoded.csv')
-stores_cdf = CartoDataFrame(stores_df, geometry='the_geom')
+stores_df = read_csv('http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.csv')
+stores_gdf = GeoDataFrame(stores_df, geometry=decode_geometry(stores_df['the_geom']))
 
 # 15 minute walk time polygons
-iso_df = pandas.read_csv('../files/starbucks_brooklyn_iso_enriched.csv')
-iso_cdf = CartoDataFrame(iso_df, geometry='the_geom')
+iso_df = read_csv('http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_iso_enriched.csv')
+iso_gdf = GeoDataFrame(iso_df, geometry=decode_geometry(iso_df['the_geom']))
 ```
 
 ### Add Layers to a Map
@@ -36,8 +36,8 @@ Next, import the Map and Layer classes from the [Viz namespace](/developers/cart
 from cartoframes.viz import Map, Layer
 
 Map([
-    Layer(iso_cdf),
-    Layer(stores_cdf)
+    Layer(iso_gdf),
+    Layer(stores_gdf)
 ])
 ```
 
@@ -65,7 +65,7 @@ First, explore the store location attributes. In this dataset you will use the f
 * `revenue` which provides the information about how much a particular store earned in the year 2018
 
 ```python
-stores_cdf.head(3)
+stores_gdf.head(3)
 ```
 
 <div>
@@ -126,7 +126,7 @@ From the isochrone Layer, you will use the demographic attributes:
 * `id_store` which matches the unique id in the store points
 
 ```python
-iso_cdf.head(3)
+iso_gdf.head(3)
 ```
 
 <div>
@@ -196,14 +196,14 @@ As seen in the table summaries above, there are a variety of demographic attribu
 
 To make this information available while exploring each location on the map, you can add each attribute as a [Widget](developers/cartoframes/reference/#heading-Widgets). For this case specifically, you will use [Formula Widgets](/developers/cartoframes/examples/#example-formula-widget) to summarize the demographic variables and a [Category Widget](/developers/cartoframes/examples/#example-category-widget) on the categorical attribute of `id_store`.
 
-To add Widgets, you first need to import the types that you want to use and then, inside of the `iso_cdf` Layer add one widget for each attribute of interest. The Formula Widget accepts different types of aggregations. For this map, you will aggregate each demographic variable using `sum` so the totals update as you zoom, pan and interact with the map. You will also label each Widget appropriately using the `title` parameter.
+To add Widgets, you first need to import the types that you want to use and then, inside of the `iso_gdf` Layer add one widget for each attribute of interest. The Formula Widget accepts different types of aggregations. For this map, you will aggregate each demographic variable using `sum` so the totals update as you zoom, pan and interact with the map. You will also label each Widget appropriately using the `title` parameter.
 
 ```python
 from cartoframes.viz import formula_widget, category_widget
 
 Map([
     Layer(
-        iso_cdf,
+        iso_gdf,
         widgets=[
             formula_widget(
                 'popcy',
@@ -232,7 +232,7 @@ Map([
         ]
     ),
     Layer(
-        stores_cdf
+        stores_gdf
     )
 ])
 ```
@@ -240,14 +240,14 @@ At this point, take a few minutes to explore the map to see how the Widget value
 
 #### Add Popups
 
-In order to aid this map-based exploration, import the [Popup](developers/cartoframes/examples/#example-popup-on-hover) class and use the hover option on the `iso_cdf` Layer to be able to quickly hover over stores and get their ID:
+In order to aid this map-based exploration, import the [Popup](developers/cartoframes/examples/#example-popup-on-hover) class and use the hover option on the `iso_gdf` Layer to be able to quickly hover over stores and get their ID:
 
 ```python
 from cartoframes.viz import popup_element
 
 Map([
     Layer(
-        iso_cdf,
+        iso_gdf,
         widgets=[
             formula_widget(
                 'popcy',
@@ -279,7 +279,7 @@ Map([
         ]
     ),
     Layer(
-        stores_cdf
+        stores_gdf
     )
 ])
 ```
@@ -296,7 +296,7 @@ from cartoframes.viz.helpers import size_continuous_layer
 
 Map([
     Layer(
-        iso_cdf,
+        iso_gdf,
         widgets=[
             formula_widget(
                 'popcy',
@@ -328,7 +328,7 @@ Map([
         ]
     ),
     size_continuous_layer(
-        stores_cdf,
+        stores_gdf,
         'revenue'
     )
 ])
@@ -348,7 +348,7 @@ Let's make a few adjustments to make it easier to distinguish and locate the hig
 
 ```python
 size_continuous_layer(
-    stores_cdf,
+    stores_gdf,
     'revenue',
     size=[10,50],
     title='Annual Revenue ($)',
@@ -392,7 +392,7 @@ from cartoframes.viz.helpers import color_bins_layer
 
 Map([
     color_bins_layer(
-        iso_cdf,
+        iso_gdf,
         'inccymedhh',
         bins=7,
         palette='pinkyl',
@@ -402,7 +402,7 @@ Map([
         footer='Source: US Census Bureau'
     ),
     size_continuous_layer(
-        stores_cdf,
+        stores_gdf,
         'revenue',
         size=[10,50],
         range_max=1000000,
@@ -413,7 +413,7 @@ Map([
         description='Reported in 2018'
     ),
     Layer(
-        stores_cdf,
+        stores_gdf,
         hover_popup=[
             popup_element('id_store', title='Store ID')
         ]
@@ -444,7 +444,7 @@ from cartoframes.viz import Layout
 Layout([
     Map([
         size_continuous_layer(
-            stores_cdf,
+            stores_gdf,
             'revenue',
             size=[10,50],
             range_max=1000000,
@@ -454,11 +454,11 @@ Layout([
             title='Annual Revenue',
             popups=False
         ),
-        Layer(stores_cdf)
+        Layer(stores_gdf)
     ]),
     Map([
         color_bins_layer(
-            iso_cdf,
+            iso_gdf,
             'inccymedhh',
             bins=7,
             palette='pinkyl',
@@ -466,11 +466,11 @@ Layout([
             title='Median Income',
             popups=False
         ),
-        Layer(stores_cdf)
+        Layer(stores_gdf)
     ]),
     Map([
         color_bins_layer(
-            iso_cdf,
+            iso_gdf,
             'popcy',
             bins=7,
             palette='pinkyl',
@@ -478,11 +478,11 @@ Layout([
             title='Total Pop',
             popups=False
         ),
-        Layer(stores_cdf)
+        Layer(stores_gdf)
     ]),
     Map([
         color_bins_layer(
-            iso_cdf,
+            iso_gdf,
             'lbfcyempl',
             bins=7,
             palette='pinkyl',
@@ -490,7 +490,7 @@ Layout([
             title='Employed Pop',
             popups=False
         ),
-        Layer(stores_cdf)
+        Layer(stores_gdf)
     ]),
 ],2,2,viewport={'zoom': 10, 'lat': 40.64, 'lng': -73.92}, map_height=400)
 ```

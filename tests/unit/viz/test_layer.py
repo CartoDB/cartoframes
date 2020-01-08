@@ -5,7 +5,7 @@ from cartoframes.viz.popup_list import PopupList
 from cartoframes.viz.source import Source
 from cartoframes.viz.style import Style
 from cartoframes.viz import Layer
-from cartoframes.core.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager
 
 
 def setup_mocks(mocker, table_name):

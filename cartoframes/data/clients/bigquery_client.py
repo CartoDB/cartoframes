@@ -6,11 +6,11 @@ import pandas as pd
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery, storage, bigquery_storage_v1beta1 as bigquery_storage
 from google.oauth2.credentials import Credentials as GoogleCredentials
-from carto.exceptions import CartoException
 
 from ...auth import get_default_credentials
-from ...core.logger import log
-from ...utils.utils import timelogger
+from ...utils.logger import log
+from ...utils.utils import timelogger, is_ipython_notebook
+from ...exceptions import DOError
 
 
 _GCS_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB. This must be a multiple of 256 KB per the API specification.
@@ -25,12 +25,12 @@ def refresh_clients(func):
             try:
                 return func(self, *args, **kwargs)
             except RefreshError:
-                raise CartoException('Something went wrong accessing data. '
-                                     'Please, try again in a few seconds or contact support for help.')
+                raise DOError('Something went wrong accessing data. '
+                              'Please, try again in a few seconds or contact support for help.')
     return wrapper
 
 
-class BigQueryClient(object):
+class BigQueryClient:
 
     def __init__(self, credentials):
         self._credentials = credentials or get_default_credentials()
@@ -83,7 +83,7 @@ class BigQueryClient(object):
     @timelogger
     def download_to_file(self, job, file_path, fail_if_exists=False, column_names=None, progress_bar=True):
         if fail_if_exists and os.path.isfile(file_path):
-            raise CartoException('The file `{}` already exists.'.format(file_path))
+            raise OSError('The file `{}` already exists.'.format(file_path))
 
         try:
             rows = self._download_by_bq_storage_api(job)
@@ -96,7 +96,7 @@ class BigQueryClient(object):
                 if job.errors:
                     log.error([error['message'] for error in job.errors if 'message' in error])
 
-                raise CartoException('Error downloading data')
+                raise DOError('Error downloading data')
 
         _rows_to_file(rows, file_path, column_names, progress_bar)
 
@@ -115,7 +115,7 @@ class BigQueryClient(object):
                 if job.errors:
                     log.error([error['message'] for error in job.errors if 'message' in error])
 
-                raise CartoException('Error downloading data')
+                raise DOError('Error downloading data')
 
     def _download_by_bq_storage_api(self, job):
         table_ref = job.destination.to_bqstorage()
@@ -173,7 +173,7 @@ class BigQueryClient(object):
             if job.errors:
                 log.error([error['message'] for error in job.errors if 'message' in error])
 
-            raise CartoException('Error uploading data')
+            raise DOError('Error uploading data')
 
     def get_table_column_names(self, project, dataset, table):
         table_info = self._get_table(project, dataset, table)
@@ -186,7 +186,9 @@ class BigQueryClient(object):
 
 
 def _rows_to_file(rows, file_path, column_names=None, progress_bar=True):
-    if progress_bar:
+    show_progress_bar = progress_bar and is_ipython_notebook()
+
+    if show_progress_bar:
         pb = tqdm.tqdm_notebook(total=rows.total_rows)
 
     with open(file_path, 'w') as csvfile:
@@ -197,5 +199,5 @@ def _rows_to_file(rows, file_path, column_names=None, progress_bar=True):
 
         for row in rows:
             csvwriter.writerow(row.values())
-            if progress_bar:
+            if show_progress_bar:
                 pb.update(1)

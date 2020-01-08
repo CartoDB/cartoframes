@@ -41,6 +41,7 @@ class QueryJobMock(object):
         return ResponseMock(self.response)
 
 
+@pytest.mark.skip()
 class TestBigQueryClient(unittest.TestCase):
     def setUp(self):
         if (os.environ.get('APIKEY') is None or os.environ.get('USERNAME') is None):

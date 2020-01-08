@@ -2,26 +2,25 @@
 
 import json
 import collections
-import pandas as pd
 
 from warnings import warn
+from pandas import DataFrame
 from carto.exceptions import CartoException
 
-from ...core.managers.context_manager import ContextManager
 from ...io.carto import read_carto, to_carto
 from ...utils import utils
+from ...io.managers.context_manager import ContextManager
 
 
-class DataObsClient(object):
-    """
-    Data Observatory v1 class. `Data Observatory documentation
+class DataObsClient:
+    """Data Observatory v1 class. `Data Observatory documentation
     <https://carto.com/developers/data-observatory/>`__.
 
     This class provides the following methods to interact with Data Observatory:
-        - boundaries: returns a :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with
+        - boundaries: returns a geopandas.GeoDataFrame with
             the geographic boundaries (geometries) or their metadata.
         - discovery: returns a pandas.DataFrame with the measures found.
-        - augment: returns a :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with the augmented data.
+        - augment: returns a geopandas.GeoDataFrame with the augmented data.
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
@@ -49,57 +48,43 @@ class DataObsClient(object):
         section for more).
 
         Examples:
-
             Find all boundaries available for Australia. The columns
             `geom_name` gives us the name of the boundary and `geom_id`
             is what we need for the `boundary` argument.
 
-            .. code:: python
-
-                from cartoframes.auth import Credentials
-                from cartoframes.data.clients import DataObsClient
-                creds = Credentials('user name', 'api key')
-                do = DataObsClient(creds)
-                au_boundaries = do.boundaries(region='Australia')
-                au_boundaries[['geom_name', 'geom_id']]
+            >>> do = DataObsClient(credentials)
+            >>> au_boundaries = do.boundaries(region='Australia')
+            >>> au_boundaries[['geom_name', 'geom_id']]
 
             Get the boundaries for Australian Postal Areas and map them.
 
-            .. code:: python
-
-                from cartoframes.viz import Layer
-                au_postal_areas = do.boundaries(boundary='au.geo.POA')
-                Layer(au_postal_areas)
+            >>> au_postal_areas = do.boundaries(boundary='au.geo.POA')
+            >>> Map(Layer(au_postal_areas))
 
             Get census tracts around Idaho Falls, Idaho, USA, and add median
             income from the US census. Without limiting the metadata, we get
             median income measures for each census in the Data Observatory.
 
-            .. code:: python
-
-                from cartoframes.auth import Credentials
-                from cartoframes.data.clients import DataObsClient
-                credentials = Credentials('user name', 'api key')
-                # Note: default credentials will be supported in a future release
-                do = DataObsClient(credentials)
-                # will return CartoDataFrame with columns `the_geom` and `geom_ref`
-                tracts = do.boundaries(
-                    boundary='us.census.tiger.census_tract',
-                    region=[-112.096642,43.429932,-111.974213,43.553539])
-                # write geometries to a CARTO table
-                tracts.upload('idaho_falls_tracts')
-                # gather metadata needed to look up median income
-                median_income_meta = do.discovery(
-                    'idaho_falls_tracts',
-                    keywords='median income',
-                    boundaries='us.census.tiger.census_tract')
-                # get median income data and original table as new CartoDataFrame
-                idaho_falls_income = do.augment(
-                    'idaho_falls_tracts',
-                    median_income_meta,
-                    how='geom_refs')
-                # overwrite existing table with newly-enriched CartoDataFrame
-                idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')
+            >>> # Note: default credentials will be supported in a future release
+            >>> do = DataObsClient(credentials)
+            >>> # will return GeoDataFrame with columns `the_geom` and `geom_ref`
+            >>> tracts = do.boundaries(
+            ...     boundary='us.census.tiger.census_tract',
+            ...     region=[-112.096642,43.429932,-111.974213,43.553539])
+            >>> # write geometries to a CARTO table
+            >>> tracts.upload('idaho_falls_tracts')
+            >>> # gather metadata needed to look up median income
+            >>> median_income_meta = do.discovery(
+            ...     'idaho_falls_tracts',
+            ...     keywords='median income',
+            ...     boundaries='us.census.tiger.census_tract')
+            >>> # get median income data and original table as new GeoDataFrame
+            >>> idaho_falls_income = do.augment(
+            ...     'idaho_falls_tracts',
+            ...     median_income_meta,
+            ...     how='geom_refs')
+            >>> # overwrite existing table with newly-enriched GeoDataFrame
+            >>> idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')
 
         Args:
             boundary (str, optional):
@@ -138,11 +123,11 @@ class DataObsClient(object):
                 US Census Tiger.
 
         Returns:
-            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`:
+            geopandas.GeoDataFrame:
                 If `boundary` is specified, then all available
                 boundaries and accompanying `geom_refs` in `region` (or the world
                 if `region` is ``None`` or not specified) are returned. If
-                `boundary` is not specified, then a CartoDataFrame of all available
+                `boundary` is not specified, then a GeoDataFrame of all available
                 boundaries in `region` (or the world if `region` is ``None``).
         """
         # TODO: create a function out of this?
@@ -262,15 +247,12 @@ class DataObsClient(object):
             no filter values set will result in many thousands of measures.
 
         Examples:
-
             Get all European Union measures that mention ``freight``.
 
-            .. code::
-
-                freight_meta = do.discovery('European Union',
-                                       keywords='freight',
-                                       time='2010')
-                freight_meta['numer_name'].head()
+            >>> freight_meta = do.discovery('European Union',
+            ...                        keywords='freight',
+            ...                        time='2010')
+            >>> freight_meta['numer_name'].head()
 
         Args:
             region (str or list of float):
@@ -320,7 +302,7 @@ class DataObsClient(object):
                 catalog <http://cartodb.github.io/bigmetadata/>`__.
             include_quantiles (bool, optional):
                 Include quantiles calculations which are a calculation
-                of how a measure compares to all measures in the full CartoDataFrame.
+                of how a measure compares to all measures in the full GeoDataFrame.
                 Defaults to ``False``. If ``True``, quantiles columns will be returned
                 for each column which has it pre-calculated.
 
@@ -475,7 +457,7 @@ class DataObsClient(object):
                 numers=numers,
                 quantiles=quantiles).strip()
         utils.debug_print(self._verbose, query=query)
-        return pd.DataFrame(self._fetch(query, decode_geom=True))
+        return DataFrame(self._fetch(query, decode_geom=True))
 
     def augment(self, table_name, metadata, persist_as=None, how='the_geom'):
         """Get an augmented CARTO dataset with `Data Observatory
@@ -490,29 +472,22 @@ class DataObsClient(object):
             Get a DataFrame with Data Observatory measures based on the
             geometries in a CARTO table.
 
-            .. code::
-
-                from cartoframes.auth import Credentials
-                from cartoframes.data.clients import DataObsClient
-                creds = Credentials('user name', 'api key')
-                do = DataObsClient(creds)
-                median_income = do.discovery(
-                    'transaction_events',
-                    regex='.*median income.*',
-                    time='2011 - 2015')
-                ds = do.augment('transaction_events', median_income)
+            >>> do = DataObsClient(credentials)
+            >>> median_income = do.discovery(
+            ...     'transaction_events',
+            ...     regex='.*median income.*',
+            ...     time='2011 - 2015')
+            >>> ds = do.augment('transaction_events', median_income)
 
             Pass in cherry-picked measures from the Data Observatory catalog.
             The rest of the metadata will be filled in, but it's important to
             specify the geographic level as this will not show up in the column
             name.
 
-            .. code::
-
-                median_income = [{'numer_id': 'us.census.acs.B19013001',
-                                  'geom_id': 'us.census.tiger.block_group',
-                                  'numer_timespan': '2011 - 2015'}]
-                ds = do.augment('transaction_events', median_income)
+            >>> median_income = [{'numer_id': 'us.census.acs.B19013001',
+            ...                   'geom_id': 'us.census.tiger.block_group',
+            ...                   'numer_timespan': '2011 - 2015'}]
+            >>> ds = do.augment('transaction_events', median_income)
 
         Args:
             table_name (str):
@@ -538,8 +513,8 @@ class DataObsClient(object):
                 metadata.
 
         Returns:
-            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`:
-                A CartoDataFrame representation of `table_name` which
+            geopandas.GeoDataFrame:
+                A GeoDataFrame representation of `table_name` which
                 has new columns for each measure in `metadata`.
 
         Raises:
@@ -553,7 +528,7 @@ class DataObsClient(object):
                 If user account consumes all of Data Observatory quota
         """
 
-        if isinstance(metadata, pd.DataFrame):
+        if isinstance(metadata, DataFrame):
             _meta = metadata.copy().reset_index()
         elif isinstance(metadata, collections.Iterable):
             query = utils.minify_sql((
@@ -592,7 +567,7 @@ class DataObsClient(object):
                 '      numeric, timespan_rownum numeric)',
             )).format(table_name=table_name,
                       meta=json.dumps(metadata).replace('\'', '\'\''))
-            _meta = pd.DataFrame(self._fetch(query))
+            _meta = DataFrame(self._fetch(query))
 
         if _meta.shape[0] == 0:
             raise ValueError('There are no valid metadata entries. Check '
@@ -654,11 +629,11 @@ class DataObsClient(object):
         return self._fetch(query, decode_geom=False, table_name=persist_as)
 
     def _fetch(self, query, decode_geom=False, table_name=None):
-        cdf = read_carto(query, self._credentials, decode_geom=decode_geom)
+        gdf = read_carto(query, self._credentials, decode_geom=decode_geom)
         if table_name:
-            to_carto(cdf, table_name, self._credentials,
+            to_carto(gdf, table_name, self._credentials,
                      geom_col='the_geom', if_exists='replace', log_enabled=False)
-        return cdf
+        return gdf
 
     def _geom_type(self, table):
         """gets geometry type(s) of specified layer"""

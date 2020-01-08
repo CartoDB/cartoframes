@@ -1,8 +1,12 @@
-import pandas
+from pandas import DataFrame
+from geopandas import GeoDataFrame
 
-from ..core.cartodataframe import CartoDataFrame
-from ..core.managers.context_manager import ContextManager
-from ..utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type
+from ..io.managers.context_manager import ContextManager
+from ..utils.geom_utils import set_geometry, has_geometry
+from ..utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type, \
+                          get_datetime_column_names
+
+RFC_2822_DATETIME_FORMAT = "%a, %d %b %Y %T %z"
 
 
 class SourceType:
@@ -10,73 +14,47 @@ class SourceType:
     GEOJSON = 'GeoJSON'
 
 
-class Source(object):
+class Source:
     """Source
 
     Args:
-        data (str, pandas.DataFrame, geopandas.GeoDataFrame,
-          :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` ): a table name,
-          SQL query, DataFrame, GeoDataFrame or CartoDataFrame instance.
+        data (str, pandas.DataFrame, geopandas.GeoDataFrame): a table name,
+            SQL query, DataFrame, GeoDataFrame instance.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-          A Credentials instance. If not provided, the credentials will be automatically
-          obtained from the default credentials if available.
+            A Credentials instance. If not provided, the credentials will be automatically
+            obtained from the default credentials if available.
         bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
-          keys, or an array of floats in the following structure: [[west,
-          south], [east, north]]. If not provided the bounds will be automatically
-          calculated to fit all features.
+            keys, or an array of floats in the following structure: [[west,
+            south], [east, north]]. If not provided the bounds will be automatically
+            calculated to fit all features.
         geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
 
     Example:
 
         Table name.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Source
-
-            set_default_credentials('your_user_name', 'your api key')
-
-            Source('table_name')
+        >>> Source('table_name')
 
         SQL query.
 
-        .. code::
+        >>> Source('SELECT * FROM table_name')
 
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Source
+        DataFrame object.
 
-            set_default_credentials('your_user_name', 'your api key')
+        >>> Source(df, geom_col='my_geom')
 
-            Source('SELECT * FROM table_name')
+        GeoDataFrame object.
 
-        CartoDataFrame object.
-
-        .. code::
-
-            from cartoframes.viz import Source
-            from cartoframes import CartoDataFrame
-
-            set_default_credentials('your_user_name', 'your api key')
-
-            cdf = CartoDataFrame.from_carto('table_name')
-
-            Source(cdf)
+        >>> Source(gdf)
 
         Setting the credentials.
 
-        .. code::
+        >>> Source('table_name', credentials)
 
-            from cartoframes.auth import Credentials
-            from cartoframes.viz import Source
-
-            credentials = Credentials('your_user_name', 'your api key')
-
-            Source('table_name', credentials)
     """
-
     def __init__(self, source, credentials=None, geom_col=None):
         self.credentials = None
+        self.datetime_column_names = None
 
         if isinstance(source, str):
             # Table, SQL query
@@ -84,17 +62,19 @@ class Source(object):
             self.manager = ContextManager(credentials)
             self.query = self.manager.compute_query(source)
             self.credentials = self.manager.credentials
-        elif isinstance(source, pandas.DataFrame):
-            # DataFrame, GeoDataFrame, CartoDataFrame
+        elif isinstance(source, DataFrame):
+            # DataFrame, GeoDataFrame
             self.type = SourceType.GEOJSON
-            self.cdf = CartoDataFrame(source, copy=True)
+            self.gdf = GeoDataFrame(source, copy=True)
+            self.set_datetime_columns()
 
-            if geom_col:
-                self.cdf.set_geometry(geom_col, inplace=True)
-
-            if not self.cdf.has_geometry():
-                raise Exception('No valid geometry found. Please provide an input source with ' +
-                                'a valid geometry or specify the "geom_col" param with a geometry column.')
+            if geom_col in self.gdf:
+                set_geometry(self.gdf, geom_col, inplace=True)
+            elif has_geometry(source):
+                self.gdf.set_geometry(source.geometry.name, inplace=True)
+            else:
+                raise ValueError('No valid geometry found. Please provide an input source with ' +
+                                 'a valid geometry or specify the "geom_col" param with a geometry column.')
         else:
             raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 
@@ -108,11 +88,22 @@ class Source(object):
                 'base_url': self.credentials.base_url
             }
 
+    def set_datetime_columns(self):
+        if self.type == SourceType.GEOJSON:
+            self.datetime_column_names = get_datetime_column_names(self.gdf)
+
+            if self.datetime_column_names:
+                for column in self.datetime_column_names:
+                    self.gdf[column] = self.gdf[column].dt.strftime(RFC_2822_DATETIME_FORMAT)
+
+    def get_datetime_column_names(self):
+        return self.datetime_column_names
+
     def get_geom_type(self):
         if self.type == SourceType.QUERY:
             return self.manager.get_geom_type(self.query) or 'point'
         elif self.type == SourceType.GEOJSON:
-            return get_geodataframe_geom_type(self.cdf)
+            return get_geodataframe_geom_type(self.gdf)
 
     def compute_metadata(self, columns=None):
         if self.type == SourceType.QUERY:
@@ -120,10 +111,10 @@ class Source(object):
             self.bounds = self.manager.get_bounds(self.query)
         elif self.type == SourceType.GEOJSON:
             if columns is not None:
-                columns += [self.cdf.geometry.name]
-                self.cdf = self.cdf[columns]
-            self.data = encode_geodataframe(self.cdf)
-            self.bounds = get_geodataframe_bounds(self.cdf)
+                columns += [self.gdf.geometry.name]
+                self.gdf = self.gdf[columns]
+            self.data = encode_geodataframe(self.gdf)
+            self.bounds = get_geodataframe_bounds(self.gdf)
 
     def is_local(self):
         return self.type == SourceType.GEOJSON

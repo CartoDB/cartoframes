@@ -2,24 +2,25 @@
 
 import os
 import pytest
-import pandas as pd
 import numpy as np
 
+from pandas import read_csv
+from geopandas import GeoDataFrame
 from shapely.geometry import box, shape
-from cartoframes.analysis.grid import QuadGrid
-from cartoframes import CartoDataFrame
 
-import geopandas as gpd
+from cartoframes.analysis.grid import QuadGrid
+from cartoframes.utils.geom_utils import set_geometry
+
 from geopandas.testing import assert_geodataframe_equal
 
 # DATA FRAME SRC BBOX
 pol_1 = box(1, 1, 2, 2)
 pol_2 = box(3, 3, 4, 4)
-GDF_BOX = gpd.GeoDataFrame({'id': [1, 2], 'geom': [pol_1, pol_2]}, columns=['id', 'geom'], geometry='geom')
+GDF_BOX = GeoDataFrame({'id': [1, 2], 'geom': [pol_1, pol_2]}, columns=['id', 'geom'], geometry='geom')
 
 pol_geojson = {
-    "type": "Polygon",
-    "coordinates": [
+    'type': 'Polygon',
+    'coordinates': [
         [
             [
                 -5.899658203125,
@@ -61,7 +62,7 @@ pol_geojson = {
     ]
 }
 
-GDF_IRREGULAR = gpd.GeoDataFrame({'id': [1], 'geom': [shape(pol_geojson)]}, columns=['id', 'geom'], geometry='geom')
+GDF_IRREGULAR = GeoDataFrame({'id': [1], 'geom': [shape(pol_geojson)]}, columns=['id', 'geom'], geometry='geom')
 
 BASE_FOLDER = os.path.dirname(os.path.abspath(__file__))
 
@@ -70,26 +71,27 @@ class TestGrid(object):
 
     def _load_test_gdf(self, fname):
         fname = os.path.join(BASE_FOLDER, fname)
-        df = pd.read_csv(fname, dtype={'id': np.int64, 'geom': object, 'quadkey': object})
-        cdf_test = CartoDataFrame(df, geometry='geom', crs='epsg:4326')
-        return cdf_test
+        df = read_csv(fname, dtype={'id': np.int64, 'geom': object, 'quadkey': object})
+        gdf = GeoDataFrame(df, crs='epsg:4326')
+        set_geometry(gdf, 'geom', inplace=True)
+        return gdf
 
     @pytest.mark.skip()
     def test_quadgrid_polyfill_box(self, mocker):
         """cartoframes.analysis.grid.QuadGrid.polyfill"""
-        cdf = QuadGrid().polyfill(GDF_BOX, 12)
-        assert isinstance(cdf, CartoDataFrame)
+        gdf = QuadGrid().polyfill(GDF_BOX, 12)
+        assert isinstance(gdf, GeoDataFrame)
 
         # Check both dataframes are equals
-        cdf_test = self._load_test_gdf('grid_quadkey_bbox.csv')
-        assert_geodataframe_equal(cdf, cdf_test, check_less_precise=True)
+        gdf_test = self._load_test_gdf('grid_quadkey_bbox.csv')
+        assert_geodataframe_equal(gdf, gdf_test, check_less_precise=True)
 
     @pytest.mark.skip()
     def test_quadgrid_polyfill_pol(self, mocker):
         """cartoframes.analysis.grid.QuadGrid.polyfill"""
-        cdf = QuadGrid().polyfill(GDF_IRREGULAR, 12)
-        assert isinstance(cdf, CartoDataFrame)
+        gdf = QuadGrid().polyfill(GDF_IRREGULAR, 12)
+        assert isinstance(gdf, GeoDataFrame)
 
         # Check both dataframes are equals
-        cdf_test = self._load_test_gdf('grid_quadkey_pol.csv')
-        assert_geodataframe_equal(cdf, cdf_test, check_less_precise=True)
+        gdf_test = self._load_test_gdf('grid_quadkey_pol.csv')
+        assert_geodataframe_equal(gdf, gdf_test, check_less_precise=True)

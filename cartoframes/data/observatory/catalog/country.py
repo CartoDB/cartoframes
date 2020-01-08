@@ -16,24 +16,16 @@ class Country(CatalogEntity):
     Examples:
         List the available countries in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
 
-        .. code::
-
-            from cartoframes.data.observatory import Catalog
-
-            catalog = Catalog()
-            countries = catalog.countries
+        >>> catalog = Catalog()
+        >>> countries = catalog.countries
 
         Get a :py:class:`Country <cartoframes.data.observatory.Country>` from the
         :py:class:`Catalog <cartoframes.data.observatory.Catalog>` given its ID
 
-        .. code::
+        >>> # country ID is a lowercase ISO Alpha 3 Code
+        >>> country = Country.get('usa')
 
-            from cartoframes.data.observatory import Country
-
-            # country ID is a lowercase ISO Alpha 3 Code
-            country = Country.get('usa')
     """
-
     _entity_repo = get_country_repo()
 
     @property
@@ -43,42 +35,30 @@ class Country(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         Examples:
             Get all the `datasets` :py:class:`Dataset <cartoframes.data.observatory.Dataset>` available
             in the `catalog` for a :py:class:`Country <cartoframes.data.observatory.Country>` instance
 
-            .. code::
-
-                from cartoframes.data.observatory import Country
-
-                country = Country.get('usa')
-                datasets = country.datasets
+            >>> country = Country.get('usa')
+            >>> datasets = country.datasets
 
             Same example as above but using nested filters:
 
-            .. code::
-
-                from cartoframes.data.observatory import Catalog
-
-                catalog = Catalog()
-                datasets = catalog.country('usa').datasets
+            >>> catalog = Catalog()
+            >>> datasets = catalog.country('usa').datasets
 
             You can perform these other operations with a
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`:
 
-            .. code::
-
-                from cartoframes.data.observatory import Catalog, Dataset
-
-                datasets = catalog.country('usa').datasets
-                # convert the list of datasets into a pandas DataFrame
-                # for further filtering and exploration
-                dataframe = datasets.to_dataframe()
-                # get a dataset by ID or slug
-                dataset = Dataset.get(A_VALID_ID_OR_SLUG)
+            >>> datasets = catalog.country('usa').datasets
+            >>> # convert the list of datasets into a pandas DataFrame
+            >>> # for further filtering and exploration
+            >>> dataframe = datasets.to_dataframe()
+            >>> # get a dataset by ID or slug
+            >>> dataset = Dataset.get(A_VALID_ID_OR_SLUG)
 
         """
         return get_dataset_repo().get_all({COUNTRY_FILTER: self.id})
@@ -90,42 +70,30 @@ class Country(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Geography instances.
 
-        :raises DiscoveryException: When no geographies are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no geographies are found.
 
         Examples:
             Get all the `geographies` :py:class:`Geography <cartoframes.data.observatory.Geography>` available
             in the `catalog` for a :py:class:`Country <cartoframes.data.observatory.Country>` instance
 
-            .. code::
-
-                from cartoframes.data.observatory import Country
-
-                country = Country.get('usa')
-                geographies = country.geographies
+            >>> country = Country.get('usa')
+            >>> geographies = country.geographies
 
             Same example as above but using nested filters:
 
-            .. code::
-
-                from cartoframes.data.observatory import Catalog
-
-                catalog = Catalog()
-                geographies = catalog.country('usa').geographies
+            >>> catalog = Catalog()
+            >>> geographies = catalog.country('usa').geographies
 
             You can perform these other operations with a
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`:
 
-            .. code::
-
-                from cartoframes.data.observatory import Catalog, Geography
-
-                geographies = catalog.country('usa').geographies
-                # convert the list of geographies into a pandas DataFrame
-                # for further filtering and exploration
-                dataframe = geographies.to_dataframe()
-                # get a geography by ID or slug
-                geography = Geography.get(A_VALID_ID_OR_SLUG)
+            >>> geographies = catalog.country('usa').geographies
+            >>> # convert the list of geographies into a pandas DataFrame
+            >>> # for further filtering and exploration
+            >>> dataframe = geographies.to_dataframe()
+            >>> # get a geography by ID or slug
+            >>> geography = Geography.get(A_VALID_ID_OR_SLUG)
 
         """
         return get_geography_repo().get_all({COUNTRY_FILTER: self.id})
@@ -137,28 +105,20 @@ class Country(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Category instances.
 
-        :raises DiscoveryException: When no datasets are found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         Examples:
             Get all the `categories` :py:class:`Category <cartoframes.data.observatory.Category>` available
             in the `catalog` for a :py:class:`Country <cartoframes.data.observatory.Country>` instance
 
-            .. code::
-
-                from cartoframes.data.observatory import Country
-
-                country = Country.get('usa')
-                categories = country.categories
+            >>> country = Country.get('usa')
+            >>> categories = country.categories
 
             Same example as above but using nested filters:
 
-            .. code::
-
-                from cartoframes.data.observatory import Catalog
-
-                catalog = Catalog()
-                category = catalog.country('usa').categories
+            >>> catalog = Catalog()
+            >>> category = catalog.country('usa').categories
 
         """
         return get_category_repo().get_all({COUNTRY_FILTER: self.id})

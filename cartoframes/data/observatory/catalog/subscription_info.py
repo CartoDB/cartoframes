@@ -2,14 +2,14 @@
 from carto.do_subscription_info import DOSubscriptionInfoManager
 
 
-class SubscriptionInfo(object):
+class SubscriptionInfo:
     """This class represents a :py:class:`SubscriptionInfo <cartoframes.data.observatory.SubscriptionInfo>`
     of datasets and geographies in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
 
     It contains private metadata (you need a CARTO account to query them) that is useful when you want a subscription
     license for a specific dataset or geography.
-    """
 
+    """
     def __init__(self, raw_data):
         self._raw_data = raw_data
 

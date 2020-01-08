@@ -1,8 +1,11 @@
 import pytest
+import numpy as np
+import pandas as pd
+import geopandas as gpd
 
 from cartoframes.auth import Credentials
 from cartoframes.viz.source import Source
-from cartoframes.core.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager
 
 
 def setup_mocks(mocker):
@@ -40,9 +43,25 @@ class TestSource(object):
 
     def test_source_no_credentials(self):
         """Source should raise an exception if there are no credentials"""
-        with pytest.raises(AttributeError) as e:
+        with pytest.raises(ValueError) as e:
             Source('faketable')
 
         assert str(e.value) == ('Credentials attribute is required. '
                                 'Please pass a `Credentials` instance or use '
                                 'the `set_default_credentials` function.')
+
+    def test_dates_in_source(self):
+        df = pd.DataFrame({
+            'date_column': ['2019-11-10', '2019-11-11'],
+            'lat': [1, 2],
+            'lon': [1, 2]
+        })
+        df['date_column'] = pd.to_datetime(df['date_column'])
+        gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.lon, df.lat))
+
+        assert df.dtypes['date_column'] == np.dtype('datetime64[ns]')
+
+        source = Source(gdf)
+
+        assert source.datetime_column_names == ['date_column']
+        assert source.gdf.dtypes['date_column'] == np.object

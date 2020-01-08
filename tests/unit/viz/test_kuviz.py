@@ -2,18 +2,16 @@
 
 import pytest
 
-from carto.exceptions import CartoException
-
 from cartoframes.auth import Credentials
 from cartoframes.viz import Map, Layer
 from cartoframes.viz.source import Source
 from cartoframes.viz.kuviz import KuvizPublisher, DEFAULT_PUBLIC, kuviz_to_dict
-from cartoframes.core.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager
 
 from ..mocks.kuviz_mock import CartoKuvizMock
 from ..mocks.api_key_mock import APIKeyManagerMock
 
-from .utils import build_cartodataframe
+from .utils import build_geodataframe
 
 
 def setup_mocks(mocker, credentials, is_public=True, token=None):
@@ -55,8 +53,8 @@ class TestKuvizPublisher(object):
     def test_kuviz_publisher_set_layers(self, mocker):
         setup_mocks(mocker, self.credentials)
 
-        source_1 = Source(build_cartodataframe([-10, 0], [-10, 0]))
-        source_2 = Source(build_cartodataframe([0, 10], [10, 0]))
+        source_1 = Source(build_geodataframe([-10, 0], [-10, 0]))
+        source_2 = Source(build_geodataframe([0, 10], [10, 0]))
         layer_1 = Layer(source_1)
         layer_2 = Layer(source_2)
         vmap = Map([
@@ -162,7 +160,7 @@ class TestKuvizPublisher(object):
         kuviz_publisher = KuvizPublisher(None)
         kuviz_publisher.set_layers(vmap.layers, kuviz_name, 'fake_table_name')
 
-        with pytest.raises(CartoException):
+        with pytest.raises(Exception):
             kuviz_publisher.update(html, kuviz_name, None)
 
     def test_kuviz_publisher_update(self, mocker):

@@ -9,6 +9,7 @@ import decimal
 import hashlib
 import requests
 import geopandas
+
 import numpy as np
 import pkg_resources
 import semantic_version
@@ -16,8 +17,10 @@ import semantic_version
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
 from pyrestcli.exceptions import ServerErrorException
+from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
-from ..core.logger import log
+from .logger import log
+from ..exceptions import DOError
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
@@ -307,6 +310,18 @@ def is_table_name(data):
     return isinstance(data, str) and normalize_name(data) == data
 
 
+def is_valid_str(value):
+    return isinstance(value, str) and value != ''
+
+
+def is_url(text):
+    return re.match(r'^https?://.*$', text)
+
+
+def is_json_filepath(text):
+    return re.match(r'^.*\.json\s*$', text, re.IGNORECASE)
+
+
 def get_credentials(credentials=None):
     from ..auth import defaults
     _credentials = credentials or defaults.get_default_credentials()
@@ -317,9 +332,9 @@ def get_credentials(credentials=None):
 def check_credentials(credentials):
     from ..auth.credentials import Credentials
     if not isinstance(credentials, Credentials):
-        raise AttributeError('Credentials attribute is required. '
-                             'Please pass a `Credentials` instance '
-                             'or use the `set_default_credentials` function.')
+        raise ValueError('Credentials attribute is required. '
+                         'Please pass a `Credentials` instance '
+                         'or use the `set_default_credentials` function.')
 
 
 def get_center(center):
@@ -418,10 +433,33 @@ def check_do_enabled(method):
             return method(*args, **kw)
         except ServerErrorException as e:
             if str(e) == "['The user does not have Data Observatory enabled']":
-                raise Exception(
+                raise DOError(
                     'We are sorry, the Data Observatory is not enabled for your account yet. '
                     'Please contact your customer success manager or send an email to '
                     'sales@carto.com to request access to it.')
             else:
                 raise e
     return fn
+
+
+def get_datetime_column_names(df):
+    column_names = []
+    for column in df.columns:
+        if is_datetime(df[column]):
+            column_names.append(column)
+
+    return column_names
+
+
+def is_ipython_notebook():
+    """
+    Detect whether we are in a Jupyter notebook.
+    """
+    try:
+        cfg = get_ipython().config
+        if 'IPKernelApp' in cfg:
+            return True
+        else:
+            return False
+    except NameError:
+        return False

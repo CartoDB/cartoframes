@@ -1,8 +1,7 @@
-from carto.exceptions import CartoException
-
 from .service import Service
-from ...core.logger import log
-from ...core.managers.source_manager import SourceManager
+from ...utils.logger import log
+from ...utils.geom_utils import set_geometry, has_geometry
+from ...io.managers.source_manager import SourceManager
 from ...io.carto import read_carto, to_carto, delete_table
 
 QUOTA_SERVICE = 'isolines'
@@ -19,12 +18,12 @@ class Isolines(Service):
         super(Isolines, self).__init__(credentials, quota_service=QUOTA_SERVICE)
 
     def isochrones(self, source, ranges, **args):
-        """isochrone areas
+        """isochrone areas.
 
         This method computes areas delimited by isochrone lines (lines of constant travel time) based upon public roads.
 
         Args:
-            source (str, DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
+            source (str, pandas.DataFrame, geopandas.GeoDataFrame):
                 table, SQL query or DataFrame containing the source points for the isochrones: travel routes from the
                 source points are computed to determine areas within specified travel times.
             ranges (list): travel time values in seconds; for each range value and source point a result polygon
@@ -57,8 +56,8 @@ class Isolines(Service):
                 or the index of the source `DataFrame`.
 
         Returns:
-            A named-tuple ``(data, metadata)`` containing a ``data`` :py:class:`CartoDataFrame
-            <cartoframes.CartoDataFrame>` and a ``metadata`` dictionary. For dry runs the data will be ``None``.
+            A named-tuple ``(data, metadata)`` containing a ``data`` geopandas.GeoDataFrame
+            and a ``metadata`` dictionary. For dry runs the data will be ``None``.
             The data contains a ``range_data`` column with a numeric value and a ``the_geom``
             geometry with the corresponding area. It will also contain a ``source_id`` column
             that identifies the source point corresponding to each area if the source has a
@@ -67,13 +66,13 @@ class Isolines(Service):
         return self._iso_areas(source, ranges, function='isochrone', **args)
 
     def isodistances(self, source, ranges, **args):
-        """isodistance areas
+        """isodistance areas.
 
         This method computes areas delimited by isodistance lines (lines of constant travel distance) based upon public
         roads.
 
         Args:
-            source (str, DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
+            source (str, pandas.DataFrame, geopandas.GeoDataFrame):
                 table, SQL query or DataFrame containing the source points for the isodistances: travel routes from the
                 source points are computed to determine areas within specified travel distances.
             ranges (list): travel distance values in meters; for each range value and source point a result polygon
@@ -106,12 +105,16 @@ class Isolines(Service):
                 or the index of the source `DataFrame`.
 
         Returns:
-            A named-tuple ``(data, metadata)`` containing a ``data`` :py:class:`CartoDataFrame
-            <cartoframes.CartoDataFrame>` and a ``metadata`` dictionary. For dry runs the data will be ``None``.
+            A named-tuple ``(data, metadata)`` containing a ``data`` geopandas.GeoDataFrame
+            and a ``metadata`` dictionary. For dry runs the data will be ``None``.
             The data contains a ``range_data`` column with a numeric value and a ``the_geom``
             geometry with the corresponding area. It will also contain a ``source_id`` column
             that identifies the source point corresponding to each area if the source has a
             ``cartodb_id`` column.
+
+        Raises:
+            Exception: if the available quota is less than the required quota.
+            ValueError: if there is no valid geometry found in the dataframe.
         """
         return self._iso_areas(source, ranges, function='isodistance', **args)
 
@@ -144,7 +147,7 @@ class Isolines(Service):
         else:
             available_quota = self.available_quota()
             if metadata['required_quota'] > available_quota:
-                raise CartoException('Your CARTO account does not have enough Isolines quota: {}/{}'.format(
+                raise Exception('Your CARTO account does not have enough Isolines quota: {}/{}'.format(
                     metadata['required_quota'],
                     available_quota
                 ))
@@ -155,18 +158,18 @@ class Isolines(Service):
         else:
             # upload to temporary table
             temporary_table_name = self._new_temporary_table_name()
-            source_cdf = source_manager.cdf
+            source_gdf = source_manager.gdf
 
-            if geom_col:
-                source_cdf.set_geometry(geom_col, inplace=True)
+            if geom_col in source_gdf:
+                set_geometry(source_gdf, geom_col, inplace=True)
 
-            if not source_cdf.has_geometry():
-                raise Exception('No valid geometry found. Please provide an input source with ' +
-                                'a valid geometry or specify the "geom_col" param with a geometry column.')
+            if not has_geometry(source_gdf):
+                raise ValueError('No valid geometry found. Please provide an input source with ' +
+                                 'a valid geometry or specify the "geom_col" param with a geometry column.')
 
-            index_as_cartodbid = CARTO_INDEX_KEY not in source_cdf.columns
+            index_as_cartodbid = CARTO_INDEX_KEY not in source_gdf.columns
 
-            to_carto(source_cdf, temporary_table_name, self._credentials, index=index_as_cartodbid,
+            to_carto(source_gdf, temporary_table_name, self._credentials, index=index_as_cartodbid,
                      index_label=CARTO_INDEX_KEY, log_enabled=False)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
 
@@ -192,24 +195,24 @@ class Isolines(Service):
             sql = _rings_query(sql)
 
         # Execute and download the query to generate the isolines
-        cdf = read_carto(sql, self._credentials)
+        gdf = read_carto(sql, self._credentials)
 
         if exclusive:
             # Add range label column
-            if len(cdf) > 0:
-                cdf[RANGE_LABEL_KEY] = cdf.apply(lambda r: '%.0f min.' % (r[DATA_RANGE_KEY]/60), axis=1)
+            if len(gdf) > 0:
+                gdf[RANGE_LABEL_KEY] = gdf.apply(lambda r: '%.0f min.' % (r[DATA_RANGE_KEY]/60), axis=1)
 
         if table_name:
             # save result in a table
-            to_carto(cdf, table_name, self._credentials, if_exists, log_enabled=dry_run)
+            to_carto(gdf, table_name, self._credentials, if_exists, log_enabled=dry_run)
 
-        if source_manager.is_dataframe() and CARTO_INDEX_KEY in cdf:
-            del cdf[CARTO_INDEX_KEY]
+        if source_manager.is_dataframe() and CARTO_INDEX_KEY in gdf:
+            del gdf[CARTO_INDEX_KEY]
 
         if temporary_table_name:
             delete_table(temporary_table_name, self._credentials, log_enabled=False)
 
-        result = self.result(data=cdf, metadata=metadata)
+        result = self.result(data=gdf, metadata=metadata)
 
         log.info('Success! Isolines created correctly')
 

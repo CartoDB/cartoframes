@@ -2,13 +2,11 @@
 import os
 import pytest
 
-from io import StringIO
-
 from cartoframes.auth import Credentials
 from cartoframes.auth.credentials import _DEFAULT_PATH, _USER_CONFIG_DIR
 
 
-class TestCredentials(object):
+class TestCredentials:
     def setup_method(self, method):
         self.api_key = 'fake_api_key'
         self.username = 'fake_user'
@@ -43,16 +41,6 @@ class TestCredentials(object):
         assert credentials.username is None
         assert credentials.base_url == self.base_url.strip('/')
 
-    def test_credentials_baseurl_without_https(self):
-        with pytest.raises(ValueError):
-            Credentials(api_key=self.api_key, base_url=self.base_url.replace('https', 'http'))
-
-    def test_credentials_set_baseurl_without_https(self):
-        credentials = Credentials(api_key=self.api_key, base_url=self.base_url)
-
-        with pytest.raises(ValueError):
-            credentials.base_url = self.base_url.replace('https', 'http')
-
     def test_credentials_without_base_url_and_username(self):
         with pytest.raises(ValueError):
             Credentials(api_key=self.api_key)
@@ -79,39 +67,20 @@ class TestCredentials(object):
         assert credentials.username == self.username
         assert credentials.base_url == self.onprem_base_url.strip('/')
 
-    def test_credentials_api_key_get_and_set(self):
+    def test_credentials_api_key_get(self):
         credentials = Credentials(self.username, self.api_key)
-        new_api_key = 'new_api_key'
-        credentials.api_key = new_api_key
 
-        assert credentials.api_key == new_api_key
+        assert credentials.api_key == self.api_key
 
-    def test_credentials_username_get_and_set(self):
+    def test_credentials_username_get(self):
         credentials = Credentials(self.username, self.api_key)
-        new_username = 'new_username'
-        credentials.username = new_username
 
-        assert credentials.username == new_username
+        assert credentials.username == self.username
 
-    def test_credentials_updating_username_updates_base_url(self):
-        base_url = 'https://fakeurl'
-        credentials = Credentials(api_key=self.api_key, base_url=base_url)
-
-        assert credentials.base_url == base_url
-
-        new_username = 'new_username'
-        expected_url = 'https://{}.carto.com'.format(new_username)
-        credentials.username = new_username
-
-        assert credentials.username == new_username
-        assert credentials.base_url == expected_url
-
-    def test_credentials_base_url_get_and_set(self):
+    def test_credentials_base_url_get(self):
         credentials = Credentials(self.username, self.api_key)
-        new_base_url = credentials.base_url + 'new'
-        credentials.base_url = new_base_url
 
-        assert credentials.base_url == new_base_url
+        assert credentials.base_url == self.base_url.strip('/')
 
     def test_credentials_repr(self):
         credentials = Credentials(self.username, self.api_key)
@@ -127,8 +96,6 @@ class TestCredentials(object):
         credentials2 = Credentials.from_credentials(credentials1)
 
         assert credentials1 == credentials2
-        credentials2.api_key = 'another_apy_key'
-        assert credentials1 != credentials2
 
     def test_get_api_key_auth_client(self):
         credentials = Credentials(self.username, self.api_key)
@@ -152,7 +119,7 @@ class TestCredentials(object):
         assert do_credentials.access_token == access_token
 
 
-class TestCredentialsFromFile(object):
+class TestCredentialsFromFile:
     def setup_method(self, method):
         # remove default credential file
         if os.path.exists(_DEFAULT_PATH):
@@ -172,7 +139,7 @@ class TestCredentialsFromFile(object):
             os.rmdir(_USER_CONFIG_DIR)
 
     def test_credentials_without_file(self, mocker):
-        mocker_stdout = mocker.patch('sys.stdout', new_callable=StringIO)
+        mocker_log = mocker.patch('cartoframes.utils.logger.log.info')
 
         credentials1 = Credentials(self.username, self.api_key)
         credentials1.save()
@@ -180,8 +147,9 @@ class TestCredentialsFromFile(object):
         credentials2 = Credentials.from_file()
 
         assert credentials1 == credentials2
-        assert mocker_stdout.getvalue() == 'User credentials for `{0}` were successfully saved to `{1}`\n'.format(
-            self.username, _DEFAULT_PATH)
+        mocker_log.assert_called_once_with(
+            'User credentials for `{0}` were successfully saved to `{1}`'.format(
+                self.username, _DEFAULT_PATH))
 
         credentials1.delete()
 
@@ -189,22 +157,23 @@ class TestCredentialsFromFile(object):
             Credentials.from_file()
 
     def test_credentials_with_file(self, mocker):
-        mocker_stdout = mocker.patch('sys.stdout', new_callable=StringIO)
+        mocker_log = mocker.patch('cartoframes.utils.logger.log.info')
 
-        file = '/tmp/credentials.json'
+        filepath = '/tmp/credentials.json'
         credentials1 = Credentials(self.username, self.api_key)
-        credentials1.save(file)
+        credentials1.save(filepath)
 
-        credentials2 = Credentials.from_file(file)
+        credentials2 = Credentials.from_file(filepath)
 
         assert credentials1 == credentials2
-        assert mocker_stdout.getvalue() == 'User credentials for `{0}` were successfully saved to `{1}`\n'.format(
-            self.username, file)
+        mocker_log.assert_called_once_with(
+            'User credentials for `{0}` were successfully saved to `{1}`'.format(
+                self.username, filepath))
 
-        credentials1.delete(file)
+        credentials1.delete(filepath)
 
         with pytest.raises(FileNotFoundError):
-            Credentials.from_file(file)
+            Credentials.from_file(filepath)
 
     def test_credentials_with_session(self):
         credentials1 = Credentials(self.username, self.api_key)

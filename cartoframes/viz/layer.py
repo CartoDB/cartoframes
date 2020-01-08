@@ -1,6 +1,5 @@
 import pandas
 
-from ..utils.utils import merge_dicts
 from .legend import Legend
 from .legend_list import LegendList
 from .popup import Popup
@@ -10,7 +9,7 @@ from .style import Style
 from .widget import Widget
 from .widget_list import WidgetList
 
-from ..utils.utils import extract_viz_columns
+from ..utils.utils import merge_dicts, extract_viz_columns
 
 
 class Layer:
@@ -22,15 +21,14 @@ class Layer:
         :py:class:`Map <cartoframes.viz.Map>` if only visualizing data as a single layer.
 
     Args:
-        source (str, pandas.DataFrame, geopandas.GeoDataFrame,
-            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): The source data:
+        source (str, pandas.DataFrame, geopandas.GeoDataFrame): The source data:
             table name, SQL query or a dataframe.
-        style (dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
+        style (dict, or :py:class:`Style <cartoframes.viz.style.Style>`, optional):
             The style of the visualization.
-        legends (bool, :py:class:`Legend <cartoframes.viz.Legend>` list, optional):
+        legends (bool, :py:class:`Legend <cartoframes.viz.legend.Legend>` list, optional):
             The legends definition for a layer. It contains a list of legend helpers.
-            See :py:class:`Legend <cartoframes.viz.Legend>` for more information.
-        widgets (bool, list, or :py:class:`WidgetList <cartoframes.viz.WidgetList>`, optional):
+            See :py:class:`Legend <cartoframes.viz.legend.Legend>` for more information.
+        widgets (bool, list, or :py:class:`WidgetList <cartoframes.viz.widget_list.WidgetList>`, optional):
             Widget or list of widgets for a layer. It contains the information to display
             different widget types on the top right of the map. See
             :py:class:`WidgetList` for more information.
@@ -50,8 +48,11 @@ class Layer:
             calculated to fit all features.
         geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
 
-    Example:
 
+    Raises:
+        ValueError: if the source is not valid.
+
+    Examples:
         Create a layer with the defaults (style, legend).
 
         >>> Layer('table_name')  # or Layer(gdf)
@@ -64,16 +65,14 @@ class Layer:
         ...     legends=color_bins_legend(title='Legend title'),
         ...     widgets=histogram_widget('column_name', title='Widget title'),
         ...     click_popup=popup_element('column_name', title='Popup title')
-        ...     hover_popup=popup_element('column_name', title='Popup title')
-        >>> )
+        ...     hover_popup=popup_element('column_name', title='Popup title'))
 
         Create a layer specifically tied to a :py:class:`Credentials
         <cartoframes.auth.Credentials>`.
 
         >>> Layer(
         ...     'table_name',
-        ...     credentials=Credentials.from_file('creds.json')
-        >>> )
+        ...     credentials=Credentials.from_file('creds.json'))
 
     """
     def __init__(self,
@@ -113,6 +112,7 @@ class Layer:
         self.interactivity = self.popups.get_interactivity()
         self.widgets_info = self.widgets.get_widgets_info()
         self.legends_info = self.legends.get_info() if self.legends is not None else None
+        self.options = self._set_options()
         self.has_legend_list = isinstance(self.legends, LegendList)
 
     def _init_legends(self, legends, title, description, footer):
@@ -147,6 +147,14 @@ class Layer:
             popups['hover'] = hover_popup
         return _set_popups(popups)
 
+    def _set_options(self):
+        date_column_names = self.source.get_datetime_column_names()
+
+        if isinstance(date_column_names, list):
+            return {'dateColumns': date_column_names}
+
+        return {}
+
     def _repr_html_(self):
         from .map import Map
         return Map(self)._repr_html_()
@@ -158,7 +166,7 @@ def _set_source(source, credentials, geom_col):
     elif isinstance(source, Source):
         return source
     else:
-        raise ValueError('Wrong source')
+        raise ValueError('Wrong source. Valid sources are string, DataFrame or GeoDataFrame.')
 
 
 def _set_style(style):

@@ -1,12 +1,12 @@
 import pytest
-import pandas as pd
 
+from pandas import DataFrame
+from geopandas import GeoDataFrame
 from unittest.mock import Mock, patch
 from shapely.geometry.point import Point
 from shapely.geometry.polygon import Polygon
 from google.cloud import bigquery, storage
 
-from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory import Variable, Dataset
@@ -14,8 +14,9 @@ from cartoframes.data.observatory.catalog.repository.dataset_repo import Dataset
 from cartoframes.data.observatory.catalog.repository.entity_repo import EntityRepository
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables, \
     _ENRICHMENT_ID, _GEOM_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation, _build_where_condition, \
-    _build_where_clausule, _validate_variables_input
-from cartoframes.exceptions import EnrichmentException
+    _build_where_clausule, _validate_variables_input, _build_polygons_query_variables_with_aggregation, \
+    _build_polygons_column_with_aggregation, _build_where_conditions_by_variable
+from cartoframes.exceptions import EnrichmentError
 from cartoframes.utils.geom_utils import to_geojson
 
 _WORKING_PROJECT = 'carto-do-customers'
@@ -54,11 +55,11 @@ class TestEnrichmentService(object):
         geom_column = 'the_geom'
         enrichment_service = EnrichmentService(credentials=self.credentials)
         point = Point(1, 1)
-        df = pd.DataFrame(
+        df = DataFrame(
             [[1, point]],
             columns=['cartodb_id', geom_column])
 
-        with pytest.raises(EnrichmentException) as e:
+        with pytest.raises(ValueError) as e:
             enrichment_service._prepare_data(df, None)
 
         error = ('No valid geometry found. Please provide an input source with ' +
@@ -69,10 +70,10 @@ class TestEnrichmentService(object):
         geom_column = 'the_geom'
         enrichment_service = EnrichmentService(credentials=self.credentials)
         point = Point(1, 1)
-        df = pd.DataFrame(
+        df = DataFrame(
             [[1, point]],
             columns=['cartodb_id', geom_column])
-        expected_cdf = CartoDataFrame(
+        expected_gdf = GeoDataFrame(
             [[1, point, 0, to_geojson(point)]],
             columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOM_COLUMN],
             geometry=geom_column
@@ -80,18 +81,18 @@ class TestEnrichmentService(object):
 
         result = enrichment_service._prepare_data(df, geom_column)
 
-        assert result.equals(expected_cdf)
+        assert result.equals(expected_gdf)
 
     def test_prepare_data_polygon_with_close_vertex(self):
         geom_column = 'the_geom'
         enrichment_service = EnrichmentService(credentials=self.credentials)
 
         polygon = Polygon([(10, 2), (1.12345688, 1), (1.12345677, 1), (10, 2)])
-        df = pd.DataFrame(
+        df = DataFrame(
             [[1, polygon]],
             columns=['cartodb_id', geom_column])
 
-        expected_cdf = CartoDataFrame(
+        expected_gdf = GeoDataFrame(
             [[1, polygon, 0, to_geojson(polygon)]],
             columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOM_COLUMN],
             geometry=geom_column
@@ -99,27 +100,27 @@ class TestEnrichmentService(object):
 
         result = enrichment_service._prepare_data(df, geom_column)
 
-        assert result.equals(expected_cdf)
+        assert result.equals(expected_gdf)
 
     def test_upload_data(self):
         geom_column = 'the_geom'
         user_dataset = 'test_dataset'
 
         point = Point(1, 1)
-        input_cdf = CartoDataFrame(
+        input_gdf = GeoDataFrame(
             [[1, point, 0, to_geojson(point)]],
             columns=['cartodb_id', geom_column, _ENRICHMENT_ID, _GEOM_COLUMN],
             geometry=geom_column
         )
 
         expected_schema = {_ENRICHMENT_ID: 'INTEGER', _GEOM_COLUMN: 'GEOGRAPHY'}
-        expected_cdf = CartoDataFrame(
+        expected_gdf = GeoDataFrame(
             [[0, to_geojson(point)]],
             columns=[_ENRICHMENT_ID, _GEOM_COLUMN])
 
         # mock
         def assert_upload_data(_, dataframe, schema, tablename):
-            assert dataframe.equals(expected_cdf)
+            assert dataframe.equals(expected_gdf)
             assert schema == expected_schema
             assert isinstance(tablename, str) and len(tablename) > 0
             assert tablename == user_dataset
@@ -127,7 +128,7 @@ class TestEnrichmentService(object):
         enrichment_service = EnrichmentService(credentials=self.credentials)
         original = BigQueryClient.upload_dataframe
         BigQueryClient.upload_dataframe = assert_upload_data
-        enrichment_service._upload_data(user_dataset, input_cdf)
+        enrichment_service._upload_data(user_dataset, input_gdf)
 
         BigQueryClient.upload_dataframe = original
 
@@ -136,23 +137,23 @@ class TestEnrichmentService(object):
         user_dataset = 'test_dataset'
 
         point = Point(1, 1)
-        input_cdf = CartoDataFrame(
+        input_gdf = GeoDataFrame(
             [[1, point, 0], [2, None, 1]],
             columns=['cartodb_id', geom_column, _ENRICHMENT_ID],
             geometry=geom_column
         )
 
         enrichment_service = EnrichmentService(credentials=self.credentials)
-        input_cdf = enrichment_service._prepare_data(input_cdf, geom_column)
+        input_gdf = enrichment_service._prepare_data(input_gdf, geom_column)
 
         expected_schema = {_ENRICHMENT_ID: 'INTEGER', _GEOM_COLUMN: 'GEOGRAPHY'}
-        expected_cdf = CartoDataFrame(
+        expected_gdf = GeoDataFrame(
             [[0, to_geojson(point)], [1, None]],
             columns=[_ENRICHMENT_ID, _GEOM_COLUMN])
 
         # mock
         def assert_upload_data(_, dataframe, schema, tablename):
-            assert dataframe.equals(expected_cdf)
+            assert dataframe.equals(expected_gdf)
             assert schema == expected_schema
             assert isinstance(tablename, str) and len(tablename) > 0
             assert tablename == user_dataset
@@ -160,17 +161,17 @@ class TestEnrichmentService(object):
         enrichment_service = EnrichmentService(credentials=self.credentials)
         original = BigQueryClient.upload_dataframe
         BigQueryClient.upload_dataframe = assert_upload_data
-        enrichment_service._upload_data(user_dataset, input_cdf)
+        enrichment_service._upload_data(user_dataset, input_gdf)
 
         BigQueryClient.upload_dataframe = original
 
     def test_execute_enrichment(self):
         geom_column = 'the_geom'
         point = Point(1, 1)
-        input_cdf = CartoDataFrame(
+        input_gdf = GeoDataFrame(
             [[point, 0, to_geojson(point)]],
             columns=[geom_column, _ENRICHMENT_ID, _GEOM_COLUMN])
-        expected_cdf = CartoDataFrame(
+        expected_gdf = GeoDataFrame(
             [[point, 'new data']],
             columns=[geom_column, 'var1'])
 
@@ -180,7 +181,7 @@ class TestEnrichmentService(object):
                 self.errors = None
 
             def to_dataframe(self):
-                return pd.DataFrame([[0, 'new data']], columns=[_ENRICHMENT_ID, 'var1'])
+                return DataFrame([[0, 'new data']], columns=[_ENRICHMENT_ID, 'var1'])
 
             def add_done_callback(self, callback):
                 return callback(self)
@@ -189,9 +190,9 @@ class TestEnrichmentService(object):
         BigQueryClient.query = Mock(return_value=JobMock())
         enrichment_service = EnrichmentService(credentials=self.credentials)
 
-        result = enrichment_service._execute_enrichment(['fake_query'], input_cdf)
+        result = enrichment_service._execute_enrichment(['fake_query'], input_gdf)
 
-        assert result.equals(expected_cdf)
+        assert result.equals(expected_gdf)
 
         BigQueryClient.query = original
 
@@ -323,7 +324,7 @@ class TestEnrichmentService(object):
 
         credentials = Credentials('fake_user', '1234')
 
-        with pytest.raises(EnrichmentException) as e:
+        with pytest.raises(EnrichmentError) as e:
             prepare_variables(variable, credentials)
 
         error = """
@@ -362,7 +363,7 @@ class TestEnrichmentService(object):
 
         credentials = Credentials('fake_user', '1234')
 
-        with pytest.raises(EnrichmentException) as e:
+        with pytest.raises(EnrichmentError) as e:
             prepare_variables(variable, credentials)
 
         error = """
@@ -435,7 +436,7 @@ class TestEnrichmentService(object):
 
         credentials = Credentials('fake_user', '1234')
 
-        with pytest.raises(EnrichmentException) as e:
+        with pytest.raises(EnrichmentError) as e:
             prepare_variables(variable, credentials)
 
         error = """
@@ -532,6 +533,10 @@ class TestEnrichmentService(object):
         assert _get_aggregation(variable_agg, custom_agg) == 'avg'
         custom_agg = {}
         assert _get_aggregation(variable_agg, custom_agg) == variable_agg.agg_method.lower()
+        custom_agg = {variable_agg.id: ['sum', 'avg']}
+        assert _get_aggregation(variable_agg, custom_agg) == ['sum', 'avg']
+        custom_agg = {variable_agg.id: ['SUM', 'aVg']}
+        assert _get_aggregation(variable_agg, custom_agg) == ['sum', 'avg']
 
         variable_agg_none = Variable({
             'id': 'id',
@@ -550,6 +555,10 @@ class TestEnrichmentService(object):
         assert _get_aggregation(variable_agg_none, custom_agg) == 'avg'
         custom_agg = {}
         assert _get_aggregation(variable_agg_none, custom_agg) is None
+        custom_agg = {variable_agg.id: ['sum', 'avg']}
+        assert _get_aggregation(variable_agg_none, custom_agg) == ['sum', 'avg']
+        custom_agg = {variable_agg.id: ['suM', 'AVG']}
+        assert _get_aggregation(variable_agg_none, custom_agg) == ['sum', 'avg']
 
     def test_where_condition(self):
         column = 'column'
@@ -587,7 +596,7 @@ class TestEnrichmentService(object):
         ]
 
         for invalid_input in invalid_inputs:
-            with pytest.raises(EnrichmentException) as e:
+            with pytest.raises(EnrichmentError) as e:
                 _validate_variables_input(invalid_input)
 
             error = ('variables parameter should be a Variable instance, a list or a str.')
@@ -600,7 +609,7 @@ class TestEnrichmentService(object):
         ]
 
         for invalid_input in invalid_inputs:
-            with pytest.raises(EnrichmentException) as e:
+            with pytest.raises(EnrichmentError) as e:
                 _validate_variables_input(invalid_input)
 
             error = ('You should add at least one variable to be used in enrichment.')
@@ -612,8 +621,127 @@ class TestEnrichmentService(object):
         ]
 
         for invalid_input in invalid_inputs:
-            with pytest.raises(EnrichmentException) as e:
+            with pytest.raises(EnrichmentError) as e:
                 _validate_variables_input(invalid_input)
 
             error = ('The maximum number of variables to be used in enrichment is 50.')
             assert str(e.value) == error
+
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._build_polygons_column_with_aggregation')
+    def test_build_polygons_query_variables_with_aggregation(self, column_query_mock):
+        def get_column(variable, aggregation, sufix=False):
+            return '{}_{}'.format(variable.column_name, str(sufix))
+
+        column_query_mock.side_effect = get_column
+
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': 'SUM'
+        })
+
+        expected_result = '{}_{}'.format(variable.column_name, 'False')
+        assert _build_polygons_query_variables_with_aggregation([variable], AGGREGATION_DEFAULT) == expected_result
+
+        expected_result = '{}_{}'.format(variable.column_name, 'False')
+        assert _build_polygons_query_variables_with_aggregation([variable], AGGREGATION_NONE) == expected_result
+
+        expected_result = '{}_{}'.format(variable.column_name, 'False')
+        assert _build_polygons_query_variables_with_aggregation([variable], 'AVG') == expected_result
+
+        expected_result = '{}_{}'.format(variable.column_name, 'False')
+        agg = {variable.id: 'AVG'}
+        assert _build_polygons_query_variables_with_aggregation([variable], agg) == expected_result
+
+        expected_result = '{}_{}'.format(variable.column_name, 'False')
+        agg = {'unexisting_id': 'AVG'}
+        assert _build_polygons_query_variables_with_aggregation([variable], agg) == expected_result
+
+        expected_result = '{}_{}, {}_{}'.format(variable.column_name, 'True', variable.column_name, 'True')
+        agg = {variable.id: ['AVG', 'SUM']}
+        assert _build_polygons_query_variables_with_aggregation([variable], agg) == expected_result
+
+    def test_build_polygons_column_with_aggregation(self):
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': 'sum'
+        })
+
+        aggregation = 'sum'
+        expected_sql = """
+            sum(
+                enrichment_table.{column} * (
+                    ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
+                    /
+                    NULLIF(ST_AREA(enrichment_geo_table.geom), 0)
+                )
+            ) AS {column_name}
+            """.format(
+                column=variable.column_name,
+                column_name=variable.column_name,
+                geo_column=_GEOM_COLUMN)
+        sql = _build_polygons_column_with_aggregation(variable, aggregation)
+        assert sql == expected_sql
+
+        aggregation = 'sum'
+        expected_sql = """
+            sum(
+                enrichment_table.{column} * (
+                    ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
+                    /
+                    NULLIF(ST_AREA(enrichment_geo_table.geom), 0)
+                )
+            ) AS {column_name}
+            """.format(
+                column=variable.column_name,
+                column_name='sum_{}'.format(variable.column_name),
+                geo_column=_GEOM_COLUMN)
+        sql = _build_polygons_column_with_aggregation(variable, aggregation, True)
+        assert sql == expected_sql
+
+        aggregation = 'avg'
+        expected_sql = 'avg(enrichment_table.{column}) AS {column_name}'.format(
+            column=variable.column_name,
+            column_name=variable.column_name)
+
+        sql = _build_polygons_column_with_aggregation(variable, aggregation)
+        assert sql.strip() == expected_sql.strip()
+
+        aggregation = 'avg'
+        expected_sql = 'avg(enrichment_table.{column}) AS {column_name}'.format(
+            column=variable.column_name,
+            column_name='avg_{}'.format(variable.column_name))
+        sql = _build_polygons_column_with_aggregation(variable, aggregation, True)
+        assert sql.strip() == expected_sql.strip()
+
+    def test_build_where_conditions_by_variable(self):
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': 'sum'
+        })
+
+        filters = {}
+        result = _build_where_conditions_by_variable(variable, filters)
+        assert result is None
+
+        filters = {'unexistingid': ''}
+        result = _build_where_conditions_by_variable(variable, filters)
+        assert result is None
+
+        filters = {variable.id: '> 50'}
+        expected = ["enrichment_table.{} > 50".format(variable.column_name)]
+        result = _build_where_conditions_by_variable(variable, filters)
+        assert result == expected
+
+        filters = {variable.id: ['> 50', '< 100']}
+        expected = [
+            "enrichment_table.{} > 50".format(variable.column_name),
+            "enrichment_table.{} < 100".format(variable.column_name)
+        ]
+        result = _build_where_conditions_by_variable(variable, filters)
+        assert result == expected

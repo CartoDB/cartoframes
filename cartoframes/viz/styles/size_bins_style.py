@@ -6,7 +6,7 @@ from ..popups import popup_element
 
 
 def size_bins_style(
-        value, method='quantiles', bins=5, breaks=None, ranges=None, color=None,
+        value, method='quantiles', bins=5, breaks=None, size=None, color=None,
         opacity=None, stroke_width=None, stroke_color=None, animate=None):
     """Helper function for quickly creating a size bind style with
     classification method/buckets.
@@ -14,17 +14,17 @@ def size_bins_style(
     Args:
         value (str): Column to symbolize by.
         method (str, optional): Classification method of data: "quantiles", "equal", "stdev".
-          Default is "quantiles".
+            Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
         breaks (list<int>, optional): Assign manual class break values.
-        ranges (int, optional): Min/max size array as a string. Default is
+        size (int, optional): Min/max size array as a string. Default is
           '[2, 14]' for point geometries and '[1, 10]' for lines.
         color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for point geometries and
           '#4CC8A3' for lines.
-        opacity (int, optional): Opacity value for point color and line features.
-          Default is '0.8'.
+        opacity (float, optional): Opacity value for point color and line features.
+          Default is 0.8.
         stroke_color (str, optional): Color of the stroke on point features.
-          Default is '#222'.
+            Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.
         animate (str, optional): Animate features by date/time or other numeric field.
 
@@ -53,7 +53,7 @@ def size_bins_style(
                 get_value(color, 'color', 'point'),
                 get_value(opacity, 0.8)),
             'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                func, value, breaks or bins, ranges or [2, 14]),
+                func, value, breaks or bins, size or [2, 14]),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
             'filter': animation_filter
@@ -63,7 +63,7 @@ def size_bins_style(
                 get_value(color, 'color', 'line'),
                 get_value(opacity, 0.8)),
             'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                func, value, breaks or bins, ranges or [1, 10]),
+                func, value, breaks or bins, size or [1, 10]),
             'filter': animation_filter
         }
     }

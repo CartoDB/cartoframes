@@ -2,7 +2,7 @@ from ..legend import Legend
 
 
 def basic_legend(title='', description='', footer=''):
-    """Helper function for quickly creating a basic legend
+    """Helper function for quickly creating a basic legend.
 
     Args:
         title (str, optional):
@@ -13,24 +13,14 @@ def basic_legend(title='', description='', footer=''):
             Footer of legend. This is often used to attribute data sources
 
     Returns:
-        :py:class:`Legend <cartoframes.viz.Legend>`
+        cartoframes.viz.legend.Legend
 
     Example:
+        >>> basic_legend(
+        ...     title='Legend title',
+        ...     description='Legend description',
+        ...     footer='Legend footer')
 
-        .. code::
-
-            from cartoframes.viz import Map, Layer, color_bins_legend
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    style=color_bins_style('amount')
-                    legends=basic_legend(
-                      title='Seattle Collisions',
-                      description='Car accidents in the city of Seattle'
-                    )
-                )
-            )
     """
 
     return Legend('basic', title, description, footer)

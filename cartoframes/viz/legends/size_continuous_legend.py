@@ -3,7 +3,7 @@ from ..legend import Legend
 
 def size_continuous_legend(title='', description='', footer='', prop='size',
                            variable=None, dynamic=True):
-    """Helper function for quickly creating a size continuous legend
+    """Helper function for quickly creating a size continuous legend.
 
     Args:
         prop (str, optional): Allowed properties are 'size' and 'stroke_width'.
@@ -22,41 +22,14 @@ def size_continuous_legend(title='', description='', footer='', prop='size',
             variable.
 
     Returns:
-        A 'size-continuous' :py:class:`Legend <cartoframes.viz.Legend>`
+        cartoframes.viz.legend.Legend
 
-    Examples:
+    Example:
+        >>> size_continuous_legend(
+        ...     title='Legend title',
+        ...     description='Legend description',
+        ...     footer='Legend footer',
+        ...     dynamic=False)
 
-        Default legend:
-
-        .. code::
-
-            from cartoframes.viz import Map, Layer, size_continuous_legend
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    style=size_continuous_style('collisiontype')
-                    legends=size_continuous_legend()
-                )
-            )
-
-        Legend with custom parameters:
-
-        .. code::
-
-            from cartoframes.viz import Map, Layer, size_continuous_legend
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    style=size_continuous_style('amount')
-                    legends=size_continuous_legend(
-                      title='Collision Type',
-                      description="Seattle Collisions"
-                      dynamic=False
-                    )
-                )
-            )
     """
-
     return Legend('size-continuous', title, description, footer, prop, variable, dynamic)

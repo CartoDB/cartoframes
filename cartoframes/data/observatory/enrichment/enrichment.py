@@ -1,5 +1,4 @@
 from .enrichment_service import EnrichmentService, prepare_variables, AGGREGATION_DEFAULT
-from ....utils.utils import timelogger
 
 
 class Enrichment(EnrichmentService):
@@ -18,8 +17,8 @@ class Enrichment(EnrichmentService):
             a default credentials (if set with :py:meth:`set_default_credentials
             <cartoframes.auth.set_default_credentials>`) will attempted to be
             used.
-    """
 
+    """
     def __init__(self, credentials=None):
         super(Enrichment, self).__init__(credentials)
 
@@ -32,104 +31,64 @@ class Enrichment(EnrichmentService):
         purposes.
 
         Args:
-            dataframe (pandas `DataFrame`, geopandas `GeoDataFrame`
-                or :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): a `DataFrame` instance to be enriched.
+            dataframe (pandas.DataFrame, geopandas.GeoDataFrame: a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`. The maximum number of
                 variables is 50.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (dict, optional): dictionary to filter results by variable values. As a key it receives the
-                variable id, and as value receives a SQL operator, for example: {variable1.id: "> 30"}. It works by
+                variable id, and as value receives a SQL operator, for example: `{variable1.id: "> 30"}`. It works by
                 appending the filter SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND`
-                operator (in the example: `WHERE {variable1.column_name} > 30`). The variables used to filter results
-                should exists in `variables` property list.
+                operator (in the example: `WHERE {variable1.column_name} > 30`). If you want to filter the same
+                variable several times you can use a list as a dict value: `{variable1.id: ["> 30", "< 100"]}`. The
+                variables used to filter results should exist in `variables` property list.
 
         Returns:
-            A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` enriched with the variables passed as argument.
+            A geopandas.GeoDataFrame enriched with the variables passed as argument.
+
+        Raises:
+            EnrichmentError: if there is an error in the enrichment process.
 
         *Note that if the points of the `dataframe` you provide are contained in more than one geometry
-        in the enrichment dataset, the number of rows of the returned `CartoDataFrame` could be different
+        in the enrichment dataset, the number of rows of the returned `GeoDataFrame` could be different
         than the `dataframe` argument number of rows.*
 
         Examples:
-
             Enrich a points `DataFrame` with Catalog classes:
 
-            .. code::
-
-                import pandas
-                from cartoframes.auth import set_default_credentials
-                from cartoframes.data.observatory import Enrichment, Catalog
-
-                # load credentials from local file
-                set_default_credentials('creds.json')
-
-                df = pandas.read_csv('path/to/local/csv')
-
-                catalog = Catalog()
-                variables = catalog.country('usa').category('demographics').datasets[0].variables
-
-                enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_points(df, variables)
-
+            >>> df = pandas.read_csv('path/to/local/csv')
+            >>> variables = Catalog().country('usa').category('demographics').datasets[0].variables
+            >>> gdf_enrich = Enrichment().enrich_points(df, variables, geom_col='the_geom')
 
             Enrich a points dataframe with several Variables using their ids:
 
-            .. code::
-
-                import pandas
-                from cartoframes.auth import set_default_credentials
-                from cartoframes.data.observatory import Enrichment, Catalog
-
-                # load credentials from local file
-                set_default_credentials('creds.json')
-
-                df = pandas.read_csv('path/to/local/csv')
-
-                catalog = Catalog()
-                all_variables = catalog.country('usa').category('demographics').datasets[0].variables
-                variable1 = all_variables[0]
-                variable2 = all_variables[1]
-                variables = [
-                    variable1.id,
-                    variable2.id
-                ]
-
-                enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_points(df, variables)
-
+            >>> df = pandas.read_csv('path/to/local/csv')
+            >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
+            >>> variables = all_variables[:2]
+            >>> gdf_enrich = Enrichment().enrich_points(df, variables, geom_col='the_geom')
 
             Enrich a points dataframe with filters:
 
-            .. code::
+            >>> df = pandas.read_csv('path/to/local/csv')
+            >>> variable = Catalog().country('usa').category('demographics').datasets[0].variables[0]
+            >>> filters = {variable.id: "= '2019-09-01'"}
+            >>> gdf_enrich = Enrichment().enrich_points(
+            ...     df,
+            ...     variables=[variable],
+            ...     filters=filters,
+            ...     geom_col='the_geom')
 
-                import pandas
-                from cartoframes.auth import set_default_credentials
-                from cartoframes.data.observatory import Enrichment, Catalog
-
-                # load credentials from local file
-                set_default_credentials('creds.json')
-
-                df = pandas.read_csv('path/to/local/csv')
-
-                catalog = Catalog()
-                variable = catalog.country('usa').category('demographics').datasets[0].variables[0]
-                filters = {variable.id: "= '2019-09-01'"}
-
-                enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_points(df, variables=[variable], filters=filters)
         """
         variables = prepare_variables(variables, self.credentials)
-        cartodataframe = self._prepare_data(dataframe, geom_col)
+        geodataframe = self._prepare_data(dataframe, geom_col)
 
         temp_table_name = self._get_temp_table_name()
-        self._upload_data(temp_table_name, cartodataframe)
+        self._upload_data(temp_table_name, geodataframe)
 
         queries = self._get_points_enrichment_sql(temp_table_name, variables, filters)
-        return self._execute_enrichment(queries, cartodataframe)
+        return self._execute_enrichment(queries, geodataframe)
 
-    @timelogger
     def enrich_polygons(self, dataframe, variables, geom_col=None, filters={}, aggregation=AGGREGATION_DEFAULT):
         """Enrich your polygons `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset` in
         the Data Observatory by intersecting the polygons in the source `DataFrame` with geographies in the
@@ -143,18 +102,18 @@ class Enrichment(EnrichmentService):
         variable column will be skipped from the enrichment.
 
         Args:
-            dataframe (pandas `DataFrame`, geopandas `GeoDataFrame`
-                or :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`): a `DataFrame` instance to be enriched.
+            dataframe (pandas.DataFrame, geopandas.GeoDataFrame): a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
                 or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`. The maximum number of
                 variables is 50.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (dict, optional): dictionary to filter results by variable values. As a key it receives the
-                variable id, and as value receives a SQL operator, for example: {variable1.id: "> 30"}. It works by
+                variable id, and as value receives a SQL operator, for example: `{variable1.id: "> 30"}`. It works by
                 appending the filter SQL operators to the `WHERE` clause of the resulting enrichment SQL with the `AND`
-                operator (in the example: `WHERE {variable1.column_name} > 30`). The variables used to filter results
-                should exists in `variables` property list.
+                operator (in the example: `WHERE {variable1.column_name} > 30`). If you want to filter the same
+                variable several times you can use a list as a dict value: `{variable1.id: ["> 30", "< 100"]}`. The
+                variables used to filter results should exist in `variables` property list.
             aggregation (None, str, list, optional): sets the data aggregation. The polygons in the source `DataFrame`
                 can intersect with one or more polygons from the Data Observatory. With this method you can select how
                 to aggregate the resulting data.
@@ -176,210 +135,125 @@ class Enrichment(EnrichmentService):
                 aggregation method to use.
                 - dictionary: if you want to overwrite some default aggregation methods from your selected
                 variables, use a dict as :py:attr:`Variable.id`: aggregation method pairs, for example:
-                `{variable1.id: 'SUM', variable3.id: 'AVG'}`.
+                `{variable1.id: 'SUM', variable3.id: 'AVG'}`. Or if you want to use several aggregation method for one
+                variable, you can use a list as a dict value: `{variable1.id: ['SUM', 'AVG'], variable3.id: 'AVG'}`
 
         Returns:
-            A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` enriched with the variables passed as argument.
+            A geopandas.GeoDataFrame enriched with the variables passed as argument.
+
+        Raises:
+            EnrichmentError: if there is an error in the enrichment process.
 
         *Note that if the geometry of the `dataframe` you provide intersects with more than one geometry
-        in the enrichment dataset, the number of rows of the returned `CartoDataFrame` could be different
+        in the enrichment dataset, the number of rows of the returned `GeoDataFrame` could be different
         than the `dataframe` argument number of rows.*
 
         Examples:
-
             Enrich a polygons dataframe with one Variable:
 
-            .. code::
-
-                import pandas
-                from cartoframes.auth import set_default_credentials
-                from cartoframes.data.observatory import Enrichment, Catalog
-
-                # load credentials from local file
-                set_default_credentials('creds.json')
-
-                df = pandas.read_csv('path/to/local/csv')
-
-                catalog = Catalog()
-                variable = catalog.country('usa').category('demographics').datasets[0].variables[0]
-                variables = [variable]
-
-                enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_polygons(df, variables)
-
+            >>> df = pandas.read_csv('path/to/local/csv')
+            >>> variable = Catalog().country('usa').category('demographics').datasets[0].variables[0]
+            >>> variables = [variable]
+            >>> gdf_enrich = Enrichment().enrich_polygons(df, variables, geom_col='the_geom')
 
             Enrich a polygons dataframe with all Variables from a Catalog Dataset:
 
-            .. code::
-
-                import pandas
-                from cartoframes.auth import set_default_credentials
-                from cartoframes.data.observatory import Enrichment, Catalog
-
-                # load credentials from local file
-                set_default_credentials('creds.json')
-
-                df = pandas.read_csv('path/to/local/csv')
-
-                catalog = Catalog()
-                variables = catalog.country('usa').category('demographics').datasets[0].variables
-
-                enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_polygons(df, variables)
-
+            >>> df = pandas.read_csv('path/to/local/csv')
+            >>> variables = Catalog().country('usa').category('demographics').datasets[0].variables
+            >>> gdf_enrich = Enrichment().enrich_polygons(df, variables, geom_col='the_geom')
 
             Enrich a polygons dataframe with several Variables using their ids:
 
-            .. code::
-
-                import pandas
-                from cartoframes.auth import set_default_credentials
-                from cartoframes.data.observatory import Enrichment, Catalog
-
-                # load credentials from local file
-                set_default_credentials('creds.json')
-
-                df = pandas.read_csv('path/to/csv/csv')
-
-                catalog = Catalog()
-                all_variables = catalog.country('usa').category('demographics').datasets[0].variables
-                variable1 = all_variables[0]
-                variable2 = all_variables[1]
-                variables = [
-                    variable1.id,
-                    variable2.id
-                ]
-
-                enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_polygons(df, variables)
-
+            >>> df = pandas.read_csv('path/to/local/csv')
+            >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
+            >>> variables = [all_variables[0].id, all_variables[1].id]
+            >>> cdf_enrich = Enrichment().enrich_polygons(df, variables, geom_col='the_geom')
 
             Enrich a polygons dataframe with filters:
 
-            .. code::
-
-                import pandas
-                from cartoframes.data.observatory import Enrichment, Catalog
-                from cartoframes.auth import set_default_credentials
-
-                # load local credentials file
-                set_default_credentials('creds.json')
-
-                df = pandas.read_csv('path/to/local/csv')
-
-                catalog = Catalog()
-                variable = catalog.country('usa').category('demographics').datasets[0].variables[0]
-                filters = {variable.id: "= '2019-09-01'"}
-
-                enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_polygons(df, variables=[variable], filters=filters)
+            >>> df = pandas.read_csv('path/to/local/csv')
+            >>> variable = Catalog().country('usa').category('demographics').datasets[0].variables[0]
+            >>> filters = {variable.id: "= '2019-09-01'"}
+            >>> gdf_enrich = Enrichment().enrich_polygons(
+            ...     df,
+            ...     variables=[variable],
+            ...     filters=filters,
+            ...     geom_col='the_geom')
 
             Enrich a polygons dataframe overwriting every variables aggregation method to use `SUM` function:
 
-            .. code::
-
-                import pandas
-                from cartoframes.data.observatory import Enrichment, Catalog
-                from cartoframes.auth import set_default_credentials
-
-                # load credentials from local file
-                set_default_credentials('creds.json')
-
-                df = pandas.read_csv('path/to/local/csv')
-
-                catalog = Catalog()
-                all_variables = catalog.country('usa').category('demographics').datasets[0].variables
-
-                variable1 = all_variables[0] # variable1.agg_method is 'AVG' but you want 'SUM'
-                variable2 = all_variables[1] # variable2.agg_method is 'AVG' but you want 'SUM'
-                variable3 = all_variables[2] # variable3.agg_method is 'SUM' and you want to keep it
-
-                variables = [variable1, variable2, variable3]
-
-                enrichment = Enrichment()
-                # override default aggregation of all variables with `SUM`
-                cdf_enrich = enrichment.enrich_polygons(df, variables,
-                                                        aggregation='SUM')
+            >>> df = pandas.read_csv('path/to/local/csv')
+            >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
+            >>> variables = all_variables[:3]
+            >>> gdf_enrich = Enrichment().enrich_polygons(
+            ...     df,
+            ...     variables,
+            ...     aggregation='SUM',
+            ...     geom_col='the_geom')
 
             Enrich a polygons dataframe overwriting some of the variables aggregation methods:
 
-            .. code::
+            >>> df = pandas.read_csv('path/to/local/csv')
+            >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
+            >>> variable1 = all_variables[0] // variable1.agg_method is 'AVG' but you want 'SUM'
+            >>> variable2 = all_variables[1] // variable2.agg_method is 'AVG' and it is what you want
+            >>> variable3 = all_variables[2] // variable3.agg_method is 'SUM' but you want 'AVG'
+            >>> variables = [variable1, variable2, variable3]
+            >>> aggregation = {
+            ...     variable1.id: 'SUM',
+            ...     variable3.id: 'AVG'
+            >>> }
+            >>> gdf_enrich = Enrichment().enrich_polygons(
+            ...     df,
+            ...     variables,
+            ...     aggregation=aggregation,
+            ...     geom_col='the_geom')
 
-                import pandas
-                from cartoframes.data.observatory import Enrichment, Catalog
-                from cartoframes.auth import set_default_credentials
+            Enrich a polygons dataframe using several aggregation methods for a variable:
 
-                # load credentials from local file
-                set_default_credentials('creds.json')
-
-                df = pandas.read_csv('path/to/local/csv')
-
-                catalog = Catalog()
-                all_variables = catalog.country('usa').category('demographics').datasets[0].variables
-                # aggregation methods can be overridden
-                variable1 = all_variables[0] # variable1.agg_method is 'AVG' but you want 'SUM'
-                variable2 = all_variables[1] # variable2.agg_method is 'AVG' and want to keep it that way
-                variable3 = all_variables[2] # variable3.agg_method is 'SUM' but you want 'AVG'
-
-                variables = [variable1, variable2, variable3]
-
-                # override default aggregations
-                aggregation = {
-                    variable1.id: 'SUM',
-                    variable3.id: 'AVG'
-                }
-
-                enrichment = Enrichment()
-                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=aggregation)
+            >>> df = pandas.read_csv('path/to/local/csv')
+            >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
+            >>> variable1 = all_variables[0] // variable1.agg_method is 'AVG' but you want 'SUM' and 'AVG'
+            >>> variable2 = all_variables[1] // variable2.agg_method is 'AVG' and it is what you want
+            >>> variable3 = all_variables[2] // variable3.agg_method is 'SUM' but you want 'AVG'
+            >>> variables = [variable1, variable2, variable3]
+            >>> aggregation = {
+            ...     variable1.id: ['SUM', 'AVG'],
+            ...     variable3.id: 'AVG'
+            >>> }
+            >>> cdf_enrich = Enrichment().enrich_polygons(df, variables, aggregation=aggregation)
 
             Enrich a polygons dataframe without aggregating variables (because you want to it yourself, for example,
                 in case you want to use your custom function for aggregating the data):
 
-            .. code::
-
-                import pandas
-                from cartoframes.data.observatory import Enrichment, Catalog
-                from cartoframes.auth import set_default_credentials
-
-                # load credentials from local file
-                set_default_credentials('creds.json')
-
-                df = pandas.read_csv('path/to/local/csv')
-
-                catalog = Catalog()
-                all_variables = catalog.country('usa').category('demographics').datasets[0].variables
-                variable1 = all_variables[0]
-                variable2 = all_variables[1]
-                variable3 = all_variables[2]
-
-                variables = [variable1, variable2, variable3]
-
-                enrichment = Enrichment()
-                # disable aggregation for all variables
-                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregation=None)
+            >>> df = pandas.read_csv('path/to/local/csv')
+            >>> all_variables = Catalog().country('usa').category('demographics').datasets[0].variables
+            >>> variables = all_variables[:3]
+            >>> gdf_enrich = Enrichment().enrich_polygons(
+            ...     df,
+            ...     variables,
+            ...     aggregation=None,
+            ...     geom_col='the_geom')
 
             The next example uses filters to calculate the `SUM` of car-free households
             :obj:`Variable` of the :obj:`Catalog` for each polygon of `my_local_dataframe` pandas `DataFrame` only for
             areas with more than 100 car-free households:
 
-            .. code::
+            >>> variable = Variable.get('no_cars_d19dfd10')
+            >>> gdf_enrich = Enrichment().enrich_polygons(
+            ...     my_local_dataframe,
+            ...     variables=[variable],
+            ...     aggregation={variable.id: 'SUM'},
+            ...     filters={variable.id: '> 100'},
+            ...     geom_col='the_geom')
 
-                from cartoframes.data.observatory import Enrichment, Variable
-
-                variable = Variable.get('no_cars_d19dfd10')
-                enriched_dataset_cdf = Enrichment().enrich_polygons(
-                    my_local_dataframe,
-                    variables=[variable],
-                    aggregation={variable.id: 'SUM'}
-                    filters={variable.id: '> 100'}
-                )
         """
         variables = prepare_variables(variables, self.credentials, aggregation)
 
-        cartodataframe = self._prepare_data(dataframe, geom_col)
+        geodataframe = self._prepare_data(dataframe, geom_col)
         temp_table_name = self._get_temp_table_name()
 
-        self._upload_data(temp_table_name, cartodataframe)
+        self._upload_data(temp_table_name, geodataframe)
 
         queries = self._get_polygon_enrichment_sql(temp_table_name, variables, filters, aggregation)
-        return self._execute_enrichment(queries, cartodataframe)
+        return self._execute_enrichment(queries, geodataframe)

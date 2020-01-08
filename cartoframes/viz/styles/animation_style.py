@@ -11,13 +11,13 @@ def animation_style(value, duration=20, color=None, size=None, opacity=None,
     Args:
         value (str): Column to symbolize by.
         color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for point geometries,
-          '#4CC8A3' for lines and #826DBA for polygons.
+            '#4CC8A3' for lines and #826DBA for polygons.
         size (int, optional): Size of point or line features.
-        opacity (int, optional): Opacity value for point color and line features.
-          Default is '0.8'.
+        opacity (float, optional): Opacity value. Default is 1 for points and lines and
+            0.9 for polygons.
         stroke_width (int, optional): Size of the stroke on point features.
         stroke_color (str, optional): Color of the stroke on point features.
-          Default is '#222'.
+            Default is '#222'.
 
     Returns:
         cartoframes.viz.style.Style
@@ -44,7 +44,7 @@ def animation_style(value, duration=20, color=None, size=None, opacity=None,
         'polygon': {
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'polygon'),
-                get_value(opacity, 0.8)),
+                get_value(opacity, 0.9)),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon'),
             'filter': _animation_filter(value, duration, fade)

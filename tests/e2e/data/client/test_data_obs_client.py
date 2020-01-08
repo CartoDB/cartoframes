@@ -22,6 +22,7 @@ from tests.e2e.helpers import _UserUrlLoader
 warnings.filterwarnings('ignore')
 
 
+@pytest.mark.skip()
 class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.client.DataObsClient"""
 
@@ -253,18 +254,18 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         meta = do.discovery(self.test_read_table,
                             keywords=('poverty', ),
                             time=('2010 - 2014', ))
-        cdf = do.augment(self.test_data_table, meta)
+        gdf = do.augment(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
         origcols = set(
             read_carto(self.test_data_table, credentials=self.credentials, limit=1, decode_geom=True).columns)
-        self.assertSetEqual(anscols, set(cdf.columns) - origcols - {'the_geom', 'cartodb_id'})
+        self.assertSetEqual(anscols, set(gdf.columns) - origcols - {'the_geom', 'cartodb_id'})
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
                  'geom_id': 'us.census.tiger.block_group',
                  'numer_timespan': '2011 - 2015'}, ]
-        cdf = do.augment(self.test_data_table, meta)
+        gdf = do.augment(self.test_data_table, meta)
         self.assertSetEqual(set(('median_income_2011_2015', )),
-                            set(cdf.columns) - origcols - {'the_geom', 'cartodb_id'})
+                            set(gdf.columns) - origcols - {'the_geom', 'cartodb_id'})
 
         with self.assertRaises(ValueError, msg='no measures'):
             meta = do.discovery('United States', keywords='not a measure')
@@ -284,20 +285,20 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         meta = do.discovery(self.test_read_table,
                             keywords=('poverty', ),
                             time=('2010 - 2014', ))
-        cdf = do.augment(self.test_data_table, meta)
+        gdf = do.augment(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
         origcols = set(
             read_carto(self.test_data_table, credentials=self.credentials, limit=1, decode_geom=True).columns)
-        self.assertSetEqual(anscols, set(cdf.columns) - origcols - {'the_geom', 'cartodb_id'})
+        self.assertSetEqual(anscols, set(gdf.columns) - origcols - {'the_geom', 'cartodb_id'})
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
                  'geom_id': 'us.census.tiger.block_group',
                  'numer_timespan': '2011 - 2015'}, ]
-        cdf = do.augment(self.test_data_table, meta, persist_as=self.test_write_table)
+        gdf = do.augment(self.test_data_table, meta, persist_as=self.test_write_table)
         self.assertSetEqual(set(('median_income_2011_2015', )),
-                            set(cdf.columns) - origcols - {'the_geom', 'cartodb_id'})
-        self.assertEqual(cdf.index.name, 'cartodb_id')
-        self.assertEqual(cdf.index.dtype, 'int64')
+                            set(gdf.columns) - origcols - {'the_geom', 'cartodb_id'})
+        self.assertEqual(gdf.index.name, 'cartodb_id')
+        self.assertEqual(gdf.index.dtype, 'int64')
 
         df = read_carto(self.test_write_table, credentials=self.credentials, decode_geom=False)
 
@@ -305,21 +306,21 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(df.index.dtype, 'int64')
 
         # same number of rows
-        self.assertEqual(len(df), len(cdf),
+        self.assertEqual(len(df), len(gdf),
                          msg='Expected number or rows')
 
         # same type of object
         self.assertIsInstance(df, pd.DataFrame,
                               'Should be a pandas DataFrame')
         # same column names
-        self.assertSetEqual(set(cdf.columns.values),
+        self.assertSetEqual(set(gdf.columns.values),
                             set(df.columns.values),
                             msg='Should have the columns requested')
 
         # should have exected schema
         self.assertEqual(
             sorted(tuple(str(d) for d in df.dtypes)),
-            sorted(tuple(str(d) for d in cdf.dtypes)),
+            sorted(tuple(str(d) for d in gdf.dtypes)),
             msg='Should have same schema/types'
         )
 
@@ -345,12 +346,12 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         do = DataObsClient(self.credentials)
         meta = do.discovery(region=self.test_write_table, keywords='female')
         meta = meta[meta.suggested_name == dup_col]
-        cdf = do.augment(
+        gdf = do.augment(
             self.test_write_table,
             meta[meta.suggested_name == dup_col]
         )
 
-        self.assertIn('_' + dup_col, cdf.keys())
+        self.assertIn('_' + dup_col, gdf.keys())
 
     def test_get_countrytag(self):
         valid_regions = ('Australia', 'Brasil', 'EU', 'España', 'U.K.', )

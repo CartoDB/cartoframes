@@ -1,20 +1,12 @@
 from .legend import Legend
 
 
-class LegendList(object):
+class LegendList:
     """LegendList
-     Args:
-        legends (list, Legend): List of legends for a layer.
+        Args:
+            legends (list, Legend): List of legends for a layer.
 
-    Example:
-
-        .. code::python
-
-            from cartoframes.viz import legend
-
-            LegendList([])
     """
-
     def __init__(self, legends=None, default_legend=None):
         self._legends = self._init_legends(legends, default_legend)
 

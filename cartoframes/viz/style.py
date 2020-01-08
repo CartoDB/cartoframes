@@ -1,5 +1,5 @@
-from ..utils.utils import merge_dicts, text_match
 from . import defaults
+from ..utils.utils import merge_dicts, text_match
 
 
 class Style:
@@ -7,8 +7,8 @@ class Style:
 
     Args:
         data (str, dict): The style for the layer.
-    """
 
+    """
     def __init__(self, data=None, value=None, default_legend=None,
                  default_widget=None, default_popups=None):
         self._style = self._init_style(data=data)

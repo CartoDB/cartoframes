@@ -3,7 +3,7 @@ from ..legend import Legend
 
 def size_bins_legend(title='', description='', footer='', prop='size',
                      variable=None, dynamic=True):
-    """Helper function for quickly creating a size bins legend
+    """Helper function for quickly creating a size bins legend.
 
     Args:
         title (str, optional):
@@ -23,41 +23,14 @@ def size_bins_legend(title='', description='', footer='', prop='size',
             Defaults to ``True``.
 
     Returns:
-        A 'size-bins' :py:class:`Legend <cartoframes.viz.Legend>`
+        cartoframes.viz.legend.Legend
 
-    Examples:
+    Example:
+        >>> size_bins_style(
+        ...     title='Legend title',
+        ...     description='Legend description',
+        ...     footer='Legend footer',
+        ...     dynamic=False)
 
-        Default legend:
-
-        .. code::
-
-            from cartoframes.viz import Map, Layer, size_bins_legend
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    style=size_bins_style('amount')
-                    legends=size_bins_legend()
-                )
-            )
-
-        Legend with custom parameters:
-
-        .. code::
-
-            from cartoframes.viz import Map, Layer, size_bins_legend
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    style=size_bins_style('amount')
-                    legends=size_bins_legend(
-                      title='Collision Type',
-                      description="Seattle Collisions"
-                      dynamic=False
-                    )
-                )
-            )
     """
-
     return Legend('size-bins', title, description, footer, prop, variable, dynamic)

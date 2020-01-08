@@ -4,9 +4,8 @@ from pandas import Index
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
 
-from cartoframes import CartoDataFrame
 from cartoframes.auth import Credentials
-from cartoframes.core.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager
 from cartoframes.io.carto import read_carto, to_carto, copy_table, create_table_from_query
 
 
@@ -34,12 +33,12 @@ def test_read_carto(mocker):
     }, geometry='the_geom')
 
     # When
-    cdf = read_carto('__source__', CREDENTIALS)
+    gdf = read_carto('__source__', CREDENTIALS)
 
     # Then
     cm_mock.assert_called_once_with('__source__', None, None, 3)
-    assert expected.equals(cdf)
-    assert cdf.crs == 'epsg:4326'
+    assert expected.equals(gdf)
+    assert gdf.crs == 'epsg:4326'
 
 
 def test_read_carto_wrong_source(mocker):
@@ -53,7 +52,7 @@ def test_read_carto_wrong_source(mocker):
 
 def test_read_carto_wrong_credentials(mocker):
     # When
-    with pytest.raises(AttributeError) as e:
+    with pytest.raises(ValueError) as e:
         read_carto('__source__', 1234)
 
     # Then
@@ -63,7 +62,7 @@ def test_read_carto_wrong_credentials(mocker):
 
 def test_read_carto_limit(mocker):
     # Given
-    mocker.patch.object(CartoDataFrame, 'set_geometry')
+    mocker.patch('cartoframes.utils.geom_utils.set_geometry')
     cm_mock = mocker.patch.object(ContextManager, 'copy_to')
 
     # When
@@ -75,7 +74,7 @@ def test_read_carto_limit(mocker):
 
 def test_read_carto_retry_times(mocker):
     # Given
-    mocker.patch.object(CartoDataFrame, 'set_geometry')
+    mocker.patch('cartoframes.utils.geom_utils.set_geometry')
     cm_mock = mocker.patch.object(ContextManager, 'copy_to')
 
     # When
@@ -87,7 +86,7 @@ def test_read_carto_retry_times(mocker):
 
 def test_read_carto_schema(mocker):
     # Given
-    mocker.patch.object(CartoDataFrame, 'set_geometry')
+    mocker.patch('cartoframes.utils.geom_utils.set_geometry')
     cm_mock = mocker.patch.object(ContextManager, 'copy_to')
 
     # When
@@ -117,10 +116,10 @@ def test_read_carto_index_col_exists(mocker):
     }, geometry='the_geom', index=Index([1, 2, 3], 'cartodb_id'))
 
     # When
-    cdf = read_carto('__source__', CREDENTIALS, index_col='cartodb_id')
+    gdf = read_carto('__source__', CREDENTIALS, index_col='cartodb_id')
 
     # Then
-    assert expected.equals(cdf)
+    assert expected.equals(gdf)
 
 
 def test_read_carto_index_col_not_exists(mocker):
@@ -144,10 +143,10 @@ def test_read_carto_index_col_not_exists(mocker):
     }, geometry='the_geom', index=Index([0, 1, 2], 'rename_index'))
 
     # When
-    cdf = read_carto('__source__', CREDENTIALS, index_col='rename_index')
+    gdf = read_carto('__source__', CREDENTIALS, index_col='rename_index')
 
     # Then
-    assert expected.equals(cdf)
+    assert expected.equals(gdf)
 
 
 def test_read_carto_decode_geom_false(mocker):
@@ -171,10 +170,10 @@ def test_read_carto_decode_geom_false(mocker):
     })
 
     # When
-    cdf = read_carto('__source__', CREDENTIALS, decode_geom=False)
+    gdf = read_carto('__source__', CREDENTIALS, decode_geom=False)
 
     # Then
-    assert expected.equals(cdf)
+    assert expected.equals(gdf)
 
 
 def test_to_carto(mocker):
@@ -217,7 +216,7 @@ def test_to_carto_wrong_credentials(mocker):
     df = GeoDataFrame({'geometry': [Point([0, 0])]})
 
     # When
-    with pytest.raises(AttributeError) as e:
+    with pytest.raises(ValueError) as e:
         to_carto(df, '__table_name__', 1234)
 
     # Then
@@ -281,7 +280,7 @@ def test_copy_table_wrong_new_table_name(mocker):
 
 def test_copy_table_wrong_credentials(mocker):
     # When
-    with pytest.raises(AttributeError) as e:
+    with pytest.raises(ValueError) as e:
         copy_table('__table_name__', '__new_table_name__', 1234)
 
     # Then
@@ -318,7 +317,7 @@ def test_create_table_from_query_wrong_new_table_name(mocker):
 
 def test_create_table_from_query_wrong_credentials(mocker):
     # When
-    with pytest.raises(AttributeError) as e:
+    with pytest.raises(ValueError) as e:
         create_table_from_query('SELECT * FROM table', '__new_table_name__', 1234)
 
     # Then

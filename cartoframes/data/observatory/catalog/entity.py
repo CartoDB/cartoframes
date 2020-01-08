@@ -1,18 +1,17 @@
 import pandas as pd
 
 from abc import ABC
-from carto.exceptions import CartoException
 
 from ...clients.bigquery_client import BigQueryClient
-from ....core.logger import log
+from ....utils.logger import log
+from ....exceptions import DOError
 
 
 _PLATFORM_BQ = 'bq'
 
 
 class CatalogEntity(ABC):
-    """
-    This is an internal class the rest of the classes related to the catalog discovery extend.
+    """This is an internal class the rest of the classes related to the catalog discovery extend.
 
     It contains:
       - Properties: `id`, `slug` (a shorter ID).
@@ -21,8 +20,8 @@ class CatalogEntity(ABC):
       - Instance methods to convert to pandas Series, Python dict, compare instances, etc.
 
     As a rule of thumb you don't directly use this class, it is documented for inheritance purposes.
-    """
 
+    """
     id_field = 'id'
     _entity_repo = None
     export_excluded_fields = ['summary_json', 'available_in', 'geom_coverage']
@@ -51,8 +50,9 @@ class CatalogEntity(ABC):
             id_ (str):
                 ID or slug of a catalog entity.
 
-        :raises DiscoveryException: When no entities found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no entities are found.
+
         """
         return cls._entity_repo.get_by_id(id_)
 
@@ -64,6 +64,7 @@ class CatalogEntity(ABC):
             filters (dict, optional):
                 Dict containing pairs of entity properties and its value to be used as filters to query the available
                 entities. If none is provided, no filters will be applied to the query.
+
         """
         return cls._entity_repo.get_all(filters)
 
@@ -75,8 +76,9 @@ class CatalogEntity(ABC):
             id_list (list):
                 List of sD or slugs of entities in the catalog to retrieve instances.
 
-        :raises DiscoveryException: When no entities found.
-        :raises CartoException: If there's a problem when connecting to the catalog.
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no entities are found.
+
         """
         return cls._entity_repo.get_by_id_list(id_list)
 
@@ -107,9 +109,9 @@ class CatalogEntity(ABC):
 
         return self.id
 
-    def _download(self, credentials, file_path=None):
+    def _download(self, credentials, file_path=None, limit=None):
         if not self._is_available_in('bq'):
-            raise CartoException('{} is not ready for Download. Please, contact us for more information.'.format(self))
+            raise DOError('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
         bq_client = _get_bigquery_client(credentials)
 
@@ -122,7 +124,11 @@ class CatalogEntity(ABC):
         project, dataset, table = full_remote_table_name.split('.')
 
         column_names = bq_client.get_table_column_names(project, dataset, table)
+
         query = 'SELECT * FROM `{}`'.format(full_remote_table_name)
+        if limit:
+            query = '{} LIMIT {}'.format(query, limit)
+
         job = bq_client.query(query)
 
         if file_path:
@@ -157,16 +163,15 @@ def is_slug_value(id_value):
 
 
 class CatalogList(list):
-    """
-    This is an internal class that represents a list of entities in the catalog of the same type.
+    """This is an internal class that represents a list of entities in the catalog of the same type.
 
     It contains:
       - Instance methods to convert to get an instance of the entity by ID and to convert the list to a pandas
         DataFrame for further filtering and exploration.
 
     As a rule of thumb you don't directly use this class, it is documented for inheritance purposes.
-    """
 
+    """
     def __init__(self, data):
         super(CatalogList, self).__init__(data)
 
@@ -174,15 +179,10 @@ class CatalogList(list):
         """Converts a list to a pandas DataFrame.
 
         Examples:
+            >>> catalog = Catalog()
+            >>> catalog.categories.to_dataframe()
 
-            .. code::
-
-                from cartoframes.data.observatory import Catalog
-
-                catalog = Catalog()
-                catalog.categories.to_dataframe()
         """
-
         df = pd.DataFrame([item.data for item in self])
 
         if 'available_in' in df:

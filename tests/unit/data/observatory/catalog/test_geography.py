@@ -370,7 +370,7 @@ class TestGeography(object):
         geography = Geography(db_geography1)
 
         # When
-        with pytest.raises(AttributeError) as e:
+        with pytest.raises(ValueError) as e:
             geography.subscribe(wrong_credentials)
 
         # Then
@@ -443,7 +443,7 @@ class TestGeography(object):
         geography = Geography(db_geography1)
 
         # When
-        with pytest.raises(AttributeError) as e:
+        with pytest.raises(ValueError) as e:
             geography.subscription_info(wrong_credentials)
 
         # Then

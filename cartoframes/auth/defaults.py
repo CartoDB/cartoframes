@@ -1,6 +1,5 @@
-import re
-
 from .credentials import Credentials
+from ..utils.utils import is_url, is_json_filepath
 
 _default_credentials = None
 
@@ -9,13 +8,9 @@ def set_default_credentials(
         first=None, second=None, credentials=None, filepath=None,
         username=None, base_url=None, api_key=None, session=None):
     """Set default credentials for all operations that require authentication
-    against a CARTO account. CARTOframes methods
-    :py:class:`cartoframes.viz.Layer` (and helper layers in
-    :py:mod:`cartoframes.viz.helpers`),
-    :py:class:`cartoframes.data.clients.SQLClient`, and others.
+    against a CARTO account.
 
     Args:
-
         credentials (:py:class:`Credentials <cartoframes.credentials.Credentials>`, optional):
           A :py:class:`Credentials <cartoframes.credentials.Credentials>`
           instance can be used in place of a `username | base_url`/`api_key` combination.
@@ -33,7 +28,6 @@ def set_default_credentials(
           <https://2.python-requests.org/en/master/user/advanced/#session-objects>`__
           for more information.
 
-
     .. note::
 
         The recommended way to authenticate in CARTOframes is to read user
@@ -47,7 +41,6 @@ def set_default_credentials(
                 "base_url": "https://your_username.carto.com"
             }
 
-
         *Note that the ``base_url`` will be different for on premises
         installations.*
 
@@ -58,36 +51,12 @@ def set_default_credentials(
 
         This file can then be read in the following ways:
 
-        .. code::
-
-            from cartoframes.auth import Credentials, set_default_credentials
-
-            # attempts to read file from default location if it exists
-            set_default_credentials()
-
-            # read credentials from specified location
-            set_default_credentials('./carto-project-credentials.json')
-
+        >>> set_default_credentials('./carto-project-credentials.json')
 
     Example:
-
         Create Credentials from a ``username``, ``api_key`` pair.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-
-            set_default_credentials(
-                username='johnsmith',
-                api_key='your api key'
-            )
-
-            # or
-
-            set_default_credentials(
-                'johnsmith',
-                'your api key'
-            )
+        >>> set_default_credentials('johnsmith', 'your api key')
 
         Create credentials from only a ``username`` (only works with public
         datasets and those marked public with link). If the API key is not
@@ -96,47 +65,25 @@ def set_default_credentials(
         maps, reading data from the Data Observatory, or creating new hosted
         datasets).
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            set_default_credentials('johnsmith')
+        >>> set_default_credentials('johnsmith')
 
         From a pair ``base_url``, ``api_key``.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            set_default_credentials(
-                base_url='https://johnsmith.carto.com',
-                api_key='your api key'
-            )
-            # or
-            set_default_credentials(
-                'https://johnsmith.carto.com',
-                'your api key'
-            )
+        >>> set_default_credentials('https://johnsmith.carto.com', 'your api key')
 
         From a ``base_url`` (for public datasets). The API key `default_public`
         is used by default.
 
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            set_default_credentials('https://johnsmith.carto.com')
+        >>> set_default_credentials('https://johnsmith.carto.com')
 
         From a :py:class:`Credentials <cartoframes.auth.Credentials>` class.
 
-        .. code::
-
-            from cartoframes.auth import Credentials, set_default_credentials
-            credentials = Credentials(
-                base_url='https://johnsmith.carto.com',
-                api_key='your api key'
-            )
-            set_default_credentials(credentials)
+        >>> credentials = Credentials(
+        ...     base_url='https://johnsmith.carto.com',
+        ...     api_key='your api key')
+        >>> set_default_credentials(credentials)
 
     """
-
     global _default_credentials
 
     _base_url = base_url if first is None else first
@@ -148,21 +95,17 @@ def set_default_credentials(
     if isinstance(_credentials, Credentials):
         _default_credentials = _credentials
 
-    elif isinstance(_filepath, str) and _is_json_filepath(_filepath):
+    elif isinstance(_filepath, str) and is_json_filepath(_filepath):
         _default_credentials = Credentials.from_file(_filepath)
 
     elif isinstance(_base_url or _username, str) and isinstance(_api_key, str):
-        if _base_url and _is_url(_base_url):
+        if _base_url and is_url(_base_url):
             _default_credentials = Credentials(base_url=_base_url, api_key=_api_key)
         else:
             _default_credentials = Credentials(username=_username, api_key=_api_key)
 
     else:
-        try:
-            _default_credentials = Credentials.from_file()
-        except Exception:
-            raise Exception('There is no default credentials file. '
-                            'Run `Credentials(...).save()` to create a credentials file.')
+        _default_credentials = Credentials.from_file()
 
     if session:
         _default_credentials.session = session
@@ -173,30 +116,13 @@ def get_default_credentials():
     :func:`cartoframes.auth.set_default_credentials` in Python session.
 
     Example:
-
-        Retrieve default credentials.
-
-        .. code::
-
-            from cartoframes.auth import set_default_credentials, get_default_credentials
-
-            set_default_credentials()
-
-            current_creds = get_default_credentials()
+        >>> set_default_credentials('creds.json')
+        >>> current_creds = get_default_credentials()
 
     Returns:
-
         :py:class:`cartoframes.auth.Credentials`: Default credentials
         previously set in current Python session. `None` will be returned if
         default credentials were not previously set.
 
     """
     return _default_credentials
-
-
-def _is_url(text):
-    return re.match(r'^https?://.*$', text)
-
-
-def _is_json_filepath(text):
-    return re.match(r'^.*\.json\s*$', text, re.IGNORECASE)

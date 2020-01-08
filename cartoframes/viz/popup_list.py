@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from .popup import Popup
 
 
@@ -10,15 +8,12 @@ class PopupList:
         popups (dict, PopupElement): List of popups for a layer classified by interactivity event
 
     Example:
+        >>> popupList = PopupList({
+        ... 'click': [popup_element('name')],
+        ... 'hover': [popup_element('pop_max')]
+        >>> })
 
-        .. code::
-
-        popupList = PopupList({
-            'click': [popup_element('name')],
-            'hover': [popup_element('pop_max')]
-        })
     """
-
     def __init__(self, popups=None):
         self._popups = self._init_popups(popups)
 
