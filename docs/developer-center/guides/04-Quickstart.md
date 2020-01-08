@@ -27,14 +27,14 @@ Let's get started!
 
 ### Get and explore your company's data
 
-[Use this dataset](https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn.csv) to start your exploration. It contains information about the location of Starbucks and each store's annual revenue.
+[Use this dataset](http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn.csv) to start your exploration. It contains information about the location of Starbucks and each store's annual revenue.
 
 As a first exploratory step, read it into a Jupyter Notebook using [pandas](https://pandas.pydata.org/).
 
 ```python
 import pandas as pd
 
-stores_df = pd.read_csv('https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn.csv')
+stores_df = pd.read_csv('http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn.csv')
 stores_df.head()
 ```
 
@@ -85,7 +85,7 @@ stores_df.head()
 
 To display your stores as points on a map, you first have to convert the `address` column into geometries. This process is called [geocoding](https://carto.com/help/working-with-data/geocoding-types/) and CARTO provides a straightforward way to do it (you can learn more about it in the [Location Data Services guide](/developers/cartoframes/guides/Location-Data-Services)).
 
-In order to geocode, you have to set your CARTO credentials. If you aren't sure about your API key, check the [Authentication guide](/developers/cartoframes/guides/Authentication/) to learn how to get it. In case you want to see the geocoded result, without being logged in, [you can get it here](https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.csv).
+In order to geocode, you have to set your CARTO credentials. If you aren't sure about your API key, check the [Authentication guide](/developers/cartoframes/guides/Authentication/) to learn how to get it. In case you want to see the geocoded result, without being logged in, [you can get it here](http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.csv).
 
 > Note: If you don't have an account yet, you can get a trial, or a free account if you are a student, by [signing up here](https://carto.com/signup/).
 

@@ -296,7 +296,7 @@ Let's start by loading those geocoded Starbucks stores:
 ```python
 from geopandas import read_file
 
-stores_gdf = read_file('https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.geojson')
+stores_gdf = read_file('http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.geojson')
 stores_gdf.head(5)
 ```
 
@@ -494,7 +494,7 @@ Next, let's do a second enrichment, but this time using a DataFrame with areas o
 
 
 ```python
-aoi_gdf = read_file('https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_isolines.geojson')
+aoi_gdf = read_file('http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_isolines.geojson')
 aoi_gdf.head(5)
 ```
 

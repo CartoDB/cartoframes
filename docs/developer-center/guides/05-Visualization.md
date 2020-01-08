@@ -10,7 +10,7 @@ In this guide you are introduced to the Map and Layer classes, how to explore da
 
 ### Data
 
-This guide uses two datasets: a point dataset of simulated Starbucks locations in Brooklyn, New York and 15 minute walk time polygons (isochrones) around each store augmented with demographic variables from CARTO's [Data Observatory](). To follow along, you can get the [point dataset here](https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.csv) and the [polygon dataset here](https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_iso_enriched.csv).
+This guide uses two datasets: a point dataset of simulated Starbucks locations in Brooklyn, New York and 15 minute walk time polygons (isochrones) around each store augmented with demographic variables from CARTO's [Data Observatory](). To follow along, you can get the [point dataset here](http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.csv) and the [polygon dataset here](http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_iso_enriched.csv).
 
 As a first step, load both datasets as [pandas.DataFrame](https://pandas.pydata.org/pandas-docs/stable/getting_started/dsintro.html#dataframe) into the notebook:
 
@@ -20,11 +20,11 @@ from geopandas import GeoDataFrame
 from cartoframes.utils import decode_geometry
 
 # store point locations
-stores_df = read_csv('https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.csv')
+stores_df = read_csv('http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.csv')
 stores_gdf = GeoDataFrame(stores_df, geometry=decode_geometry(stores_df['the_geom']))
 
 # 15 minute walk time polygons
-iso_df = read_csv('https://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_iso_enriched.csv')
+iso_df = read_csv('http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_iso_enriched.csv')
 iso_gdf = GeoDataFrame(iso_df, geometry=decode_geometry(iso_df['the_geom']))
 ```
 
