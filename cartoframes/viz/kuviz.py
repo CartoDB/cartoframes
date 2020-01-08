@@ -72,7 +72,7 @@ class KuvizPublisher:
             self._layers.append(layer)
 
     def _sync_layer(self, layer, table_name):
-        layer.source.cdf.to_carto(table_name=table_name, credentials=self._credentials)
+        layer.source.gdf.to_carto(table_name=table_name, credentials=self._credentials)
         layer.source = Source(table_name, credentials=self._credentials)
         return layer
 

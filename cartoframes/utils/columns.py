@@ -6,7 +6,7 @@ from unidecode import unidecode
 from collections import namedtuple
 
 from .utils import dtypes2pg, pg2dtypes, PG_NULL
-from .geom_utils import decode_geometry, detect_encoding_type
+from .geom_utils import decode_geometry_item, detect_encoding_type
 
 
 class Column(object):
@@ -118,7 +118,7 @@ def _get_geometry_type(df):
         first_geom = _first_value(df[geom_column])
         if first_geom:
             enc_type = detect_encoding_type(first_geom)
-            return decode_geometry(first_geom, enc_type).geom_type
+            return decode_geometry_item(first_geom, enc_type).geom_type
 
 
 def _is_valid_column(name):

@@ -3,7 +3,7 @@ import time
 from carto.datasets import DatasetManager
 
 from warnings import filterwarnings
-filterwarnings("ignore", category=FutureWarning, module="carto")
+filterwarnings('ignore', category=FutureWarning, module='carto')
 
 
 class DatasetInfo:

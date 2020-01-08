@@ -1,4 +1,4 @@
-from ...core.managers.context_manager import ContextManager
+from ...io.managers.context_manager import ContextManager
 
 
 class SQLClient:

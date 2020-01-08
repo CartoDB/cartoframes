@@ -3,7 +3,7 @@ import json
 import shapely
 import binascii as ba
 
-from geopandas import GeoSeries
+from geopandas import GeoSeries, GeoDataFrame, points_from_xy
 
 
 ENC_SHAPELY = 'shapely'
@@ -14,15 +14,126 @@ ENC_WKT = 'wkt'
 ENC_EWKT = 'ewkt'
 
 
-def decode_geometry_column(geom_column):
-    if geom_column.size > 0:
-        enc_type = None
-        if any(geom_column):
-            first_geom = next(item for item in geom_column if item is not None)
-            enc_type = detect_encoding_type(first_geom)
-        return GeoSeries(geom_column.apply(lambda g: decode_geometry(g, enc_type)))
+def set_geometry(gdf, col, drop=False, inplace=False, crs=None):
+    """Set the GeoDataFrame geometry using either an existing column or the specified input.
+    By default yields a new object. The original geometry column is replaced with the input.
+    It detects the geometry encoding and it decodes the column if required. Supported geometry
+    encodings are:
+
+        - `WKB` (Bytes, Hexadecimal String, Hexadecimal Bytestring)
+        - `Extended WKB` (Bytes, Hexadecimal String, Hexadecimal Bytestring)
+        - `WKT` (String)
+        - `Extended WKT` (String)
+
+    Args:
+        col (column label or array): Name of the column or column containing the geometry.
+        drop (boolean, default False): Delete the column to be used as the new geometry.
+        inplace (boolean, default False): Modify the GeoDataFrame in place (do not create a new object).
+        crs (str/result of fion.get_crs, optional): Coordinate system to use. If passed, overrides both
+            DataFrame and col's crs. Otherwise, tries to get crs from passed col values or DataFrame.
+
+    Example:
+        >>> set_geometry(gdf, 'the_geom', drop=True, inplace=True)
+
+    """
+    if not isinstance(gdf, GeoDataFrame):
+        raise ValueError('gdf must be an instance of geopandas.GeoDataFrame.')
+
+    if inplace:
+        frame = gdf
     else:
-        return geom_column
+        frame = gdf.copy()
+
+    # Decode geometry
+    if isinstance(col, str):
+        if col not in frame:
+            raise Exception('Column "{0}" does not exist.'.format(col))
+        frame[col] = decode_geometry(frame[col])
+    else:
+        col = decode_geometry(col)
+
+    # Call set_geometry with decoded column
+    frame.set_geometry(col, drop=drop, inplace=True, crs=crs)
+
+    if not inplace:
+        return frame
+
+
+def set_geometry_from_xy(gdf, x, y, drop=False, inplace=False, crs=None):
+    """Set the GeoDataFrame geometry using either existing lng/lat columns or the specified inputs.
+    By default yields a new object. The original geometry column is replaced with the new one.
+
+    Args:
+        x (column label or array): Name of the x (longitude) column or column containing the x coordinates.
+        y (column label or array): Name of the y (latitude) column or column containing the y coordinates.
+        drop (boolean, default False): Delete the columns to be used to generate the new geometry.
+        inplace (boolean, default False): Modify the GeoDataFrame in place (do not create a new object).
+        crs (str/result of fion.get_crs, optional): Coordinate system to use. If passed, overrides both
+            DataFrame and col's crs. Otherwise, tries to get crs from passed col values or DataFrame.
+
+    Example:
+        >>> set_geometry_from_xy(gdf, 'lng', 'lat', drop=True, inplace=True)
+
+    """
+    if not isinstance(gdf, GeoDataFrame):
+        raise ValueError('gdf must be an instance of geopandas.GeoDataFrame.')
+
+    if isinstance(x, str) and x in gdf and isinstance(y, str) and y in gdf:
+        x_col = gdf[x]
+        y_col = gdf[y]
+    else:
+        x_col = x
+        y_col = y
+
+    # Generate geometry
+    geom_col = points_from_xy(x_col, y_col)
+
+    # Call set_geometry with generated column
+    frame = gdf.set_geometry(geom_col, inplace=inplace, crs=crs)
+
+    if drop:
+        if frame is None:
+            frame = gdf
+        del frame[x]
+        del frame[y]
+
+    return frame
+
+
+def has_geometry(gdf):
+    """Method to check if the GeoDataFrame contains a valid geometry column.
+    If there is no valid geometry, you can use the following methods:
+
+        - `set_geometry`: to create a decoded geometry column from any raw geometry column.
+        - `set_geometry_from_xy`: to create a geometry column from `longitude` and `latitude` columns.
+    """
+    return hasattr(gdf, '_geometry_column_name') and gdf._geometry_column_name in gdf
+
+
+def decode_geometry(geom_col):
+    """Decodes a DataFrame column. It detects the geometry encoding and it decodes the column if required.
+    Supported geometry encodings are:
+
+        - `WKB` (Bytes, Hexadecimal String, Hexadecimal Bytestring)
+        - `Extended WKB` (Bytes, Hexadecimal String, Hexadecimal Bytestring)
+        - `WKT` (String)
+        - `Extended WKT` (String)
+
+    Args:
+        geom_col (array): Column containing the encoded geometry.
+
+    Example:
+        >>> decode_geometry(df['the_geom'])
+
+    """
+    if geom_col.size > 0:
+        enc_type = None
+        if any(geom_col):
+            first_geom = next(item for item in geom_col if item is not None)
+            enc_type = detect_encoding_type(first_geom)
+        return GeoSeries(geom_col.apply(lambda g: decode_geometry_item(g, enc_type)))
+    else:
+        return geom_col
 
 
 def detect_encoding_type(input_geom):
@@ -62,7 +173,7 @@ def detect_encoding_type(input_geom):
     return None
 
 
-def decode_geometry(geom, enc_type):
+def decode_geometry_item(geom, enc_type):
     """Decode any geometry into a shapely geometry."""
     if geom:
         func = {

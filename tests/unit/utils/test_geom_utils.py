@@ -8,7 +8,7 @@ from shapely.geometry import Point, base
 
 from cartoframes.utils.geom_utils import (ENC_EWKT, ENC_SHAPELY, ENC_WKB,
                                           ENC_WKB_BHEX, ENC_WKB_HEX, ENC_WKT,
-                                          decode_geometry_column, decode_geometry, detect_encoding_type)
+                                          decode_geometry, decode_geometry_item, detect_encoding_type)
 
 
 class TestGeomUtils(object):
@@ -28,25 +28,25 @@ class TestGeomUtils(object):
             Point([20, 30])
         ], name='geometry')
 
-    def test_decode_geometry_column(self):
+    def test_decode_geometry(self):
         geom = pd.Series(['POINT(0 0)', 'POINT(1 1)'])
         expected_decoded_geom = gpd.GeoSeries([Point([0, 0]), Point([1, 1])])
 
-        decoded_geom = decode_geometry_column(geom)
+        decoded_geom = decode_geometry(geom)
         assert str(decoded_geom) == str(expected_decoded_geom)
 
-    def test_decode_geometry_column_empty(self):
+    def test_decode_geometry_empty(self):
         geom_empty = gpd.GeoSeries([])
         expected_decoded_geom = gpd.GeoSeries([])
 
-        decoded_geom = decode_geometry_column(geom_empty)
+        decoded_geom = decode_geometry(geom_empty)
         assert str(decoded_geom) == str(expected_decoded_geom)
 
-    def test_decode_geometry_column_none(self):
+    def test_decode_geometry_none(self):
         geom_none = gpd.GeoSeries([None, None])
         expected_decoded_geom = gpd.GeoSeries([base.BaseGeometry(), base.BaseGeometry()])
 
-        decoded_geom = decode_geometry_column(geom_none)
+        decoded_geom = decode_geometry(geom_none)
         assert str(decoded_geom) == str(expected_decoded_geom)
 
     def test_detect_encoding_type_shapely(self):
@@ -86,44 +86,44 @@ class TestGeomUtils(object):
 
     def test_decode_geometry_shapely(self):
         expected_geom = Point(1234, 5789)
-        geom = decode_geometry(Point(1234, 5789), ENC_SHAPELY)
+        geom = decode_geometry_item(Point(1234, 5789), ENC_SHAPELY)
         assert str(geom) == str(expected_geom)
 
     def test_decode_geometry_wkb(self):
-        geom = decode_geometry(
+        geom = decode_geometry_item(
             b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@', ENC_WKB)
         assert lgeos.GEOSGetSRID(geom._geom) == 0
         assert geom.wkb == b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@'
 
-        geom = decode_geometry(
+        geom = decode_geometry_item(
             b'\x01\x01\x00\x00 \xe6\x10\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@', ENC_WKB)  # ext
         assert lgeos.GEOSGetSRID(geom._geom) == 4326
         assert geom.wkb == b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@'
 
     def test_decode_geometry_wkb_hex(self):
-        geom = decode_geometry('0101000000000000000048934000000000009DB640', ENC_WKB_HEX)
+        geom = decode_geometry_item('0101000000000000000048934000000000009DB640', ENC_WKB_HEX)
         assert lgeos.GEOSGetSRID(geom._geom) == 0
         assert geom.wkb_hex == '0101000000000000000048934000000000009DB640'
 
-        geom = decode_geometry('0101000020E6100000000000000048934000000000009DB640', ENC_WKB_HEX)  # ext
+        geom = decode_geometry_item('0101000020E6100000000000000048934000000000009DB640', ENC_WKB_HEX)  # ext
         assert lgeos.GEOSGetSRID(geom._geom) == 4326
         assert geom.wkb_hex == '0101000000000000000048934000000000009DB640'
 
     def test_decode_geometry_wkb_bhex(self):
-        geom = decode_geometry(b'0101000000000000000048934000000000009DB640', ENC_WKB_BHEX)
+        geom = decode_geometry_item(b'0101000000000000000048934000000000009DB640', ENC_WKB_BHEX)
         assert lgeos.GEOSGetSRID(geom._geom) == 0
         assert geom.wkb == b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@'
 
-        geom = decode_geometry(b'0101000020E6100000000000000048934000000000009DB640', ENC_WKB_BHEX)  # ext
+        geom = decode_geometry_item(b'0101000020E6100000000000000048934000000000009DB640', ENC_WKB_BHEX)  # ext
         assert lgeos.GEOSGetSRID(geom._geom) == 4326
         assert geom.wkb == b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@'
 
     def test_decode_geometry_wkt(self):
-        geom = decode_geometry('POINT (1234 5789)', ENC_WKT)
+        geom = decode_geometry_item('POINT (1234 5789)', ENC_WKT)
         assert lgeos.GEOSGetSRID(geom._geom) == 0
         assert geom.wkt == 'POINT (1234 5789)'
 
     def test_decode_geometry_ewkt(self):
-        geom = decode_geometry('SRID=4326;POINT (1234 5789)', ENC_EWKT)  # ext
+        geom = decode_geometry_item('SRID=4326;POINT (1234 5789)', ENC_EWKT)  # ext
         assert lgeos.GEOSGetSRID(geom._geom) == 4326
         assert geom.wkt == 'POINT (1234 5789)'

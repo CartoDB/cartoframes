@@ -1,21 +1,20 @@
 import time
-import pandas as pd
 
+from pandas import read_csv
 from warnings import warn
 
 from carto.auth import APIKeyAuthClient
 from carto.exceptions import CartoException, CartoRateLimitException
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
+from ..dataset_info import DatasetInfo
 from ... import __version__
-from ...utils.logger import log
-from ...io.dataset_info import DatasetInfo
 from ...auth.defaults import get_default_credentials
+from ...utils.logger import log
 from ...utils.geom_utils import encode_geometry_ewkb
 from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
 from ...utils.columns import Column, get_dataframe_columns_info, obtain_converters, \
-                             date_columns_names, normalize_name
-
+                      date_columns_names, normalize_name
 
 DEFAULT_RETRY_TIMES = 3
 
@@ -43,10 +42,10 @@ class ContextManager:
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
-    def copy_from(self, cdf, table_name, if_exists='fail', cartodbfy=True):
+    def copy_from(self, gdf, table_name, if_exists='fail', cartodbfy=True):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
-        columns = get_dataframe_columns_info(cdf)
+        columns = get_dataframe_columns_info(gdf)
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
             log.debug('Creating table "{}"'.format(table_name))
@@ -59,7 +58,7 @@ class ContextManager:
         else:  # 'append'
             pass
 
-        self._copy_from(cdf, table_name, columns)
+        self._copy_from(gdf, table_name, columns)
         return table_name
 
     def create_table_from_query(self, query, table_name, if_exists, cartodbfy=True):
@@ -265,7 +264,7 @@ class ContextManager:
         converters = obtain_converters(columns)
         parse_dates = date_columns_names(columns)
 
-        df = pd.read_csv(
+        df = read_csv(
             raw_result,
             converters=converters,
             parse_dates=parse_dates)
