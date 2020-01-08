@@ -3,4 +3,4 @@ max-line-length = 120
 
 # Ignore rules from the "black" formatter. This is added
 # to avoid "Black would make changes." in houndci-bot.
-ignore = BLK, W503, W504, E121, E126, E226
+ignore = BLK, E121, E123, E126, E133, E226, E241, E242, E704, W503, W504, W505
