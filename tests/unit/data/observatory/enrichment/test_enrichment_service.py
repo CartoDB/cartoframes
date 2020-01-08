@@ -14,7 +14,8 @@ from cartoframes.data.observatory.catalog.repository.dataset_repo import Dataset
 from cartoframes.data.observatory.catalog.repository.entity_repo import EntityRepository
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables, \
     _ENRICHMENT_ID, _GEOM_COLUMN, AGGREGATION_DEFAULT, AGGREGATION_NONE, _get_aggregation, _build_where_condition, \
-    _build_where_clausule, _validate_variables_input
+    _build_where_clausule, _validate_variables_input, _build_polygons_query_variables_with_aggregation, \
+    _build_polygons_column_with_aggregation, _build_where_conditions_by_variable
 from cartoframes.exceptions import EnrichmentError
 from cartoframes.utils.geom_utils import to_geojson
 
@@ -532,6 +533,10 @@ class TestEnrichmentService(object):
         assert _get_aggregation(variable_agg, custom_agg) == 'avg'
         custom_agg = {}
         assert _get_aggregation(variable_agg, custom_agg) == variable_agg.agg_method.lower()
+        custom_agg = {variable_agg.id: ['sum', 'avg']}
+        assert _get_aggregation(variable_agg, custom_agg) == ['sum', 'avg']
+        custom_agg = {variable_agg.id: ['SUM', 'aVg']}
+        assert _get_aggregation(variable_agg, custom_agg) == ['sum', 'avg']
 
         variable_agg_none = Variable({
             'id': 'id',
@@ -550,6 +555,10 @@ class TestEnrichmentService(object):
         assert _get_aggregation(variable_agg_none, custom_agg) == 'avg'
         custom_agg = {}
         assert _get_aggregation(variable_agg_none, custom_agg) is None
+        custom_agg = {variable_agg.id: ['sum', 'avg']}
+        assert _get_aggregation(variable_agg_none, custom_agg) == ['sum', 'avg']
+        custom_agg = {variable_agg.id: ['suM', 'AVG']}
+        assert _get_aggregation(variable_agg_none, custom_agg) == ['sum', 'avg']
 
     def test_where_condition(self):
         column = 'column'
@@ -617,3 +626,122 @@ class TestEnrichmentService(object):
 
             error = ('The maximum number of variables to be used in enrichment is 50.')
             assert str(e.value) == error
+
+    @patch('cartoframes.data.observatory.enrichment.enrichment_service._build_polygons_column_with_aggregation')
+    def test_build_polygons_query_variables_with_aggregation(self, column_query_mock):
+        def get_column(variable, aggregation, sufix=False):
+            return '{}_{}'.format(variable.column_name, str(sufix))
+
+        column_query_mock.side_effect = get_column
+
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': 'SUM'
+        })
+
+        expected_result = '{}_{}'.format(variable.column_name, 'False')
+        assert _build_polygons_query_variables_with_aggregation([variable], AGGREGATION_DEFAULT) == expected_result
+
+        expected_result = '{}_{}'.format(variable.column_name, 'False')
+        assert _build_polygons_query_variables_with_aggregation([variable], AGGREGATION_NONE) == expected_result
+
+        expected_result = '{}_{}'.format(variable.column_name, 'False')
+        assert _build_polygons_query_variables_with_aggregation([variable], 'AVG') == expected_result
+
+        expected_result = '{}_{}'.format(variable.column_name, 'False')
+        agg = {variable.id: 'AVG'}
+        assert _build_polygons_query_variables_with_aggregation([variable], agg) == expected_result
+
+        expected_result = '{}_{}'.format(variable.column_name, 'False')
+        agg = {'unexisting_id': 'AVG'}
+        assert _build_polygons_query_variables_with_aggregation([variable], agg) == expected_result
+
+        expected_result = '{}_{}, {}_{}'.format(variable.column_name, 'True', variable.column_name, 'True')
+        agg = {variable.id: ['AVG', 'SUM']}
+        assert _build_polygons_query_variables_with_aggregation([variable], agg) == expected_result
+
+    def test_build_polygons_column_with_aggregation(self):
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': 'sum'
+        })
+
+        aggregation = 'sum'
+        expected_sql = """
+            sum(
+                enrichment_table.{column} * (
+                    ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
+                    /
+                    NULLIF(ST_AREA(enrichment_geo_table.geom), 0)
+                )
+            ) AS {column_name}
+            """.format(
+                column=variable.column_name,
+                column_name=variable.column_name,
+                geo_column=_GEOM_COLUMN)
+        sql = _build_polygons_column_with_aggregation(variable, aggregation)
+        assert sql == expected_sql
+
+        aggregation = 'sum'
+        expected_sql = """
+            sum(
+                enrichment_table.{column} * (
+                    ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
+                    /
+                    NULLIF(ST_AREA(enrichment_geo_table.geom), 0)
+                )
+            ) AS {column_name}
+            """.format(
+                column=variable.column_name,
+                column_name='sum_{}'.format(variable.column_name),
+                geo_column=_GEOM_COLUMN)
+        sql = _build_polygons_column_with_aggregation(variable, aggregation, True)
+        assert sql == expected_sql
+
+        aggregation = 'avg'
+        expected_sql = 'avg(enrichment_table.{column}) AS {column_name}'.format(
+            column=variable.column_name,
+            column_name=variable.column_name)
+
+        sql = _build_polygons_column_with_aggregation(variable, aggregation)
+        assert sql.strip() == expected_sql.strip()
+
+        aggregation = 'avg'
+        expected_sql = 'avg(enrichment_table.{column}) AS {column_name}'.format(
+            column=variable.column_name,
+            column_name='avg_{}'.format(variable.column_name))
+        sql = _build_polygons_column_with_aggregation(variable, aggregation, True)
+        assert sql.strip() == expected_sql.strip()
+
+    def test_build_where_conditions_by_variable(self):
+        variable = Variable({
+            'id': 'id',
+            'column_name': 'column',
+            'dataset_id': 'fake_name',
+            'agg_method': 'sum'
+        })
+
+        filters = {}
+        result = _build_where_conditions_by_variable(variable, filters)
+        assert result is None
+
+        filters = {'unexistingid': ''}
+        result = _build_where_conditions_by_variable(variable, filters)
+        assert result is None
+
+        filters = {variable.id: '> 50'}
+        expected = ["enrichment_table.{} > 50".format(variable.column_name)]
+        result = _build_where_conditions_by_variable(variable, filters)
+        assert result == expected
+
+        filters = {variable.id: ['> 50', '< 100']}
+        expected = [
+            "enrichment_table.{} > 50".format(variable.column_name),
+            "enrichment_table.{} < 100".format(variable.column_name)
+        ]
+        result = _build_where_conditions_by_variable(variable, filters)
+        assert result == expected

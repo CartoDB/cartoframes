@@ -108,13 +108,9 @@ class EnrichmentService(object):
             table_name = self.__get_enrichment_table_by_variable(variable)
             tables_metadata[table_name]['variables'].append(variable)
 
-            if variable.id in filters:
-                tables_metadata[table_name]['filters'].append(
-                    _build_where_condition(
-                        variable.column_name,
-                        filters[variable.id]
-                    )
-                )
+            variable_filters = _build_where_conditions_by_variable(variable, filters)
+            if variable_filters:
+                tables_metadata[table_name]['filters'] = variable_filters
 
             if 'geo_table' not in tables_metadata[table_name].keys():
                 tables_metadata[table_name]['geo_table'] = self.__get_geo_table(variable)
@@ -246,35 +242,49 @@ class EnrichmentService(object):
 
 
 def _build_polygons_query_variables_with_aggregation(variables, aggregation):
-    return ', '.join([
-        _build_polygons_query_variable_with_aggregation(
-            variable,
-            aggregation
-        ) for variable in variables])
+    sql = []
+    for variable in variables:
+        variable_aggregation = _get_aggregation(variable, aggregation)
+        if isinstance(variable_aggregation, list):
+            for agg in variable_aggregation:
+                sql.append(_build_polygons_column_with_aggregation(variable, agg, True))
+        else:
+            sql.append(_build_polygons_column_with_aggregation(variable, variable_aggregation))
+
+    return ', '.join(sql)
 
 
-def _build_polygons_query_variable_with_aggregation(variable, aggregation):
-    variable_agg = _get_aggregation(variable, aggregation)
+def _build_polygons_column_with_aggregation(variable, aggregation, column_sufix=False):
+    column_name = _get_polygons_agg_column_name(variable.column_name, aggregation, column_sufix)
 
-    if (variable_agg == 'sum'):
+    if (aggregation == 'sum'):
         return """
             {aggregation}(
                 enrichment_table.{column} * (
                     ST_AREA(ST_INTERSECTION(enrichment_geo_table.geom, data_table.{geo_column}))
                     /
-                    ST_AREA(data_table.{geo_column})
+                    NULLIF(ST_AREA(enrichment_geo_table.geom), 0)
                 )
-            ) AS {column}
+            ) AS {column_name}
             """.format(
                 column=variable.column_name,
+                column_name=column_name,
                 geo_column=_GEOM_COLUMN,
-                aggregation=variable_agg)
+                aggregation=aggregation)
     else:
         return """
-            {aggregation}(enrichment_table.{column}) AS {column}
+            {aggregation}(enrichment_table.{column}) AS {column_name}
             """.format(
                 column=variable.column_name,
-                aggregation=variable_agg)
+                column_name=column_name,
+                aggregation=aggregation)
+
+
+def _get_polygons_agg_column_name(column, aggregation, column_sufix):
+    if column_sufix:
+        return '{}_{}'.format(aggregation, column)
+    else:
+        return column
 
 
 def _build_polygons_query_variables_without_aggregation(variables):
@@ -289,6 +299,30 @@ def _build_polygons_query_variables_without_aggregation(variables):
         """.format(
             variables=', '.join(variables),
             geom_column=_GEOM_COLUMN)
+
+
+def _build_where_conditions_by_variable(variable, filters):
+    if variable.id in filters:
+        conditions = []
+        variable_filter = filters[variable.id]
+
+        if isinstance(variable_filter, list):
+            for f in variable_filter:
+                conditions.append(
+                    _build_where_condition(
+                        variable.column_name,
+                        f
+                    )
+                )
+        else:
+            conditions.append(
+                _build_where_condition(
+                    variable.column_name,
+                    variable_filter
+                )
+            )
+
+        return conditions
 
 
 def _build_where_condition(column, condition):
@@ -385,16 +419,22 @@ def _is_subscribed(dataset, geography, credentials):
 
 
 def _get_aggregation(variable, aggregation):
-    if aggregation is AGGREGATION_NONE:
-        aggregation_method = None
-    elif aggregation == AGGREGATION_DEFAULT:
-        aggregation_method = variable.agg_method
-    elif isinstance(aggregation, str):
-        aggregation_method = aggregation
-    elif isinstance(aggregation, dict):
+    if isinstance(aggregation, dict):
         aggregation_method = aggregation.get(variable.id, variable.agg_method)
-    else:
-        raise ValueError('The `aggregation` parameter is invalid.')
 
-    if aggregation_method is not None:
-        return aggregation_method.lower()
+        if isinstance(aggregation_method, list):
+            return [_get_aggregation(variable, agg) for agg in aggregation_method]
+
+        return _get_aggregation(variable, aggregation_method)
+    else:
+        if aggregation is AGGREGATION_NONE:
+            aggregation_method = None
+        elif aggregation == AGGREGATION_DEFAULT:
+            aggregation_method = variable.agg_method
+        elif isinstance(aggregation, str):
+            aggregation_method = aggregation
+        else:
+            raise ValueError('The `aggregation` parameter is invalid.')
+
+        if aggregation_method is not None:
+            return aggregation_method.lower()
