@@ -2,7 +2,11 @@ import pandas
 
 from ..core.cartodataframe import CartoDataFrame
 from ..core.managers.context_manager import ContextManager
-from ..utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type
+from ..utils.utils import (encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type,
+                           get_datetime_column_names)
+
+
+RFC_2822_DATETIME_FORMAT = "%a, %d %b %Y %T %z"
 
 
 class SourceType:
@@ -47,6 +51,7 @@ class Source:
     """
     def __init__(self, source, credentials=None, geom_col=None):
         self.credentials = None
+        self.datetime_column_names = None
 
         if isinstance(source, str):
             # Table, SQL query
@@ -58,6 +63,7 @@ class Source:
             # DataFrame, GeoDataFrame, CartoDataFrame
             self.type = SourceType.GEOJSON
             self.cdf = CartoDataFrame(source, copy=True)
+            self.set_datetime_columns()
 
             if geom_col:
                 self.cdf.set_geometry(geom_col, inplace=True)
@@ -77,6 +83,17 @@ class Source:
                 'api_key': self.credentials.api_key,
                 'base_url': self.credentials.base_url
             }
+
+    def set_datetime_columns(self):
+        if self.type == SourceType.GEOJSON:
+            self.datetime_column_names = get_datetime_column_names(self.cdf)
+
+            if self.datetime_column_names:
+                for column in self.datetime_column_names:
+                    self.cdf[column] = self.cdf[column].dt.strftime(RFC_2822_DATETIME_FORMAT)
+
+    def get_datetime_column_names(self):
+        return self.datetime_column_names
 
     def get_geom_type(self):
         if self.type == SourceType.QUERY:

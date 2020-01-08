@@ -9,6 +9,7 @@ import decimal
 import hashlib
 import requests
 import geopandas
+
 import numpy as np
 import pkg_resources
 import semantic_version
@@ -16,6 +17,7 @@ import semantic_version
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
 from pyrestcli.exceptions import ServerErrorException
+from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
 from .logger import log
 from ..exceptions import DOError
@@ -438,6 +440,15 @@ def check_do_enabled(method):
             else:
                 raise e
     return fn
+
+
+def get_datetime_column_names(df):
+    column_names = []
+    for column in df.columns:
+        if is_datetime(df[column]):
+            column_names.append(column)
+
+    return column_names
 
 
 def is_ipython_notebook():
