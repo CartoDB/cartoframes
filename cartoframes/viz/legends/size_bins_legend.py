@@ -12,7 +12,7 @@ def size_bins_legend(title='', description='', footer='', prop='size',
             Description in legend.
         footer (str, optional):
             Footer of legend. This is often used to attribute data sources.
-        prop (str, optional): Allowed properties are 'size' and 'stroke-width'.
+        prop (str, optional): Allowed properties are 'size' and 'stroke_width'.
             It is 'size' by default.
         variable (str, optional):
             If the information in the legend depends on a different value than the

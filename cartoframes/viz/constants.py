@@ -29,16 +29,16 @@ STYLE_PROPERTIES = [
 
 LEGEND_PROPERTIES = [
     'color',
-    'stroke-color',
+    'stroke_color',
     'size',
-    'stroke-width'
+    'stroke_width'
 ]
 
 VIZ_PROPERTIES_MAP = {
     'color': 'color',
-    'stroke-color': 'strokeColor',
+    'stroke_color': 'strokeColor',
     'size': 'width',
-    'stroke-width': 'strokeWidth'
+    'stroke_width': 'strokeWidth'
 }
 
 LEGEND_TYPES = [
