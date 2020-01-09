@@ -74,7 +74,7 @@ To install the 1.0b7 beta version:
 
     $ pip install cartoframes==1.0b7
 
-`cartoframes` is continuously tested on Python versions 3.5, 3.6, and 3.7. It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyter`). See the example usage section below or notebooks in the `examples directory <https://github.com/CartoDB/cartoframes/tree/master/examples>`__ for using `cartoframes` in that environment.
+`cartoframes` is continuously tested on Python versions 3.5, 3.6, 3.7, and 3.8. It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyter`). See the example usage section below or notebooks in the `examples directory <https://github.com/CartoDB/cartoframes/tree/master/examples>`__ for using `cartoframes` in that environment.
 
 Example usage
 =============
