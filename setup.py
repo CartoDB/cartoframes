@@ -30,11 +30,11 @@ REQUIRES = [
     'geopandas>=0.6.0,<1.0',
     'tqdm>=4.32.1,<5.0',
     'unidecode>=1.1.0,<2.0',
-    'pyarrow>=0.14.1,<1.0',
-    'google-cloud-storage>=1.23.0,<2.0',
-    'google-cloud-bigquery>=1.22.0,<2.0',
-    'google-cloud-bigquery-storage>=0.7.0,<1.0',
-    'fastavro>=0.22.7,<1.0',
+    'pyarrow==0.14.1',
+    'google-cloud-storage==1.23.0',
+    'google-cloud-bigquery==1.22.0',
+    'google-cloud-bigquery-storage==0.7.0',
+    'fastavro==0.22.7',
     'semantic_version>=2.8.0,<3',
     # 'Rtree>=0.8.3,<1.0'
 ]
