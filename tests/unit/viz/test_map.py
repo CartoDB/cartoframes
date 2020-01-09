@@ -104,14 +104,14 @@ class TestMapLayer(object):
             {
                 'event': 'click',
                 'attrs': {
-                    'name': 'v559339',
-                    'title': 'pop'
+                    'name': 'v8e0f74',
+                    'title': 'name'
                 }
             }, {
                 'event': 'click',
                 'attrs': {
-                    'name': 'v8e0f74',
-                    'title': 'name'
+                    'name': 'v559339',
+                    'title': 'pop'
                 }
             }, {
                 'event': 'hover',

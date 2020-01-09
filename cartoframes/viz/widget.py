@@ -14,8 +14,8 @@ class Widget:
         - :py:meth:`animation_widget <cartoframes.viz.animation_widget>`
 
     """
-    def __init__(self, widget_type, value, title='', description='',
-                 footer='', prop='', read_only=False, buckets=20):
+    def __init__(self, widget_type, value=None, title=None, description=None,
+                 footer=None, prop='', read_only=False, buckets=20):
         self._check_type(widget_type)
 
         self._type = widget_type
@@ -39,7 +39,7 @@ class Widget:
             return {
                 'type': self._type,
                 'prop': self._prop,
-                'value': self._value,
+                'value': self._value or '',
                 'variable_name': self._variable_name,
                 'title': self._title or '',
                 'description': self._description or '',

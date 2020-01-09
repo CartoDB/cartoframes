@@ -157,7 +157,7 @@ class Layer:
             popups['click'] = self.style.default_popup_click
             popups['click']['title'] = title
 
-        return _set_popups(popups)
+        return _set_popups(popups, self.style.default_popup_hover, self.style.default_popup_click)
 
     def _set_options(self):
         date_column_names = self.source.get_datetime_column_names()
@@ -215,8 +215,8 @@ def _set_widgets(widgets, default_widget=None):
         return WidgetList()
 
 
-def _set_popups(popups):
+def _set_popups(popups, default_popup_hover=None, default_popup_click=None):
     if isinstance(popups, (dict, Popup)):
-        return PopupList(popups)
+        return PopupList(popups, default_popup_hover, default_popup_click)
     else:
         return PopupList()

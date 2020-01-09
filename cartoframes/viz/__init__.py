@@ -36,6 +36,7 @@ from .widgets import time_series_widget
 from .widgets import default_widget
 
 from .popups import popup_element
+from .popups import default_popup_element
 
 
 __all__ = [
@@ -75,5 +76,6 @@ __all__ = [
     'time_series_widget',
     'default_widget',
 
-    'popup_element'
+    'popup_element',
+    'default_popup_element'
 ]
