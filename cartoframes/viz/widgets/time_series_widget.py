@@ -30,4 +30,4 @@ def time_series_widget(value, title='', description='', footer='', read_only=Fal
 
     """
     return Widget('time-series', value, title, description, footer,
-                  read_only=read_only, buckets=buckets)
+                  read_only=read_only, buckets=buckets, prop='filter')

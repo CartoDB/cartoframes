@@ -15,7 +15,7 @@ class Widget:
 
     """
     def __init__(self, widget_type, value=None, title=None, description=None,
-                 footer=None, prop='', read_only=False, buckets=20):
+                 footer=None, prop=None, read_only=False, buckets=20):
         self._check_type(widget_type)
 
         self._type = widget_type
@@ -51,12 +51,8 @@ class Widget:
             return {}
 
     def _get_prop(self, prop):
-        if self._type in ('animation', 'time-series') and not prop:
-            return 'filter'
-
         if not prop:
             return ''
-
         return constants.VIZ_PROPERTIES_MAP.get(prop)
 
     def has_bridge(self):

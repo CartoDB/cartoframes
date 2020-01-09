@@ -47,7 +47,7 @@ class TestWidget(object):
 
     def test_animation_widget(self):
         """An Animation widget should be created successfully with the default property"""
-        widget = Widget('animation')
+        widget = Widget('animation', prop='filter')
 
         assert widget.get_info() == {
             'type': 'animation',

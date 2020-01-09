@@ -38,7 +38,8 @@ VIZ_PROPERTIES_MAP = {
     'color': 'color',
     'stroke-color': 'strokeColor',
     'size': 'width',
-    'stroke-width': 'strokeWidth'
+    'stroke-width': 'strokeWidth',
+    'filter': 'filter'
 }
 
 LEGEND_TYPES = [

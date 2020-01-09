@@ -2,7 +2,7 @@ from ..constants import FORMULA_OPERATIONS_GLOBAL, FORMULA_OPERATIONS_VIEWPORT
 from ..widget import Widget
 
 
-def formula_widget(value, title='', description='', footer='', operation=None, is_global=False):
+def formula_widget(value, operation=None, title='', description='', footer='', is_global=False):
     """Helper function for quickly creating a formula widget.
 
     Formula widgets calculate aggregated values ('avg', 'max', 'min', 'sum') from numeric columns
@@ -13,10 +13,10 @@ def formula_widget(value, title='', description='', footer='', operation=None, i
 
     Args:
         value (str): Column name of the numeric value.
+        operation (str): attribute for widget's aggregated value ('count', 'avg', 'max', 'min', 'sum').
         title (str, optional): Title of widget.
         description (str, optional): Description text widget placed under widget title.
         footer (str, optional): Footer text placed on the widget bottom.
-        operation (str): attribute for widget's aggregated value ('count', 'avg', 'max', 'min', 'sum').
         is_global (boolean, optional): Account for calculations based on the entire dataset ('global') vs.
             the default of 'viewport' features.
 

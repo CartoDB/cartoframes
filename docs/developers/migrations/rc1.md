@@ -153,7 +153,7 @@ from cartoframes.viz import Layer, popup_element
 
 Layer(
     'populated_places',
-    hover_popup=[
+    popup_hover=[
         popup_element('name')
     ]
 )
@@ -186,7 +186,7 @@ from cartoframes.viz import Layer, popup_element
 
 Layer(
     'populated_places',
-    click_popup=[
+    popup_click=[
         popup_element('name'),
         popup_element('pop_max')
     ]
@@ -230,12 +230,12 @@ from cartoframes.viz import Layer, popup_element
 
 Layer(
     'populated_places',
-    click_popup=[
+    popup_hover=[
+        popup_element('name', title='Name'),
+    ],
+    popup_click=[
         popup_element('name', title='Name'),
         popup_element('pop_max', title='Pop Max')
-    ],
-    hover_popup=[
-        popup_element('name', title='Name'),
     ]
 )
 ```
