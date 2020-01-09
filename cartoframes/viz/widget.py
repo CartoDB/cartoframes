@@ -29,6 +29,10 @@ class Widget:
         self._variable_name = gen_variable_name(self._value) if self._value else ''
         self._options = self._build_options()
 
+    def set_title(self, title):
+        if title is not None:
+            self._title = title
+
     def get_info(self):
         if self._type or self._title or self._description or self._footer:
 

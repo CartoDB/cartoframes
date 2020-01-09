@@ -50,9 +50,9 @@ def cluster_size_style(
         data,
         value,
         default_legend=size_continuous_legend(title=value),
-        default_widget=histogram_widget(value, title='Distribution'),
-        default_popups={'hover': popup_element(cluster_operation, title=cluster_operation_title, operation=True),
-                        'click': popup_element(cluster_operation, title=cluster_operation_title, operation=True)}
+        default_widget=histogram_widget(value, title=value),
+        default_popup_hover=popup_element(cluster_operation, title=cluster_operation_title, operation=True),
+        default_popup_click=popup_element(cluster_operation, title=cluster_operation_title, operation=True)
     )
 
 

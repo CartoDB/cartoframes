@@ -90,11 +90,11 @@ class TestMapLayer(object):
         source_1 = Source(build_geodataframe([-10, 0], [-10, 0], ['pop', 'name']))
         layer = Layer(
             source_1,
-            click_popup=[
+            popup_click=[
                 popup_element('pop'),
                 popup_element('name')
             ],
-            hover_popup=[
+            popup_hover=[
                 popup_element('pop', 'Pop')
             ]
         )

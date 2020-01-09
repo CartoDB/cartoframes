@@ -3,19 +3,16 @@ from ..utils.utils import merge_dicts, text_match
 
 
 class Style:
-    """Style
 
-    Args:
-        data (str, dict): The style for the layer.
-
-    """
-    def __init__(self, data=None, value=None, default_legend=None,
-                 default_widget=None, default_popups=None):
+    def __init__(self, data=None, value=None,
+                 default_legend=None, default_widget=None,
+                 default_popup_hover=None, default_popup_click=None):
         self._style = self._init_style(data=data)
         self._value = value
         self._default_legend = default_legend
         self._default_widget = default_widget
-        self._default_popups = default_popups
+        self._default_popup_hover = default_popup_hover
+        self._default_popup_click = default_popup_click
 
     def _init_style(self, data):
         if data is None:
@@ -38,8 +35,12 @@ class Style:
         return self._default_widget
 
     @property
-    def default_popups(self):
-        return self._default_popups
+    def default_popup_hover(self):
+        return self._default_popup_hover
+
+    @property
+    def default_popup_click(self):
+        return self._default_popup_click
 
     def compute_viz(self, geom_type, variables={}):
         style = self._style
