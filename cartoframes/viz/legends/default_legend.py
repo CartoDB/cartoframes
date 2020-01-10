@@ -1,8 +1,9 @@
 from ..legend import Legend
 
 
-def basic_legend(title=None, description=None, footer=None):
-    """Helper function for quickly creating a basic legend.
+def default_legend(title=None, description=None, footer=None, **kwargs):
+    """Helper function for quickly creating a default legend based on the style.
+    A style helper is required.
 
     Args:
         title (str, optional):
@@ -10,17 +11,16 @@ def basic_legend(title=None, description=None, footer=None):
         description (str, optional):
             Description in legend.
         footer (str, optional):
-            Footer of legend. This is often used to attribute data sources
+            Footer of legend. This is often used to attribute data sources.
 
     Returns:
         cartoframes.viz.legend.Legend
 
     Example:
-        >>> basic_legend(
+        >>> default_legend(
         ...     title='Legend title',
         ...     description='Legend description',
         ...     footer='Legend footer')
 
     """
-
-    return Legend('basic', title, description, footer)
+    return Legend('default', title=title, description=description, footer=footer, **kwargs)

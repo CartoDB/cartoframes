@@ -1,7 +1,11 @@
-
-<as-animation-controls-widget
-  animated
-  id='{{id}}'
-  heading='{{widget.title}}'
-  description='{{widget.description}}'
-></as-animation-controls-widget>
+<div>
+  <as-animation-controls-widget
+    animated
+    id="{{id}}"
+    heading="{{widget.title}}"
+    description="{{widget.description}}"
+  ></as-animation-controls-widget>
+  {% if widget.footer %}
+    <footer>{{widget.footer}}</footer>
+  {% endif %}
+</div>

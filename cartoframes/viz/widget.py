@@ -14,8 +14,8 @@ class Widget:
         - :py:meth:`animation_widget <cartoframes.viz.animation_widget>`
 
     """
-    def __init__(self, widget_type=None, value='', title='', description='',
-                 footer='', prop='', read_only=False, buckets=20):
+    def __init__(self, widget_type, value=None, title=None, description=None,
+                 footer=None, prop=None, read_only=False, buckets=20):
         self._check_type(widget_type)
 
         self._type = widget_type
@@ -29,13 +29,17 @@ class Widget:
         self._variable_name = gen_variable_name(self._value) if self._value else ''
         self._options = self._build_options()
 
+    def set_title(self, title):
+        if title is not None:
+            self._title = title
+
     def get_info(self):
         if self._type or self._title or self._description or self._footer:
 
             return {
                 'type': self._type,
                 'prop': self._prop,
-                'value': self._value,
+                'value': self._value or '',
                 'variable_name': self._variable_name,
                 'title': self._title or '',
                 'description': self._description or '',
@@ -47,16 +51,12 @@ class Widget:
             return {}
 
     def _get_prop(self, prop):
-        if self._type in ('animation', 'time-series') and not prop:
-            return 'filter'
-
         if not prop:
             return ''
-
         return constants.VIZ_PROPERTIES_MAP.get(prop)
 
     def has_bridge(self):
-        return self._type not in ('formula', 'default')
+        return self._type not in ('formula', 'basic')
 
     def _check_type(self, widget_type):
         if widget_type and widget_type not in constants.WIDGET_TYPES:

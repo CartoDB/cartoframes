@@ -38,6 +38,7 @@ wheels/
 *.egg
 Pipfile
 Pipfile.lock
+package-lock.json
 
 # Swap files
 .*.sw[nop]

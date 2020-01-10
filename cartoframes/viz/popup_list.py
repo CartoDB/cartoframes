@@ -14,12 +14,12 @@ class PopupList:
         >>> })
 
     """
-    def __init__(self, popups=None):
-        self._popups = self._init_popups(popups)
+    def __init__(self, popups=None, default_popup_hover=None, default_popup_click=None):
+        self._popups = self._init_popups(popups, default_popup_hover, default_popup_click)
 
-    def _init_popups(self, popups):
+    def _init_popups(self, popups, default_popup_hover, default_popup_click):
         if isinstance(popups, dict):
-            return self.get_popup_elements(popups)
+            return self._get_popup_elements(popups, default_popup_hover, default_popup_click)
         else:
             return []
 
@@ -27,7 +27,7 @@ class PopupList:
     def elements(self):
         return self._popups
 
-    def get_popup_elements(self, popups):
+    def _get_popup_elements(self, popups, default_popup_hover, default_popup_click):
         popup_elements = []
         click_popup_elements = popups.get('click')
         hover_popup_elements = popups.get('hover')
@@ -35,8 +35,11 @@ class PopupList:
         if click_popup_elements is not None:
             if not isinstance(click_popup_elements, list):
                 click_popup_elements = [click_popup_elements]
+            click_popup_elements.reverse()
             for popup in click_popup_elements:
                 if isinstance(popup, dict):
+                    if popup.get('value') is None and default_popup_click:
+                        popup['value'] = default_popup_click.get('value')
                     popup_elements.append(
                         Popup('click',
                               value=popup.get('value'),
@@ -47,8 +50,11 @@ class PopupList:
         if hover_popup_elements is not None:
             if not isinstance(hover_popup_elements, list):
                 hover_popup_elements = [hover_popup_elements]
+            hover_popup_elements.reverse()
             for popup in hover_popup_elements:
                 if isinstance(popup, dict):
+                    if popup.get('value') is None and default_popup_hover:
+                        popup['value'] = default_popup_hover.get('value')
                     popup_elements.append(
                         Popup('hover',
                               value=popup.get('value'),

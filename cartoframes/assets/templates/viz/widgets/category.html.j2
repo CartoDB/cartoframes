@@ -1,5 +1,10 @@
-<as-category-widget
-  id="{{id}}"
-  description="{{widget.description}}"
-  heading="{{widget.title}}">
-</as-category-widget>
+<div>
+  <as-category-widget
+    id="{{id}}"
+    description="{{widget.description}}"
+    heading="{{widget.title}}">
+  </as-category-widget>
+  {% if widget.footer %}
+    <footer>{{widget.footer}}</footer>
+  {% endif %}
+</div>

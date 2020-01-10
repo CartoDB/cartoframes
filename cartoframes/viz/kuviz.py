@@ -5,9 +5,10 @@ from carto.kuvizs import KuvizManager
 
 from .source import Source
 from ..auth import get_default_credentials
+from ..io.carto import to_carto
 from ..utils.columns import normalize_name
-from ..data.clients.auth_api_client import AuthAPIClient
 from ..utils.logger import log
+from ..data.clients.auth_api_client import AuthAPIClient
 from ..exceptions import PublishError
 
 filterwarnings('ignore', category=FutureWarning, module='carto')
@@ -72,7 +73,7 @@ class KuvizPublisher:
             self._layers.append(layer)
 
     def _sync_layer(self, layer, table_name):
-        layer.source.gdf.to_carto(table_name=table_name, credentials=self._credentials)
+        to_carto(layer.source.gdf, table_name, credentials=self._credentials)
         layer.source = Source(table_name, credentials=self._credentials)
         return layer
 
