@@ -18,10 +18,10 @@ To install the latest stable version (soon to be deprecated):
 $ pip install cartoframes
 ```
 
-To install a specific version, for example, let's say the 1.0b7 version:
+To install a specific version, for example, let's say the 1.0rc1 version:
 
 ```bash
-$ pip install cartoframes==1.0b7
+$ pip install cartoframes==1.0rc1
 ```
 
 
@@ -50,7 +50,7 @@ To install a specific version:
 ```bash
 $ virtualenv cartoframes_env
 $ source cartoframes_env/bin/activate
-(cartoframes_env) $ pip install cartoframes==1.0b7
+(cartoframes_env) $ pip install cartoframes==1.0rc1
 ```
 
 When the virtual environment is activated, it is visible in the command line prompt, in this case: `(cartoframes_env)`. It can be deactivated by typing `deactivate` to exit the virtualenv:
