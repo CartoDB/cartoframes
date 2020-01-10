@@ -140,57 +140,57 @@
             "path": "map_configuration"
         }]
     }, {
-        "title": "Visualization Layer Helpers",
+        "title": "Visualization Helpers",
         "samples": [{
-            "title": "Color Category Layer",
-            "desc": "Color Category Layer",
-            "file": "color_category_layer",
-            "path": "visualization_layers"
+            "title": "Color Category Style",
+            "desc": "Color Category Style",
+            "file": "color_category_style",
+            "path": "styles"
         }, {
-            "title": "Color Continuous Layer",
-            "desc": "Color Continuous Layer",
-            "file": "color_continuous_layer",
-            "path": "visualization_layers"
+            "title": "Color Continuous Style",
+            "desc": "Color Continuous Style",
+            "file": "color_continuous_style",
+            "path": "styles"
         }, {
-            "title": "Color Bins Layer",
-            "desc": "Color Bins Layer",
-            "file": "color_bins_layer",
-            "path": "visualization_layers"
+            "title": "Color Bins Style",
+            "desc": "Color Bins Style",
+            "file": "color_bins_style",
+            "path": "styles"
         }, {
-            "title": "Size Category Layer",
-            "desc": "Size Category Layer",
-            "file": "size_category_layer",
-            "path": "visualization_layers"
+            "title": "Size Category Style",
+            "desc": "Size Category Style",
+            "file": "size_category_style",
+            "path": "styles"
         }, {
-            "title": "Size Continuous Layer",
-            "desc": "Size Continuous Layer",
-            "file": "size_continuous_layer",
-            "path": "visualization_layers"
+            "title": "Size Continuous Style",
+            "desc": "Size Continuous Style",
+            "file": "size_continuous_style",
+            "path": "styles"
         }, {
-            "title": "Size Bins Layer",
-            "desc": "Size Bins Layer",
-            "file": "size_bins_layer",
-            "path": "visualization_layers"
+            "title": "Size Bins Style",
+            "desc": "Size Bins Style",
+            "file": "size_bins_style",
+            "path": "styles"
         }, {
-            "title": "Cluster Size Layer",
-            "desc": "Cluster Size Layer",
-            "file": "cluster_size_layer",
-            "path": "visualization_layers"
+            "title": "Cluster Size Style",
+            "desc": "Cluster Size Style",
+            "file": "cluster_size_style",
+            "path": "styles"
         }, {
-            "title": "Animation Layer",
-            "desc": "Animation Layer",
-            "file": "animation_layer",
-            "path": "visualization_layers"
+            "title": "Animation Style",
+            "desc": "Animation Style",
+            "file": "animation_style",
+            "path": "styles"
         }, {
-            "title": "Isolines Layer",
-            "desc": "Isolines Layer",
-            "file": "isolines_layer",
-            "path": "visualization_layers"
+            "title": "Isolines Style",
+            "desc": "Isolines Style",
+            "file": "isolines_style",
+            "path": "styles"
         }, {
-            "title": "Combine Visualization Layers",
-            "desc": "Combine visualization layers",
-            "file": "combine_visualization_layers",
-            "path": "visualization_layers"
+            "title": "Combine Visualization Styles",
+            "desc": "Combine visualization styles",
+            "file": "combine_visualization_styles",
+            "path": "styles"
         }]
     }, {
         "title": "Legends",

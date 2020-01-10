@@ -7,7 +7,7 @@ Hi! Glad to see you made it to the Quickstart guide! In this guide you are intro
 Before you get started, we encourage you to have CARTOframes installed so you can get a feel for the library by using it:
 
 ```
-pip install --pre cartoframes
+pip install cartoframes
 ```
 
 For additional ways to install CARTOframes, check out the [Installation Guide](/developers/cartoframes/guides/Installation).
@@ -191,12 +191,12 @@ Map(Layer(stores_gdf))
 
 Great! You have a map!
 
-With the stores plotted on the map, you now have a better sense about where each one is. To continue your exploration, you want to know which stores earn the most yearly revenue. To do this, you can use the [`size_continuous_layer`](/developers/cartoframes/examples/#example-size-continuous-layer) visualization layer:
+With the stores plotted on the map, you now have a better sense about where each one is. To continue your exploration, you want to know which stores earn the most yearly revenue. To do this, you can use the [`size_continuous_style`](/developers/cartoframes/examples/#example-size-continuous-style) visualization layer:
 
 ```python
-from cartoframes.viz.helpers import size_continuous_layer
+from cartoframes.viz import Map, Layer, size_continuous_style
 
-Map(size_continuous_layer(stores_gdf, 'revenue', 'Annual Revenue ($)'))
+Map(Layer(stores_gdf, size_continuous_style('revenue', 'Annual Revenue ($)'))
 ```
 
 <div class="example-map">
@@ -210,7 +210,7 @@ Map(size_continuous_layer(stores_gdf, 'revenue', 'Annual Revenue ($)'))
     </iframe>
 </div>
 
-Good job! By using the [`size continuous visualization layer`](/developers/cartoframes/examples/#example-size-continuous-layer) you can see right away where the stores with higher revenue are. By default, visualization layers also provide a popup with the mapped value and an appropriate legend.
+Good job! By using the [`size continuous visualization style`](/developers/cartoframes/examples/#example-size-continuous-style) you can see right away where the stores with higher revenue are. By default, visualization styles also provide a popup with the mapped value and an appropriate legend.
 
 ### Create your areas of influence
 
@@ -2213,7 +2213,7 @@ We can see that the area of influence of the store on the right, is the one with
 
 ```python
 stores_gdf['rev_pop'] = stores_gdf['revenue']/isochrones_gdf['sum_total_pop']
-Map(size_continuous_layer(stores_gdf, 'rev_pop', 'Revenue per person ($)'))
+Map(Layer(stores_gdf, size_continuous_style('rev_pop', 'Revenue per person ($)')))
 ```
 
 <div class="example-map">
@@ -2249,9 +2249,10 @@ Now, let's visualize them and add widgets to them so people are able to see some
 
 ```python
 result_map = Map([
-    color_continuous_layer('starbucks_isochrones', 'sum_total_pop', 'Population', stroke_width=0, opacity=0.7),
-    size_continuous_layer('starbucks_stores', 'rev_pop', 'Revenue per person ($)', stroke_color='white', widget=True)
+    Layer('starbucks_isochrones', color_continuous_style('sum_total_pop', 'Population', stroke_width=0,     opacity=0.7)),
+    Layer('starbucks_stores', size_continuous_style('rev_pop', 'Revenue per person ($)', stroke_color='white', widget=True))
 ])
+
 result_map
 ```
 
