@@ -275,7 +275,7 @@ Map([
             )
         ],
         popup_hover=[
-            popup_element('id_store', title='Store ID')
+            popup_element('id_store', 'Store ID')
         ]
     ),
     Layer(
@@ -292,7 +292,7 @@ At this point, you have some really useful information available on the map but 
 To size the store points proportionate to their revenue, you'll use the [`size_continuous_style`](/developers/cartoframes/examples/#example-size-continuous-style):
 
 ```python
-from cartoframes.viz import size_continuous_style, popup_element
+from cartoframes.viz import size_continuous_style
 
 Map([
     Layer(
@@ -349,12 +349,12 @@ Let's make a few adjustments to make it easier to distinguish and locate the hig
 ```python
 Layer(
     stores_gdf,
-    style=size_continuous_style(
+    size_continuous_style(
         'revenue',
         size_range=[10,50],
-        title='Annual Revenue ($)',
-        default_widget=True
-    )
+    ),
+    title='Annual Revenue ($)',
+    default_widget=True
 )
 ```
 
@@ -395,28 +395,26 @@ from cartoframes.viz import Map, Layer, color_bins_style, size_continuous_style
 Map([
     Layer(
         iso_gdf,
-        style=color_bins_style(
+        color_bins_style(
             'inccymedhh',
             bins=7,
             palette='pinkyl',
             opacity=0.8,
-            stroke_width=0,
-            title='Median Household Income ($)',
-            footer='Source: US Census Bureau'
-        )
+            stroke_width=0
+        ),
+        title='Median Household Income ($)'
     ),
     Layer(
         stores_gdf,
-        style=size_continuous_style(
+        size_continuous_style(
             'revenue',
             size_range=[10,50],
             range_max=1000000,
             opacity=0,
             stroke_color='turquoise',
             stroke_width=2,
-            title='Annual Revenue ($)',
-            description='Reported in 2018'
-        )
+        ),
+        title='Annual Revenue ($)',
     ),
     Layer(
         stores_gdf,
@@ -451,61 +449,57 @@ Layout([
     Map([
         Layer(
             stores_gdf,
-            style=size_continuous_style(
+            size_continuous_style(
                 'revenue',
                 size_range=[10,50],
                 range_max=1000000,
                 opacity=0,
                 stroke_color='turquoise',
                 stroke_width=2,
-                title='Annual Revenue',
-                default_popup_hover=False,
-                default_popup_click=False
-            )
+            ),
+            default_popup_hover=False,
+            title='Annual Revenue'
         ),
         Layer(stores_gdf)
     ]),
     Map([
         Layer(
             iso_gdf,
-            style=color_bins_style(
+            color_bins_style(
                 'inccymedhh',
                 bins=7,
                 palette='pinkyl',
                 stroke_width=0,
-                title='Median Income',
-                default_popup_hover=False,
-                default_popup_click=False
-            )
+            ),
+            default_popup_hover=False,
+            title='Median Income'
         ),
         Layer(stores_gdf)
     ]),
     Map([
         Layer(iso_gdf,
-            style=color_bins_style(
+            color_bins_style(
                 'popcy',
                 bins=7,
                 palette='pinkyl',
                 stroke_width=0,
-                title='Total Pop',
-                default_popup_hover=False,
-                default_popup_click=False
             )
+            default_popup_hover=False,
+            title='Total Pop'
         ),
         Layer(stores_gdf)
     ]),
     Map([
         Layer(
             iso_gdf,
-            style=color_bins_style(
+            color_bins_style(
                 'lbfcyempl',
                 bins=7,
                 palette='pinkyl',
                 stroke_width=0,
-                title='Employed Pop',
-                default_popup_hover=False,
-                default_popup_click=False
-            )
+            ),
+            default_popup_hover=False,
+            title='Employed Pop'
         ),
         Layer(stores_gdf)
     ]),
