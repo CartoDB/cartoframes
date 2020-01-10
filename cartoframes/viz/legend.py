@@ -54,8 +54,6 @@ class Legend:
         else:
             _prop = self._prop
 
-        self._check_prop(_prop)
-
         return constants.VIZ_PROPERTIES_MAP.get(_prop)
 
     def _check_type(self, _type):
