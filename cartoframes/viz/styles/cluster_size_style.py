@@ -6,9 +6,8 @@ from ..widgets import histogram_widget
 from ..popups import popup_element
 
 
-def cluster_size_style(
-        value, operation='count', resolution=32, color=None, opacity=None,
-        stroke_color=None, stroke_width=None, animate=None):
+def cluster_size_style(value, operation='count', resolution=32, color=None, opacity=None,
+                       stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a cluster map with
     continuously sized points.
 
@@ -49,10 +48,10 @@ def cluster_size_style(
     return Style(
         data,
         value,
-        default_legends=size_continuous_legend(title=value),
-        default_widgets=histogram_widget(value, title=value or 'Distribution'),
-        default_popups={'hover': popup_element(cluster_operation, title=cluster_operation_title, operation=True),
-                        'click': popup_element(cluster_operation, title=cluster_operation_title, operation=True)}
+        default_legend=size_continuous_legend(title=value),
+        default_widget=histogram_widget(value, title=value),
+        default_popup_hover=popup_element(cluster_operation, title=cluster_operation_title, operation=True),
+        default_popup_click=popup_element(cluster_operation, title=cluster_operation_title, operation=True)
     )
 
 

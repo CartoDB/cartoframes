@@ -1,18 +1,18 @@
-def popup_element(value, title=None, operation=None):
-    """Helper function for quickly adding a popup element to a layer.
+def default_popup_element(title=None, operation=None):
+    """Helper function for quickly adding a default popup element based on the style.
+    A style helper is required.
 
     Args:
-        value (str): Column name to display the value for each feature.
         title (str, optional): Title for the given value. By default, it's the name of the value.
         operation (str, optional): Cluster operation, defaults to 'count'. Other options
           available are 'avg', 'min', 'max', and 'sum'.
 
     Example:
-        >>> popup_element('column_name', title='Popup title')
+        >>> default_popup_element(title='Popup title')
 
     """
     return {
-      'value': value,
+      'value': None,
       'title': title,
       'operation': operation
     }

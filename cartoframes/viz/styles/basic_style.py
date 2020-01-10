@@ -52,6 +52,6 @@ def basic_style(color=None, size=None, opacity=None, stroke_color=None, stroke_w
     return Style(
         data,
         value,
-        default_legends=basic_legend(),
-        default_widgets=basic_widget()
+        default_legend=basic_legend(),
+        default_widget=basic_widget()
     )

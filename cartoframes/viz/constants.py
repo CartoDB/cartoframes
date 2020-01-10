@@ -38,10 +38,12 @@ VIZ_PROPERTIES_MAP = {
     'color': 'color',
     'stroke_color': 'strokeColor',
     'size': 'width',
-    'stroke_width': 'strokeWidth'
+    'stroke_width': 'strokeWidth',
+    'filter': 'filter'
 }
 
 LEGEND_TYPES = [
+    'basic',
     'default',
     'color-bins',
     'color-bins-line',
@@ -67,6 +69,7 @@ LEGEND_TYPES = [
 ]
 
 WIDGET_TYPES = [
+    'basic',
     'default',
     'formula',
     'histogram',

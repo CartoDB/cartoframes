@@ -1,7 +1,7 @@
 from ..widget import Widget
 
 
-def time_series_widget(value, title='', description='', footer='', read_only=False, buckets=20):
+def time_series_widget(value, title=None, description=None, footer=None, read_only=False, buckets=20):
     """Helper function for quickly creating a time series widget.
 
     The time series widget enables you to display animated data (by aggregation) over a specified date or numeric field.
@@ -30,4 +30,4 @@ def time_series_widget(value, title='', description='', footer='', read_only=Fal
 
     """
     return Widget('time-series', value, title, description, footer,
-                  read_only=read_only, buckets=buckets)
+                  read_only=read_only, buckets=buckets, prop='filter')

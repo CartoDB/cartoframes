@@ -238,15 +238,16 @@ var init = (function () {
     interactivity.off('featureHover');
   }
 
-  function setPopupsClick(map, popup, interactivity, attrs) {
+  function setPopupsClick(map, clickPopup, hoverPopup, interactivity, attrs) {
     interactivity.on('featureClick', (event) => {
-      updatePopup(map, popup, event, attrs);
+      updatePopup(map, clickPopup, event, attrs);
+      hoverPopup.remove();
     });
   }
 
-  function setPopupsHover(map, popup, interactivity, attrs) {
+  function setPopupsHover(map, hoverPopup, interactivity, attrs) {
     interactivity.on('featureHover', (event) => {
-      updatePopup(map, popup, event, attrs);
+      updatePopup(map, hoverPopup, event, attrs);
     });
   }
 
@@ -290,7 +291,13 @@ var init = (function () {
 
   function setInteractivity(map, interactiveLayers, interactiveMapLayers) {
     const interactivity = new carto.Interactivity(interactiveMapLayers);
-    const popup = new mapboxgl.Popup({
+
+    const clickPopup = new mapboxgl.Popup({
+      closeButton: true,
+      closeOnClick: false
+    });
+
+    const hoverPopup = new mapboxgl.Popup({
       closeButton: false,
       closeOnClick: false
     });
@@ -301,11 +308,11 @@ var init = (function () {
     resetPopupHover(map);
 
     if (clickAttrs.length > 0) {
-      setPopupsClick(map, popup, interactivity, clickAttrs);
+      setPopupsClick(map, clickPopup, hoverPopup, interactivity, clickAttrs);
     }
 
     if (hoverAttrs.length > 0) {
-      setPopupsHover(map, popup, interactivity, hoverAttrs);
+      setPopupsHover(map, hoverPopup, interactivity, hoverAttrs);
     }
   }
 

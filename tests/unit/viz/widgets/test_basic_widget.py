@@ -10,5 +10,5 @@ class TestBasicWidget(object):
         "should create a basic widget"
         widget = widgets.basic_widget(title='Default Widget')
         widget_info = widget.get_info()
-        assert widget_info.get('type') == 'default'
+        assert widget_info.get('type') == 'basic'
         assert widget_info.get('title') == 'Default Widget'

@@ -2,9 +2,8 @@ from . import color_category_style
 from ...data.services.isolines import RANGE_LABEL_KEY
 
 
-def isolines_style(
-        value=RANGE_LABEL_KEY, top=11, cat=None, palette='pinkyl', size=None, opacity=0.8,
-        stroke_color='rgba(150,150,150,0.4)', stroke_width=None):
+def isolines_style(value=RANGE_LABEL_KEY, top=11, cat=None, palette='pinkyl', size=None, opacity=0.8,
+                   stroke_color='rgba(150,150,150,0.4)', stroke_width=None):
     """Helper function for quickly creating an isolines style.
     Based on the color category style.
 

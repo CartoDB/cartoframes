@@ -1,7 +1,7 @@
 from ..legend import Legend
 
 
-def size_category_legend(title='', description='', footer='', prop='size',
+def size_category_legend(title=None, description=None, footer=None, prop='size',
                          variable=None, dynamic=True):
     """Helper function for quickly creating a size category legend.
 

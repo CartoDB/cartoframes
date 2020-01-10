@@ -8,15 +8,16 @@ export function resetPopupHover(interactivity) {
   interactivity.off('featureHover');
 }
 
-export function setPopupsClick(map, popup, interactivity, attrs) {
+export function setPopupsClick(map, clickPopup, hoverPopup, interactivity, attrs) {
   interactivity.on('featureClick', (event) => {
-    updatePopup(map, popup, event, attrs);
+    updatePopup(map, clickPopup, event, attrs);
+    hoverPopup.remove();
   });
 }
 
-export function setPopupsHover(map, popup, interactivity, attrs) {
+export function setPopupsHover(map, hoverPopup, interactivity, attrs) {
   interactivity.on('featureHover', (event) => {
-    updatePopup(map, popup, event, attrs);
+    updatePopup(map, hoverPopup, event, attrs);
   });
 }
 

@@ -20,7 +20,7 @@ class TestWidgetList(object):
 
     def test_widget_list_init_with_a_dict(self):
         """WidgetList should be properly initialized"""
-        widget_list = WidgetList(WIDGET_A)
+        widget_list = WidgetList([WIDGET_A])
 
         assert widget_list._widgets[0]._type == 'formula'
         assert widget_list._widgets[0]._value == 'viewportSum($amount)'
@@ -41,15 +41,15 @@ class TestWidgetList(object):
         assert widget_list._widgets[0]._footer == '[footer]'
         assert isinstance(widget_list._widgets[0], Widget)
 
-        assert widget_list._widgets[1]._type == 'default'
+        assert widget_list._widgets[1]._type == 'basic'
         assert widget_list._widgets[1]._title == 'Custom Info'
-        assert widget_list._widgets[1]._description == ''
-        assert widget_list._widgets[1]._footer == ''
+        assert widget_list._widgets[1]._description is None
+        assert widget_list._widgets[1]._footer is None
         assert isinstance(widget_list._widgets[1], Widget)
 
     def test_widget_list_init_with_a_widget(self):
         """WidgetList should be properly initialized"""
-        widget_list = WidgetList(WIDGET_A)
+        widget_list = WidgetList([WIDGET_A])
         assert isinstance(widget_list._widgets[0], Widget)
 
     def test_widget_list_init_with_a_list_of_widgets(self):
@@ -80,7 +80,7 @@ class TestWidgetList(object):
                     'buckets': 20
                 }
             }, {
-                'type': 'default',
+                'type': 'basic',
                 'title': 'Custom Info',
                 'value': '',
                 'prop': '',

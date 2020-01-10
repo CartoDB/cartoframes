@@ -54,9 +54,9 @@ def animation_style(value, duration=20, color=None, size=None, opacity=None,
     return Style(
         data,
         value,
-        default_widgets=time_series_widget(value, title=value),
-        default_popups={'hover': popup_element(value, title=value),
-                        'click': popup_element(value, title=value)}
+        default_widget=time_series_widget(value, title=value),
+        default_popup_hover=popup_element(value, title=value),
+        default_popup_click=popup_element(value, title=value)
     )
 
 
