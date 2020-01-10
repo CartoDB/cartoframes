@@ -469,12 +469,12 @@ Map(
       'gc_status_rel',
       method='equal',
       bins=geo_gdf.gc_status_rel.unique().size,
-      title='Geocoding Precision',
-      popup_hover=[
-        popup_element('address', title='Address'),
-        popup_element('gc_status_rel', title='Precision'),
-      ]
-    )
+      title='Geocoding Precision'
+    ),
+    popup_hover=[
+      popup_element('address', title='Address'),
+      popup_element('gc_status_rel', title='Precision'),
+    ]
   )
 )
 ```
@@ -747,13 +747,13 @@ Map([
           color='white',
           opacity='0.2',
           stroke_color='blue',
-          size_range=[20, 80],
-          popup_hover=[
-            popup_element('address', title='Address'),
-            popup_element('gc_status_rel', title='Precision'),
-            popup_element('revenue', title='Revenue'),
-          ]
-        )
+          size_range=[20, 80]
+        ),
+        popup_hover=[
+          popup_element('address', title='Address'),
+          popup_element('gc_status_rel', title='Precision'),
+          popup_element('revenue', title='Revenue'),
+        ]
     )
 ])
 ```
@@ -818,13 +818,13 @@ Map([
           color='white',
           opacity='0.2',
           stroke_color='blue',
-          size_range=[20, 80],
-          popup_hover=[
-            popup_element('address', title='Address'),
-            popup_element('gc_status_rel', title='Precision'),
-            popup_element('revenue', title='Revenue'),
-          ]
-        )
+          size_range=[20, 80]
+        ),
+        popup_hover=[
+          popup_element('address', title='Address'),
+          popup_element('gc_status_rel', title='Precision'),
+          popup_element('revenue', title='Revenue'),
+        ]
     )
 ])
 ```
