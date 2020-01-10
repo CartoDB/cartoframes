@@ -732,7 +732,7 @@ Layer(isochrones_gdf, isolines_style())
 Let's visualize the data in one map to see what insights we can find.
 
 ```python
-from cartoframes.viz import Map, Layer, isolines_style, size_continuous_style
+from cartoframes.viz import Map, Layer, isolines_style, size_continuous_style, popup_element
 
 Map([
     Layer(
@@ -748,10 +748,10 @@ Map([
           opacity='0.2',
           stroke_color='blue',
           size_range=[20, 80],
-          popups=[
-            hover_popup('address', title='Address'),
-            hover_popup('gc_status_rel', title='Precision'),
-            hover_popup('revenue', title='Revenue'),
+          popup_hover=[
+            popup_element('address', title='Address'),
+            popup_element('gc_status_rel', title='Precision'),
+            popup_element('revenue', title='Revenue'),
           ]
         )
     )
@@ -799,7 +799,7 @@ isochrones_new_gdf, isochrones_new_metadata = iso_service.isochrones(new_store_g
 ```
 
 ```python
-from cartoframes.viz import Map, Layer, isolines_style, size_continuous_style
+from cartoframes.viz import Map, Layer, isolines_style, size_continuous_style, popup_element
 
 Map([
     Layer(
@@ -819,10 +819,10 @@ Map([
           opacity='0.2',
           stroke_color='blue',
           size_range=[20, 80],
-          popups=[
-            hover_popup('address', title='Address'),
-            hover_popup('gc_status_rel', title='Precision'),
-            hover_popup('revenue', title='Revenue'),
+          popup_hover=[
+            popup_element('address', title='Address'),
+            popup_element('gc_status_rel', title='Precision'),
+            popup_element('revenue', title='Revenue'),
           ]
         )
     )

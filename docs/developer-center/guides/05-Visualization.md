@@ -274,7 +274,7 @@ Map([
                 title='Store ID'
             )
         ],
-        hover_popup=[
+        popup_hover=[
             popup_element('id_store', title='Store ID')
         ]
     ),
