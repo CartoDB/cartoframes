@@ -15,13 +15,13 @@ Try it Out
 ==========
 
 * Stable (v0.10.1): |stable|
-* Beta (v1.0rc1): |rc|
+* Release Candidate (v1.0rc1): |rc|
 * Latest (develop branch): |develop|
 
 .. |stable| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v0.10.1?filepath=examples
 
-.. |beta| image:: https://mybinder.org/badge_logo.svg
+.. |rc| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0rc1?filepath=examples
 
 .. |develop| image:: https://mybinder.org/badge_logo.svg
@@ -55,3 +55,5 @@ More info
 - Complete documentation: https://carto.com/developers/cartoframes/
 - Source code: https://github.com/CartoDB/cartoframes
 - Bug tracker / feature requests: https://github.com/CartoDB/cartoframes/issues
+
+    `cartoframes` users must have a CARTO API key for most `cartoframes` functionality. For example, writing DataFrames to an account, reading from private tables, and visualizing data on maps all require an API key. CARTO provides API keys for education and nonprofit uses, among others. Request access at support@carto.com. API key access is also given through `GitHub's Student Developer Pack <https://carto.com/blog/carto-is-part-of-the-github-student-pack>`__.
