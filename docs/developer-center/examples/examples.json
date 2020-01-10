@@ -283,11 +283,6 @@
             "file": "time_series_widget",
             "path": "widgets"
         }, {
-            "title": "Animation Widget to Style Property",
-            "desc": "Animation Widget to Style Property",
-            "file": "animation_widget_style_property",
-            "path": "widgets"
-        }, {
             "title": "Multiple Widgets",
             "desc": "Multiple Widgets",
             "file": "multiple_widgets",
