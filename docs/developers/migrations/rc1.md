@@ -1,6 +1,6 @@
 # RC1 Migration
 
-Migration notes from `1.0b7` to `rc1`
+Migration notes from `1.0b7` to `1.0rc1`
 
 * [Data](#Data)
 * [Style](#Style)

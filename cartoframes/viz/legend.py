@@ -17,6 +17,7 @@ class Legend:
     def __init__(self, legend_type=None, title=None, description=None,
                  footer=None, prop=None, variable='', dynamic=True):
         self._check_type(legend_type)
+        self._check_prop(prop)
         self._type = legend_type
         self._title = title
         self._description = description
@@ -53,8 +54,6 @@ class Legend:
             _prop = self._infer_prop(_type)
         else:
             _prop = self._prop
-
-        self._check_prop(_prop)
 
         return constants.VIZ_PROPERTIES_MAP.get(_prop)
 

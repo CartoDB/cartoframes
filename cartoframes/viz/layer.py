@@ -47,7 +47,15 @@ class Layer:
             south], [east, north]]. If not provided the bounds will be automatically
             calculated to fit all features.
         geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
-
+        default_legend (bool, optional): flag to set the default legend. This only works when using a
+            style helper. Default True.
+        default_widget (bool, optional): flag to set the default widget. This only works when using a
+            style helper. Default False.
+        default_popup_hover (bool, optional): flag to set the default popup hover. This only works when using a
+            style helper. Default True.
+        default_popup_click (bool, optional): flag to set the default popup click. This only works when using a
+            style helper. Default False.
+        title (str, optional): title for the default legend, widget and popups.
 
     Raises:
         ValueError: if the source is not valid.

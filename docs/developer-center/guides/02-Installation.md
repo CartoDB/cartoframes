@@ -6,16 +6,22 @@ This guide is intended for those who are using CARTOframes for the first time an
 
 CARTOframes can be installed with [`pip`](https://pypi.org/project/pip/) by simply typing one of the following commands to do a system install:
 
-To install the latest stable version:
+To install the latest pre release (recommended), use the --pre flag:
+
+```bash
+$ pip install cartoframes --pre
+```
+
+To install the latest stable version (soon to be deprecated):
 
 ```bash
 $ pip install cartoframes
 ```
 
-To install a specific version, let's say the 1.0b7 version:
+To install a specific version, let's say the 1.0rc1 version:
 
 ```bash
-$ pip install cartoframes==1.0b7
+$ pip install cartoframes==1.0rc1
 ```
 
 ### Install CARTOframes in a Jupyter Notebook
@@ -25,7 +31,7 @@ In the CARTOframes Developer Center, all of the examples are created with [Jupyt
 To install CARTOframes through a Jupyter Notebook, run this command:
 
 ```bash
-! pip install cartoframes
+! pip install cartoframes --pre
 ```
 
 ### Use a Virtual Environment
@@ -35,7 +41,7 @@ We recommend installing CARTOframes in a [Virtual Environment](http://docs.pytho
 ```bash
 $ virtualenv cartoframes_env
 $ source cartoframes_env/bin/activate
-(cartoframes_env) $ pip install cartoframes
+(cartoframes_env) $ pip install cartoframes --pre
 ```
 
 To install a specific version:
@@ -43,7 +49,7 @@ To install a specific version:
 ```bash
 $ virtualenv cartoframes_env
 $ source cartoframes_env/bin/activate
-(cartoframes_env) $ pip install cartoframes==1.0b7
+(cartoframes_env) $ pip install cartoframes==1.0rc1
 ```
 
 When the virtual environment is activated, it is visible in the command line prompt, in this case: `(cartoframes_env)`. It can be deactivated by typing `deactivate` to exit the virtualenv:

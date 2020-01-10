@@ -70,6 +70,12 @@ Add documentation to the API reference:
     .. automodule:: cartoframes.module.other_module
     :members:
 
+- Use `autoclass` syntax to include class content:
+
+.. code::
+    .. autoclass:: cartoframes.module.MyClass
+    :members:
+
 - Include the file you want to import in the `__init__.py` file properly
 
 Developer center

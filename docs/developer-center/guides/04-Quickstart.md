@@ -7,7 +7,7 @@ Hi! Glad to see you made it to the Quickstart guide! In this guide you are intro
 Before you get started, we encourage you to have CARTOframes installed so you can get a feel for the library by using it:
 
 ```
-pip install cartoframes
+pip install cartoframes --pre
 ```
 
 For additional ways to install CARTOframes, check out the [Installation Guide](/developers/cartoframes/guides/Installation).
@@ -196,7 +196,7 @@ With the stores plotted on the map, you now have a better sense about where each
 ```python
 from cartoframes.viz import Map, Layer, size_continuous_style
 
-Map(Layer(stores_gdf, size_continuous_style('revenue', 'Annual Revenue ($)'))
+Map(Layer(stores_gdf, size_continuous_style('revenue'), title='Annual Revenue ($)')
 ```
 
 <div class="example-map">
@@ -288,8 +288,8 @@ isochrones_gdf.head()
 ```python
 map = Map([
     Layer(isochrones_gdf),
-    Layer(stores_gdf)]
-)
+    Layer(stores_gdf)
+])
 map
 ```
 
@@ -326,7 +326,7 @@ datasets_df[datasets_df['is_public_data'] == True]
 ```
 
 <div>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -1830,7 +1830,7 @@ datasets_df[datasets_df['id'].str.contains('blockgroup') & (datasets_df['provide
 ```
 
 <div>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -2198,7 +2198,8 @@ from cartoframes.viz import color_continuous_style
 Map(
   Layer(
     isochrones_gdf,
-    style=color_continuous_style('sum_total_pop', 'Population')
+    color_continuous_style('sum_total_pop'),
+    title='Population'
   )
 )
 ```
@@ -2218,7 +2219,7 @@ We can see that the area of influence of the store on the right, is the one with
 
 ```python
 stores_gdf['rev_pop'] = stores_gdf['revenue']/isochrones_gdf['sum_total_pop']
-Map(Layer(stores_gdf, size_continuous_style('rev_pop', 'Revenue per person ($)')))
+Map(Layer(stores_gdf, size_continuous_style('rev_pop'), title='Revenue per person ($)'))
 ```
 
 <div class="example-map">
@@ -2254,8 +2255,17 @@ Now, let's visualize them and add widgets to them so people are able to see some
 
 ```python
 result_map = Map([
-    Layer('starbucks_isochrones', color_continuous_style('sum_total_pop', 'Population', stroke_width=0,     opacity=0.7)),
-    Layer('starbucks_stores', size_continuous_style('rev_pop', 'Revenue per person ($)', stroke_color='white', widget=True))
+    Layer(
+      'starbucks_isochrones',
+      color_continuous_style('sum_total_pop', stroke_width=0, opacity=0.7),
+      title='Population'
+    ),
+    Layer(
+      'starbucks_stores',
+      size_continuous_style('rev_pop', stroke_color='white'),
+      default_widget=True,
+      title='Revenue per person ($)'
+    )
 ])
 
 result_map
