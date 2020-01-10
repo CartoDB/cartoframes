@@ -3,10 +3,10 @@
 Migration notes from `1.0b7` to `rc1`
 
 * [Data](#Data)
+* [Style](#Style)
 * [Popups](#Popups)
 * [Widgets](#Widgets)
 * [Legends](#Legends)
-* [Style](#Style)
 
 ## Data
 
@@ -50,7 +50,6 @@ gdf = GeoDataFrame(df, geometry=points_from_xy(df['lng'], df['lat']))
 </p>
 </details>
 
-
 <details><summary>Load data from CARTO</summary>
 <p>
 
@@ -72,7 +71,6 @@ gdf = read_carto('global_power_plants', limit=100)
 
 </p>
 </details>
-
 
 <details><summary>Upload data to CARTO</summary>
 <p>
@@ -101,7 +99,6 @@ to_carto(
 </p>
 </details>
 
-
 <details><summary>Visualization</summary>
 <p>
 
@@ -124,14 +121,110 @@ Map(Layer(gdf))
 </p>
 </details>
 
-## Popups
+## Style
 
-* [Related issue #1348](https://github.com/CartoDB/cartoframes/issues/1348)
+<details><summary>Use basic_style over "string syntax"</summary>
+<p>
+
+Replace CARTO VL style syntax by using style helpers.
+
+* From:
+
+```python
+from cartoframes.viz import Map, Layer, Style
+
+Map(
+  Layer(
+    'table_name',
+    style='color: blue strokeColor: white'
+  )
+)
+```
+
+* To:
+
+```python
+from cartoframes.viz import Map, Layer, basic_style
+
+Map(
+  Layer(
+    'table_name',
+    style=basic_style(color='blue', stroke_color='white')
+  )
+)
+```
+
+</p>
+</details>
+
+<details><summary>Replace layer helpers with style helpers</summary>
+<p>
+
+* From:
+
+```python
+from cartoframes.viz.helpers import size_category_layer
+
+size_category_layer(
+  'roads',
+  'type',
+  title='Roads sized by category'
+)
+```
+
+* To:
+
+```python
+from cartoframes.viz import Layer, size_category_style
+
+Layer(
+  'roads',
+  size_category_style('type'),
+  title='Roads sized by category'
+)
+```
+
+</p>
+</details>
+
+<details><summary>Layer Helpers</summary>
+<p>
+
+Layer helpers have been replaced by style helpers. Now every layer is made by using the Layer class.
+
+* From:
+
+```python
+from cartoframes.viz.helpers import color_category_layer
+
+color_category_layer('table', 'column', palette='sunset', legends=False, widgets=True, popups=True, title='Title')
+```
+
+* To:
+
+```python
+from cartoframes.viz.helpers import Layer, color_category_style
+
+Layer(
+    'table',
+    color_category_style('column', palette='sunset'),
+    default_legend=False,
+    default_widget=True,
+    default_popup_hover=True,
+    default_popup_click=True  # New feature
+    title='Title'
+)
+```
+
+</p>
+</details>
+
+## Popups
 
 <details><summary>Hover Popup</summary>
 <p>
 
-Simple hover popup, now `hover_popup` is a Layer parameter that contains an array of `popup_element`
+Simple hover popup, now `popup_hover` is a Layer parameter that contains an array of `popup_element`
 
 * From:
 
@@ -164,7 +257,7 @@ Layer(
 <details><summary>Click Popup</summary>
 <p>
 
-Click popup with two values, now `click_popup` is also a Layer parameter that contains an array of `popup_element`
+Click popup with two values, now `popup_click` is also a Layer parameter that contains an array of `popup_element`
 
 * From:
 
@@ -244,8 +337,6 @@ Layer(
 
 ## Widgets
 
-* [Related issue #1349](https://github.com/CartoDB/cartoframes/issues/1349)
-
 <details><summary>Namespace</summary>
 <p>
 
@@ -273,8 +364,6 @@ from cartoframes.viz import formula_widget
 </details>
 
 ## Legends
-
-* [Related issue #1347](https://github.com/CartoDB/cartoframes/issues/1347)
 
 <details><summary>Namespace</summary>
 <p>
@@ -318,7 +407,7 @@ Map(
 
 
 ```python
-from cartoframes.viz import Map, Layer, color_bins_legend, color_bins_style
+from cartoframes.viz import Map, Layer, color_bins_style, color_bins_legend, 
 Map(
   Layer(
     'table_name',
@@ -326,19 +415,30 @@ Map(
     legends=color_bins_legend(title='Legend Title')
   )
 )
+
+# or
+
+from cartoframes.viz import Map, Layer, color_bins_style, default_legend
+Map(
+  Layer(
+    'table_name',
+    style=color_bins_style('column_name'),
+    legends=default_legend(title='Legend Title')
+  )
+)
 ```
 
 Using multiple legends:
 
 ```python
-from cartoframes.viz import Map, Layer, color_bins_style, color_bins_legend, color_continuous_legend
+from cartoframes.viz import Map, Layer, color_bins_style, basic_legend, default_legend
 Map(
   Layer(
     'table_name',
     style=color_bins_style('column_name')
     legends=[
-      color_bins_legend(title='Legend Title 1'),
-      color_continuous_legend(title='Legend Title 2')
+      basic_legend(title='Legend Title 1'),
+      default_legend(title='Legend Title 2')
     ]
   )
 )
@@ -381,65 +481,5 @@ Map(
   )
 )
 ```
-</p>
-</details>
-
-## Style
-
-* [Related Issue](https://github.com/CartoDB/cartoframes/issues/1345)
-
-<details><summary>Remove "string syntax"</summary>
-<p>
-
-Replace CARTO VL style syntax by using style helpers.
-
-* From:
-
-```python
-from cartoframes.viz import Map, Layer, Style
-
-Map(
-  Layer(
-    'table_name',
-    style='color: blue strokeColor: white'
-  )
-)
-```
-
-* To:
-
-```python
-from cartoframes.viz import Map, Layer, basic_style
-
-Map(
-  Layer(
-    'table_name',
-    style=basic_style(color='blue', stroke_color='white')
-  )
-)
-```
-
-</p>
-</details>
-
-<details><summary>Replace layer helpers with style helpers</summary>
-<p>
-
-* From:
-
-```python
-from cartoframes.viz.helpers import size_category_layer
-
-size_category_layer('roads', 'type', 'Roads sized by category')
-```
-
-* To:
-
-```python
-from cartoframes.viz import Layer, size_category_style
-
-Layer('roads', size_category_style('type'), legends=size_category_style(title='Roads sized by category'))
-```
-
 </p>
 </details>
