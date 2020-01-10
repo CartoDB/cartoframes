@@ -1,7 +1,7 @@
 from ..legend import Legend
 
 
-def basic_legend(title='', description='', footer=''):
+def basic_legend(title=None, description=None, footer=None):
     """Helper function for quickly creating a basic legend.
 
     Args:

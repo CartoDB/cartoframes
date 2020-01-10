@@ -14,8 +14,8 @@ class Legend:
         - :py:meth:`size_continuous_legend <cartoframes.viz.size_continuous_legend>`
 
     """
-    def __init__(self, legend_type=None, title='', description='',
-                 footer='', prop=None, variable='', dynamic=True):
+    def __init__(self, legend_type=None, title=None, description=None,
+                 footer=None, prop=None, variable='', dynamic=True):
         self._check_type(legend_type)
         self._type = legend_type
         self._title = title

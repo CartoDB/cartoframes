@@ -5,14 +5,13 @@ from ..widgets import histogram_widget
 from ..popups import popup_element
 
 
-def size_continuous_style(
-        value, size=None, range_min=None, range_max=None, color=None, opacity=None,
-        stroke_color=None, stroke_width=None, animate=None, credentials=None):
+def size_continuous_style(value, size_range=None, range_min=None, range_max=None, color=None, opacity=None,
+                          stroke_color=None, stroke_width=None, animate=None, credentials=None):
     """Helper function for quickly creating a size continuous style.
 
     Args:
         value (str): Column to symbolize by.
-        size (str, optional): Min/max size array as a string. Default is
+        size_range (str, optional): Min/max size array as a string. Default is
           '[2, 40]' for point geometries and '[1, 10]' for lines.
         range_min (int, optional): The minimum value of the data range for the continuous
             size ramp. Defaults to the globalMIN of the dataset.
@@ -42,24 +41,24 @@ def size_continuous_style(
     data = {
         'point': {
             '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                value, range_min, range_max, size or [2, 40]),
+                value, range_min, range_max, size_range or [2, 40]),
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'point'),
                 get_value(opacity, 0.8)),
             'width': 'ramp(linear(sqrt(${0}), sqrt({1}), sqrt({2})), {3})'.format(
-                value, range_min, range_max, size or [2, 40]),
+                value, range_min, range_max, size_range or [2, 40]),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
             'filter': animation_filter
         },
         'line': {
             '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                value, range_min, range_max, size or [1, 10]),
+                value, range_min, range_max, size_range or [1, 10]),
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'line'),
                 get_value(opacity, 0.8)),
             'width': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                value, range_min, range_max, size or [1, 10]),
+                value, range_min, range_max, size_range or [1, 10]),
             'filter': animation_filter
         }
     }

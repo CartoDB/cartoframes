@@ -1,7 +1,7 @@
 from ..legend import Legend
 
 
-def color_bins_legend(title='', description='', footer='', prop='color',
+def color_bins_legend(title=None, description=None, footer=None, prop='color',
                       variable=None, dynamic=True):
     """Helper function for quickly creating a color bins legend.
 

@@ -38,7 +38,6 @@ class PopupList:
             click_popup_elements.reverse()
             for popup in click_popup_elements:
                 if isinstance(popup, dict):
-                    # FIXME
                     if popup.get('value') is None and default_popup_click:
                         popup['value'] = default_popup_click.get('value')
                     popup_elements.append(
@@ -54,7 +53,6 @@ class PopupList:
             hover_popup_elements.reverse()
             for popup in hover_popup_elements:
                 if isinstance(popup, dict):
-                    # FIXME
                     if popup.get('value') is None and default_popup_hover:
                         popup['value'] = default_popup_hover.get('value')
                     popup_elements.append(

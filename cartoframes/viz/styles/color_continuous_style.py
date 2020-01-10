@@ -5,9 +5,8 @@ from ..widgets import histogram_widget
 from ..popups import popup_element
 
 
-def color_continuous_style(
-        value, size=None, range_min=None, range_max=None, palette=None, opacity=None,
-        stroke_color=None, stroke_width=None, animate=None):
+def color_continuous_style(value, size=None, range_min=None, range_max=None, palette=None, opacity=None,
+                           stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a color continuous style.
 
     Args:

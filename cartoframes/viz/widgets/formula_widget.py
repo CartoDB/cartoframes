@@ -2,7 +2,7 @@ from ..constants import FORMULA_OPERATIONS_GLOBAL, FORMULA_OPERATIONS_VIEWPORT
 from ..widget import Widget
 
 
-def formula_widget(value, operation=None, title='', description='', footer='', is_global=False):
+def formula_widget(value, operation=None, title=None, description=None, footer=None, is_global=False):
     """Helper function for quickly creating a formula widget.
 
     Formula widgets calculate aggregated values ('avg', 'max', 'min', 'sum') from numeric columns

@@ -6,9 +6,8 @@ from ..widgets import histogram_widget
 from ..popups import popup_element
 
 
-def cluster_size_style(
-        value, operation='count', resolution=32, color=None, opacity=None,
-        stroke_color=None, stroke_width=None, animate=None):
+def cluster_size_style(value, operation='count', resolution=32, color=None, opacity=None,
+                       stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a cluster map with
     continuously sized points.
 

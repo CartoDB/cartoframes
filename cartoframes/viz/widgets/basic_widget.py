@@ -1,7 +1,7 @@
 from ..widget import Widget
 
 
-def basic_widget(title='', description='', footer=''):
+def basic_widget(title=None, description=None, footer=None):
     """Helper function for quickly creating a default widget.
 
     The default widget is a general purpose widget that can be used to provide additional information about your map.
@@ -21,5 +21,4 @@ def basic_widget(title='', description='', footer=''):
         ...     footer='Widget footer')
 
     """
-
-    return Widget('basic', '', title, description, footer)
+    return Widget('basic', None, title, description, footer)

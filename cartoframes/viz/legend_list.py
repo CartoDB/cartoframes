@@ -15,7 +15,6 @@ class LegendList:
             legend_list = []
             for legend in legends:
                 if isinstance(legend, Legend):
-                    # FIXME
                     if legend._type == 'default' and default_legend:
                         legend._type = default_legend._type
                     legend_list.append(legend)

@@ -5,9 +5,8 @@ from ..widgets import category_widget
 from ..popups import popup_element
 
 
-def color_category_style(
-        value, top=11, cat=None, palette=None, size=None, opacity=None,
-        stroke_color=None, stroke_width=None, animate=None):
+def color_category_style(value, top=11, cat=None, palette=None, size=None, opacity=None,
+                         stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a color category style.
 
     Args:

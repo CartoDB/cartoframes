@@ -5,9 +5,8 @@ from ..widgets import histogram_widget
 from ..popups import popup_element
 
 
-def color_bins_style(
-        value, method='quantiles', bins=5, breaks=None, palette=None, size=None,
-        opacity=None, stroke_color=None, stroke_width=None, animate=None):
+def color_bins_style(value, method='quantiles', bins=5, breaks=None, palette=None, size=None,
+                     opacity=None, stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a color bins style.
 
     Args:

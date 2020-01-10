@@ -5,9 +5,8 @@ from ..widgets import histogram_widget
 from ..popups import popup_element
 
 
-def size_bins_style(
-        value, method='quantiles', bins=5, breaks=None, size=None, color=None,
-        opacity=None, stroke_width=None, stroke_color=None, animate=None):
+def size_bins_style(value, method='quantiles', bins=5, breaks=None, size_range=None, color=None,
+                    opacity=None, stroke_width=None, stroke_color=None, animate=None):
     """Helper function for quickly creating a size bind style with
     classification method/buckets.
 
@@ -17,7 +16,7 @@ def size_bins_style(
             Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
         breaks (list<int>, optional): Assign manual class break values.
-        size (int, optional): Min/max size array as a string. Default is
+        size_range (int, optional): Min/max size array as a string. Default is
           '[2, 14]' for point geometries and '[1, 10]' for lines.
         color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for point geometries and
           '#4CC8A3' for lines.
@@ -53,7 +52,7 @@ def size_bins_style(
                 get_value(color, 'color', 'point'),
                 get_value(opacity, 0.8)),
             'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                func, value, breaks or bins, size or [2, 14]),
+                func, value, breaks or bins, size_range or [2, 14]),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
             'filter': animation_filter
@@ -63,7 +62,7 @@ def size_bins_style(
                 get_value(color, 'color', 'line'),
                 get_value(opacity, 0.8)),
             'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                func, value, breaks or bins, size or [1, 10]),
+                func, value, breaks or bins, size_range or [1, 10]),
             'filter': animation_filter
         }
     }

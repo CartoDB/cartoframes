@@ -43,8 +43,8 @@ class TestWidgetList(object):
 
         assert widget_list._widgets[1]._type == 'basic'
         assert widget_list._widgets[1]._title == 'Custom Info'
-        assert widget_list._widgets[1]._description == ''
-        assert widget_list._widgets[1]._footer == ''
+        assert widget_list._widgets[1]._description is None
+        assert widget_list._widgets[1]._footer is None
         assert isinstance(widget_list._widgets[1], Widget)
 
     def test_widget_list_init_with_a_widget(self):

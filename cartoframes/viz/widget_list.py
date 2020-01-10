@@ -18,7 +18,6 @@ class WidgetList:
                 if isinstance(widget, dict):
                     widget_list.append(Widget(widget))
                 elif isinstance(widget, Widget):
-                    # FIXME
                     if widget._type == 'default' and default_widget:
                         widget._type = default_widget._type
                         widget._prop = default_widget._prop
