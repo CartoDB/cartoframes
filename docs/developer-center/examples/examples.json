@@ -39,11 +39,6 @@
             "desc": "Change CARTO Table Privacy",
             "file": "change_carto_table_privacy",
             "path": "data_workflows"
-        }, {
-            "title": "Animate a DataFrame by date",
-            "desc": "Animate a DataFrame by date",
-            "file": "date_columns_in_dataframes",
-            "path": "data_workflows"
         }]
     }, {
         "title": "Data Enrichment",
@@ -79,36 +74,6 @@
             "title": "Add Layer",
             "desc": "Add a Layer",
             "file": "add_layer",
-            "path": "layers"
-        }, {
-            "title": "Add Basic Widget",
-            "desc": "Add a basic Widget",
-            "file": "add_basic_widget_layer",
-            "path": "layers"
-        }, {
-            "title": "Add Basic Legend",
-            "desc": "Add a basic Legend",
-            "file": "add_basic_legend_layer",
-            "path": "layers"
-        }, {
-            "title": "Add Popup on Click",
-            "desc": "Add popup on click to layer",
-            "file": "add_popup_click_layer",
-            "path": "layers"
-        }, {
-            "title": "Add Popup on Hover",
-            "desc": "Add popup on hover to layer",
-            "file": "add_popup_hover_layer",
-            "path": "layers"
-        }, {
-            "title": "Add Basic Style",
-            "desc": "Add basic style to a layer",
-            "file": "add_style_layer",
-            "path": "layers"
-        }, {
-            "title": "Add Data Driven Style",
-            "desc": "Add a data driven style to a layer",
-            "file": "add_data_driven_style_layer",
             "path": "layers"
         }, {
             "title": "Add Multiple Layers",
@@ -182,11 +147,6 @@
             "file": "animation_style",
             "path": "styles"
         }, {
-            "title": "Isolines Style",
-            "desc": "Isolines Style",
-            "file": "isolines_style",
-            "path": "styles"
-        }, {
             "title": "Combine Visualization Styles",
             "desc": "Combine visualization styles",
             "file": "combine_visualization_styles",
@@ -240,11 +200,6 @@
             "file": "legend_line_geometry",
             "path": "legends"
         }, {
-            "title": "Use Stroke Color in Legend",
-            "desc": "Use stroke color in legend",
-            "file": "stroke_color_legend",
-            "path": "legends"
-        }, {
             "title": "Use Opacity in Legend",
             "desc": "Use opacity in legend",
             "file": "opacity_in_legend",
@@ -283,11 +238,6 @@
             "file": "time_series_widget",
             "path": "widgets"
         }, {
-            "title": "Animation Widget to Style Property",
-            "desc": "Animation Widget to Style Property",
-            "file": "animation_widget_style_property",
-            "path": "widgets"
-        }, {
             "title": "Multiple Widgets",
             "desc": "Multiple Widgets",
             "file": "multiple_widgets",
@@ -314,11 +264,6 @@
             "title": "Multiple Popup Events",
             "desc": "Multiple Popup Events",
             "file": "multiple_popup_events",
-            "path": "popups"
-        }, {
-            "title": "Popup Expressions",
-            "desc": "Popups with Expressions",
-            "file": "popup_expressions",
             "path": "popups"
         }]
     }, {
