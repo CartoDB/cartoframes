@@ -452,9 +452,9 @@ Map(
 Available properties for legends are changed to:
 
 * "color" -> "color"
-* "strokeColor" -> "stroke-color"
+* "strokeColor" -> "stroke_color"
 * "width" -> "size"
-* "strokeWidth" -> "stroke-width"
+* "strokeWidth" -> "stroke_width"
 
 * From:
 
@@ -477,7 +477,7 @@ Map(
   Layer(
     'table_name',
     style=color_category_style('column_name'),
-    legends=color_category_legend('color-bins', title='Legend Title', prop='stroke-color')
+    legends=color_category_legend('color-bins', title='Legend Title', prop='stroke_color')
   )
 )
 ```
