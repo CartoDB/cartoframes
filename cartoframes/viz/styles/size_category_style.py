@@ -14,12 +14,12 @@ def size_category_style(value, top=5, cat=None, size_range=None, color=None, opa
         top (int, optional): Number of size categories. Default is 5. Values
             can range from 1 to 16.
         cat (list<str>, optional): Category list as a string.
-        size_range (str, optional): Min/max size array as a string. Default is
-          '[2, 20]' for point geometries and '[1, 10]' for lines.
+        size_range (list<int>, optional): Min/max size array as a string. Default is
+            [2, 20] for point geometries and [1, 10] for lines.
         color (str, optional): hex, rgb or named color value.
-          Default is '#F46D43' for point geometries and '#4CC8A3' for lines.
+            Default is '#F46D43' for point geometries and '#4CC8A3' for lines.
         opacity (float, optional): Opacity value for point color and line features.
-          Default is 0.8.
+            Default is 0.8.
         stroke_color (str, optional): Color of the stroke on point features.
             Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.
@@ -36,7 +36,7 @@ def size_category_style(value, top=5, cat=None, size_range=None, color=None, opa
     data = {
         'point': {
             'color': 'opacity({0}, {1})'.format(
-                get_value(color, 'color', 'point'),
+                get_value(color, '#F46D43'),
                 get_value(opacity, 1)),
             'width': 'ramp({0}(${1}, {2}), {3})'.format(
                 func, value, cat or top, size_range or [2, 20]),

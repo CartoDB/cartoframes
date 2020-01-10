@@ -105,7 +105,7 @@
             "path": "map_configuration"
         }]
     }, {
-        "title": "Visualization Helpers",
+        "title": "Styles",
         "samples": [{
             "title": "Color Category Style",
             "desc": "Color Category Style",

@@ -11,16 +11,16 @@ def size_continuous_style(value, size_range=None, range_min=None, range_max=None
 
     Args:
         value (str): Column to symbolize by.
-        size_range (str, optional): Min/max size array as a string. Default is
-          '[2, 40]' for point geometries and '[1, 10]' for lines.
+        size_range (list<int>, optional): Min/max size array as a string. Default is
+            [2, 40] for point geometries and [1, 10] for lines.
         range_min (int, optional): The minimum value of the data range for the continuous
             size ramp. Defaults to the globalMIN of the dataset.
         range_max (int, optional): The maximum value of the data range for the continuous
-          size ramp. Defaults to the globalMAX of the dataset.
+            size ramp. Defaults to the globalMAX of the dataset.
         color (str, optional): hex, rgb or named color value.
-          Defaults is '#FFB927' for point geometries and '#4CC8A3' for lines.
+            Defaults is '#FFB927' for point geometries and '#4CC8A3' for lines.
         opacity (float, optional): Opacity value for point color and line features.
-          Default is 0.8.
+            Default is 0.8.
         stroke_color (str, optional): Color of the stroke on point features.
             Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.
@@ -43,7 +43,7 @@ def size_continuous_style(value, size_range=None, range_min=None, range_max=None
             '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
                 value, range_min, range_max, size_range or [2, 40]),
             'color': 'opacity({0}, {1})'.format(
-                get_value(color, 'color', 'point'),
+                get_value(color, '#FFB927'),
                 get_value(opacity, 0.8)),
             'width': 'ramp(linear(sqrt(${0}), sqrt({1}), sqrt({2})), {3})'.format(
                 value, range_min, range_max, size_range or [2, 40]),

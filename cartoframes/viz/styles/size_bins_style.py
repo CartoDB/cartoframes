@@ -16,12 +16,12 @@ def size_bins_style(value, method='quantiles', bins=5, breaks=None, size_range=N
             Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
         breaks (list<int>, optional): Assign manual class break values.
-        size_range (int, optional): Min/max size array as a string. Default is
-          '[2, 14]' for point geometries and '[1, 10]' for lines.
+        size_range (list<int>, optional): Min/max size array as a string. Default is
+            [2, 14] for point geometries and [1, 10] for lines.
         color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for point geometries and
-          '#4CC8A3' for lines.
+            '#4CC8A3' for lines.
         opacity (float, optional): Opacity value for point color and line features.
-          Default is 0.8.
+            Default is 0.8.
         stroke_color (str, optional): Color of the stroke on point features.
             Default is '#222'.
         stroke_width (int, optional): Size of the stroke on point features.
@@ -49,7 +49,7 @@ def size_bins_style(value, method='quantiles', bins=5, breaks=None, size_range=N
     data = {
         'point': {
             'color': 'opacity({0}, {1})'.format(
-                get_value(color, 'color', 'point'),
+                get_value(color, '#EE5D5A'),
                 get_value(opacity, 0.8)),
             'width': 'ramp({0}(${1}, {2}), {3})'.format(
                 func, value, breaks or bins, size_range or [2, 14]),
