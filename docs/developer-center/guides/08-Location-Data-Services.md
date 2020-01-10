@@ -165,7 +165,7 @@ records, and new geocoding will be performed only on _new or changed records_.
 In order to use cached results, we have to save the results to a CARTO table using the `table_name` and `cached=True` parameters.
 
 ```python
-geo_gdf, geo_metadata = geo_service.geocode(
+geo_gdf_cached, geo_metadata_cached = geo_service.geocode(
     df,
     street='address',
     city={'value': 'New York'},
@@ -465,16 +465,16 @@ from cartoframes.viz import Map, Layer, color_bins_style, popup_element
 Map(
   Layer(
     geo_gdf,
-    style=color_bins_style(
+    color_bins_style(
       'gc_status_rel',
       method='equal',
-      bins=geo_gdf.gc_status_rel.unique().size,
-      title='Geocoding Precision'
+      bins=geo_gdf.gc_status_rel.unique().size
     ),
     popup_hover=[
       popup_element('address', title='Address'),
       popup_element('gc_status_rel', title='Precision'),
-    ]
+    ],
+    title='Geocoding Precision'
   )
 )
 ```
@@ -589,9 +589,9 @@ isochrones_gdf.head()
 </table>
 </div>
 
-#### Visualize with the isolines layer
+#### The isolines helper
 
-The most straightforward way of visualizing the resulting geometries is to use the [`isolines_layer`](/developers/cartoframes/examples/#example-isolines-layer) visualization layer. This visualization layer uses the `range_label` column that is automatically added by the service to classify each polygon by category.
+The most straightforward way of visualizing the resulting geometries is to use the `isolines_style` visualization layer. This visualization layer uses the `range_label` column that is automatically added by the service to classify each polygon by category.
 
 ```python
 from cartoframes.viz import Layer, isolines_style
@@ -737,23 +737,24 @@ from cartoframes.viz import Map, Layer, isolines_style, size_continuous_style, p
 Map([
     Layer(
         isochrones_gdf,
-        style=isolines_style(title='Walking Time')
+        isolines_style(),
+        title='Walking Time'
     ),
     Layer(
         geo_gdf,
-        style=size_continuous_style(
-          'revenue',
-          title='Revenue $',
-          color='white',
-          opacity='0.2',
-          stroke_color='blue',
-          size_range=[20, 80]
+        size_continuous_style(
+            'revenue',
+            color='white',
+            opacity='0.2',
+            stroke_color='blue',
+            size_range=[20, 80],
         ),
         popup_hover=[
-          popup_element('address', title='Address'),
-          popup_element('gc_status_rel', title='Precision'),
-          popup_element('revenue', title='Revenue'),
-        ]
+            popup_element('address', 'Address'),
+            popup_element('gc_status_rel', 'Precision'),
+            popup_element('revenue', 'Revenue')
+        ],
+        title='Revenue $',
     )
 ])
 ```
@@ -791,41 +792,45 @@ polygon = geometry.Polygon([[p.x, p.y] for p in new_store_location])
 ```python
 from geopandas import GeoDataFrame, points_from_xy
 
-new_store_gdf = GeoDataFrame(
-    [['New Store', points_from_xy(polygon.centroid.x, polygon.centroid.y)]],
-    columns=['name', 'geometry'])
+new_store_gdf = GeoDataFrame({
+    'name': ['New Store'],
+    'geometry': points_from_xy([polygon.centroid.x], [polygon.centroid.y])
+})
 
 isochrones_new_gdf, isochrones_new_metadata = iso_service.isochrones(new_store_gdf, [300, 900, 1800], mode='walk')
 ```
 
 ```python
-from cartoframes.viz import Map, Layer, isolines_style, size_continuous_style, popup_element
+from cartoframes.viz import Map, Layer, isolines_style, size_continuous_style
 
 Map([
     Layer(
         isochrones_gdf,
-        style=isolines_style(title='Walking Time - Current')
+        isolines_style(opacity='0.2'),
+        title='Walking Time - Current'
     ),
     Layer(
         isochrones_new_gdf,
-        style=isolines_style(title='Walking Time - New')
+        isolines_style(),
+        title='Walking Time - New'
     ),
     Layer(
         geo_gdf,
-        style=size_continuous_style(
-          'revenue',
-          title='Revenue $',
-          color='white',
-          opacity='0.2',
-          stroke_color='blue',
-          size_range=[20, 80]
+        size_continuous_style(
+            'revenue',
+            color='white',
+            opacity='0.2',
+            stroke_color='blue',
+            size_range=[20, 80]
         ),
         popup_hover=[
-          popup_element('address', title='Address'),
-          popup_element('gc_status_rel', title='Precision'),
-          popup_element('revenue', title='Revenue'),
-        ]
-    )
+            popup_element('address', 'Address'),
+            popup_element('gc_status_rel', 'Precision'),
+            popup_element('revenue', 'Revenue')
+        ],
+        title='Revenue $',
+    ),
+    Layer(new_store_gdf)
 ])
 ```
 
