@@ -159,22 +159,25 @@ df[df['id'].str.contains('blockgroup', case=False, na=False)]
 </table>
 </div>
 
-We have three available datasets, from three different providers: Michael Bauer International, Open Data, and AGS. For this example, we are going to look for demographic datasets for the AGS block group geography `ags_blockgroup_1c63771c`:
+We have three available datasets, from three different providers: Michael Bauer International, Open Data, and AGS. For this example, we are going to look for demographic datasets for the MBI block group geography `mbi_blockgroups_1ab060a`:
 
 ```python
-datasets = Catalog().country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
+datasets = Catalog().country('usa').category('demographics').geography('mbi_blockgroups_1ab060a').datasets
 datasets
 ```
 
-<pre class="u-topbottom-Margin"><code>[<Dataset.get('ags_sociodemogr_e92b1637')>,
-    <Dataset.get('ags_consumerspe_fe5d060a')>,
-    <Dataset.get('ags_retailpoten_ddf56a1a')>,
-    <Dataset.get('ags_consumerpro_e8344e2e')>,
-    <Dataset.get('ags_businesscou_a8310a11')>,
-    <Dataset.get('ags_crimerisk_9ec89442')>]
+<pre class="u-topbottom-Margin"><code>[<Dataset.get('mbi_households__45067b14')>,
+ <Dataset.get('mbi_population_341ee33b')>,
+ <Dataset.get('mbi_purchasing__53ab279d')>,
+ <Dataset.get('mbi_consumer_sp_54c4abc3')>,
+ <Dataset.get('mbi_sociodemogr_b5516832')>,
+ <Dataset.get('mbi_education_20063878')>,
+ <Dataset.get('mbi_households__c943a740')>,
+ <Dataset.get('mbi_retail_spen_c31f0ba0')>,
+ <Dataset.get('mbi_consumer_pr_68d1265a')>]
 </code></pre>
 
-Let's continue the data discovery process. We have 6 datasets in the US with demographic information at the level of AGS block groups:
+Let's continue the data discovery process. We have 6 datasets in the US with demographic information at the level of MBI block groups:
 
 ```python
 datasets.to_dataframe()
