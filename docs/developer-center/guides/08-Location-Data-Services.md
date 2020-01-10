@@ -460,19 +460,22 @@ array([0.97, 0.99, 0.98])
 Finally, we can visualize the precision of the geocoded results using a CARTOframes [visualization layer](/developers/cartoframes/examples/#example-color-bins-layer).
 
 ```python
-from cartoframes.viz.helpers import color_bins_layer
-from cartoframes.viz import hover_popup
+from cartoframes.viz import Map, Layer, color_bins_style, popup_element
 
-color_bins_layer(
+Map(
+  Layer(
     geo_gdf,
-    'gc_status_rel',
-    method='equal',
-    bins=geo_gdf.gc_status_rel.unique().size,
-    title='Geocoding Precision',
-    popups=[
-      hover_popup('address', title='Address'),
-      hover_popup('gc_status_rel', title='Precision'),
-    ]})
+    style=color_bins_style(
+      'gc_status_rel',
+      method='equal',
+      bins=geo_gdf.gc_status_rel.unique().size,
+      title='Geocoding Precision',
+      popup_hover=[
+        popup_element('address', title='Address'),
+        popup_element('gc_status_rel', title='Precision'),
+      ]
+    )
+  )
 )
 ```
 
@@ -590,11 +593,10 @@ isochrones_gdf.head()
 
 The most straightforward way of visualizing the resulting geometries is to use the [`isolines_layer`](/developers/cartoframes/examples/#example-isolines-layer) visualization layer. This visualization layer uses the `range_label` column that is automatically added by the service to classify each polygon by category.
 
-
 ```python
-from cartoframes.viz.helpers import isolines_layer
+from cartoframes.viz import Layer, isolines_style
 
-isolines_layer(isochrones_gdf)
+Layer(isochrones_gdf, isolines_style())
 ```
 
 <div class="example-map">
@@ -646,7 +648,6 @@ isodistances_gdf, isodistances_metadata = iso_service.isodistances(
     quality=2
 )
 ```
-
 
 ```python
 isodistances_gdf.head()
@@ -710,9 +711,9 @@ isodistances_gdf.head()
 </div>
 
 ```python
-from cartoframes.viz.helpers import isolines_layer
+from cartoframes.viz import Layer, isolines_style
 
-isolines_layer(isodistances_gdf)
+Layer(isochrones_gdf, isolines_style())
 ```
 
 <div class="example-map">
@@ -730,29 +731,29 @@ isolines_layer(isodistances_gdf)
 
 Let's visualize the data in one map to see what insights we can find.
 
-
 ```python
-from cartoframes.viz import Map
-from cartoframes.viz.helpers import size_continuous_layer
+from cartoframes.viz import Map, Layer, isolines_style, size_continuous_style, popup_element
 
 Map([
-    isolines_layer(
+    Layer(
         isochrones_gdf,
-        title='Walking Time'
+        style=isolines_style(title='Walking Time')
     ),
-    size_continuous_layer(
+    Layer(
         geo_gdf,
-        'revenue',
-        title='Revenue $',
-        color='white',
-        opacity='0.2',
-        stroke_color='blue',
-        size=[20, 80],
-        popups=[
-          hover_popup('address', title='Address'),
-          hover_popup('gc_status_rel', title='Precision'),
-          hover_popup('revenue', title='Revenue'),
-        ]
+        style=size_continuous_style(
+          'revenue',
+          title='Revenue $',
+          color='white',
+          opacity='0.2',
+          stroke_color='blue',
+          size_range=[20, 80],
+          popup_hover=[
+            popup_element('address', title='Address'),
+            popup_element('gc_status_rel', title='Precision'),
+            popup_element('revenue', title='Revenue'),
+          ]
+        )
     )
 ])
 ```
@@ -798,31 +799,32 @@ isochrones_new_gdf, isochrones_new_metadata = iso_service.isochrones(new_store_g
 ```
 
 ```python
-from cartoframes.viz import Layer
+from cartoframes.viz import Map, Layer, isolines_style, size_continuous_style, popup_element
 
 Map([
-    isolines_layer(
+    Layer(
         isochrones_gdf,
-        title='Walking Time - Current',
-        opacity='0.2'
+        style=isolines_style(title='Walking Time - Current')
     ),
-    isolines_layer(
+    Layer(
         isochrones_new_gdf,
-        title='Walking Time - New',
+        style=isolines_style(title='Walking Time - New')
     ),
-    size_continuous_layer(
+    Layer(
         geo_gdf,
-        'revenue',
-        title='Revenue $',
-        color='white',
-        opacity='0.2',
-        stroke_color='blue',
-        size=[20, 80],
-        popups=[
-          hover_popup('address', title='Address'),
-          hover_popup('gc_status_rel', title='Precision'),
-          hover_popup('revenue', title='Revenue'),
-        ]
+        style=size_continuous_style(
+          'revenue',
+          title='Revenue $',
+          color='white',
+          opacity='0.2',
+          stroke_color='blue',
+          size_range=[20, 80],
+          popup_hover=[
+            popup_element('address', title='Address'),
+            popup_element('gc_status_rel', title='Precision'),
+            popup_element('revenue', title='Revenue'),
+          ]
+        )
     )
 ])
 ```

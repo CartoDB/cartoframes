@@ -10,7 +10,7 @@ In this guide you are introduced to the Map and Layer classes, how to explore da
 
 ### Data
 
-This guide uses two datasets: a point dataset of simulated Starbucks locations in Brooklyn, New York and 15 minute walk time polygons (isochrones) around each store augmented with demographic variables from CARTO's [Data Observatory](). To follow along, you can get the [point dataset here](http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.csv) and the [polygon dataset here](http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_iso_enriched.csv).
+This guide uses two datasets: a point dataset of simulated Starbucks locations in Brooklyn, New York and 15 minute walk time polygons (isochrones) around each store augmented with demographic variables from CARTO's [Data Observatory](developers/cartoframes/guides/Data-discovery/). To follow along, you can get the [point dataset here](http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_geocoded.csv) and the [polygon dataset here](http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_iso_enriched.csv).
 
 As a first step, load both datasets as [pandas.DataFrame](https://pandas.pydata.org/pandas-docs/stable/getting_started/dsintro.html#dataframe) into the notebook:
 
@@ -274,7 +274,7 @@ Map([
                 title='Store ID'
             )
         ],
-        hover_popup=[
+        popup_hover=[
             popup_element('id_store', title='Store ID')
         ]
     ),
@@ -289,10 +289,10 @@ Now, as you explore the map and summarize demographics, it is much easier to rel
 
 At this point, you have some really useful information available on the map but only coming from the isochrone Layer. Sizing the store points by the attribute `revenue` will provide a way to visually locate which stores are performing better than others. A quick way to visualize numeric or categorical attributes during the data exploration process is to take advantage of [Visualization Layers](/developers/cartoframes/reference/#heading-Helpers).
 
-To size the store points proportionate to their revenue, you'll use the [`size_continuous_layer`](/developers/cartoframes/examples/#example-size-continuous-layer):
+To size the store points proportionate to their revenue, you'll use the [`size_continuous_style`](/developers/cartoframes/examples/#example-size-continuous-style):
 
 ```python
-from cartoframes.viz.helpers import size_continuous_layer
+from cartoframes.viz import size_continuous_style, popup_element
 
 Map([
     Layer(
@@ -323,13 +323,13 @@ Map([
                 title='Store ID'
             )
         ],
-        hover_popup=[
+        popup_hover=[
             popup_element('id_store', title='Store ID')
         ]
     ),
-    size_continuous_layer(
+    Layer(
         stores_gdf,
-        'revenue'
+        size_continuous_style('revenue')
     )
 ])
 ```
@@ -338,21 +338,23 @@ Now you have a proportional symbol map where points are sized by revenue. You wi
 
 Next, let's take a look at how to modify some of the defaults.
 
-Every Visualization Layer has a set of parameters available to customize the defaults to better suit a given map. A quick way to see which parameters are available for customization in the `size_continuous_layer`, is to run `help(size_continuous_layer)` in a notebook cell.
+Every Visualization Layer has a set of parameters available to customize the defaults to better suit a given map. A quick way to see which parameters are available for customization in the `size_continuous_style`, is to run `help(size_continuous_style)` in a notebook cell.
 
 Let's make a few adjustments to make it easier to distinguish and locate the highest and lowest performing stores:
 
-* The continuous point size reads between a minimum and maximum range of symbol sizes. Since the smallest revenue value on this map is hard to see, set `size=[10,50]`
+* The continuous point size reads between a minimum and maximum range of symbol sizes. Since the smallest revenue value on this map is hard to see, set `size_range=[10,50]`
 * By default both the Legend and Popup titles are set to the attribute being visualized. To give them more descriptive titles, set `title=Annual Revenue ($)`
-* In order to see and interact with the distribution of revenue values, you can also add a Histogram Widget (turned off by default) by setting `widget=True`
+* In order to see and interact with the distribution of revenue values, you can also add a Histogram Widget (turned off by default) by setting `default_widget=True`
 
 ```python
-size_continuous_layer(
+Layer(
     stores_gdf,
-    'revenue',
-    size=[10,50],
-    title='Annual Revenue ($)',
-    widget=True
+    style=size_continuous_style(
+        'revenue',
+        size_range=[10,50],
+        title='Annual Revenue ($)',
+        default_widget=True
+    )
 )
 ```
 
@@ -385,36 +387,40 @@ Use the map to see if you can find the highest and lowest performing stores and 
 
 Now that you have gained insight into the relationship between revenue and demographics, let's say that the most influential factor of how well a store performed was median income and you want to create a map to show that particular relationship.
 
-To show this, the map below uses another Visualization Layer, this time the [`color_bins_layer`](/developers/cartoframes/examples/#example-color-bins-layer) to color each isochrone according to the range of median household income it falls within. Additionally, the `size_continuous_layer` used in the previous map has been further customized to account for the new thematic median income style, and the store points have been added again as a third Layer to show their location and ID on hover. The map also has a custom [viewport](https://carto.com/developers/cartoframes/examples/#example-set-custom-viewport) set to center it on the highest performing (A) and lowest performing (J) stores that have similar median income values.
+To show this, the map below uses another Visualization Layer, this time the [`color_bins_style`](/developers/cartoframes/examples/#example-color-bins-style) to color each isochrone according to the range of median household income it falls within. Additionally, the `size_continuous_style` used in the previous map has been further customized to account for the new thematic median income style, and the store points have been added again as a third Layer to show their location and ID on hover. The map also has a custom [viewport](https://carto.com/developers/cartoframes/examples/#example-set-custom-viewport) set to center it on the highest performing (A) and lowest performing (J) stores that have similar median income values.
 
 ```python
-from cartoframes.viz.helpers import color_bins_layer
+from cartoframes.viz import Map, Layer, color_bins_style, size_continuous_style
 
 Map([
-    color_bins_layer(
+    Layer(
         iso_gdf,
-        'inccymedhh',
-        bins=7,
-        palette='pinkyl',
-        opacity=0.8,
-        stroke_width=0,
-        title='Median Household Income ($)',
-        footer='Source: US Census Bureau'
-    ),
-    size_continuous_layer(
-        stores_gdf,
-        'revenue',
-        size=[10,50],
-        range_max=1000000,
-        opacity=0,
-        stroke_color='turquoise',
-        stroke_width=2,
-        title='Annual Revenue ($)',
-        description='Reported in 2018'
+        style=color_bins_style(
+            'inccymedhh',
+            bins=7,
+            palette='pinkyl',
+            opacity=0.8,
+            stroke_width=0,
+            title='Median Household Income ($)',
+            footer='Source: US Census Bureau'
+        )
     ),
     Layer(
         stores_gdf,
-        hover_popup=[
+        style=size_continuous_style(
+            'revenue',
+            size_range=[10,50],
+            range_max=1000000,
+            opacity=0,
+            stroke_color='turquoise',
+            stroke_width=2,
+            title='Annual Revenue ($)',
+            description='Reported in 2018'
+        )
+    ),
+    Layer(
+        stores_gdf,
+        popup_hover=[
             popup_element('id_store', title='Store ID')
         ]
     )
@@ -443,52 +449,63 @@ from cartoframes.viz import Layout
 
 Layout([
     Map([
-        size_continuous_layer(
+        Layer(
             stores_gdf,
-            'revenue',
-            size=[10,50],
-            range_max=1000000,
-            opacity=0,
-            stroke_color='turquoise',
-            stroke_width=2,
-            title='Annual Revenue',
-            popups=False
+            style=size_continuous_style(
+                'revenue',
+                size_range=[10,50],
+                range_max=1000000,
+                opacity=0,
+                stroke_color='turquoise',
+                stroke_width=2,
+                title='Annual Revenue',
+                default_popup_hover=False,
+                default_popup_click=False
+            )
         ),
         Layer(stores_gdf)
     ]),
     Map([
-        color_bins_layer(
+        Layer(
             iso_gdf,
-            'inccymedhh',
-            bins=7,
-            palette='pinkyl',
-            stroke_width=0,
-            title='Median Income',
-            popups=False
+            style=color_bins_style(
+                'inccymedhh',
+                bins=7,
+                palette='pinkyl',
+                stroke_width=0,
+                title='Median Income',
+                default_popup_hover=False,
+                default_popup_click=False
+            )
         ),
         Layer(stores_gdf)
     ]),
     Map([
-        color_bins_layer(
-            iso_gdf,
-            'popcy',
-            bins=7,
-            palette='pinkyl',
-            stroke_width=0,
-            title='Total Pop',
-            popups=False
+        Layer(iso_gdf,
+            style=color_bins_style(
+                'popcy',
+                bins=7,
+                palette='pinkyl',
+                stroke_width=0,
+                title='Total Pop',
+                default_popup_hover=False,
+                default_popup_click=False
+            )
         ),
         Layer(stores_gdf)
     ]),
     Map([
-        color_bins_layer(
+        Layer(
             iso_gdf,
-            'lbfcyempl',
-            bins=7,
-            palette='pinkyl',
-            stroke_width=0,
-            title='Employed Pop',
-            popups=False
+            style=color_bins_style(
+                'lbfcyempl',
+                bins=7,
+                palette='pinkyl',
+                stroke_width=0,
+                title='Employed Pop',
+                default_popup_hover=False,
+                default_popup_click=False
+            )
         ),
         Layer(stores_gdf)
     ]),

@@ -448,11 +448,9 @@ The reason we are obtaining the `SUM` is because we are using the `ags_sociodemo
 variable.agg_method
 ```
 
-
-
-
-    'SUM'
-
+<pre class="u-topbottom-Margin"><code>
+'SUM'
+</code></pre>
 
 
 All this information is available in the `ags_sociodemogr_e92b1637` metadata. Let's take a look:
@@ -461,9 +459,6 @@ All this information is available in the `ags_sociodemogr_e92b1637` metadata. Le
 ```python
 dataset.to_dict()
 ```
-
-
-
 
 <pre class="u-topbottom-Margin"><code>{'id': 'carto-do.ags.demographics_sociodemographic_usa_blockgroup_2015_yearly_2019',
   'slug': 'ags_sociodemogr_e92b1637',
@@ -497,8 +492,6 @@ Next, let's do a second enrichment, but this time using a DataFrame with areas o
 aoi_gdf = read_file('http://libs.cartocdn.com/cartoframes/files/starbucks_brooklyn_isolines.geojson')
 aoi_gdf.head(5)
 ```
-
-
 
 
 <div>
@@ -564,8 +557,6 @@ from cartoframes.data.observatory import Enrichment
 enriched_aoi_gdf = Enrichment().enrich_polygons(aoi_gdf, [variable])
 enriched_aoi_gdf.head(5)
 ```
-
-
 
 
 <div>

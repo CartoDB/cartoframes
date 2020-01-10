@@ -6,28 +6,21 @@ This guide is intended for those who are using CARTOframes for the first time an
 
 CARTOframes can be installed with [`pip`](https://pypi.org/project/pip/) by simply typing one of the following commands to do a system install:
 
-To install the latest beta release (recommended), use the `--pre` flag:
-
-```bash
-$ pip install cartoframes --pre
-```
-
-To install the latest stable version (soon to be deprecated):
+To install the latest stable version:
 
 ```bash
 $ pip install cartoframes
 ```
 
-To install a specific version, for example, let's say the 1.0rc1 version:
+To install a specific version, let's say the 1.0rc1 version:
 
 ```bash
 $ pip install cartoframes==1.0rc1
 ```
 
-
 ### Install CARTOframes in a Jupyter Notebook
 
-In the CARTOframes Developer Center, all of the examples are in a [Jupyter Notebook](https://jupyter.org/). If you aren't familiar with Jupyter Notebooks, we recommended reading the [beginner documentation](https://jupyter-notebook-beginner-guide.readthedocs.io/en/latest/what_is_jupyter.html) to get familiar with the environment.
+In the CARTOframes Developer Center, all of the examples are created with [Jupyter Notebooks](https://jupyter.org/). If you aren't familiar with Jupyter Notebooks, we recommend reading the [beginner documentation](https://jupyter-notebook-beginner-guide.readthedocs.io/en/latest/what_is_jupyter.html) to get familiar with the environment.
 
 To install CARTOframes through a Jupyter Notebook, run this command:
 

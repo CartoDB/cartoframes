@@ -42,6 +42,7 @@ REQUIRES = [
 
 EXTRAS_REQUIRES_TESTS = [
     'pytest',
+    'pytest-mock',
     'pylint',
     'flake8'
 ]
