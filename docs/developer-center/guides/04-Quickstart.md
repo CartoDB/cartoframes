@@ -326,7 +326,7 @@ datasets_df[datasets_df['is_public_data'] == True]
 ```
 
 <div>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -1830,7 +1830,7 @@ datasets_df[datasets_df['id'].str.contains('blockgroup') & (datasets_df['provide
 ```
 
 <div>
-<table border="1" class="dataframe">
+<table border="1" class="dataframe u-vertical-scroll">
   <thead>
     <tr style="text-align: right;">
       <th></th>
