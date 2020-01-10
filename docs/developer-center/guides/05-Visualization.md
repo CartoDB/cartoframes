@@ -292,7 +292,7 @@ At this point, you have some really useful information available on the map but 
 To size the store points proportionate to their revenue, you'll use the [`size_continuous_style`](/developers/cartoframes/examples/#example-size-continuous-style):
 
 ```python
-from cartoframes.viz import size_continuous_style
+from cartoframes.viz import size_continuous_style, popup_element
 
 Map([
     Layer(

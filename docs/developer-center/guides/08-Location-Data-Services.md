@@ -460,19 +460,22 @@ array([0.97, 0.99, 0.98])
 Finally, we can visualize the precision of the geocoded results using a CARTOframes [visualization layer](/developers/cartoframes/examples/#example-color-bins-layer).
 
 ```python
-from cartoframes.viz.helpers import color_bins_layer
-from cartoframes.viz import hover_popup
+from cartoframes.viz import Map, Layer, color_bins_style, popup_element
 
-color_bins_layer(
+Map(
+  Layer(
     geo_gdf,
-    'gc_status_rel',
-    method='equal',
-    bins=geo_gdf.gc_status_rel.unique().size,
-    title='Geocoding Precision',
-    popups=[
-      hover_popup('address', title='Address'),
-      hover_popup('gc_status_rel', title='Precision'),
-    ]})
+    style=color_bins_style(
+      'gc_status_rel',
+      method='equal',
+      bins=geo_gdf.gc_status_rel.unique().size,
+      title='Geocoding Precision',
+      popup_hover=[
+        popup_element('address', title='Address'),
+        popup_element('gc_status_rel', title='Precision'),
+      ]
+    )
+  )
 )
 ```
 

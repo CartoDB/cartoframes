@@ -114,22 +114,20 @@ Interactive vector maps can be created programmatically in CARTOframes. In addit
 
 .. code:: python
 
-    from cartoframes.viz import Map
-    from cartoframes.viz.helpers import color_continuous_layer
+    from cartoframes.viz import Layer, color_continuous_style
     from cartoframes.auth import set_default_credentials
 
     set_default_credentials('cartoframes')
 
     # display map in a notebook
-    Map(color_continuous_layer('brooklyn_poverty', 'poverty_per_pop'))
+    Layer('brooklyn_poverty', color_continuous_style('poverty_per_pop'))
 
 Publish map to CARTO
 ^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
-    from cartoframes.viz import Map
-    from cartoframes.viz.helpers import color_continuous_layer
+    from cartoframes.viz import Map, Layer, color_continuous_style
     from cartoframes.auth import set_default_credentials
 
     set_default_credentials(
@@ -138,7 +136,7 @@ Publish map to CARTO
     )
 
     # display map in a notebook
-    bk_map = Map(color_continuous_layer('brooklyn_poverty', 'poverty_per_pop'))
+    bk_map = Map(Layer('brooklyn_poverty', color_continuous_style('poverty_per_pop')))
     bk_map.publish('Brooklyn Poverty')
 
 This will publish a map like `this one <https://cartoframes.carto.com/kuviz/2a7badc3-00b3-49d0-9bc8-3b138542cdcf>`__.

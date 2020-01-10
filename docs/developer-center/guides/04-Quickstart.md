@@ -2193,9 +2193,14 @@ isochrones_gdf.head()
 Great! Let's see the result on a map:
 
 ```python
-from cartoframes.viz.helpers import color_continuous_layer
+from cartoframes.viz import color_continuous_style
 
-Map(color_continuous_layer(isochrones_gdf, 'sum_total_pop', 'Population'))
+Map(
+  Layer(
+    isochrones_gdf,
+    style=color_continuous_style('sum_total_pop', 'Population')
+  )
+)
 ```
 
 <div class="example-map">
