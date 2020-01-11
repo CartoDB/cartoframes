@@ -17,6 +17,7 @@ class LegendList:
                 if isinstance(legend, Legend):
                     if legend._type == 'default' and default_legend:
                         legend._type = default_legend._type
+                        legend._prop = default_legend._prop
                     legend_list.append(legend)
                 else:
                     raise ValueError('Legends list contains invalid elements')

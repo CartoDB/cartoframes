@@ -75,6 +75,6 @@ class Legend:
         if _type.startswith('color'):
             return 'color'
         elif _type.startswith('size'):
-            return 'width'
+            return 'size'
         else:
             return None
