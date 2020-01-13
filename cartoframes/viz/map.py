@@ -8,6 +8,7 @@ from .html import HTMLMap
 from .basemaps import Basemaps
 from .kuviz import KuvizPublisher
 from ..utils.utils import get_center
+from ..utils.metrics import send_metrics
 
 WORLD_BOUNDS = [[-180, -90], [180, 90]]
 
@@ -136,6 +137,7 @@ class Map:
                 'pitch': viewport.get('pitch')
             }
 
+    @send_metrics('map_created')
     def _repr_html_(self):
         self._html_map = HTMLMap()
 
@@ -179,6 +181,7 @@ class Map:
             '_airship_path': self._airship_path
         }
 
+    @send_metrics('map_published')
     def publish(self, name, password, table_name=None, credentials=None):
         """Publish the map visualization as a CARTO custom visualization.
 

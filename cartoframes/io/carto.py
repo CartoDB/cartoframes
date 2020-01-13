@@ -9,6 +9,7 @@ from .managers.context_manager import ContextManager
 from ..utils.geom_utils import set_geometry, has_geometry
 from ..utils.logger import log
 from ..utils.utils import is_valid_str, is_sql_query
+from ..utils.metrics import send_metrics
 
 
 GEOM_COLUMN_NAME = 'the_geom'
@@ -16,6 +17,7 @@ GEOM_COLUMN_NAME = 'the_geom'
 IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
 
 
+@send_metrics('data_downloaded')
 def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True):
     """Read a table or a SQL query from the CARTO account.
 
@@ -61,6 +63,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
     return gdf
 
 
+@send_metrics('data_uploaded')
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
              cartodbfy=True, log_enabled=True):
     """Upload a Dataframe to CARTO.
