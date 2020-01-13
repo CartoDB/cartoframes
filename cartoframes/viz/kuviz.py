@@ -42,8 +42,8 @@ class KuvizPublisher:
         self._create_maps_api_keys(name)
         self._add_layers_credentials()
 
-    def publish(self, html, name, password):
-        self.kuviz = _create_kuviz(html, name, self._auth_client, password)
+    def publish(self, html, name, password, if_exists):
+        self.kuviz = _create_kuviz(html, name, self._auth_client, password, if_exists)
         return kuviz_to_dict(self.kuviz)
 
     def update(self, data, name, password):
@@ -96,9 +96,9 @@ class KuvizPublisher:
             }
 
 
-def _create_kuviz(html, name, auth_client, password):
+def _create_kuviz(html, name, auth_client, password, if_exists):
     kmanager = _get_kuviz_manager(auth_client)
-    return kmanager.create(html=html, name=name, password=password)
+    return kmanager.create(html=html, name=name, password=password, if_exists=if_exists)
 
 
 def _create_auth_client(credentials):
