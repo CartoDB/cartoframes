@@ -180,10 +180,11 @@ class Credentials:
         if config_file is None:
             config_file = save_in_config(content, filename=DEFAULT_CREDS_FILENAME)
         else:
-            save_in_config(content, filepath=config_file)
+            config_file = save_in_config(content, filepath=config_file)
 
-        log.info('User credentials for `{0}` were successfully saved to `{1}`'.format(
-            self._username or self._base_url, config_file))
+        if config_file is not None:
+            log.info('User credentials for `{0}` were successfully saved to `{1}`'.format(
+                self._username or self._base_url, config_file))
 
     @classmethod
     def delete(cls, config_file=None):

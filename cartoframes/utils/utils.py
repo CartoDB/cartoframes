@@ -5,6 +5,7 @@ import re
 import gzip
 import json
 import time
+import uuid
 import base64
 import appdirs
 import decimal
@@ -31,6 +32,9 @@ GEOM_TYPE_POLYGON = 'polygon'
 PG_NULL = '__null'
 
 USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
+METRICS_FILENAME = 'metrics.json'
+
+_metrics_config = None
 
 
 def map_geom_type(geom_type):
@@ -475,19 +479,56 @@ def save_in_config(content, filename=None, filepath=None):
             os.makedirs(USER_CONFIG_DIR)
         filepath = default_config_path(filename)
 
-    with open(filepath, 'w') as f:
-        json.dump(content, f)
-
-    return filepath
+    try:
+        with open(filepath, 'w') as f:
+            json.dump(content, f)
+            return filepath
+    except Exception:
+        return None
 
 
 def read_from_config(filename=None, filepath=None):
     if filepath is None:
         filepath = default_config_path(filename)
 
-    with open(filepath, 'r') as f:
-        return json.load(f)
+    try:
+        with open(filepath, 'r') as f:
+            return json.load(f)
+    except Exception:
+        return None
 
 
 def default_config_path(filename):
     return os.path.join(USER_CONFIG_DIR, filename)
+
+
+def setup_metrics_config():
+    global _metrics_config
+
+    filepath = default_config_path(METRICS_FILENAME)
+
+    if _metrics_config is None:
+        if os.path.exists(filepath):
+            metrics_config = read_from_config(filepath=filepath)
+
+        if metrics_config is None:
+            metrics_config = create_metrics_config()
+            save_in_config(metrics_config, filename=METRICS_FILENAME)
+
+    _metrics_config = metrics_config
+    print(_metrics_config)
+
+
+def create_metrics_config():
+    return {
+        'installation_id': str(uuid.uuid4()),
+        'enabled': True
+    }
+
+
+def get_installation_id():
+    return _metrics_config.get('installation_id')
+
+
+# Run this once
+setup_metrics_config()
