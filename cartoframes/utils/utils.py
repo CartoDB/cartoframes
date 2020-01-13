@@ -478,6 +478,17 @@ def is_ipython_notebook():
         return False
 
 
+def get_runtime_env():
+    if is_ipython_notebook():
+        kernel_class = get_ipython().config['IPKernelApp'].get('kernel_class', '')  # noqa: F821
+        if kernel_class.startswith('google.colab'):
+            return 'google.colab'
+        else:
+            return 'notebook'
+    else:
+        return 'cli'
+
+
 def save_in_config(content, filename=None, filepath=None):
     if filepath is None:
         if not os.path.exists(USER_CONFIG_DIR):

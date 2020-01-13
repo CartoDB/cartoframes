@@ -3,7 +3,7 @@ import uuid
 import requests
 
 from .utils import default_config_path, read_from_config, save_in_config, \
-                   is_uuid, get_timestamp, silent_fail
+                   is_uuid, get_timestamp, silent_fail, get_runtime_env
 from .. import __version__
 
 EVENT_VERSION = '1'
@@ -73,7 +73,8 @@ def build_metrics_data(event_name):
         'event_source': EVENT_SOURCE,
         'event_name': event_name,
         'source_version': __version__,
-        'installation_id': get_metrics_uuid()
+        'installation_id': get_metrics_uuid(),
+        'runtime_env': get_runtime_env()
     }
 
 
