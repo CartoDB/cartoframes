@@ -1,10 +1,12 @@
 """general utility functions"""
 
+import os
 import re
 import gzip
 import json
 import time
 import base64
+import appdirs
 import decimal
 import hashlib
 import requests
@@ -27,6 +29,8 @@ GEOM_TYPE_LINE = 'line'
 GEOM_TYPE_POLYGON = 'polygon'
 
 PG_NULL = '__null'
+
+USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 
 
 def map_geom_type(geom_type):
@@ -463,3 +467,27 @@ def is_ipython_notebook():
             return False
     except NameError:
         return False
+
+
+def save_in_config(content, filename=None, filepath=None):
+    if filepath is None:
+        if not os.path.exists(USER_CONFIG_DIR):
+            os.makedirs(USER_CONFIG_DIR)
+        filepath = default_config_path(filename)
+
+    with open(filepath, 'w') as f:
+        json.dump(content, f)
+
+    return filepath
+
+
+def read_from_config(filename=None, filepath=None):
+    if filepath is None:
+        filepath = default_config_path(filename)
+
+    with open(filepath, 'r') as f:
+        return json.load(f)
+
+
+def default_config_path(filename):
+    return os.path.join(USER_CONFIG_DIR, filename)

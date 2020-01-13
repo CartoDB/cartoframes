@@ -1,8 +1,6 @@
 """Credentials management for CARTOframes usage."""
 
 import os
-import json
-import appdirs
 
 from urllib.parse import urlparse
 from carto.auth import APIKeyAuthClient
@@ -10,13 +8,13 @@ from carto.do_token import DoTokenManager
 
 from .. import __version__
 from ..utils.logger import log
-from ..utils.utils import is_valid_str, check_do_enabled
+from ..utils.utils import is_valid_str, check_do_enabled, save_in_config, \
+                          read_from_config, default_config_path
 
 from warnings import filterwarnings
 filterwarnings('ignore', category=FutureWarning, module='carto')
 
-_USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
-_DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR, 'cartocreds.json')
+DEFAULT_CREDS_FILENAME = 'creds.json'
 
 
 class Credentials:
@@ -121,8 +119,10 @@ class Credentials:
 
         """
         try:
-            with open(config_file or _DEFAULT_PATH, 'r') as f:
-                credentials = json.load(f)
+            if config_file is None:
+                credentials = read_from_config(filename=DEFAULT_CREDS_FILENAME)
+            else:
+                credentials = read_from_config(filepath=config_file)
             return cls(
                 credentials.get('username'),
                 credentials.get('api_key'),
@@ -171,20 +171,19 @@ class Credentials:
             User credentials for `johnsmith` were successfully saved to `creds.json`
 
         """
+        content = {
+            'username': self._username,
+            'api_key': self._api_key,
+            'base_url': self._base_url
+        }
+
         if config_file is None:
-            config_file = _DEFAULT_PATH
+            config_file = save_in_config(content, filename=DEFAULT_CREDS_FILENAME)
+        else:
+            save_in_config(content, filepath=config_file)
 
-            # create directory if not exists
-            if not os.path.exists(_USER_CONFIG_DIR):
-                os.makedirs(_USER_CONFIG_DIR)
-
-        with open(config_file, 'w') as _file:
-            json.dump({
-                'username': self._username,
-                'api_key': self._api_key,
-                'base_url': self._base_url}, _file)
-            log.info('User credentials for `{0}` were successfully saved to `{1}`'.format(
-                self._username or self._base_url, config_file))
+        log.info('User credentials for `{0}` were successfully saved to `{1}`'.format(
+            self._username or self._base_url, config_file))
 
     @classmethod
     def delete(cls, config_file=None):
@@ -206,7 +205,7 @@ class Credentials:
             base_url='https://johnsmith.carto.com/')
 
         """
-        path_to_remove = config_file or _DEFAULT_PATH
+        path_to_remove = config_file or default_config_path(DEFAULT_CREDS_FILENAME)
 
         try:
             os.remove(path_to_remove)
