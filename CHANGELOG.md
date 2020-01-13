@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Add utils.setup_metrics function (#)
+- Add metrics and utils.setup_metrics function (#1457)
 
 ## [1.0rc1] - 2020-01-10
 
