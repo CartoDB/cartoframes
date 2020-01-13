@@ -1,6 +1,6 @@
 from .logger import set_log_level
 from .geom_utils import decode_geometry
-from .utils import setup_metrics
+from .metrics import setup_metrics
 
 __all__ = [
     'setup_metrics',

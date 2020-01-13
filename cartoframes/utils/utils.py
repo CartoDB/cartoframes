@@ -5,7 +5,6 @@ import re
 import gzip
 import json
 import time
-import uuid
 import base64
 import appdirs
 import decimal
@@ -32,9 +31,6 @@ GEOM_TYPE_POLYGON = 'polygon'
 PG_NULL = '__null'
 
 USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
-METRICS_FILENAME = 'metrics.json'
-
-_metrics_config = None
 
 
 def map_geom_type(geom_type):
@@ -505,54 +501,3 @@ def read_from_config(filename=None, filepath=None):
 
 def default_config_path(filename):
     return os.path.join(USER_CONFIG_DIR, filename)
-
-
-def setup_metrics_config():
-    global _metrics_config
-
-    filepath = default_config_path(METRICS_FILENAME)
-
-    if _metrics_config is None:
-        if os.path.exists(filepath):
-            metrics_config = read_from_config(filepath=filepath)
-
-        if not check_valid_metrics_uuid(metrics_config):
-            metrics_config = create_metrics_config()
-            save_in_config(metrics_config, filename=METRICS_FILENAME)
-
-    _metrics_config = metrics_config
-
-
-def create_metrics_config():
-    return {
-        'uuid': str(uuid.uuid4()),
-        'enabled': True
-    }
-
-
-def get_metrics_uuid():
-    return _metrics_config.get('uuid')
-
-
-def get_metrics_enabled():
-    return _metrics_config.get('enabled')
-
-
-def check_valid_metrics_uuid(metrics_config):
-    return metrics_config is not None and is_uuid(metrics_config.get('uuid'))
-
-
-def setup_metrics(enabled):
-    """Update the metrics configuration.
-
-    Args:
-        enabled (bool): flag to enable/disable metrics.
-
-    """
-    global _metrics_config
-    _metrics_config['enabled'] = enabled
-    save_in_config(_metrics_config, filename=METRICS_FILENAME)
-
-
-# Run this once
-setup_metrics_config()
