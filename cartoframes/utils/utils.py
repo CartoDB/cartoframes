@@ -330,6 +330,11 @@ def is_json_filepath(text):
     return re.match(r'^.*\.json\s*$', text, re.IGNORECASE)
 
 
+def is_uuid(text):
+    if text is not None:
+        return re.match(r'^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$', text)
+
+
 def get_credentials(credentials=None):
     from ..auth import defaults
     _credentials = credentials or defaults.get_default_credentials()
@@ -511,23 +516,42 @@ def setup_metrics_config():
         if os.path.exists(filepath):
             metrics_config = read_from_config(filepath=filepath)
 
-        if metrics_config is None:
+        if not check_valid_metrics_uuid(metrics_config):
             metrics_config = create_metrics_config()
             save_in_config(metrics_config, filename=METRICS_FILENAME)
 
     _metrics_config = metrics_config
-    print(_metrics_config)
 
 
 def create_metrics_config():
     return {
-        'installation_id': str(uuid.uuid4()),
+        'uuid': str(uuid.uuid4()),
         'enabled': True
     }
 
 
-def get_installation_id():
-    return _metrics_config.get('installation_id')
+def get_metrics_uuid():
+    return _metrics_config.get('uuid')
+
+
+def get_metrics_enabled():
+    return _metrics_config.get('enabled')
+
+
+def check_valid_metrics_uuid(metrics_config):
+    return metrics_config is not None and is_uuid(metrics_config.get('uuid'))
+
+
+def setup_metrics(enabled):
+    """Update the metrics configuration.
+
+    Args:
+        enabled (bool): flag to enable/disable metrics.
+
+    """
+    global _metrics_config
+    _metrics_config['enabled'] = enabled
+    save_in_config(_metrics_config, filename=METRICS_FILENAME)
 
 
 # Run this once
