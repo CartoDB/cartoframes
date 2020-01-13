@@ -11,12 +11,12 @@ import decimal
 import hashlib
 import requests
 import geopandas
-
 import numpy as np
 import pkg_resources
 import semantic_version
 
 from functools import wraps
+from datetime import datetime, timezone
 from warnings import catch_warnings, filterwarnings
 from pyrestcli.exceptions import ServerErrorException
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
@@ -410,8 +410,9 @@ def remove_comments(text):
     return re.sub(pattern, replacer, text).strip()
 
 
-def get_timestamp():
-    return round(time.time() * 1000)
+def get_local_time():
+    local_time = datetime.now(timezone.utc).astimezone()
+    return local_time.isoformat()
 
 
 def timelogger(method):

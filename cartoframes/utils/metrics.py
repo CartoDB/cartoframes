@@ -2,8 +2,9 @@ import os
 import uuid
 import requests
 
+from .logger import log
 from .utils import default_config_path, read_from_config, save_in_config, \
-                   is_uuid, get_timestamp, silent_fail, get_runtime_env
+                   is_uuid, get_local_time, silent_fail, get_runtime_env
 from .. import __version__
 
 EVENT_VERSION = '1'
@@ -69,7 +70,7 @@ def check_valid_metrics_uuid(metrics_config):
 def build_metrics_data(event_name):
     return {
         'event_version': EVENT_VERSION,
-        'event_timestamp': get_timestamp(),
+        'event_time': get_local_time(),
         'event_source': EVENT_SOURCE,
         'event_name': event_name,
         'source_version': __version__,
@@ -82,10 +83,8 @@ def build_metrics_data(event_name):
 def post_metrics(event_name):
     if get_metrics_enabled():
         json_data = build_metrics_data(event_name)
-        result = requests.post('http://carto.com/api/metrics', json=json_data, timeout=2)
-
-        print(json_data, result)
-        print('Metrics sent!')
+        result = requests.post('https://carto.com/api/metrics', json=json_data, timeout=2)
+        log.debug('Metrics sent! {0} {1}'.format(json_data, result))
 
 
 def send_metrics(event_name):
