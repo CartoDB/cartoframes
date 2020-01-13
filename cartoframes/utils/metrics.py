@@ -1,7 +1,13 @@
 import os
 import uuid
+import requests
 
-from .utils import default_config_path, read_from_config, save_in_config, is_uuid
+from .utils import default_config_path, read_from_config, save_in_config, \
+                   is_uuid, get_timestamp, silent_fail
+from .. import __version__
+
+EVENT_VERSION = '1'
+EVENT_SOURCE = 'cartoframes'
 
 UUID_KEY = 'uuid'
 ENABLED_KEY = 'enabled'
@@ -11,12 +17,12 @@ _metrics_config = None
 
 
 def setup_metrics(enabled):
-    """Update the metrics configuration.
+    '''Update the metrics configuration.
 
     Args:
         enabled (bool): flag to enable/disable metrics.
 
-    """
+    '''
     global _metrics_config
 
     _metrics_config[ENABLED_KEY] = enabled
@@ -24,6 +30,7 @@ def setup_metrics(enabled):
     save_in_config(_metrics_config, filename=METRICS_FILENAME)
 
 
+@silent_fail
 def init_metrics_config():
     global _metrics_config
 
@@ -57,6 +64,34 @@ def get_metrics_enabled():
 
 def check_valid_metrics_uuid(metrics_config):
     return metrics_config is not None and is_uuid(metrics_config.get(UUID_KEY))
+
+
+def build_metrics_data(event_name):
+    return {
+        'event_version': EVENT_VERSION,
+        'event_timestamp': get_timestamp(),
+        'event_source': EVENT_SOURCE,
+        'event_name': event_name,
+        'source_version': __version__,
+        'installation_id': get_metrics_uuid()
+    }
+
+
+# @silent_fail
+def post_metrics():
+    json_data = build_metrics_data('data_uploaded')
+    result = requests.post('http://carto.com/api/metrics', json=json_data)
+
+    print(json_data, result)
+    print('Metrics sent!')
+
+
+def send_metrics(method):
+    def fn(*args, **kw):
+        result = method(*args, **kw)
+        post_metrics()
+        return result
+    return fn
 
 
 # Run this once

@@ -410,6 +410,10 @@ def remove_comments(text):
     return re.sub(pattern, replacer, text).strip()
 
 
+def get_timestamp():
+    return round(time.time() * 1000)
+
+
 def timelogger(method):
     def fn(*args, **kw):
         start = time.time()
@@ -501,3 +505,12 @@ def read_from_config(filename=None, filepath=None):
 
 def default_config_path(filename):
     return os.path.join(USER_CONFIG_DIR, filename)
+
+
+def silent_fail(method):
+    def fn(*args, **kw):
+        try:
+            return method(*args, **kw)
+        except Exception:
+            pass
+    return fn
