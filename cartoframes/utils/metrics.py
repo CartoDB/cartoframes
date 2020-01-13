@@ -78,20 +78,22 @@ def build_metrics_data(event_name):
 
 
 # @silent_fail
-def post_metrics():
-    json_data = build_metrics_data('data_uploaded')
+def post_metrics(event_name):
+    json_data = build_metrics_data(event_name)
     result = requests.post('http://carto.com/api/metrics', json=json_data)
 
     print(json_data, result)
     print('Metrics sent!')
 
 
-def send_metrics(method):
-    def fn(*args, **kw):
-        result = method(*args, **kw)
-        post_metrics()
-        return result
-    return fn
+def send_metrics(event_name):
+    def decorator_func(func):
+        def wrapper_func(*args, **kwargs):
+            result = func(*args, **kwargs)
+            post_metrics(event_name)
+            return result
+        return wrapper_func
+    return decorator_func
 
 
 # Run this once
