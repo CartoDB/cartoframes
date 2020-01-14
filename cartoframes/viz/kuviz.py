@@ -43,11 +43,11 @@ class KuvizPublisher:
         self._create_maps_api_keys(name)
         self._add_layers_credentials()
 
-    def publish(self, html, name, password, if_exists):
+    def publish(self, html, name, password, if_exists='fail'):
         self.kuviz = _create_kuviz(html, name, self._auth_client, password, if_exists)
         return kuviz_to_dict(self.kuviz)
 
-    def update(self, data, name, password, if_exists):
+    def update(self, data, name, password, if_exists='fail'):
         if not self.kuviz:
             raise PublishError('The map has not been published yet. Use the `publish` method instead.')
 
