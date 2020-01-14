@@ -216,20 +216,22 @@ class Map:
         """Delete the published map visualization."""
         return self._publisher.delete()
 
-    def update_publication(self, name, password):
+    def update_publication(self, name, password, if_exists='fail'):
         """Update the published map visualization.
 
         Args:
             name (str): The visualization name on CARTO.
             password (str): setting it your visualization will be protected by
                 password and using `None` the visualization will be public.
+            if_exists (str, optional): 'fail' or 'replace'. Behavior in case a publication with the same name already
+                exists in your account. Default is 'fail'.
 
         Raises:
             PublishError: if the map has not been published yet.
 
         """
         html = self._get_publication_html(name)
-        return self._publisher.update(html, name, password)
+        return self._publisher.update(html, name, password, if_exists)
 
     @staticmethod
     def all_publications(credentials=None):
