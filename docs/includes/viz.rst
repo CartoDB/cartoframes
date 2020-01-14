@@ -6,42 +6,42 @@ Viz namespace contains all the classes to create visualizations based on data
 Map
 ^^^
 
-.. automodule:: cartoframes.viz.Map
+.. autoclass:: cartoframes.viz.Map
     :member-order: bysource
     :show-inheritance:
 
 Layer
 ^^^^^
 
-.. automodule:: cartoframes.viz.Layer
+.. autoclass:: cartoframes.viz.Layer
     :member-order: bysource
     :show-inheritance:
 
 Source
 ^^^^^^
 
-.. automodule:: cartoframes.viz.Source
+.. autoclass:: cartoframes.viz.Source
     :member-order: bysource
     :show-inheritance:
 
 Layout
 ^^^^^^
 
-.. automodule:: cartoframes.viz.Layout
+.. autoclass:: cartoframes.viz.Layout
     :member-order: bysource
     :show-inheritance:
 
 Basemaps
 ^^^^^^^^
 
-.. automodule:: cartoframes.viz.basemaps
+.. autoclass:: cartoframes.viz.basemaps
     :undoc-members:
     :show-inheritance:
 
 Themes
 ^^^^^^
 
-.. automodule:: cartoframes.viz.themes
+.. autoclass:: cartoframes.viz.themes
     :undoc-members:
     :show-inheritance:
 
@@ -72,7 +72,8 @@ Legends
               color_continuous_legend,
               size_bins_legend,
               size_category_legend,
-              size_continuous_legend
+              size_continuous_legend,
+              default_legend
 
 Widgets
 ^^^^^^^
@@ -84,11 +85,13 @@ Widgets
               formula_widget,
               histogram_widget,
               time_series_widget,
-              animation_widget
+              animation_widget,
+              default_widget
 
 Popups
 ^^^^^^
 
 .. automodule:: cartoframes.viz
     :noindex:
-    :members: popup_element
+    :members: popup_element,
+              default_popup_element

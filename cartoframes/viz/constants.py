@@ -2,7 +2,7 @@ CARTO_VL_VERSION = 'v1.4'
 CARTO_VL_DEV = '/dist/carto-vl.js'
 CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/{}/carto-vl.min.js'.format(CARTO_VL_VERSION)
 
-AIRSHIP_VERSION = 'v2.2.0-rc.2.1'
+AIRSHIP_VERSION = 'v2.2.0-rc.2.2'
 AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
 AIRSHIP_BRIDGE_DEV = '/packages/bridge/dist/asbridge.js'
 AIRSHIP_MODULE_DEV = '/packages/components/dist/airship/airship.esm.js'
@@ -29,19 +29,21 @@ STYLE_PROPERTIES = [
 
 LEGEND_PROPERTIES = [
     'color',
-    'stroke-color',
+    'stroke_color',
     'size',
-    'stroke-width'
+    'stroke_width'
 ]
 
 VIZ_PROPERTIES_MAP = {
     'color': 'color',
-    'stroke-color': 'strokeColor',
+    'stroke_color': 'strokeColor',
     'size': 'width',
-    'stroke-width': 'strokeWidth'
+    'stroke_width': 'strokeWidth',
+    'filter': 'filter'
 }
 
 LEGEND_TYPES = [
+    'basic',
     'default',
     'color-bins',
     'color-bins-line',
@@ -67,6 +69,7 @@ LEGEND_TYPES = [
 ]
 
 WIDGET_TYPES = [
+    'basic',
     'default',
     'formula',
     'histogram',

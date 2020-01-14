@@ -14,9 +14,10 @@ class Legend:
         - :py:meth:`size_continuous_legend <cartoframes.viz.size_continuous_legend>`
 
     """
-    def __init__(self, legend_type=None, title='', description='',
-                 footer='', prop=None, variable='', dynamic=True):
+    def __init__(self, legend_type=None, title=None, description=None,
+                 footer=None, prop=None, variable='', dynamic=True):
         self._check_type(legend_type)
+        self._check_prop(prop)
         self._type = legend_type
         self._title = title
         self._description = description
@@ -27,6 +28,10 @@ class Legend:
 
     def add_defaults(self, title=None):
         self._title = self._title or title
+
+    def set_title(self, title):
+        if title is not None:
+            self._title = title
 
     def get_info(self):
         if self._type or self._title or self._description or self._footer:
@@ -50,8 +55,6 @@ class Legend:
         else:
             _prop = self._prop
 
-        self._check_prop(_prop)
-
         return constants.VIZ_PROPERTIES_MAP.get(_prop)
 
     def _check_type(self, _type):
@@ -72,6 +75,6 @@ class Legend:
         if _type.startswith('color'):
             return 'color'
         elif _type.startswith('size'):
-            return 'width'
+            return 'size'
         else:
             return None

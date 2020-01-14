@@ -5,20 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Next
-[Migration Docs](/docs/developers/migrations/rc1.md)
+## [1.0rc1] - 2020-01-10
+
+[RC1 Migration Guide](/docs/developers/migrations/rc1.md)
+
+### Added
+- Add CLI subscription prompt (#1388)
+- Add Data Enrichment e2e tests (#1365)
+- Add utils.decode_geometry function (#1418)
+- Add legend helpers (#1347, #1442)
+- Add style helpers (#1345, #1410)
+- Add popup_element helper (#1348)
+- Add title and default_* params to Layer class (#1432)
+- Add default_legend/widget/popup_element helpers (#1432)
 
 ### Changed
-- Remove `popup` parameter and add `hover_popup` and `click_popup` in Layer (#1348)
-- Add `popup_element` helpers (#1348)
-- Refactor Widgets API (#1349)
-- Add widget helpers (#1349)
-- Refactor Legends API (#1347)
-- Add legend helpers (#1345)
-- Add style helpers (#1345)
+- Check quota before using Data Services (#1370)
+- Check dependencies on runtime (#1342, #1310)
+- Return areas using aggregation None (#1295, #1394)
+- Split update_table into rename_table and update_privacy_table (#1380)
+- Review subscription messages (#1391, #1407, #1413)
+- Remove aggregation in column names, and add variable limit (#1400)
+- Update Enrichment filter API (#1374, #1390)
+- Rename methods to_csv and to_dataframe (#1396)
+- Move widgets helpers to viz (#1349)
+- Replace popup param by popup_hover and popup_click in Layer class (#1348, #1432)
+- Cartodbfy by default in to_carto (#1416)
+- Improve Error messages/docs (#1409)
+- Return a GeoDataFrame in every method (#1418)
+- Support several agg (#1294)
+- Support array in filters (#1406)
+
+### Fixed
+- Catch and show Enrichment errors (BQ) (#1364)
+- Fix Geography geom_coverage docstring (#1405)
+- Fix Geographies not filtered by provider (#1248)
+- Fix /support/contribute section in docs (#1427)
+- Fix date format when using Dataframes (#1358)
+- Fix hover+click behaviour (#1458)
+- Fix footer in widgets (#1432)
+- Fix dependencies to run in Colab (#1453)
 
 ### Removed
-- Remove default_legend param in Map
+- Remove Python 2.7 support (#1324)
+- Remove get from CatalogList (#1369)
+- Remove CartoDataFrame class (#1418)
+- Remove utils.table (#1461)
+- Remove default_legend param in Map class (#1399)
+- Remove Style, Legend, Widget and Popup classes from viz (#1399)
 
 ## [1.0b7] - 2019-12-13
 ### Added

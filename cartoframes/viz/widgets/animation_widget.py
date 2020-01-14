@@ -1,7 +1,7 @@
 from ..widget import Widget
 
 
-def animation_widget(title='', description='', footer='', prop=''):
+def animation_widget(title=None, description=None, footer=None, prop='filter'):
     """Helper function for quickly creating an animated widget.
 
     The animation widget includes an animation status bar as well as controls to play or pause animated data.

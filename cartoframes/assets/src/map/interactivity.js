@@ -7,7 +7,13 @@ import {
 
 export function setInteractivity(map, interactiveLayers, interactiveMapLayers) {
   const interactivity = new carto.Interactivity(interactiveMapLayers);
-  const popup = new mapboxgl.Popup({
+
+  const clickPopup = new mapboxgl.Popup({
+    closeButton: true,
+    closeOnClick: false
+  });
+
+  const hoverPopup = new mapboxgl.Popup({
     closeButton: false,
     closeOnClick: false
   });
@@ -18,11 +24,11 @@ export function setInteractivity(map, interactiveLayers, interactiveMapLayers) {
   resetPopupHover(map, interactivity);
 
   if (clickAttrs.length > 0) {
-    setPopupsClick(map, popup, interactivity, clickAttrs);
+    setPopupsClick(map, clickPopup, hoverPopup, interactivity, clickAttrs);
   }
 
   if (hoverAttrs.length > 0) {
-    setPopupsHover(map, popup, interactivity, hoverAttrs);
+    setPopupsHover(map, hoverPopup, interactivity, hoverAttrs);
   }
 }
 

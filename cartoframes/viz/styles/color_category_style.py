@@ -5,9 +5,8 @@ from ..widgets import category_widget
 from ..popups import popup_element
 
 
-def color_category_style(
-        value, top=11, cat=None, palette=None, size=None, opacity=None,
-        stroke_color=None, stroke_width=None, animate=None):
+def color_category_style(value, top=11, cat=None, palette=None, size=None, opacity=None,
+                         stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a color category style.
 
     Args:
@@ -68,8 +67,8 @@ def color_category_style(
     return Style(
         data,
         value,
-        default_legends=color_category_legend(title=value),
-        default_widgets=category_widget(value, title=value),
-        default_popups={'hover': popup_element(value, title=value),
-                        'click': popup_element(value, title=value)}
+        default_legend=color_category_legend(title=value),
+        default_widget=category_widget(value, title=value),
+        default_popup_hover=popup_element(value, title=value),
+        default_popup_click=popup_element(value, title=value)
     )

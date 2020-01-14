@@ -4,13 +4,16 @@ from ..widgets import time_series_widget
 from ..popups import popup_element
 
 
-def animation_style(value, duration=20, color=None, size=None, opacity=None,
-                    stroke_color=None, stroke_width=None):
+def animation_style(value, duration=20, fade_in=1, fade_out=1, color=None,
+                    size=None, opacity=None, stroke_color=None, stroke_width=None):
     """Helper function for quickly creating an animated style.
 
     Args:
         value (str): Column to symbolize by.
-        color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for point geometries,
+        duration (float, optional): Time of the animation in seconds. Default is 20s.
+        fade_in (float, optional): Time of fade in transitions in seconds. Default is 1s.
+        fade_out (float, optional): Time of fade out transitions in seconds. Default is 1s.
+        color (str, optional): Hex, rgb or named color value. Default is '#EE5D5A' for points,
             '#4CC8A3' for lines and #826DBA for polygons.
         size (int, optional): Size of point or line features.
         opacity (float, optional): Opacity value. Default is 1 for points and lines and
@@ -23,7 +26,7 @@ def animation_style(value, duration=20, color=None, size=None, opacity=None,
         cartoframes.viz.style.Style
 
     """
-    fade = '(1, 1)'
+    fade = '({0}, {1})'.format(fade_in, fade_out)
     data = {
         'point': {
             'color': 'opacity({0}, {1})'.format(
@@ -54,9 +57,9 @@ def animation_style(value, duration=20, color=None, size=None, opacity=None,
     return Style(
         data,
         value,
-        default_widgets=time_series_widget(value, title=value),
-        default_popups={'hover': popup_element(value, title=value),
-                        'click': popup_element(value, title=value)}
+        default_widget=time_series_widget(value, title=value),
+        default_popup_hover=popup_element(value, title=value),
+        default_popup_click=popup_element(value, title=value)
     )
 
 
