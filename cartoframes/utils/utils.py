@@ -1,20 +1,22 @@
 """general utility functions"""
 
+import os
 import re
 import gzip
 import json
 import time
 import base64
+import appdirs
 import decimal
 import hashlib
 import requests
 import geopandas
-
 import numpy as np
 import pkg_resources
 import semantic_version
 
 from functools import wraps
+from datetime import datetime, timezone
 from warnings import catch_warnings, filterwarnings
 from pyrestcli.exceptions import ServerErrorException
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
@@ -27,6 +29,8 @@ GEOM_TYPE_LINE = 'line'
 GEOM_TYPE_POLYGON = 'polygon'
 
 PG_NULL = '__null'
+
+USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 
 
 def map_geom_type(geom_type):
@@ -322,6 +326,11 @@ def is_json_filepath(text):
     return re.match(r'^.*\.json\s*$', text, re.IGNORECASE)
 
 
+def is_uuid(text):
+    if text is not None:
+        return re.match(r'^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$', text)
+
+
 def get_credentials(credentials=None):
     from ..auth import defaults
     _credentials = credentials or defaults.get_default_credentials()
@@ -401,6 +410,11 @@ def remove_comments(text):
     return re.sub(pattern, replacer, text).strip()
 
 
+def get_local_time():
+    local_time = datetime.now(timezone.utc).astimezone()
+    return local_time.isoformat()
+
+
 def timelogger(method):
     def fn(*args, **kw):
         start = time.time()
@@ -463,3 +477,46 @@ def is_ipython_notebook():
             return False
     except NameError:
         return False
+
+
+def get_runtime_env():
+    if is_ipython_notebook():
+        kernel_class = get_ipython().config['IPKernelApp'].get('kernel_class', '')  # noqa: F821
+        if kernel_class.startswith('google.colab'):
+            return 'google.colab'
+        else:
+            return 'notebook'
+    else:
+        return 'cli'
+
+
+def save_in_config(content, filename=None, filepath=None):
+    if filepath is None:
+        if not os.path.exists(USER_CONFIG_DIR):
+            os.makedirs(USER_CONFIG_DIR)
+        filepath = default_config_path(filename)
+
+    with open(filepath, 'w') as f:
+        json.dump(content, f)
+        return filepath
+
+
+def read_from_config(filename=None, filepath=None):
+    if filepath is None:
+        filepath = default_config_path(filename)
+
+    with open(filepath, 'r') as f:
+        return json.load(f)
+
+
+def default_config_path(filename):
+    return os.path.join(USER_CONFIG_DIR, filename)
+
+
+def silent_fail(method):
+    def fn(*args, **kw):
+        try:
+            return method(*args, **kw)
+        except Exception:
+            pass
+    return fn

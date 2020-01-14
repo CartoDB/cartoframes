@@ -3,7 +3,10 @@ import os
 import pytest
 
 from cartoframes.auth import Credentials
-from cartoframes.auth.credentials import _DEFAULT_PATH, _USER_CONFIG_DIR
+from cartoframes.utils.utils import default_config_path
+from cartoframes.auth.credentials import DEFAULT_CREDS_FILENAME
+
+DEFAULT_PATH = default_config_path(DEFAULT_CREDS_FILENAME)
 
 
 class TestCredentials:
@@ -122,21 +125,15 @@ class TestCredentials:
 class TestCredentialsFromFile:
     def setup_method(self, method):
         # remove default credential file
-        if os.path.exists(_DEFAULT_PATH):
-            os.remove(_DEFAULT_PATH)
-        # delete path for user config data
-        if os.path.exists(_USER_CONFIG_DIR):
-            os.rmdir(_USER_CONFIG_DIR)
+        if os.path.exists(DEFAULT_PATH):
+            os.remove(DEFAULT_PATH)
 
         self.api_key = 'fake_api_key'
         self.username = 'fake_user'
 
     def teardown_method(self, method):
-        if os.path.exists(_DEFAULT_PATH):
-            os.remove(_DEFAULT_PATH)
-
-        if os.path.exists(_USER_CONFIG_DIR):
-            os.rmdir(_USER_CONFIG_DIR)
+        if os.path.exists(DEFAULT_PATH):
+            os.remove(DEFAULT_PATH)
 
     def test_credentials_without_file(self, mocker):
         mocker_log = mocker.patch('cartoframes.utils.logger.log.info')
@@ -149,7 +146,7 @@ class TestCredentialsFromFile:
         assert credentials1 == credentials2
         mocker_log.assert_called_once_with(
             'User credentials for `{0}` were successfully saved to `{1}`'.format(
-                self.username, _DEFAULT_PATH))
+                self.username, DEFAULT_PATH))
 
         credentials1.delete()
 
