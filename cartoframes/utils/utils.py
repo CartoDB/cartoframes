@@ -170,7 +170,7 @@ def text_match(regex, text):
 def camel_dictionary(dictionary):
     snake_keys = filter(in_snake_case, dictionary.keys())
 
-    for snake_key in snake_keys:
+    for snake_key in list(snake_keys):
         dictionary[snake_to_camel(snake_key)] = dictionary.pop(snake_key)
 
     return dictionary
