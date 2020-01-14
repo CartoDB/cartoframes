@@ -59,7 +59,7 @@ class KuvizPublisher:
         try:
             self.kuviz.save()
         except BadRequestException as e:
-            manage_unique_name_exception(e)
+            manage_unique_name_exception(e, name)
 
         return kuviz_to_dict(self.kuviz)
 
@@ -108,7 +108,7 @@ def _create_kuviz(html, name, auth_client, password, if_exists):
     try:
         return kmanager.create(html=html, name=name, password=password, if_exists=if_exists)
     except BadRequestException as e:
-        manage_unique_name_exception(e)
+        manage_unique_name_exception(e, name)
 
 
 def _create_auth_client(credentials):
@@ -135,9 +135,9 @@ def rename_privacy(privacy):
     }[privacy]
 
 
-def manage_unique_name_exception(error):
+def manage_unique_name_exception(error, name):
     if str(error) == 'Validation failed: Name has already been taken':
-        raise PublishError("You already have a publication with this name. "
-                           "Please, use another different or use if_exists='replace'")
+        raise PublishError("Map '{}' already exists in your CARTO account. Please choose a different `name` or use "
+                           "if_exists='replace' to overwrite it".format(name))
     else:
         raise error
