@@ -84,7 +84,7 @@ def post_metrics(event_name):
     if get_metrics_enabled():
         json_data = build_metrics_data(event_name)
         result = requests.post('https://carto.com/api/metrics', json=json_data, timeout=2)
-        log.debug('Metrics sent! {0} {1}'.format(json_data, result))
+        log.debug('Metrics sent! {0} {1}'.format(result.status_code, json_data))
 
 
 def send_metrics(event_name):
