@@ -183,7 +183,7 @@ class KuvizPublisherMock(KuvizPublisher):
     def set_layers(self, _1, _2, _3):
         pass
 
-    def publish(self, _1, name, password):
+    def publish(self, _1, name, password, if_exists='fail'):
         self.kuviz = CartoKuvizMock(name, password=password)
         return kuviz_to_dict(self.kuviz)
 

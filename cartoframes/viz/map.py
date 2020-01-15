@@ -182,7 +182,7 @@ class Map:
         }
 
     @send_metrics('map_published')
-    def publish(self, name, password, table_name=None, credentials=None):
+    def publish(self, name, password, if_exists='fail', table_name=None, credentials=None):
         """Publish the map visualization as a CARTO custom visualization.
 
         Args:
@@ -190,6 +190,8 @@ class Map:
             password (str): By setting it, your visualization will be protected by
                 password. When someone tries to show the visualization, the password
                 will be requested. To disable password you must set it to None.
+            if_exists (str, optional): 'fail' or 'replace'. Behavior in case a publication with the same name already
+                exists in your account. Default is 'fail'.
             table_name (str, optional): Desired table name for the dataset in CARTO.
                 It is required for working with local data (we need to upload it to CARTO).
                 If name does not conform to SQL naming conventions, it will be
@@ -211,26 +213,28 @@ class Map:
         self._publisher.set_layers(self.layers, name, table_name)
 
         html = self._get_publication_html(name)
-        return self._publisher.publish(html, name, password)
+        return self._publisher.publish(html, name, password, if_exists)
 
     def delete_publication(self):
         """Delete the published map visualization."""
         return self._publisher.delete()
 
-    def update_publication(self, name, password):
+    def update_publication(self, name, password, if_exists='fail'):
         """Update the published map visualization.
 
         Args:
             name (str): The visualization name on CARTO.
             password (str): setting it your visualization will be protected by
                 password and using `None` the visualization will be public.
+            if_exists (str, optional): 'fail' or 'replace'. Behavior in case a publication with the same name already
+                exists in your account. Default is 'fail'.
 
         Raises:
             PublishError: if the map has not been published yet.
 
         """
         html = self._get_publication_html(name)
-        return self._publisher.update(html, name, password)
+        return self._publisher.update(html, name, password, if_exists)
 
     @staticmethod
     def all_publications(credentials=None):
