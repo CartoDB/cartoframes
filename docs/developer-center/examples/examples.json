@@ -5,7 +5,7 @@
     },
     "categories": [{
         "title": "Data Management",
-        "desc": "Learn how to load, upload and modify data both locally and with your CARTO account.",
+        "desc": "Explore working with data both locally and with a CARTO account.",
         "file": "data_management.md",
         "hide_sidebar_samples": true,
         "samples": [{
@@ -51,12 +51,12 @@
         }]
     }, {
         "title": "Data Enrichment",
-        "desc": "Augment your public and private data with new variables by means of a spatial join between your data and a CARTO Data Observatory dataset.",
+        "desc": "Learn how to augment your public and private datasets through spatial operations and CARTO's Data Observatory.",
         "file": "data_enrichment.md",
         "hide_sidebar_samples": true,
         "samples": [{
             "title": "Enrichment Subscription Workflow",
-            "desc": "Steps to subscribe to a datasate in the Data Observatory to start enriching your data.",
+            "desc": "Steps to subscribe to a dataset in the Data Observatory to start enriching your data.",
             "file": "enrichment_subscription_workflow",
             "path": "data_enrichment"
         }, {
@@ -82,7 +82,7 @@
         }]
     }, {
         "title": "Data Visualization",
-        "desc": "Understand the basic building blocks for creating web-based, dynamic, and interactive map visualizations.",
+        "desc": "Explore the building blocks for creating web-based, dynamic, and interactive map visualizations.",
         "file": "data_visualization.md",
         "hide_sidebar_samples": true,
         "samples": [{
@@ -293,7 +293,7 @@
         }]
     }, {
         "title": "Data Services",
-        "desc": "Apply geocoding and isolines functions to your data to perform geospatial analyses.",
+        "desc": "Learn how to combine your data and CARTO's Location Data Services for geospatial analyses.",
         "file": "data_services.md",
         "hide_sidebar_samples": true,
         "samples": [{
@@ -319,7 +319,7 @@
         }]
     }, {
         "title": "Publish and Share",
-        "desc": "Share interactive visualizations with your colleagues so they can explore the information on their own.",
+        "desc": "Learn how to publish and share interactive visualizations for others to explore.",
         "file": "publish_share.md",
         "hide_sidebar_samples": true,
         "samples": [{
@@ -335,7 +335,7 @@
         }]
     }, {
         "title": "Use Cases",
-        "desc": "Explore different use cases.",
+        "desc": "Explore a variety of ways to use CARTOframes in your workflows.",
         "file": "use_cases.md",
         "hide_sidebar_samples": true,
         "samples": [{
