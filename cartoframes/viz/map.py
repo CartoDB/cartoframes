@@ -182,7 +182,7 @@ class Map:
         }
 
     @send_metrics('map_published')
-    def publish(self, name, password, credentials=None, maps_api_key=None):
+    def publish(self, name, password, credentials=None, if_exists='fail', maps_api_key=None):
         """Publish the map visualization as a CARTO custom visualization.
 
         Args:
@@ -194,6 +194,8 @@ class Map:
                 A Credentials instance. If not provided, the credentials will be automatically
                 obtained from the default credentials if available. It is used to create the
                 publication and also to save local data (if exists) into your CARTO account.
+            if_exists (str, optional): 'fail' or 'replace'. Behavior in case a publication with
+                the same name already exists in your account. Default is 'fail'.
             maps_api_key (str, optional): The Maps API key used for private datasets.
 
         Example:
@@ -209,26 +211,28 @@ class Map:
         self._publisher.set_layers(self.layers, maps_api_key)
 
         html = self._get_publication_html(name)
-        return self._publisher.publish(html, name, password)
+        return self._publisher.publish(html, name, password, if_exists)
 
     def delete_publication(self):
         """Delete the published map visualization."""
         return self._publisher.delete()
 
-    def update_publication(self, name, password):
+    def update_publication(self, name, password, if_exists='fail'):
         """Update the published map visualization.
 
         Args:
             name (str): The visualization name on CARTO.
             password (str): setting it your visualization will be protected by
                 password and using `None` the visualization will be public.
+            if_exists (str, optional): 'fail' or 'replace'. Behavior in case a publication with the same name already
+                exists in your account. Default is 'fail'.
 
         Raises:
             PublishError: if the map has not been published yet.
 
         """
         html = self._get_publication_html(name)
-        return self._publisher.update(html, name, password)
+        return self._publisher.update(html, name, password, if_exists)
 
     @staticmethod
     def all_publications(credentials=None):

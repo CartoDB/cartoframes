@@ -2,6 +2,7 @@ import copy
 
 from warnings import filterwarnings
 from carto.kuvizs import KuvizManager
+from pyrestcli.exceptions import BadRequestException
 
 from ..data.clients.auth_api_client import AuthAPIClient
 from ..exceptions import PublishError
@@ -43,18 +44,23 @@ class KuvizPublisher:
 
             self._layers.append(layer_copy)
 
-    def publish(self, html, name, password):
-        self.kuviz = _create_kuviz(html, name, self._auth_client, password)
+    def publish(self, html, name, password, if_exists='fail'):
+        self.kuviz = _create_kuviz(html, name, self._auth_client, password, if_exists)
         return kuviz_to_dict(self.kuviz)
 
-    def update(self, data, name, password):
+    def update(self, data, name, password, if_exists='fail'):
         if not self.kuviz:
             raise PublishError('The map has not been published yet. Use the `publish` method instead.')
 
         self.kuviz.data = data
         self.kuviz.name = name
         self.kuviz.password = password
-        self.kuviz.save()
+        self.kuviz.if_exists = if_exists
+
+        try:
+            self.kuviz.save()
+        except BadRequestException as e:
+            manage_unique_name_exception(e, name)
 
         return kuviz_to_dict(self.kuviz)
 
@@ -79,9 +85,13 @@ class KuvizPublisher:
         return DEFAULT_PUBLIC
 
 
-def _create_kuviz(html, name, auth_client, password):
+def _create_kuviz(html, name, auth_client, password, if_exists):
     kmanager = _get_kuviz_manager(auth_client)
-    return kmanager.create(html=html, name=name, password=password)
+
+    try:
+        return kmanager.create(html=html, name=name, password=password, if_exists=if_exists)
+    except BadRequestException as e:
+        manage_unique_name_exception(e, name)
 
 
 def _create_auth_client(credentials):
@@ -110,3 +120,11 @@ def rename_privacy(privacy):
         'public': 'link',
         'password': 'password'
     }[privacy]
+
+
+def manage_unique_name_exception(error, name):
+    if str(error) == 'Validation failed: Name has already been taken':
+        raise PublishError("Map '{}' already exists in your CARTO account. Please choose a different `name` or use "
+                           "if_exists='replace' to overwrite it".format(name))
+    else:
+        raise error
