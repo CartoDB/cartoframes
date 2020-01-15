@@ -7,7 +7,7 @@ from . import constants
 from .html import HTMLMap
 from .basemaps import Basemaps
 from .kuviz import KuvizPublisher
-from ..utils.utils import get_center
+from ..utils.utils import get_center, get_credentials
 from ..utils.metrics import send_metrics
 
 WORLD_BOUNDS = [[-180, -90], [180, 90]]
@@ -182,7 +182,7 @@ class Map:
         }
 
     @send_metrics('map_published')
-    def publish(self, name, password, table_name=None, credentials=None):
+    def publish(self, name, password, credentials=None, maps_api_key=None):
         """Publish the map visualization as a CARTO custom visualization.
 
         Args:
@@ -190,15 +190,11 @@ class Map:
             password (str): By setting it, your visualization will be protected by
                 password. When someone tries to show the visualization, the password
                 will be requested. To disable password you must set it to None.
-            table_name (str, optional): Desired table name for the dataset in CARTO.
-                It is required for working with local data (we need to upload it to CARTO).
-                If name does not conform to SQL naming conventions, it will be
-                'normalized' (e.g., all lower case, adding `_` in place of spaces.
-                and other special characters.
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 A Credentials instance. If not provided, the credentials will be automatically
                 obtained from the default credentials if available. It is used to create the
                 publication and also to save local data (if exists) into your CARTO account.
+            maps_api_key (str, optional): The Maps API key used for private datasets.
 
         Example:
             Publishing the map visualization.
@@ -207,8 +203,10 @@ class Map:
             >>> tmap.publish('Custom Map Title', password=None)
 
         """
-        self._publisher = _get_publisher(table_name, credentials)
-        self._publisher.set_layers(self.layers, name, table_name)
+        _credentials = get_credentials(credentials)
+
+        self._publisher = _get_publisher(_credentials)
+        self._publisher.set_layers(self.layers, maps_api_key)
 
         html = self._get_publication_html(name)
         return self._publisher.publish(html, name, password)
@@ -242,7 +240,9 @@ class Map:
                 obtained from the default credentials if available.
 
         """
-        return KuvizPublisher.all(credentials)
+        _credentials = get_credentials(credentials)
+
+        return KuvizPublisher.all(_credentials)
 
     def _get_publication_html(self, name):
         html_map = HTMLMap('templates/viz/main.html.j2')
@@ -264,7 +264,7 @@ class Map:
         return html_map.html
 
 
-def _get_publisher(self, credentials):
+def _get_publisher(credentials):
     return KuvizPublisher(credentials)
 
 

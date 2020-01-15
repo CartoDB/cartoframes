@@ -1,6 +1,7 @@
 from carto.api_keys import APIKeyManager
 
 from ...auth import get_default_credentials
+from ...utils.utils import create_hash
 
 
 class AuthAPIClient:
@@ -18,19 +19,23 @@ class AuthAPIClient:
         credentials = credentials or get_default_credentials()
         self._api_key_manager = _get_api_key_manager(credentials)
 
-    def create_api_key(self, sources, name, apis=['sql', 'maps'], permissions=['select']):
+    def create_api_key(self, sources, apis=['sql', 'maps'], permissions=['select'], name=None):
         tables = []
         for source in sources:
             table_names = source.get_table_names()
             for table_name in table_names:
                 tables.append(_get_table_dict(source.schema(), table_name, permissions))
 
-        api_key = self._api_key_manager.create(
-            name=name,
-            apis=apis,
-            tables=tables)
+        if name is None:
+            name = 'cartoframes_{}'.format(create_hash(tables))
 
-        return api_key.token
+        try:
+            api_key = self._api_key_manager.create(name, apis, tables)
+        except Exception as e:
+            if str(e) == 'Validation failed: Name has already been taken':
+                api_key = self._api_key_manager.get(name)
+
+        return api_key.token, tables
 
 
 def _get_table_dict(schema, name, permissions):

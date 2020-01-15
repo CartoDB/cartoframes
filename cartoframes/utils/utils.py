@@ -388,6 +388,10 @@ def encode_row(row):
     return '{}'.format(row).encode('utf-8')
 
 
+def create_hash(value):
+    return hashlib.md5(str(value).encode()).hexdigest()
+
+
 def extract_viz_columns(viz):
     """Extract columns ($name) in viz"""
     columns = []
