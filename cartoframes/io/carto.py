@@ -108,7 +108,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             raise ValueError('Wrong index name. You should provide a valid index label.')
 
     if geom_col in gdf:
-        set_geometry(gdf, geom_col, inplace=True)
+        set_geometry(gdf, geom_col, inplace=True, drop=True)
     elif has_geometry(dataframe):
         gdf.set_geometry(dataframe.geometry.name, inplace=True)
 

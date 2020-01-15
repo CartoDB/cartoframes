@@ -260,6 +260,18 @@ def test_to_carto_no_cartodbfy(mocker):
     assert cm_mock.call_args[0][3] is False
 
 
+def test_to_carto_replace_geometry(mocker):
+    # Given
+    cm_mock = mocker.patch.object(ContextManager, 'copy_from')
+    df = GeoDataFrame({'geom': 'POINT(1 1)', 'geometry': [Point([0, 0])]})
+
+    # When
+    to_carto(df, '__table_name__', CREDENTIALS, geom_col='geom', cartodbfy=False)
+
+    # Then
+    assert str(cm_mock.call_args[0][0]).strip() == 'the_geom\n0  POINT (1.00000 1.00000)'
+
+
 def test_copy_table_wrong_table_name(mocker):
     # When
     with pytest.raises(ValueError) as e:
