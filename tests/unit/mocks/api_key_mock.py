@@ -12,5 +12,5 @@ class APIKeyManagerMock():
     def __init__(self, token=''):
         self.token = token
 
-    def create(self, name, **kwargs):
+    def create(self, name, apis, tables):
         return APIKeyMock(name, self.token)
