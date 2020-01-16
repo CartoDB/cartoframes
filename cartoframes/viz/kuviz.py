@@ -2,7 +2,6 @@ import time
 from warnings import filterwarnings
 
 from carto.kuvizs import KuvizManager
-from pyrestcli.exceptions import BadRequestException
 
 from .source import Source
 from ..auth import get_default_credentials
@@ -58,8 +57,8 @@ class KuvizPublisher:
 
         try:
             self.kuviz.save()
-        except BadRequestException as e:
-            manage_unique_name_exception(e, name)
+        except Exception as e:
+            manage_kuviz_exception(e, name)
 
         return kuviz_to_dict(self.kuviz)
 
@@ -107,8 +106,8 @@ def _create_kuviz(html, name, auth_client, password, if_exists):
 
     try:
         return kmanager.create(html=html, name=name, password=password, if_exists=if_exists)
-    except BadRequestException as e:
-        manage_unique_name_exception(e, name)
+    except Exception as e:
+        manage_kuviz_exception(e, name)
 
 
 def _create_auth_client(credentials):
@@ -135,9 +134,12 @@ def rename_privacy(privacy):
     }[privacy]
 
 
-def manage_unique_name_exception(error, name):
+def manage_kuviz_exception(error, name):
     if str(error) == 'Validation failed: Name has already been taken':
         raise PublishError("Map '{}' already exists in your CARTO account. Please choose a different `name` or use "
                            "if_exists='replace' to overwrite it".format(name))
+    elif str(error) == 'Public map quota exceeded':
+        raise PublishError("You have reached the limit for the number of maps you can create with your account. "
+                           "Upgrade your account or delete some of your previous maps to be able to create new ones.")
     else:
         raise error
