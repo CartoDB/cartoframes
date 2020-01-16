@@ -122,7 +122,7 @@
             "path": "map_configuration",
             "group": "Configuration"
         }, {
-            "title": "Color Category",
+            "title": "Color Category Style",
             "desc": "Use the color_category_style method to color features by categorical values",
             "file": "color_category_style",
             "path": "styles",
@@ -272,7 +272,7 @@
             "path": "widgets",
             "group": "Widgets"
         }, {
-            "title": "Combine",
+            "title": "Combine widgets",
             "desc": "Combine multiple widgets in the same visualization",
             "file": "multiple_widgets",
             "path": "widgets",
@@ -296,7 +296,7 @@
             "path": "popups",
             "group": "Popups"
         }, {
-            "title": "Combine",
+            "title": "Combine popups",
             "desc": "Display popups triggered by both click and hover events",
             "file": "multiple_popup_events",
             "path": "popups",
