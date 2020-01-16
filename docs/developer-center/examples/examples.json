@@ -89,207 +89,248 @@
             "title": "Single Layer",
             "desc": "Add a Layer",
             "file": "add_layer",
-            "path": "layers"
+            "path": "layers",
+            "group": "Layers"
         }, {
             "title": "Multiple Layers",
             "desc": "Add multiple Layers",
             "file": "add_multiple_layers",
-            "path": "layers"
+            "path": "layers",
+            "group": "Layers"
         }, {
-            "title": "Defaults - Basemaps",
+            "title": "Basemaps",
             "desc": "Change the default CARTO basemap",
             "file": "change_default_carto_basemap",
-            "path": "map_configuration"
+            "path": "map_configuration",
+            "group": "Configuration"
         }, {
-            "title": "Defaults - Viewport",
+            "title": "Viewport",
             "desc": "Set a custom viewport",
             "file": "custom_viewport",
-            "path": "map_configuration"
+            "path": "map_configuration",
+            "group": "Configuration"
         }, {
-            "title": "Defaults - Background",
+            "title": " Background",
             "desc": "Set a background color",
             "file": "solid_color_background",
-            "path": "map_configuration"
+            "path": "map_configuration",
+            "group": "Configuration"
         }, {
-            "title": "Defaults - Dark Theme",
+            "title": "Dark Theme",
             "desc": "Switch to the dark theme",
             "file": "dark_theme",
-            "path": "map_configuration"
+            "path": "map_configuration",
+            "group": "Configuration"
         }, {
-            "title": "Style - Color Category",
-            "desc": "Color Category Style",
+            "title": "Color Category",
+            "desc": "Use the color_category_style method to color features by categorical values",
             "file": "color_category_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
-            "title": "Style - Color Continuous",
-            "desc": "Color Continuous Style",
+            "title": "Color Continuous Style",
+            "desc": "Use the color_continuous_style method to color features by continuous numeric values",
             "file": "color_continuous_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
-            "title": "Style - Color Bins",
-            "desc": "Color Bins Style",
+            "title": "Color Bins Style",
+            "desc": "Use the color_bins_style method to color features by discrete numeric values",
             "file": "color_bins_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
-            "title": "Style - Size Category",
-            "desc": "Size Category Style",
+            "title": "Size Category Style",
+            "desc": "Use the size_category_style method to resize each feature by categorical values",
             "file": "size_category_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
-            "title": "Style - Size Continuous",
-            "desc": "Size Continuous Style",
+            "title": "Size Continuous Style",
+            "desc": "Use the size_continuous_style method to resize each feature by continuous numeric values",
             "file": "size_continuous_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
-            "title": "Style - Size Bins",
-            "desc": "Size Bins Style",
+            "title": "Size Bins Style",
+            "desc": "Use the size_bins_style method to resize each feature by discrete numeric values",
             "file": "size_bins_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
-            "title": "Style - Cluster Size",
-            "desc": "Cluster Size Style",
+            "title": "Cluster Size Style",
+            "desc": "Use the cluster_size_style method to aggregate features by continuous numeric values",
             "file": "cluster_size_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
-            "title": "Style - Animation",
-            "desc": "Animation Style",
+            "title": "Animation Style",
+            "desc": "Use the animation_style helper method to simply animate a visualization",
             "file": "animation_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
-            "title": "Style - Combine",
+            "title": "Combine styles",
             "desc": "Combine different visualization styles",
             "file": "combine_visualization_styles",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
-            "title": "Legends - Default",
-            "desc": "Default Legend",
+            "title": "Default Legend",
+            "desc": "Use the basic_legend method to display a simple default legend",
             "file": "basic_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Legends - Color Category",
-            "desc": "Color Category Legend",
+            "title": "Color Category Legend",
+            "desc": "Use the color_category_legend method to represent categorical values by color",
             "file": "color_category_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Legends - Color Bins",
-            "desc": "Color Bins Legend",
+            "title": "Color Bins Legend",
+            "desc": "Use the color_bins_legend method to represent discrete numeric values by color",
             "file": "color_bins_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Legends - Color Continuous",
-            "desc": "Color Continuous Legend",
+            "title": "Color Continuous Legend",
+            "desc": "Use the color_continuous_legend method to represent continuous numeric values by color",
             "file": "color_continuous_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Legends- Size Category",
-            "desc": "Size category legend",
+            "title": "Size Category Legend",
+            "desc": "Use the size_category_legend method to represent categorical values by size",
             "file": "size_category_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Legends - Size Bins",
-            "desc": "Size Bins Legend",
+            "title": "Size Bins Legend",
+            "desc": "Use the size_bins_legend method to represent discrete numeric values by size",
             "file": "size_bins_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Legends - Size Continuous",
-            "desc": "Size Continuous Legend",
+            "title": "Size Continuous Legend",
+            "desc": "Use the size_bins_legend method to represent continuous numeric values by size",
             "file": "size_continuous_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Legends - Combine",
-            "desc": "Combine multiple Legends",
+            "title": "Combine Legends",
+            "desc": "Combine different legends in the same visualization",
             "file": "multiple_legends",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Legends - Line Geometry",
-            "desc": "Legend Line Geometry",
+            "title": "Legend by Geometry",
+            "desc": "Specify the geometry type in a legend helper",
             "file": "legend_line_geometry",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Legends - Opacity",
+            "title": "Opacity",
             "desc": "Use opacity in legend",
             "file": "opacity_in_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Widgets - Basic",
-            "desc": "Basic Widget",
+            "title": "Basic widget",
+            "desc": "Use the basic_widget method to display a simple default widget",
             "file": "basic_widget",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
-            "title": "Widgets - Category",
-            "desc": "Category Widget",
+            "title": "Category Widget",
+            "desc": "Use the category_widget to create a widget to represent categorical values",
             "file": "category_widget",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
-            "title": "Widgets - Histogram",
-            "desc": "Histogram Widget",
+            "title": "Histogram Widget",
+            "desc": "Use the histogram_widget to create a widget to represent categorical, numeric and date values in a histogram",
             "file": "histogram_widget",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
-            "title": "Widgets - Formula",
-            "desc": "Formula Widget",
+            "title": "Formula Widget",
+            "desc": "Use the formula_widget to display the result of a count, avg, max, min or sum operation in a numeric",
             "file": "formula_widget",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
-            "title": "Widgets - Animation",
-            "desc": "Animation Widget",
+            "title": "Animation Widget",
+            "desc": "Use the animation_widget to be able to play, pause and change an animated visualization through animation controls",
             "file": "animation_widget",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
-            "title": "Widgets - Time Series",
-            "desc": "Time Series Widget",
+            "title": "Time Series Widget",
+            "desc": "Use the time_series_widget to represent a sequence of categorical, numeric and date values in a histogram indexed by a numeric or date value",
             "file": "time_series_widget",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
-            "title": "Widgets - Combine",
-            "desc": "Combine ultiple Widgets",
+            "title": "Combine",
+            "desc": "Combine multiple widgets in the same visualization",
             "file": "multiple_widgets",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
-            "title": "Popup - Click",
-            "desc": "Popup on Click",
+            "title": "Popup Click",
+            "desc": "Display a popup triggered by a click event",
             "file": "popup_on_click",
-            "path": "popups"
+            "path": "popups",
+            "group": "Popups"
         }, {
-            "title": "Popup - Hover",
-            "desc": "Popup on Hover",
+            "title": "Popup Hover",
+            "desc": "Display a popup triggered by a hover event",
             "file": "popup_on_hover",
-            "path": "popups"
+            "path": "popups",
+            "group": "Popups"
         }, {
-            "title": "Popup - Customize",
+            "title": "Custom popups",
             "desc": "Change popup titles",
             "file": "popup_titles",
-            "path": "popups"
+            "path": "popups",
+            "group": "Popups"
         }, {
-            "title": "Popup - Combine",
-            "desc": "Combine popups on click and hover events",
+            "title": "Combine",
+            "desc": "Display popups triggered by both click and hover events",
             "file": "multiple_popup_events",
-            "path": "popups"
+            "path": "popups",
+            "group": "Popups"
         }, {
-            "title": "Layout - Default",
-            "desc": "Default Layout",
+            "title": "Default Layout",
+            "desc": "Create a default visualization layout",
             "file": "default_layout",
-            "path": "map_layout"
+            "path": "map_layout",
+            "group": "Layout"
         }, {
-            "title": "Layout - Custom",
-            "desc": "Custom Layout",
+            "title": "Custom Layout",
+            "desc": "Use different settings to create a custom visualization layout",
             "file": "custom_layout",
-            "path": "map_layout"
+            "path": "map_layout",
+            "group": "Layout"
         }, {
-            "title": "Layout - Titles",
-            "desc": "Layout Titles",
+            "title": "Custom titles",
+            "desc": "Use different custom titles to create a visualization layout",
             "file": "layout_titles",
-            "path": "map_layout"
+            "path": "map_layout",
+            "group": "Layout"
         }, {
-            "title": "Layout - Viewport",
-            "desc": "Layout Viewport",
+            "title": "Change the viewport",
+            "desc": "Use different viewport settings to create a visualization layout",
             "file": "layout_viewport",
-            "path": "map_layout"
+            "path": "map_layout",
+            "group": "Layout"
         }, {
-            "title": "Layout - Interactive",
-            "desc": "Interactive Layout",
+            "title": "Interactive Layout",
+            "desc": "Create an interactive visualization layout",
             "file": "interactive_layout",
-            "path": "map_layout"
+            "path": "map_layout",
+            "group": "Layout"
         }]
     }, {
         "title": "Data Services",
