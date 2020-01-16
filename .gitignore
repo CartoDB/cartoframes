@@ -6,6 +6,7 @@ sandbox/
 # Misc
 creds.json
 credentials.json
+
 __pycache__
 .*.sw[nop]
 .vscode

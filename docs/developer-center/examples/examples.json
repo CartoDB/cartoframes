@@ -1,337 +1,397 @@
 {
     "main": {
+        "title": "Introduction",
         "file": "introduction.md"
     },
     "categories": [{
-        "title": "Data Workflows",
+        "title": "Data Management",
+        "desc": "Explore working with data both locally and with a CARTO account.",
+        "file": "data_management.md",
+        "hide_sidebar_samples": true,
         "samples": [{
-            "title": "Load data from CSV",
+            "title": "Load a CSV file",
             "desc": "Load data from a CSV file",
             "file": "load_data_from_csv",
-            "path": "data_workflows"
+            "path": "data_management"
         }, {
-            "title": "Load data from JSON",
+            "title": "Load a JSON file",
             "desc": "Load data from a JSON file",
             "file": "load_data_from_json",
-            "path": "data_workflows"
+            "path": "data_management"
         }, {
-            "title": "Load data from GeoJSON",
+            "title": "Load a GeoJSON file",
             "desc": "Load data from a GeoJSON file",
             "file": "load_data_from_geojson",
-            "path": "data_workflows"
+            "path": "data_management"
         }, {
-            "title": "Load data from CARTO Table",
-            "desc": "Load data from a CARTO Table",
+            "title": "Load a CARTO table",
+            "desc": "Load data from a CARTO table.",
             "file": "load_data_from_carto_table",
-            "path": "data_workflows"
+            "path": "data_management"
         }, {
-            "title": "Load data from CARTO SQL Query",
-            "desc": "Load data from a CARTO SQL query",
+            "title": "Load a CARTO SQL query",
+            "desc": "Load data from a CARTO table using a SQL Query",
             "file": "load_data_from_carto_query",
-            "path": "data_workflows"
+            "path": "data_management"
         }, {
-            "title": "Upload data to CARTO",
+            "title": "Upload to CARTO",
             "desc": "Upload data to CARTO",
             "file": "upload_data_to_carto",
-            "path": "data_workflows"
+            "path": "data_management"
         }, {
-            "title": "Change CARTO Table Privacy",
-            "desc": "Change CARTO Table Privacy",
+            "title": "Change CARTO table privacy",
+            "desc": "Change the privacy of a CARTO table.",
             "file": "change_carto_table_privacy",
-            "path": "data_workflows"
+            "path": "data_management"
+        }, {
+            "title": "Use dates in a Dataframe",
+            "desc": "Animate a visualization using date columns.",
+            "file": "date_columns_in_dataframes",
+            "path": "data_management"
         }]
     }, {
-        "title": "Data Enrichment",
+        "title": "Data Visualization",
+        "desc": "Explore the building blocks for creating web-based, dynamic, and interactive map visualizations.",
+        "file": "data_visualization.md",
+        "hide_sidebar_samples": true,
         "samples": [{
-            "title": "Enrich Points - Public Dataset",
-            "desc": "Enrich Points - Public Dataset",
-            "file": "points_enrichment_public_dataset",
-            "path": "data_enrichment"
-        }, {
-            "title": "Enrich Polygons - Public Dataset",
-            "desc": "Enrich Polygons - Public Dataset",
-            "file": "polygons_enrichment_public_dataset",
-            "path": "data_enrichment"
-        }, {
-            "title": "Enrich Points - Private Dataset",
-            "desc": "Enrich Points - Private Dataset",
-            "file": "points_enrichment_private_dataset",
-            "path": "data_enrichment"
-        }, {
-            "title": "Enrich Polygons - Private Dataset",
-            "desc": "Enrich Polygons - Private Dataset",
-            "file": "polygons_enrichment_private_dataset",
-            "path": "data_enrichment"
-        }, {
-            "title": "Enrichment Subscription Workflow",
-            "desc": "Enrichment Subscription Workflow",
-            "file": "enrichment_subscription_workflow",
-            "path": "data_enrichment"
-        }]
-    }, {
-        "title": "Layers",
-        "samples": [{
-            "title": "Add Layer",
+            "title": "Single Layer",
             "desc": "Add a Layer",
             "file": "add_layer",
-            "path": "layers"
+            "path": "layers",
+            "group": "Layers"
         }, {
-            "title": "Add Multiple Layers",
+            "title": "Multiple Layers",
             "desc": "Add multiple Layers",
             "file": "add_multiple_layers",
-            "path": "layers"
-        }]
-    }, {
-        "title": "Map Configuration",
-        "samples": [{
-            "title": "Change Default Basemap",
+            "path": "layers",
+            "group": "Layers"
+        }, {
+            "title": "Basemaps",
             "desc": "Change the default CARTO basemap",
             "file": "change_default_carto_basemap",
-            "path": "map_configuration"
+            "path": "map_configuration",
+            "group": "Configuration"
         }, {
-            "title": "Set Custom Viewport",
+            "title": "Viewport",
             "desc": "Set a custom viewport",
             "file": "custom_viewport",
-            "path": "map_configuration"
+            "path": "map_configuration",
+            "group": "Configuration"
         }, {
-            "title": "Set Background Color",
+            "title": " Background",
             "desc": "Set a background color",
             "file": "solid_color_background",
-            "path": "map_configuration"
+            "path": "map_configuration",
+            "group": "Configuration"
         }, {
-            "title": "Switch to Dark Theme",
+            "title": "Dark Theme",
             "desc": "Switch to the dark theme",
             "file": "dark_theme",
-            "path": "map_configuration"
-        }]
-    }, {
-        "title": "Styles",
-        "samples": [{
+            "path": "map_configuration",
+            "group": "Configuration"
+        }, {
+            "title": "Basic Style",
+            "desc": "Use the basic_style method to change the basic style properties",
+            "file": "basic_style",
+            "path": "styles",
+            "group": "Style"
+        }, {
             "title": "Color Category Style",
-            "desc": "Color Category Style",
+            "desc": "Use the color_category_style method to color features by categorical values",
             "file": "color_category_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
             "title": "Color Continuous Style",
-            "desc": "Color Continuous Style",
+            "desc": "Use the color_continuous_style method to color features by continuous numeric values",
             "file": "color_continuous_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
             "title": "Color Bins Style",
-            "desc": "Color Bins Style",
+            "desc": "Use the color_bins_style method to color features by discrete numeric values",
             "file": "color_bins_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
             "title": "Size Category Style",
-            "desc": "Size Category Style",
+            "desc": "Use the size_category_style method to resize each feature by categorical values",
             "file": "size_category_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
             "title": "Size Continuous Style",
-            "desc": "Size Continuous Style",
+            "desc": "Use the size_continuous_style method to resize each feature by continuous numeric values",
             "file": "size_continuous_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
             "title": "Size Bins Style",
-            "desc": "Size Bins Style",
+            "desc": "Use the size_bins_style method to resize each feature by discrete numeric values",
             "file": "size_bins_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
             "title": "Cluster Size Style",
-            "desc": "Cluster Size Style",
+            "desc": "Use the cluster_size_style method to aggregate features by continuous numeric values",
             "file": "cluster_size_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
             "title": "Animation Style",
-            "desc": "Animation Style",
+            "desc": "Use the animation_style helper method to simply animate a visualization",
             "file": "animation_style",
-            "path": "styles"
+            "path": "styles",
+            "group": "Style"
         }, {
-            "title": "Combine Visualization Styles",
-            "desc": "Combine visualization styles",
+            "title": "Add multiple style helpers",
+            "desc": "Combine different visualization styles",
             "file": "combine_visualization_styles",
-            "path": "styles"
-        }]
-    }, {
-        "title": "Legends",
-        "samples": [{
-            "title": "Default Legend",
-            "desc": "Default Legend",
+            "path": "styles",
+            "group": "Style"
+        }, {
+            "title": "Basic Legend",
+            "desc": "Use the basic_legend method to display a simple default legend",
             "file": "basic_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
+        }, {
+            "title": "Default Legend",
+            "desc": "Set the default legend needed for the style helper",
+            "file": "default_legend",
+            "path": "legends",
+            "group": "Legends"
         }, {
             "title": "Color Category Legend",
-            "desc": "Color Category Legend",
+            "desc": "Use the color_category_legend method to represent categorical values by color",
             "file": "color_category_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
             "title": "Color Bins Legend",
-            "desc": "Color Bins Legend",
+            "desc": "Use the color_bins_legend method to represent discrete numeric values by color",
             "file": "color_bins_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
             "title": "Color Continuous Legend",
-            "desc": "Color Continuous Legend",
+            "desc": "Use the color_continuous_legend method to represent continuous numeric values by color",
             "file": "color_continuous_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
             "title": "Size Category Legend",
-            "desc": "Size category legend",
+            "desc": "Use the size_category_legend method to represent categorical values by size",
             "file": "size_category_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
             "title": "Size Bins Legend",
-            "desc": "Size Bins Legend",
+            "desc": "Use the size_bins_legend method to represent discrete numeric values by size",
             "file": "size_bins_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
             "title": "Size Continuous Legend",
-            "desc": "Size Continuous Legend",
+            "desc": "Use the size_bins_legend method to represent continuous numeric values by size",
             "file": "size_continuous_legend",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Multiple Legends",
-            "desc": "Multiple Legends",
+            "title": "Add multiple legends",
+            "desc": "Combine different legends in the same visualization",
             "file": "multiple_legends",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Legend Line Geometry",
-            "desc": "Legend Line Geometry",
+            "title": "Legend by Geometry",
+            "desc": "Specify the geometry type in a legend helper",
             "file": "legend_line_geometry",
-            "path": "legends"
+            "path": "legends",
+            "group": "Legends"
         }, {
-            "title": "Use Opacity in Legend",
+            "title": "Opacity",
             "desc": "Use opacity in legend",
             "file": "opacity_in_legend",
-            "path": "legends"
-        }]
-    }, {
-        "title": "Widgets",
-        "samples": [{
-            "title": "Basic Widget",
-            "desc": "Basic Widget",
+            "path": "legends",
+            "group": "Legends"
+        }, {
+            "title": "Default Widget",
+            "desc": "Set the default widget needed for the style helper",
+            "file": "default_widget",
+            "path": "widgets",
+            "group": "Widgets"
+        }, {
+            "title": "Basic widget",
+            "desc": "Use the basic_widget method to display a simple default widget",
             "file": "basic_widget",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
             "title": "Category Widget",
-            "desc": "Category Widget",
+            "desc": "Use the category_widget to create a widget to represent categorical values",
             "file": "category_widget",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
             "title": "Histogram Widget",
-            "desc": "Histogram Widget",
+            "desc": "Use the histogram_widget to create a widget to represent categorical, numeric and date values in a histogram",
             "file": "histogram_widget",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
             "title": "Formula Widget",
-            "desc": "Formula Widget",
+            "desc": "Use the formula_widget to display the result of a count, avg, max, min or sum operation in a numeric",
             "file": "formula_widget",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
             "title": "Animation Widget",
-            "desc": "Animation Widget",
+            "desc": "Use the animation_widget to be able to play, pause and change an animated visualization through animation controls",
             "file": "animation_widget",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
             "title": "Time Series Widget",
-            "desc": "Time Series Widget",
+            "desc": "Use the time_series_widget to represent a sequence of categorical, numeric and date values in a histogram indexed by a numeric or date value",
             "file": "time_series_widget",
-            "path": "widgets"
+            "path": "widgets",
+            "group": "Widgets"
         }, {
-            "title": "Multiple Widgets",
-            "desc": "Multiple Widgets",
+            "title": "Add multiple widgets",
+            "desc": "Combine multiple widgets in the same visualization",
             "file": "multiple_widgets",
-            "path": "widgets"
-        }]
-    }, {
-        "title": "Popups",
-        "samples": [{
-            "title": "Popup on Click",
-            "desc": "Popup on Click",
+            "path": "widgets",
+            "group": "Widgets"
+        }, {
+            "title": "Popup on click",
+            "desc": "Display a popup triggered by a click event",
             "file": "popup_on_click",
-            "path": "popups"
+            "path": "popups",
+            "group": "Popups"
         }, {
-            "title": "Popup on Hover",
-            "desc": "Popup on Hover",
+            "title": "Popup on hover",
+            "desc": "Display a popup triggered by a hover event",
             "file": "popup_on_hover",
-            "path": "popups"
+            "path": "popups",
+            "group": "Popups"
         }, {
-            "title": "Popup Titles",
-            "desc": "Popup Titles",
+            "title": "Custom popups",
+            "desc": "Customize popup titles",
             "file": "popup_titles",
-            "path": "popups"
+            "path": "popups",
+            "group": "Popups"
         }, {
-            "title": "Multiple Popup Events",
-            "desc": "Multiple Popup Events",
+            "title": "Multiple popups",
+            "desc": "Display popups triggered by both click and hover events",
             "file": "multiple_popup_events",
-            "path": "popups"
-        }]
-    }, {
-        "title": "Map Layout",
-        "samples": [{
+            "path": "popups",
+            "group": "Popups"
+        }, {
             "title": "Default Layout",
-            "desc": "Default Layout",
+            "desc": "Create a default visualization layout",
             "file": "default_layout",
-            "path": "map_layout"
+            "path": "map_layout",
+            "group": "Layout"
         }, {
             "title": "Custom Layout",
-            "desc": "Custom Layout",
+            "desc": "Use different settings to create a custom visualization layout",
             "file": "custom_layout",
-            "path": "map_layout"
+            "path": "map_layout",
+            "group": "Layout"
         }, {
-            "title": "Layout Titles",
-            "desc": "Layout Titles",
+            "title": "Add titles",
+            "desc": "Use different custom titles to create a visualization layout",
             "file": "layout_titles",
-            "path": "map_layout"
+            "path": "map_layout",
+            "group": "Layout"
         }, {
-            "title": "Layout Viewport",
-            "desc": "Layout Viewport",
+            "title": "Customize the viewport",
+            "desc": "Use different viewport settings to create a visualization layout",
             "file": "layout_viewport",
-            "path": "map_layout"
+            "path": "map_layout",
+            "group": "Layout"
         }, {
-            "title": "Interactive Layout",
-            "desc": "Interactive Layout",
+            "title": "Make it interactive",
+            "desc": "Create an interactive visualization layout",
             "file": "interactive_layout",
-            "path": "map_layout"
+            "path": "map_layout",
+            "group": "Layout"
         }]
     }, {
-        "title": "Geocoding and Isolines",
+        "title": "Data Services",
+        "desc": "Learn how to combine your data and CARTO's Location Data Services for geospatial analyses.",
+        "file": "data_services.md",
+        "hide_sidebar_samples": true,
         "samples": [{
-            "title": "Geocode a Dataframe",
+            "title": "Geocoding",
             "desc": "Using the Geocoding Services to geocode a Dataframe",
             "file": "geocoding_dataframe",
             "path": "data_services"
         }, {
-            "title": "Calculate Isochrones",
+            "title": "Isochrones",
             "desc": "Using the Isolines Services to calculate isochrones",
             "file": "isochrones",
             "path": "data_services"
         }, {
-            "title": "Calculate Isodistances",
+            "title": "Isodistances",
             "desc": "Using the Isolines Services to calculate isodistances",
             "file": "isodistances",
             "path": "data_services"
         }, {
-            "title": "Use Geocoding and Isoline Services",
+            "title": "Combining geocoding and isolines",
             "desc": "Use both Geocoding and Isolines services",
             "file": "geocoding_and_isolines",
             "path": "data_services"
         }]
     }, {
-        "title": "Publish and Share",
+        "title": "Data Enrichment",
+        "desc": "Learn how to augment your public and private datasets through spatial operations and CARTO's Data Observatory.",
+        "file": "data_enrichment.md",
+        "hide_sidebar_samples": true,
         "samples": [{
-            "title": "Publish Public Visualization",
+            "title": "Discover a dataset",
+            "desc": "Basic steps to discover a Dataset in the Data Observatory",
+            "file": "discover_dataset",
+            "path": "data_enrichment"
+        }, {
+            "title": "Enrich points",
+            "desc": "Use the enrichment to enrich points for a dataset.",
+            "file": "points_enrichment_dataset",
+            "path": "data_enrichment"
+        }, {
+            "title": "Enrich polygons",
+            "desc": "Use the enrichment to enrich polygons for a dataset.",
+            "file": "polygons_enrichment_dataset",
+            "path": "data_enrichment"
+        }, {
+            "title": "Subscribe to a premium dataset",
+            "desc": "Basic steps to subscribe to a premium dataset in the Data Observatory to start enriching your data.",
+            "file": "enrichment_subscription_workflow",
+            "path": "data_enrichment"
+        }]
+    }, {
+        "title": "Publish and Share",
+        "desc": "Learn how to publish and share interactive visualizations for others to explore.",
+        "file": "publish_share.md",
+        "hide_sidebar_samples": true,
+        "samples": [{
+            "title": "Publish a map with local data",
             "desc": "Publish a public visualization",
             "file": "publish_a_public_visualization",
             "path": "publish_and_share"
         }, {
-            "title": "Publish Protected Visualization",
+            "title": "Publish a map with local data with password",
             "desc": "Publish a protected visualization",
             "file": "publish_a_protected_visualization",
             "path": "publish_and_share"
         }]
     }, {
         "title": "Use Cases",
+        "desc": "Explore a variety of ways to use CARTOframes in your workflows.",
+        "file": "use_cases.md",
+        "hide_sidebar_samples": true,
         "samples": [{
             "title": "Visualize Temperatures",
             "desc": "Visualize warm temperatures",
@@ -339,7 +399,7 @@
             "path": "real_use_cases"
         }, {
             "title": "Paris WiFi Services",
-            "desc": "Download data in json format",
+            "desc": "Download and visualize WiFi Services data in json format",
             "file": "paris_wifi_services",
             "path": "real_use_cases"
         }, {
