@@ -2,7 +2,6 @@ import copy
 
 from warnings import filterwarnings
 from carto.kuvizs import KuvizManager
-from pyrestcli.exceptions import BadRequestException
 
 from ..data.clients.auth_api_client import AuthAPIClient
 from ..exceptions import PublishError
@@ -59,7 +58,7 @@ class KuvizPublisher:
 
         try:
             self.kuviz.save()
-        except BadRequestException as e:
+        except Exception as e:
             manage_kuviz_exception(e, name)
 
         return kuviz_to_dict(self.kuviz)
@@ -89,7 +88,7 @@ def _create_kuviz(html, name, auth_client, password, if_exists):
 
     try:
         return kmanager.create(html=html, name=name, password=password, if_exists=if_exists)
-    except BadRequestException as e:
+    except Exception as e:
         manage_kuviz_exception(e, name)
 
 
@@ -123,11 +122,14 @@ def rename_privacy(privacy):
 
 def manage_kuviz_exception(error, name):
     if str(error) == 'Validation failed: Name has already been taken':
-        raise PublishError("Map '{}' already exists in your CARTO account. Please choose a different `name` or use "
+        raise PublishError("Map '{}' already exists in your CARTO account. Please, choose a different `name` or use "
                            "if_exists='replace' to overwrite it".format(name))
 
-    if str(error) == 'visualization over the size limit (10000000)':
-        raise PublishError("Map '{}' exceeds size limit of 10MB. Please, upload your data to CARTO and use"
+    if str(error) == 'Visualization over the size limit (10MB)':
+        raise PublishError("Map '{}' exceeds the size limit of 10MB. Please, upload your data to CARTO and use"
                            "the table names in the layers instead.".format(name))
+
+    if str(error) == 'Public map quota exceeded':
+        raise PublishError("Public maps quota has been exceeded.")
 
     raise error
