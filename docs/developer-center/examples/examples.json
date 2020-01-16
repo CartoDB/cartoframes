@@ -1,6 +1,6 @@
 {
     "main": {
-        "title": "Examples",
+        "title": "Introduction",
         "file": "introduction.md"
     },
     "categories": [{
@@ -9,37 +9,37 @@
         "file": "data_management.md",
         "hide_sidebar_samples": true,
         "samples": [{
-            "title": "Load CSV",
+            "title": "Load a CSV file",
             "desc": "Load data from a CSV file",
             "file": "load_data_from_csv",
             "path": "data_management"
         }, {
-            "title": "Load JSON",
+            "title": "Load a JSON file",
             "desc": "Load data from a JSON file",
             "file": "load_data_from_json",
             "path": "data_management"
         }, {
-            "title": "Load GeoJSON",
+            "title": "Load a GeoJSON file",
             "desc": "Load data from a GeoJSON file",
             "file": "load_data_from_geojson",
             "path": "data_management"
         }, {
-            "title": "Load CARTO table",
+            "title": "Load a CARTO table",
             "desc": "Load data from a CARTO table.",
             "file": "load_data_from_carto_table",
             "path": "data_management"
         }, {
-            "title": "Load CARTO SQL Query",
+            "title": "Load a CARTO SQL query",
             "desc": "Load data from a CARTO table using a SQL Query",
             "file": "load_data_from_carto_query",
             "path": "data_management"
         }, {
-            "title": "Upload data",
+            "title": "Upload to CARTO",
             "desc": "Upload data to CARTO",
             "file": "upload_data_to_carto",
             "path": "data_management"
         }, {
-            "title": "Change CARTO Table Privacy",
+            "title": "Change CARTO table privacy",
             "desc": "Change the privacy of a CARTO table.",
             "file": "change_carto_table_privacy",
             "path": "data_management"
@@ -48,37 +48,6 @@
             "desc": "Animate a visualization using date columns.",
             "file": "date_columns_in_dataframes",
             "path": "data_management"
-        }]
-    }, {
-        "title": "Data Enrichment",
-        "desc": "Learn how to augment your public and private datasets through spatial operations and CARTO's Data Observatory.",
-        "file": "data_enrichment.md",
-        "hide_sidebar_samples": true,
-        "samples": [{
-            "title": "Enrichment Subscription Workflow",
-            "desc": "Steps to subscribe to a dataset in the Data Observatory to start enriching your data.",
-            "file": "enrichment_subscription_workflow",
-            "path": "data_enrichment"
-        }, {
-            "title": "Points - Public Dataset",
-            "desc": "Enrich points for a public dataset.",
-            "file": "points_enrichment_public_dataset",
-            "path": "data_enrichment"
-        }, {
-            "title": "Polygons - Public Dataset",
-            "desc": "Enrich polygons for a public dataset.",
-            "file": "polygons_enrichment_public_dataset",
-            "path": "data_enrichment"
-        }, {
-            "title": "Points - Private Dataset",
-            "desc": "Enrich points for a private dataset.",
-            "file": "points_enrichment_private_dataset",
-            "path": "data_enrichment"
-        }, {
-            "title": "Polygons - Private Dataset",
-            "desc": "Enrich polygons for a private dataset.",
-            "file": "polygons_enrichment_private_dataset",
-            "path": "data_enrichment"
         }]
     }, {
         "title": "Data Visualization",
@@ -121,6 +90,12 @@
             "file": "dark_theme",
             "path": "map_configuration",
             "group": "Configuration"
+        }, {
+            "title": "Basic Style",
+            "desc": "Use the basic_style method to change the basic style properties",
+            "file": "basic_style",
+            "path": "styles",
+            "group": "Style"
         }, {
             "title": "Color Category Style",
             "desc": "Use the color_category_style method to color features by categorical values",
@@ -170,15 +145,21 @@
             "path": "styles",
             "group": "Style"
         }, {
-            "title": "Combine styles",
+            "title": "Add multiple style helpers",
             "desc": "Combine different visualization styles",
             "file": "combine_visualization_styles",
             "path": "styles",
             "group": "Style"
         }, {
-            "title": "Default Legend",
+            "title": "Basic Legend",
             "desc": "Use the basic_legend method to display a simple default legend",
             "file": "basic_legend",
+            "path": "legends",
+            "group": "Legends"
+        }, {
+            "title": "Default Legend",
+            "desc": "Set the default legend needed for the style helper",
+            "file": "default_legend",
             "path": "legends",
             "group": "Legends"
         }, {
@@ -218,7 +199,7 @@
             "path": "legends",
             "group": "Legends"
         }, {
-            "title": "Combine Legends",
+            "title": "Add multiple legends",
             "desc": "Combine different legends in the same visualization",
             "file": "multiple_legends",
             "path": "legends",
@@ -235,6 +216,12 @@
             "file": "opacity_in_legend",
             "path": "legends",
             "group": "Legends"
+        }, {
+            "title": "Default Widget",
+            "desc": "Set the default widget needed for the style helper",
+            "file": "default_widget",
+            "path": "widgets",
+            "group": "Widgets"
         }, {
             "title": "Basic widget",
             "desc": "Use the basic_widget method to display a simple default widget",
@@ -272,31 +259,31 @@
             "path": "widgets",
             "group": "Widgets"
         }, {
-            "title": "Combine widgets",
+            "title": "Add multiple widgets",
             "desc": "Combine multiple widgets in the same visualization",
             "file": "multiple_widgets",
             "path": "widgets",
             "group": "Widgets"
         }, {
-            "title": "Popup Click",
+            "title": "Popup on click",
             "desc": "Display a popup triggered by a click event",
             "file": "popup_on_click",
             "path": "popups",
             "group": "Popups"
         }, {
-            "title": "Popup Hover",
+            "title": "Popup on hover",
             "desc": "Display a popup triggered by a hover event",
             "file": "popup_on_hover",
             "path": "popups",
             "group": "Popups"
         }, {
             "title": "Custom popups",
-            "desc": "Change popup titles",
+            "desc": "Customize popup titles",
             "file": "popup_titles",
             "path": "popups",
             "group": "Popups"
         }, {
-            "title": "Combine popups",
+            "title": "Multiple popups",
             "desc": "Display popups triggered by both click and hover events",
             "file": "multiple_popup_events",
             "path": "popups",
@@ -314,19 +301,19 @@
             "path": "map_layout",
             "group": "Layout"
         }, {
-            "title": "Custom titles",
+            "title": "Add titles",
             "desc": "Use different custom titles to create a visualization layout",
             "file": "layout_titles",
             "path": "map_layout",
             "group": "Layout"
         }, {
-            "title": "Change the viewport",
+            "title": "Customize the viewport",
             "desc": "Use different viewport settings to create a visualization layout",
             "file": "layout_viewport",
             "path": "map_layout",
             "group": "Layout"
         }, {
-            "title": "Interactive Layout",
+            "title": "Make it interactive",
             "desc": "Create an interactive visualization layout",
             "file": "interactive_layout",
             "path": "map_layout",
@@ -338,25 +325,51 @@
         "file": "data_services.md",
         "hide_sidebar_samples": true,
         "samples": [{
-            "title": "Geocode a Dataframe",
+            "title": "Geocoding",
             "desc": "Using the Geocoding Services to geocode a Dataframe",
             "file": "geocoding_dataframe",
             "path": "data_services"
         }, {
-            "title": "Calculate Isochrones",
+            "title": "Isochrones",
             "desc": "Using the Isolines Services to calculate isochrones",
             "file": "isochrones",
             "path": "data_services"
         }, {
-            "title": "Calculate Isodistances",
+            "title": "Isodistances",
             "desc": "Using the Isolines Services to calculate isodistances",
             "file": "isodistances",
             "path": "data_services"
         }, {
-            "title": "Use Geocoding and Isoline Services",
+            "title": "Combining geocoding and isolines",
             "desc": "Use both Geocoding and Isolines services",
             "file": "geocoding_and_isolines",
             "path": "data_services"
+        }]
+    }, {
+        "title": "Data Enrichment",
+        "desc": "Learn how to augment your public and private datasets through spatial operations and CARTO's Data Observatory.",
+        "file": "data_enrichment.md",
+        "hide_sidebar_samples": true,
+        "samples": [{
+            "title": "Discover a dataset",
+            "desc": "Basic steps to discover a Dataset in the Data Observatory",
+            "file": "discover_dataset",
+            "path": "data_enrichment"
+        }, {
+            "title": "Enrich points",
+            "desc": "Use the enrichment to enrich points for a dataset.",
+            "file": "points_enrichment_dataset",
+            "path": "data_enrichment"
+        }, {
+            "title": "Enrich polygons",
+            "desc": "Use the enrichment to enrich polygons for a dataset.",
+            "file": "polygons_enrichment_public_dataset",
+            "path": "data_enrichment"
+        }, {
+            "title": "Subscribe to a premium dataset",
+            "desc": "Basic steps to subscribe to a premium dataset in the Data Observatory to start enriching your data.",
+            "file": "enrichment_subscription_workflow",
+            "path": "data_enrichment"
         }]
     }, {
         "title": "Publish and Share",
@@ -364,12 +377,12 @@
         "file": "publish_share.md",
         "hide_sidebar_samples": true,
         "samples": [{
-            "title": "Public",
+            "title": "Publish a map with local data",
             "desc": "Publish a public visualization",
             "file": "publish_a_public_visualization",
             "path": "publish_and_share"
         }, {
-            "title": "Protected",
+            "title": "Publish a map with local data with password",
             "desc": "Publish a protected visualization",
             "file": "publish_a_protected_visualization",
             "path": "publish_and_share"
