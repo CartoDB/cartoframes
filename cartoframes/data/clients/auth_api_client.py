@@ -21,13 +21,17 @@ class AuthAPIClient:
 
     def create_api_key(self, sources, apis=['sql', 'maps'], permissions=['select'], name=None):
         tables = []
+        tables_names = []
+
         for source in sources:
             table_names = source.get_table_names()
             for table_name in table_names:
                 tables.append(_get_table_dict(source.schema(), table_name, permissions))
+                tables_names.append(table_name)
 
         if name is None:
-            name = 'cartoframes_{}'.format(create_hash(tables))
+            tables_names.sort()
+            name = 'cartoframes_{}'.format(create_hash(tables_names))
 
         try:
             api_key = self._api_key_manager.create(name, apis, tables)
@@ -35,7 +39,7 @@ class AuthAPIClient:
             if str(e) == 'Validation failed: Name has already been taken':
                 api_key = self._api_key_manager.get(name)
 
-        return api_key.token, tables
+        return api_key.token, tables_names
 
 
 def _get_table_dict(schema, name, permissions):

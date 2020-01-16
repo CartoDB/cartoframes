@@ -76,8 +76,7 @@ class KuvizPublisher:
         non_public_sources = [layer.source for layer in layers if not layer.source.is_public()]
 
         if len(non_public_sources) > 0:
-            maps_api_key, non_public_tables = self._auth_api_client.create_api_key(non_public_sources, ['maps'])
-            non_public_tables_names = [table['name'] for table in non_public_tables]
+            maps_api_key, non_public_tables_names = self._auth_api_client.create_api_key(non_public_sources, ['maps'])
             log.info('Maps API key "{0}" is used for non public datasets {1}'.format(
                 maps_api_key, non_public_tables_names))
             return maps_api_key
