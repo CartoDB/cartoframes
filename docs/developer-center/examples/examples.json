@@ -363,7 +363,7 @@
         }, {
             "title": "Enrich polygons",
             "desc": "Use the enrichment to enrich polygons for a dataset.",
-            "file": "polygons_enrichment_public_dataset",
+            "file": "polygons_enrichment_dataset",
             "path": "data_enrichment"
         }, {
             "title": "Subscribe to a premium dataset",
