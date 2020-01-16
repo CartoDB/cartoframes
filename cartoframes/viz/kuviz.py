@@ -122,14 +122,15 @@ def rename_privacy(privacy):
 
 def manage_kuviz_exception(error, name):
     if str(error) == 'Validation failed: Name has already been taken':
-        raise PublishError("Map '{}' already exists in your CARTO account. Please, choose a different `name` or use "
-                           "if_exists='replace' to overwrite it".format(name))
+        raise PublishError("Map '{}' already exists in your CARTO account. Please, choose a different `name` "
+                           "or use if_exists='replace' to overwrite it.".format(name))
 
     if str(error) == 'Visualization over the size limit (10MB)':
-        raise PublishError("Map '{}' exceeds the size limit of 10MB. Please, upload your data to CARTO and use"
-                           "the table names in the layers instead.".format(name))
+        raise PublishError("Map '{}' exceeds the size limit of 10MB. Please, upload your data to CARTO calling "
+                           "to_carto() function and use the table names in the layers instead.".format(name))
 
     if str(error) == 'Public map quota exceeded':
-        raise PublishError("Public maps quota has been exceeded.")
+        raise PublishError("You have reached the limit for the number of maps you can create with your account. "
+                           "Upgrade your account or delete some of your previous maps to be able to create new ones.")
 
     raise error
