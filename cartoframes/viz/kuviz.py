@@ -37,8 +37,8 @@ class KuvizPublisher:
         for layer in layers:
             layer_copy = copy.deepcopy(layer)
 
-            # Set the Maps API key if the source is private
-            if not layer_copy.source.is_public() and layer_copy.credentials is not None:
+            # Set the Maps API key if the source has credentials
+            if layer_copy.credentials is not None:
                 layer_copy.credentials['api_key'] = maps_api_key
 
             self._layers.append(layer_copy)
