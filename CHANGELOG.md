@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix Geography geom_coverage docstring (#1405)
 - Fix Geographies not filtered by provider (#1248)
 - Fix /support/contribute section in docs (#1427)
-- Fix date format when using Dataframes (#1358)
+- Fix date format when using DataFrames (#1358)
 - Fix hover+click behaviour (#1458)
 - Fix footer in widgets (#1432)
 - Fix dependencies to run in Colab (#1453)

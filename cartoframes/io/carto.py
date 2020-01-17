@@ -66,7 +66,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 @send_metrics('data_uploaded')
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
              cartodbfy=True, log_enabled=True):
-    """Upload a Dataframe to CARTO.
+    """Upload a DataFrame to CARTO.
 
     Args:
         dataframe (pandas.DataFrame, geopandas.GeoDataFrame`): data to be uploaded.
