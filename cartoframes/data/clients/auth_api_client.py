@@ -38,6 +38,8 @@ class AuthAPIClient:
         except Exception as e:
             if str(e) == 'Validation failed: Name has already been taken':
                 api_key = self._api_key_manager.get(name)
+            else:
+                raise e
 
         return api_key.token, tables_names
 
