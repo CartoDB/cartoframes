@@ -184,22 +184,3 @@ class TestKuvizPublisher(object):
         assert kuviz_publisher.kuviz == kuviz
         assert result_update == kuviz_to_dict(kuviz)
         assert result_publish != kuviz_to_dict(kuviz)
-
-    def test_kuviz_publisher_delete(self, mocker):
-        setup_mocks(mocker, self.credentials)
-
-        kuviz = CartoKuvizMock('fake_kuviz')
-        mocker.patch('cartoframes.viz.kuviz._create_kuviz', return_value=kuviz)
-
-        vmap = Map(Layer('fake_table', credentials=self.credentials))
-
-        html = 'fake_html'
-        kuviz_name = 'fake_name'
-
-        kuviz_publisher = KuvizPublisher(None)
-        kuviz_publisher.set_layers(vmap.layers, kuviz_name, 'fake_table_name')
-        kuviz_publisher.publish(html, kuviz_name, None)
-
-        kuviz_publisher.delete()
-
-        assert kuviz_publisher.kuviz is None
