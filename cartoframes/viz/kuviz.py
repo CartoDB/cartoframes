@@ -30,16 +30,19 @@ class KuvizPublisher:
         return self._layers
 
     def set_layers(self, layers, maps_api_key=None):
-        if not isinstance(maps_api_key, str):
-            maps_api_key = self._create_maps_api_keys(layers)
+        new_maps_api_key = None
+        if maps_api_key is None:
+            new_maps_api_key = self._create_maps_api_keys(layers)
 
         self._layers = []
         for layer in layers:
             layer_copy = copy.deepcopy(layer)
 
-            # Set the Maps API key if the source has credentials
             if layer_copy.credentials is not None:
-                layer_copy.credentials['api_key'] = maps_api_key
+                if layer_copy.source.is_public():
+                    layer_copy.credentials['api_key'] = maps_api_key or DEFAULT_PUBLIC
+                else:
+                    layer_copy.credentials['api_key'] = maps_api_key or new_maps_api_key
 
             self._layers.append(layer_copy)
 
