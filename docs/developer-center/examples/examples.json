@@ -211,12 +211,6 @@
             "path": "legends",
             "group": "Legends"
         }, {
-            "title": "Opacity",
-            "desc": "Use opacity in legend",
-            "file": "opacity_in_legend",
-            "path": "legends",
-            "group": "Legends"
-        }, {
             "title": "Default widget",
             "desc": "Set the default widget needed for the style helper",
             "file": "default_widget",
@@ -293,31 +287,31 @@
             "desc": "Create a default visualization layout",
             "file": "default_layout",
             "path": "map_layout",
-            "group": "layout"
+            "group": "Layout"
         }, {
             "title": "Custom layout",
             "desc": "Use different settings to create a custom visualization layout",
             "file": "custom_layout",
             "path": "map_layout",
-            "group": "layout"
+            "group": "Layout"
         }, {
             "title": "Add layout titles",
             "desc": "Use different custom titles to create a visualization layout",
             "file": "layout_titles",
             "path": "map_layout",
-            "group": "layout"
+            "group": "Layout"
         }, {
             "title": "Customize layout viewport",
             "desc": "Use different viewport settings to create a visualization layout",
             "file": "layout_viewport",
             "path": "map_layout",
-            "group": "layout"
+            "group": "Layout"
         }, {
             "title": "Make layout interactive",
             "desc": "Create an interactive visualization layout",
             "file": "interactive_layout",
             "path": "map_layout",
-            "group": "layout"
+            "group": "Layout"
         }]
     }, {
         "title": "Data services",
