@@ -40,7 +40,7 @@ def size_continuous_style(value, size_range=None, range_min=None, range_max=None
 
     data = {
         'point': {
-            '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
+            '@size_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
                 value, range_min, range_max, size_range or [2, 40]),
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, '#FFB927'),
@@ -52,7 +52,7 @@ def size_continuous_style(value, size_range=None, range_min=None, range_max=None
             'filter': animation_filter
         },
         'line': {
-            '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
+            '@size_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
                 value, range_min, range_max, size_range or [1, 10]),
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'line'),
