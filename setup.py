@@ -63,8 +63,8 @@ DISTNAME = 'cartoframes'
 DESCRIPTION = 'CARTO Python package for data scientists'
 LICENSE = 'BSD'
 URL = 'https://github.com/CartoDB/cartoframes'
-AUTHOR = 'Andy Eschbacher'
-EMAIL = 'andy@carto.com'
+AUTHOR = 'CARTO'
+EMAIL = 'contact@carto.com'
 
 
 setup(
@@ -103,5 +103,5 @@ setup(
     extras_requires={
         'tests': EXTRAS_REQUIRES_TESTS
     },
-    python_requires=">=3.5"
+    python_requires='>=3.5'
 )
