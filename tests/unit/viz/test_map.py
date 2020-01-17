@@ -180,10 +180,10 @@ class KuvizPublisherMock(KuvizPublisher):
     def get_layers(self):
         return []
 
-    def set_layers(self, _1, _2, _3):
+    def set_layers(self, layers, map_api_key):
         pass
 
-    def publish(self, _1, name, password, if_exists='fail'):
+    def publish(self, html, name, password, if_exists='fail'):
         self.kuviz = CartoKuvizMock(name, password=password)
         return kuviz_to_dict(self.kuviz)
 
@@ -223,7 +223,7 @@ class TestMapPublication(object):
         vmap = Map(Layer('fake_table', credentials=self.credentials))
 
         name = 'cf_publish'
-        kuviz_dict = vmap.publish(name, None)
+        kuviz_dict = vmap.publish(name, None, self.credentials)
         self.assert_kuviz_dict(kuviz_dict, name, 'link')
         mock_set_content.assert_called_once_with(
             _airship_path=None,
@@ -257,7 +257,7 @@ class TestMapPublication(object):
         )
 
         name = 'cf_publish'
-        kuviz_dict = vmap.publish(name, None)
+        kuviz_dict = vmap.publish(name, None, self.credentials)
         self.assert_kuviz_dict(kuviz_dict, name, 'link')
         mock_set_content.assert_called_once_with(
             _airship_path=None,

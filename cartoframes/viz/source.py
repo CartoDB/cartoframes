@@ -79,14 +79,17 @@ class Source:
             raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 
     def get_credentials(self):
-        if self.credentials:
-            return {
-                # CARTO VL requires a username but CARTOframes allows passing only the base_url.
-                # That's why 'user' is used by default if username is empty.
-                'username': self.credentials.username or 'user',
-                'api_key': self.credentials.api_key,
-                'base_url': self.credentials.base_url
-            }
+        if self.type == SourceType.QUERY:
+            if self.credentials:
+                return {
+                    # CARTO VL requires a username but CARTOframes allows passing only the base_url.
+                    # That's why 'user' is used by default if username is empty.
+                    'username': self.credentials.username or 'user',
+                    'api_key': self.credentials.api_key,
+                    'base_url': self.credentials.base_url
+                }
+        elif self.type == SourceType.GEOJSON:
+            return None
 
     def set_datetime_columns(self):
         if self.type == SourceType.GEOJSON:

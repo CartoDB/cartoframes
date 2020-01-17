@@ -377,14 +377,19 @@
         "file": "publish_share.md",
         "hide_sidebar_samples": true,
         "samples": [{
-            "title": "Publish a map with local data",
-            "desc": "Publish a public visualization",
-            "file": "publish_a_public_visualization",
+            "title": "Publish Public Table Visualization",
+            "desc": "Publish a visualization from a public table",
+            "file": "publish_visualization_public_table",
             "path": "publish_and_share"
         }, {
-            "title": "Publish a map with local data with password",
-            "desc": "Publish a protected visualization",
-            "file": "publish_a_protected_visualization",
+            "title": "Publish Private Table Visualization",
+            "desc": "Publish a visualization from a private table",
+            "file": "publish_visualization_private_table",
+            "path": "publish_and_share"
+        }, {
+            "title": "Publish GeoDataFrame Visualization",
+            "desc": "Publish a visualization from a GeoDataFrame",
+            "file": "publish_visualization_gdf",
             "path": "publish_and_share"
         }]
     }, {
