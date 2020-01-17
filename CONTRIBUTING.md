@@ -27,8 +27,7 @@ To run tests, rename the file `secret.json.sample` to `secret.json` and fill in 
 To open a pull request:
 
 1. Open against the `develop` branch, which we will keep up-to-date with `master`
-2. Tag @andy-esch for review
-3. Once the PR has been approved, we'll merge it into `develop`, and then open a fresh pull request against `master` for running the continuous integration. Once tests are successful, we will tag the original contributor there and give final notice before merging in.
+2. Once the PR has been approved, we'll merge it into `develop`, and then open a fresh pull request against `master` for running the continuous integration. Once tests are successful, we will tag the original contributor there and give final notice before merging in.
 
 ### `carto-python` dependency
 
@@ -42,7 +41,7 @@ Of course, it should be removed before a release is done.
 
 ### Internal contributors
 
-Open a new pull request against the `master` branch and tag @andy-esch.
+Open a new pull request against the `develop` branch.
 
 ## Completing documentation
 
