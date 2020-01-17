@@ -32,6 +32,22 @@ class KuvizPublisher:
         kuvizs = kmanager.all()
         return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
 
+    @staticmethod
+    def delete(name, credentials=None):
+        auth_client = _create_auth_client(credentials)
+        kmanager = _get_kuviz_manager(auth_client)
+        kuvizs = kmanager.all()
+        kuviz = next((kuviz for kuviz in kuvizs if kuviz.name == name), None)
+
+        if kuviz is None:
+            raise PublishError('Publication "{}" not found.'.format(name))
+
+        try:
+            kuviz.delete()
+            log.info('Success! Publication "{0}" deleted'.format(name))
+        except Exception as e:
+            manage_kuviz_exception(e, name)
+
     def get_layers(self):
         return self._layers
 
@@ -61,14 +77,6 @@ class KuvizPublisher:
             manage_kuviz_exception(e, name)
 
         return kuviz_to_dict(self.kuviz)
-
-    def delete(self):
-        if self.kuviz:
-            self.kuviz.delete()
-            log.warning("Publication '{n}' ({id}) deleted".format(n=self.kuviz.name, id=self.kuviz.id))
-            self.kuviz = None
-            return True
-        return False
 
     def _sync_layers(self, layers, table_name=None):
         for idx, layer in enumerate(layers):

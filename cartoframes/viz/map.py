@@ -7,7 +7,7 @@ from . import constants
 from .html import HTMLMap
 from .basemaps import Basemaps
 from .kuviz import KuvizPublisher
-from ..utils.utils import get_center
+from ..utils.utils import get_center, get_credentials
 from ..utils.metrics import send_metrics
 
 WORLD_BOUNDS = [[-180, -90], [180, 90]]
@@ -215,10 +215,6 @@ class Map:
         html = self._get_publication_html(name)
         return self._publisher.publish(html, name, password, if_exists)
 
-    def delete_publication(self):
-        """Delete the published map visualization."""
-        return self._publisher.delete()
-
     def update_publication(self, name, password, if_exists='fail'):
         """Update the published map visualization.
 
@@ -247,6 +243,21 @@ class Map:
 
         """
         return KuvizPublisher.all(credentials)
+
+    @staticmethod
+    def delete_publication(name, credentials=None):
+        """Delete a map visualization published by id.
+
+        Args:
+            name (str): name of the publication to be deleted.
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                A Credentials instance. If not provided, the credentials will be automatically
+                obtained from the default credentials if available.
+
+        """
+        _credentials = get_credentials(credentials)
+
+        return KuvizPublisher.delete(name, _credentials)
 
     def _get_publication_html(self, name):
         html_map = HTMLMap('templates/viz/main.html.j2')
