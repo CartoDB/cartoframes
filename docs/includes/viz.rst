@@ -7,6 +7,7 @@ Map
 ^^^
 
 .. autoclass:: cartoframes.viz.Map
+    :members:
     :member-order: bysource
     :show-inheritance:
 
@@ -14,6 +15,7 @@ Layer
 ^^^^^
 
 .. autoclass:: cartoframes.viz.Layer
+    :members:
     :member-order: bysource
     :show-inheritance:
 
@@ -21,6 +23,7 @@ Source
 ^^^^^^
 
 .. autoclass:: cartoframes.viz.Source
+    :members:
     :member-order: bysource
     :show-inheritance:
 
@@ -28,21 +31,8 @@ Layout
 ^^^^^^
 
 .. autoclass:: cartoframes.viz.Layout
+    :members:
     :member-order: bysource
-    :show-inheritance:
-
-Basemaps
-^^^^^^^^
-
-.. autoclass:: cartoframes.viz.basemaps
-    :undoc-members:
-    :show-inheritance:
-
-Themes
-^^^^^^
-
-.. autoclass:: cartoframes.viz.themes
-    :undoc-members:
     :show-inheritance:
 
 Styles

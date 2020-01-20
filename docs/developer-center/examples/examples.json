@@ -43,11 +43,6 @@
             "desc": "Change the privacy of a CARTO table",
             "file": "change_carto_table_privacy",
             "path": "data_management"
-        }, {
-            "title": "Use dates in a DataFrame",
-            "desc": "Animate a visualization using date columns",
-            "file": "date_columns_in_dataframes",
-            "path": "data_management"
         }]
     }, {
         "title": "Data visualization",

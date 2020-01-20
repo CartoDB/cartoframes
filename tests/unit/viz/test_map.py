@@ -224,7 +224,7 @@ class TestMapPublication(object):
 
         name = 'cf_publish'
         kuviz_dict = vmap.publish(name, None, self.credentials)
-        self.assert_kuviz_dict(kuviz_dict, name, 'link')
+        self.assert_kuviz_dict(kuviz_dict, name, 'public')
         mock_set_content.assert_called_once_with(
             _airship_path=None,
             _carto_vl_path=None,
@@ -258,7 +258,7 @@ class TestMapPublication(object):
 
         name = 'cf_publish'
         kuviz_dict = vmap.publish(name, None, self.credentials)
-        self.assert_kuviz_dict(kuviz_dict, name, 'link')
+        self.assert_kuviz_dict(kuviz_dict, name, 'public')
         mock_set_content.assert_called_once_with(
             _airship_path=None,
             _carto_vl_path=None,
@@ -306,7 +306,7 @@ class TestMapPublication(object):
         new_name = 'cf_update'
         kuviz_dict = map.update_publication(new_name, password=None)
 
-        self.assert_kuviz_dict(kuviz_dict, new_name, 'link')
+        self.assert_kuviz_dict(kuviz_dict, new_name, 'public')
 
     def test_map_publish_update_password(self, mocker):
         setup_mocks(mocker)

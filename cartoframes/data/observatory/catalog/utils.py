@@ -1,10 +1,9 @@
 from .subscriptions import trigger_subscription
 from .subscription_info import fetch_subscription_info
-from ....utils.utils import is_ipython_notebook
+from ....utils.utils import is_ipython_notebook, check_package
 
 if is_ipython_notebook():
     from IPython.display import display
-    from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
 
 
 def display_existing_subscription_message(entity_id, entity_type):
@@ -25,6 +24,10 @@ def display_subscription_form(entity_id, entity_type, credentials):
 
 
 def _display_existing_subscription_message_notebook(entity_id, entity_type):
+    check_package('ipywidgets')
+
+    from ipywidgets.widgets import HTML
+
     message = '''
         <h3>Subscription already purchased</h3>
         The {0} <b>{1}</b> has already been purchased.
@@ -108,6 +111,10 @@ def _display_subscription_form_notebook(entity_id, entity_type, info, instant_li
 
 
 def _create_notebook_form(entity_id, entity_type, message, responses, credentials):
+    check_package('ipywidgets')
+
+    from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
+
     text = HTML(message)
 
     button_yes = Button(
