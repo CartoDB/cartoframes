@@ -31,20 +31,6 @@ Layout
     :member-order: bysource
     :show-inheritance:
 
-Basemaps
-^^^^^^^^
-
-.. autoclass:: cartoframes.viz.basemaps
-    :undoc-members:
-    :show-inheritance:
-
-Themes
-^^^^^^
-
-.. autoclass:: cartoframes.viz.themes
-    :undoc-members:
-    :show-inheritance:
-
 Styles
 ^^^^^^
 
