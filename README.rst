@@ -18,7 +18,7 @@ Try it Out
 * Latest (develop branch): |develop|
 
 .. |stable| image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v0.10.1?filepath=examples
+    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0.0?filepath=examples
 
 .. |develop| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/develop?filepath=examples
