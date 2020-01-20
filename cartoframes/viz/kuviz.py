@@ -75,12 +75,12 @@ class KuvizPublisher:
         return False
 
     def _create_maps_api_keys(self, layers):
-        non_public_sources = [layer.source for layer in layers if not layer.source.is_public()]
+        private_sources = [layer.source for layer in layers if not layer.source.is_public()]
 
-        if len(non_public_sources) > 0:
-            maps_api_key, non_public_tables_names = self._auth_api_client.create_api_key(non_public_sources, ['maps'])
-            log.info('Maps API key "{0}" is used for non public datasets {1}'.format(
-                maps_api_key, non_public_tables_names))
+        if len(private_sources) > 0:
+            maps_api_key, private_tables_names = self._auth_api_client.create_api_key(private_sources, ['maps'])
+            log.info('For publishing this map, Maps API key "{0}" is used for private datasets {1}'.format(
+                maps_api_key, private_tables_names))
             return maps_api_key
 
         return DEFAULT_PUBLIC
