@@ -1,6 +1,7 @@
 import os
 import uuid
 import requests
+import functools
 
 from .logger import log
 from .utils import default_config_path, read_from_config, save_in_config, \
@@ -89,6 +90,7 @@ def post_metrics(event_name):
 
 def send_metrics(event_name):
     def decorator_func(func):
+        @functools.wraps(func)
         def wrapper_func(*args, **kwargs):
             result = func(*args, **kwargs)
             post_metrics(event_name)
