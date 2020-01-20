@@ -6,6 +6,7 @@ import pandas as pd
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery, storage, bigquery_storage_v1beta1 as bigquery_storage
 from google.oauth2.credentials import Credentials as GoogleCredentials
+from google.api_core.exceptions import DeadlineExceeded
 
 from ...auth import get_default_credentials
 from ...utils.logger import log
@@ -89,16 +90,13 @@ class BigQueryClient:
             rows = self._download_by_bq_storage_api(job)
         except Exception:
             log.debug('Cannot download using BigQuery Storage API, fallback to standard')
-
-            try:
-                rows = job.result()
-            except Exception:
-                if job.errors:
-                    log.error([error['message'] for error in job.errors if 'message' in error])
-
-                raise DOError('Error downloading data')
-
-        _rows_to_file(rows, file_path, column_names, progress_bar)
+            rows = _get_job_result(job, 'Error downloading data')
+        try:
+            _rows_to_file(rows, file_path, column_names, progress_bar)
+        except DeadlineExceeded:
+            log.debug('Cannot download using BigQuery Storage API, fallback to standard')
+            rows = _get_job_result(job, 'Error downloading data')
+            _rows_to_file(rows, file_path, column_names, progress_bar)
 
     @timelogger
     def download_to_dataframe(self, job):
@@ -167,13 +165,7 @@ class BigQueryClient:
             uri, table_ref, job_config=job_config
         )
 
-        try:
-            job.result()  # Waits for table load to complete.
-        except Exception:
-            if job.errors:
-                log.error([error['message'] for error in job.errors if 'message' in error])
-
-            raise DOError('Error uploading data')
+        _get_job_result(job, 'Error uploading data')
 
     def get_table_column_names(self, project, dataset, table):
         table_info = self._get_table(project, dataset, table)
@@ -201,3 +193,13 @@ def _rows_to_file(rows, file_path, column_names=None, progress_bar=True):
             csvwriter.writerow(row.values())
             if show_progress_bar:
                 pb.update(1)
+
+
+def _get_job_result(job, error):
+    try:
+        return job.result()
+    except Exception:
+        if job.errors:
+            log.error([error['message'] for error in job.errors if 'message' in error])
+
+        raise DOError(error)
