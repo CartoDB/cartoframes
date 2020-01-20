@@ -34,8 +34,7 @@ REQUIRES = [
     'google-cloud-bigquery==1.22.0',
     'google-cloud-bigquery-storage==0.7.0',
     'fastavro==0.22.7',
-    'semantic_version>=2.8.0,<3',
-    # 'Rtree>=0.8.3,<1.0'
+    'semantic_version>=2.8.0,<3'
 ]
 
 

@@ -114,15 +114,8 @@ def kuviz_to_dict(kuviz):
         'id': kuviz.id,
         'url': kuviz.url,
         'name': kuviz.name,
-        'privacy': rename_privacy(kuviz.privacy)
+        'privacy': kuviz.privacy
     }
-
-
-def rename_privacy(privacy):
-    return {
-        'public': 'link',
-        'password': 'password'
-    }[privacy]
 
 
 def manage_kuviz_exception(error, name):
