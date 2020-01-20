@@ -13,8 +13,8 @@ from ...utils.logger import log
 from ...utils.utils import timelogger, is_ipython_notebook
 from ...exceptions import DOError
 
-
 _GCS_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB. This must be a multiple of 256 KB per the API specification.
+_BQS_TIMEOUT = 2 * 3600  # 2 hours in seconds
 
 
 def refresh_clients(func):
@@ -116,7 +116,7 @@ class BigQueryClient:
 
                 raise DOError('Error downloading data')
 
-    def _download_by_bq_storage_api(self, job):
+    def _download_by_bq_storage_api(self, job, timeout=_BQS_TIMEOUT):
         table_ref = job.destination.to_bqstorage()
 
         parent = 'projects/{}'.format(self._gcp_execution_project)
@@ -131,7 +131,8 @@ class BigQueryClient:
         )
 
         reader = self.bq_storage_client.read_rows(
-            bigquery_storage.types.StreamPosition(stream=session.streams[0])
+            bigquery_storage.types.StreamPosition(stream=session.streams[0]),
+            timeout=timeout
         )
 
         return reader.rows(session)
