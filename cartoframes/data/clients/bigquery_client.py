@@ -91,6 +91,7 @@ class BigQueryClient:
         except Exception:
             log.debug('Cannot download using BigQuery Storage API, fallback to standard')
             rows = _get_job_result(job, 'Error downloading data')
+
         try:
             _rows_to_file(rows, file_path, column_names, progress_bar)
         except DeadlineExceeded:
