@@ -1,6 +1,11 @@
 const maps = {{ maps|tojson }};
 const show_info = '{{show_info}}' === 'True';
 const is_static = '{{is_static}}' === 'True';
+const has_legends = false;
+
+maps.forEach((map) => {
+  map.has_legends = false;
+});
 
 init({
   show_info,
