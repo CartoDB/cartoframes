@@ -196,11 +196,11 @@ def _rows_to_file(rows, file_path, column_names=None, progress_bar=True):
                 pb.update(1)
 
 
-def _get_job_result(job, error):
+def _get_job_result(job, error_message):
     try:
         return job.result()
     except Exception:
         if job.errors:
             log.error([error['message'] for error in job.errors if 'message' in error])
 
-        raise DOError(error)
+        raise DOError(error_message)
