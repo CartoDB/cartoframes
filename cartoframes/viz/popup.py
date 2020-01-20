@@ -1,128 +1,58 @@
-from __future__ import absolute_import
-
-from ..utils import gen_variable_name
+from ..utils.utils import gen_variable_name, gen_column_name
 
 
-class Popup(object):
-    """Popup
+class Popup:
+    """Popups can be added to each layer and displayed in the visualization when clicking or hovering
+    features.
 
-    Args:
-        data (dict): The popup definition for a layer. It contains the information
-          to show a popup on 'click' and 'hover' events with the attributes provided
-          in the definition using the `CARTO VL expressions syntax
-          <https://carto.com/developers/carto-vl/reference/#cartoexpressions>`.
-
-    Example:
-
-        Show columns.
-
-        .. code::
-            from cartoframes.viz import Popup
-
-            Popup({
-                'hover': ['$name'],
-                'click': ['$name', '$pop_max']
-            })
-
-        Show expressions.
-
-        .. code::
-            from cartoframes.viz import Popup
-
-            Popup({
-                'click': ['$pop_min % 100', 'sqrt($pop_max)']
-            })
-
-        Show titles.
-
-        .. code::
-            from cartoframes.viz import Popup
-
-            Popup({
-                'hover': [{
-                    'title': 'Name',
-                    'value': '$name'
-                }],
-                'click': [{
-                    'title': 'Name',
-                    'value': '$name'
-                }, {
-                    'title': 'Pop max',
-                    'value': '$pop_max'
-                }]
-            })
+    They should be added by using the :py:meth:`popup_element <cartoframes.viz.popup_element>` in each
+    Layer popup.
 
     """
+    def __init__(self, event=None, value=None, title=None, operation=False):
+        self._init_popup(event, value, title, operation)
 
-    def __init__(self, data=None):
-        self._init_popup(data)
+    def _init_popup(self, event=None, value=None, title=None, operation=False):
+        if not isinstance(event, str) and not isinstance(value, str):
+            raise ValueError('Wrong popup input')
 
-    def _init_popup(self, data):
-        self._click = []
-        self._hover = []
-        if data is not None:
-            if isinstance(data, dict):
-                # TODO: error control
-                if 'click' in data:
-                    click_data = data.get('click', [])
-                    if isinstance(click_data, list):
-                        self._click = click_data
-                    else:
-                        self._click = [click_data]
-                if 'hover' in data:
-                    hover_data = data.get('hover', [])
-                    if isinstance(hover_data, list):
-                        self._hover = hover_data
-                    else:
-                        self._hover = [hover_data]
-            else:
-                raise ValueError('Wrong popup input')
+        self._event = event
+        self._value = gen_column_name(value, operation)
+        self._title = title if title else value
 
-    def get_interactivity(self):
-        interactivity = []
-        if len(self._click) > 0:
-            interactivity.append({
-                'event': 'click',
-                'attrs': self._get_attrs(self._click)
-            })
-        if len(self._hover) > 0:
-            interactivity.append({
-                'event': 'hover',
-                'attrs': self._get_attrs(self._hover)
-            })
-        return interactivity
+        self._interactivity = self._get_interactivity()
+        self._variable = self._get_variable()
 
-    def _get_attrs(self, array):
-        output = []
-        for item in array:
-            if item:
-                if isinstance(item, str):
-                    output.append({
-                        'name': gen_variable_name(item),
-                        'title': item
-                    })
-                elif isinstance(item, dict) and 'value' in item:
-                    output.append({
-                        'name': gen_variable_name(item.get('value')),
-                        'title': item.get('title')
-                    })
-                else:
-                    raise ValueError('Wrong popup input')
-        return output
+    @property
+    def value(self):
+        return self._value
 
-    def get_variables(self):
-        return self._get_vars(self._click + self._hover)
+    @property
+    def title(self):
+        return self._title
 
-    def _get_vars(self, array):
-        output = {}
-        for item in array:
-            if item:
-                if isinstance(item, str):
-                    name = gen_variable_name(item)
-                    output[name] = item
-                elif isinstance(item, dict) and 'value' in item:
-                    name = gen_variable_name(item.get('value'))
-                    output[name] = item.get('value')
-                else:
-                    raise ValueError('Wrong popup input')
-        return output
+    @property
+    def interactivity(self):
+        return self._interactivity
+
+    @property
+    def variable(self):
+        return self._variable
+
+    def _get_interactivity(self):
+        return {
+            'event': self._event,
+            'attrs': self._get_attrs()
+        }
+
+    def _get_attrs(self):
+        return {
+            'name': gen_variable_name(self._value),
+            'title': self._title
+        }
+
+    def _get_variable(self):
+        return {
+            'name': gen_variable_name(self._value),
+            'value': self._value
+        }

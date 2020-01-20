@@ -1,1 +1,2 @@
+# check setup.py's REQUIRES variable for requirements
 .

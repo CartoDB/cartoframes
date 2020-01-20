@@ -13,7 +13,7 @@ If the bug is not already reported, open a new issue. Please give the following 
 * Code snippet that produced the error
 * Relevant error messages
 * cartoframes version (find it with `print(cartoframes.__version__)`)
-* Python version (e.g., 3.5, 2.7, etc.)
+* Python version (e.g., 3.5, etc.)
 * Operation system (Windows, Linux, etc.)
 
 ## Pull requests
@@ -21,18 +21,27 @@ If the bug is not already reported, open a new issue. Please give the following 
 ### External contributors
 
 CARTOframes has automated testing against a working CARTO account, and the authentication information is not public. Because of this, external pull requests currently cannot successfully run the full suite of tests.
- 
+
 To run tests, rename the file `secret.json.sample` to `secret.json` and fill in the credentials for a CARTO account to which you have access. NOTE: the tests require access to different CARTO services like the Data Observatory, so the tests consume quota.
 
 To open a pull request:
 
 1. Open against the `develop` branch, which we will keep up-to-date with `master`
-2. Tag @andy-esch for review
-3. Once the PR has been approved, we'll merge it into `develop`, and then open a fresh pull request against `master` for running the continuous integration. Once tests are successful, we will tag the original contributor there and give final notice before merging in.
+2. Once the PR has been approved, we'll merge it into `develop`, and then open a fresh pull request against `master` for running the continuous integration. Once tests are successful, we will tag the original contributor there and give final notice before merging in.
+
+### `carto-python` dependency
+
+CARTOframes uses [carto-python](https://github.com/CartoDB/carto-python) intensively. It has the clients to connect to the different CARTO APIs. Usually, when we are developing in CARTOframes, we add the following line in the `requirements.txt` file to work with the last code in the master branch:
+
+```
+-e git+https://github.com/CartoDB/carto-python.git#egg=carto
+```
+
+Of course, it should be removed before a release is done.
 
 ### Internal contributors
 
-Open a new pull request against the `master` branch and tag @andy-esch.
+Open a new pull request against the `develop` branch.
 
 ## Completing documentation
 

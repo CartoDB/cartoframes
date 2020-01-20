@@ -1,0 +1,20 @@
+{% macro createLegend(legend_data, id) -%}
+  <as-legend-{{legend_data.type}} id="{{id}}" slot="legends"></as-legend-{{legend_data.type}}>
+{%- endmacro %}
+
+<div id="legends" class="legends layout-legends">
+  {% for layer in layers|reverse %}
+    {% if layer.legend %}
+      <as-legend
+        class="layout-legend"
+        heading="{{layer.legend.title}}"
+        description="{{layer.legend.description}}"
+      >
+        {{ createLegend(layer.legend, 'layer%d_map%d_legend' | format(loop.index0, index)) }}
+        {% if layer.legend.footer %}
+          <span slot="footer">{{layer.legend.footer}}</span>
+        {% endif %}
+      </as-legend>
+    {% endif %}
+  {% endfor %}
+</div>

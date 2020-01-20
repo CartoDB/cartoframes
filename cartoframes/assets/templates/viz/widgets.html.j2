@@ -1,0 +1,20 @@
+{% macro createWidget(widget, id) -%}
+  <section class="as-body">
+    {% with id = id %}
+      {% include 'templates/viz/widgets/' + widget.type + '.html.j2' %}
+    {% endwith %}
+  </section>
+{%- endmacro %}
+
+<aside class="as-sidebar as-sidebar--right" id="widgets" data-name="Widgets">
+  {% for layer in layers|reverse %}
+    {% if layer.widgets %}
+      {% set outer_loop = loop %}
+        {% for widget in layer.widgets %}
+          <div class="as-box">
+            {{ createWidget(widget, 'layer%d_widget%d' | format(outer_loop.index0, loop.index0)) }}
+          </div>
+        {% endfor %}
+    {% endif %}
+  {% endfor %}
+</aside>

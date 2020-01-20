@@ -1,15 +1,9 @@
-CREDENTIALS = {
-    'username': 'cartoframes',
-    'api_key': 'default_public',
-    'base_url': ''
-}
-
 STYLE = {
     'point': {
         'color': 'hex("#EE4D5A")',
         'width': 'ramp(linear(zoom(),0,18),[2,10])',
         'strokeWidth': 'ramp(linear(zoom(),0,18),[0,1])',
-        'strokeColor': 'opacity(#222,ramp(linear(zoom(),0,18),[0,1]))'
+        'strokeColor': 'opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))'
     },
     'line': {
         'color': 'hex("#4CC8A3")',
@@ -21,3 +15,75 @@ STYLE = {
         'strokeColor': 'opacity(#2c2c2c,ramp(linear(zoom(),2,18),[0.2,0.6]))'
     }
 }
+
+COLOR_PALETTES = [
+    'BURG',
+    'BURGYL',
+    'REDOR',
+    'ORYEL',
+    'PEACH',
+    'PINKYL',
+    'MINT',
+    'BLUGRN',
+    'DARKMINT',
+    'EMRLD',
+    'AG_GRNYL',
+    'BLUYL',
+    'TEAL',
+    'TEALGRN',
+    'PURP',
+    'PURPOR',
+    'SUNSET',
+    'MAGENTA',
+    'SUNSETDARK',
+    'AG_SUNSET',
+    'BRWNYL',
+    'ARMYROSE',
+    'FALL',
+    'GEYSER',
+    'TEMPS',
+    'TEALROSE',
+    'TROPIC',
+    'EARTH',
+    'ANTIQUE',
+    'BOLD',
+    'PASTEL',
+    'PRISM',
+    'SAFE',
+    'VIVID'
+    'CB_YLGN',
+    'CB_YLGNBU',
+    'CB_GNBU',
+    'CB_BUGN',
+    'CB_PUBUGN',
+    'CB_PUBU',
+    'CB_BUPU',
+    'CB_RDPU',
+    'CB_PURD',
+    'CB_ORRD',
+    'CB_YLORRD',
+    'CB_YLORBR',
+    'CB_PURPLES',
+    'CB_BLUES',
+    'CB_GREENS',
+    'CB_ORANGES',
+    'CB_REDS',
+    'CB_GREYS',
+    'CB_PUOR',
+    'CB_BRBG',
+    'CB_PRGN',
+    'CB_PIYG',
+    'CB_RDBU',
+    'CB_RDGY',
+    'CB_RDYLBU',
+    'CB_SPECTRAL',
+    'CB_RDYLGN',
+    'CB_ACCENT',
+    'CB_DARK2',
+    'CB_PAIRED',
+    'CB_PASTEL1',
+    'CB_PASTEL2',
+    'CB_SET1',
+    'CB_SET2',
+    'CB_SET3'
+]

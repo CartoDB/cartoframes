@@ -2,41 +2,49 @@
 # -*- coding: utf-8 -*-
 
 import os
-import io
-from codecs import open
 from setuptools import setup, find_packages
 
 
 def walk_subpkg(name):
     data_files = []
     package_dir = 'cartoframes'
-    for parent, dirs, files in os.walk(os.path.join(package_dir, name)):
+    for parent, _, files in os.walk(os.path.join(package_dir, name)):
         # Remove package_dir from the path.
         sub_dir = os.sep.join(parent.split(os.sep)[1:])
-        for f in files:
-            data_files.append(os.path.join(sub_dir, f))
+        for _file in files:
+            data_files.append(os.path.join(sub_dir, _file))
     return data_files
 
 
+def get_version():
+    _version = {}
+    with open('cartoframes/_version.py') as fp:
+        exec(fp.read(), _version)
+    return _version['__version__']
+
+
 REQUIRES = [
-    'appdirs>=1.4.3',
-    'carto>=1.5.0',
-    'jinja2>=2.10',
-    'pandas>=0.20.1',
-    'shapely>=1.5.0',
-    'tqdm>=4.14.0',
-    'unidecode>=1.0.23',
-    'webcolors>=1.7'
+    'appdirs>=1.4.3,<2.0',
+    'carto>=1.8.4,<2.0',
+    'jinja2>=2.10.1,<3.0',
+    'geopandas>=0.6.0,<1.0',
+    'tqdm>=4.32.1,<5.0',
+    'unidecode>=1.1.0,<2.0',
+    'google-cloud-storage==1.23.0',
+    'google-cloud-bigquery==1.22.0',
+    'google-cloud-bigquery-storage==0.7.0',
+    'fastavro==0.22.7',
+    'semantic_version>=2.8.0,<3'
 ]
 
-EXTRAS_REQUIRE = {
-    ':python_version == "2.7"': [
-        'IPython>=5.0.0,<6.0.0',
-    ],
-    ':python_version >= "3.4"': [
-        'IPython>=6.0.0'
-    ],
-}
+
+EXTRAS_REQUIRES_TESTS = [
+    'pytest',
+    'pytest-mock',
+    'pylint',
+    'flake8'
+]
+
 
 PACKAGE_DATA = {
     '': [
@@ -49,44 +57,50 @@ PACKAGE_DATA = {
     ] + walk_subpkg('assets'),
 }
 
-here = os.path.abspath(os.path.dirname(__file__))
 
-with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = '\n' + f.read()
+DISTNAME = 'cartoframes'
+DESCRIPTION = 'CARTO Python package for data scientists'
+LICENSE = 'BSD'
+URL = 'https://github.com/CartoDB/cartoframes'
+AUTHOR = 'CARTO'
+EMAIL = 'contact@carto.com'
 
-about = {}
-with open(os.path.join(here, 'cartoframes', '__version__.py'), 'r', 'utf-8') as f:
-    exec(f.read(), about)
 
 setup(
-    name=about['__title__'],
-    version=about['__version__'],
-    description=about['__description__'],
-    long_description=long_description,
-    url=about['__url__'],
-    author=about['__author__'],
-    author_email=about['__email__'],
-    license=about['__license__'],
+    name=DISTNAME,
+    version=get_version(),
+
+    description=DESCRIPTION,
+    long_description=open('README.rst').read(),
+    long_description_content_type='text/x-rst',
+    license=LICENSE,
+    url=URL,
+
+    author=AUTHOR,
+    author_email=EMAIL,
+
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7'
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8'
     ],
-    keywords='carto data science maps spatial pandas',
+    keywords=['carto', 'data', 'science', 'maps', 'spatial', 'pandas'],
+
     packages=find_packages(),
-    install_requires=REQUIRES,
-    python_requires=">=2.6, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
-    extras_require=EXTRAS_REQUIRE,
-    include_package_data=True,
-    package_dir={'cartoframes': 'cartoframes'},
     package_data=PACKAGE_DATA,
+    package_dir={'cartoframes': 'cartoframes'},
+    include_package_data=True,
+
+    install_requires=REQUIRES,
+    extras_requires={
+        'tests': EXTRAS_REQUIRES_TESTS
+    },
+    python_requires='>=3.5'
 )

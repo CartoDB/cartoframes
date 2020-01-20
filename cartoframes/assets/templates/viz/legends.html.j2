@@ -1,58 +1,32 @@
-{% macro createLegend(legend_data, id) -%}
-  {% set type = legend_data.type %}
-  {% if type == 'color-bins' %}
-    <as-legend-color-bins id="{{id}}" slot="legends"></as-legend-color-bins>
-  {% elif type == 'color-bins-line' %}
-    <as-legend-color-bins-line id="{{id}}" slot="legends"></as-legend-color-bins-line>
-  {% elif type == 'color-bins-point' %}
-    <as-legend-color-bins-point id="{{id}}" slot="legends"></as-legend-color-bins-point>
-  {% elif type == 'color-bins-polygon' %}
-    <as-legend-color-bins-polygon id="{{id}}" slot="legends"></as-legend-color-bins-polygon>
-  {% elif type == 'color-category' %}
-    <as-legend-color-category id="{{id}}" slot="legends"></as-legend-color-category>
-  {% elif type == 'color-category-line' %}
-    <as-legend-color-category-line id="{{id}}" slot="legends"></as-legend-color-category-line>
-  {% elif type == 'color-category-point' %}
-    <as-legend-color-category-point id="{{id}}" slot="legends"></as-legend-color-category-point>
-  {% elif type == 'color-category-polygon' %}
-    <as-legend-color-category-polygon id="{{id}}" slot="legends"></as-legend-color-category-polygon>
-  {% elif type == 'color-continuous' %}
-    <as-legend-color-continuous id="{{id}}" slot="legends"></as-legend-color-continuous>
-  {% elif type == 'color-continuous-line' %}
-    <as-legend-color-continuous-line id="{{id}}" slot="legends"></as-legend-color-continuous-line>
-  {% elif type == 'color-continuous-point' %}
-    <as-legend-color-continuous-point id="{{id}}" slot="legends"></as-legend-color-continuous-point>
-  {% elif type == 'color-continuous-polygon' %}
-    <as-legend-color-continuous-polygon id="{{id}}" slot="legends"></as-legend-color-continuous-polygon>
-  {% elif type == 'size-bins' %}
-    <as-legend-size-bins id="{{id}}" slot="legends"></as-legend-size-bins>
-  {% elif type == 'size-bins-point' %}
-    <as-legend-size-bins-point id="{{id}}" slot="legends"></as-legend-size-bins-point>
-  {% elif type == 'size-continuous' %}
-    <as-legend-size-continuous id="{{id}}" slot="legends"></as-legend-size-continuous>
-  {% elif type == 'size-continuous-point' %}
-    <as-legend-size-continuous-point id="{{id}}" slot="legends"></as-legend-size-continuous-point>
-  {% endif %}
+{% macro createLegend(legend, id) -%}
+  <as-legend-{{legend.type}} id="{{id}}" slot="legends"></as-legend-{{legend.type}}>
 {%- endmacro %}
 
 <div class="as-panel__element" id="legends">
-  {% if default_legend %}
-  <as-legend id="defaultLegendContainer" heading="Map Legend">
-    <as-legend-color-category id="defaultLegend" slot="legends"></as-legend-color-category>
-  </as-legend>
-  {% endif %}
-
-  {% for layer in layers %}
-    {% if layer.legend %}
-      <as-legend
-        heading="{{layer.legend.title}}"
-        description="{{layer.legend.description}}"
-      >
-        {{ createLegend(layer.legend, 'layer%d_legend' % loop.index0) }}
-        {% if layer.legend.footer %}
-          <span slot="footer">{{layer.legend.footer}}</span>
-        {% endif %}
-      </as-legend>
+  {% for layer in layers|reverse %}
+    {% if layer.legends %}
+    {% set layer_index = loop.index0 %}
+      {% if layer.has_legend_list %}
+        {% for legend in layer.legends %}
+          <as-legend
+            heading="{{legend.title}}"
+            description="{{legend.description}}">
+            {{ createLegend(legend, 'layer%d_map%d_legend%d' | format(layer_index, 0, loop.index0)) }}
+            {% if legend.footer %}
+              <span slot="footer">{{legend.footer}}</span>
+            {% endif %}
+          </as-legend>
+        {% endfor %}
+      {% else %}
+        <as-legend
+          heading="{{layer.legends.title}}"
+          description="{{layer.legends.description}}">
+          {{ createLegend(layer.legends, 'layer%d_map%d_legend%d' | format(layer_index, 0, 0)) }}
+          {% if layer.legends.footer %}
+            <span slot="footer">{{layer.legends.footer}}</span>
+          {% endif %}
+        </as-legend>
+      {% endif %}
     {% endif %}
   {% endfor %}
 </div>

@@ -1,120 +1,199 @@
-from __future__ import absolute_import
+import pandas
 
+from .legend import Legend
+from .legend_list import LegendList
+from .popup import Popup
+from .popup_list import PopupList
 from .source import Source
 from .style import Style
-from .popup import Popup
-from .legend import Legend
-from ..dataset import Dataset
+from .widget import Widget
+from .widget_list import WidgetList
+
+from ..utils.utils import merge_dicts, extract_viz_columns
 
 
-class Layer(object):
-    """Layer
+class Layer:
+    """Layer to display data on a map. This class can be used as one or more
+    layers in :py:class:`Map <cartoframes.viz.Map>` or on its own in a Jupyter
+    notebook to get a preview of a Layer.
+
+    Note: in a Jupyter notebook, it is not required to explicitly add a Layer to a
+        :py:class:`Map <cartoframes.viz.Map>` if only visualizing data as a single layer.
 
     Args:
-        source (str, :py:class:`Dataset <cartoframes.Dataset>`,
-          :py:class:`Source <cartoframes.viz.Source>`): The source data.
-        style (str, dict, :py:class:`Style <cartoframes.viz.Style>`,
-          optional): The style of the visualization: `CARTO VL styling
-          <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`.
-        popup (dict, :py:class:`Popup <cartoframes.viz.Popup>`, optional):
-          This option adds interactivity (click and hover) to a layer to show popups.
-          The columns to be shown must be added in a list format for each event. It
-          must be written using `CARTO VL expressions syntax
-          <https://carto.com/developers/carto-vl/reference/#cartoexpressions>`.
-        legend (dict, :py:class:`Legend <cartoframes.viz.Legend>`, optional):
-          The legend definition for a layer. It contains the information
-          to show a legend "type" (color-category, color-bins, color-continuous),
-          "prop" (color) and also text information: "title", "description" and "footer".
-        context (:py:class:`Context <cartoframes.Context>`):
-          A Context instance. This is only used for the simplified Source API.
-          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
-          this context is simply ignored. If not provided the context will be
-          automatically obtained from the default context.
+        source (str, pandas.DataFrame, geopandas.GeoDataFrame): The source data:
+            table name, SQL query or a dataframe.
+        style (dict, or :py:class:`Style <cartoframes.viz.style.Style>`, optional):
+            The style of the visualization.
+        legends (bool, :py:class:`Legend <cartoframes.viz.legend.Legend>` list, optional):
+            The legends definition for a layer. It contains a list of legend helpers.
+            See :py:class:`Legend <cartoframes.viz.legend.Legend>` for more information.
+        widgets (bool, list, or :py:class:`WidgetList <cartoframes.viz.widget_list.WidgetList>`, optional):
+            Widget or list of widgets for a layer. It contains the information to display
+            different widget types on the top right of the map. See
+            :py:class:`WidgetList` for more information.
+        popup_click(`popup_element <cartoframes.viz.popup_element>` list, optional):
+            Set up a popup to be displayed on a click event.
+        popup_hover(bool, `popup_element <cartoframes.viz.popup_element>` list, optional):
+            Set up a popup to be displayed on a hover event. Style helpers include a default hover popup,
+            set it to `popup_hover=False` to remove it.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            A Credentials instance. This is only used for the simplified Source API.
+            When a :py:class:`Source <cartoframes.viz.Source>` is passed as source,
+            these credentials is simply ignored. If not provided the credentials will be
+            automatically obtained from the default credentials.
+        bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
+            keys, or an array of floats in the following structure: [[west,
+            south], [east, north]]. If not provided the bounds will be automatically
+            calculated to fit all features.
+        geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
+        default_legend (bool, optional): flag to set the default legend. This only works when using a
+            style helper. Default True.
+        default_widget (bool, optional): flag to set the default widget. This only works when using a
+            style helper. Default False.
+        default_popup_hover (bool, optional): flag to set the default popup hover. This only works when using a
+            style helper. Default True.
+        default_popup_click (bool, optional): flag to set the default popup click. This only works when using a
+            style helper. Default False.
+        title (str, optional): title for the default legend, widget and popups.
 
-    Example:
+    Raises:
+        ValueError: if the source is not valid.
 
-        .. code::
+    Examples:
+        Create a layer with the defaults (style, legend).
 
-            from cartoframes.auth import set_default_context
-            from cartoframes.viz import Layer
+        >>> Layer('table_name')  # or Layer(gdf)
 
-            set_default_context(
-                base_url='https://cartovl.carto.com/',
-                api_key='default_public'
-            )
+        Create a layer with a custom style, legend, widget and popups.
 
-            Layer(
-                'SELECT * FROM populated_places WHERE adm0name = \'Spain\'',
-                'color: ramp(globalQuantiles($pop_max, 5), reverse(purpor))',
-                popup={
-                    'hover': '$name',
-                    'click': ['$name', '$pop_max', '$pop_min']
-                },
-                legend={
-                    'type': 'color-category',
-                    'prop': 'color',
-                    'title': 'Population'
-                }
-            )
+        >>> Layer(
+        ...     'table_name',
+        ...     style=color_bins_style('column_name'),
+        ...     legends=color_bins_legend(title='Legend title'),
+        ...     widgets=histogram_widget('column_name', title='Widget title'),
+        ...     popup_click=popup_element('column_name', title='Popup title')
+        ...     popup_hover=popup_element('column_name', title='Popup title'))
 
-        Setting the context.
+        Create a layer specifically tied to a :py:class:`Credentials
+        <cartoframes.auth.Credentials>`.
 
-        .. code::
+        >>> Layer(
+        ...     'table_name',
+        ...     credentials=Credentials.from_file('creds.json'))
 
-            from cartoframes.auth import Context
-            from cartoframes.viz import Layer
-
-            context = Context(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
-            )
-
-            Layer(
-                'populated_places',
-                'color: "red"',
-                context=context
-            )
     """
-
     def __init__(self,
                  source,
                  style=None,
-                 popup=None,
-                 legend=None,
-                 context=None):
+                 legends=None,
+                 widgets=None,
+                 popup_hover=None,
+                 popup_click=None,
+                 credentials=None,
+                 bounds=None,
+                 geom_col=None,
+                 default_legend=True,
+                 default_widget=False,
+                 default_popup_hover=True,
+                 default_popup_click=False,
+                 title=None):
 
         self.is_basemap = False
-
-        self.source = _set_source(source, context)
+        self.source = _set_source(source, credentials, geom_col)
         self.style = _set_style(style)
-        self.popup = _set_popup(popup)
-        self.legend = _set_legend(legend)
 
-        self.bounds = self.source.bounds
-        self.orig_query = self.source.query
-        self.viz = self.style.compute_viz(
-            self.source.geom_type,
-            self.popup.get_variables()
-        )
-        self.interactivity = self.popup.get_interactivity()
-        self.legend_info = self.legend.get_info(
-            self.source.geom_type
-        )
+        self.popups = self._init_popups(
+            popup_hover, popup_click, default_popup_hover, default_popup_click, title)
+        self.legends = self._init_legends(legends, default_legend, title)
+        self.widgets = self._init_widgets(widgets, default_widget, title)
+
+        geom_type = self.source.get_geom_type()
+        popups_variables = self.popups.get_variables()
+        widget_variables = self.widgets.get_variables()
+        external_variables = merge_dicts(popups_variables, widget_variables)
+        self.viz = self.style.compute_viz(geom_type, external_variables)
+        viz_columns = extract_viz_columns(self.viz)
+
+        self.source.compute_metadata(viz_columns)
+        self.source_type = self.source.type
+        self.source_data = self.source.data
+        self.bounds = bounds or self.source.bounds
+        self.credentials = self.source.get_credentials()
+        self.interactivity = self.popups.get_interactivity()
+        self.widgets_info = self.widgets.get_widgets_info()
+        self.legends_info = self.legends.get_info() if self.legends is not None else None
+        self.options = self._set_options()
+        self.has_legend_list = isinstance(self.legends, LegendList)
+
+    def _init_legends(self, legends, default_legend, title):
+        if legends:
+            return _set_legends(legends, self.style.default_legend)
+
+        if default_legend is True:
+            default_legend = self.style.default_legend
+            if default_legend is not None:
+                default_legend.set_title(title)
+            return _set_legends(default_legend)
+
+        return LegendList()
+
+    def _init_widgets(self, widgets, default_widget, title):
+        if widgets:
+            return _set_widgets(widgets, self.style.default_widget)
+
+        if default_widget is True:
+            default_widget = self.style.default_widget
+            if default_widget is not None:
+                default_widget.set_title(title)
+            return _set_widgets(default_widget)
+
+        return WidgetList()
+
+    def _init_popups(self, popup_hover, popup_click, default_popup_hover, default_popup_click, title):
+        popups = {}
+
+        if popup_hover:
+            popups['hover'] = popup_hover
+        elif default_popup_hover is True and self.style.default_popup_hover is not None:
+            popups['hover'] = self.style.default_popup_hover
+            popups['hover']['title'] = title
+
+        if popup_click:
+            popups['click'] = popup_click
+        elif default_popup_click is True and self.style.default_popup_click is not None:
+            popups['click'] = self.style.default_popup_click
+            popups['click']['title'] = title
+
+        return _set_popups(popups, self.style.default_popup_hover, self.style.default_popup_click)
+
+    def _set_options(self):
+        date_column_names = self.source.get_datetime_column_names()
+
+        if isinstance(date_column_names, list):
+            return {'dateColumns': date_column_names}
+
+        return {}
+
+    def _repr_html_(self):
+        from .map import Map
+        return Map(self)._repr_html_()
 
 
-def _set_source(source, context):
-    """Set a Source class from the input"""
-    if isinstance(source, (str, list, dict, Dataset)):
-        return Source(source, context)
+def _set_source(source, credentials, geom_col):
+    if isinstance(source, (str, pandas.DataFrame)):
+        return Source(source, credentials, geom_col)
     elif isinstance(source, Source):
         return source
     else:
-        raise ValueError('Wrong source')
+        raise ValueError('Wrong source. Valid sources are string, DataFrame or GeoDataFrame.')
 
 
 def _set_style(style):
-    """Set a Style class from the input"""
-    if isinstance(style, (str, dict)):
+    if isinstance(style, str):
+        # Only for testing purposes
+        return Style(data=style)
+    if isinstance(style, dict):
         return Style(style)
     elif isinstance(style, Style):
         return style
@@ -122,21 +201,30 @@ def _set_style(style):
         return Style()
 
 
-def _set_popup(popup):
-    """Set a Popup class from the input"""
-    if isinstance(popup, dict):
-        return Popup(popup)
-    elif isinstance(popup, Popup):
-        return popup
+def _set_legends(legends, default_legend=None):
+    if isinstance(legends, list):
+        return LegendList(legends, default_legend)
+    if isinstance(legends, Legend):
+        return LegendList([legends], default_legend)
+    if isinstance(legends, LegendList):
+        return legends
     else:
-        return Popup()
+        return LegendList()
 
 
-def _set_legend(legend):
-    """Set a Legend class from the input"""
-    if isinstance(legend, dict):
-        return Legend(legend)
-    elif isinstance(legend, Legend):
-        return legend
+def _set_widgets(widgets, default_widget=None):
+    if isinstance(widgets, list):
+        return WidgetList(widgets, default_widget)
+    if isinstance(widgets, Widget):
+        return WidgetList([widgets], default_widget)
+    if isinstance(widgets, WidgetList):
+        return widgets
     else:
-        return Legend()
+        return WidgetList()
+
+
+def _set_popups(popups, default_popup_hover=None, default_popup_click=None):
+    if isinstance(popups, (dict, Popup)):
+        return PopupList(popups, default_popup_hover, default_popup_click)
+    else:
+        return PopupList()

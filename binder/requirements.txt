@@ -1,9 +1,6 @@
-cartoframes
+cartoframes==1.0.0
 # Additional dependencies from examples
 matplotlib
-pandas
-geopandas
 dask
 # needed for pandas.read_excel in data obs notebook
 xlrd
-

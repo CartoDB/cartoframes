@@ -4,10 +4,12 @@
 sandbox/
 
 # Misc
+creds.json
 credentials.json
-test/secret.json
+
 __pycache__
 .*.sw[nop]
+.vscode
 
 # OS
 .DS_Store
@@ -26,7 +28,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
 lib64/
 parts/
 sdist/
@@ -37,6 +39,7 @@ wheels/
 *.egg
 Pipfile
 Pipfile.lock
+package-lock.json
 
 # Swap files
 .*.sw[nop]
@@ -44,9 +47,21 @@ Pipfile.lock
 # project-specific
 CARTOCREDS.json
 SITEKEY.txt
-test/secret.json
+secret.json
 examples/scratch/*
 
+# JavaScript 
+node_modules
+
 # Tests
+.tox
 .coverage
+htmlcov
 test_*.json
+.pytest_cache
+tmp_file.csv
+
+# Sphinx documentation
+docs/build/
+docs/_static/
+docs/_templates/

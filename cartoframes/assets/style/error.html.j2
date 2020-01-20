@@ -1,0 +1,47 @@
+  <style>
+    #error-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: white;
+      visibility: hidden;
+      padding: 1em;
+      font-family: "Courier New", Courier, monospace;
+      margin: 0 auto;
+      font-size: 14px;
+      overflow: auto;
+      z-index: 1000;
+      color: black;
+    }
+
+    .error-section {
+      padding: 1em;
+      border-radius: 5px;
+      background-color: #fee;
+    }
+
+    #error-container #error-highlight {
+      font-weight: bold;
+      color: inherit;
+    }
+
+    #error-container #error-type {
+      color: #008000;
+    }
+
+    #error-container #error-name {
+      color: #ba2121;
+    }
+
+    #error-container #error-content {
+      margin-top: 0.4em;
+    }
+
+    .error-details {
+      margin-top: 1em;
+    }
+
+    #error-stacktrace {
+      list-style: none;
+    }
+</style>

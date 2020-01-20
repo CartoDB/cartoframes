@@ -1,0 +1,12 @@
+<div>
+  <as-time-series-widget
+    animated
+    id="{{id}}"
+    time-format="{% if widget.options.timeFormat %}{{widget.options.timeFormat}}{% else %}auto{% endif %}"
+    description="{{widget.description}}"
+    heading="{{widget.title}}">
+  </as-time-series-widget>
+  {% if widget.footer %}
+    <footer>{{widget.footer}}</footer>
+  {% endif %}
+</div>

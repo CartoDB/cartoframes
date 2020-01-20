@@ -1,76 +1,80 @@
-from __future__ import absolute_import
-
 from . import constants
 
 
-class Legend(object):
-    """Legend
+class Legend:
+    """Legends are added to each layer and displayed in the visualization
 
-    Args:
-        data (dict): The legend definition for a layer. It contains the information
-          to show a legend "type" (color-category, color-bins, color-continuous),
-          "prop" (color) and also text information: "title", "description" and "footer".
-
-    Example:
-
-    .. code::
-        from cartoframes.viz import Legend
-
-        Legend({
-            'type': 'color-category',
-            'prop': 'color',
-            'title': '[TITLE]',
-            'description': '[description]',
-            'footer': '[footer]'
-        })
+    Available legends are:
+        - :py:meth:`basic_legend <cartoframes.viz.basic_legend>`
+        - :py:meth:`color_bins_legend <cartoframes.viz.color_bins_legend>`
+        - :py:meth:`color_category_legend <cartoframes.viz.color_category_legend>`
+        - :py:meth:`color_continuous_legend <cartoframes.viz.color_continuous_legend>`
+        - :py:meth:`size_bins_legend <cartoframes.viz.size_bins_legend>`
+        - :py:meth:`size_category_legend <cartoframes.viz.size_category_legend>`
+        - :py:meth:`size_continuous_legend <cartoframes.viz.size_continuous_legend>`
 
     """
+    def __init__(self, legend_type=None, title=None, description=None,
+                 footer=None, prop=None, variable='', dynamic=True):
+        self._check_type(legend_type)
+        self._check_prop(prop)
+        self._type = legend_type
+        self._title = title
+        self._description = description
+        self._footer = footer
+        self._prop = prop
+        self._variable = variable
+        self._dynamic = dynamic
 
-    def __init__(self, data=None):
-        self._init_legend(data)
+    def add_defaults(self, title=None):
+        self._title = self._title or title
 
-    def _init_legend(self, data):
-        self._type = ''
-        self._prop = ''
-        self._title = ''
-        self._description = ''
-        self._footer = ''
-        if data is not None:
-            if isinstance(data, dict):
-                self._type = data.get('type', '')
-                self._prop = data.get('prop', '')
-                self._title = data.get('title', '')
-                self._description = data.get('description', '')
-                self._footer = data.get('footer', '')
+    def set_title(self, title):
+        if title is not None:
+            self._title = title
 
-                if self._type or self._prop:
-                    if not isinstance(self._type, dict) and self._type not in constants.LEGEND_TYPES:
-                        raise ValueError(
-                            'Legend type "{0}" is not valid. Valid legend types are: {1}'.format(
-                                self._type,
-                                ', '.join(constants.LEGEND_TYPES)
-                            ))
-                    if self._prop not in constants.LEGEND_PROPERTIES:
-                        raise ValueError(
-                            'Legend property "{0}" is not valid. Valid legend property are: {1}'.format(
-                                self._prop,
-                                ', '.join(constants.LEGEND_PROPERTIES)
-                            ))
+    def get_info(self):
+        if self._type or self._title or self._description or self._footer:
+            _prop = self._get_prop(self._type)
 
-            else:
-                raise ValueError('Wrong legend input')
-
-    def get_info(self, geom_type):
-        if (self._type and self._prop) or self._title or self._description or self._footer:
-            _type = self._type
-            if isinstance(_type, dict) and geom_type in _type:
-                _type = _type.get(geom_type)
             return {
-                'type': _type,
-                'prop': self._prop,
-                'title': self._title,
-                'description': self._description,
-                'footer': self._footer
+                'type': self._type,
+                'prop': _prop,
+                'variable': self._variable,
+                'dynamic': self._dynamic,
+                'title': self._title or '',
+                'description': self._description or '',
+                'footer': self._footer or ''
             }
         else:
             return {}
+
+    def _get_prop(self, _type):
+        if _type and not self._prop:
+            _prop = self._infer_prop(_type)
+        else:
+            _prop = self._prop
+
+        return constants.VIZ_PROPERTIES_MAP.get(_prop)
+
+    def _check_type(self, _type):
+        if _type and _type not in constants.LEGEND_TYPES:
+            raise ValueError(
+                'Legend type "{}" is not valid. Valid legend types are: {}.'.format(
+                    _type, ', '.join(constants.LEGEND_TYPES)
+                ))
+
+    def _check_prop(self, _prop):
+        if _prop and _prop not in constants.LEGEND_PROPERTIES:
+            raise ValueError(
+                'Legend property "{}" is not valid. Valid legend properties are: {}.'.format(
+                    _prop, ', '.join(constants.LEGEND_PROPERTIES)
+                ))
+
+    def _infer_prop(self, _type):
+        if _type.startswith('color'):
+            return 'color'
+        elif _type.startswith('size'):
+            return 'size'
+        else:
+            return None
