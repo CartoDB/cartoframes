@@ -11,6 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Add metrics and utils.setup_metrics function (#1457)
+- Add support for Python 3.8 (#1455)
+- Add migration guides (#828)
+
+### Changed
+- Allow to update a published map (#1451)
+- Generate guides from Jupyter Notebooks (#1479)
+- Review examples/guides (#1473, #1201, #1500)
+- Manage kuviz quota (#1471)
+- Explicit map.publish behaviour (#1485)
+- Use Airship v2.2 (#1499)
+
+### Fixed
+- Replace geometry from geom_col (#1487)
+- Fix size_continuous_style/_legend not displaying totals (#1488)
 
 ## [1.0rc1] - 2020-01-10
 
