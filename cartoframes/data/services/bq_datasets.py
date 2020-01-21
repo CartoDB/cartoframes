@@ -1,10 +1,8 @@
 import requests
 from carto.utils import ResponseStream
-from carto.auth import APIKeyAuthClient
+# from carto.auth import APIKeyAuthClient
 
 from carto.exceptions import CartoException
-
-
 
 DO_ENRICHMENT_API_URL = 'http://localhost:7070/bq'
 
@@ -39,7 +37,6 @@ class BQDataset:
             raise CartoException(e)
 
         return response
-
 
     def download_stream(self):
         return ResponseStream(self.download())
