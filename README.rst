@@ -2,8 +2,8 @@
 CARTOframes
 ***********
 
-.. image:: https://travis-ci.org/CartoDB/cartoframes.svg
-    :target: https://travis-ci.org/CartoDB/CARTOframes
+.. image:: https://travis-ci.org/CartoDB/cartoframes.svg?branch=develop
+    :target: https://travis-ci.org/CartoDB/cartoframes
 .. image:: https://img.shields.io/badge/pypi-v1.0.0-orange
     :target: https://pypi.org/project/cartoframes/1.0.0
 
