@@ -26,12 +26,14 @@ REQUIRES = [
     'shapely==1.5.0',
     'tqdm==4.14.0',
     'unidecode==1.0.23',
-    'webcolors==1.7'
+    'webcolors==1.7',
+    'numpy==1.15.1'
 ]
 
 EXTRAS_REQUIRE = {
     ':python_version == "2.7"': [
         'IPython>=5.0.0,<6.0.0',
+        'numpy==1.15.1'
     ],
     ':python_version >= "3.4"': [
         'IPython>=6.0.0'
