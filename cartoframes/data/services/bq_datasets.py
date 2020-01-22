@@ -4,6 +4,7 @@ from carto.utils import ResponseStream
 
 from carto.exceptions import CartoException
 
+# TODO: this shouldn't be hardcoded
 DO_ENRICHMENT_API_URL = 'http://localhost:7070/bq'
 
 
