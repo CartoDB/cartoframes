@@ -1,5 +1,4 @@
 import unittest
-import pytest
 import pandas
 import geopandas
 from shapely import wkt
@@ -15,6 +14,7 @@ EXPECTED_CSV_SAMPLE = """state_fips_code,county_fips_code,geo_id,tract_name,inte
 60,10,60010950500,9505.0,POINT (-170.6651925 -14.2713653)
 60,10,60010950600,9506.0,POINT (-170.701028 -14.252446)
 """
+
 
 class TestBQUserDataset(unittest.TestCase):
 
@@ -43,7 +43,7 @@ class TestBQUserDataset(unittest.TestCase):
     def test_creation_of_dataset(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         dataset = BQUserDataset.name(unique_table_name) \
-                               .column(name='cartodb_id',type='INT64') \
+                               .column(name='cartodb_id', type='INT64') \
                                .column('the_geom', 'GEOMETRY')
 
         dataset.ttl_seconds(30)

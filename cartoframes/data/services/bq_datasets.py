@@ -7,13 +7,16 @@ from carto.exceptions import CartoException
 # TODO: this shouldn't be hardcoded
 DO_ENRICHMENT_API_URL = 'http://localhost:7070/bq'
 
-VALID_TYPES = [ 'STRING', 'BYTES', 'INTEGER', 'INT64', 'FLOAT',
-                'FLOAT64', 'BOOLEAN', 'BOOL', 'TIMESTAMP', 'DATE',
-                'TIME', 'DATETIME', 'GEOMETRY' ]
+VALID_TYPES = [
+    'STRING', 'BYTES', 'INTEGER', 'INT64', 'FLOAT',
+    'FLOAT64', 'BOOLEAN', 'BOOL', 'TIMESTAMP', 'DATE', 'TIME',
+    'DATETIME', 'GEOMETRY'
+]
 
 TYPES_MAPPING = {
     'GEOMETRY': 'GEOGRAPHY'
 }
+
 
 class _BQDatasetClient:
 
@@ -99,7 +102,7 @@ class BQUserDataset:
     def column(self, name=None, type=None):
         # TODO validate field names
         type = type.upper()
-        if not type in VALID_TYPES:
+        if type not in VALID_TYPES:
             # TODO custom exception
             raise Exception(f'Invalid type {type}')
         self._columns.append((name, type))
@@ -112,7 +115,7 @@ class BQUserDataset:
     def create(self):
         payload = {
             'id': self._name_id,
-            'schema': [ {'name': c[0], 'type': self._map_type(c[1])} for c in self._columns ],
+            'schema': [{'name': c[0], 'type': self._map_type(c[1])} for c in self._columns],
         }
         if self.ttl_seconds is not None:
             payload['ttl_seconds'] = self._ttl_seconds
