@@ -1,3 +1,4 @@
+import os
 import requests
 from carto.utils import ResponseStream
 # from carto.auth import APIKeyAuthClient
@@ -17,7 +18,34 @@ class BQDataset:
         self.api_key = 'my_valid_api_key'
 
     def upload(self, dataframe):
-        pass
+        url = DO_ENRICHMENT_API_URL + '/datasets/' + self.name
+        params = {'api_key': self.api_key}
+
+        try:
+            dataframe.to_csv(self.name, index=False)
+            files = {'file': open(self.name, 'rb')}
+
+            response = self.session.post(
+                url,
+                params=params,
+                files=files
+            )
+
+            response.raise_for_status()
+        except requests.HTTPError as e:
+            if 400 <= response.status_code < 500:
+                reason = response.json()['error'][0]
+                error_msg = u'%s Client Error: %s' % (response.status_code,
+                                                      reason)
+                raise CartoException(error_msg)
+            raise CartoException(e)
+        except Exception as e:
+            raise CartoException(e)
+        finally:
+            os.remove(self.name)
+
+        return response
+
 
     def upload_file_object(self, file_object):
         pass
@@ -60,10 +88,10 @@ class BQJob:
     def __init__(self, job_id):
         self.id = job_id
 
-    def status():
+    def status(self):
         pass
 
-    def result():
+    def result(self):
         pass
 
 

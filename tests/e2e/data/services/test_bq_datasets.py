@@ -2,6 +2,7 @@ import unittest
 import pandas
 import geopandas
 from shapely import wkt
+import uuid
 
 from cartoframes.data.services import BQUserDataset
 
@@ -14,8 +15,12 @@ EXPECTED_CSV_SAMPLE = """state_fips_code,county_fips_code,geo_id,tract_name,inte
 60,10,60010950600,9506.0,POINT (-170.701028 -14.252446)
 """
 
-
 class TestBQDataset(unittest.TestCase):
+
+    def test_can_upload_from_dataframe(self):
+        df = pandas.read_csv(EXPECTED_CSV_SAMPLE)
+        unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        BQUserDataset.name(unique_table_name).upload(df)
 
     def test_can_download_to_dataframe(self):
         result = BQUserDataset.name('census_tracts_american_samoa').download_stream()
