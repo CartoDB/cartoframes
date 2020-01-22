@@ -16,6 +16,19 @@ class BQDataset:
         self.session = requests.Session()
         self.api_key = 'my_valid_api_key'
 
+    def upload(self, dataframe):
+        pass
+
+    def upload_file_object(self, file_object):
+        pass
+
+    def import(self):
+        pass
+
+    def upload_dataframe(self, dataframe):
+        self.upload(dataframe)
+        pass
+
     def download(self):
         url = DO_ENRICHMENT_API_URL + '/datasets/' + self.name
         params = {'api_key': self.api_key}
@@ -42,6 +55,15 @@ class BQDataset:
     def download_stream(self):
         return ResponseStream(self.download())
 
+class BQJob:
+
+    def __init__(self, job_id):
+        self.id = job_id
+
+    def status():
+        pass
+    def result():
+        pass
 
 class BQUserDataset:
 
