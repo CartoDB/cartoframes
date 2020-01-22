@@ -22,11 +22,10 @@ class BQDataset:
     def upload_file_object(self, file_object):
         pass
 
-    def import(self):
+    def create_import(self):
         pass
 
     def upload_dataframe(self, dataframe):
-        self.upload(dataframe)
         pass
 
     def download(self):
@@ -55,6 +54,7 @@ class BQDataset:
     def download_stream(self):
         return ResponseStream(self.download())
 
+
 class BQJob:
 
     def __init__(self, job_id):
@@ -62,8 +62,10 @@ class BQJob:
 
     def status():
         pass
+
     def result():
         pass
+
 
 class BQUserDataset:
 
