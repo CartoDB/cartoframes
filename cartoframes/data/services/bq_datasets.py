@@ -46,7 +46,6 @@ class BQDataset:
 
         return response
 
-
     def upload_file_object(self, file_object):
         pass
 
