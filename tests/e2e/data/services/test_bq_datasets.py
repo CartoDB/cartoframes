@@ -15,6 +15,7 @@ EXPECTED_CSV_SAMPLE = """state_fips_code,county_fips_code,geo_id,tract_name,inte
 60,10,60010950600,9506.0,POINT (-170.701028 -14.252446)
 """
 
+
 class TestBQDataset(unittest.TestCase):
 
     def test_can_upload_from_dataframe(self):
