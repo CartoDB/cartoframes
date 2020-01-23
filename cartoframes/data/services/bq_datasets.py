@@ -101,8 +101,7 @@ class BQDataset:
                 error_msg = u'%s Client Error: %s' % (response.status_code,
                                                       reason)
                 raise CartoException(error_msg)
-            else:
-                raise CartoException(e)
+            raise CartoException(e)
         except Exception as e:
             raise CartoException(e)
 
@@ -140,8 +139,7 @@ class BQJob:
                 error_msg = u'%s Client Error: %s' % (response.status_code,
                                                       reason)
                 raise CartoException(error_msg)
-            else:
-                raise CartoException(e)
+            raise CartoException(e)
         except Exception as e:
             raise CartoException(e)
 
