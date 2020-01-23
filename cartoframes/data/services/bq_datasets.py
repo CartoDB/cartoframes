@@ -49,7 +49,7 @@ class BQDataset:
     def upload_file_object(self, file_object):
         pass
 
-    def create_import(self):
+    def import_dataset(self):
         pass
 
     def upload_dataframe(self, dataframe):
