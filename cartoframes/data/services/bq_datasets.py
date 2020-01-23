@@ -26,7 +26,7 @@ class _BQDatasetClient:
         self.api_key = 'my_valid_api_key'
 
     def download(self, name_id):
-        url = f'{DO_ENRICHMENT_API_URL}/datasets/{name_id}'
+        url = '%s/datasets/%s' % (DO_ENRICHMENT_API_URL, name_id)
         params = {'api_key': self.api_key}
 
         try:
@@ -52,7 +52,7 @@ class _BQDatasetClient:
         return ResponseStream(self.download(name_id))
 
     def create(self, payload):
-        url = f'{DO_ENRICHMENT_API_URL}/datasets'
+        url = '%s/datasets' % DO_ENRICHMENT_API_URL
         params = {'api_key': self.api_key}
 
         try:
@@ -104,7 +104,7 @@ class BQUserDataset:
         type = type.upper()
         if type not in VALID_TYPES:
             # TODO custom exception
-            raise Exception(f'Invalid type {type}')
+            raise Exception('Invalid type %s' % type)
         self._columns.append((name, type))
         return self
 
