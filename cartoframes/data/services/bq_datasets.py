@@ -117,6 +117,6 @@ class BQUserDataset:
             'id': self._name_id,
             'schema': [{'name': c[0], 'type': self._map_type(c[1])} for c in self._columns],
         }
-        if self.ttl_seconds is not None:
+        if self._ttl_seconds is not None:
             payload['ttl_seconds'] = self._ttl_seconds
         self._client.create(payload)
