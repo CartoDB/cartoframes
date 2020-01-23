@@ -25,6 +25,11 @@ class TestBQDataset(unittest.TestCase):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         BQUserDataset.name(unique_table_name).upload(df)
 
+    def test_can_upload_from_file_object(self):
+        file_object = StringIO(EXPECTED_CSV_SAMPLE)
+        unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        BQUserDataset.name(unique_table_name).upload_file_object(file_object)
+
     def test_can_download_to_dataframe(self):
         result = BQUserDataset.name('census_tracts_american_samoa').download_stream()
         df = pandas.read_csv(result)
