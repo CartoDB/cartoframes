@@ -22,7 +22,7 @@ class BQDataset:
         params = {'api_key': self.api_key}
 
         try:
-            dataframe.to_csv(self.name, index=False)
+            dataframe.to_csv(path_or_buf=self.name, index=False)
 
             with open(self.name, 'rb') as f:
                 response = self.session.post(url, params=params, data=f)
