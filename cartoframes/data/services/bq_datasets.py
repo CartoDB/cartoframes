@@ -120,7 +120,6 @@ class BQJob:
         self.session = requests.Session()
         self.api_key = 'my_valid_api_key'
 
-
     def status(self):
         url = DO_ENRICHMENT_API_URL + '/datasets/' + self.name + '/imports/' + self.id
         params = {'api_key': self.api_key}
