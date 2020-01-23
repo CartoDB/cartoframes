@@ -45,8 +45,7 @@ class TestBQDataset(unittest.TestCase):
         BQUserDataset.name(unique_table_name).upload_file_object(file_object)
         job = BQUserDataset.name(unique_table_name).import_dataset()
         status = job.status()
-        self.assertTrue(status in 'done' or 'running' or 'waiting')
-
+        self.assertTrue(status in ('done' or 'running' or 'waiting' or 'failed'))
 
     # TODO: it needs the create_dataset method to be able to import a datase from GCS to BQ
     def test_can_wait_for_job_completion(self):
