@@ -148,7 +148,12 @@ class BQJob:
             raise CartoException(e)
 
     def result(self):
-        pass
+        status = self.status()
+
+        while status != 'done':
+            status = self.status()
+
+        return status
 
 
 class BQUserDataset:
