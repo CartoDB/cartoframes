@@ -5,6 +5,7 @@ from shapely import wkt
 import uuid
 
 from cartoframes.data.services import BQUserDataset
+from io import StringIO
 
 
 EXPECTED_CSV_SAMPLE = """state_fips_code,county_fips_code,geo_id,tract_name,internal_point_geo
@@ -19,7 +20,8 @@ EXPECTED_CSV_SAMPLE = """state_fips_code,county_fips_code,geo_id,tract_name,inte
 class TestBQDataset(unittest.TestCase):
 
     def test_can_upload_from_dataframe(self):
-        df = pandas.read_csv(EXPECTED_CSV_SAMPLE)
+        sample = StringIO(EXPECTED_CSV_SAMPLE)
+        df = pandas.read_csv(sample)
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         BQUserDataset.name(unique_table_name).upload(df)
 

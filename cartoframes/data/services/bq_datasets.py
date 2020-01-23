@@ -23,15 +23,10 @@ class BQDataset:
 
         try:
             dataframe.to_csv(self.name, index=False)
-            files = {'file': open(self.name, 'rb')}
 
-            response = self.session.post(
-                url,
-                params=params,
-                files=files
-            )
-
-            response.raise_for_status()
+            with open(self.name, 'rb') as f:
+                response = self.session.post(url, params=params, data=f)
+                response.raise_for_status()
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 reason = response.json()['error'][0]
