@@ -39,8 +39,6 @@ class BQDataset:
         finally:
             os.remove(self.name)
 
-        return response
-
     def upload_file_object(self, file_object):
         url = DO_ENRICHMENT_API_URL + '/datasets/' + self.name
         params = {'api_key': self.api_key}
@@ -57,8 +55,6 @@ class BQDataset:
             raise CartoException(e)
         except Exception as e:
             raise CartoException(e)
-
-        return response
 
     def import_dataset(self):
         url = DO_ENRICHMENT_API_URL + '/datasets/' + self.name + '/imports'
@@ -84,7 +80,10 @@ class BQDataset:
     def upload_dataframe(self, dataframe):
         # missing call to create the dataset
         self.upload(dataframe)
-        self.import_dataset()
+        job = self.import_dataset()
+        status = job.result()
+
+        return status
 
     def download(self):
         url = DO_ENRICHMENT_API_URL + '/datasets/' + self.name

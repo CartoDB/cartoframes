@@ -57,6 +57,13 @@ class TestBQDataset(unittest.TestCase):
         status = job.result()
         self.assertEqual(status, 'done')
 
+    def test_can_upload_a_dataframe_and_wait_for_completion(self):
+        sample = StringIO(EXPECTED_CSV_SAMPLE)
+        df = pandas.read_csv(sample)
+        unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        status = BQUserDataset.name(unique_table_name).upload_dataframe(df)
+        self.assertEqual(status, 'done')
+
     def test_can_download_to_dataframe(self):
         result = BQUserDataset.name('census_tracts_american_samoa').download_stream()
         df = pandas.read_csv(result)
