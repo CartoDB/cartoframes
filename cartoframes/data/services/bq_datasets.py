@@ -86,7 +86,6 @@ class BQDataset:
         self.upload(dataframe)
         self.import_dataset()
 
-
     def download(self):
         url = DO_ENRICHMENT_API_URL + '/datasets/' + self.name
         params = {'api_key': self.api_key}
