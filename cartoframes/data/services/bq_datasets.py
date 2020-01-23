@@ -67,6 +67,10 @@ class BQDataset:
         try:
             response = self.session.post(url, params=params)
             response.raise_for_status()
+
+            job = response.json()
+
+            return BQJob(job['item_queue_id'], self.name)
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 reason = response.json()['error'][0]
@@ -77,10 +81,11 @@ class BQDataset:
         except Exception as e:
             raise CartoException(e)
 
-        return response
-
     def upload_dataframe(self, dataframe):
-        pass
+        # missing call to create the dataset
+        self.upload(dataframe)
+        self.import_dataset()
+
 
     def download(self):
         url = DO_ENRICHMENT_API_URL + '/datasets/' + self.name
@@ -111,11 +116,36 @@ class BQDataset:
 
 class BQJob:
 
-    def __init__(self, job_id):
+    def __init__(self, job_id, name_id):
         self.id = job_id
+        self.name = name_id
+        # TODO fix this crap
+        self.session = requests.Session()
+        self.api_key = 'my_valid_api_key'
+
 
     def status(self):
-        pass
+        url = DO_ENRICHMENT_API_URL + '/datasets/' + self.name + '/imports/' + self.id
+        params = {'api_key': self.api_key}
+
+        try:
+            response = self.session.get(url, params=params)
+            response.raise_for_status()
+
+            body = response.json()
+
+            return body['status']
+        except requests.HTTPError as e:
+            if 400 <= response.status_code < 500:
+                # Client error, provide better reason
+                reason = response.json()['error'][0]
+                error_msg = u'%s Client Error: %s' % (response.status_code,
+                                                      reason)
+                raise CartoException(error_msg)
+            else:
+                raise CartoException(e)
+        except Exception as e:
+            raise CartoException(e)
 
     def result(self):
         pass
