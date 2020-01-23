@@ -58,8 +58,26 @@ class BQDataset:
         except Exception as e:
             raise CartoException(e)
 
+        return response
+
     def import_dataset(self):
-        pass
+        url = DO_ENRICHMENT_API_URL + '/datasets/' + self.name + '/imports'
+        params = {'api_key': self.api_key}
+
+        try:
+            response = self.session.post(url, params=params)
+            response.raise_for_status()
+        except requests.HTTPError as e:
+            if 400 <= response.status_code < 500:
+                reason = response.json()['error'][0]
+                error_msg = u'%s Client Error: %s' % (response.status_code,
+                                                      reason)
+                raise CartoException(error_msg)
+            raise CartoException(e)
+        except Exception as e:
+            raise CartoException(e)
+
+        return response
 
     def upload_dataframe(self, dataframe):
         pass

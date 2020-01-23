@@ -30,6 +30,13 @@ class TestBQDataset(unittest.TestCase):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         BQUserDataset.name(unique_table_name).upload_file_object(file_object)
 
+    # TODO: it needs the create_dataset method to be able to import a datase from GCS to BQ
+    def test_can_import_a_dataset(self):
+        file_object = StringIO(EXPECTED_CSV_SAMPLE)
+        unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        BQUserDataset.name(unique_table_name).upload_file_object(file_object)
+        BQUserDataset.name(unique_table_name).import_dataset()
+
     def test_can_download_to_dataframe(self):
         result = BQUserDataset.name('census_tracts_american_samoa').download_stream()
         df = pandas.read_csv(result)
