@@ -40,56 +40,64 @@ class TestBQUserDataset(unittest.TestCase):
 
     def test_can_import_a_dataset(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        BQUserDataset \
+        file_object = StringIO(CSV_SAMPLE_REDUCED)
+
+        dataset = BQUserDataset \
             .name(unique_table_name) \
             .column(name='id', type='INT64') \
             .column('geom', 'GEOMETRY') \
-            .ttl_seconds(30) \
-            .create()
-        file_object = StringIO(CSV_SAMPLE_REDUCED)
-        BQUserDataset.name(unique_table_name).upload_file_object(file_object)
-        job = BQUserDataset.name(unique_table_name).import_dataset()
+            .ttl_seconds(30)
+        dataset.create()
+        dataset.upload_file_object(file_object)
+        job = dataset.import_dataset()
+
         self.assertIsInstance(job, BQJob)
 
     def test_can_get_status_from_import(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        BQUserDataset \
+        file_object = StringIO(CSV_SAMPLE_REDUCED)
+
+        dataset = BQUserDataset \
             .name(unique_table_name) \
             .column(name='id', type='INT64') \
             .column('geom', 'GEOMETRY') \
-            .ttl_seconds(30) \
-            .create()
-        file_object = StringIO(CSV_SAMPLE_REDUCED)
-        BQUserDataset.name(unique_table_name).upload_file_object(file_object)
-        job = BQUserDataset.name(unique_table_name).import_dataset()
+            .ttl_seconds(30)
+        dataset.create()
+        dataset.upload_file_object(file_object)
+        job = dataset.import_dataset()
         status = job.status()
+
         self.assertIn(status, ['done', 'running', 'waiting', 'failed'])
 
     def test_can_wait_for_job_completion(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        BQUserDataset \
+        file_object = StringIO(CSV_SAMPLE_REDUCED)
+
+        dataset = BQUserDataset \
             .name(unique_table_name) \
             .column(name='id', type='INT64') \
             .column('geom', 'GEOMETRY') \
-            .ttl_seconds(30) \
-            .create()
-        file_object = StringIO(CSV_SAMPLE_REDUCED)
-        BQUserDataset.name(unique_table_name).upload_file_object(file_object)
-        job = BQUserDataset.name(unique_table_name).import_dataset()
+            .ttl_seconds(30)
+        dataset.create()
+        dataset.upload_file_object(file_object)
+        job = dataset.import_dataset()
         status = job.result()
+
         self.assertIn(status, ['done'])
 
     def test_can_upload_a_dataframe_and_wait_for_completion(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        BQUserDataset \
+        sample = StringIO(CSV_SAMPLE_REDUCED)
+        df = pandas.read_csv(sample)
+
+        dataset = BQUserDataset \
             .name(unique_table_name) \
             .column(name='id', type='INT64') \
             .column('geom', 'GEOMETRY') \
-            .ttl_seconds(30) \
-            .create()
-        sample = StringIO(CSV_SAMPLE_REDUCED)
-        df = pandas.read_csv(sample)
-        status = BQUserDataset.name(unique_table_name).upload_dataframe(df)
+            .ttl_seconds(30)
+        dataset.create()
+        status = dataset.upload_dataframe(df)
+
         self.assertIn(status, ['done'])
 
     def test_can_download_to_dataframe(self):
