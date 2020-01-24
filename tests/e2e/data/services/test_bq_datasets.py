@@ -17,7 +17,7 @@ EXPECTED_CSV_SAMPLE = """state_fips_code,county_fips_code,geo_id,tract_name,inte
 """
 
 
-class TestBQDataset(unittest.TestCase):
+class TestBQUserDataset(unittest.TestCase):
 
     def test_can_upload_from_dataframe(self):
         sample = StringIO(EXPECTED_CSV_SAMPLE)
@@ -84,3 +84,17 @@ class TestBQDataset(unittest.TestCase):
         geosample = geopandas.GeoDataFrame(sample, geometry='internal_point_geo')
 
         self.assertEqual(geosample.to_csv(index=False), EXPECTED_CSV_SAMPLE)
+
+    def test_creation_of_dataset(self):
+        unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        dataset = BQUserDataset.name(unique_table_name) \
+                               .column(name='cartodb_id', type='INT64') \
+                               .column('the_geom', 'GEOMETRY') \
+                               .ttl_seconds(30)
+        dataset.create()
+
+        # do a quick check on the resulting table
+        result = dataset.download_stream()
+        df = pandas.read_csv(result)
+        self.assertEqual(df.shape, (0, 2))
+        self.assertEqual(df.to_csv(index=False), 'cartodb_id,the_geom\n')
