@@ -87,7 +87,6 @@ class _BQDatasetClient:
             raise CartoException(e)
 
     def upload_dataframe(self, dataframe, name):
-        # missing call to create the dataset
         self.upload(dataframe, name)
         job = self.import_dataset(name)
         status = job.result()

@@ -16,52 +16,80 @@ EXPECTED_CSV_SAMPLE = """state_fips_code,county_fips_code,geo_id,tract_name,inte
 60,10,60010950600,9506.0,POINT (-170.701028 -14.252446)
 """
 
+CSV_SAMPLE_REDUCED = """id,geom
+1,POINT (-170.5618796 -14.2587411)
+2,POINT (-170.5589852 -14.2859572)
+3,POINT (-170.6310985 -14.2760947)
+4,POINT (-170.6651925 -14.2713653)
+5,POINT (-170.701028 -14.252446)
+"""
 
 class TestBQUserDataset(unittest.TestCase):
 
     def test_can_upload_from_dataframe(self):
-        sample = StringIO(EXPECTED_CSV_SAMPLE)
+        sample = StringIO(CSV_SAMPLE_REDUCED)
         df = pandas.read_csv(sample)
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         BQUserDataset.name(unique_table_name).upload(df)
 
     def test_can_upload_from_file_object(self):
-        file_object = StringIO(EXPECTED_CSV_SAMPLE)
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        file_object = StringIO(CSV_SAMPLE_REDUCED)
         BQUserDataset.name(unique_table_name).upload_file_object(file_object)
 
-    # TODO: it needs the create_dataset method to be able to import a datase from GCS to BQ
     def test_can_import_a_dataset(self):
-        file_object = StringIO(EXPECTED_CSV_SAMPLE)
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        BQUserDataset \
+            .name(unique_table_name) \
+            .column(name='id', type='INT64') \
+            .column('geom', 'GEOMETRY') \
+            .ttl_seconds(30) \
+            .create()
+        file_object = StringIO(CSV_SAMPLE_REDUCED)
         BQUserDataset.name(unique_table_name).upload_file_object(file_object)
         job = BQUserDataset.name(unique_table_name).import_dataset()
         self.assertIsInstance(job, BQJob)
 
-    # TODO: it needs the create_dataset method to be able to import a datase from GCS to BQ
     def test_can_get_status_from_import(self):
-        file_object = StringIO(EXPECTED_CSV_SAMPLE)
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        BQUserDataset \
+            .name(unique_table_name) \
+            .column(name='id', type='INT64') \
+            .column('geom', 'GEOMETRY') \
+            .ttl_seconds(30) \
+            .create()
+        file_object = StringIO(CSV_SAMPLE_REDUCED)
         BQUserDataset.name(unique_table_name).upload_file_object(file_object)
         job = BQUserDataset.name(unique_table_name).import_dataset()
         status = job.status()
         self.assertIn(status, ['done', 'running', 'waiting', 'failed'])
 
-    # TODO: it needs the create_dataset method to be able to import a datase from GCS to BQ
     def test_can_wait_for_job_completion(self):
-        file_object = StringIO(EXPECTED_CSV_SAMPLE)
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        BQUserDataset \
+            .name(unique_table_name) \
+            .column(name='id', type='INT64') \
+            .column('geom', 'GEOMETRY') \
+            .ttl_seconds(30) \
+            .create()
+        file_object = StringIO(CSV_SAMPLE_REDUCED)
         BQUserDataset.name(unique_table_name).upload_file_object(file_object)
         job = BQUserDataset.name(unique_table_name).import_dataset()
         status = job.result()
-        self.assertIn(status, ['done', 'failed'])
+        self.assertIn(status, ['done'])
 
     def test_can_upload_a_dataframe_and_wait_for_completion(self):
-        sample = StringIO(EXPECTED_CSV_SAMPLE)
-        df = pandas.read_csv(sample)
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        BQUserDataset \
+            .name(unique_table_name) \
+            .column(name='id', type='INT64') \
+            .column('geom', 'GEOMETRY') \
+            .ttl_seconds(30) \
+            .create()
+        sample = StringIO(CSV_SAMPLE_REDUCED)
+        df = pandas.read_csv(sample)
         status = BQUserDataset.name(unique_table_name).upload_dataframe(df)
-        self.assertIn(status, ['done', 'failed'])
+        self.assertIn(status, ['done'])
 
     def test_can_download_to_dataframe(self):
         result = BQUserDataset.name('census_tracts_american_samoa').download_stream()
