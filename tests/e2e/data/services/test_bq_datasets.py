@@ -44,7 +44,12 @@ class TestBQUserDataset(unittest.TestCase):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         dataset = BQUserDataset.name(unique_table_name) \
                                .column(name='cartodb_id', type='INT64') \
-                               .column('the_geom', 'GEOMETRY')
-
-        dataset.ttl_seconds(30)
+                               .column('the_geom', 'GEOMETRY') \
+                               .ttl_seconds(30)
         dataset.create()
+
+        # do a quick check on the resulting table
+        result = dataset.download_stream()
+        df = pandas.read_csv(result)
+        self.assertEqual(df.shape, (0, 2))
+        self.assertEqual(df.to_csv(index=False), 'cartodb_id,the_geom\n')
