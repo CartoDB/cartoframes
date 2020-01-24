@@ -6,5 +6,5 @@ __all__ = [
     'Geocoding',
     'Isolines',
     'BQUserDataset',
-    'BQJob'
+    'BQJob',
 ]
