@@ -24,6 +24,7 @@ CSV_SAMPLE_REDUCED = """id,geom
 5,POINT (-170.701028 -14.252446)
 """
 
+
 class TestBQUserDataset(unittest.TestCase):
 
     def test_can_upload_from_dataframe(self):
