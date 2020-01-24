@@ -27,24 +27,10 @@ class _BQDatasetClient:
         self.api_key = 'my_valid_api_key'
 
     def upload(self, dataframe, name):
-        url = DO_ENRICHMENT_API_URL + '/datasets/' + name
-        params = {'api_key': self.api_key}
-
+        dataframe.to_csv(path_or_buf=name, index=False)
         try:
-            dataframe.to_csv(path_or_buf=name, index=False)
-
             with open(name, 'rb') as f:
-                response = self.session.post(url, params=params, data=f)
-                response.raise_for_status()
-        except requests.HTTPError as e:
-            if 400 <= response.status_code < 500:
-                reason = response.json()['error'][0]
-                error_msg = u'%s Client Error: %s' % (response.status_code,
-                                                      reason)
-                raise CartoException(error_msg)
-            raise CartoException(e)
-        except Exception as e:
-            raise CartoException(e)
+                self.upload_file_object(f, name)
         finally:
             os.remove(name)
 
