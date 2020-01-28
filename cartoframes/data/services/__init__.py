@@ -7,5 +7,4 @@ __all__ = [
     'Isolines',
     'BQUserDataset',
     'BQJob',
-    'BQUserEnrichmentJob',
 ]
