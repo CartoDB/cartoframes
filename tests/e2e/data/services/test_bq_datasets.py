@@ -135,3 +135,21 @@ class TestBQUserDataset(unittest.TestCase):
         df = pandas.read_csv(result)
         self.assertEqual(df.shape, (0, 2))
         self.assertEqual(df.to_csv(index=False), 'cartodb_id,the_geom\n')
+
+    def test_enrichment_of_dataset(self):
+        unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        dataset = BQUserDataset.name(unique_table_name) \
+                               .column(name='cartodb_id', type='INT64') \
+                               .column('the_geom', 'GEOMETRY') \
+                               .ttl_seconds(30)
+        dataset.create()
+        variables = ['d1.nonfamily_households']
+        output_name = f'{unique_table_name}_result'
+        status = dataset.enrichment(variables, output_name)
+
+        self.assertIn(status, ['success'])
+
+        result = BQUserDataset.name(output_name).download_stream()
+        df = pandas.read_csv(result)
+
+        self.assertIn(variables[0], df.columns)
