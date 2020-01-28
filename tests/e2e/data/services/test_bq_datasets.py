@@ -143,7 +143,7 @@ class TestBQUserDataset(unittest.TestCase):
                                .column('the_geom', 'GEOMETRY') \
                                .ttl_seconds(30)
         dataset.create()
-        variables = ['d1.nonfamily_households']
+        variables = ['carto-do.do_provider.d1.nonfamily_households']
         output_name = f'{unique_table_name}_result'
         status = dataset.enrichment(variables, output_name)
 
