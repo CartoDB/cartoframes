@@ -138,11 +138,19 @@ class TestBQUserDataset(unittest.TestCase):
 
     def test_enrichment_of_dataset(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        dataset = BQUserDataset.name(unique_table_name) \
-                               .column(name='cartodb_id', type='INT64') \
-                               .column('the_geom', 'GEOMETRY') \
-                               .ttl_seconds(30)
+        sample = StringIO(CSV_SAMPLE_REDUCED)
+        df = pandas.read_csv(sample)
+
+        dataset = BQUserDataset \
+            .name(unique_table_name) \
+            .column(name='cartodb_id', type='INT64') \
+            .column('the_geom', 'GEOMETRY') \
+            .ttl_seconds(30)
         dataset.create()
+        status = dataset.upload_dataframe(df)
+
+        self.assertIn(status, ['success'])
+
         geom_type = 'points'
         variables = ['carto-do.do_provider.d1.nonfamily_households']
         output_name = '{}_result'.format(unique_table_name)
