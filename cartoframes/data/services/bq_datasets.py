@@ -128,7 +128,7 @@ class _BQDatasetClient:
         return response
 
     def enrichment(self, payload):
-        url = f'{DO_ENRICHMENT_API_URL}/enrichment'
+        url = '{}/enrichment'.format(DO_ENRICHMENT_API_URL)
         params = {'api_key': self.api_key}
 
         try:
@@ -200,7 +200,7 @@ class BQUserEnrichmentJob:
         self.api_key = 'my_valid_api_key'
 
     def status(self):
-        url = f'{DO_ENRICHMENT_API_URL}/enrichment/{self.id}/status'
+        url = '{}/enrichment/{}/status'.format(DO_ENRICHMENT_API_URL, self.id)
         params = {'api_key': self.api_key}
 
         try:
@@ -287,10 +287,9 @@ class BQUserDataset:
     def upload_dataframe(self, dataframe):
         return self._client.upload_dataframe(dataframe, self._name_id)
 
-    def enrichment(self, variables, output_name):
-        #  TODO: make it compatible with polygons
+    def enrichment(self, geom_type='points', variables=None, output_name=None):
         payload = {
-            'type': 'points',
+            'type': geom_type,
             'input': self._name_id,
             'variables': variables,
             'output': output_name

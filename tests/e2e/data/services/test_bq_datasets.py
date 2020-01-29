@@ -143,9 +143,10 @@ class TestBQUserDataset(unittest.TestCase):
                                .column('the_geom', 'GEOMETRY') \
                                .ttl_seconds(30)
         dataset.create()
+        geom_type = 'points'
         variables = ['carto-do.do_provider.d1.nonfamily_households']
-        output_name = f'{unique_table_name}_result'
-        status = dataset.enrichment(variables, output_name)
+        output_name = '{}_result'.format(unique_table_name)
+        status = dataset.enrichment(geom_type=geom_type, variables=variables, output_name=output_name)
 
         self.assertIn(status, ['success'])
 
