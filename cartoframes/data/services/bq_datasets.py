@@ -185,7 +185,7 @@ class BQJob:
     def result(self):
         status = self.status()
 
-        while status not in ('done', 'failed'):
+        while status not in ('success', 'failure'):
             status = self.status()
 
         return status
