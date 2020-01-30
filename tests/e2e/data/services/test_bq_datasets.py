@@ -35,6 +35,7 @@ CSV_ENRICHMENT_SAMPLE = """{},{}
 5,POINT (-83.987743 44.507068)
 """.format(ENRICHMENT_ID, GEOM_COLUMN)
 
+
 class TestBQUserDataset(unittest.TestCase):
 
     def test_can_upload_from_dataframe(self):
