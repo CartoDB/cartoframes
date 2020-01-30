@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 from carto.utils import ResponseStream
 # from carto.auth import APIKeyAuthClient
@@ -186,6 +187,7 @@ class BQJob:
         status = self.status()
 
         while status not in ('success', 'failure'):
+            time.sleep(1)
             status = self.status()
 
         return status
