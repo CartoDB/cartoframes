@@ -24,6 +24,16 @@ CSV_SAMPLE_REDUCED = """id,geom
 5,POINT (-170.701028 -14.252446)
 """
 
+ENRICHMENT_ID = '__enrichment_id'
+GEOM_COLUMN = '__geom_column'
+
+CSV_ENRICHMENT_SAMPLE = """{},{}
+1,POINT (-79.887 36.082835)
+2,POINT (-80.4061889648438 25.5151787443985)
+3,POINT (-98.5021405 40.868677)
+4,POINT (-107.299463 31.820398)
+5,POINT (-83.987743 44.507068)
+""".format(ENRICHMENT_ID, GEOM_COLUMN)
 
 class TestBQUserDataset(unittest.TestCase):
 
@@ -121,6 +131,7 @@ class TestBQUserDataset(unittest.TestCase):
         geosample = geopandas.GeoDataFrame(sample, geometry='internal_point_geo')
 
         self.assertEqual(geosample.to_csv(index=False), EXPECTED_CSV_SAMPLE)
+        self.assertEqual(1, 2)
 
     def test_creation_of_dataset(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
@@ -138,21 +149,21 @@ class TestBQUserDataset(unittest.TestCase):
 
     def test_enrichment_of_dataset(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        sample = StringIO(CSV_SAMPLE_REDUCED)
+        sample = StringIO(CSV_ENRICHMENT_SAMPLE)
         df = pandas.read_csv(sample)
 
         dataset = BQUserDataset \
             .name(unique_table_name) \
-            .column(name='cartodb_id', type='INT64') \
-            .column('the_geom', 'GEOMETRY') \
-            .ttl_seconds(30)
+            .column(ENRICHMENT_ID, 'INT64') \
+            .column(GEOM_COLUMN, 'GEOMETRY') \
+            .ttl_seconds(3600)
         dataset.create()
         status = dataset.upload_dataframe(df)
 
         self.assertIn(status, ['success'])
 
         geom_type = 'points'
-        variables = ['carto-do.do_provider.d1.nonfamily_households']
+        variables = ['nonfamily_households']
         output_name = '{}_result'.format(unique_table_name)
         status = dataset.enrichment(geom_type=geom_type, variables=variables, output_name=output_name)
 
