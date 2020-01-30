@@ -27,13 +27,21 @@ CSV_SAMPLE_REDUCED = """id,geom
 ENRICHMENT_ID = '__enrichment_id'
 GEOM_COLUMN = '__geom_column'
 
-CSV_ENRICHMENT_SAMPLE = """{},{}
+CSV_ENRICHMENT_POINTS_SAMPLE = """{},{}
 1,POINT (-79.887 36.082835)
 2,POINT (-80.4061889648438 25.5151787443985)
 3,POINT (-98.5021405 40.868677)
 4,POINT (-107.299463 31.820398)
 5,POINT (-83.987743 44.507068)
 """.format(ENRICHMENT_ID, GEOM_COLUMN)
+
+CSV_ENRICHMENT_POLYGONS_SAMPLE = """{},{}
+1,POLYGON((-90.79369349999999 40.3670515, -90.79369349999999 40.5484845, -90.56156849999999 40.5484845, -90.56156849999999 40.3670515))
+2,POLYGON((-96.9603555 43.58713899999999, -96.9603555 43.762051, -96.6221105 43.762051, -96.6221105 43.58713899999999))
+3,POLYGON((-98.612071 40.7853815, -98.612071 40.9595765, -98.392263 40.9595765, -98.392263 40.7853815))
+4,POLYGON((-97.3415835 44.890463, -97.3415835 45.064705000000004, -97.0354245 45.064705000000004, -97.0354245 44.890463))
+5,POLYGON((-90.47619175 31.087278249999997, -90.47619175 31.26260875, -90.33176725000001 31.26260875, -90.33176725000001 31.087278249999997))
+"""
 
 
 class TestBQUserDataset(unittest.TestCase):
@@ -148,9 +156,36 @@ class TestBQUserDataset(unittest.TestCase):
         self.assertEqual(df.shape, (0, 2))
         self.assertEqual(df.to_csv(index=False), 'cartodb_id,the_geom\n')
 
-    def test_enrichment_of_dataset(self):
+    def test_points_enrichment_dataset(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        sample = StringIO(CSV_ENRICHMENT_SAMPLE)
+        sample = StringIO(CSV_ENRICHMENT_POINTS_SAMPLE)
+        df = pandas.read_csv(sample)
+
+        dataset = BQUserDataset \
+            .name(unique_table_name) \
+            .column(ENRICHMENT_ID, 'INT64') \
+            .column(GEOM_COLUMN, 'GEOMETRY') \
+            .ttl_seconds(3600)
+        dataset.create()
+        status = dataset.upload_dataframe(df)
+
+        self.assertIn(status, ['success'])
+
+        geom_type = 'points'
+        variables = ['nonfamily_households']
+        output_name = '{}_result'.format(unique_table_name)
+        status = dataset.enrichment(geom_type=geom_type, variables=variables, output_name=output_name)
+
+        self.assertIn(status, ['success'])
+
+        result = BQUserDataset.name(output_name).download_stream()
+        df = pandas.read_csv(result)
+
+        self.assertIn(variables[0], df.columns)
+
+    def test_polygons_enrichment_dataset(self):
+        unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        sample = StringIO(CSV_ENRICHMENT_POLYGONS_SAMPLE)
         df = pandas.read_csv(sample)
 
         dataset = BQUserDataset \
