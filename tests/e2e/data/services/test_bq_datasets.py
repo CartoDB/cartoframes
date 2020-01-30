@@ -28,6 +28,7 @@ CSV_SAMPLE_REDUCED = """id,geom
 ENRICHMENT_ID = '__enrichment_id'
 GEOM_COLUMN = '__geom_column'
 
+
 def file_path(path):
     return '{}/{}'.format(Path(__file__).parent.absolute(), path)
 
