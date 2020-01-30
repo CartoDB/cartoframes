@@ -113,7 +113,7 @@ def test_read_carto_index_col_exists(mocker):
             Point([10, 15]),
             Point([20, 30])
         ]
-    }, geometry='the_geom', index=Index([1, 2, 3], 'cartodb_id'))
+    }, geometry='the_geom', index=Index([1, 2, 3], name='cartodb_id'))
 
     # When
     gdf = read_carto('__source__', CREDENTIALS, index_col='cartodb_id')
@@ -140,7 +140,7 @@ def test_read_carto_index_col_not_exists(mocker):
             Point([10, 15]),
             Point([20, 30])
         ]
-    }, geometry='the_geom', index=Index([0, 1, 2], 'rename_index'))
+    }, geometry='the_geom', index=Index([0, 1, 2], name='rename_index'))
 
     # When
     gdf = read_carto('__source__', CREDENTIALS, index_col='rename_index')
