@@ -6,6 +6,7 @@ import uuid
 
 from cartoframes.data.services import BQUserDataset, BQJob
 from io import StringIO
+from pathlib import Path
 
 
 EXPECTED_CSV_SAMPLE = """state_fips_code,county_fips_code,geo_id,tract_name,internal_point_geo
@@ -27,21 +28,8 @@ CSV_SAMPLE_REDUCED = """id,geom
 ENRICHMENT_ID = '__enrichment_id'
 GEOM_COLUMN = '__geom_column'
 
-CSV_ENRICHMENT_POINTS_SAMPLE = """{},{}
-1,POINT (-79.887 36.082835)
-2,POINT (-80.4061889648438 25.5151787443985)
-3,POINT (-98.5021405 40.868677)
-4,POINT (-107.299463 31.820398)
-5,POINT (-83.987743 44.507068)
-""".format(ENRICHMENT_ID, GEOM_COLUMN)
-
-CSV_ENRICHMENT_POLYGONS_SAMPLE = """{},{}
-1,POLYGON((-90.79369349999999 40.3670515, -90.79369349999999 40.5484845, -90.56156849999999 40.5484845, -90.56156849999999 40.3670515))
-2,POLYGON((-96.9603555 43.58713899999999, -96.9603555 43.762051, -96.6221105 43.762051, -96.6221105 43.58713899999999))
-3,POLYGON((-98.612071 40.7853815, -98.612071 40.9595765, -98.392263 40.9595765, -98.392263 40.7853815))
-4,POLYGON((-97.3415835 44.890463, -97.3415835 45.064705000000004, -97.0354245 45.064705000000004, -97.0354245 44.890463))
-5,POLYGON((-90.47619175 31.087278249999997, -90.47619175 31.26260875, -90.33176725000001 31.26260875, -90.33176725000001 31.087278249999997))
-"""
+def file_path(path):
+    return '{}/{}'.format(Path(__file__).parent.absolute(), path)
 
 
 class TestBQUserDataset(unittest.TestCase):
@@ -158,8 +146,7 @@ class TestBQUserDataset(unittest.TestCase):
 
     def test_points_enrichment_dataset(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        sample = StringIO(CSV_ENRICHMENT_POINTS_SAMPLE)
-        df = pandas.read_csv(sample)
+        df = pandas.read_csv(file_path('fixtures/enrichment_points.csv'))
 
         dataset = BQUserDataset \
             .name(unique_table_name) \
@@ -185,8 +172,7 @@ class TestBQUserDataset(unittest.TestCase):
 
     def test_polygons_enrichment_dataset(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        sample = StringIO(CSV_ENRICHMENT_POLYGONS_SAMPLE)
-        df = pandas.read_csv(sample)
+        df = pandas.read_csv(file_path('fixtures/enrichment_polygons.csv'))
 
         dataset = BQUserDataset \
             .name(unique_table_name) \
