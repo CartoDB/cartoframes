@@ -2,8 +2,8 @@
 CARTOframes
 ***********
 
-.. image:: https://travis-ci.org/CartoDB/cartoframes.svg
-    :target: https://travis-ci.org/CartoDB/CARTOframes
+.. image:: https://travis-ci.org/CartoDB/cartoframes.svg?branch=develop
+    :target: https://travis-ci.org/CartoDB/cartoframes
 .. image:: https://img.shields.io/badge/pypi-v1.0.0-orange
     :target: https://pypi.org/project/cartoframes/1.0.0
 
@@ -18,7 +18,7 @@ Try it Out
 * Latest (develop branch): |develop|
 
 .. |stable| image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v0.10.1?filepath=examples
+    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0.0?filepath=examples
 
 .. |develop| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/develop?filepath=examples
