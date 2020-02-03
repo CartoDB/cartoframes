@@ -158,7 +158,7 @@
             "path": "legends",
             "group": "Legends"
         }, {
-            "title": "Color category cegend",
+            "title": "Color category legend",
             "desc": "Use the color_category_legend method to represent categorical values by color",
             "file": "color_category_legend",
             "path": "legends",
