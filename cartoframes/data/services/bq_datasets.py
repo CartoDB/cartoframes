@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 from carto.utils import ResponseStream
 # from carto.auth import APIKeyAuthClient
@@ -127,6 +128,29 @@ class _BQDatasetClient:
 
         return response
 
+    def enrichment(self, payload):
+        url = '{}/enrichment'.format(DO_ENRICHMENT_API_URL)
+        params = {'api_key': self.api_key}
+
+        try:
+            response = self.session.post(url, params=params, json=payload)
+            response.raise_for_status()
+
+            body = response.json()
+            job = BQUserEnrichmentJob(body['job_id'])
+            status = job.result()
+
+            return status
+        except requests.HTTPError as e:
+            if 400 <= response.status_code < 500:
+                # Client error, provide better reason
+                reason = response.json()['error'][0]
+                error_msg = u'%s Client Error: %s' % (response.status_code, reason)
+                raise CartoException(error_msg)
+            raise CartoException(e)
+        except Exception as e:
+            raise CartoException(e)
+
 
 class BQJob:
 
@@ -162,7 +186,47 @@ class BQJob:
     def result(self):
         status = self.status()
 
-        while status != 'done' and status != 'failed':
+        while status not in ('success', 'failure'):
+            time.sleep(1)
+            status = self.status()
+
+        return status
+
+
+class BQUserEnrichmentJob:
+
+    def __init__(self, job_id):
+        self.id = job_id
+        # TODO fix this crap
+        self.session = requests.Session()
+        self.api_key = 'my_valid_api_key'
+
+    def status(self):
+        url = '{}/enrichment/{}/status'.format(DO_ENRICHMENT_API_URL, self.id)
+        params = {'api_key': self.api_key}
+
+        try:
+            response = self.session.get(url, params=params)
+            response.raise_for_status()
+
+            body = response.json()
+
+            return body['status']
+        except requests.HTTPError as e:
+            if 400 <= response.status_code < 500:
+                # Client error, provide better reason
+                reason = response.json()['error'][0]
+                error_msg = u'%s Client Error: %s' % (response.status_code, reason)
+                raise CartoException(error_msg)
+            raise CartoException(e)
+        except Exception as e:
+            raise CartoException(e)
+
+    def result(self):
+        status = self.status()
+
+        while status not in ('success', 'failure'):
+            time.sleep(1)
             status = self.status()
 
         return status
@@ -225,3 +289,13 @@ class BQUserDataset:
 
     def upload_dataframe(self, dataframe):
         return self._client.upload_dataframe(dataframe, self._name_id)
+
+    def enrichment(self, geom_type='points', variables=None, output_name=None):
+        payload = {
+            'type': geom_type,
+            'input': self._name_id,
+            'variables': variables,
+            'output': output_name
+        }
+
+        return self._client.enrichment(payload)

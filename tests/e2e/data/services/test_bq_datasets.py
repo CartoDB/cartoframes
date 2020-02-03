@@ -6,6 +6,7 @@ import uuid
 
 from cartoframes.data.services import BQUserDataset, BQJob
 from io import StringIO
+from pathlib import Path
 
 
 EXPECTED_CSV_SAMPLE = """state_fips_code,county_fips_code,geo_id,tract_name,internal_point_geo
@@ -23,6 +24,13 @@ CSV_SAMPLE_REDUCED = """id,geom
 4,POINT (-170.6651925 -14.2713653)
 5,POINT (-170.701028 -14.252446)
 """
+
+ENRICHMENT_ID = '__enrichment_id'
+GEOM_COLUMN = '__geom_column'
+
+
+def file_path(path):
+    return '{}/{}'.format(Path(__file__).parent.absolute(), path)
 
 
 class TestBQUserDataset(unittest.TestCase):
@@ -121,6 +129,7 @@ class TestBQUserDataset(unittest.TestCase):
         geosample = geopandas.GeoDataFrame(sample, geometry='internal_point_geo')
 
         self.assertEqual(geosample.to_csv(index=False), EXPECTED_CSV_SAMPLE)
+        self.assertEqual(1, 2)
 
     def test_creation_of_dataset(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
@@ -135,3 +144,55 @@ class TestBQUserDataset(unittest.TestCase):
         df = pandas.read_csv(result)
         self.assertEqual(df.shape, (0, 2))
         self.assertEqual(df.to_csv(index=False), 'cartodb_id,the_geom\n')
+
+    def test_points_enrichment_dataset(self):
+        unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        df = pandas.read_csv(file_path('fixtures/enrichment_points.csv'))
+
+        dataset = BQUserDataset \
+            .name(unique_table_name) \
+            .column(ENRICHMENT_ID, 'INT64') \
+            .column(GEOM_COLUMN, 'GEOMETRY') \
+            .ttl_seconds(3600)
+        dataset.create()
+        status = dataset.upload_dataframe(df)
+
+        self.assertIn(status, ['success'])
+
+        geom_type = 'points'
+        variables = ['nonfamily_households']
+        output_name = '{}_result'.format(unique_table_name)
+        status = dataset.enrichment(geom_type=geom_type, variables=variables, output_name=output_name)
+
+        self.assertIn(status, ['success'])
+
+        result = BQUserDataset.name(output_name).download_stream()
+        df = pandas.read_csv(result)
+
+        self.assertIn(variables[0], df.columns)
+
+    def test_polygons_enrichment_dataset(self):
+        unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
+        df = pandas.read_csv(file_path('fixtures/enrichment_polygons.csv'))
+
+        dataset = BQUserDataset \
+            .name(unique_table_name) \
+            .column(ENRICHMENT_ID, 'INT64') \
+            .column(GEOM_COLUMN, 'GEOMETRY') \
+            .ttl_seconds(3600)
+        dataset.create()
+        status = dataset.upload_dataframe(df)
+
+        self.assertIn(status, ['success'])
+
+        geom_type = 'points'
+        variables = ['nonfamily_households']
+        output_name = '{}_result'.format(unique_table_name)
+        status = dataset.enrichment(geom_type=geom_type, variables=variables, output_name=output_name)
+
+        self.assertIn(status, ['success'])
+
+        result = BQUserDataset.name(output_name).download_stream()
+        df = pandas.read_csv(result)
+
+        self.assertIn(variables[0], df.columns)
