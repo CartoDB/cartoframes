@@ -226,6 +226,7 @@ class BQUserEnrichmentJob:
         status = self.status()
 
         while status not in ('success', 'failure'):
+            time.sleep(1)
             status = self.status()
 
         return status
