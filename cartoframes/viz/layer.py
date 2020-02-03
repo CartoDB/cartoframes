@@ -181,12 +181,12 @@ class Layer:
 
 
 def _set_source(source, credentials, geom_col):
-    if isinstance(source, (str, pandas.DataFrame)):
+    if isinstance(source, (str, dict, pandas.DataFrame)):
         return Source(source, credentials, geom_col)
     elif isinstance(source, Source):
         return source
     else:
-        raise ValueError('Wrong source. Valid sources are string, DataFrame or GeoDataFrame.')
+        raise ValueError('Wrong source. Valid sources are string, dict, DataFrame or GeoDataFrame.')
 
 
 def _set_style(style):

@@ -1,5 +1,5 @@
 export default function SourceFactory() {
-  const sourceTypes = { GeoJSON, Query, MVT };
+  const sourceTypes = { GeoJSON, Query, MVT, BQMVT };
 
   this.createSource = (layer) => {
     return sourceTypes[layer.type](layer);
@@ -28,6 +28,17 @@ function Query(layer) {
 
 function MVT(layer) {
   return new carto.source.MVT(layer.data.file, JSON.parse(layer.data.metadata));
+}
+
+function BQMVT(layer) {
+  const data = layer.data.data;
+  const metadata = layer.data.metadata;
+  return new carto.source.BQMVT({
+    projectId: data.project_id,
+    datasetId: data.dataset_id,
+    tableId: data.table_id,
+    token: data.token
+  }, metadata);
 }
 
 function _decodeJSONData(b64Data) {
