@@ -29,6 +29,7 @@ export function initMap(settings, mapIndex) {
   }
 
   if (settings.camera) {
+    settings.camera.animate = false;
     map.flyTo(settings.camera);
   }
 

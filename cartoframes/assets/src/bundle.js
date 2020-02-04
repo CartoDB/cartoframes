@@ -569,6 +569,7 @@ var init = (function () {
     }
 
     if (settings.camera) {
+      settings.camera.animate = false;
       map.flyTo(settings.camera);
     }
 
