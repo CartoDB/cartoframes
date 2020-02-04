@@ -3,7 +3,7 @@ CARTO_VL_DEV = '/dist/carto-vl.js'
 CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/{}/carto-vl.min.js'.format(CARTO_VL_VERSION)
 
 # Testing BigQuery source
-CARTO_VL_URL = 'https://cdn.jsdelivr.net/gh/cartodb/carto-vl@bq-mvt-ww/dist/carto-vl.min.js'
+CARTO_VL_URL = 'https://cdn.jsdelivr.net/gh/cartodb/carto-vl@bq-poc-0.1/dist/carto-vl.min.js'
 
 AIRSHIP_VERSION = 'v2.2'
 AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
