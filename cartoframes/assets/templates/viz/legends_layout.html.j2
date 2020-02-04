@@ -12,7 +12,7 @@
       >
         {{ createLegend(layer.legend, 'layer%d_map%d_legend' | format(loop.index0, index)) }}
         {% if layer.legend.footer %}
-          <span slot="footer">{{layer.legend.footer |safe }}</span>
+          <span slot="footer">{{layer.legend.footer | safe }}</span>
         {% endif %}
       </as-legend>
     {% endif %}

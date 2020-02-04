@@ -4,6 +4,6 @@
     subheader="{{widget.description}}">
   </as-widget-header>
   {% if widget.footer %}
-    <footer>{{widget.footer}}</footer>
+    <footer>{{widget.footer | safe }}</footer>
   {% endif %}
 </div>

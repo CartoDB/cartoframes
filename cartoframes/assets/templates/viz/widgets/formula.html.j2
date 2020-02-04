@@ -13,6 +13,6 @@
   </p>
 
   {% if widget.footer %}
-    <footer>{{widget.footer}}</footer>
+    <footer>{{widget.footer | safe }}</footer>
   {% endif %}
 </div>
