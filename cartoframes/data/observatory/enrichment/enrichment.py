@@ -1,5 +1,12 @@
+import pandas
 from .enrichment_service import EnrichmentService, prepare_variables, AGGREGATION_DEFAULT
+from cartoframes.data.services import BQUserDataset
+from ....exceptions import EnrichmentError
+from geopandas import GeoDataFrame
 
+ENRICHMENT_ID = '__enrichment_id'
+GEOM_COLUMN = '__geom_column'
+TTL_IN_SECONDS = 3600
 
 class Enrichment(EnrichmentService):
     """This is the main class to enrich your own data with data from the
@@ -80,14 +87,38 @@ class Enrichment(EnrichmentService):
             ...     geom_col='the_geom')
 
         """
-        variables = prepare_variables(variables, self.credentials)
-        geodataframe = self._prepare_data(dataframe, geom_col)
-
         temp_table_name = self._get_temp_table_name()
-        self._upload_data(temp_table_name, geodataframe)
 
-        queries = self._get_points_enrichment_sql(temp_table_name, variables, filters)
-        return self._execute_enrichment(queries, geodataframe)
+        dataset = BQUserDataset \
+            .name(temp_table_name) \
+            .column(ENRICHMENT_ID, 'INT64') \
+            .column(GEOM_COLUMN, 'GEOMETRY') \
+            .ttl_seconds(TTL_IN_SECONDS)
+        dataset.create()
+
+        dataframe = dataframe[[ENRICHMENT_ID, GEOM_COLUMN]]
+
+        status = dataset.upload_dataframe(dataframe)
+
+        if status not in ['success']:
+            raise EnrichmentError('Couldn\'t upload the dataframe to be enriched. The job hasn\'t finished successfuly')
+
+        geom_type = 'points'
+        output_name = '{}_result'.format(temp_table_name)
+
+        status = dataset.enrichment(geom_type=geom_type, variables=variables, output_name=output_name)
+
+        if status not in ['success']:
+            raise EnrichmentError('Couldn\'t enrich the dataframe. The job hasn\'t finished successfuly')
+
+        result = BQUserDataset.name(output_name).download_stream()
+        df = pandas.read_csv(result)
+
+        dataframe = dataframe.merge(df, on=ENRICHMENT_ID, how='left')
+        dataframe.drop(ENRICHMENT_ID, axis=1, inplace=True)
+        dataframe.drop(ENRICHMENT_ID, axis=1, inplace=True)
+
+        return dataframe
 
     def enrich_polygons(self, dataframe, variables, geom_col=None, filters={}, aggregation=AGGREGATION_DEFAULT):
         """Enrich your polygons `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset` in
@@ -248,12 +279,35 @@ class Enrichment(EnrichmentService):
             ...     geom_col='the_geom')
 
         """
-        variables = prepare_variables(variables, self.credentials, aggregation)
-
-        geodataframe = self._prepare_data(dataframe, geom_col)
         temp_table_name = self._get_temp_table_name()
 
-        self._upload_data(temp_table_name, geodataframe)
+        dataset = BQUserDataset \
+            .name(temp_table_name) \
+            .column(ENRICHMENT_ID, 'INT64') \
+            .column(GEOM_COLUMN, 'GEOMETRY') \
+            .ttl_seconds(TTL_IN_SECONDS)
+        dataset.create()
 
-        queries = self._get_polygon_enrichment_sql(temp_table_name, variables, filters, aggregation)
-        return self._execute_enrichment(queries, geodataframe)
+        dataframe = dataframe[[ENRICHMENT_ID, GEOM_COLUMN]]
+
+        status = dataset.upload_dataframe(dataframe)
+
+        if status not in ['success']:
+            raise EnrichmentError('Couldn\'t upload the dataframe to be enriched. The job hasn\'t finished successfuly')
+
+        geom_type = 'polygons'
+        output_name = '{}_result'.format(temp_table_name)
+
+        status = dataset.enrichment(geom_type=geom_type, variables=variables, output_name=output_name)
+
+        if status not in ['success']:
+            raise EnrichmentError('Couldn\'t enrich the dataframe. The job hasn\'t finished successfuly')
+
+        result = BQUserDataset.name(output_name).download_stream()
+        df = pandas.read_csv(result)
+
+        dataframe = dataframe.merge(df, on=ENRICHMENT_ID, how='left')
+        dataframe.drop(ENRICHMENT_ID, axis=1, inplace=True)
+        dataframe.drop(ENRICHMENT_ID, axis=1, inplace=True)
+
+        return dataframe
