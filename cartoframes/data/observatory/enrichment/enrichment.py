@@ -1,14 +1,15 @@
 import pandas
-from .enrichment_service import EnrichmentService, prepare_variables, AGGREGATION_DEFAULT
 from cartoframes.data.services import BQUserDataset
 from ....exceptions import EnrichmentError
+from ....auth import get_default_credentials
 from geopandas import GeoDataFrame
 
 ENRICHMENT_ID = '__enrichment_id'
 GEOM_COLUMN = '__geom_column'
 TTL_IN_SECONDS = 3600
+AGGREGATION_DEFAULT = 'default'
 
-class Enrichment(EnrichmentService):
+class Enrichment():
     """This is the main class to enrich your own data with data from the
     `Data Observatory <https://carto.com/platform/location-data-streams/>`__
 
@@ -27,7 +28,7 @@ class Enrichment(EnrichmentService):
 
     """
     def __init__(self, credentials=None):
-        super(Enrichment, self).__init__(credentials)
+        self.credentials = credentials = credentials or get_default_credentials()
 
     def enrich_points(self, dataframe, variables, geom_col=None, filters={}):
         """Enrich your points `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset`

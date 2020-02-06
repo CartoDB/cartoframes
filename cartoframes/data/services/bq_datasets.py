@@ -2,12 +2,7 @@ import os
 import time
 import requests
 from carto.utils import ResponseStream
-# from carto.auth import APIKeyAuthClient
-
 from carto.exceptions import CartoException
-
-# TODO: this shouldn't be hardcoded
-DO_ENRICHMENT_API_URL = 'http://localhost:7070/bq'
 
 VALID_TYPES = [
     'STRING', 'BYTES', 'INTEGER', 'INT64', 'FLOAT',
@@ -22,10 +17,12 @@ TYPES_MAPPING = {
 
 class _BQDatasetClient:
 
-    def __init__(self):
-        # TODO fix this crap
+    def __init__(self, credentials):
         self.session = requests.Session()
-        self.api_key = 'my_valid_api_key'
+        self._credentials = credentials
+        self._username = credentials.username
+        self._api_key = credentials.api_key
+        self._base_url = credentials.base_url
 
     def upload(self, dataframe, name):
         dataframe.to_csv(path_or_buf=name, index=False)
@@ -36,8 +33,8 @@ class _BQDatasetClient:
             os.remove(name)
 
     def upload_file_object(self, file_object, name):
-        url = DO_ENRICHMENT_API_URL + '/datasets/' + name
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/datasets/' + name
+        params = {'api_key': self._api_key}
 
         try:
             response = self.session.post(url, params=params, data=file_object)
@@ -53,8 +50,8 @@ class _BQDatasetClient:
             raise CartoException(e)
 
     def import_dataset(self, name):
-        url = DO_ENRICHMENT_API_URL + '/datasets/' + name + '/imports'
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/datasets/' + name + '/imports'
+        params = {'api_key': self._api_key}
 
         try:
             response = self.session.post(url, params=params)
@@ -62,7 +59,7 @@ class _BQDatasetClient:
 
             job = response.json()
 
-            return BQJob(job['item_queue_id'], name)
+            return BQJob(job['item_queue_id'], name, self._credentials)
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 reason = response.json()['error'][0]
@@ -81,13 +78,11 @@ class _BQDatasetClient:
         return status
 
     def download(self, name_id):
-        url = '%s/datasets/%s' % (DO_ENRICHMENT_API_URL, name_id)
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/datasets/' + name_id
+        params = {'api_key': self._api_key}
 
         try:
-            response = self.session.get(url,
-                                        params=params,
-                                        stream=True)
+            response = self.session.get(url, params=params, stream=True)
             response.raise_for_status()
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
@@ -106,13 +101,11 @@ class _BQDatasetClient:
         return ResponseStream(self.download(name_id))
 
     def create(self, payload):
-        url = '%s/datasets' % DO_ENRICHMENT_API_URL
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/datasets'
+        params = {'api_key': self._api_key}
 
         try:
-            response = self.session.post(url,
-                                         params=params,
-                                         json=payload)
+            response = self.session.post(url, params=params, json=payload)
             response.raise_for_status()
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
@@ -129,15 +122,15 @@ class _BQDatasetClient:
         return response
 
     def enrichment(self, payload):
-        url = '{}/enrichment'.format(DO_ENRICHMENT_API_URL)
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/enrichment'
+        params = {'api_key': self._api_key}
 
         try:
             response = self.session.post(url, params=params, json=payload)
             response.raise_for_status()
 
             body = response.json()
-            job = BQUserEnrichmentJob(body['job_id'])
+            job = BQUserEnrichmentJob(body['job_id'], self._credentials)
             status = job.result()
 
             return status
@@ -154,16 +147,17 @@ class _BQDatasetClient:
 
 class BQJob:
 
-    def __init__(self, job_id, name_id):
+    def __init__(self, job_id, name_id, credentials):
         self.id = job_id
         self.name = name_id
-        # TODO fix this crap
+        self._username = credentials.username
+        self._api_key = credentials.api_key
+        self._base_url = credentials.base_url
         self.session = requests.Session()
-        self.api_key = 'my_valid_api_key'
 
     def status(self):
-        url = DO_ENRICHMENT_API_URL + '/datasets/' + self.name + '/imports/' + self.id
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/datasets/' + self.name + '/imports/' + self.id
+        params = {'api_key': self._api_key}
 
         try:
             response = self.session.get(url, params=params)
@@ -195,15 +189,16 @@ class BQJob:
 
 class BQUserEnrichmentJob:
 
-    def __init__(self, job_id):
+    def __init__(self, job_id, credentials):
         self.id = job_id
-        # TODO fix this crap
+        self._username = credentials.username
+        self._api_key = credentials.api_key
+        self._base_url = credentials.base_url
         self.session = requests.Session()
-        self.api_key = 'my_valid_api_key'
 
     def status(self):
-        url = '{}/enrichment/{}/status'.format(DO_ENRICHMENT_API_URL, self.id)
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/enrichment/' + self.id + '/status'
+        params = {'api_key': self._api_key}
 
         try:
             response = self.session.get(url, params=params)
@@ -248,10 +243,14 @@ class BQUserDataset:
 
     def __init__(self, name_id, client=None, ttl_seconds=None):
         self._name_id = name_id
-        if client is None:
-            self._client = _BQDatasetClient()
+        self._client = client
         self._columns = []
         self._ttl_seconds = ttl_seconds
+
+    def credentials(self, credentials):
+        if self._client is None:
+            self._client = _BQDatasetClient(credentials)
+        return self
 
     def download_stream(self):
         return self._client.download_stream(self._name_id)
