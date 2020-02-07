@@ -2,12 +2,12 @@ import pandas
 from cartoframes.data.services import BQUserDataset
 from ....exceptions import EnrichmentError
 from ....auth import get_default_credentials
-from geopandas import GeoDataFrame
 
 ENRICHMENT_ID = '__enrichment_id'
 GEOM_COLUMN = '__geom_column'
 TTL_IN_SECONDS = 3600
 AGGREGATION_DEFAULT = 'default'
+
 
 class Enrichment():
     """This is the main class to enrich your own data with data from the
