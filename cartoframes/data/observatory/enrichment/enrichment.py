@@ -28,7 +28,7 @@ class Enrichment():
 
     """
     def __init__(self, credentials=None):
-        self.credentials = credentials = credentials or get_default_credentials()
+        self.credentials = credentials or get_default_credentials()
 
     def enrich_points(self, dataframe, variables, geom_col=None, filters={}):
         """Enrich your points `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset`

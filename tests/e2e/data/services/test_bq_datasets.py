@@ -39,7 +39,7 @@ def file_path(path):
 
 class TestBQUserDataset(unittest.TestCase):
     """This test suite needs the ENV variable USERURL pointing to a working DO API in "tests/e2e/secret.json".
-    DO API must have the user/apikey mapping set to get access to the user's DO Project while testing.
+    DO API must have the user/apikey mapping set to get access to the user's DO Project in GCP.
     """
 
     def setUp(self):
@@ -54,31 +54,29 @@ class TestBQUserDataset(unittest.TestCase):
             self.base_url = os.environ['USERURL']
 
         self.credentials = Credentials(username=self.username, api_key=self.apikey, base_url=self.base_url)
+        self.bq_user_dataset = BQUserDataset(credentials=self.credentials)
 
     def test_can_upload_from_dataframe(self):
         sample = StringIO(CSV_SAMPLE_REDUCED)
         df = pandas.read_csv(sample)
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        BQUserDataset.name(unique_table_name) \
-                     .credentials(self.credentials) \
-                     .upload(df)
+        self.bq_user_dataset.name(unique_table_name) \
+                            .upload(df)
 
     def test_can_upload_from_file_object(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         file_object = StringIO(CSV_SAMPLE_REDUCED)
-        BQUserDataset.name(unique_table_name) \
-                     .credentials(self.credentials) \
-                     .upload_file_object(file_object)
+        self.bq_user_dataset.name(unique_table_name) \
+                            .upload_file_object(file_object)
 
     def test_can_import_a_dataset(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         file_object = StringIO(CSV_SAMPLE_REDUCED)
 
-        dataset = BQUserDataset.name(unique_table_name) \
-                               .credentials(self.credentials) \
-                               .column(name='id', type='INT64') \
-                               .column('geom', 'GEOMETRY') \
-                               .ttl_seconds(30)
+        dataset = self.bq_user_dataset.name(unique_table_name) \
+                                      .column(name='id', type='INT64') \
+                                      .column('geom', 'GEOMETRY') \
+                                      .ttl_seconds(30)
         dataset.create()
         dataset.upload_file_object(file_object)
         job = dataset.import_dataset()
@@ -89,11 +87,10 @@ class TestBQUserDataset(unittest.TestCase):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         file_object = StringIO(CSV_SAMPLE_REDUCED)
 
-        dataset = BQUserDataset.name(unique_table_name) \
-                               .credentials(self.credentials) \
-                               .column(name='id', type='INT64') \
-                               .column('geom', 'GEOMETRY') \
-                               .ttl_seconds(30)
+        dataset = self.bq_user_dataset.name(unique_table_name) \
+                                      .column(name='id', type='INT64') \
+                                      .column('geom', 'GEOMETRY') \
+                                      .ttl_seconds(30)
         dataset.create()
         dataset.upload_file_object(file_object)
         job = dataset.import_dataset()
@@ -105,11 +102,10 @@ class TestBQUserDataset(unittest.TestCase):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         file_object = StringIO(CSV_SAMPLE_REDUCED)
 
-        dataset = BQUserDataset.name(unique_table_name) \
-                               .credentials(self.credentials) \
-                               .column(name='id', type='INT64') \
-                               .column('geom', 'GEOMETRY') \
-                               .ttl_seconds(30)
+        dataset = self.bq_user_dataset.name(unique_table_name) \
+                                      .column(name='id', type='INT64') \
+                                      .column('geom', 'GEOMETRY') \
+                                      .ttl_seconds(30)
         dataset.create()
         dataset.upload_file_object(file_object)
         job = dataset.import_dataset()
@@ -122,20 +118,18 @@ class TestBQUserDataset(unittest.TestCase):
         sample = StringIO(CSV_SAMPLE_REDUCED)
         df = pandas.read_csv(sample)
 
-        dataset = BQUserDataset.name(unique_table_name) \
-                               .credentials(self.credentials) \
-                               .column(name='id', type='INT64') \
-                               .column('geom', 'GEOMETRY') \
-                               .ttl_seconds(30)
+        dataset = self.bq_user_dataset.name(unique_table_name) \
+                                      .column(name='id', type='INT64') \
+                                      .column('geom', 'GEOMETRY') \
+                                      .ttl_seconds(30)
         dataset.create()
         status = dataset.upload_dataframe(df)
 
         self.assertIn(status, ['success'])
 
     def test_can_download_to_dataframe(self):
-        result = BQUserDataset.name('census_tracts_american_samoa') \
-                              .credentials(self.credentials) \
-                              .download_stream()
+        result = self.bq_user_dataset.name('census_tracts_american_samoa') \
+                                     .download_stream()
         df = pandas.read_csv(result)
 
         self.assertEqual(df.shape, (18, 13))
@@ -158,11 +152,11 @@ class TestBQUserDataset(unittest.TestCase):
 
     def test_creation_of_dataset(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        dataset = BQUserDataset.name(unique_table_name) \
-                               .credentials(self.credentials) \
-                               .column(name='cartodb_id', type='INT64') \
-                               .column('the_geom', 'GEOMETRY') \
-                               .ttl_seconds(30)
+
+        dataset = self.bq_user_dataset.name(unique_table_name) \
+                                      .column(name='cartodb_id', type='INT64') \
+                                      .column('the_geom', 'GEOMETRY') \
+                                      .ttl_seconds(30)
         dataset.create()
 
         # do a quick check on the resulting table
@@ -187,11 +181,10 @@ class TestBQUserDataset(unittest.TestCase):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         df = pandas.read_csv(file_path('fixtures/enrichment_points.csv'))
 
-        dataset = BQUserDataset.name(unique_table_name) \
-                               .credentials(self.credentials) \
-                               .column(ENRICHMENT_ID, 'INT64') \
-                               .column(GEOM_COLUMN, 'GEOMETRY') \
-                               .ttl_seconds(3600)
+        dataset = self.bq_user_dataset.name(unique_table_name) \
+                                      .column(ENRICHMENT_ID, 'INT64') \
+                                      .column(GEOM_COLUMN, 'GEOMETRY') \
+                                      .ttl_seconds(3600)
         dataset.create()
         status = dataset.upload_dataframe(df)
 
@@ -204,7 +197,8 @@ class TestBQUserDataset(unittest.TestCase):
 
         self.assertIn(status, ['success'])
 
-        result = BQUserDataset.name(output_name).download_stream()
+        result = self.bq_user_dataset.name(output_name) \
+                                     .download_stream()
         df = pandas.read_csv(result)
 
         self.assertIn(variables[0], df.columns)
@@ -224,11 +218,10 @@ class TestBQUserDataset(unittest.TestCase):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         df = pandas.read_csv(file_path('fixtures/enrichment_polygons.csv'))
 
-        dataset = BQUserDataset.name(unique_table_name) \
-                               .credentials(self.credentials) \
-                               .column(ENRICHMENT_ID, 'INT64') \
-                               .column(GEOM_COLUMN, 'GEOMETRY') \
-                               .ttl_seconds(3600)
+        dataset = self.bq_user_dataset.name(unique_table_name) \
+                                      .column(ENRICHMENT_ID, 'INT64') \
+                                      .column(GEOM_COLUMN, 'GEOMETRY') \
+                                      .ttl_seconds(3600)
         dataset.create()
         status = dataset.upload_dataframe(df)
 
@@ -241,7 +234,8 @@ class TestBQUserDataset(unittest.TestCase):
 
         self.assertIn(status, ['success'])
 
-        result = BQUserDataset.name(output_name).download_stream()
+        result = self.bq_user_dataset.name(output_name) \
+                                     .download_stream()
         df = pandas.read_csv(result)
 
         self.assertIn(variables[0], df.columns)
