@@ -34,9 +34,6 @@ class GeographyRepository(EntityRepository):
         return Geography
 
     def _get_rows(self, filters=None):
-        if filters is not None and (COUNTRY_FILTER in filters.keys() or CATEGORY_FILTER in filters.keys()):
-            return self.client.get_geographies_joined_datasets(filters)
-
         return self.client.get_geographies(filters)
 
     def _map_row(self, row):
@@ -59,6 +56,7 @@ class GeographyRepository(EntityRepository):
         }
 
     def get_geographies_gdf(self):
+        # TODO: Should we use DO-Metadata API for this?
         query = 'select id, geom_coverage as the_geom from geographies_public where geom_coverage is not null'
         return read_carto(query, _DO_CREDENTIALS)
 

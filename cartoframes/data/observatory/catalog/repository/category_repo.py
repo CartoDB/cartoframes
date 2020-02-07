@@ -21,9 +21,6 @@ class CategoryRepository(EntityRepository):
         return Category
 
     def _get_rows(self, filters=None):
-        if filters is not None and COUNTRY_FILTER in filters.keys():
-            return self.client.get_categories_joined_datasets(filters)
-
         return self.client.get_categories(filters)
 
     def _map_row(self, row):

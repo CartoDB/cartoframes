@@ -6,8 +6,11 @@ from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.variable_group import VariableGroup
 from cartoframes.data.observatory.catalog.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.catalog.repository.variable_group_repo import VariableGroupRepository
-from .examples import test_variables_groups, test_variable_group1, test_variables, db_variable_group1, \
+from cartoframes.data.observatory.catalog.repository.constants import VARIABLE_GROUP_FILTER
+from .examples import (
+    test_variables_groups, test_variable_group1, test_variables, db_variable_group1,
     test_variable_group2, db_variable_group2
+)
 
 
 class TestVariableGroup(object):
@@ -34,7 +37,7 @@ class TestVariableGroup(object):
         variables = test_variable_group1.variables
 
         # Then
-        mocked_repo.assert_called_once_with({'variable_group_id': test_variable_group1.id})
+        mocked_repo.assert_called_once_with({VARIABLE_GROUP_FILTER: test_variable_group1.id})
         assert isinstance(variables, list)
         assert isinstance(variables, CatalogList)
         assert variables == test_variables

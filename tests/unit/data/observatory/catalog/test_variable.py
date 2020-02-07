@@ -6,6 +6,7 @@ from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.variable import Variable
 from cartoframes.data.observatory.catalog.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.catalog.repository.constants import VARIABLE_FILTER
 from .examples import test_datasets, test_variable1, test_variables, db_variable1, test_variable2, db_variable2
 
 
@@ -33,7 +34,7 @@ class TestVariable(object):
         datasets = test_variable1.datasets
 
         # Then
-        mocked_repo.assert_called_once_with({'variable_id': test_variable1.id})
+        mocked_repo.assert_called_once_with({VARIABLE_FILTER: test_variable1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets

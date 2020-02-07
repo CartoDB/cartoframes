@@ -22,6 +22,7 @@ _build
 # Distribution / packaging
 .Python
 env/
+.venv/
 build/
 develop-eggs/
 dist/
@@ -50,7 +51,7 @@ SITEKEY.txt
 secret.json
 examples/scratch/*
 
-# JavaScript 
+# JavaScript
 node_modules
 
 # Tests

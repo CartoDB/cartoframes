@@ -97,10 +97,7 @@ class EntityRepository(ABC):
 
     @classmethod
     def _normalize_field(cls, row, field):
-        if field in row:
-            return row[field]
-
-        return None
+        return row.get(field, None)
 
     @classmethod
     @abstractmethod

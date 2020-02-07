@@ -8,6 +8,10 @@ from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.dataset import Dataset
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.catalog.repository.constants import (
+    CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER,
+    VARIABLE_GROUP_FILTER
+)
 from ..examples import test_dataset1, test_datasets, db_dataset1, db_dataset2
 
 
@@ -63,12 +67,12 @@ class TestDatasetRepo(object):
         mocked_repo.return_value = [db_dataset1, db_dataset2]
         repo = DatasetRepository()
         filters = {
-            'country_id': 'usa',
-            'category_id': 'demographics',
-            'variable_id': 'population',
-            'geography_id': 'census-geo',
-            'variable_group_id': 'var-group',
-            'provider_id': 'open_data',
+            COUNTRY_FILTER: 'usa',
+            CATEGORY_FILTER: 'demographics',
+            VARIABLE_FILTER: 'population',
+            GEOGRAPHY_FILTER: 'census-geo',
+            VARIABLE_GROUP_FILTER: 'var-group',
+            PROVIDER_FILTER: 'open_data',
             'fake_field_id': 'fake_value'
         }
 
@@ -77,11 +81,11 @@ class TestDatasetRepo(object):
 
         # Then
         mocked_repo.assert_called_once_with({
-            'country_id': 'usa',
-            'category_id': 'demographics',
-            'variable_id': 'population',
-            'geography_id': 'census-geo',
-            'provider_id': 'open_data'
+            COUNTRY_FILTER: 'usa',
+            CATEGORY_FILTER: 'demographics',
+            # VARIABLE_FILTER: 'population',
+            GEOGRAPHY_FILTER: 'census-geo',
+            PROVIDER_FILTER: 'open_data'
         })
         assert datasets == test_datasets
 

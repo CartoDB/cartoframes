@@ -6,6 +6,7 @@ from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.provider import Provider
 from cartoframes.data.observatory.catalog.repository.provider_repo import ProviderRepository
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.catalog.repository.constants import PROVIDER_FILTER
 from .examples import test_datasets, test_provider1, test_providers, db_provider1, test_provider2, db_provider2
 
 
@@ -33,7 +34,7 @@ class TestProvider(object):
         datasets = test_provider1.datasets
 
         # Then
-        mocked_repo.assert_called_once_with({'provider_id': test_provider1.id})
+        mocked_repo.assert_called_once_with({PROVIDER_FILTER: test_provider1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets

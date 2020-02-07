@@ -1,11 +1,10 @@
-from .constants import CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER
+from .constants import CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER
 from .entity_repo import EntityRepository
-from ..entity import CatalogList
 
 
 _DATASET_ID_FIELD = 'id'
 _DATASET_SLUG_FIELD = 'slug'
-_ALLOWED_FILTERS = [CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER]
+_ALLOWED_FILTERS = [CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER]
 
 
 def get_dataset_repo():
@@ -55,11 +54,6 @@ class DatasetRepository(EntityRepository):
             'summary_json': self._normalize_field(row, 'summary_json'),
             'available_in': self._normalize_field(row, 'available_in')
         }
-
-    def get_datasets_for_geographies(self, geographies):
-        rows = self.client.get_datasets_for_geographies(geographies)
-        normalized_data = [self._get_entity_class()(self._map_row(row)) for row in rows]
-        return CatalogList(normalized_data)
 
 
 _REPO = DatasetRepository()

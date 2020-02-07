@@ -8,6 +8,10 @@ from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.geography import Geography
 from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.catalog.repository.constants import (
+    CATEGORY_FILTER, COUNTRY_FILTER, DATASET_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER,
+    VARIABLE_GROUP_FILTER
+)
 from ..examples import test_geography1, test_geographies, db_geography1, db_geography2
 
 
@@ -57,19 +61,19 @@ class TestGeographyRepo(object):
         mocked_repo.assert_called_once_with(None)
         assert geographies is None
 
-    @patch.object(RepoClient, 'get_geographies_joined_datasets')
+    @patch.object(RepoClient, 'get_geographies')
     def test_get_all_only_uses_allowed_filters(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1, db_geography2]
         repo = GeographyRepository()
         filters = {
-            'country_id': 'usa',
-            'dataset_id': 'carto-do.project.census2011',
-            'category_id': 'demographics',
-            'variable_id': 'population',
-            'geography_id': 'census-geo',
-            'variable_group_id': 'var-group',
-            'provider_id': 'open_data',
+            COUNTRY_FILTER: 'usa',
+            DATASET_FILTER: 'carto-do.project.census2011',
+            CATEGORY_FILTER: 'demographics',
+            VARIABLE_FILTER: 'population',
+            GEOGRAPHY_FILTER: 'census-geo',
+            VARIABLE_GROUP_FILTER: 'var-group',
+            PROVIDER_FILTER: 'open_data',
             'fake_field_id': 'fake_value'
         }
 
@@ -78,9 +82,9 @@ class TestGeographyRepo(object):
 
         # Then
         mocked_repo.assert_called_once_with({
-            'country_id': 'usa',
-            'category_id': 'demographics',
-            'provider_id': 'open_data'
+            COUNTRY_FILTER: 'usa',
+            CATEGORY_FILTER: 'demographics',
+            PROVIDER_FILTER: 'open_data'
         })
         assert geographies == test_geographies
 
@@ -166,17 +170,17 @@ class TestGeographyRepo(object):
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
-    @patch.object(RepoClient, 'get_geographies_joined_datasets')
+    @patch.object(RepoClient, 'get_geographies')
     def test_get_all_with_join_filters(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1, db_geography2]
         repo = GeographyRepository()
 
         # When
-        geographies = repo.get_all({'category_id': 'demographics'})
+        geographies = repo.get_all({CATEGORY_FILTER: 'demographics'})
 
         # Then
-        mocked_repo.assert_called_once_with({'category_id': 'demographics'})
+        mocked_repo.assert_called_once_with({CATEGORY_FILTER: 'demographics'})
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 

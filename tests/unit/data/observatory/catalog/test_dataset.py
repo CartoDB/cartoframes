@@ -11,8 +11,11 @@ from cartoframes.data.observatory.catalog.repository.variable_repo import Variab
 from cartoframes.data.observatory.catalog.repository.variable_group_repo import VariableGroupRepository
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.subscription_info import SubscriptionInfo
-from .examples import test_dataset1, test_datasets, test_variables, test_variables_groups, db_dataset1, test_dataset2, \
+from cartoframes.data.observatory.catalog.repository.constants import DATASET_FILTER
+from .examples import (
+    test_dataset1, test_datasets, test_variables, test_variables_groups, db_dataset1, test_dataset2,
     db_dataset2, test_subscription_info
+)
 from .mocks import BigQueryClientMock
 
 
@@ -40,7 +43,7 @@ class TestDataset(object):
         variables = test_dataset1.variables
 
         # Then
-        mocked_repo.assert_called_once_with({'dataset_id': test_dataset1.id})
+        mocked_repo.assert_called_once_with({DATASET_FILTER: test_dataset1.id})
         assert isinstance(variables, list)
         assert isinstance(variables, CatalogList)
         assert variables == test_variables
@@ -54,7 +57,7 @@ class TestDataset(object):
         variables_groups = test_dataset1.variables_groups
 
         # Then
-        mocked_repo.assert_called_once_with({'dataset_id': test_dataset1.id})
+        mocked_repo.assert_called_once_with({DATASET_FILTER: test_dataset1.id})
         assert isinstance(variables_groups, list)
         assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
