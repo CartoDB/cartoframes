@@ -171,13 +171,16 @@ class TestBQUserDataset(unittest.TestCase):
         self.assertEqual(df.shape, (0, 2))
         self.assertEqual(df.to_csv(index=False), 'cartodb_id,the_geom\n')
 
-    @pytest.mark.skip()
     def test_points_enrichment_dataset(self):
         """FIXME: this test needs the DO_DATA_VARIABLE env variable, for instance:
         $ DO_DATA_VARIABLE='cartodb-on-gcp-core-team.test_bq_enrichment_api.d1.nonfamily_households' \
           pytest tests/e2e/data/services/test_bq_datasets.py::TestBQUserDataset::test_points_enrichment_dataset
         """
-        _do_data_variable = os.environ['DO_DATA_VARIABLE']
+
+        _do_data_variable = os.environ.get('DO_DATA_VARIABLE')
+
+        if not _do_data_variable:
+            raise unittest.SkipTest("No DO_DATA_VARIABLE env variable available")
 
         self.assertIsNotNone(_do_data_variable)
 
@@ -213,9 +216,10 @@ class TestBQUserDataset(unittest.TestCase):
           pytest tests/e2e/data/services/test_bq_datasets.py::TestBQUserDataset::test_polygons_enrichment_dataset
         """
 
-        _do_data_variable = os.environ['DO_DATA_VARIABLE']
+        _do_data_variable = os.environ.get('DO_DATA_VARIABLE')
 
-        self.assertIsNotNone(_do_data_variable)
+        if not _do_data_variable:
+            raise unittest.SkipTest("No DO_DATA_VARIABLE env variable available")
 
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         df = pandas.read_csv(file_path('fixtures/enrichment_polygons.csv'))
