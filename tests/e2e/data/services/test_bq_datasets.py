@@ -38,6 +38,9 @@ def file_path(path):
 
 
 class TestBQUserDataset(unittest.TestCase):
+    """This test suite needs the ENV variable USERURL pointing to a working DO API in "tests/e2e/secret.json".
+    DO API must have the user/apikey mapping set to get access to the user's DO Project while testing.
+    """
 
     def setUp(self):
         if (os.environ.get('APIKEY') is None or os.environ.get('USERNAME') is None or os.environ.get('USERURL')):
@@ -170,11 +173,13 @@ class TestBQUserDataset(unittest.TestCase):
 
     @pytest.mark.skip()
     def test_points_enrichment_dataset(self):
-        """FIXME: this test needs the following env variable to pass. For instance:
+        """FIXME: this test needs the DO_DATA_VARIABLE env variable, for instance:
         $ DO_DATA_VARIABLE='cartodb-on-gcp-core-team.test_bq_enrichment_api.d1.nonfamily_households' \
           pytest tests/e2e/data/services/test_bq_datasets.py::TestBQUserDataset::test_points_enrichment_dataset
         """
         _do_data_variable = os.environ['DO_DATA_VARIABLE']
+
+        self.assertIsNotNone(_do_data_variable)
 
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         df = pandas.read_csv(file_path('fixtures/enrichment_points.csv'))
@@ -203,12 +208,14 @@ class TestBQUserDataset(unittest.TestCase):
 
     @pytest.mark.skip()
     def test_polygons_enrichment_dataset(self):
-        """FIXME: this test needs the following env variables to pass. For instance:
+        """FIXME: this test needs the DO_DATA_VARIABLE env variable, for instance:
         $ DO_DATA_VARIABLE='cartodb-on-gcp-core-team.test_bq_enrichment_api.d1.nonfamily_households' \
           pytest tests/e2e/data/services/test_bq_datasets.py::TestBQUserDataset::test_polygons_enrichment_dataset
         """
 
         _do_data_variable = os.environ['DO_DATA_VARIABLE']
+
+        self.assertIsNotNone(_do_data_variable)
 
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         df = pandas.read_csv(file_path('fixtures/enrichment_polygons.csv'))
