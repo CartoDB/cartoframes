@@ -18,7 +18,8 @@ class RepoClient:
     def set_user_credentials(self, credentials):
         self._user_credentials = credentials
 
-    def get_countries(self, filters={}):
+    def get_countries(self, filters=None):
+        filters = filters or {}
         api_path = 'metadata/countries'
         id_filter = filters.get('id')
         if id_filter:
@@ -26,7 +27,8 @@ class RepoClient:
         else:
             return self._make_request(api_path, filters)
 
-    def get_categories(self, filters={}):
+    def get_categories(self, filters=None):
+        filters = filters or {}
         api_path = 'metadata/categories'
         id_filter = filters.get('id')
         if id_filter:
@@ -34,7 +36,8 @@ class RepoClient:
         else:
             return self._make_request(api_path, filters)
 
-    def get_providers(self, filters={}):
+    def get_providers(self, filters=None):
+        filters = filters or {}
         api_path = 'metadata/providers'
         provider_id = filters.get('id')
         if provider_id:
@@ -42,7 +45,8 @@ class RepoClient:
         else:
             return self._make_request(api_path, filters)
 
-    def get_variables(self, filters={}):
+    def get_variables(self, filters=None):
+        filters = filters or {}
         api_path = 'metadata/variables'
         id_filter = filters.get('id') or filters.get('slug')
         if id_filter:
@@ -52,7 +56,8 @@ class RepoClient:
             api_path = f'metadata/datasets/{dataset_id}/variables'
             return self._make_request(api_path, filters)
 
-    def get_variables_groups(self, filters={}):
+    def get_variables_groups(self, filters=None):
+        filters = filters or {}
         api_path = 'metadata/variables_groups'
         id_filter = filters.get('id') or filters.get('slug')
         if id_filter:
@@ -63,7 +68,8 @@ class RepoClient:
             api_path = f'metadata/datasets/{dataset_id}/variables_groups'
             return self._make_request(api_path, filters)
 
-    def get_geographies(self, filters={}):
+    def get_geographies(self, filters=None):
+        filters = filters or {}
         api_path = 'metadata/geographies'
         id_filter = filters.get('id') or filters.get('slug')
         if id_filter:
@@ -71,7 +77,8 @@ class RepoClient:
         else:
             return self._make_request(api_path, filters)
 
-    def get_datasets(self, filters={}):
+    def get_datasets(self, filters=None):
+        filters = filters or {}
         api_path = 'metadata/datasets'
         id_filter = filters.get('id') or filters.get('slug')
         if id_filter:
@@ -92,13 +99,14 @@ class RepoClient:
 
         return entities
 
-    def _make_request(self, api_path, filters={}):
+    def _make_request(self, api_path, filters=None):
         request_url = self._build_url(api_path, filters)
         req = requests.get(request_url, verify=REQUEST_VERIFY_SSL)
         return req.json()
 
     def _build_url(self, api_path, filters):
         credentials = self._get_user_credentials()
+        filters = filters or {}
 
         url_params = [f'api_key={credentials.api_key}']
         for key, value in filters.items():
