@@ -24,7 +24,7 @@ class EnrichmentService(object):
 
     @timelogger
     def _enrich(self, geom_type, dataframe, variables, geom_col=None, filters={}, aggregation=_AGGREGATION_DEFAULT):
-        variable_ids = self.prepare_variables(variables)
+        variable_ids = self._prepare_variables(variables)
         geodataframe = self._prepare_data(dataframe, geom_col)
         temp_table_name = self._get_temp_table_name()
         uploaded_dataset = self._upload_data(temp_table_name, geodataframe)
@@ -33,7 +33,7 @@ class EnrichmentService(object):
 
         return result
 
-    def prepare_variables(self, variables):
+    def _prepare_variables(self, variables):
         _variables = []
 
         if isinstance(variables, list):
