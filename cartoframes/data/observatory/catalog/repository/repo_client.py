@@ -53,7 +53,7 @@ class RepoClient:
             return self._get_entities_by_id(api_path, id_filter)
         else:
             dataset_id = filters.get('dataset')  # Mandatory filter
-            api_path = f'metadata/datasets/{dataset_id}/variables'
+            api_path = 'metadata/datasets/{}/variables'.format(dataset_id)
             return self._make_request(api_path, filters)
 
     def get_variables_groups(self, filters=None):
@@ -65,7 +65,7 @@ class RepoClient:
             return self._get_entities_by_id(api_path, id_filter)
         else:
             dataset_id = filters.get('dataset')  # Mandatory filter
-            api_path = f'metadata/datasets/{dataset_id}/variables_groups'
+            api_path = 'metadata/datasets/{}/variables_groups'.format(dataset_id)
             return self._make_request(api_path, filters)
 
     def get_geographies(self, filters=None):
@@ -108,9 +108,9 @@ class RepoClient:
         credentials = self._get_user_credentials()
         filters = filters or {}
 
-        url_params = [f'api_key={credentials.api_key}']
+        url_params = ['api_key={}'.format(credentials.api_key)]
         for key, value in filters.items():
-            url_params.append(f'{key}={value}')
+            url_params.append('{}={}'.format(key, value))
 
         url = urlsplit(credentials.base_url)
 
