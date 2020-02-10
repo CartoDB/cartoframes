@@ -42,7 +42,7 @@ class _BQDatasetClient:
             response.raise_for_status()
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code,
                                                       reason)
                 raise CartoException(error_msg)
@@ -63,7 +63,7 @@ class _BQDatasetClient:
             return BQJob(job['item_queue_id'], name, self._credentials)
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code,
                                                       reason)
                 raise CartoException(error_msg)
@@ -88,7 +88,7 @@ class _BQDatasetClient:
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 # Client error, provide better reason
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code,
                                                       reason)
                 raise CartoException(error_msg)
@@ -111,7 +111,7 @@ class _BQDatasetClient:
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 # Client error, provide better reason
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code,
                                                       reason)
                 raise CartoException(error_msg)
@@ -138,13 +138,12 @@ class _BQDatasetClient:
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 # Client error, provide better reason
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code, reason)
                 raise CartoException(error_msg)
             raise CartoException(e)
         except Exception as e:
             raise CartoException(e)
-
 
 class BQJob:
 
@@ -170,7 +169,7 @@ class BQJob:
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 # Client error, provide better reason
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code,
                                                       reason)
                 raise CartoException(error_msg)
@@ -211,7 +210,7 @@ class BQUserEnrichmentJob:
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 # Client error, provide better reason
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code, reason)
                 raise CartoException(error_msg)
             raise CartoException(e)
