@@ -43,7 +43,9 @@ class TestBQUserDataset(unittest.TestCase):
     """
 
     def setUp(self):
-        if (os.environ.get('APIKEY') is None or os.environ.get('USERNAME') is None or os.environ.get('USERURL') is None):
+        if (os.environ.get('APIKEY') is None
+                or os.environ.get('USERNAME') is None
+                or os.environ.get('USERURL') is None):
             creds = json.loads(open('tests/e2e/secret.json').read())
             self.apikey = creds['APIKEY']
             self.username = creds['USERNAME']
