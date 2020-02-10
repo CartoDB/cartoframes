@@ -28,7 +28,7 @@ class EnrichmentService(object):
         geodataframe = self._prepare_data(dataframe, geom_col)
         temp_table_name = self._get_temp_table_name()
         uploaded_dataset = self._upload_data(temp_table_name, geodataframe)
-        enriched_dataframe = self._enrichment(uploaded_dataset, temp_table_name, geom_type, variable_ids)
+        enriched_dataframe = self._execute_enrichment(uploaded_dataset, temp_table_name, geom_type, variable_ids)
         result = self._merge(geodataframe, enriched_dataframe)
 
         return result
@@ -82,7 +82,7 @@ class EnrichmentService(object):
         return bq_dataset
 
     @timelogger
-    def _enrichment(self, dataset, temp_table_name, geom_type, variables):
+    def _execute_enrichment(self, dataset, temp_table_name, geom_type, variables):
         output_name = '{}_result'.format(temp_table_name)
         status = dataset.enrichment(geom_type=geom_type, variables=variables, output_name=output_name)
 
