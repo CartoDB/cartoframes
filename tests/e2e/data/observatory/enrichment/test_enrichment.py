@@ -28,15 +28,17 @@ private_variable3 = Variable.get('BLOCKGROUP_f1b3a750')  # STRING, NONE
 
 class TestEnrichment(object):
     def setup_method(self):
-        if (os.environ.get('APIKEY') and os.environ.get('USERNAME')):
+        if (os.environ.get('APIKEY') and os.environ.get('USERNAME') and os.environ.get('USERURL')):
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
+            self.base_url = os.environ['USERURL']
         else:
             creds = json.loads(open('tests/e2e/secret.json').read())
             self.apikey = creds['APIKEY']
             self.username = creds['USERNAME']
+            self.base_url = creds['USERURL']
 
-        self.credentials = Credentials(self.username, self.apikey)
+        self.credentials = Credentials(self.username, self.apikey, self.base_url)
         self.enrichment = Enrichment(self.credentials)
 
         self.points_gdf = read_file(file_path('files/points.geojson'))

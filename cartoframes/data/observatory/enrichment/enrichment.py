@@ -1,3 +1,4 @@
+import uuid
 import pandas
 from cartoframes.data.services import BQUserDataset
 from ....exceptions import EnrichmentError
@@ -90,11 +91,10 @@ class Enrichment():
         """
         temp_table_name = self._get_temp_table_name()
 
-        dataset = BQUserDataset \
-            .name(temp_table_name) \
-            .column(ENRICHMENT_ID, 'INT64') \
-            .column(GEOM_COLUMN, 'GEOMETRY') \
-            .ttl_seconds(TTL_IN_SECONDS)
+        dataset = BQUserDataset(credentials=self.credentials).name(temp_table_name) \
+                                                             .column(ENRICHMENT_ID, 'INT64') \
+                                                             .column(GEOM_COLUMN, 'GEOMETRY') \
+                                                             .ttl_seconds(TTL_IN_SECONDS)
         dataset.create()
 
         dataframe = dataframe[[ENRICHMENT_ID, GEOM_COLUMN]]
@@ -112,7 +112,8 @@ class Enrichment():
         if status not in ['success']:
             raise EnrichmentError('Couldn\'t enrich the dataframe. The job hasn\'t finished successfuly')
 
-        result = BQUserDataset.name(output_name).download_stream()
+        result = BQUserDataset(credentials=self.credentials).name(output_name) \
+                                                            .download_stream()
         df = pandas.read_csv(result)
 
         dataframe = dataframe.merge(df, on=ENRICHMENT_ID, how='left')
@@ -282,11 +283,10 @@ class Enrichment():
         """
         temp_table_name = self._get_temp_table_name()
 
-        dataset = BQUserDataset \
-            .name(temp_table_name) \
-            .column(ENRICHMENT_ID, 'INT64') \
-            .column(GEOM_COLUMN, 'GEOMETRY') \
-            .ttl_seconds(TTL_IN_SECONDS)
+        dataset = BQUserDataset(credentials=self.credentials).name(temp_table_name) \
+                                                             .column(ENRICHMENT_ID, 'INT64') \
+                                                             .column(GEOM_COLUMN, 'GEOMETRY') \
+                                                             .ttl_seconds(TTL_IN_SECONDS)
         dataset.create()
 
         dataframe = dataframe[[ENRICHMENT_ID, GEOM_COLUMN]]
@@ -304,7 +304,8 @@ class Enrichment():
         if status not in ['success']:
             raise EnrichmentError('Couldn\'t enrich the dataframe. The job hasn\'t finished successfuly')
 
-        result = BQUserDataset.name(output_name).download_stream()
+        result = BQUserDataset(credentials=self.credentials).name(output_name) \
+                                                            .download_stream()
         df = pandas.read_csv(result)
 
         dataframe = dataframe.merge(df, on=ENRICHMENT_ID, how='left')
@@ -312,3 +313,7 @@ class Enrichment():
         dataframe.drop(ENRICHMENT_ID, axis=1, inplace=True)
 
         return dataframe
+
+    def _get_temp_table_name(self):
+        id_tablename = uuid.uuid4().hex
+        return 'temp_{id}'.format(id=id_tablename)
