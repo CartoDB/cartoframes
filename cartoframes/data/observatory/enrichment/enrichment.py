@@ -1,16 +1,9 @@
-import uuid
-import pandas
-from cartoframes.data.services import BQUserDataset
-from ....exceptions import EnrichmentError
-from ....auth import get_default_credentials
+from .enrichment_service import EnrichmentService
 
-ENRICHMENT_ID = '__enrichment_id'
-GEOM_COLUMN = '__geom_column'
-TTL_IN_SECONDS = 3600
-AGGREGATION_DEFAULT = 'default'
+GEOM_TYPE_POINTS = 'points'
+GEOM_TYPE_POLYGONS = 'polygons'
 
-
-class Enrichment():
+class Enrichment(EnrichmentService):
     """This is the main class to enrich your own data with data from the
     `Data Observatory <https://carto.com/platform/location-data-streams/>`__
 
@@ -29,7 +22,7 @@ class Enrichment():
 
     """
     def __init__(self, credentials=None):
-        self.credentials = credentials or get_default_credentials()
+        super(Enrichment, self).__init__(credentials)
 
     def enrich_points(self, dataframe, variables, geom_col=None, filters={}):
         """Enrich your points `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset`
@@ -89,40 +82,10 @@ class Enrichment():
             ...     geom_col='the_geom')
 
         """
-        temp_table_name = self._get_temp_table_name()
+        dataframe_enriched = self._enrich(GEOM_TYPE_POINTS, dataframe, variables, geom_col, filters)
+        return dataframe_enriched
 
-        dataset = BQUserDataset(credentials=self.credentials).name(temp_table_name) \
-                                                             .column(ENRICHMENT_ID, 'INT64') \
-                                                             .column(GEOM_COLUMN, 'GEOMETRY') \
-                                                             .ttl_seconds(TTL_IN_SECONDS)
-        dataset.create()
-
-        dataframe = dataframe[[ENRICHMENT_ID, GEOM_COLUMN]]
-
-        status = dataset.upload_dataframe(dataframe)
-
-        if status not in ['success']:
-            raise EnrichmentError('Couldn\'t upload the dataframe to be enriched. The job hasn\'t finished successfuly')
-
-        geom_type = 'points'
-        output_name = '{}_result'.format(temp_table_name)
-
-        status = dataset.enrichment(geom_type=geom_type, variables=variables, output_name=output_name)
-
-        if status not in ['success']:
-            raise EnrichmentError('Couldn\'t enrich the dataframe. The job hasn\'t finished successfuly')
-
-        result = BQUserDataset(credentials=self.credentials).name(output_name) \
-                                                            .download_stream()
-        df = pandas.read_csv(result)
-
-        dataframe = dataframe.merge(df, on=ENRICHMENT_ID, how='left')
-        dataframe.drop(ENRICHMENT_ID, axis=1, inplace=True)
-        dataframe.drop(ENRICHMENT_ID, axis=1, inplace=True)
-
-        return dataframe
-
-    def enrich_polygons(self, dataframe, variables, geom_col=None, filters={}, aggregation=AGGREGATION_DEFAULT):
+    def enrich_polygons(self, dataframe, variables, geom_col=None, filters={}, aggregation=None):
         """Enrich your polygons `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset` in
         the Data Observatory by intersecting the polygons in the source `DataFrame` with geographies in the
         Data Observatory.
@@ -281,39 +244,5 @@ class Enrichment():
             ...     geom_col='the_geom')
 
         """
-        temp_table_name = self._get_temp_table_name()
-
-        dataset = BQUserDataset(credentials=self.credentials).name(temp_table_name) \
-                                                             .column(ENRICHMENT_ID, 'INT64') \
-                                                             .column(GEOM_COLUMN, 'GEOMETRY') \
-                                                             .ttl_seconds(TTL_IN_SECONDS)
-        dataset.create()
-
-        dataframe = dataframe[[ENRICHMENT_ID, GEOM_COLUMN]]
-
-        status = dataset.upload_dataframe(dataframe)
-
-        if status not in ['success']:
-            raise EnrichmentError('Couldn\'t upload the dataframe to be enriched. The job hasn\'t finished successfuly')
-
-        geom_type = 'polygons'
-        output_name = '{}_result'.format(temp_table_name)
-
-        status = dataset.enrichment(geom_type=geom_type, variables=variables, output_name=output_name)
-
-        if status not in ['success']:
-            raise EnrichmentError('Couldn\'t enrich the dataframe. The job hasn\'t finished successfuly')
-
-        result = BQUserDataset(credentials=self.credentials).name(output_name) \
-                                                            .download_stream()
-        df = pandas.read_csv(result)
-
-        dataframe = dataframe.merge(df, on=ENRICHMENT_ID, how='left')
-        dataframe.drop(ENRICHMENT_ID, axis=1, inplace=True)
-        dataframe.drop(ENRICHMENT_ID, axis=1, inplace=True)
-
-        return dataframe
-
-    def _get_temp_table_name(self):
-        id_tablename = uuid.uuid4().hex
-        return 'temp_{id}'.format(id=id_tablename)
+        dataframe_enriched = self._enrich(GEOM_TYPE_POLYGONS, dataframe, variables, geom_col, filters, aggregation)
+        return dataframe_enriched
