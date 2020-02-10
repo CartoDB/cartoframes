@@ -3,6 +3,7 @@ from .enrichment_service import EnrichmentService
 GEOM_TYPE_POINTS = 'points'
 GEOM_TYPE_POLYGONS = 'polygons'
 
+
 class Enrichment(EnrichmentService):
     """This is the main class to enrich your own data with data from the
     `Data Observatory <https://carto.com/platform/location-data-streams/>`__
