@@ -1,16 +1,13 @@
-from cartoframes.auth import Credentials
+from pandas import DataFrame
+from geopandas import GeoDataFrame
 
+from .....utils.geom_utils import set_geometry
 from .constants import COUNTRY_FILTER, CATEGORY_FILTER, PROVIDER_FILTER
 from .entity_repo import EntityRepository
-
-from .....io.carto import read_carto
-
 
 _GEOGRAPHY_ID_FIELD = 'id'
 _GEOGRAPHY_SLUG_FIELD = 'slug'
 _ALLOWED_FILTERS = [COUNTRY_FILTER, CATEGORY_FILTER, PROVIDER_FILTER]
-
-_DO_CREDENTIALS = Credentials('do-metadata', 'default_public')
 
 
 def get_geography_repo():
@@ -56,9 +53,12 @@ class GeographyRepository(EntityRepository):
         }
 
     def get_geographies_gdf(self):
-        # TODO: Should we use DO-Metadata API for this?
-        query = 'select id, geom_coverage as the_geom from geographies_public where geom_coverage is not null'
-        return read_carto(query, _DO_CREDENTIALS)
+        data = self.client.get_geographies({'get_geoms_coverage': True})
+        df = DataFrame(data)
+        gdf = GeoDataFrame(df, crs='epsg:4326')
+
+        set_geometry(gdf, col='geom_coverage', inplace=True)
+        return gdf
 
 
 _REPO = GeographyRepository()
