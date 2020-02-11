@@ -145,6 +145,7 @@ class _BQDatasetClient:
         except Exception as e:
             raise CartoException(e)
 
+
 class BQJob:
 
     def __init__(self, job_id, name_id, credentials):

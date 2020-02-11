@@ -1,5 +1,4 @@
 import uuid
-import time
 import pandas
 from geopandas import GeoDataFrame
 from ...observatory import Variable
