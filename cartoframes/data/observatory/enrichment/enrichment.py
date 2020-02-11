@@ -25,7 +25,7 @@ class Enrichment(EnrichmentService):
     def __init__(self, credentials=None):
         super(Enrichment, self).__init__(credentials)
 
-    def enrich_points(self, dataframe, variables, geom_col=None, filters={}):
+    def enrich_points(self, dataframe, variables, geom_col=None, filters=None):
         """Enrich your points `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset`
         in the Data Observatory, intersecting the points in the source `DataFrame` with the geographies in the
         Data Observatory.
@@ -83,6 +83,8 @@ class Enrichment(EnrichmentService):
             ...     geom_col='the_geom')
 
         """
+        if filters is None:
+            filters = {}
         dataframe_enriched = self._enrich(GEOM_TYPE_POINTS, dataframe, variables, geom_col, filters)
         return dataframe_enriched
 
@@ -245,5 +247,7 @@ class Enrichment(EnrichmentService):
             ...     geom_col='the_geom')
 
         """
+        if filters is None:
+            filters = {}
         dataframe_enriched = self._enrich(GEOM_TYPE_POLYGONS, dataframe, variables, geom_col, filters, aggregation)
         return dataframe_enriched

@@ -23,7 +23,9 @@ class EnrichmentService(object):
         self.bq_user_dataset = BQUserDataset(credentials=credentials or get_default_credentials())
 
     @timelogger
-    def _enrich(self, geom_type, dataframe, variables, geom_col=None, filters={}, aggregation=_AGGREGATION_DEFAULT):
+    def _enrich(self, geom_type, dataframe, variables, geom_col=None, filters=None, aggregation=_AGGREGATION_DEFAULT):
+        if filters is None:
+            filters = {}
         variable_ids = self._prepare_variables(variables)
         geodataframe = self._prepare_data(dataframe, geom_col)
         temp_table_name = self._get_temp_table_name()
