@@ -2,12 +2,8 @@ import os
 import time
 import requests
 from carto.utils import ResponseStream
-# from carto.auth import APIKeyAuthClient
-
 from carto.exceptions import CartoException
-
-# TODO: this shouldn't be hardcoded
-DO_ENRICHMENT_API_URL = 'http://localhost:7070/bq'
+from ...auth import get_default_credentials
 
 VALID_TYPES = [
     'STRING', 'BYTES', 'INTEGER', 'INT64', 'FLOAT',
@@ -22,10 +18,12 @@ TYPES_MAPPING = {
 
 class _BQDatasetClient:
 
-    def __init__(self):
-        # TODO fix this crap
+    def __init__(self, credentials):
         self.session = requests.Session()
-        self.api_key = 'my_valid_api_key'
+        self._credentials = credentials
+        self._username = credentials.username
+        self._api_key = credentials.api_key
+        self._base_url = credentials.base_url
 
     def upload(self, dataframe, name):
         dataframe.to_csv(path_or_buf=name, index=False)
@@ -36,15 +34,15 @@ class _BQDatasetClient:
             os.remove(name)
 
     def upload_file_object(self, file_object, name):
-        url = DO_ENRICHMENT_API_URL + '/datasets/' + name
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/datasets/' + name
+        params = {'api_key': self._api_key}
 
         try:
             response = self.session.post(url, params=params, data=file_object)
             response.raise_for_status()
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code,
                                                       reason)
                 raise CartoException(error_msg)
@@ -53,8 +51,8 @@ class _BQDatasetClient:
             raise CartoException(e)
 
     def import_dataset(self, name):
-        url = DO_ENRICHMENT_API_URL + '/datasets/' + name + '/imports'
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/datasets/' + name + '/imports'
+        params = {'api_key': self._api_key}
 
         try:
             response = self.session.post(url, params=params)
@@ -62,10 +60,10 @@ class _BQDatasetClient:
 
             job = response.json()
 
-            return BQJob(job['item_queue_id'], name)
+            return BQJob(job['item_queue_id'], name, self._credentials)
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code,
                                                       reason)
                 raise CartoException(error_msg)
@@ -81,18 +79,16 @@ class _BQDatasetClient:
         return status
 
     def download(self, name_id):
-        url = '%s/datasets/%s' % (DO_ENRICHMENT_API_URL, name_id)
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/datasets/' + name_id
+        params = {'api_key': self._api_key}
 
         try:
-            response = self.session.get(url,
-                                        params=params,
-                                        stream=True)
+            response = self.session.get(url, params=params, stream=True)
             response.raise_for_status()
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 # Client error, provide better reason
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code,
                                                       reason)
                 raise CartoException(error_msg)
@@ -106,18 +102,16 @@ class _BQDatasetClient:
         return ResponseStream(self.download(name_id))
 
     def create(self, payload):
-        url = '%s/datasets' % DO_ENRICHMENT_API_URL
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/datasets'
+        params = {'api_key': self._api_key}
 
         try:
-            response = self.session.post(url,
-                                         params=params,
-                                         json=payload)
+            response = self.session.post(url, params=params, json=payload)
             response.raise_for_status()
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 # Client error, provide better reason
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code,
                                                       reason)
                 raise CartoException(error_msg)
@@ -129,22 +123,22 @@ class _BQDatasetClient:
         return response
 
     def enrichment(self, payload):
-        url = '{}/enrichment'.format(DO_ENRICHMENT_API_URL)
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/enrichment'
+        params = {'api_key': self._api_key}
 
         try:
             response = self.session.post(url, params=params, json=payload)
             response.raise_for_status()
 
             body = response.json()
-            job = BQUserEnrichmentJob(body['job_id'])
+            job = BQUserEnrichmentJob(body['job_id'], self._credentials)
             status = job.result()
 
             return status
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 # Client error, provide better reason
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code, reason)
                 raise CartoException(error_msg)
             raise CartoException(e)
@@ -154,16 +148,17 @@ class _BQDatasetClient:
 
 class BQJob:
 
-    def __init__(self, job_id, name_id):
+    def __init__(self, job_id, name_id, credentials):
         self.id = job_id
         self.name = name_id
-        # TODO fix this crap
+        self._username = credentials.username
+        self._api_key = credentials.api_key
+        self._base_url = credentials.base_url
         self.session = requests.Session()
-        self.api_key = 'my_valid_api_key'
 
     def status(self):
-        url = DO_ENRICHMENT_API_URL + '/datasets/' + self.name + '/imports/' + self.id
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/datasets/' + self.name + '/imports/' + self.id
+        params = {'api_key': self._api_key}
 
         try:
             response = self.session.get(url, params=params)
@@ -175,7 +170,7 @@ class BQJob:
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 # Client error, provide better reason
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code,
                                                       reason)
                 raise CartoException(error_msg)
@@ -195,15 +190,16 @@ class BQJob:
 
 class BQUserEnrichmentJob:
 
-    def __init__(self, job_id):
+    def __init__(self, job_id, credentials):
         self.id = job_id
-        # TODO fix this crap
+        self._username = credentials.username
+        self._api_key = credentials.api_key
+        self._base_url = credentials.base_url
         self.session = requests.Session()
-        self.api_key = 'my_valid_api_key'
 
     def status(self):
-        url = '{}/enrichment/{}/status'.format(DO_ENRICHMENT_API_URL, self.id)
-        params = {'api_key': self.api_key}
+        url = self._base_url.format(self._username) + '/bq/enrichment/' + self.id + '/status'
+        params = {'api_key': self._api_key}
 
         try:
             response = self.session.get(url, params=params)
@@ -215,7 +211,7 @@ class BQUserEnrichmentJob:
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
                 # Client error, provide better reason
-                reason = response.json()['error'][0]
+                reason = response.json()['errors'][0]
                 error_msg = u'%s Client Error: %s' % (response.status_code, reason)
                 raise CartoException(error_msg)
             raise CartoException(e)
@@ -235,10 +231,6 @@ class BQUserEnrichmentJob:
 class BQUserDataset:
 
     @staticmethod
-    def name(name_id):
-        return BQUserDataset(name_id)
-
-    @staticmethod
     def _map_type(in_type):
         if in_type in TYPES_MAPPING:
             out_type = TYPES_MAPPING[in_type]
@@ -246,15 +238,21 @@ class BQUserDataset:
             out_type = in_type
         return out_type
 
-    def __init__(self, name_id, client=None, ttl_seconds=None):
-        self._name_id = name_id
-        if client is None:
-            self._client = _BQDatasetClient()
-        self._columns = []
+    def __init__(self, name=None, columns=None, ttl_seconds=None, client=None, credentials=None):
+        self._name = name
+        if columns is None:
+            self._columns = []
+        else:
+            self._columns = columns
         self._ttl_seconds = ttl_seconds
+        self._client = client
+        if self._client is None:
+            self._credentials = credentials or get_default_credentials()
+            self._client = _BQDatasetClient(self._credentials)
 
-    def download_stream(self):
-        return self._client.download_stream(self._name_id)
+    def name(self, name):
+        self._name = name
+        return self
 
     def column(self, name=None, type=None):
         # TODO validate field names
@@ -271,30 +269,35 @@ class BQUserDataset:
 
     def create(self):
         payload = {
-            'id': self._name_id,
+            'id': self._name,
             'schema': [{'name': c[0], 'type': self._map_type(c[1])} for c in self._columns],
         }
         if self._ttl_seconds is not None:
             payload['ttl_seconds'] = self._ttl_seconds
         self._client.create(payload)
 
+    def download_stream(self):
+        return self._client.download_stream(self._name)
+
     def upload(self, dataframe):
-        self._client.upload(dataframe, self._name_id)
+        self._client.upload(dataframe, self._name)
 
     def upload_file_object(self, file_object):
-        self._client.upload_file_object(file_object, self._name_id)
+        self._client.upload_file_object(file_object, self._name)
 
     def import_dataset(self):
-        return self._client.import_dataset(self._name_id)
+        return self._client.import_dataset(self._name)
 
     def upload_dataframe(self, dataframe):
-        return self._client.upload_dataframe(dataframe, self._name_id)
+        return self._client.upload_dataframe(dataframe, self._name)
 
-    def enrichment(self, geom_type='points', variables=None, output_name=None):
+    def enrichment(self, geom_type='points', variables=None, filters=None, aggregation=None, output_name=None):
         payload = {
             'type': geom_type,
-            'input': self._name_id,
+            'input': self._name,
             'variables': variables,
+            'filters': filters,
+            'aggregation': aggregation,
             'output': output_name
         }
 
