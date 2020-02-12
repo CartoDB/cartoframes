@@ -56,6 +56,7 @@ class Layer:
         default_popup_click (bool, optional): flag to set the default popup click. This only works when using a
             style helper. Default False.
         title (str, optional): title for the default legend, widget and popups.
+        encode_data (bool, optional):
 
     Raises:
         ValueError: if the source is not valid.
@@ -97,12 +98,13 @@ class Layer:
                  default_widget=False,
                  default_popup_hover=True,
                  default_popup_click=False,
-                 title=None):
+                 title=None,
+                 encode_data=True):
 
         self.is_basemap = False
-        self.source = _set_source(source, credentials, geom_col)
+        self.source = _set_source(source, credentials, geom_col, encode_data)
         self.style = _set_style(style)
-
+        self.encode_data = encode_data
         self.popups = self._init_popups(
             popup_hover, popup_click, default_popup_hover, default_popup_click, title)
         self.legends = self._init_legends(legends, default_legend, title)
@@ -180,9 +182,9 @@ class Layer:
         return Map(self)._repr_html_()
 
 
-def _set_source(source, credentials, geom_col):
+def _set_source(source, credentials, geom_col, encode_data):
     if isinstance(source, (str, pandas.DataFrame)):
-        return Source(source, credentials, geom_col)
+        return Source(source, credentials, geom_col, encode_data)
     elif isinstance(source, Source):
         return source
     else:
