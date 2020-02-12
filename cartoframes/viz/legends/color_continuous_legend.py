@@ -2,7 +2,7 @@ from ..legend import Legend
 
 
 def color_continuous_legend(title=None, description=None, footer=None, prop='color',
-                            variable=None, dynamic=True):
+                            variable=None, dynamic=True, sort='ascending'):
     """Helper function for quickly creating a color continuous legend.
 
     Args:
@@ -33,4 +33,4 @@ def color_continuous_legend(title=None, description=None, footer=None, prop='col
         ...     dynamic=False)
 
     """
-    return Legend('color-continuous', title, description, footer, prop, variable, dynamic)
+    return Legend('color-continuous', title, description, footer, prop, variable, dynamic, sort)
