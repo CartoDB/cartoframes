@@ -83,12 +83,10 @@ class Enrichment(EnrichmentService):
             ...     geom_col='the_geom')
 
         """
-        if filters is None:
-            filters = {}
-        dataframe_enriched = self._enrich(GEOM_TYPE_POINTS, dataframe, variables, geom_col, filters)
+        dataframe_enriched = self._enrich(GEOM_TYPE_POINTS, dataframe, variables, geom_col, filters or {})
         return dataframe_enriched
 
-    def enrich_polygons(self, dataframe, variables, geom_col=None, filters={}, aggregation=None):
+    def enrich_polygons(self, dataframe, variables, geom_col=None, filters=None, aggregation=None):
         """Enrich your polygons `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset` in
         the Data Observatory by intersecting the polygons in the source `DataFrame` with geographies in the
         Data Observatory.
@@ -247,7 +245,6 @@ class Enrichment(EnrichmentService):
             ...     geom_col='the_geom')
 
         """
-        if filters is None:
-            filters = {}
-        dataframe_enriched = self._enrich(GEOM_TYPE_POLYGONS, dataframe, variables, geom_col, filters, aggregation)
+        dataframe_enriched = self._enrich(GEOM_TYPE_POLYGONS, dataframe, variables,
+                                          geom_col, filters or {}, aggregation)
         return dataframe_enriched

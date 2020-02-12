@@ -291,11 +291,13 @@ class BQUserDataset:
     def upload_dataframe(self, dataframe):
         return self._client.upload_dataframe(dataframe, self._name)
 
-    def enrichment(self, geom_type='points', variables=None, output_name=None):
+    def enrichment(self, geom_type='points', variables=None, filters=None, aggregation=None, output_name=None):
         payload = {
             'type': geom_type,
             'input': self._name,
             'variables': variables,
+            'filters': filters,
+            'aggregation': aggregation,
             'output': output_name
         }
 
