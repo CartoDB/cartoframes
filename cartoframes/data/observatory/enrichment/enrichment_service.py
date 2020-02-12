@@ -10,7 +10,7 @@ from ....utils.utils import timelogger
 
 
 _ENRICHMENT_ID = '__enrichment_id'
-_GEOM_COLUMN = '__geojson_geom'
+_GEOM_COLUMN = '__geom_column'
 _TTL_IN_SECONDS = 3600
 _AGGREGATION_DEFAULT = 'default'
 

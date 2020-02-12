@@ -34,7 +34,7 @@ class _BQDatasetClient:
             os.remove(name)
 
     def upload_file_object(self, file_object, name):
-        url = self._base_url.format(self._username) + '/bq/datasets/' + name
+        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/datasets/' + name
         params = {'api_key': self._api_key}
 
         try:
@@ -51,7 +51,7 @@ class _BQDatasetClient:
             raise CartoException(e)
 
     def import_dataset(self, name):
-        url = self._base_url.format(self._username) + '/bq/datasets/' + name + '/imports'
+        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/datasets/' + name + '/imports'
         params = {'api_key': self._api_key}
 
         try:
@@ -79,7 +79,7 @@ class _BQDatasetClient:
         return status
 
     def download(self, name_id):
-        url = self._base_url.format(self._username) + '/bq/datasets/' + name_id
+        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/datasets/' + name_id
         params = {'api_key': self._api_key}
 
         try:
@@ -102,7 +102,7 @@ class _BQDatasetClient:
         return ResponseStream(self.download(name_id))
 
     def create(self, payload):
-        url = self._base_url.format(self._username) + '/bq/datasets'
+        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/datasets'
         params = {'api_key': self._api_key}
 
         try:
@@ -123,7 +123,7 @@ class _BQDatasetClient:
         return response
 
     def enrichment(self, payload):
-        url = self._base_url.format(self._username) + '/bq/enrichment'
+        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/enrichment'
         params = {'api_key': self._api_key}
 
         try:
@@ -157,7 +157,7 @@ class BQJob:
         self.session = requests.Session()
 
     def status(self):
-        url = self._base_url.format(self._username) + '/bq/datasets/' + self.name + '/imports/' + self.id
+        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/datasets/' + self.name + '/imports/' + self.id
         params = {'api_key': self._api_key}
 
         try:
@@ -198,7 +198,7 @@ class BQUserEnrichmentJob:
         self.session = requests.Session()
 
     def status(self):
-        url = self._base_url.format(self._username) + '/bq/enrichment/' + self.id + '/status'
+        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/enrichment/' + self.id + '/status'
         params = {'api_key': self._api_key}
 
         try:
