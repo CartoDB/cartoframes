@@ -107,8 +107,13 @@ class Credentials:
         if not self._user_id:
             log.debug('Getting `user_id` for {}'.format(self._username))
             api_key_auth_client = self.get_api_key_auth_client()
-            user_me = api_key_auth_client.send(ME_SERVICE, 'get').json()
-            self._user_id = user_me.get('user_data', {}).get('id')
+
+            try:
+                user_me = api_key_auth_client.send(ME_SERVICE, 'get').json()
+                self._user_id = user_me.get('user_data', {}).get('id')
+
+            except ValueError:  # When the response isn't a JSON
+                pass
 
         return self._user_id
 
