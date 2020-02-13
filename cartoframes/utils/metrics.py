@@ -80,10 +80,12 @@ def build_metrics_data(event_name, extra_metrics_data):
         'runtime_env': get_runtime_env()
     }
 
-    if not isinstance(extra_metrics_data, dict):
+    if isinstance(extra_metrics_data, dict):
+        metrics_data.update(extra_metrics_data)  # Compatible with old Python versions
+
+    elif extra_metrics_data is not None:
         extra_metrics_data = {'extra': str(extra_metrics_data)}
 
-    metrics_data.update(extra_metrics_data)  # Compatible with old Python versions
     return metrics_data
 
 
@@ -101,15 +103,19 @@ def send_metrics(event_name):
         def wrapper_func(*args, **kwargs):
             result = func(*args, **kwargs)
 
-            credentials = get_parameter_from_decorator('credentials', func, *args, **kwargs)
-            credentials = get_credentials(credentials)
-            extra_metrics_data = {'user_id': credentials.user_id} \
-                if credentials and credentials.user_id else {}
-
+            extra_metrics_data = build_extra_metrics_data(func, *args, **kwargs)
             post_metrics(event_name, extra_metrics_data)
+
             return result
         return wrapper_func
     return decorator_func
+
+
+def build_extra_metrics_data(decorated_function, *args, **kwargs):
+    credentials = get_parameter_from_decorator(
+        'credentials', decorated_function, *args, **kwargs)
+    credentials = get_credentials(credentials)
+    return {'user_id': credentials.user_id} if credentials and credentials.user_id else {}
 
 
 # Run this once
