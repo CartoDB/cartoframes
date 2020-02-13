@@ -44,7 +44,7 @@ class TestGeographyRepo(object):
         geographies = repo.get_all(credentials=credentials)
 
         # Then
-        mocked_get_geographies.assert_called_once()
+        mocked_get_geographies.assert_called_once_with({'id': [db_geography1['id'], db_geography2['id']]})
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 

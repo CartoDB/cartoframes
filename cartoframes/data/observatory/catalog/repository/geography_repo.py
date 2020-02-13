@@ -27,7 +27,7 @@ class GeographyRepository(EntityRepository):
             if len(ids) == 0:
                 return []
             elif len(ids) > 0:
-                filters = filters if filters else {}
+                filters = filters or {}
                 filters['id'] = ids
 
         return self._get_filtered_entities(filters)

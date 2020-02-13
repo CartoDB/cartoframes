@@ -44,7 +44,7 @@ class TestDatasetRepo(object):
         datasets = repo.get_all(credentials=credentials)
 
         # Then
-        mocked_get_datasets.assert_called_once()
+        mocked_get_datasets.assert_called_once_with({'id': [db_dataset1['id'], db_dataset2['id']]})
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
