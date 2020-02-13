@@ -69,7 +69,7 @@ def check_valid_metrics_uuid(metrics_config):
     return metrics_config is not None and is_uuid(metrics_config.get(UUID_KEY))
 
 
-def build_metrics_data(event_name, extra_metrics_data={}):
+def build_metrics_data(event_name, extra_metrics_data):
     metrics_data = {
         'event_version': EVENT_VERSION,
         'event_time': get_local_time(),
@@ -80,12 +80,15 @@ def build_metrics_data(event_name, extra_metrics_data={}):
         'runtime_env': get_runtime_env()
     }
 
+    if not isinstance(extra_metrics_data, dict):
+        extra_metrics_data = {'extra': str(extra_metrics_data)}
+
     metrics_data.update(extra_metrics_data)  # Compatible with old Python versions
     return metrics_data
 
 
 @silent_fail
-def post_metrics(event_name, extra_metrics_data={}):
+def post_metrics(event_name, extra_metrics_data):
     if get_metrics_enabled():
         json_data = build_metrics_data(event_name, extra_metrics_data)
         result = requests.post('https://carto.com/api/metrics', json=json_data, timeout=2)
