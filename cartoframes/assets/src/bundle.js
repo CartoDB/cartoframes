@@ -407,9 +407,9 @@ var init = (function () {
       const othersLabel = 'Others';   // TODO: i18n
       const prop = legend.prop;
       const dynamic = legend.dynamic;
-      const sort = legend.sort;
+      const order = legend.order;
       const variable = legend.variable;
-      const config = { othersLabel, variable, sort };
+      const config = { othersLabel, variable, order };
       const options = { format, config, dynamic };
 
       if (legend.type.startsWith('size-continuous')) {

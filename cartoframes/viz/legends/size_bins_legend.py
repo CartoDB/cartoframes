@@ -2,7 +2,7 @@ from ..legend import Legend
 
 
 def size_bins_legend(title=None, description=None, footer=None, prop='size',
-                     variable=None, dynamic=True, sort='ascending'):
+                     variable=None, dynamic=True, order='ASC'):
     """Helper function for quickly creating a size bins legend.
 
     Args:
@@ -33,4 +33,4 @@ def size_bins_legend(title=None, description=None, footer=None, prop='size',
         ...     dynamic=False)
 
     """
-    return Legend('size-bins', title, description, footer, prop, variable, dynamic, sort)
+    return Legend('size-bins', title, description, footer, prop, variable, dynamic, order)

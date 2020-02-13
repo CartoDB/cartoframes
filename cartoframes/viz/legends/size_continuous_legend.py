@@ -2,7 +2,7 @@ from ..legend import Legend
 
 
 def size_continuous_legend(title=None, description=None, footer=None, prop='size',
-                           variable='size_value', dynamic=True, sort='ascending'):
+                           variable='size_value', dynamic=True, order='ASC'):
     """Helper function for quickly creating a size continuous legend.
 
     Args:
@@ -32,4 +32,4 @@ def size_continuous_legend(title=None, description=None, footer=None, prop='size
         ...     dynamic=False)
 
     """
-    return Legend('size-continuous', title, description, footer, prop, variable, dynamic, sort)
+    return Legend('size-continuous', title, description, footer, prop, variable, dynamic, order)
