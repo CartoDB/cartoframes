@@ -5,7 +5,8 @@ import functools
 
 from .logger import log
 from .utils import default_config_path, read_from_config, save_in_config, \
-                   is_uuid, get_local_time, silent_fail, get_runtime_env
+                   is_uuid, get_local_time, silent_fail, get_runtime_env, \
+                   get_credentials, get_parameter_from_decorator
 from .. import __version__
 
 EVENT_VERSION = '1'
@@ -68,8 +69,8 @@ def check_valid_metrics_uuid(metrics_config):
     return metrics_config is not None and is_uuid(metrics_config.get(UUID_KEY))
 
 
-def build_metrics_data(event_name):
-    return {
+def build_metrics_data(event_name, extra_metrics_data={}):
+    metrics_data = {
         'event_version': EVENT_VERSION,
         'event_time': get_local_time(),
         'event_source': EVENT_SOURCE,
@@ -79,11 +80,14 @@ def build_metrics_data(event_name):
         'runtime_env': get_runtime_env()
     }
 
+    metrics_data.update(extra_metrics_data)  # Compatible with old Python versions
+    return metrics_data
+
 
 @silent_fail
-def post_metrics(event_name):
+def post_metrics(event_name, extra_metrics_data={}):
     if get_metrics_enabled():
-        json_data = build_metrics_data(event_name)
+        json_data = build_metrics_data(event_name, extra_metrics_data)
         result = requests.post('https://carto.com/api/metrics', json=json_data, timeout=2)
         log.debug('Metrics sent! {0} {1}'.format(result.status_code, json_data))
 
@@ -93,7 +97,13 @@ def send_metrics(event_name):
         @functools.wraps(func)
         def wrapper_func(*args, **kwargs):
             result = func(*args, **kwargs)
-            post_metrics(event_name)
+
+            credentials = get_parameter_from_decorator('credentials', func, *args, **kwargs)
+            credentials = get_credentials(credentials)
+            extra_metrics_data = {'user_id': credentials.user_id} \
+                if credentials and credentials.user_id else {}
+
+            post_metrics(event_name, extra_metrics_data)
             return result
         return wrapper_func
     return decorator_func
