@@ -1,6 +1,6 @@
 import pytest
 
-from unittest.mock import patch, call
+from unittest.mock import patch
 
 from cartoframes.auth import Credentials
 from cartoframes.exceptions import CatalogError
@@ -32,9 +32,10 @@ class TestDatasetRepo(object):
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
-    @patch.object(RepoClient, 'set_user_credentials')
-    def test_get_all_credentials(self, mocked_set_user_credentials, mocked_get_datasets):
+    @patch('cartoframes.data.observatory.catalog.repository.dataset_repo.get_subscription_ids')
+    def test_get_all_credentials(self, mocked_get_subscription_ids, mocked_get_datasets):
         # Given
+        mocked_get_subscription_ids.return_value = [db_dataset1['id'], db_dataset2['id']]
         mocked_get_datasets.return_value = [db_dataset1, db_dataset2]
         credentials = Credentials('user', '1234')
         repo = DatasetRepository()
@@ -43,8 +44,7 @@ class TestDatasetRepo(object):
         datasets = repo.get_all(credentials=credentials)
 
         # Then
-        mocked_set_user_credentials.assert_has_calls([call(credentials), call(None)])
-        mocked_get_datasets.assert_called_once_with(None)
+        mocked_get_datasets.assert_called_once()
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 

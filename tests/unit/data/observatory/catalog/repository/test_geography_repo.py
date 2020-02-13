@@ -1,6 +1,6 @@
 import pytest
 
-from unittest.mock import patch, call
+from unittest.mock import patch
 
 from cartoframes.auth import Credentials
 from cartoframes.exceptions import CatalogError
@@ -32,9 +32,10 @@ class TestGeographyRepo(object):
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'set_user_credentials')
-    def test_get_all_credentials(self, mocked_set_user_credentials, mocked_get_geographies):
+    @patch('cartoframes.data.observatory.catalog.repository.geography_repo.get_subscription_ids')
+    def test_get_all_credentials(self, mocked_get_subscription_ids, mocked_get_geographies):
         # Given
+        mocked_get_subscription_ids.return_value = [db_geography1['id'], db_geography2['id']]
         mocked_get_geographies.return_value = [db_geography1, db_geography2]
         credentials = Credentials('user', '1234')
         repo = GeographyRepository()
@@ -43,8 +44,7 @@ class TestGeographyRepo(object):
         geographies = repo.get_all(credentials=credentials)
 
         # Then
-        mocked_set_user_credentials.assert_has_calls([call(credentials), call(None)])
-        mocked_get_geographies.assert_called_once_with(None)
+        mocked_get_geographies.assert_called_once()
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
