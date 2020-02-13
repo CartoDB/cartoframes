@@ -75,6 +75,13 @@ class Source:
             else:
                 raise ValueError('No valid geometry found. Please provide an input source with ' +
                                  'a valid geometry or specify the "geom_col" param with a geometry column.')
+
+            # Checking the uniqueness of the geometry type
+            geometry_types = self.gdf.geom_type.unique()
+            if len(geometry_types) > 1:
+                raise ValueError('No valid geometry column, it has more that one ' +
+                                 'geometry type: {}.'.format(geometry_types))
+
         else:
             raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 
