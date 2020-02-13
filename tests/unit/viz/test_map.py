@@ -1,4 +1,5 @@
-from cartoframes.auth import Credentials
+from cartoframes.auth import Credentials, set_default_credentials, \
+                             unset_default_credentials
 from cartoframes.viz import Map, Layer, popup_element, constants
 from cartoframes.viz.source import Source
 
@@ -24,6 +25,11 @@ class TestMap(object):
 
 
 class TestMapInitialization(object):
+    def setup_method(self):
+        self.username = 'fake_username'
+        self.api_key = 'fake_api_key'
+        self.credentials = Credentials(username=self.username, api_key=self.api_key)
+
     def test_size(self):
         """Map should set the size by default"""
         map = Map()
@@ -31,13 +37,16 @@ class TestMapInitialization(object):
 
     def test__init(self):
         """Map should return a valid template"""
+        set_default_credentials(self.credentials)
         map = Map()
         map._repr_html_()
         assert map.bounds is not None
         assert map._html_map is not None
+        unset_default_credentials()
 
     def test_bounds(self):
         """Map should set the bounds"""
+        set_default_credentials(self.credentials)
         map = Map(bounds={
             'west': -10,
             'east': 10,
@@ -45,9 +54,11 @@ class TestMapInitialization(object):
             'south': 10
         })
         assert map.bounds == [[-10, 10], [10, -10]]
+        unset_default_credentials()
 
     def test_bounds_clamp(self):
         """Map should set the bounds clamped"""
+        set_default_credentials(self.credentials)
         map = Map(bounds={
             'west': -1000,
             'east': 1000,
@@ -55,6 +66,7 @@ class TestMapInitialization(object):
             'south': 1000
         })
         assert map.bounds == [[-180, 90], [180, -90]]
+        unset_default_credentials()
 
 
 class TestMapLayer(object):
@@ -134,23 +146,33 @@ class TestMapLayer(object):
 
 
 class TestMapDevelopmentPath(object):
+    def setup_method(self):
+        self.username = 'fake_username'
+        self.api_key = 'fake_api_key'
+        self.credentials = Credentials(username=self.username, api_key=self.api_key)
+
     def test_default_carto_vl_path(self):
         """Map dev path should use default paths if none are given"""
+        set_default_credentials(self.credentials)
         map = Map()
         map._repr_html_()
         template = map._html_map.html
         assert constants.CARTO_VL_URL in template
+        unset_default_credentials()
 
     def test_custom_carto_vl_path(self):
         """Map dev path should use custom paths"""
+        set_default_credentials(self.credentials)
         _carto_vl_path = 'custom_carto_vl_path'
         map = Map(_carto_vl_path=_carto_vl_path)
         map._repr_html_()
         template = map._html_map.html
         assert _carto_vl_path + constants.CARTO_VL_DEV in template
+        unset_default_credentials()
 
     def test_default_airship_path(self):
         """Map dev path should use default paths if none are given"""
+        set_default_credentials(self.credentials)
         map = Map()
         map._repr_html_()
         template = map._html_map.html
@@ -159,9 +181,11 @@ class TestMapDevelopmentPath(object):
         assert constants.AIRSHIP_STYLES_URL in template
         assert constants.AIRSHIP_MODULE_URL in template
         assert constants.AIRSHIP_ICONS_URL in template
+        unset_default_credentials()
 
     def test_custom_airship_path(self):
         """Map dev path should use custom paths"""
+        set_default_credentials(self.credentials)
         _airship_path = 'custom_airship_path'
         map = Map(_airship_path=_airship_path)
         map._repr_html_()
@@ -171,6 +195,7 @@ class TestMapDevelopmentPath(object):
         assert _airship_path + constants.AIRSHIP_STYLES_DEV in template
         assert _airship_path + constants.AIRSHIP_MODULE_DEV in template
         assert _airship_path + constants.AIRSHIP_ICONS_DEV in template
+        unset_default_credentials()
 
 
 class KuvizPublisherMock(KuvizPublisher):

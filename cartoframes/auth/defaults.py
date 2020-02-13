@@ -126,3 +126,16 @@ def get_default_credentials():
 
     """
     return _default_credentials
+
+
+def unset_default_credentials():
+    """Unset the default credentials if previously set with
+    :func:`cartoframes.auth.set_default_credentials` in Python session.
+
+    Example:
+        >>> set_default_credentials('creds.json')
+        >>> unset_default_credentials()
+
+    """
+    global _default_credentials
+    _default_credentials = None

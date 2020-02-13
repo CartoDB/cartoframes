@@ -335,8 +335,7 @@ def is_uuid(text):
 def get_credentials(credentials=None):
     from ..auth import defaults
     _credentials = credentials or defaults.get_default_credentials()
-    if credentials is not None:
-        check_credentials(_credentials)
+    check_credentials(_credentials)
     return _credentials
 
 
