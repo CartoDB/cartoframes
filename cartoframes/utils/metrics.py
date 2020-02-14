@@ -112,10 +112,14 @@ def send_metrics(event_name):
 
 
 def build_extra_metrics_data(decorated_function, *args, **kwargs):
-    credentials = get_parameter_from_decorator(
-        'credentials', decorated_function, *args, **kwargs)
-    credentials = get_credentials(credentials)
-    return {'user_id': credentials.user_id} if credentials and credentials.user_id else {}
+    try:
+        credentials = get_parameter_from_decorator(
+            'credentials', decorated_function, *args, **kwargs)
+        credentials = get_credentials(credentials)
+        return {'user_id': credentials.user_id} if credentials and credentials.user_id else {}
+
+    except ValueError:  # When the decorated function doesn't contain `credentials`
+        return {}
 
 
 # Run this once

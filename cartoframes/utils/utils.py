@@ -536,7 +536,7 @@ def get_parameter_from_decorator(parameter_name, decorated_function, *args, **kw
             parameter_arg_index = inspect.getargspec(decorated_function).args.index(parameter_name)
             parameter = args[parameter_arg_index]
 
-        except (IndexError, ValueError):
+        except IndexError:
             parameter = None
 
     return parameter
