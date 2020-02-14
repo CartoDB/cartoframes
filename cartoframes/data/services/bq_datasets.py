@@ -25,17 +25,19 @@ class _BQDatasetClient:
         self._api_key = credentials.api_key
         self._base_url = credentials.base_url
 
-    def upload(self, dataframe, name):
+    def upload(self, dataframe, name, params=None):
+        params = params or {}
         dataframe.to_csv(path_or_buf=name, index=False)
         try:
             with open(name, 'rb') as f:
-                self.upload_file_object(f, name)
+                self.upload_file_object(f, name, params)
         finally:
             os.remove(name)
 
-    def upload_file_object(self, file_object, name):
+    def upload_file_object(self, file_object, name, params=None):
+        params = params or {}
         url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/datasets/' + name
-        params = {'api_key': self._api_key}
+        params['api_key'] = self._api_key
 
         try:
             response = self.session.post(url, params=params, data=file_object)
@@ -71,8 +73,9 @@ class _BQDatasetClient:
         except Exception as e:
             raise CartoException(e)
 
-    def upload_dataframe(self, dataframe, name):
-        self.upload(dataframe, name)
+    def upload_dataframe(self, dataframe, name, params=None):
+        params = params or {}
+        self.upload(dataframe, name, params)
         job = self.import_dataset(name)
         status = job.result()
 
@@ -288,8 +291,8 @@ class BQUserDataset:
     def import_dataset(self):
         return self._client.import_dataset(self._name)
 
-    def upload_dataframe(self, dataframe):
-        return self._client.upload_dataframe(dataframe, self._name)
+    def upload_dataframe(self, dataframe, geom_column=None):
+        return self._client.upload_dataframe(dataframe, self._name, params={'geom_column': geom_column})
 
     def enrichment(self, geom_type='points', variables=None, filters=None, aggregation=None, output_name=None):
         payload = {

@@ -80,7 +80,7 @@ class EnrichmentService(object):
                                          .ttl_seconds(_TTL_IN_SECONDS)
         bq_dataset.create()
 
-        status = bq_dataset.upload_dataframe(reduced_geodataframe)
+        status = bq_dataset.upload_dataframe(reduced_geodataframe, _GEOM_COLUMN)
 
         if status not in ['success']:
             raise EnrichmentError('Couldn\'t upload the dataframe to be enriched. The job hasn\'t finished successfuly')
