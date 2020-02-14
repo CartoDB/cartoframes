@@ -25,7 +25,8 @@ class _BQDatasetClient:
         self._api_key = credentials.api_key
         self._base_url = credentials.base_url
 
-    def upload(self, dataframe, name, params={}):
+    def upload(self, dataframe, name, params=None):
+        params = params or {}
         dataframe.to_csv(path_or_buf=name, index=False)
         try:
             with open(name, 'rb') as f:
@@ -33,7 +34,8 @@ class _BQDatasetClient:
         finally:
             os.remove(name)
 
-    def upload_file_object(self, file_object, name, params= {}):
+    def upload_file_object(self, file_object, name, params=None):
+        params = params or {}
         url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/datasets/' + name
         params['api_key'] = self._api_key
 
@@ -71,7 +73,8 @@ class _BQDatasetClient:
         except Exception as e:
             raise CartoException(e)
 
-    def upload_dataframe(self, dataframe, name, params={}):
+    def upload_dataframe(self, dataframe, name, params=None):
+        params = params or {}
         self.upload(dataframe, name, params)
         job = self.import_dataset(name)
         status = job.result()
