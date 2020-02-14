@@ -44,7 +44,7 @@ class Subscriptions:
 def get_subscription_ids(credentials):
     subscriptions = fetch_subscriptions(credentials)
     subscriptions_ids = list(map(lambda pd: pd.id, subscriptions))
-    return ','.join(["'" + id + "'" for id in subscriptions_ids])
+    return subscriptions_ids
 
 
 def fetch_subscriptions(credentials):

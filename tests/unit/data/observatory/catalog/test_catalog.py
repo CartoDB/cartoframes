@@ -10,8 +10,13 @@ from cartoframes.data.observatory.catalog.category import Category
 from cartoframes.data.observatory.catalog.catalog import Catalog
 from cartoframes.data.observatory.catalog.subscriptions import Subscriptions
 from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
-from .examples import test_country2, test_country1, test_category1, test_category2, test_dataset1, test_dataset2, \
+from cartoframes.data.observatory.catalog.repository.constants import (
+    CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER
+)
+from .examples import (
+    test_country2, test_country1, test_category1, test_category2, test_dataset1, test_dataset2,
     test_geographies, test_datasets, test_categories, test_countries, test_geography1, test_geography2
+)
 
 
 class TestCatalog(object):
@@ -65,7 +70,7 @@ class TestCatalog(object):
         countries = catalog.category('demographics').countries
 
         # Then
-        mocked_countries.called_once_with({'category_id': 'demographics'})
+        mocked_countries.called_once_with({CATEGORY_FILTER: 'demographics'})
         assert countries == test_countries
 
     @patch.object(Category, 'get_all')
@@ -78,7 +83,7 @@ class TestCatalog(object):
         categories = catalog.country('usa').categories
 
         # Then
-        mocked_categories.called_once_with({'country_id': 'usa'})
+        mocked_categories.called_once_with({COUNTRY_FILTER: 'usa'})
         assert categories == test_categories
 
     @patch.object(Dataset, 'get_all')
@@ -91,7 +96,7 @@ class TestCatalog(object):
         datasets = catalog.country('usa').category('demographics').datasets
 
         # Then
-        mocked_datasets.called_once_with({'country_id': 'usa', 'category_id': 'demographics'})
+        mocked_datasets.called_once_with({COUNTRY_FILTER: 'usa', CATEGORY_FILTER: 'demographics'})
         assert datasets == test_datasets
 
     @patch.object(Geography, 'get_all')
@@ -104,7 +109,7 @@ class TestCatalog(object):
         geographies = catalog.country('usa').category('demographics').geographies
 
         # Then
-        mocked_geographies.called_once_with({'country_id': 'usa', 'category_id': 'demographics'})
+        mocked_geographies.called_once_with({COUNTRY_FILTER: 'usa', CATEGORY_FILTER: 'demographics'})
         assert geographies == test_geographies
 
     @patch.object(Dataset, 'get_all')
@@ -119,9 +124,9 @@ class TestCatalog(object):
 
         # Then
         mocked_datasets.called_once_with({
-            'country_id': 'usa',
-            'category_id': 'demographics',
-            'geography_id': 'carto-do-public-data.tiger.geography_esp_census_2019'})
+            COUNTRY_FILTER: 'usa',
+            CATEGORY_FILTER: 'demographics',
+            GEOGRAPHY_FILTER: 'carto-do-public-data.tiger.geography_esp_census_2019'})
 
         assert datasets == test_datasets
 
@@ -139,7 +144,7 @@ class TestCatalog(object):
 
         # Then
         mocked_repo.assert_called_once_with(slug)
-        mocked_datasets.assert_called_once_with({'geography_id': test_geography1.id})
+        mocked_datasets.assert_called_once_with({GEOGRAPHY_FILTER: test_geography1.id})
         assert datasets == test_datasets
 
     @patch.object(Dataset, 'get_all')

@@ -1,65 +1,50 @@
-from unittest.mock import patch
-
-from cartoframes.io.managers.context_manager import ContextManager
+from unittest import mock
+from cartoframes.data.observatory.catalog.repository.constants import CATEGORY_FILTER, COUNTRY_FILTER
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
-
+from ..mocks import mocked_do_api_requests_get_datasets
 from ..examples import db_dataset1, db_dataset2
 
 
 class TestRepoClient(object):
 
-    @patch.object(ContextManager, 'execute_query')
-    def test_run_query_with_one_filter(self, mocked_client):
-        # Given
-        mocked_client.return_value = {'rows': [db_dataset1, db_dataset2]}
+    @mock.patch(
+        'cartoframes.data.observatory.catalog.repository.repo_client.requests.get',
+        side_effect=mocked_do_api_requests_get_datasets
+    )
+    def test_run_query_with_one_filter(self, mocket_get):
         repo = RepoClient()
-        query = 'SELECT t.* FROM datasets t'
-        filters = {'category_id': 'demographics'}
-        expected_query = "SELECT t.* FROM datasets t WHERE t.category_id = 'demographics'"
+        filters = {CATEGORY_FILTER: 'demographics'}
+        # Mocked request should return URL filters as a dict:
+        result_filters = repo.get_datasets(filters)
 
-        # When
-        categories = repo._run_query(query, filters)
+        assert result_filters[CATEGORY_FILTER] == 'demographics'
 
-        # Then
-        mocked_client.assert_called_once_with(expected_query)
-        assert categories == [db_dataset1, db_dataset2]
-
-    @patch.object(ContextManager, 'execute_query')
-    def test_run_query_with_multiple_filter(self, mocked_client):
-        # Given
-        mocked_client.return_value = {'rows': [db_dataset1, db_dataset2]}
+    @mock.patch(
+        'cartoframes.data.observatory.catalog.repository.repo_client.requests.get',
+        side_effect=mocked_do_api_requests_get_datasets
+    )
+    def test_run_query_with_multiple_filter(self, mocket_get):
         repo = RepoClient()
-        query = 'SELECT t.* FROM datasets t'
         filters = {
-            'category_id': 'demographics',
-            'country_id': 'usa'}
-        expected_select = 'SELECT t.* FROM datasets t WHERE'
-        expected_filter_category = "t.category_id = 'demographics'"
-        expected_filter_country = "t.country_id = 'usa'"
+            CATEGORY_FILTER: 'demographics',
+            COUNTRY_FILTER: 'usa'
+        }
+        # Mocked request should return URL filters as a dict:
+        result_filters = repo.get_datasets(filters)
 
-        # When
-        datasets = repo._run_query(query, filters)
+        assert result_filters[CATEGORY_FILTER] == 'demographics'
+        assert result_filters[COUNTRY_FILTER] == 'usa'
 
-        # Then
-        actual_query = str(mocked_client.call_args_list)
-        assert expected_select in actual_query
-        assert expected_filter_category in actual_query
-        assert expected_filter_country in actual_query
-        assert datasets == [db_dataset1, db_dataset2]
-
-    @patch.object(ContextManager, 'execute_query')
-    def test_run_query_with_id_list(self, mocked_client):
-        # Given
-        mocked_client.return_value = {'rows': [db_dataset1, db_dataset2]}
+    @mock.patch(
+        'cartoframes.data.observatory.catalog.repository.repo_client.requests.get',
+        side_effect=mocked_do_api_requests_get_datasets
+    )
+    def test_run_query_with_id_list(self, mocket_get):
         repo = RepoClient()
-        query = 'SELECT t.* FROM datasets t'
-        filters = {'id': ['carto-do.dataset.census', 'carto-do.dataset.municipalities']}
-        expected_query = "SELECT t.* FROM datasets t " \
-                         "WHERE t.id IN ('carto-do.dataset.census','carto-do.dataset.municipalities')"
+        filters = {
+            'id': ['basicstats_census_1234567a', 'basicstats_municipalities_2345678b']
+        }
+        # Mocked request should return both datasets in this case:
+        datasets = repo.get_datasets(filters)
 
-        # When
-        datasets = repo._run_query(query, filters)
-
-        # Then
-        mocked_client.assert_called_once_with(expected_query)
         assert datasets == [db_dataset1, db_dataset2]

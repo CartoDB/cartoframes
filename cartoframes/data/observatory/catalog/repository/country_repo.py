@@ -2,7 +2,7 @@ from .constants import CATEGORY_FILTER
 from .entity_repo import EntityRepository
 
 
-_COUNTRY_ID_FIELD = 'country_id'
+_COUNTRY_ID_FIELD = 'id'
 _ALLOWED_FILTERS = [CATEGORY_FILTER]
 
 
