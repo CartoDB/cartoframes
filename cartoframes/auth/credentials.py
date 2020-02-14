@@ -15,6 +15,7 @@ from warnings import filterwarnings
 filterwarnings('ignore', category=FutureWarning, module='carto')
 
 DEFAULT_CREDS_FILENAME = 'creds.json'
+ME_SERVICE = '/api/v3/me'
 
 
 class Credentials:
@@ -58,6 +59,7 @@ class Credentials:
         self._username = username
         self._base_url = base_url or self._base_url_from_username()
         self._session = session
+        self._user_id = None
         self._api_key_auth_client = None
 
         self._norm_credentials()
@@ -98,6 +100,22 @@ class Credentials:
     def session(self, session):
         """Set session"""
         self._session = session
+
+    @property
+    def user_id(self):
+        """Credentials user ID"""
+        if not self._user_id:
+            log.debug('Getting `user_id` for {}'.format(self._username))
+            api_key_auth_client = self.get_api_key_auth_client()
+
+            try:
+                user_me = api_key_auth_client.send(ME_SERVICE, 'get').json()
+                self._user_id = user_me.get('user_data', {}).get('id')
+
+            except ValueError:  # When the response isn't a JSON
+                pass
+
+        return self._user_id
 
     @classmethod
     def from_file(cls, config_file=None, session=None):

@@ -9,6 +9,7 @@ import base64
 import appdirs
 import decimal
 import hashlib
+import inspect
 import requests
 import geopandas
 import numpy as np
@@ -524,3 +525,18 @@ def silent_fail(method):
         except Exception:
             pass
     return fn
+
+
+def get_parameter_from_decorator(parameter_name, decorated_function, *args, **kwargs):
+    try:
+        parameter = kwargs[parameter_name]
+
+    except KeyError:
+        try:
+            parameter_arg_index = inspect.getargspec(decorated_function).args.index(parameter_name)
+            parameter = args[parameter_arg_index]
+
+        except IndexError:
+            parameter = None
+
+    return parameter
