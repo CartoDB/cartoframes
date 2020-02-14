@@ -156,7 +156,8 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         table_name = self.get_test_table_name('isodf')
 
         # Preview
-        result = iso.isochrones(gdf, [100, 1000], mode='car', table_name=table_name, dry_run=True, exclusive=True).metadata
+        result = iso.isochrones(
+            gdf, [100, 1000], mode='car', table_name=table_name, dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
@@ -210,7 +211,8 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         table_name = self.get_test_table_name('isodfds')
 
         # Preview
-        result = iso.isochrones(df, [100, 1000], mode='car', table_name=table_name, dry_run=True, exclusive=True).metadata
+        result = iso.isochrones(
+            df, [100, 1000], mode='car', table_name=table_name, dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
@@ -274,7 +276,8 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(gdf, [100, 1000], mode='car', table_name=result_table_name, dry_run=True, exclusive=True).metadata
+        result = iso.isochrones(
+            gdf, [100, 1000], mode='car', table_name=result_table_name, dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
@@ -300,7 +303,8 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(df, [100, 1000], mode='car', with_lnglat=('lng', 'lat'), dry_run=True, exclusive=True).metadata
+        result = iso.isochrones(
+            df, [100, 1000], mode='car', with_lnglat=('lng', 'lat'), dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
@@ -357,7 +361,8 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(gdf, [100, 1000], mode='car', table_name=result_table_name, dry_run=True, exclusive=True).metadata
+        result = iso.isochrones(
+            gdf, [100, 1000], mode='car', table_name=result_table_name, dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
