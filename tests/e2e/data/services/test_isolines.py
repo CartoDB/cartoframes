@@ -123,12 +123,12 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(gdf, [100, 1000], mode='car', dry_run=True).metadata
+        result = iso.isochrones(gdf, [100, 1000], mode='car', dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result, meta = iso.isochrones(gdf, [100, 1000], mode='car')
+        result, meta = iso.isochrones(gdf, [100, 1000], mode='car', exclusive=True)
         self.assertTrue(isinstance(result, GeoDataFrame))
         self.assertTrue(result.is_local())
         self.assertEqual(meta.get('required_quota'), 6)
@@ -156,12 +156,13 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         table_name = self.get_test_table_name('isodf')
 
         # Preview
-        result = iso.isochrones(gdf, [100, 1000], mode='car', table_name=table_name, dry_run=True).metadata
+        result = iso.isochrones(
+            gdf, [100, 1000], mode='car', table_name=table_name, dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrones(gdf, [100, 1000], mode='car', table_name=table_name).data
+        result = iso.isochrones(gdf, [100, 1000], mode='car', table_name=table_name, exclusive=True).data
         self.assertTrue(isinstance(result, GeoDataFrame))
         self.assertTrue(result.is_remote())
         quota += 6
@@ -181,12 +182,12 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(df, [100, 1000], mode='car', dry_run=True).metadata
+        result = iso.isochrones(df, [100, 1000], mode='car', dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrones(df, [100, 1000], mode='car').data
+        result = iso.isochrones(df, [100, 1000], mode='car', exclusive=True).data
         self.assertTrue(isinstance(result, GeoDataFrame))
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)
@@ -210,12 +211,13 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         table_name = self.get_test_table_name('isodfds')
 
         # Preview
-        result = iso.isochrones(df, [100, 1000], mode='car', table_name=table_name, dry_run=True).metadata
+        result = iso.isochrones(
+            df, [100, 1000], mode='car', table_name=table_name, dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrones(df, [100, 1000], mode='car', table_name=table_name) .data
+        result = iso.isochrones(df, [100, 1000], mode='car', table_name=table_name, exclusive=True) .data
         self.assertTrue(isinstance(result, GeoDataFrame))
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)
@@ -242,12 +244,12 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(gdf, [100, 1000], mode='car', dry_run=True).metadata
+        result = iso.isochrones(gdf, [100, 1000], mode='car', dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrones(gdf, [100, 1000], mode='car').data
+        result = iso.isochrones(gdf, [100, 1000], mode='car', exclusive=True).data
         self.assertTrue(isinstance(result, GeoDataFrame))
         self.assertTrue(result.is_local())
         quota += 6
@@ -274,12 +276,13 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(gdf, [100, 1000], mode='car', table_name=result_table_name, dry_run=True).metadata
+        result = iso.isochrones(
+            gdf, [100, 1000], mode='car', table_name=result_table_name, dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrones(gdf, [100, 1000], mode='car', table_name=result_table_name).data
+        result = iso.isochrones(gdf, [100, 1000], mode='car', table_name=result_table_name, exclusive=True).data
         self.assertTrue(isinstance(result, GeoDataFrame))
         self.assertTrue(result.is_remote())
         quota += 6
@@ -300,12 +303,13 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(df, [100, 1000], mode='car', with_lnglat=('lng', 'lat'), dry_run=True).metadata
+        result = iso.isochrones(
+            df, [100, 1000], mode='car', with_lnglat=('lng', 'lat'), dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrones(df, [100, 1000], mode='car', with_lnglat=('lng', 'lat')).data
+        result = iso.isochrones(df, [100, 1000], mode='car', with_lnglat=('lng', 'lat'), exclusive=True).data
         self.assertTrue(isinstance(result, GeoDataFrame))
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)
@@ -327,12 +331,12 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(gdf, [100, 1000], mode='car', dry_run=True).metadata
+        result = iso.isochrones(gdf, [100, 1000], mode='car', dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrones(gdf, [100, 1000], mode='car').data
+        result = iso.isochrones(gdf, [100, 1000], mode='car', exclusive=True).data
         self.assertTrue(isinstance(result, GeoDataFrame))
         self.assertTrue(result.is_local())
         quota += 6
@@ -357,12 +361,13 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(gdf, [100, 1000], mode='car', table_name=result_table_name, dry_run=True).metadata
+        result = iso.isochrones(
+            gdf, [100, 1000], mode='car', table_name=result_table_name, dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrones(gdf, [100, 1000], mode='car', table_name=result_table_name).data
+        result = iso.isochrones(gdf, [100, 1000], mode='car', table_name=result_table_name, exclusive=True).data
         self.assertTrue(isinstance(result, GeoDataFrame))
         self.assertTrue(result.is_remote())
         quota += 6
@@ -383,12 +388,12 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isodistances(df, [100, 1000], mode='car', dry_run=True).metadata
+        result = iso.isodistances(df, [100, 1000], mode='car', dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isodistances
-        result = iso.isodistances(df, [100, 1000], mode='car').data
+        result = iso.isodistances(df, [100, 1000], mode='car', exclusive=True).data
         self.assertTrue(isinstance(result, GeoDataFrame))
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)
@@ -405,12 +410,12 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(gdf, [100, 1000], mode='car', maxpoints=10, dry_run=True).metadata
+        result = iso.isochrones(gdf, [100, 1000], mode='car', maxpoints=10, dry_run=True, exclusive=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrones(gdf, [100, 1000], mode='car', maxpoints=10).data
+        result = iso.isochrones(gdf, [100, 1000], mode='car', maxpoints=10, exclusive=True).data
         self.assertTrue(isinstance(result, GeoDataFrame))
         self.assertTrue(result.is_local())
         quota += 6
