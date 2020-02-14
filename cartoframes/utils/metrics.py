@@ -81,10 +81,7 @@ def build_metrics_data(event_name, extra_metrics_data):
     }
 
     if isinstance(extra_metrics_data, dict):
-        metrics_data.update(extra_metrics_data)  # Compatible with old Python versions
-
-    elif extra_metrics_data is not None:
-        extra_metrics_data = {'extra': str(extra_metrics_data)}
+        return {**metrics_data, **extra_metrics_data}
 
     return metrics_data
 
