@@ -57,8 +57,9 @@ class Layer:
             style helper. Default False.
         title (str, optional): title for the default legend, widget and popups.
         encode_data (bool, optional): By default, local data is encoded in order to save local space.
-            However, when using very large files, it is nos possible to encode all the data. By disabling this parameter
-            with `encode_data=False` the resulting notebook will be large, but there will be no encoding issues.
+            However, when using very large files, it might not be possible to encode all the data.
+            By disabling this parameter with `encode_data=False` the resulting notebook will be large,
+            but there will be no encoding issues.
 
 
     Raises:
