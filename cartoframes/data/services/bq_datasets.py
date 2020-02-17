@@ -15,6 +15,14 @@ TYPES_MAPPING = {
     'GEOMETRY': 'GEOGRAPHY'
 }
 
+API_BASE_PATH = 'api/v4/data/observatory'
+DATASETS_BASE_PATH = 'bq/datasets'
+ENRICHMENT_BASE_PATH = 'bq/enrichment'
+
+
+def _build_enrichment_base_path(base_url, resource):
+    return '{}/{}/{}'.format(base_url, API_BASE_PATH, resource)
+
 
 class _BQDatasetClient:
 
@@ -23,7 +31,7 @@ class _BQDatasetClient:
         self._credentials = credentials
         self._username = credentials.username
         self._api_key = credentials.api_key
-        self._base_url = credentials.base_url
+        self._base_url = credentials.base_url.format(self._username)
 
     def upload(self, dataframe, name, params=None):
         params = params or {}
@@ -36,7 +44,8 @@ class _BQDatasetClient:
 
     def upload_file_object(self, file_object, name, params=None):
         params = params or {}
-        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/datasets/' + name
+        upload_file_path = '{}/{}'.format(DATASETS_BASE_PATH, name)
+        url = _build_enrichment_base_path(self._base_url, upload_file_path)
         params['api_key'] = self._api_key
 
         try:
@@ -53,7 +62,8 @@ class _BQDatasetClient:
             raise CartoException(e)
 
     def import_dataset(self, name):
-        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/datasets/' + name + '/imports'
+        import_dataset_path = '{}/{}/imports'.format(DATASETS_BASE_PATH, name)
+        url = _build_enrichment_base_path(self._base_url, import_dataset_path)
         params = {'api_key': self._api_key}
 
         try:
@@ -82,7 +92,8 @@ class _BQDatasetClient:
         return status
 
     def download(self, name_id):
-        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/datasets/' + name_id
+        download_path = '{}/{}'.format(DATASETS_BASE_PATH, name_id)
+        url = _build_enrichment_base_path(self._base_url, download_path)
         params = {'api_key': self._api_key}
 
         try:
@@ -105,7 +116,8 @@ class _BQDatasetClient:
         return ResponseStream(self.download(name_id))
 
     def create(self, payload):
-        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/datasets'
+        create_path = DATASETS_BASE_PATH
+        url = _build_enrichment_base_path(self._base_url, create_path)
         params = {'api_key': self._api_key}
 
         try:
@@ -126,7 +138,8 @@ class _BQDatasetClient:
         return response
 
     def enrichment(self, payload):
-        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/enrichment'
+        enrichment_path = ENRICHMENT_BASE_PATH
+        url = _build_enrichment_base_path(self._base_url, enrichment_path)
         params = {'api_key': self._api_key}
 
         try:
@@ -160,7 +173,8 @@ class BQJob:
         self.session = requests.Session()
 
     def status(self):
-        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/datasets/' + self.name + '/imports/' + self.id
+        status_path = '{}/{}/imports/{}'.format(DATASETS_BASE_PATH, self.name, self.id)
+        url = _build_enrichment_base_path(self._base_url, status_path)
         params = {'api_key': self._api_key}
 
         try:
@@ -201,7 +215,8 @@ class BQUserEnrichmentJob:
         self.session = requests.Session()
 
     def status(self):
-        url = self._base_url.format(self._username) + '/api/v4/do/dev/bq/enrichment/' + self.id + '/status'
+        status_path = '{}/{}/status'.format(ENRICHMENT_BASE_PATH, self.id)
+        url = _build_enrichment_base_path(self._base_url, status_path)
         params = {'api_key': self._api_key}
 
         try:
