@@ -20,7 +20,7 @@ DATASETS_BASE_PATH = 'bq/datasets'
 ENRICHMENT_BASE_PATH = 'bq/enrichment'
 
 
-def _build_enrichment_base_path(base_url, resource):
+def _build_api_url(base_url, resource):
     return '{}/{}/{}'.format(base_url, API_BASE_PATH, resource)
 
 
@@ -45,7 +45,7 @@ class _BQDatasetClient:
     def upload_file_object(self, file_object, name, params=None):
         params = params or {}
         upload_file_path = '{}/{}'.format(DATASETS_BASE_PATH, name)
-        url = _build_enrichment_base_path(self._base_url, upload_file_path)
+        url = _build_api_url(self._base_url, upload_file_path)
         params['api_key'] = self._api_key
 
         try:
@@ -63,7 +63,7 @@ class _BQDatasetClient:
 
     def import_dataset(self, name):
         import_dataset_path = '{}/{}/imports'.format(DATASETS_BASE_PATH, name)
-        url = _build_enrichment_base_path(self._base_url, import_dataset_path)
+        url = _build_api_url(self._base_url, import_dataset_path)
         params = {'api_key': self._api_key}
 
         try:
@@ -93,7 +93,7 @@ class _BQDatasetClient:
 
     def download(self, name_id):
         download_path = '{}/{}'.format(DATASETS_BASE_PATH, name_id)
-        url = _build_enrichment_base_path(self._base_url, download_path)
+        url = _build_api_url(self._base_url, download_path)
         params = {'api_key': self._api_key}
 
         try:
@@ -117,7 +117,7 @@ class _BQDatasetClient:
 
     def create(self, payload):
         create_path = DATASETS_BASE_PATH
-        url = _build_enrichment_base_path(self._base_url, create_path)
+        url = _build_api_url(self._base_url, create_path)
         params = {'api_key': self._api_key}
 
         try:
@@ -139,7 +139,7 @@ class _BQDatasetClient:
 
     def enrichment(self, payload):
         enrichment_path = ENRICHMENT_BASE_PATH
-        url = _build_enrichment_base_path(self._base_url, enrichment_path)
+        url = _build_api_url(self._base_url, enrichment_path)
         params = {'api_key': self._api_key}
 
         try:
@@ -174,7 +174,7 @@ class BQJob:
 
     def status(self):
         status_path = '{}/{}/imports/{}'.format(DATASETS_BASE_PATH, self.name, self.id)
-        url = _build_enrichment_base_path(self._base_url, status_path)
+        url = _build_api_url(self._base_url, status_path)
         params = {'api_key': self._api_key}
 
         try:
@@ -216,7 +216,7 @@ class BQUserEnrichmentJob:
 
     def status(self):
         status_path = '{}/{}/status'.format(ENRICHMENT_BASE_PATH, self.id)
-        url = _build_enrichment_base_path(self._base_url, status_path)
+        url = _build_api_url(self._base_url, status_path)
         params = {'api_key': self._api_key}
 
         try:
