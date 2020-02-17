@@ -459,7 +459,14 @@ var init = (function () {
       datasetId: data.dataset_id,
       tableId: data.table_id,
       token: data.token
-    }, metadata);
+    }, metadata, {
+      viewportZoomToSourceZoom: (zoom) => {
+        if (zoom > 13) {
+          return 14;
+        }
+        return zoom;
+      }
+    });
   }
 
   function _decodeJSONData(b64Data) {
