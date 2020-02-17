@@ -258,6 +258,17 @@ def get_geodataframe_geom_type(gdf):
     return None
 
 
+def get_geodataframe_data(data, encode_data=True):
+    filtered_geometries = _filter_null_geometries(data)
+    data = _set_time_cols_epoc(filtered_geometries).to_json(cls=CustomJSONEncoder, separators=(',', ':'))
+
+    if (encode_data):
+        compressed_data = gzip.compress(data.encode('utf-8'))
+        return base64.b64encode(compressed_data).decode('utf-8')
+    else:
+        return data
+
+
 # Dup
 def _first_value(series):
     series = series.loc[~series.isnull()]  # Remove null values
@@ -271,13 +282,6 @@ class CustomJSONEncoder(json.JSONEncoder):
         if isinstance(o, decimal.Decimal):
             return float(o)
         return super(CustomJSONEncoder, self).default(o)
-
-
-def encode_geodataframe(data):
-    filtered_geometries = _filter_null_geometries(data)
-    data = _set_time_cols_epoc(filtered_geometries).to_json(cls=CustomJSONEncoder, separators=(',', ':'))
-    compressed_data = gzip.compress(data.encode('utf-8'))
-    return base64.b64encode(compressed_data).decode('utf-8')
 
 
 def _filter_null_geometries(data):
