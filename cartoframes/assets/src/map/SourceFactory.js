@@ -43,7 +43,7 @@ function BQMVT(layer) {
       if (zoom > 13) {
         return 14;
       }
-      return zoom;
+      return null;
     }
   });
 }

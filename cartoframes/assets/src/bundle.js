@@ -464,7 +464,7 @@ var init = (function () {
         if (zoom > 13) {
           return 14;
         }
-        return zoom;
+        return null;
       }
     });
   }
