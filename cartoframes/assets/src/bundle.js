@@ -452,16 +452,21 @@ var init = (function () {
   }
 
   function BQMVT(layer) {
-    const data = layer.data.data;
-    const metadata = layer.data.metadata;
+    const data = layer.data;
     return new carto.source.BQMVT({
-      projectId: data.project_id,
-      datasetId: data.dataset_id,
-      tableId: data.table_id,
+      projectId: data.project,
+      datasetId: data.dataset,
+      tableId: data.table,
       token: data.token
-    }, metadata, {
+    }, {
+      'idProperty': 'geoid',
+      'properties': {
+        'area': { 'type': 'number' },
+        'geoid': { 'type': 'category' }
+      }
+    }, {
       viewportZoomToSourceZoom: (zoom) => {
-        if (zoom > 13) {
+        if (zoom > 12) {
           return 14;
         }
         return null;
