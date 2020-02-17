@@ -3,7 +3,7 @@ from geopandas import GeoDataFrame
 
 from ..io.managers.context_manager import ContextManager
 from ..utils.geom_utils import set_geometry, has_geometry
-from ..utils.utils import parse_local_data, get_geodataframe_bounds, get_geodataframe_geom_type, \
+from ..utils.utils import get_geodataframe_data, get_geodataframe_bounds, get_geodataframe_geom_type, \
                           get_datetime_column_names
 
 RFC_2822_DATETIME_FORMAT = "%a, %d %b %Y %T %z"
@@ -117,7 +117,7 @@ class Source:
             if columns is not None:
                 columns += [self.gdf.geometry.name]
                 self.gdf = self.gdf[columns]
-            self.data = parse_local_data(self.gdf, self.encode_data)
+            self.data = get_geodataframe_data(self.gdf, self.encode_data)
             self.bounds = get_geodataframe_bounds(self.gdf)
 
     def is_local(self):
