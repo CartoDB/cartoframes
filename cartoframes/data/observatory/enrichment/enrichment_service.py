@@ -12,7 +12,8 @@ from ....utils.utils import timelogger
 _ENRICHMENT_ID = '__enrichment_id'
 _GEOM_COLUMN = '__geom_column'
 _TTL_IN_SECONDS = 3600
-_AGGREGATION_DEFAULT = 'default'
+
+AGGREGATION_DEFAULT = 'default'
 
 
 class EnrichmentService(object):
@@ -22,7 +23,7 @@ class EnrichmentService(object):
         self.bq_user_dataset = BQUserDataset(credentials=credentials or get_default_credentials())
 
     @timelogger
-    def _enrich(self, geom_type, dataframe, variables, geom_col=None, filters=None, aggregation=_AGGREGATION_DEFAULT):
+    def _enrich(self, geom_type, dataframe, variables, geom_col=None, filters=None, aggregation=AGGREGATION_DEFAULT):
         if filters is None:
             filters = {}
         variable_ids = self._prepare_variables(variables)

@@ -1,4 +1,4 @@
-from .enrichment_service import EnrichmentService
+from .enrichment_service import EnrichmentService, AGGREGATION_DEFAULT
 
 GEOM_TYPE_POINTS = 'points'
 GEOM_TYPE_POLYGONS = 'polygons'
@@ -86,7 +86,7 @@ class Enrichment(EnrichmentService):
         dataframe_enriched = self._enrich(GEOM_TYPE_POINTS, dataframe, variables, geom_col, filters or {})
         return dataframe_enriched
 
-    def enrich_polygons(self, dataframe, variables, geom_col=None, filters=None, aggregation=None):
+    def enrich_polygons(self, dataframe, variables, geom_col=None, filters=None, aggregation=AGGREGATION_DEFAULT):
         """Enrich your polygons `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset` in
         the Data Observatory by intersecting the polygons in the source `DataFrame` with geographies in the
         Data Observatory.
