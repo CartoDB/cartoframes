@@ -24,6 +24,11 @@
             "file": "load_data_from_geojson",
             "path": "data_management"
         }, {
+            "title": "Load a shapefile",
+            "desc": "Load data from a shapefile",
+            "file": "load_data_from_shapefile",
+            "path": "data_management"
+        }, {
             "title": "Load a CARTO table",
             "desc": "Load data from a CARTO table",
             "file": "load_data_from_carto_table",
