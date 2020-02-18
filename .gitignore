@@ -6,6 +6,7 @@ sandbox/
 # Misc
 creds.json
 credentials.json
+tmp_dir/
 
 __pycache__
 .*.sw[nop]
@@ -50,7 +51,7 @@ SITEKEY.txt
 secret.json
 examples/scratch/*
 
-# JavaScript 
+# JavaScript
 node_modules
 
 # Tests
