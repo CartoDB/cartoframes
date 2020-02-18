@@ -40,7 +40,7 @@ function BQMVT(layer) {
   }, {
     'idProperty': 'geoid',
     'properties': {
-      'area': { 'type': 'number' },
+      'area_tile': { 'type': 'number' },
       'geoid': { 'type': 'category' }
     }
   }, {
