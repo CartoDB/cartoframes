@@ -6,7 +6,6 @@ sandbox/
 # Misc
 creds.json
 credentials.json
-tmp_dir/
 
 __pycache__
 .*.sw[nop]
