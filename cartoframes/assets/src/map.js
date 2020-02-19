@@ -101,7 +101,9 @@ export function createMapboxGLMap(container, style, accessToken) {
   return new mapboxgl.Map({
     container,
     style,
-    zoom: 9,
+    zoom: 12,
+    minZoom: 11,
+    maxZoom: 16,
     dragRotate: false,
     attributionControl: false
   });

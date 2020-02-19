@@ -40,13 +40,13 @@ function BQMVT(layer) {
   }, {
     'idProperty': 'geoid',
     'properties': {
-      'area_tile': { 'type': 'number' },
+      'do_area': { 'type': 'number' },
       'geoid': { 'type': 'category' }
     }
   }, {
     viewportZoomToSourceZoom: (zoom) => {
-      if (zoom > 12) {
-        return 14;
+      if (zoom >= 11) {
+        return 12;
       }
       return null;
     }
