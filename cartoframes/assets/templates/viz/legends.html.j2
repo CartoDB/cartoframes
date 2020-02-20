@@ -3,6 +3,8 @@
 {%- endmacro %}
 
 <div class="as-panel__element" id="legends">
+  {% include 'templates/viz/layer_selector.html.j2' %}
+
   {% for layer in layers|reverse %}
     {% if layer.legends %}
     {% set layer_index = loop.index0 %}

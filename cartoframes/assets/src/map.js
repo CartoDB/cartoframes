@@ -48,7 +48,9 @@ export function initLayers(map, settings, mapIndex) {
     mapIndex
   );
 
-  addLayersSelector(mapLayers);
+  if (settings.layer_selector) {
+    addLayersSelector(layers, mapLayers);
+  }
   setInteractiveLayers(map, layers, mapLayers);
 
   return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
@@ -84,10 +86,18 @@ export function setInteractiveLayers(map, layers, mapLayers) {
   }
 }
 
-export function addLayersSelector(layers) {
+export function addLayersSelector(layers, mapLayers) {
   const layerSelector$ = document.querySelector(`#layer-selector`);
-  const layerSelector = new AsBridge.VL.Layers(layerSelector$, carto, layers);
-
+    const layersInfo = mapLayers.map((layer, index) => {
+      return {
+        title: layers[index].title || `Layer ${index}`,
+        id: layer.id,
+        checked: true
+      };
+    });
+  
+  const layerSelector = new AsBridge.VL.Layers(layerSelector$, carto, layersInfo, mapLayers);
+  
   layerSelector.build();
 }
 
