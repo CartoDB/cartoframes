@@ -588,6 +588,7 @@ var init = (function () {
       mapIndex
     );
 
+    addLayersSelector(mapLayers);
     setInteractiveLayers(map, layers, mapLayers);
 
     return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
@@ -621,6 +622,13 @@ var init = (function () {
     if (interactiveLayers && interactiveLayers.length > 0) {
       setInteractivity(map, interactiveLayers, interactiveMapLayers);
     }
+  }
+
+  function addLayersSelector(layers) {
+    const layerSelector$ = document.querySelector(`#layer-selector`);
+    const layerSelector = new AsBridge.VL.Layers(layerSelector$, carto, layers);
+
+    layerSelector.build();
   }
 
   function createMap(container, basemapStyle, bounds, accessToken) {

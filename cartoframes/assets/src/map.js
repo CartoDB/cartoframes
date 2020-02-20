@@ -48,6 +48,7 @@ export function initLayers(map, settings, mapIndex) {
     mapIndex
   );
 
+  addLayersSelector(mapLayers);
   setInteractiveLayers(map, layers, mapLayers);
 
   return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
@@ -81,6 +82,13 @@ export function setInteractiveLayers(map, layers, mapLayers) {
   if (interactiveLayers && interactiveLayers.length > 0) {
     setInteractivity(map, interactiveLayers, interactiveMapLayers);
   }
+}
+
+export function addLayersSelector(layers) {
+  const layerSelector$ = document.querySelector(`#layer-selector`);
+  const layerSelector = new AsBridge.VL.Layers(layerSelector$, carto, layers);
+
+  layerSelector.build();
 }
 
 export function createMap(container, basemapStyle, bounds, accessToken) {

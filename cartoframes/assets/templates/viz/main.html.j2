@@ -53,6 +53,13 @@
         {% if show_info %}
           {% include 'templates/viz/info.html.j2' %}
         {% endif %}
+        <div class="as-map-panels" data-name="Legends">
+          <div class="as-panel as-panel--left as-panel--top">
+            <div class="as-panel__element as-p--16" id="layer-selector-panel">
+              <as-layer-selector id="layer-selector"></as-layer-selector>
+            </div>
+          </div> <!-- as-panel -->
+        </div> <!-- as-map-panels -->
         {% if has_legends %}
           <div class="as-map-panels" data-name="Legends">
             <div class="as-panel as-panel--left as-panel--top">
