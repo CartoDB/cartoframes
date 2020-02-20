@@ -450,10 +450,11 @@ def check_package(pkg_name, spec='*', is_optional=False):
                             'Please run: pip install {0}'.format(pkg_name))
 
 
-def check_do_enabled(method):
-    def fn(*args, **kw):
+def check_do_enabled(func):
+    @wraps(func)
+    def wrapper(*args, **kw):
         try:
-            return method(*args, **kw)
+            return func(*args, **kw)
         except ServerErrorException as e:
             if str(e) == "['The user does not have Data Observatory enabled']":
                 raise DOError(
@@ -462,7 +463,7 @@ def check_do_enabled(method):
                     'sales@carto.com to request access to it.')
             else:
                 raise e
-    return fn
+    return wrapper
 
 
 def get_datetime_column_names(df):
