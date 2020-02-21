@@ -183,6 +183,10 @@ class BQJob:
 
             body = response.json()
 
+            if body['status'] == 'failure':
+                msg = u'Client Error: %s' % (body['errors'][0])
+                raise CartoException(msg)
+
             return body['status']
         except requests.HTTPError as e:
             if 400 <= response.status_code < 500:
@@ -224,6 +228,10 @@ class BQUserEnrichmentJob:
             response.raise_for_status()
 
             body = response.json()
+
+            if body['status'] == 'failure':
+                msg = u'Client Error: %s' % (body['errors'][0])
+                raise CartoException(msg)
 
             return body['status']
         except requests.HTTPError as e:
