@@ -1,8 +1,6 @@
 from .base_source import BaseSource
 
 SOURCE_TYPE = 'BQMVT'
-PROJECT_KEY = 'GOOGLE_CLOUD_PROJECT'
-DATAFRAME_SIZE_LIMIT = 1 * 1024
 
 
 class BigQuerySource(BaseSource):
@@ -22,6 +20,7 @@ class BigQuerySource(BaseSource):
         self.gbq_metadata = gbq_metadata
 
     def get_geom_type(self):
+        # TODO: detect geometry type
         return 'polygon'
 
     def compute_metadata(self, columns=None):

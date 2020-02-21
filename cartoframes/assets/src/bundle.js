@@ -451,9 +451,8 @@ var init = (function () {
   }
 
   function BQMVT(layer) {
-    const data = Object.assign(layer.data.data, {});
-    const metadata = Object.assign(layer.data.metadata, {});
-    console.log(data, metadata);
+    const data = layer.data.data;
+    const metadata = layer.data.metadata;
     return new carto.source.BQMVT(data, metadata, {
       viewportZoomToSourceZoom: (zoom) => {
         if (zoom >= 11) {
