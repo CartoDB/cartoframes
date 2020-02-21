@@ -4,7 +4,10 @@ from google.cloud import bigquery
 from google.oauth2.credentials import Credentials
 
 from ...utils.logger import log
+from ...utils.utils import dtypes2vl
 
+GEOID_KEY = 'geoid'
+GEOM_KEY = 'geom'
 PROJECT_KEY = 'GOOGLE_CLOUD_PROJECT'
 
 
@@ -35,19 +38,33 @@ class GBQManager:
         }
 
     def fetch_mvt_metadata(self, query):
-        # TODO: implement metadata request
+        metadata_query = '''
+            WITH q as ({})
+            SELECT * FROM q LIMIT 1
+        '''.format(query)
+
+        result = self.client.query(metadata_query).to_dataframe()
+
+        if GEOID_KEY not in result.columns:
+            raise ValueError('No "geoid" column found.')
+
+        properties = {}
+        for column in result.columns:
+            if column == GEOM_KEY:
+                continue
+            dtype = result.dtypes[column]
+            properties[column] = {'type': dtypes2vl(dtype)}
+
         return {
-            'idProperty': 'geoid',
-            'properties': {
-                'geoid': {'type': 'category'}
-            }
+            'idProperty': GEOID_KEY,
+            'properties': properties
         }
 
     def compute_zoom_function(self, query):
         # TODO: implement
         return '''
             (zoom) => {
-                if (zoom >= 11) {
+                if (zoom >= 12) {
                     return 12;
                 }
                 return null;
@@ -60,7 +77,7 @@ class GBQManager:
         #     WITH q as ({})
         #     CREATE TABLE ...
         # '''
-        # client.query(generation_query)
+        # self.client.query(generation_query)
         pass
 
     def estimated_data_size(self, query):

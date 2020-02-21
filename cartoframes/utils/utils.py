@@ -144,6 +144,22 @@ def pg2dtypes(pgtype):
     return mapping.get(str(pgtype), 'object')
 
 
+def dtypes2vl(dtype):
+    """Returns equivalent CARTO VL type for input `dtype`"""
+    mapping = {
+        'int16': 'number',
+        'int32': 'number',
+        'int64': 'number',
+        'float32': 'number',
+        'float64': 'number',
+        'object': 'category',
+        'bool': 'number',
+        'datetime64[ns]': 'date',
+        'datetime64[ns, UTC]': 'date',
+    }
+    return mapping.get(str(dtype), 'number')
+
+
 def gen_variable_name(value):
     return 'v' + get_hash(value)[:6]
 
