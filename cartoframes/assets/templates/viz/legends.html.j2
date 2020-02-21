@@ -13,7 +13,7 @@
             description="{{legend.description}}">
             {{ createLegend(legend, 'layer%d_map%d_legend%d' | format(layer_index, 0, loop.index0)) }}
             {% if legend.footer %}
-              <span slot="footer">{{legend.footer}}</span>
+              <span slot="footer">{{legend.footer | safe }}</span>
             {% endif %}
           </as-legend>
         {% endfor %}
@@ -23,7 +23,7 @@
           description="{{layer.legends.description}}">
           {{ createLegend(layer.legends, 'layer%d_map%d_legend%d' | format(layer_index, 0, 0)) }}
           {% if layer.legends.footer %}
-            <span slot="footer">{{layer.legends.footer}}</span>
+            <span slot="footer">{{layer.legends.footer | safe }}</span>
           {% endif %}
         </as-legend>
       {% endif %}

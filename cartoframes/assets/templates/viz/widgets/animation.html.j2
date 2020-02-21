@@ -6,6 +6,6 @@
     description="{{widget.description}}"
   ></as-animation-controls-widget>
   {% if widget.footer %}
-    <footer>{{widget.footer}}</footer>
+    <footer>{{widget.footer | safe }}</footer>
   {% endif %}
 </div>
