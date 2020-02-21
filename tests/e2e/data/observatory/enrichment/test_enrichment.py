@@ -13,9 +13,9 @@ def file_path(path):
 
 def clean_gdf(gdf, sort_column=None):
     if sort_column:
-        return gdf.sort_index(axis=1).sort_values(by=sort_column).round(5).reset_index(drop=True)
+        return gdf.sort_index(axis=1).sort_values(by=sort_column).round(3).reset_index(drop=True)
     else:
-        return gdf.sort_index(axis=1).round(5).reset_index(drop=True)
+        return gdf.sort_index(axis=1).round(3).reset_index(drop=True)
 
 
 public_variable1 = Variable.get('poverty_a86da569')   # FLOAT, AVG
