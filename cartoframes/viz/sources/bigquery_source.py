@@ -31,4 +31,4 @@ class BigQuerySource(BaseSource):
             'metadata': self.gbq_metadata,
             'zoom_func': self.zoom_func
         }
-        self.bounds = [[-73.975168, 40.724298], [-73.909443, 40.755219]]  # FIXME
+        self.bounds = [[-73.978909, 40.707749], [-73.909443, 40.764192]]  # TODO

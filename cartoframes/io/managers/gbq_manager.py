@@ -4,7 +4,7 @@ from google.cloud import bigquery
 from google.oauth2.credentials import Credentials
 
 from ...utils.logger import log
-from ...utils.utils import dtypes2vl
+from ...utils.utils import dtypes2vl, create_hash
 
 GEOID_KEY = 'geoid'
 GEOM_KEY = 'geom'
@@ -27,13 +27,10 @@ class GBQManager:
         return query_job.to_dataframe()
 
     def fetch_mvt_data(self, query):
-        # TODO: implement MVT data request
-        fake_dataset = 'jarroyo'
-        fake_table = 'geography_usa_block_2019_12_mvts'
         return {
             'projectId': self.project,
-            'datasetId': fake_dataset,
-            'tableId': fake_table,
+            'datasetId': 'mvt_pool',
+            'tableId': create_hash(query),
             'token': self.token
         }
 
@@ -72,13 +69,59 @@ class GBQManager:
         '''
 
     def trigger_mvt_generation(self, query):
-        # TODO: update MVT generation query
-        # generation_query = '''
-        #     WITH q as ({})
-        #     CREATE TABLE ...
-        # '''
-        # self.client.query(generation_query)
-        pass
+        # TODO: optimize query
+        generation_query = '''
+        CREATE TABLE mvt_pool.{0} AS (
+            WITH data AS (
+                {1}
+            ),
+            data_bounds AS (
+                SELECT geoid, rmr_tests.ST_Envelope_Box(TO_HEX(ST_ASBINARY(geom))) AS bbox
+                FROM data
+            ),
+            global_bounds AS (
+                SELECT
+                    MIN(bbox[OFFSET(0)]) as gxmin,
+                    MIN(bbox[OFFSET(1)]) as gxmax,
+                    MIN(bbox[OFFSET(2)]) as gymin,
+                    MIN(bbox[OFFSET(3)]) as gymax
+                FROM data_bounds
+            ),
+            global_bbox AS (
+                SELECT tiler.getTilesBBOX(gxmin-0.1, gymin-0.1, gxmax+0.1, gymax+0.1, 12, 16/4096) AS gbbox
+                FROM global_bounds
+            ),
+            tiles_bbox AS (
+                SELECT z, x, y, xmin, ymin, xmax, ymax
+                FROM global_bbox
+                CROSS JOIN UNNEST(global_bbox.gbbox)
+            ),
+            tiles_xyz AS (
+                SELECT b.z, b.x, b.y, a.geoid
+                FROM data_bounds a, tiles_bbox b
+                WHERE NOT ((bbox[OFFSET(0)] > b.xmax) OR
+                           (bbox[OFFSET(1)] < b.xmin) OR
+                           (bbox[OFFSET(2)] > b.ymax) OR
+                           (bbox[OFFSET(3)] < b.ymin))
+            ),
+            tiles_geom AS (
+                SELECT b.z, b.x, b.y, a.geoid, ST_ASGEOJSON(a.geom) AS geom, a.total_pop
+                FROM data a, tiles_xyz b
+                WHERE a.geoid = b.geoid
+            ),
+            tiles_mvt AS (
+                SELECT tiler.ST_ASMVT(b.z, b.x, b.y, ARRAY_AGG(TO_JSON_STRING(a)), 0) AS tile
+                FROM tiles_geom a, tiles_xyz b
+                WHERE a.geoid = b.geoid AND a.x = b.x AND a.y = b.y AND a.z = b.z
+                GROUP BY b.z, b.x, b.y
+            )
+            SELECT z, x, y, mvt
+            FROM tiles_mvt
+            CROSS JOIN UNNEST(tiles_mvt.tile)
+        )
+        '''.format(create_hash(query), query)
+        self.client.query(generation_query)
+        # TODO: polling to check the job
 
     def estimated_data_size(self, query):
         log.info('Estimating size. This may take a few secods')
