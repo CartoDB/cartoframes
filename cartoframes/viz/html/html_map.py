@@ -28,18 +28,19 @@ class HTMLMap(object):
             self, size, layers, bounds, camera=None, basemap=None, show_info=None,
             theme=None, _carto_vl_path=None,
             _airship_path=None, title='CARTOframes', description=None,
-            is_embed=False, is_static=False):
+            is_embed=False, is_static=False, min_zoom=None, max_zoom=None):
 
         self.html = self._parse_html_content(
             size, layers, bounds, camera, basemap,
             show_info, theme, _carto_vl_path, _airship_path, title, description,
-            is_embed, is_static)
+            is_embed, is_static, min_zoom, max_zoom)
 
     def _parse_html_content(
             self, size, layers, bounds, camera=None,
             basemap=None, show_info=None,
             theme=None, _carto_vl_path=None, _airship_path=None,
-            title=None, description=None, is_embed=False, is_static=False):
+            title=None, description=None, is_embed=False, is_static=False,
+            min_zoom=None, max_zoom=None):
 
         token = ''
         basecolor = ''
@@ -85,6 +86,9 @@ class HTMLMap(object):
         has_legends = any(layer['legends'] for layer in layers)
         has_widgets = any(len(layer['widgets']) != 0 for layer in layers)
 
+        min_zoom = min_zoom if min_zoom is not None else 0
+        max_zoom = max_zoom if max_zoom is not None else 22
+
         return self._template.render(
             width=size[0] if size is not None else None,
             height=size[1] if size is not None else None,
@@ -107,7 +111,9 @@ class HTMLMap(object):
             title=title,
             description=description,
             is_embed=is_embed,
-            is_static=is_static
+            is_static=is_static,
+            min_zoom=min_zoom,
+            max_zoom=max_zoom
         )
 
     def _repr_html_(self):

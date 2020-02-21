@@ -106,6 +106,8 @@ class Map:
                  title=None,
                  description=None,
                  is_static=None,
+                 min_zoom=None,
+                 max_zoom=None,
                  **kwargs):
 
         self.layers = _init_layers(layers)
@@ -119,6 +121,8 @@ class Map:
         self.bounds = _get_bounds(bounds, self.layers)
         self.theme = _get_theme(theme, basemap)
         self.is_static = is_static
+        self.min_zoom = min_zoom
+        self.max_zoom = max_zoom
         self.token = get_token(basemap)
         self.basecolor = get_basecolor(basemap)
 
@@ -152,6 +156,8 @@ class Map:
             title=self.title,
             description=self.description,
             is_static=self.is_static,
+            min_zoom=self.min_zoom,
+            max_zoom=self.max_zoom,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
@@ -262,6 +268,8 @@ class Map:
             description=self.description,
             is_static=self.is_static,
             is_embed=True,
+            min_zoom=self.min_zoom,
+            max_zoom=self.max_zoom,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
