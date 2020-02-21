@@ -33,14 +33,10 @@ function MVT(layer) {
 function BQMVT(layer) {
   const data = layer.data.data;
   const metadata = layer.data.metadata;
-  return new carto.source.BQMVT(data, metadata, {
-    viewportZoomToSourceZoom: (zoom) => {
-      if (zoom >= 11) {
-        return 12;
-      }
-      return null;
-    }
-  });
+  const options = {
+    viewportZoomToSourceZoom: layer.data.zoom_func ? eval(layer.data.zoom_func) : undefined
+  };
+  return new carto.source.BQMVT(data, metadata, options);
 }
 
 function _decodeJSONData(data, encodeData) {

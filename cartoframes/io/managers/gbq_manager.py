@@ -43,6 +43,17 @@ class GBQManager:
             }
         }
 
+    def compute_zoom_function(self, query):
+        # TODO: implement
+        return '''
+            (zoom) => {
+                if (zoom >= 11) {
+                    return 12;
+                }
+                return null;
+            }
+        '''
+
     def trigger_mvt_generation(self, query):
         # TODO: update MVT generation query
         # generation_query = '''
