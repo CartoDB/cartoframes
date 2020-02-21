@@ -588,7 +588,9 @@ var init = (function () {
       mapIndex
     );
 
-    addLayersSelector(layers, mapLayers);
+    if (settings.layer_selector) {
+      addLayersSelector(layers, mapLayers);
+    }
     setInteractiveLayers(map, layers, mapLayers);
 
     return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
@@ -626,16 +628,16 @@ var init = (function () {
 
   function addLayersSelector(layers, mapLayers) {
     const layerSelector$ = document.querySelector(`#layer-selector`);
-    const layersInfo = mapLayers.map((layer, index) => {
-      return {
-        title: layers[index].title || `Layer ${index}`,
-        id: layer.id,
-        checked: true
-      };
-    });
-
+      const layersInfo = mapLayers.map((layer, index) => {
+        return {
+          title: layers[index].title || `Layer ${index}`,
+          id: layer.id,
+          checked: true
+        };
+      });
+    
     const layerSelector = new AsBridge.VL.Layers(layerSelector$, carto, layersInfo, mapLayers);
-
+    
     layerSelector.build();
   }
 
