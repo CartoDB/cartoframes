@@ -1,5 +1,5 @@
 from .base_source import BaseSource
-from ..io.managers.context_manager import ContextManager
+from ...io.managers.context_manager import ContextManager
 
 SOURCE_TYPE = 'Query'
 

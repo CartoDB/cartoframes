@@ -31,19 +31,10 @@ function MVT(layer) {
 }
 
 function BQMVT(layer) {
-  const data = layer.data;
-  return new carto.source.BQMVT({
-    projectId: data.project,
-    datasetId: data.dataset,
-    tableId: data.table,
-    token: data.token
-  }, {
-    'idProperty': 'geoid',
-    'properties': {
-      'do_area': { 'type': 'number' },
-      'geoid': { 'type': 'category' }
-    }
-  }, {
+  const data = Object.assign(layer.data.data, {});
+  const metadata = Object.assign(layer.data.metadata, {});
+  console.log(data, metadata)
+  return new carto.source.BQMVT(data, metadata, {
     viewportZoomToSourceZoom: (zoom) => {
       if (zoom >= 11) {
         return 12;

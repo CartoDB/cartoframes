@@ -2,9 +2,9 @@ from pandas import DataFrame
 from geopandas import GeoDataFrame
 
 from .base_source import BaseSource
-from ..utils.geom_utils import set_geometry, has_geometry
-from ..utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type, \
-                          get_datetime_column_names
+from ...utils.geom_utils import set_geometry, has_geometry
+from ...utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type, \
+                           get_datetime_column_names
 
 SOURCE_TYPE = 'GeoJSON'
 
