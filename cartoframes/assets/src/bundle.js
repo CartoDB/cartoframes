@@ -589,8 +589,9 @@ var init = (function () {
     );
 
     if (settings.layer_selector) {
-      addLayersSelector(layers, mapLayers);
+      addLayersSelector(layers.reverse(), mapLayers.reverse());
     }
+
     setInteractiveLayers(map, layers, mapLayers);
 
     return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);

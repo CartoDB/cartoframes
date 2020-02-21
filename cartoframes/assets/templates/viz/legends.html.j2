@@ -2,34 +2,36 @@
   <as-legend-{{legend.type}} id="{{id}}" slot="legends"></as-legend-{{legend.type}}>
 {%- endmacro %}
 
-<div class="as-panel__element as-p--16" id="layer-selector-legend">
-  {% include 'templates/viz/layer_selector.html.j2' %}
-</div>
 <div class="as-panel__element" id="legends">
-  {% for layer in layers|reverse %}
-    {% if layer.legends %}
-    {% set layer_index = loop.index0 %}
-      {% if layer.has_legend_list %}
-        {% for legend in layer.legends %}
-          <as-legend
-            heading="{{legend.title}}"
-            description="{{legend.description}}">
-            {{ createLegend(legend, 'layer%d_map%d_legend%d' | format(layer_index, 0, loop.index0)) }}
-            {% if legend.footer %}
-              <span slot="footer">{{legend.footer | safe }}</span>
-            {% endif %}
-          </as-legend>
-        {% endfor %}
-      {% else %}
-        <as-legend
-          heading="{{layer.legends.title}}"
-          description="{{layer.legends.description}}">
-          {{ createLegend(layer.legends, 'layer%d_map%d_legend%d' | format(layer_index, 0, 0)) }}
-          {% if layer.legends.footer %}
-            <span slot="footer">{{layer.legends.footer | safe }}</span>
+  <as-layer-selector id="layer-selector">
+    {% for layer in layers|reverse %}
+      {% if layer.legends %}
+        {% set layer_index = loop.index0 %}
+        {% set slot = 'as-checkbox-layer-%d-slot' | format(layer_index) %}
+        <div slot="{{slot}}">
+          {% if layer.has_legend_list %}
+            {% for legend in layer.legends %}
+              <as-legend
+                heading="{{legend.title}}"
+                description="{{legend.description}}">
+                {{ createLegend(legend, 'layer%d_map%d_legend%d' | format(layer_index, 0, loop.index0)) }}
+                {% if legend.footer %}
+                  <span slot="footer">{{legend.footer | safe }}</span>
+                {% endif %}
+              </as-legend>
+            {% endfor %}
+          {% else %}
+            <as-legend
+              heading="{{layer.legends.title}}"
+              description="{{layer.legends.description}}">
+              {{ createLegend(layer.legends, 'layer%d_map%d_legend%d' | format(layer_index, 0, 0)) }}
+              {% if layer.legends.footer %}
+                <span slot="footer">{{layer.legends.footer | safe }}</span>
+              {% endif %}
+            </as-legend>
           {% endif %}
-        </as-legend>
+        </div>
       {% endif %}
-    {% endif %}
-  {% endfor %}
+    {% endfor %}
+  </as-layer-selector>
 </div>
