@@ -11,5 +11,6 @@ users in a private beta. We're still open to more beta testers, so if you're int
 .. automodule:: cartoframes.data.observatory
     :members:
     :member-order: bysource
+    :exclude-members: get_datasets_spatial_filtered
     :undoc-members:
     :show-inheritance:
