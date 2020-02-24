@@ -8,6 +8,7 @@ from ...utils.utils import dtypes2vl, create_hash
 
 GEOID_KEY = 'geoid'
 GEOM_KEY = 'geom'
+MVT_DATASET = 'mvt_pool'
 PROJECT_KEY = 'GOOGLE_CLOUD_PROJECT'
 
 
@@ -57,6 +58,9 @@ class GBQManager:
             'properties': properties
         }
 
+    def compute_bounds(self, query):
+        return [[-73.978909, 40.707749], [-73.909443, 40.764192]]
+
     def compute_zoom_function(self, query):
         # TODO: implement
         return '''
@@ -69,11 +73,16 @@ class GBQManager:
         '''
 
     def trigger_mvt_generation(self, query):
+        table_name = create_hash(query)
+
+        if self.check_table_exists(table_name):
+            return
+
         # TODO: optimize query
         generation_query = '''
-        CREATE TABLE mvt_pool.{0} AS (
+        CREATE TABLE {0}.{1} AS (
             WITH data AS (
-                {1}
+                {2}
             ),
             data_bounds AS (
                 SELECT geoid, rmr_tests.ST_Envelope_Box(TO_HEX(ST_ASBINARY(geom))) AS bbox
@@ -119,7 +128,7 @@ class GBQManager:
             FROM tiles_mvt
             CROSS JOIN UNNEST(tiles_mvt.tile)
         )
-        '''.format(create_hash(query), query)
+        '''.format(MVT_DATASET, table_name, query)
         self.client.query(generation_query)
         # TODO: polling to check the job
 
@@ -137,6 +146,14 @@ class GBQManager:
         else:
             log.info('DEBUG: big dataset ({:.2f} MB)'.format(estimated_size / 1024 / 1024))
         return estimated_size
+
+    def check_table_exists(self, table_name):
+        check_query = '''
+            SELECT size_bytes FROM `{0}`.__TABLES__ WHERE table_id='{1}'
+        '''.format(MVT_DATASET, table_name)
+        check_job = self.client.query(check_query)
+        result = check_job.to_dataframe()
+        return not result.empty
 
     def get_total_bytes_processed(self, query):
         job_config = bigquery.QueryJobConfig(dry_run=True, use_query_cache=False)

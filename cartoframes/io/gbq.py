@@ -21,9 +21,10 @@ def prepare_gbq_source(data, project=None, token=None, force_df=False, force_mvt
         log.info('Preparing data. This may take a few minutes')
         data = manager.fetch_mvt_data(query)
         metadata = manager.fetch_mvt_metadata(query)
+        bounds = manager.compute_bounds(query)
         zoom_func = manager.compute_zoom_function(query)
         manager.trigger_mvt_generation(query)
-        return BigQuerySource(data, metadata, zoom_func)
+        return BigQuerySource(data, metadata, bounds, zoom_func)
 
 
 def _get_gbq_query(source):
