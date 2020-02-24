@@ -1,6 +1,5 @@
 from .map import Map
 from .layer import Layer
-from .source import Source
 from .layout import Layout
 
 from .themes import Themes as themes
@@ -42,7 +41,6 @@ from .popups import default_popup_element
 __all__ = [
     'Map',
     'Layer',
-    'Source',
     'Layout',
     'basemaps',
     'themes',

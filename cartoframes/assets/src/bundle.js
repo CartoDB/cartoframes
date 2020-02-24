@@ -451,26 +451,12 @@ var init = (function () {
   }
 
   function BQMVT(layer) {
-    const data = layer.data;
-    return new carto.source.BQMVT({
-      projectId: data.project,
-      datasetId: data.dataset,
-      tableId: data.table,
-      token: data.token
-    }, {
-      'idProperty': 'geoid',
-      'properties': {
-        'do_area': { 'type': 'number' },
-        'geoid': { 'type': 'category' }
-      }
-    }, {
-      viewportZoomToSourceZoom: (zoom) => {
-        if (zoom >= 11) {
-          return 12;
-        }
-        return null;
-      }
-    });
+    const data = layer.data.data;
+    const metadata = layer.data.metadata;
+    const options = {
+      viewportZoomToSourceZoom: layer.data.zoom_func ? eval(layer.data.zoom_func) : undefined
+    };
+    return new carto.source.BQMVT(data, metadata, options);
   }
 
   function _decodeJSONData(data, encodeData) {
@@ -585,7 +571,7 @@ var init = (function () {
     const basecolor = getBasecolorSettings(settings.basecolor);
     const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || basecolor;
     const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
-    const map = createMap(container, basemapStyle, settings.bounds, settings.mapboxtoken);
+    const map = createMap(container, basemapStyle, settings.bounds, settings.mapboxtoken, settings.min_zoom, settings.max_zoom);
 
     if (settings.show_info) {
       updateViewport(map);
@@ -647,8 +633,8 @@ var init = (function () {
     }
   }
 
-  function createMap(container, basemapStyle, bounds, accessToken) {
-    const map = createMapboxGLMap(container, basemapStyle, accessToken);
+  function createMap(container, basemapStyle, bounds, accessToken, minZoom, maxZoom) {
+    const map = createMapboxGLMap(container, basemapStyle, accessToken, minZoom, maxZoom);
 
     map.addControl(attributionControl);
     map.fitBounds(bounds, FIT_BOUNDS_SETTINGS);
@@ -656,7 +642,7 @@ var init = (function () {
     return map;
   }
 
-  function createMapboxGLMap(container, style, accessToken) {
+  function createMapboxGLMap(container, style, accessToken, minZoom, maxZoom) {
     if (accessToken) {
       mapboxgl.accessToken = accessToken;
     }
@@ -664,9 +650,8 @@ var init = (function () {
     return new mapboxgl.Map({
       container,
       style,
-      zoom: 12,
-      minZoom: 11,
-      maxZoom: 16,
+      minZoom,
+      maxZoom,
       dragRotate: false,
       attributionControl: false
     });

@@ -10,6 +10,8 @@ document
     const layers = {{ layers|tojson }};
     const mapboxtoken = '{{mapboxtoken}}';
     const show_info = '{{show_info}}' === 'True';
+    const min_zoom = {{ min_zoom }};
+    const max_zoom = {{ max_zoom }};
 
     init({
       basecolor,
@@ -20,6 +22,8 @@ document
       is_static,
       layers,
       mapboxtoken,
-      show_info
+      show_info,
+      min_zoom,
+      max_zoom
     });
 });

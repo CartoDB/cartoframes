@@ -22,7 +22,7 @@ export function initMap(settings, mapIndex) {
   const basecolor = getBasecolorSettings(settings.basecolor);
   const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || basecolor;
   const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
-  const map = createMap(container, basemapStyle, settings.bounds, settings.mapboxtoken);
+  const map = createMap(container, basemapStyle, settings.bounds, settings.mapboxtoken, settings.min_zoom, settings.max_zoom);
 
   if (settings.show_info) {
     updateViewport(map);
@@ -84,8 +84,8 @@ export function setInteractiveLayers(map, layers, mapLayers) {
   }
 }
 
-export function createMap(container, basemapStyle, bounds, accessToken) {
-  const map = createMapboxGLMap(container, basemapStyle, accessToken);
+export function createMap(container, basemapStyle, bounds, accessToken, minZoom, maxZoom) {
+  const map = createMapboxGLMap(container, basemapStyle, accessToken, minZoom, maxZoom);
 
   map.addControl(attributionControl);
   map.fitBounds(bounds, FIT_BOUNDS_SETTINGS);
@@ -93,7 +93,7 @@ export function createMap(container, basemapStyle, bounds, accessToken) {
   return map;
 }
 
-export function createMapboxGLMap(container, style, accessToken) {
+export function createMapboxGLMap(container, style, accessToken, minZoom, maxZoom) {
   if (accessToken) {
     mapboxgl.accessToken = accessToken;
   }
@@ -101,9 +101,8 @@ export function createMapboxGLMap(container, style, accessToken) {
   return new mapboxgl.Map({
     container,
     style,
-    zoom: 12,
-    minZoom: 11,
-    maxZoom: 16,
+    minZoom,
+    maxZoom,
     dragRotate: false,
     attributionControl: false
   });

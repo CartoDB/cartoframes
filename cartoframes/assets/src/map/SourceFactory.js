@@ -31,26 +31,12 @@ function MVT(layer) {
 }
 
 function BQMVT(layer) {
-  const data = layer.data;
-  return new carto.source.BQMVT({
-    projectId: data.project,
-    datasetId: data.dataset,
-    tableId: data.table,
-    token: data.token
-  }, {
-    'idProperty': 'geoid',
-    'properties': {
-      'do_area': { 'type': 'number' },
-      'geoid': { 'type': 'category' }
-    }
-  }, {
-    viewportZoomToSourceZoom: (zoom) => {
-      if (zoom >= 11) {
-        return 12;
-      }
-      return null;
-    }
-  });
+  const data = layer.data.data;
+  const metadata = layer.data.metadata;
+  const options = {
+    viewportZoomToSourceZoom: layer.data.zoom_func ? eval(layer.data.zoom_func) : undefined
+  };
+  return new carto.source.BQMVT(data, metadata, options);
 }
 
 function _decodeJSONData(data, encodeData) {

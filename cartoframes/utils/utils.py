@@ -144,6 +144,22 @@ def pg2dtypes(pgtype):
     return mapping.get(str(pgtype), 'object')
 
 
+def dtypes2vl(dtype):
+    """Returns equivalent CARTO VL type for input `dtype`"""
+    mapping = {
+        'int16': 'number',
+        'int32': 'number',
+        'int64': 'number',
+        'float32': 'number',
+        'float64': 'number',
+        'object': 'category',
+        'bool': 'number',
+        'datetime64[ns]': 'date',
+        'datetime64[ns, UTC]': 'date',
+    }
+    return mapping.get(str(dtype), 'number')
+
+
 def gen_variable_name(value):
     return 'v' + get_hash(value)[:6]
 
@@ -262,7 +278,7 @@ def get_geodataframe_data(data, encode_data=True):
     filtered_geometries = _filter_null_geometries(data)
     data = _set_time_cols_epoc(filtered_geometries).to_json(cls=CustomJSONEncoder, separators=(',', ':'))
 
-    if (encode_data):
+    if encode_data:
         compressed_data = gzip.compress(data.encode('utf-8'))
         return base64.b64encode(compressed_data).decode('utf-8')
     else:

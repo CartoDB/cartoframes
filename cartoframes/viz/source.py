@@ -23,22 +23,17 @@ VALID_GEOMETRY_TYPES = [
 class SourceType:
     QUERY = 'Query'
     GEOJSON = 'GeoJSON'
-    BIGQUERY = 'BQMVT'
 
 
 class Source:
     """Source
 
     Args:
-        data (str, pandas.DataFrame, geopandas.GeoDataFrame): a table name,
+        source (str, pandas.DataFrame, geopandas.GeoDataFrame): a table name,
             SQL query, DataFrame, GeoDataFrame instance.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             A Credentials instance. If not provided, the credentials will be automatically
             obtained from the default credentials if available.
-        bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
-            keys, or an array of floats in the following structure: [[west,
-            south], [east, north]]. If not provided the bounds will be automatically
-            calculated to fit all features.
         geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
 
     Example:
@@ -75,10 +70,6 @@ class Source:
             self.manager = ContextManager(credentials)
             self.query = self.manager.compute_query(source)
             self.credentials = self.manager.credentials
-        elif isinstance(source, dict):
-            # BigQuery
-            self.type = SourceType.BIGQUERY
-            self.bqdata = source
         elif isinstance(source, DataFrame):
             # DataFrame, GeoDataFrame
             self.type = SourceType.GEOJSON
@@ -112,8 +103,6 @@ class Source:
                     'api_key': self.credentials.api_key,
                     'base_url': self.credentials.base_url
                 }
-        elif self.type == SourceType.BIGQUERY:
-            return None
         elif self.type == SourceType.GEOJSON:
             return None
 
@@ -131,8 +120,6 @@ class Source:
     def get_geom_type(self):
         if self.type == SourceType.QUERY:
             return self.manager.get_geom_type(self.query) or 'point'
-        elif self.type == SourceType.BIGQUERY:
-            return 'polygon'
         elif self.type == SourceType.GEOJSON:
             return get_geodataframe_geom_type(self.gdf)
 
@@ -140,9 +127,6 @@ class Source:
         if self.type == SourceType.QUERY:
             self.data = self.query
             self.bounds = self.manager.get_bounds(self.query)
-        elif self.type == SourceType.BIGQUERY:
-            self.data = self.bqdata
-            self.bounds = None
         elif self.type == SourceType.GEOJSON:
             if columns is not None:
                 columns += [self.gdf.geometry.name]
@@ -156,23 +140,17 @@ class Source:
     def is_public(self):
         if self.type == SourceType.QUERY:
             return self.manager.is_public(self.query)
-        elif self.type == SourceType.BIGQUERY:
-            return False
         elif self.type == SourceType.GEOJSON:
             return True
 
     def schema(self):
         if self.type == SourceType.QUERY:
             return self.manager.get_schema()
-        elif self.type == SourceType.BIGQUERY:
-            return None
         elif self.type == SourceType.GEOJSON:
             return None
 
     def get_table_names(self):
         if self.type == SourceType.QUERY:
             return self.manager.get_table_names(self.query)
-        elif self.type == SourceType.BIGQUERY:
-            return []
         elif self.type == SourceType.GEOJSON:
             return []

@@ -4,7 +4,7 @@ from .legend import Legend
 from .legend_list import LegendList
 from .popup import Popup
 from .popup_list import PopupList
-from .source import Source
+from .sources import BaseSource, CartoSource, DataFrameSource
 from .style import Style
 from .widget import Widget
 from .widget_list import WidgetList
@@ -188,12 +188,15 @@ class Layer:
 
 
 def _set_source(source, credentials, geom_col, encode_data):
-    if isinstance(source, (str, dict, pandas.DataFrame)):
-        return Source(source, credentials, geom_col, encode_data)
-    elif isinstance(source, Source):
+    if isinstance(source, str):
+        return CartoSource(source, credentials)
+    elif isinstance(source, pandas.DataFrame):
+        return DataFrameSource(source, geom_col, encode_data)
+    elif isinstance(source, BaseSource):
+        source.encode_data = encode_data
         return source
     else:
-        raise ValueError('Wrong source. Valid sources are string, dict, DataFrame or GeoDataFrame.')
+        raise ValueError('Wrong source. Valid sources are string, DataFrame, GeoDataFrame or BaseSource')
 
 
 def _set_style(style):
