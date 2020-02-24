@@ -114,7 +114,7 @@ class Layer:
             popup_hover, popup_click, default_popup_hover, default_popup_click, title)
         self.legends = self._init_legends(legends, default_legend, title)
         self.widgets = self._init_widgets(widgets, default_widget, title)
-
+        self.title = title
         geom_type = self.source.get_geom_type()
         popups_variables = self.popups.get_variables()
         widget_variables = self.widgets.get_variables()
