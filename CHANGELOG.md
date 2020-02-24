@@ -5,8 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.1] -
+## [1.0.1] - 2020-
 
+### Added
+- Add encode_data param to Layer (#1536)
+- Add WKT case in CSV example (#1545)
+- Add Data Management guide (#1547)
+
+### Changed
+- Include user_id in metrics (#1539)
+- Disable default param exclusive for isolines (#1540)
+- Raise an error when trying to visualise a multi-geom GeoDataFrame (#1541)
+- Update installation guide structure (#1549)
+- Minor examples/guides improvements (#1534, #1552)
+
+### Fixed
+- Fix legend footer in published maps (#1523)
+- Fix default legend for cluster_size_style (#1533)
+- Fix DO doc reference generation (#1550)
 
 ## [1.0.0] - 2020-01-20
 
