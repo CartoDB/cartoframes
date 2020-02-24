@@ -23,25 +23,30 @@
       "file": "authentication",
       "path": ""
     }, {
+      "title": "Data management",
+      "desc": "Work with data both locally and with a CARTO account",
+      "file": "data_management",
+      "path": ""
+    }, {
       "title": "Visualization",
       "desc": "Explore and visualize your spatial data with interactive maps",
       "file": "visualization",
-      "path": ""    
+      "path": ""
     }, {
       "title": "Data Discovery",
       "desc": "Discover the spatial data you need by searching the data catalog",
       "file": "data_discovery",
-      "path": ""    
+      "path": ""
     }, {
       "title": "Data Enrichment",
       "desc": "Enrich your data with data from the Data Observatory",
       "file": "data_enrichment",
-      "path": ""    
+      "path": ""
     }, {
       "title": "Location Data Services",
       "desc": "Geocode and discover areas of influence with Isolines",
       "file": "data_services",
-      "path": ""    
+      "path": ""
     }]
   }]
 }
