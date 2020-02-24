@@ -2,7 +2,7 @@ from ..legend import Legend
 
 
 def color_category_legend(title=None, description=None, footer=None, prop='color',
-                          variable=None, dynamic=True, order='ASC'):
+                          variable=None, dynamic=True, ascending=False):
     """Helper function for quickly creating a color category legend.
 
     Args:
@@ -33,4 +33,4 @@ def color_category_legend(title=None, description=None, footer=None, prop='color
         ...     dynamic=False)
 
     """
-    return Legend('color-category', title, description, footer, prop, variable, dynamic, order)
+    return Legend('color-category', title, description, footer, prop, variable, dynamic, ascending)
