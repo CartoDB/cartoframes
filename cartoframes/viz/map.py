@@ -106,6 +106,7 @@ class Map:
                  title=None,
                  description=None,
                  is_static=None,
+                 layer_selector=False,
                  **kwargs):
 
         self.layers = _init_layers(layers)
@@ -119,6 +120,7 @@ class Map:
         self.bounds = _get_bounds(bounds, self.layers)
         self.theme = _get_theme(theme, basemap)
         self.is_static = is_static
+        self.layer_selector = layer_selector
         self.token = get_token(basemap)
         self.basecolor = get_basecolor(basemap)
 
@@ -152,6 +154,7 @@ class Map:
             title=self.title,
             description=self.description,
             is_static=self.is_static,
+            layer_selector=self.layer_selector,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
@@ -177,6 +180,7 @@ class Map:
             'title': self.title,
             'description': self.description,
             'is_static': self.is_static,
+            'layer_selector': self.layer_selector,
             '_carto_vl_path': self._carto_vl_path,
             '_airship_path': self._airship_path
         }
@@ -304,6 +308,7 @@ def _get_layer_def(layer):
         'widgets': layer.widgets_info,
         'data': layer.source_data,
         'type': layer.source_type,
+        'title': layer.title,
         'options': layer.options,
         'viz': layer.viz
     }
