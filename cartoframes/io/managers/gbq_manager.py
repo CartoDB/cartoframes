@@ -1,4 +1,5 @@
 import os
+import math
 
 from google.cloud import bigquery
 from google.oauth2.credentials import Credentials
@@ -78,30 +79,24 @@ class GBQManager:
         job = self.client.query(bounds_query)
         result = job.to_dataframe()
         bounds = result.iloc[0]
-        return [[bounds.xmin, bounds.ymin], [bounds.xmax, bounds.ymax]]
+        zoom = math.floor(math.log2(360 / (bounds.xmax - bounds.xmin)))
+        return [[bounds.xmin, bounds.ymin], [bounds.xmax, bounds.ymax]], zoom
 
-    def compute_zoom_function(self, query):
-        # TODO: implement
-        return '''
-            (zoom) => {
-                if (zoom >= 12) {
-                    return 12;
-                }
-                return null;
-            }
-        '''
-
-    def trigger_mvt_generation(self, query):
+    def trigger_mvt_generation(self, query, zoom):
         table_name = create_hash(query)
 
         if self.check_table_exists(table_name):
+            log.info('DEBUG: table cached')
             return
+
+        xo = 360./(2**zoom)
+        yo = 180./(2**zoom)
 
         # TODO: optimize query
         generation_query = '''
-        CREATE TABLE {0}.{1} AS (
+        CREATE TABLE {dataset}.{table} AS (
             WITH data AS (
-                {2}
+                {query}
             ),
             data_bounds AS (
                 SELECT geoid, rmr_tests.ST_Envelope_Box(TO_HEX(ST_ASBINARY(geom))) AS bbox
@@ -116,7 +111,7 @@ class GBQManager:
                 FROM data_bounds
             ),
             global_bbox AS (
-                SELECT tiler.getTilesBBOX(gxmin, gymin, gxmax, gymax, 12, 16/4096) AS gbbox
+                SELECT tiler.getTilesBBOX(gxmin-{xo}, gymin-{yo}, gxmax+{xo}, gymax+{yo}, {zoom}, 16/4096) AS gbbox
                 FROM global_bounds
             ),
             tiles_bbox AS (
@@ -133,7 +128,7 @@ class GBQManager:
                            (bbox[OFFSET(3)] < b.ymin))
             ),
             tiles_geom AS (
-                SELECT b.z, b.x, b.y, a.geoid, ST_ASGEOJSON(a.geom) AS geom, a.total_pop
+                SELECT b.z, b.x, b.y, a.geoid, ST_ASGEOJSON(a.geom) AS geom, a.* EXCEPT (geoid, geom)
                 FROM data a, tiles_xyz b
                 WHERE a.geoid = b.geoid
             ),
@@ -147,12 +142,13 @@ class GBQManager:
             FROM tiles_mvt
             CROSS JOIN UNNEST(tiles_mvt.tile)
         )
-        '''.format(MVT_DATASET, table_name, query)
-        self.client.query(generation_query)
-        # TODO: polling to check the job
+        '''.format(dataset=MVT_DATASET, table=table_name, query=query,
+                   xo=xo, yo=yo, zoom=zoom)
+        job = self.client.query(generation_query)
+        job.result()  # Wait for the job to complete.
 
     def estimated_data_size(self, query):
-        log.info('Estimating size. This may take a few secods')
+        log.info('Estimating size. This may take a few seconds')
         estimation_query = '''
             WITH q as ({})
             SELECT SUM(CHAR_LENGTH(ST_ASTEXT(geom))) AS s FROM q

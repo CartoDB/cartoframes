@@ -11,15 +11,15 @@ class BigQuerySource(BaseSource):
         metadata (str, optional): idProperty, properties.
 
     """
-    def __init__(self, gbq_data, gbq_metadata=None, boungd=None, zoom_func=None):
+    def __init__(self, gbq_data, gbq_metadata=None, bounds=None, zoom=None):
         if not isinstance(gbq_data, dict):
             raise ValueError('Wrong source input. Valid values are dict.')
 
         self.type = SOURCE_TYPE
         self.gbq_data = gbq_data
         self.gbq_metadata = gbq_metadata
-        self.zoom_func = zoom_func
-        self.bounds = boungd
+        self.bounds = bounds
+        self.zoom = zoom
 
     def get_geom_type(self):
         # TODO: detect geometry type
@@ -30,5 +30,16 @@ class BigQuerySource(BaseSource):
         self.data = {
             'data': self.gbq_data,
             'metadata': self.gbq_metadata,
-            'zoom_func': self.zoom_func
+            'zoom_func': self.compute_zoom_function()
         }
+
+    def compute_zoom_function(self):
+        # TODO: customize
+        return '''
+            (zoom) => {{
+                if (zoom >= {0}) {{
+                    return {0};
+                }}
+                return null;
+            }}
+        '''.format(self.zoom)
