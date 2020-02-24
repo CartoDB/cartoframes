@@ -59,7 +59,26 @@ class GBQManager:
         }
 
     def compute_bounds(self, query):
-        return [[-73.978909, 40.707749], [-73.909443, 40.764192]]
+        # TODO: optimize query
+        bounds_query = '''
+            WITH data AS (
+                {0}
+            ),
+            data_bounds AS (
+                SELECT rmr_tests.ST_Envelope_Box(TO_HEX(ST_ASBINARY(geom))) AS bbox
+                FROM data
+            )
+            SELECT
+                MIN(bbox[OFFSET(0)]) as xmin,
+                MAX(bbox[OFFSET(1)]) as xmax,
+                MIN(bbox[OFFSET(2)]) as ymin,
+                MAX(bbox[OFFSET(3)]) as ymax
+            FROM data_bounds
+        '''.format(query)
+        job = self.client.query(bounds_query)
+        result = job.to_dataframe()
+        bounds = result.iloc[0]
+        return [[bounds.xmin, bounds.ymin], [bounds.xmax, bounds.ymax]]
 
     def compute_zoom_function(self, query):
         # TODO: implement
@@ -91,13 +110,13 @@ class GBQManager:
             global_bounds AS (
                 SELECT
                     MIN(bbox[OFFSET(0)]) as gxmin,
-                    MIN(bbox[OFFSET(1)]) as gxmax,
+                    MAX(bbox[OFFSET(1)]) as gxmax,
                     MIN(bbox[OFFSET(2)]) as gymin,
-                    MIN(bbox[OFFSET(3)]) as gymax
+                    MAX(bbox[OFFSET(3)]) as gymax
                 FROM data_bounds
             ),
             global_bbox AS (
-                SELECT tiler.getTilesBBOX(gxmin-0.1, gymin-0.1, gxmax+0.1, gymax+0.1, 12, 16/4096) AS gbbox
+                SELECT tiler.getTilesBBOX(gxmin, gymin, gxmax, gymax, 12, 16/4096) AS gbbox
                 FROM global_bounds
             ),
             tiles_bbox AS (
