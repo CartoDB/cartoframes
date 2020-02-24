@@ -56,9 +56,15 @@ class Layer:
         default_popup_click (bool, optional): flag to set the default popup click. This only works when using a
             style helper. Default False.
         title (str, optional): title for the default legend, widget and popups.
+        encode_data (bool, optional): By default, local data is encoded in order to save local space.
+            However, when using very large files, it might not be possible to encode all the data.
+            By disabling this parameter with `encode_data=False` the resulting notebook will be large,
+            but there will be no encoding issues.
+
 
     Raises:
         ValueError: if the source is not valid.
+
 
     Examples:
         Create a layer with the defaults (style, legend).
@@ -97,12 +103,13 @@ class Layer:
                  default_widget=False,
                  default_popup_hover=True,
                  default_popup_click=False,
-                 title=None):
+                 title=None,
+                 encode_data=True):
 
         self.is_basemap = False
-        self.source = _set_source(source, credentials, geom_col)
+        self.source = _set_source(source, credentials, geom_col, encode_data)
         self.style = _set_style(style)
-
+        self.encode_data = encode_data
         self.popups = self._init_popups(
             popup_hover, popup_click, default_popup_hover, default_popup_click, title)
         self.legends = self._init_legends(legends, default_legend, title)
@@ -180,9 +187,9 @@ class Layer:
         return Map(self)._repr_html_()
 
 
-def _set_source(source, credentials, geom_col):
+def _set_source(source, credentials, geom_col, encode_data):
     if isinstance(source, (str, dict, pandas.DataFrame)):
-        return Source(source, credentials, geom_col)
+        return Source(source, credentials, geom_col, encode_data)
     elif isinstance(source, Source):
         return source
     else:

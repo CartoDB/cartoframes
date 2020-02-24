@@ -50,7 +50,7 @@ SITEKEY.txt
 secret.json
 examples/scratch/*
 
-# JavaScript 
+# JavaScript
 node_modules
 
 # Tests

@@ -300,6 +300,7 @@ def _get_layer_def(layer):
         'interactivity': layer.interactivity,
         'legends': layer.legends_info,
         'has_legend_list': layer.has_legend_list,
+        'encode_data': layer.encode_data,
         'widgets': layer.widgets_info,
         'data': layer.source_data,
         'type': layer.source_type,

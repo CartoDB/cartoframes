@@ -3,10 +3,21 @@ from geopandas import GeoDataFrame
 
 from ..io.managers.context_manager import ContextManager
 from ..utils.geom_utils import set_geometry, has_geometry
-from ..utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type, \
-                          get_datetime_column_names
+from ..utils.utils import get_geodataframe_data, get_geodataframe_bounds, \
+                          get_geodataframe_geom_type, get_datetime_column_names
 
 RFC_2822_DATETIME_FORMAT = "%a, %d %b %Y %T %z"
+
+VALID_GEOMETRY_TYPES = [
+    {'Point'},
+    {'MultiPoint'},
+    {'LineString'},
+    {'MultiLineString'},
+    {'LineString', 'MultiLineString'},
+    {'Polygon'},
+    {'MultiPolygon'},
+    {'Polygon', 'MultiPolygon'}
+]
 
 
 class SourceType:
@@ -53,9 +64,10 @@ class Source:
         >>> Source('table_name', credentials)
 
     """
-    def __init__(self, source, credentials=None, geom_col=None):
+    def __init__(self, source, credentials=None, geom_col=None, encode_data=True):
         self.credentials = None
         self.datetime_column_names = None
+        self.encode_data = encode_data
 
         if isinstance(source, str):
             # Table, SQL query
@@ -80,6 +92,13 @@ class Source:
             else:
                 raise ValueError('No valid geometry found. Please provide an input source with ' +
                                  'a valid geometry or specify the "geom_col" param with a geometry column.')
+
+            # Checking the uniqueness of the geometry type
+            geometry_types = set(self.gdf.geom_type.unique())
+            if geometry_types not in VALID_GEOMETRY_TYPES:
+                raise ValueError('No valid geometry column types ({}), it has '.format(geometry_types) +
+                                 'to be one of the next type sets: {}.'.format(VALID_GEOMETRY_TYPES))
+
         else:
             raise ValueError('Wrong source input. Valid values are str, dict and DataFrame.')
 
@@ -128,7 +147,7 @@ class Source:
             if columns is not None:
                 columns += [self.gdf.geometry.name]
                 self.gdf = self.gdf[columns]
-            self.data = encode_geodataframe(self.gdf)
+            self.data = get_geodataframe_data(self.gdf, self.encode_data)
             self.bounds = get_geodataframe_bounds(self.gdf)
 
     def is_local(self):

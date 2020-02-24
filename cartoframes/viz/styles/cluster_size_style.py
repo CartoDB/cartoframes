@@ -34,6 +34,8 @@ def cluster_size_style(value, operation='count', resolution=32, color=None, opac
 
     data = {
         'point': {
+            '@size_value': 'ramp(linear({0}, viewportMIN({0}), viewportMAX({0})), [{1}])'.format(
+                cluster_operation, breakpoints),
             'width': 'ramp(linear({0}, viewportMIN({0}), viewportMAX({0})), [{1}])'.format(
                 cluster_operation, breakpoints),
             'color': 'opacity({0}, {1})'.format(
