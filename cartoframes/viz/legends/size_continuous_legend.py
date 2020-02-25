@@ -20,6 +20,9 @@ def size_continuous_legend(title=None, description=None, footer=None, prop='size
             If the information in the legend depends on a different value than the
             information set to the style property, it is possible to set an independent
             variable.
+        ascending (boolean, optional):
+            If set to ``True`` the values are sorted in ascending order.
+            Defaults to ``False``.
 
     Returns:
         cartoframes.viz.legend.Legend
