@@ -2,7 +2,7 @@ from ..legend import Legend
 
 
 def size_category_legend(title=None, description=None, footer=None, prop='size',
-                         variable=None, dynamic=True, ascending=False):
+                         variable=None, dynamic=True):
     """Helper function for quickly creating a size category legend.
 
     Args:
@@ -22,7 +22,6 @@ def size_category_legend(title=None, description=None, footer=None, prop='size',
             Update and render the legend depending on viewport changes.
             Defaults to ``True``.
 
-
     Returns:
         cartoframes.viz.legend.Legend
 
@@ -34,4 +33,4 @@ def size_category_legend(title=None, description=None, footer=None, prop='size',
         ...     dynamic=False)
 
     """
-    return Legend('size-category', title, description, footer, prop, variable, dynamic, ascending)
+    return Legend('size-category', title, description, footer, prop, variable, dynamic)

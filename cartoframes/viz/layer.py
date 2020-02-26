@@ -104,12 +104,15 @@ class Layer:
                  default_popup_hover=True,
                  default_popup_click=False,
                  title=None,
+                 parent_map=None,
                  encode_data=True):
 
         self.is_basemap = False
+        self.default_legend = default_legend
         self.source = _set_source(source, credentials, geom_col, encode_data)
         self.style = _set_style(style)
         self.encode_data = encode_data
+        self.parent_map = None
         self.popups = self._init_popups(
             popup_hover, popup_click, default_popup_hover, default_popup_click, title)
         self.legends = self._init_legends(legends, default_legend, title)
@@ -119,6 +122,7 @@ class Layer:
         popups_variables = self.popups.get_variables()
         widget_variables = self.widgets.get_variables()
         external_variables = merge_dicts(popups_variables, widget_variables)
+
         self.viz = self.style.compute_viz(geom_type, external_variables)
         viz_columns = extract_viz_columns(self.viz)
 
@@ -185,6 +189,12 @@ class Layer:
     def _repr_html_(self):
         from .map import Map
         return Map(self)._repr_html_()
+
+    def reset_legends(self, parent_map):
+        if parent_map.layer_selector:
+            self.style.default_legend.set_title('')
+            self.legends = self._init_legends(self.legends, self.default_legend, '')
+            self.legends_info = self.legends.get_info() if self.legends is not None else None
 
 
 def _set_source(source, credentials, geom_col, encode_data):

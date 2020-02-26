@@ -109,18 +109,19 @@ class Map:
                  layer_selector=False,
                  **kwargs):
 
-        self.layers = _init_layers(layers)
+        self.layer_selector = layer_selector
         self.basemap = basemap
         self.size = size
         self.viewport = viewport
         self.title = title
         self.description = description
         self.show_info = show_info
+        self.layers = _init_layers(layers, self)
         self.layer_defs = _get_layer_defs(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
         self.theme = _get_theme(theme, basemap)
         self.is_static = is_static
-        self.layer_selector = layer_selector
+
         self.token = get_token(basemap)
         self.basecolor = get_basecolor(basemap)
 
@@ -283,12 +284,15 @@ def _get_bounds(bounds, layers):
         return _compute_bounds(layers)
 
 
-def _init_layers(layers):
+def _init_layers(layers, parent_map):
     if layers is None:
         return []
     if not isinstance(layers, collections.Iterable):
+        layers.reset_legends(parent_map)
         return [layers]
     else:
+        for layer in layers:
+            layer.reset_legends(parent_map)
         return layers
 
 

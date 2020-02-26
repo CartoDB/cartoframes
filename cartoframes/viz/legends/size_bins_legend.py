@@ -21,6 +21,9 @@ def size_bins_legend(title=None, description=None, footer=None, prop='size',
         dynamic (boolean, optional):
             Update and render the legend depending on viewport changes.
             Defaults to ``True``.
+        ascending (boolean, optional):
+            If set to ``True`` the values are sorted in ascending order.
+            Defaults to ``False``.
 
     Returns:
         cartoframes.viz.legend.Legend
