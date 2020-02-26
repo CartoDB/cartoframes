@@ -13,6 +13,7 @@ ENC_WKB_BHEX = 'wkb-bhex'
 ENC_WKT = 'wkt'
 ENC_EWKT = 'ewkt'
 SPHERICAL_TOLERANCE = 0.0001
+SIMPLIFY_TOLERANCE = 0.001
 
 
 def set_geometry(gdf, col, drop=False, inplace=False, crs=None):
@@ -249,7 +250,7 @@ def to_geojson(geom, buffer_simplify=True):
     if geom is not None and str(geom) != 'GEOMETRYCOLLECTION EMPTY':
         if buffer_simplify:
             return json.dumps(shapely.geometry.mapping(
-                geom.buffer(SPHERICAL_TOLERANCE).simplify(SPHERICAL_TOLERANCE)
+                geom.buffer(SPHERICAL_TOLERANCE).simplify(SIMPLIFY_TOLERANCE)
             ), sort_keys=True)
         else:
             return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)
