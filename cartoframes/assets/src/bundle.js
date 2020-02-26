@@ -406,8 +406,9 @@ var init = (function () {
       const othersLabel = 'Others';   // TODO: i18n
       const prop = legend.prop;
       const dynamic = legend.dynamic;
+      const order = legend.ascending ? 'ASC' : 'DESC';
       const variable = legend.variable;
-      const config = { othersLabel, variable };
+      const config = { othersLabel, variable, order };
       const options = { format, config, dynamic };
 
       if (legend.type.startsWith('size-continuous')) {
@@ -588,6 +589,10 @@ var init = (function () {
       mapIndex
     );
 
+    if (settings.layer_selector) {
+      addLayersSelector(layers.reverse(), mapLayers.reverse());
+    }
+
     setInteractiveLayers(map, layers, mapLayers);
 
     return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
@@ -621,6 +626,21 @@ var init = (function () {
     if (interactiveLayers && interactiveLayers.length > 0) {
       setInteractivity(map, interactiveLayers, interactiveMapLayers);
     }
+  }
+
+  function addLayersSelector(layers, mapLayers) {
+    const layerSelector$ = document.querySelector(`#layer-selector`);
+      const layersInfo = mapLayers.map((layer, index) => {
+        return {
+          title: layers[index].title || `Layer ${index}`,
+          id: layer.id,
+          checked: true
+        };
+      });
+    
+    const layerSelector = new AsBridge.VL.Layers(layerSelector$, carto, layersInfo, mapLayers);
+    
+    layerSelector.build();
   }
 
   function createMap(container, basemapStyle, bounds, accessToken) {
