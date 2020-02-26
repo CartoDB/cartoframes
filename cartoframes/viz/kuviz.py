@@ -80,8 +80,8 @@ class KuvizPublisher:
         if len(private_sources) > 0:
             maps_api_key, private_tables_names = self._auth_api_client.create_api_key(private_sources, ['maps'])
             log.info(
-                'Publishing a map that uses private datasets requires a Maps API key. '
-                'The "{0}" API key is being used for these datasets {1}. '
+                'The map has been published. '
+                'The "{0}" Maps API key is being used for these datasets {1}. '
                 'You can manage your API keys on your account'.format(maps_api_key, private_tables_names))
             return maps_api_key
 
