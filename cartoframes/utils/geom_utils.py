@@ -12,6 +12,7 @@ ENC_WKB_HEX = 'wkb-hex'
 ENC_WKB_BHEX = 'wkb-bhex'
 ENC_WKT = 'wkt'
 ENC_EWKT = 'ewkt'
+SPHERICAL_TOLERANCE = 0.0001
 
 
 def set_geometry(gdf, col, drop=False, inplace=False, crs=None):
@@ -244,6 +245,11 @@ def encode_geometry_ewkb(geom, srid=4326):
         return shapely.wkb.dumps(geom, hex=True, include_srid=True)
 
 
-def to_geojson(geom):
+def to_geojson(geom, buffer_simplify=True):
     if geom is not None and str(geom) != 'GEOMETRYCOLLECTION EMPTY':
-        return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)
+        if buffer_simplify:
+            return json.dumps(shapely.geometry.mapping(
+                geom.buffer(SPHERICAL_TOLERANCE).simplify(SPHERICAL_TOLERANCE)
+            ), sort_keys=True)
+        else:
+            return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)
