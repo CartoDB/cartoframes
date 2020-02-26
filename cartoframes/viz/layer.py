@@ -115,7 +115,7 @@ class Layer:
         self.parent_map = None
         self.popups = self._init_popups(
             popup_hover, popup_click, default_popup_hover, default_popup_click, title)
-        self.legends = self._init_legends(legends, default_legend)
+        self.legends = self._init_legends(legends, default_legend, title)
         self.widgets = self._init_widgets(widgets, default_widget, title)
         self.title = title
         geom_type = self.source.get_geom_type()
@@ -137,12 +137,14 @@ class Layer:
         self.options = self._set_options()
         self.has_legend_list = isinstance(self.legends, LegendList)
 
-    def _init_legends(self, legends, default_legend):
+    def _init_legends(self, legends, default_legend, title):
         if legends:
             return _set_legends(legends, self.style.default_legend)
 
         if default_legend is True:
             default_legend = self.style.default_legend
+            if default_legend is not None:
+                default_legend.set_title(title)
             return _set_legends(default_legend)
 
         return LegendList()
@@ -191,7 +193,7 @@ class Layer:
     def reset_legends(self, parent_map):
         if parent_map.layer_selector:
             self.style.default_legend.set_title('')
-            self.legends = self._init_legends(self.legends, self.default_legend)
+            self.legends = self._init_legends(self.legends, self.default_legend, '')
             self.legends_info = self.legends.get_info() if self.legends is not None else None
 
 
