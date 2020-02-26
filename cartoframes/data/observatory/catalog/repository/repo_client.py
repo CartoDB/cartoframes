@@ -4,7 +4,7 @@ from urllib.parse import urlsplit, urlunsplit, SplitResult
 from .....auth import Credentials, get_default_credentials
 
 DEFAULT_USER = 'do-metadata'
-API_BASE_PATH = 'api/v4/do/dev'
+API_BASE_PATH = 'api/v4/data/observatory'
 REQUEST_VERIFY_SSL = True
 
 
