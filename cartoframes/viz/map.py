@@ -401,7 +401,8 @@ def _get_theme(theme, basemap):
 
 def get_token(basemap):
     if isinstance(basemap, dict):
-        return get_token(basemap)
+        if 'token' in basemap:
+            return basemap.get('token')
     return ''
 
 
