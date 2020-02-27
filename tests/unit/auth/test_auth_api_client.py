@@ -1,4 +1,4 @@
-from cartoframes.viz.source import Source
+from cartoframes.viz.sources import CartoSource
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.auth_api_client import AuthAPIClient
 from cartoframes.io.managers.context_manager import ContextManager
@@ -29,7 +29,7 @@ class TestAuthAPIClient(object):
     def test_create_api_key(self, mocker):
         setup_mocks(mocker)
 
-        source = Source('fake_table', credentials=Credentials('fakeuser'))
+        source = CartoSource('fake_table', credentials=Credentials('fakeuser'))
         api_key_name = 'fake_name'
 
         auth_api_client = AuthAPIClient()
@@ -40,7 +40,7 @@ class TestAuthAPIClient(object):
     def test_create_api_key_several_sources(self, mocker):
         setup_mocks(mocker)
 
-        source = Source('fake_table', credentials=Credentials('fakeuser'))
+        source = CartoSource('fake_table', credentials=Credentials('fakeuser'))
         api_key_name = 'fake_name'
 
         auth_api_client = AuthAPIClient()

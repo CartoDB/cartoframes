@@ -4,7 +4,7 @@ import pytest
 
 from cartoframes.auth import Credentials
 from cartoframes.viz import Map, Layer
-from cartoframes.viz.source import Source
+from cartoframes.viz.sources import DataFrameSource
 from cartoframes.viz.kuviz import KuvizPublisher, DEFAULT_PUBLIC, kuviz_to_dict
 from cartoframes.io.managers.context_manager import ContextManager
 
@@ -51,8 +51,8 @@ class TestKuvizPublisher(object):
     def test_kuviz_publisher_set_layers(self, mocker):
         setup_mocks(mocker, self.credentials)
 
-        source_1 = Source(build_geodataframe([-10, 0], [-10, 0]))
-        source_2 = Source(build_geodataframe([0, 10], [10, 0]))
+        source_1 = DataFrameSource(build_geodataframe([-10, 0], [-10, 0]))
+        source_2 = DataFrameSource(build_geodataframe([0, 10], [10, 0]))
         layer_1 = Layer(source_1)
         layer_2 = Layer(source_2)
         vmap = Map([

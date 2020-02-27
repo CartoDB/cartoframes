@@ -2,7 +2,7 @@ from cartoframes.auth import Credentials
 from cartoframes.viz.legend_list import LegendList
 from cartoframes.viz.widget_list import WidgetList
 from cartoframes.viz.popup_list import PopupList
-from cartoframes.viz.source import Source
+from cartoframes.viz.sources import CartoSource
 from cartoframes.viz.style import Style
 from cartoframes.viz import Layer
 from cartoframes.io.managers.context_manager import ContextManager
@@ -23,11 +23,11 @@ class TestLayer(object):
     def test_initialization_objects(self, mocker):
         """Layer should initialize layer attributes"""
         setup_mocks(mocker, 'layer_source')
-        layer = Layer(Source('layer_source', credentials=Credentials('fakeuser')))
+        layer = Layer(CartoSource('layer_source', credentials=Credentials('fakeuser')))
 
         assert layer.is_basemap is False
         assert layer.source_data == 'SELECT * FROM "public"."layer_source"'
-        assert isinstance(layer.source, Source)
+        assert isinstance(layer.source, CartoSource)
         assert isinstance(layer.style, Style)
         assert isinstance(layer.popups, PopupList)
         assert isinstance(layer.legends, LegendList)
@@ -41,7 +41,7 @@ class TestLayer(object):
 
         assert layer.is_basemap is False
         assert layer.source_data == 'SELECT * FROM "public"."layer_source"'
-        assert isinstance(layer.source, Source)
+        assert isinstance(layer.source, CartoSource)
         assert isinstance(layer.style, Style)
         assert isinstance(layer.popups, PopupList)
         assert isinstance(layer.legends, LegendList)

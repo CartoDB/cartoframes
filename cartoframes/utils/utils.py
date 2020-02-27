@@ -554,7 +554,7 @@ def get_parameter_from_decorator(parameter_name, decorated_function, *args, **kw
 
     except KeyError:
         try:
-            parameter_arg_index = inspect.getargspec(decorated_function).args.index(parameter_name)
+            parameter_arg_index = inspect.getfullargspec(decorated_function).args.index(parameter_name)
             parameter = args[parameter_arg_index]
 
         except IndexError:

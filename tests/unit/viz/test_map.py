@@ -1,6 +1,6 @@
 from cartoframes.auth import Credentials
 from cartoframes.viz import Map, Layer, popup_element, constants
-from cartoframes.viz.source import Source
+from cartoframes.viz.sources import CartoSource, DataFrameSource
 
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
 from cartoframes.io.managers.context_manager import ContextManager
@@ -60,7 +60,7 @@ class TestMapInitialization(object):
 class TestMapLayer(object):
     def test_one_layer(self):
         """Map layer should be able to initialize one layer"""
-        source = Source(build_geodataframe([-10, 0], [-10, 0]))
+        source = DataFrameSource(build_geodataframe([-10, 0], [-10, 0]))
         layer = Layer(source)
         map = Map(layer)
 
@@ -76,8 +76,8 @@ class TestMapLayer(object):
 
     def test_two_layers(self):
         """Map layer should be able to initialize two layers in the correct order"""
-        source_1 = Source(build_geodataframe([-10, 0], [-10, 0]))
-        source_2 = Source(build_geodataframe([0, 10], [10, 0]))
+        source_1 = DataFrameSource(build_geodataframe([-10, 0], [-10, 0]))
+        source_2 = DataFrameSource(build_geodataframe([0, 10], [10, 0]))
         layer_1 = Layer(source_1)
         layer_2 = Layer(source_2)
         map = Map([layer_1, layer_2])
@@ -87,7 +87,7 @@ class TestMapLayer(object):
 
     def test_interactive_layer(self):
         """Map layer should indicate if the layer has interactivity configured"""
-        source_1 = Source(build_geodataframe([-10, 0], [-10, 0], ['pop', 'name']))
+        source_1 = DataFrameSource(build_geodataframe([-10, 0], [-10, 0], ['pop', 'name']))
         layer = Layer(
             source_1,
             popup_click=[
@@ -124,7 +124,7 @@ class TestMapLayer(object):
 
     def test_default_interactive_layer(self):
         """Map layer should get the default event if the interactivity is set to []"""
-        source_1 = Source(build_geodataframe([-10, 0], [-10, 0]))
+        source_1 = DataFrameSource(build_geodataframe([-10, 0], [-10, 0]))
         layer = Layer(
             source_1
         )
@@ -238,7 +238,9 @@ class TestMapPublication(object):
             show_info=False,
             size=None,
             theme=None,
-            title='cf_publish'
+            title='cf_publish',
+            min_zoom=None,
+            max_zoom=None
         )
 
     def test_map_publish_remote_params(self, mocker):
@@ -253,7 +255,9 @@ class TestMapPublication(object):
             is_static=True,
             theme='dark',
             title='title',
-            description='description'
+            description='description',
+            min_zoom=2,
+            max_zoom=4
         )
 
         name = 'cf_publish'
@@ -272,13 +276,15 @@ class TestMapPublication(object):
             show_info=False,
             size=None,
             theme='dark',
-            title='cf_publish'
+            title='cf_publish',
+            min_zoom=2,
+            max_zoom=4
         )
 
     def test_map_publish_with_password(self, mocker):
         setup_mocks(mocker)
 
-        map = Map(Layer(Source('fake_table', credentials=self.credentials)))
+        map = Map(Layer(CartoSource('fake_table', credentials=self.credentials)))
 
         name = 'cf_publish'
         kuviz_dict = map.publish(name, '1234', credentials=self.credentials)
@@ -287,7 +293,7 @@ class TestMapPublication(object):
     def test_map_publish_deletion(self, mocker):
         setup_mocks(mocker)
 
-        map = Map(Layer(Source('fake_table', credentials=self.credentials)))
+        map = Map(Layer(CartoSource('fake_table', credentials=self.credentials)))
 
         name = 'cf_publish'
         map.publish(name, None, credentials=self.credentials)
@@ -298,7 +304,7 @@ class TestMapPublication(object):
     def test_map_publish_update_name(self, mocker):
         setup_mocks(mocker)
 
-        map = Map(Layer(Source('fake_table', credentials=self.credentials)))
+        map = Map(Layer(CartoSource('fake_table', credentials=self.credentials)))
 
         name = 'cf_publish'
         map.publish(name, None, credentials=self.credentials)
@@ -311,7 +317,7 @@ class TestMapPublication(object):
     def test_map_publish_update_password(self, mocker):
         setup_mocks(mocker)
 
-        map = Map(Layer(Source('fake_table', credentials=self.credentials)))
+        map = Map(Layer(CartoSource('fake_table', credentials=self.credentials)))
 
         name = 'cf_publish'
         map.publish(name, None, credentials=self.credentials)
