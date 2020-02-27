@@ -248,7 +248,7 @@ def encode_geometry_ewkb(geom, srid=4326):
 
 def to_geojson(geom, buffer_simplify=True):
     if geom is not None and str(geom) != 'GEOMETRYCOLLECTION EMPTY':
-        if buffer_simplify:
+        if buffer_simplify and geom.geom_type in (Polygon, Multipolygon):
             return json.dumps(shapely.geometry.mapping(
                 geom.buffer(SPHERICAL_TOLERANCE).simplify(SIMPLIFY_TOLERANCE)
             ), sort_keys=True)
