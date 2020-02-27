@@ -4,6 +4,8 @@ import shapely
 import binascii as ba
 
 from geopandas import GeoSeries, GeoDataFrame, points_from_xy
+from shapely.geometry.polygon import Polygon
+from shapely.geometry.multipolygon import MultiPolygon
 
 
 ENC_SHAPELY = 'shapely'
