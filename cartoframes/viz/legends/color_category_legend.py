@@ -33,4 +33,4 @@ def color_category_legend(title=None, description=None, footer=None, prop='color
         ...     dynamic=False)
 
     """
-    return Legend('color-category', title, description, footer, prop, variable, dynamic)
+    return Legend('color-category', title, description, footer, prop, variable, dynamic, ascending=True)
