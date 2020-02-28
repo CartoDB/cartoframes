@@ -15,8 +15,9 @@ function _createLegend(layer, legend, layerIndex, legendIndex, mapIndex=0) {
     const othersLabel = 'Others';   // TODO: i18n
     const prop = legend.prop;
     const dynamic = legend.dynamic;
+    const order = legend.ascending ? 'ASC' : 'DESC';
     const variable = legend.variable;
-    const config = { othersLabel, variable };
+    const config = { othersLabel, variable, order };
     const options = { format, config, dynamic };
 
     if (legend.type.startsWith('size-continuous')) {

@@ -6,9 +6,8 @@ export function displayError(e) {
   const stacktrace$ = document.getElementById('error-stacktrace');
 
   errors$[0].innerHTML = e.name;
-  errors$[1].innerHTML = e.name;
-  errors$[2].innerHTML = e.type;
-  errors$[3].innerHTML = e.message.replace(e.type, '');
+  errors$[1].innerHTML = e.type;
+  errors$[2].innerHTML = e.message.replace(e.type, '');
 
   error$.style.visibility = 'visible';
 
