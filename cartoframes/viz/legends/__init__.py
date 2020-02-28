@@ -6,6 +6,7 @@ from .basic_legend import basic_legend
 from .color_bins_legend import color_bins_legend
 from .color_category_legend import color_category_legend
 from .color_continuous_legend import color_continuous_legend
+from .color_bivariate_legend import color_bivariate_legend
 from .size_bins_legend import size_bins_legend
 from .size_category_legend import size_category_legend
 from .size_continuous_legend import size_continuous_legend
@@ -16,6 +17,7 @@ __all__ = [
     'color_bins_legend',
     'color_category_legend',
     'color_continuous_legend',
+    'color_bivariate_legend',
     'size_bins_legend',
     'size_category_legend',
     'size_continuous_legend',

@@ -415,7 +415,16 @@ var init = (function () {
         config.samples = 4;
       }
 
-      AsBridge.VL.Legends.rampLegend(element, layer, prop, options);
+      if (legend.type === 'bivariate') {
+        const legendLayer = {
+          layer,
+          props: legend.props
+        };
+
+        AsBridge.VL.Legends.bivariateLegend(element, legendLayer, options);
+      } else {
+        AsBridge.VL.Legends.rampLegend(element, layer, prop, options);
+      }
     }
   }
 

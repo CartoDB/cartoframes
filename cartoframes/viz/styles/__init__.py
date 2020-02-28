@@ -7,6 +7,7 @@ from .basic_style import basic_style
 from .color_bins_style import color_bins_style
 from .color_category_style import color_category_style
 from .color_continuous_style import color_continuous_style
+from .color_bivariate_style import color_bivariate_style
 from .cluster_size_style import cluster_size_style
 from .isolines_style import isolines_style
 from .size_bins_style import size_bins_style
@@ -20,6 +21,7 @@ __all__ = [
     'color_bins_style',
     'color_category_style',
     'color_continuous_style',
+    'color_bivariate_style',
     'cluster_size_style',
     'isolines_style',
     'size_bins_style',

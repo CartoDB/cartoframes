@@ -12,6 +12,7 @@ from .styles import basic_style
 from .styles import color_bins_style
 from .styles import color_category_style
 from .styles import color_continuous_style
+from .styles import color_bivariate_style
 from .styles import cluster_size_style
 from .styles import isolines_style
 from .styles import size_bins_style
@@ -22,6 +23,7 @@ from .legends import basic_legend
 from .legends import color_bins_legend
 from .legends import color_category_legend
 from .legends import color_continuous_legend
+from .legends import color_bivariate_legend
 from .legends import size_bins_legend
 from .legends import size_category_legend
 from .legends import size_continuous_legend
@@ -53,6 +55,7 @@ __all__ = [
     'color_bins_style',
     'color_category_style',
     'color_continuous_style',
+    'color_bivariate_style',
     'cluster_size_style',
     'isolines_style',
     'size_bins_style',
@@ -63,6 +66,7 @@ __all__ = [
     'color_bins_legend',
     'color_category_legend',
     'color_continuous_legend',
+    'color_bivariate_legend',
     'size_bins_legend',
     'size_category_legend',
     'size_continuous_legend',

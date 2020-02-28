@@ -24,7 +24,16 @@ function _createLegend(layer, legend, layerIndex, legendIndex, mapIndex=0) {
       config.samples = 4;
     }
 
-    AsBridge.VL.Legends.rampLegend(element, layer, prop, options);
+    if (legend.type === 'bivariate') {
+      const legendLayer = {
+        layer,
+        props: legend.props
+      }
+
+      AsBridge.VL.Legends.bivariateLegend(element, legendLayer, options);
+    } else {
+      AsBridge.VL.Legends.rampLegend(element, layer, prop, options);
+    }
   } else {
     // TODO: we don't have a bridge for this case, should this even be a case?
   }

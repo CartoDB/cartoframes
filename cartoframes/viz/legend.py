@@ -15,7 +15,8 @@ class Legend:
 
     """
     def __init__(self, legend_type=None, title=None, description=None,
-                 footer=None, prop=None, variable='', dynamic=True, ascending=False):
+                 footer=None, prop=None, variable='', dynamic=True, props=None,
+                 ascending=False):
         self._check_type(legend_type)
         self._check_prop(prop)
         self._type = legend_type
@@ -23,6 +24,7 @@ class Legend:
         self._description = description
         self._footer = footer
         self._prop = prop
+        self._props = props
         self._variable = variable
         self._dynamic = dynamic
         self._ascending = ascending
@@ -46,7 +48,8 @@ class Legend:
                 'ascending': self._ascending,
                 'title': self._title or '',
                 'description': self._description or '',
-                'footer': self._footer or ''
+                'footer': self._footer or '',
+                'props': self._props or {}
             }
         else:
             return {}

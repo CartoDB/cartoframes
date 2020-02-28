@@ -168,13 +168,15 @@ class Layer:
             popups['hover'] = popup_hover
         elif default_popup_hover is True and self.style.default_popup_hover is not None:
             popups['hover'] = self.style.default_popup_hover
-            popups['hover']['title'] = title
+            if not isinstance(self.style.default_popup_hover, list):
+                popups['hover']['title'] = title
 
         if popup_click:
             popups['click'] = popup_click
         elif default_popup_click is True and self.style.default_popup_click is not None:
             popups['click'] = self.style.default_popup_click
-            popups['click']['title'] = title
+            if not isinstance(self.style.default_popup_click, list):
+                popups['click']['title'] = title
 
         return _set_popups(popups, self.style.default_popup_hover, self.style.default_popup_click)
 

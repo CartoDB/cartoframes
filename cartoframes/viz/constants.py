@@ -45,6 +45,7 @@ VIZ_PROPERTIES_MAP = {
 LEGEND_TYPES = [
     'basic',
     'default',
+    'bivariate',
     'color-bins',
     'color-bins-line',
     'color-bins-point',
