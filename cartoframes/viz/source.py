@@ -1,10 +1,13 @@
 from pandas import DataFrame
 from geopandas import GeoDataFrame
 
+from .sources import BaseSource
 from ..io.managers.context_manager import ContextManager
+from ..utils.logger import log
 from ..utils.geom_utils import set_geometry, has_geometry
 from ..utils.utils import get_geodataframe_data, get_geodataframe_bounds, \
                           get_geodataframe_geom_type, get_datetime_column_names
+
 
 RFC_2822_DATETIME_FORMAT = "%a, %d %b %Y %T %z"
 
@@ -25,7 +28,7 @@ class SourceType:
     GEOJSON = 'GeoJSON'
 
 
-class Source:
+class Source(BaseSource):
     """Source
 
     Args:
@@ -63,6 +66,8 @@ class Source:
         self.credentials = None
         self.datetime_column_names = None
         self.encode_data = encode_data
+
+        log.warning('Source class has been deprecated. Use CartoSource or DataFrameSource sources instead')
 
         if isinstance(source, str):
             # Table, SQL query

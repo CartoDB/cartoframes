@@ -2,9 +2,9 @@ from .map import Map
 from .layer import Layer
 from .layout import Layout
 
-from .themes import Themes as themes
-from .basemaps import Basemaps as basemaps
-from .defaults import COLOR_PALETTES as palettes
+from .sources import CartoSource
+from .sources import DataFrameSource
+from .sources import BigQuerySource
 
 from .styles import animation_style
 from .styles import basic_style
@@ -37,14 +37,19 @@ from .widgets import default_widget
 from .popups import popup_element
 from .popups import default_popup_element
 
+from .themes import Themes as themes
+from .basemaps import Basemaps as basemaps
+from .defaults import COLOR_PALETTES as palettes
+
 
 __all__ = [
     'Map',
     'Layer',
     'Layout',
-    'basemaps',
-    'themes',
-    'palettes',
+
+    'CartoSource',
+    'DataFrameSource',
+    'BigQuerySource',
 
     'animation_style',
     'basic_style',
@@ -75,5 +80,9 @@ __all__ = [
     'default_widget',
 
     'popup_element',
-    'default_popup_element'
+    'default_popup_element',
+
+    'basemaps',
+    'themes',
+    'palettes'
 ]
