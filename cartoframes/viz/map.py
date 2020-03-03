@@ -108,21 +108,24 @@ class Map:
                  is_static=None,
                  min_zoom=None,
                  max_zoom=None,
+                 layer_selector=False,
                  **kwargs):
 
-        self.layers = _init_layers(layers)
+        self.layer_selector = layer_selector
         self.basemap = basemap
         self.size = size
         self.viewport = viewport
         self.title = title
         self.description = description
         self.show_info = show_info
+        self.layers = _init_layers(layers, self)
         self.layer_defs = _get_layer_defs(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
         self.theme = _get_theme(theme, basemap)
         self.is_static = is_static
         self.min_zoom = min_zoom
         self.max_zoom = max_zoom
+
         self.token = get_token(basemap)
         self.basecolor = get_basecolor(basemap)
 
@@ -158,6 +161,7 @@ class Map:
             is_static=self.is_static,
             min_zoom=self.min_zoom,
             max_zoom=self.max_zoom,
+            layer_selector=self.layer_selector,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
@@ -183,6 +187,7 @@ class Map:
             'title': self.title,
             'description': self.description,
             'is_static': self.is_static,
+            'layer_selector': self.layer_selector,
             '_carto_vl_path': self._carto_vl_path,
             '_airship_path': self._airship_path
         }
@@ -287,12 +292,15 @@ def _get_bounds(bounds, layers):
         return _compute_bounds(layers)
 
 
-def _init_layers(layers):
+def _init_layers(layers, parent_map):
     if layers is None:
         return []
     if not isinstance(layers, collections.Iterable):
+        layers.reset_legends(parent_map)
         return [layers]
     else:
+        for layer in layers:
+            layer.reset_legends(parent_map)
         return layers
 
 
@@ -312,6 +320,7 @@ def _get_layer_def(layer):
         'widgets': layer.widgets_info,
         'data': layer.source_data,
         'type': layer.source_type,
+        'title': layer.title,
         'options': layer.options,
         'viz': layer.viz
     }
@@ -410,7 +419,8 @@ def _get_theme(theme, basemap):
 
 def get_token(basemap):
     if isinstance(basemap, dict):
-        return get_token(basemap)
+        if 'token' in basemap:
+            return basemap.get('token')
     return ''
 
 

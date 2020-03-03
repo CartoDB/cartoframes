@@ -28,19 +28,19 @@ class HTMLMap(object):
             self, size, layers, bounds, camera=None, basemap=None, show_info=None,
             theme=None, _carto_vl_path=None,
             _airship_path=None, title='CARTOframes', description=None,
-            is_embed=False, is_static=False, min_zoom=None, max_zoom=None):
+            is_embed=False, is_static=False, min_zoom=None, max_zoom=None, layer_selector=False):
 
         self.html = self._parse_html_content(
             size, layers, bounds, camera, basemap,
             show_info, theme, _carto_vl_path, _airship_path, title, description,
-            is_embed, is_static, min_zoom, max_zoom)
+            is_embed, is_static, min_zoom, max_zoom, layer_selector)
 
     def _parse_html_content(
             self, size, layers, bounds, camera=None,
             basemap=None, show_info=None,
             theme=None, _carto_vl_path=None, _airship_path=None,
             title=None, description=None, is_embed=False, is_static=False,
-            min_zoom=None, max_zoom=None):
+            min_zoom=None, max_zoom=None, layer_selector=False):
 
         token = ''
         basecolor = ''
@@ -113,7 +113,8 @@ class HTMLMap(object):
             is_embed=is_embed,
             is_static=is_static,
             min_zoom=min_zoom,
-            max_zoom=max_zoom
+            max_zoom=max_zoom,
+            layer_selector=layer_selector
         )
 
     def _repr_html_(self):

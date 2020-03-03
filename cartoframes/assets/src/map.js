@@ -49,6 +49,10 @@ export function initLayers(map, settings, mapIndex) {
     mapIndex
   );
 
+  if (settings.layer_selector) {
+    addLayersSelector(layers.reverse(), mapLayers.reverse());
+  }
+
   setInteractiveLayers(map, layers, mapLayers);
 
   return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
@@ -84,8 +88,23 @@ export function setInteractiveLayers(map, layers, mapLayers) {
   }
 }
 
-export function createMap(container, basemapStyle, bounds, accessToken, minZoom, maxZoom) {
-  const map = createMapboxGLMap(container, basemapStyle, accessToken, minZoom, maxZoom);
+export function addLayersSelector(layers, mapLayers) {
+  const layerSelector$ = document.querySelector(`#layer-selector`);
+    const layersInfo = mapLayers.map((layer, index) => {
+      return {
+        title: layers[index].title || `Layer ${index}`,
+        id: layer.id,
+        checked: true
+      };
+    });
+  
+  const layerSelector = new AsBridge.VL.Layers(layerSelector$, carto, layersInfo, mapLayers);
+  
+  layerSelector.build();
+}
+
+export function createMap(container, basemapStyle, bounds, accessToken,  minZoom, maxZoom) {
+  const map = createMapboxGLMap(container, basemapStyle, accessToken,  minZoom, maxZoom);
 
   map.addControl(attributionControl);
   map.fitBounds(bounds, FIT_BOUNDS_SETTINGS);

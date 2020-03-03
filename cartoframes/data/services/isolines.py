@@ -32,6 +32,8 @@ class Isolines(Service):
                 containing the areas for smaller time values (so the area is reachable from the source
                 within the given time). When True, areas are exclusive, each one corresponding
                 time values between the immediately smaller range value (or zero) and the area range value.
+            ascending (bool, optional): when True, the isochornes are sorted ascending by travel time,
+                and False (default) for the opposite case.
             table_name (str, optional): the resulting areas will be saved in a new
                 CARTO table with this name.
             if_exists (str, optional): Behavior for creating new datasets, only applicable
@@ -81,6 +83,8 @@ class Isolines(Service):
                 containing the areas for smaller distance values (so the area is reachable from the source
                 within the given distance). When True, areas are exclusive, each one corresponding
                 distance values between the immediately smaller range value (or zero) and the area range value.
+            ascending (bool, optional): when True, the isochornes are sorted ascending by travel time,
+                and False (default) for the opposite case.
             table_name (str, optional): the resulting areas will be saved in a new
                 CARTO table with this name.
             if_exists (str, optional): Behavior for creating new datasets, only applicable
@@ -132,6 +136,7 @@ class Isolines(Service):
                    maxpoints=None,
                    quality=None,
                    exclusive=False,
+                   ascending=False,
                    function=None,
                    geom_col=None,
                    source_col=None):
@@ -196,6 +201,12 @@ class Isolines(Service):
 
         # Execute and download the query to generate the isolines
         gdf = read_carto(sql, self._credentials)
+
+        # Sorting by `data_range` column and recalculating `cartodb_id`
+        gdf.sort_values(by=[DATA_RANGE_KEY], ascending=ascending, inplace=True)
+        gdf.reset_index(drop=True, inplace=True)
+        if CARTO_INDEX_KEY in gdf.columns:
+            gdf[CARTO_INDEX_KEY] = gdf.index + 1
 
         if exclusive:
             # Add range label column
