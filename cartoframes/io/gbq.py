@@ -3,7 +3,7 @@
 import time
 
 from .managers.gbq_manager import GBQManager
-from ..viz.sources import DataFrameSource, BigQuerySource
+from ..viz.sources import GeoDataFrameSource, GBQTilesetSource
 from ..utils.utils import is_sql_query
 from ..utils.logger import log
 
@@ -26,7 +26,7 @@ def prepare_gbq_source(data, project=None, token=None, force_df=False, force_mvt
 
         print('DEBUG: time elapsed {:.2f}s'.format(end - begin))
 
-        return DataFrameSource(df, geom_col='geom')
+        return GeoDataFrameSource(df, geom_col='geom')
     else:
         log.info('Preparing data. This may take a few minutes')
 
@@ -41,7 +41,7 @@ def prepare_gbq_source(data, project=None, token=None, force_df=False, force_mvt
 
         print('DEBUG: time elapsed {:.2f}s'.format(end - begin))
 
-        return BigQuerySource(data, metadata, bounds, zoom)
+        return GBQTilesetSource(data, metadata, bounds, zoom)
 
 
 def _get_gbq_query(source):

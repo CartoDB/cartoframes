@@ -67,7 +67,7 @@ class Source(BaseSource):
         self.datetime_column_names = None
         self.encode_data = encode_data
 
-        log.warning('Source class has been deprecated. Use CartoSource or DataFrameSource sources instead')
+        log.warning('Source class has been deprecated. Use CartoSource or GeoDataFrameSource sources instead')
 
         if isinstance(source, str):
             # Table, SQL query

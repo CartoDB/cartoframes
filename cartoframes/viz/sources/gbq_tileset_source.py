@@ -3,8 +3,8 @@ from .base_source import BaseSource
 SOURCE_TYPE = 'BQMVT'
 
 
-class BigQuerySource(BaseSource):
-    """BigQuerySource
+class GBQTilesetSource(BaseSource):
+    """GBQTilesetSource
 
     Args:
         data (dict): project, dataset, tablename, token.

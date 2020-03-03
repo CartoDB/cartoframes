@@ -4,7 +4,7 @@ from .legend import Legend
 from .legend_list import LegendList
 from .popup import Popup
 from .popup_list import PopupList
-from .sources import BaseSource, CartoSource, DataFrameSource
+from .sources import BaseSource, CartoSource, GeoDataFrameSource
 from .style import Style
 from .widget import Widget
 from .widget_list import WidgetList
@@ -201,7 +201,7 @@ def _set_source(source, credentials, geom_col, encode_data):
     if isinstance(source, str):
         return CartoSource(source, credentials)
     elif isinstance(source, pandas.DataFrame):
-        return DataFrameSource(source, geom_col, encode_data)
+        return GeoDataFrameSource(source, geom_col, encode_data)
     elif isinstance(source, BaseSource):
         source.encode_data = encode_data
         return source

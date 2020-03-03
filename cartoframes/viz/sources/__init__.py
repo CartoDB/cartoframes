@@ -1,11 +1,11 @@
 from .base_source import BaseSource
 from .carto_source import CartoSource
-from .bigquery_source import BigQuerySource
-from .dataframe_source import DataFrameSource
+from .gbq_tileset_source import GBQTilesetSource
+from .geodataframe_source import GeoDataFrameSource
 
 __all__ = [
     'BaseSource',
     'CartoSource',
-    'BigQuerySource',
-    'DataFrameSource'
+    'GBQTilesetSource',
+    'GeoDataFrameSource'
 ]

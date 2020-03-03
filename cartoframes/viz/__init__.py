@@ -3,8 +3,8 @@ from .layer import Layer
 from .layout import Layout
 
 from .sources import CartoSource
-from .sources import DataFrameSource
-from .sources import BigQuerySource
+from .sources import GBQTilesetSource
+from .sources import GeoDataFrameSource
 
 from .styles import animation_style
 from .styles import basic_style
@@ -48,8 +48,8 @@ __all__ = [
     'Layout',
 
     'CartoSource',
-    'DataFrameSource',
-    'BigQuerySource',
+    'GBQTilesetSource',
+    'GeoDataFrameSource',
 
     'animation_style',
     'basic_style',
