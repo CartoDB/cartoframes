@@ -8,6 +8,38 @@ from ..utils.utils import is_sql_query
 from ..utils.logger import log
 
 
+def read_gbq_viz(data, project=None, token=None, credentials=None, geom_col='geom'):
+    if not isinstance(data, str):
+        raise ValueError('Wrong source input. Valid values are str.')
+
+    query = _get_gbq_query(data)
+    manager = GBQManager(project, credentials=credentials, token=token)
+
+    if manager.estimated_data_size(query) < manager.DATA_SIZE_LIMIT:
+        log.info('Downloading data. This may take a few seconds')
+
+        begin = time.time()
+
+        df = manager.download_dataframe(query)
+
+        end = time.time()
+
+        print('DEBUG: time elapsed {:.2f}s'.format(end - begin))
+
+        return GeoDataFrameSource(df, geom_col=geom_col)
+    else:
+        raise Exception('''
+        To visualize this dataset you need to create a tileset:
+
+        >>> from cartoframes.io.gbq import create_tileset
+        >>> source = create_tileset(...)
+        '''.format())
+
+
+def create_tileset(data, project=None, credentials=None, name=None, index_col='geoid', geom_col='geom'):
+    raise NotImplementedError()
+
+
 def prepare_gbq_source(data, project=None, token=None, force_df=False, force_mvt=False):
     if not isinstance(data, str):
         raise ValueError('Wrong source input. Valid values are str.')

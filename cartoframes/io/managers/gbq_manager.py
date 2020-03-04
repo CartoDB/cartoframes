@@ -17,8 +17,8 @@ class GBQManager:
 
     DATA_SIZE_LIMIT = 10 * 1024 * 1024  # 10 MB
 
-    def __init__(self, project=None, token=None):
-        credentials = Credentials(token) if token else None
+    def __init__(self, project=None, credentials=None, token=None):
+        credentials = Credentials(token) if token else credentials
 
         self.token = token
         self.project = project if project else os.environ[PROJECT_KEY]

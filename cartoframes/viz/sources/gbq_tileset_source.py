@@ -9,6 +9,8 @@ class GBQTilesetSource(BaseSource):
     Args:
         data (dict): project, dataset, tablename, token.
         metadata (str, optional): idProperty, properties.
+        bounds.
+        zoom.
 
     """
     def __init__(self, gbq_data, gbq_metadata=None, bounds=None, zoom=None):
