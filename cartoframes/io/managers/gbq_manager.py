@@ -64,14 +64,14 @@ class GBQManager:
                 {0}
             ),
             data_bounds AS (
-                SELECT rmr_tests.ST_Envelope_Box(TO_HEX(ST_ASBINARY(geom))) AS bbox
+                SELECT jarroyo_tests.ST_EnvelopeBox(TO_HEX(ST_ASBINARY(geom))) AS bbox
                 FROM data
             )
             SELECT
-                MIN(bbox[OFFSET(0)]) as xmin,
-                MAX(bbox[OFFSET(1)]) as xmax,
-                MIN(bbox[OFFSET(2)]) as ymin,
-                MAX(bbox[OFFSET(3)]) as ymax
+                MIN(bbox.xmin) as xmin,
+                MAX(bbox.xmax) as xmax,
+                MIN(bbox.ymin) as ymin,
+                MAX(bbox.ymax) as ymax
             FROM data_bounds
         '''.format(query)
         job = self.client.query(bounds_query)
@@ -97,15 +97,15 @@ class GBQManager:
                 {query}
             ),
             data_bounds AS (
-                SELECT geoid, rmr_tests.ST_Envelope_Box(TO_HEX(ST_ASBINARY(geom))) AS bbox
+                SELECT geoid, jarroyo_tests.ST_EnvelopeBox(TO_HEX(ST_ASBINARY(geom))) AS bbox
                 FROM data
             ),
             global_bounds AS (
                 SELECT
-                    MIN(bbox[OFFSET(0)]) as gxmin,
-                    MAX(bbox[OFFSET(1)]) as gxmax,
-                    MIN(bbox[OFFSET(2)]) as gymin,
-                    MAX(bbox[OFFSET(3)]) as gymax
+                    MIN(bbox.xmin) as gxmin,
+                    MAX(bbox.xmax) as gxmax,
+                    MIN(bbox.ymin) as gymin,
+                    MAX(bbox.ymax) as gymax
                 FROM data_bounds
             ),
             global_bbox AS (
@@ -120,10 +120,10 @@ class GBQManager:
             tiles_xyz AS (
                 SELECT b.z, b.x, b.y, a.geoid
                 FROM data_bounds a, tiles_bbox b
-                WHERE NOT ((bbox[OFFSET(0)] > b.xmax) OR
-                           (bbox[OFFSET(1)] < b.xmin) OR
-                           (bbox[OFFSET(2)] > b.ymax) OR
-                           (bbox[OFFSET(3)] < b.ymin))
+                WHERE NOT ((bbox.xmin > b.xmax) OR
+                           (bbox.xmax < b.xmin) OR
+                           (bbox.ymin > b.ymax) OR
+                           (bbox.ymax < b.ymin))
             ),
             tiles_geom AS (
                 SELECT b.z, b.x, b.y, a.geoid, ST_ASGEOJSON(a.geom) AS geom, a.* EXCEPT (geoid, geom)
