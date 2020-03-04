@@ -47,16 +47,15 @@ def create_tileset(data, project=None, token=None, index_col='geoid', geom_col='
 
     begin = time.time()
 
-    data = manager.fetch_mvt_data(query)
-    metadata = manager.fetch_mvt_metadata(query, index_col, geom_col)
-    bounds, zoom = manager.compute_bounds(query)
-    manager.trigger_mvt_generation(query, zoom, index_col, geom_col)
+    info = manager.fetch_mvt_info(query, index_col, geom_col)
+    manager.trigger_mvt_generation(query, info['zoom'], index_col, geom_col)
+    data = manager.build_mvt_data(query)
 
     end = time.time()
 
     print('DEBUG: time elapsed {:.2f}s'.format(end - begin))
 
-    return GBQTilesetSource(data, metadata, bounds, zoom)
+    return GBQTilesetSource(data, info['metadata'], info['bounds'], info['zoom'])
 
 
 def prepare_gbq_source(data, project=None, token=None, force_df=False, force_mvt=False):

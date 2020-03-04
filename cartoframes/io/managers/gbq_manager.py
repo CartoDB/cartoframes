@@ -26,12 +26,21 @@ class GBQManager:
         query_job = self.client.query(query)
         return query_job.to_dataframe()
 
-    def fetch_mvt_data(self, query):
+    def build_mvt_data(self, query):
         return {
             'projectId': self.project,
             'datasetId': MVT_DATASET,
             'tableId': create_hash(query),
             'token': self.token
+        }
+
+    def fetch_mvt_info(self, query, index_col, geom_col):
+        metadata = self.fetch_mvt_metadata(query, index_col, geom_col)
+        bounds, zoom = self.fetch_bounds(query)
+        return {
+            'metadata': metadata,
+            'bounds': bounds,
+            'zoom': zoom
         }
 
     def fetch_mvt_metadata(self, query, index_col='geoid', geom_col='geom'):
@@ -57,7 +66,7 @@ class GBQManager:
             'properties': properties
         }
 
-    def compute_bounds(self, query):
+    def fetch_bounds(self, query):
         # TODO: optimize query
         bounds_query = '''
             WITH data AS (
