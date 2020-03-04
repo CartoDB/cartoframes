@@ -8,12 +8,12 @@ from ..utils.utils import is_sql_query
 from ..utils.logger import log
 
 
-def read_gbq_viz(data, project=None, token=None, credentials=None, geom_col='geom'):
+def read_gbq_viz(data, project=None, token=None, geom_col='geom', credentials=None):
     if not isinstance(data, str):
         raise ValueError('Wrong source input. Valid values are str.')
 
     query = _get_gbq_query(data)
-    manager = GBQManager(project, credentials=credentials, token=token)
+    manager = GBQManager(project, token=token, credentials=credentials)
 
     if manager.estimated_data_size(query) < manager.DATA_SIZE_LIMIT:
         log.info('Downloading data. This may take a few seconds')
@@ -36,8 +36,27 @@ def read_gbq_viz(data, project=None, token=None, credentials=None, geom_col='geo
         '''.format())
 
 
-def create_tileset(data, project=None, credentials=None, name=None, index_col='geoid', geom_col='geom'):
-    raise NotImplementedError()
+def create_tileset(data, project=None, token=None, index_col='geoid', geom_col='geom', credentials=None):
+    if not isinstance(data, str):
+        raise ValueError('Wrong source input. Valid values are str.')
+
+    query = _get_gbq_query(data)
+    manager = GBQManager(project, token)
+
+    log.info('Preparing data. This may take a few minutes')
+
+    begin = time.time()
+
+    data = manager.fetch_mvt_data(query)
+    metadata = manager.fetch_mvt_metadata(query, index_col, geom_col)
+    bounds, zoom = manager.compute_bounds(query)
+    manager.trigger_mvt_generation(query, zoom, index_col, geom_col)
+
+    end = time.time()
+
+    print('DEBUG: time elapsed {:.2f}s'.format(end - begin))
+
+    return GBQTilesetSource(data, metadata, bounds, zoom)
 
 
 def prepare_gbq_source(data, project=None, token=None, force_df=False, force_mvt=False):
