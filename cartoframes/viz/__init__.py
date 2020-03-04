@@ -5,6 +5,7 @@ from .layout import Layout
 from .sources import CartoSource
 from .sources import GBQTilesetSource
 from .sources import GeoDataFrameSource
+from .sources import BigQuerySource
 
 from .styles import animation_style
 from .styles import basic_style
@@ -50,6 +51,7 @@ __all__ = [
     'CartoSource',
     'GBQTilesetSource',
     'GeoDataFrameSource',
+    'BigQuerySource',
 
     'animation_style',
     'basic_style',

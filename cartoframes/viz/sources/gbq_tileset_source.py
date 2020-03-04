@@ -9,11 +9,11 @@ class GBQTilesetSource(BaseSource):
     Args:
         data (dict): project, dataset, tablename, token.
         metadata (str, optional): idProperty, properties.
-        bounds.
-        zoom.
+        bounds (list, optional)
+        zoom_fn (str, optional)
 
     """
-    def __init__(self, gbq_data, gbq_metadata=None, bounds=None, zoom=None):
+    def __init__(self, gbq_data, gbq_metadata=None, bounds=None, zoom_fn=None):
         if not isinstance(gbq_data, dict):
             raise ValueError('Wrong source input. Valid values are dict.')
 
@@ -21,7 +21,7 @@ class GBQTilesetSource(BaseSource):
         self.gbq_data = gbq_data
         self.gbq_metadata = gbq_metadata
         self.bounds = bounds
-        self.zoom = zoom
+        self.zoom_fn = zoom_fn
 
     def get_geom_type(self):
         # TODO: detect geometry type
@@ -32,16 +32,5 @@ class GBQTilesetSource(BaseSource):
         self.data = {
             'data': self.gbq_data,
             'metadata': self.gbq_metadata,
-            'zoom_func': self.compute_zoom_function()
+            'zoom_func': self.zoom_fn
         }
-
-    def compute_zoom_function(self):
-        # TODO: customize
-        return '''
-            (zoom) => {{
-                if (zoom >= {0}) {{
-                    return {0};
-                }}
-                return null;
-            }}
-        '''.format(self.zoom)
