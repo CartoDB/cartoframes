@@ -1,4 +1,3 @@
-import os
 import math
 
 from google.cloud import bigquery
@@ -10,7 +9,6 @@ from ...utils.utils import dtypes2vl, create_hash
 GEOID_KEY = 'geoid'
 GEOM_KEY = 'geom'
 MVT_DATASET = 'mvt_pool'
-PROJECT_KEY = 'GOOGLE_CLOUD_PROJECT'
 
 
 class GBQManager:
@@ -21,7 +19,7 @@ class GBQManager:
         credentials = Credentials(token) if token else credentials
 
         self.token = token
-        self.project = project if project else os.environ[PROJECT_KEY]
+        self.project = project
         self.client = bigquery.Client(project=project, credentials=credentials)
 
     def download_dataframe(self, query):

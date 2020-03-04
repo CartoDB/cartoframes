@@ -2,6 +2,7 @@ import time
 
 from . import BaseSource, GBQTilesetSource, GeoDataFrameSource
 from ...io.managers.gbq_manager import GBQManager
+from ...io.gbq import get_project, get_token
 from ...utils.logger import log
 
 
@@ -12,12 +13,13 @@ class BigQuerySource(BaseSource):
     def __new__(cls, query=None, table=None, tileset=None,
                 project=None, token=None, index_col='geoid', geom_col='geom'):
 
-        if table:
-            query = 'SELECT * FROM `{}`'.format(table)
+        query = 'SELECT * FROM `{}`'.format(table) if table else query
+        project = project or get_project()
+        token = token or get_token()
 
-        if query is None and tileset is not None:
+        if tileset:
             return _gbq_tileset_source(tileset, project, token, index_col)
-        else:
+        elif query:
             return _geo_data_frame_source(query, project, token, geom_col)
 
 
