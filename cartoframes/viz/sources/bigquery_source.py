@@ -35,17 +35,14 @@ def _gbq_tileset_source(tileset, project, token, index_col):
         'properties': {'geoid': {'type': 'category'}}
     }
     # TODO: fetch bounds
-    bounds = [[-120, -20], [80, 50]]
+    bounds = None
     # TODO: fetch zoom mapping
     zoom_fn = '''
         (zoom) => {
             if (zoom > 7) {
-                return 8;
+                return 7;
             }
-            if (zoom > 3) {
-                return 4;
-            }
-            return 0;
+            return null;
         }
     '''
 
