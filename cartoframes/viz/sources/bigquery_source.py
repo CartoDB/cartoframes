@@ -24,6 +24,11 @@ class BigQuerySource(BaseSource):
 
 
 def _gbq_tileset_source(tileset, project, token, index_col):
+    if not isinstance(tileset, str):
+        raise ValueError('Wrong source input. Valid values are str.')
+
+    manager = GBQManager(project, token=token)
+
     dataset, table = tileset.split('.')
     data = {
         'projectId': project,
@@ -31,24 +36,12 @@ def _gbq_tileset_source(tileset, project, token, index_col):
         'tableId': table,
         'token': token
     }
-    # TODO: fetch metadata
-    metadata = {
-        'idProperty': index_col,
-        'properties': {'geoid': {'type': 'category'}}
-    }
-    # TODO: fetch bounds
-    bounds = None
-    # TODO: fetch zoom mapping
-    zoom_fn = '''
-        (zoom) => {
-            if (zoom > 7) {
-                return 7;
-            }
-            return null;
-        }
-    '''
 
-    return GBQTilesetSource(data, metadata, bounds, zoom_fn)
+    (metadata, bounds, zooms) = manager.fetch_mvt_info(tileset, index_col)
+
+    print(metadata, bounds, zooms)
+
+    return GBQTilesetSource(data, metadata, bounds, zooms)
 
 
 def _geo_data_frame_source(query, project, token, geom_col):

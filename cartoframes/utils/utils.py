@@ -144,20 +144,23 @@ def pg2dtypes(pgtype):
     return mapping.get(str(pgtype), 'object')
 
 
-def dtypes2vl(dtype):
-    """Returns equivalent CARTO VL type for input `dtype`"""
+def gbq2vl(dtype):
+    """Returns equivalent CARTO VL type for input GBQ"""
     mapping = {
-        'int16': 'number',
-        'int32': 'number',
-        'int64': 'number',
-        'float32': 'number',
-        'float64': 'number',
-        'object': 'category',
-        'bool': 'number',
-        'datetime64[ns]': 'date',
-        'datetime64[ns, UTC]': 'date',
+        'INT64': 'number',
+        'INTEGER': 'number',
+        'FLOAT64': 'number',
+        'FLOAT': 'number',
+        'BOOL': 'number',
+        'BOOLEAN': 'number',
+        'BYTES': 'category',
+        'STRING': 'category',
+        'TIMESTAMP': 'date',
+        'DATE': 'date',
+        'TIME': 'date',
+        'DATETIME': 'date'
     }
-    return mapping.get(str(dtype), 'number')
+    return mapping.get(str(dtype), 'category')
 
 
 def gen_variable_name(value):

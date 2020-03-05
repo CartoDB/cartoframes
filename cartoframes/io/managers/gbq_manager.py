@@ -1,13 +1,11 @@
-import math
+import json
 
 from google.cloud import bigquery
 from google.oauth2.credentials import Credentials
 
 from ...utils.logger import log
-from ...utils.utils import dtypes2vl, create_hash
+from ...utils.utils import gbq2vl, create_hash
 
-GEOID_KEY = 'geoid'
-GEOM_KEY = 'geom'
 MVT_DATASET = 'mvt_pool'
 
 
@@ -17,68 +15,41 @@ class GBQManager:
 
     def __init__(self, project=None, credentials=None, token=None):
         credentials = Credentials(token) if token else credentials
-
-        self.token = token
-        self.project = project
         self.client = bigquery.Client(project=project, credentials=credentials)
 
     def download_dataframe(self, query):
         query_job = self.client.query(query)
         return query_job.to_dataframe()
 
-    def fetch_mvt_data(self, query):
-        return {
-            'projectId': self.project,
-            'datasetId': 'mvt_pool',
-            'tableId': create_hash(query),
-            'token': self.token
-        }
+    def fetch_mvt_info(self, tileset, index_col):
+        # TODO: get info from the tileset description
+        info = ''
 
-    def fetch_mvt_metadata(self, query):
-        metadata_query = '''
-            WITH q as ({})
-            SELECT * FROM q LIMIT 1
-        '''.format(query)
+        info = json.loads(info)
 
-        result = self.client.query(metadata_query).to_dataframe()
+        # Fetch metadata
 
-        if GEOID_KEY not in result.columns:
+        if index_col not in info['properties']:
             raise ValueError('No "geoid" column found.')
 
-        properties = {}
-        for column in result.columns:
-            if column == GEOM_KEY:
-                continue
-            dtype = result.dtypes[column]
-            properties[column] = {'type': dtypes2vl(dtype)}
+        metadata = {'idProperty': index_col, 'properties': {}, 'extent': 512}
+        for name, prop in info['properties'].items():
+            metadata['properties'][name] = {'type': gbq2vl(prop['type'])}
 
-        return {
-            'idProperty': GEOID_KEY,
-            'properties': properties
-        }
+        # Fetch bounds
 
-    def compute_bounds(self, query):
-        # TODO: optimize query
-        bounds_query = '''
-            WITH data AS (
-                {0}
-            ),
-            data_bounds AS (
-                SELECT rmr_tests.ST_Envelope_Box(TO_HEX(ST_ASBINARY(geom))) AS bbox
-                FROM data
-            )
-            SELECT
-                MIN(bbox[OFFSET(0)]) as xmin,
-                MAX(bbox[OFFSET(1)]) as xmax,
-                MIN(bbox[OFFSET(2)]) as ymin,
-                MAX(bbox[OFFSET(3)]) as ymax
-            FROM data_bounds
-        '''.format(query)
-        job = self.client.query(bounds_query)
-        result = job.to_dataframe()
-        bounds = result.iloc[0]
-        zoom = math.floor(math.log2(360 / (bounds.xmax - bounds.xmin)))
-        return [[bounds.xmin, bounds.ymin], [bounds.xmax, bounds.ymax]], zoom
+        xmin = info['bbox'][0]
+        ymin = info['bbox'][1]
+        xmax = info['bbox'][2]
+        ymax = info['bbox'][3]
+
+        bounds = [[xmin, ymin], [xmax, ymax]]
+
+        # Fetch zoom mapping
+
+        zooms = info['available_zooms']
+
+        return (metadata, bounds, zooms)
 
     def trigger_mvt_generation(self, query, zoom):
         table_name = create_hash(query)
