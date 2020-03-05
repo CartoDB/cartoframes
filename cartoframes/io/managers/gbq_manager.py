@@ -21,18 +21,18 @@ class GBQManager:
         query_job = self.client.query(query)
         return query_job.to_dataframe()
 
-    def fetch_mvt_info(self, tileset, index_col):
-        # TODO: get info from the tileset description
-        info = ''
+    def fetch_mvt_info(self, dataset, table, index_col):
+        table_ref = self.client.dataset(dataset).table(table)
+        table = self.client.get_table(table_ref)
 
-        info = json.loads(info)
+        info = json.loads(table.description)
 
         # Fetch metadata
 
         if index_col not in info['properties']:
             raise ValueError('No "geoid" column found.')
 
-        metadata = {'idProperty': index_col, 'properties': {}, 'extent': 512}
+        metadata = {'idProperty': index_col, 'properties': {}, 'extent': 4096}
         for name, prop in info['properties'].items():
             metadata['properties'][name] = {'type': gbq2vl(prop['type'])}
 
@@ -47,7 +47,7 @@ class GBQManager:
 
         # Fetch zoom mapping
 
-        zooms = info['available_zooms']
+        zooms = [item['zoom'] for item in info['available_zooms']]
 
         return (metadata, bounds, zooms)
 

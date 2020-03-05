@@ -22,7 +22,6 @@ class GBQTilesetSource(BaseSource):
         self.gbq_metadata = gbq_metadata
         self.bounds = bounds
         self.zooms = zooms
-        self.zoom_fn = self._compute_zoom_func()
 
     def get_geom_type(self):
         # TODO: detect geometry type
@@ -33,21 +32,18 @@ class GBQTilesetSource(BaseSource):
         self.data = {
             'data': self.gbq_data,
             'metadata': self.gbq_metadata,
-            'zoom_func': self.zoom_fn
+            'zoom_func': self._compute_zoom_func()
         }
 
     def _compute_zoom_func(self):
         return '''
             (zoom) => {
                 const zooms = %s.reverse();
-                console.log(zoom, zooms)
                 for (let i = 0; i < zooms.length; i++) {
                     if (zoom + 1 > zooms[i]) {
-                        console.log('RETURN', zooms[i])
                         return zooms[i];
                     }
                 }
-                console.log('RETURN', null)
                 return null;
             }
         ''' % str(self.zooms)

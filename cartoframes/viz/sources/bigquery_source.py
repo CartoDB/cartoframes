@@ -37,9 +37,11 @@ def _gbq_tileset_source(tileset, project, token, index_col):
         'token': token
     }
 
-    (metadata, bounds, zooms) = manager.fetch_mvt_info(tileset, index_col)
+    (metadata, bounds, zooms) = manager.fetch_mvt_info(dataset, table, index_col)
 
-    print(metadata, bounds, zooms)
+    log.info('DEBUG: metadata {}'.format(metadata))
+    log.info('DEBUG: bounds {}'.format(bounds))
+    log.info('DEBUG: zooms {}'.format(zooms))
 
     return GBQTilesetSource(data, metadata, bounds, zooms)
 
