@@ -1,8 +1,9 @@
 import uuid
 import pandas
 from geopandas import GeoDataFrame
+from carto.bq import BQUserDataset
+
 from ...observatory import Variable
-from ...services import BQUserDataset
 from ....auth import get_default_credentials
 from ....exceptions import EnrichmentError
 from ....utils.geom_utils import set_geometry, has_geometry
@@ -20,7 +21,8 @@ class EnrichmentService(object):
     """Base class for the Enrichment utility with commons auxiliary methods"""
 
     def __init__(self, credentials=None):
-        self.bq_user_dataset = BQUserDataset(credentials=credentials or get_default_credentials())
+        auth_client = _create_auth_client(credentials or get_default_credentials())
+        self.bq_user_dataset = BQUserDataset(auth_client=auth_client)
 
     @timelogger
     def _enrich(self, geom_type, dataframe, variables, geom_col=None, filters=None, aggregation=AGGREGATION_DEFAULT):
@@ -116,3 +118,7 @@ class EnrichmentService(object):
     def _get_temp_table_name(self):
         id_tablename = uuid.uuid4().hex
         return 'temp_{id}'.format(id=id_tablename)
+
+
+def _create_auth_client(credentials):
+    return credentials.get_api_key_auth_client()
