@@ -1,14 +1,13 @@
 import uuid
 import pandas
 from geopandas import GeoDataFrame
-from carto.bq import BQUserDataset
+from carto.do_dataset import DODataset
 
 from ...observatory import Variable
 from ....auth import get_default_credentials
 from ....exceptions import EnrichmentError
 from ....utils.geom_utils import set_geometry, has_geometry
 from ....utils.utils import timelogger
-
 
 _ENRICHMENT_ID = '__enrichment_id'
 _GEOM_COLUMN = '__geom_column'
@@ -22,7 +21,7 @@ class EnrichmentService(object):
 
     def __init__(self, credentials=None):
         auth_client = _create_auth_client(credentials or get_default_credentials())
-        self.bq_user_dataset = BQUserDataset(auth_client=auth_client)
+        self.bq_user_dataset = DODataset(auth_client=auth_client)
 
     @timelogger
     def _enrich(self, geom_type, dataframe, variables, geom_col=None, filters=None, aggregation=AGGREGATION_DEFAULT):
