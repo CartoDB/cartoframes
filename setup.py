@@ -25,6 +25,7 @@ def get_version():
 
 REQUIRES = [
     'appdirs>=1.4.3,<2.0',
+    'carto>=1.9.0,<2.0',
     'jinja2>=2.10.1,<3.0',
     'geopandas>=0.6.0,<1.0',
     'tqdm>=4.32.1,<5.0',
@@ -33,8 +34,7 @@ REQUIRES = [
     'google-cloud-bigquery==1.22.0',
     'google-cloud-bigquery-storage==0.7.0',
     'fastavro==0.22.7',
-    'semantic_version>=2.8.0,<3',
-    'pyrestcli==0.6.11'
+    'semantic_version>=2.8.0,<3'
 ]
 
 

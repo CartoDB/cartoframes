@@ -1,3 +1,2 @@
 # check setup.py's REQUIRES variable for requirements
--e git+https://github.com/CartoDB/carto-python.git@oleurud/ch58426/move-client-from-cf-to-carto-python#egg=carto
 .
