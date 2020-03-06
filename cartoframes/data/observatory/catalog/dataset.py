@@ -375,7 +375,7 @@ class Dataset(CatalogEntity):
         return join_gdf['id'].unique()
 
     @check_do_enabled
-    def to_csv(self, file_path, credentials=None, limit=None):
+    def to_csv(self, file_path, credentials=None, limit=None, order_by=None):
         """Download dataset data as a local csv file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
@@ -402,10 +402,10 @@ class Dataset(CatalogEntity):
             raise DOError('You are not subscribed to this Dataset yet. '
                           'Please, use the subscribe method first.')
 
-        self._download(_credentials, file_path, limit)
+        self._download(_credentials, file_path, limit, order_by)
 
     @check_do_enabled
-    def to_dataframe(self, credentials=None, limit=None):
+    def to_dataframe(self, credentials=None, limit=None, order_by=None):
         """Download dataset data as a pandas.DataFrame. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
@@ -434,7 +434,7 @@ class Dataset(CatalogEntity):
             raise DOError('You are not subscribed to this Dataset yet. '
                           'Please, use the subscribe method first.')
 
-        return self._download(_credentials, limit=limit)
+        return self._download(_credentials, limit=limit, order_by=order_by)
 
     @check_do_enabled
     def subscribe(self, credentials=None):
