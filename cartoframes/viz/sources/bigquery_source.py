@@ -1,45 +1,80 @@
-from .base_source import BaseSource
+import time
 
-SOURCE_TYPE = 'BQMVT'
+from . import BaseSource, GBQTilesetSource, GeoDataFrameSource
+from ...io.managers.gbq_manager import GBQManager
+from ...utils.logger import log
 
 
 class BigQuerySource(BaseSource):
     """BigQuerySource
 
-    Args:
-        data (dict): project, dataset, tablename, token.
-        metadata (str, optional): idProperty, properties.
-
     """
-    def __init__(self, gbq_data, gbq_metadata=None, bounds=None, zoom=None):
-        if not isinstance(gbq_data, dict):
-            raise ValueError('Wrong source input. Valid values are dict.')
+    def __new__(cls, query=None, table=None, tileset=None,
+                project=None, token=None, index_col='geoid', geom_col='geom'):
 
-        self.type = SOURCE_TYPE
-        self.gbq_data = gbq_data
-        self.gbq_metadata = gbq_metadata
-        self.bounds = bounds
-        self.zoom = zoom
+        if table:
+            query = 'SELECT * FROM `{}`'.format(table)
 
-    def get_geom_type(self):
-        # TODO: detect geometry type
-        return 'polygon'
+        if query is None and tileset is not None:
+            return _gbq_tileset_source(tileset, project, token, index_col)
+        else:
+            return _geo_data_frame_source(query, project, token, geom_col)
 
-    def compute_metadata(self, columns=None):
-        # TODO: filter metadata by columns
-        self.data = {
-            'data': self.gbq_data,
-            'metadata': self.gbq_metadata,
-            'zoom_func': self.compute_zoom_function()
+
+def _gbq_tileset_source(tileset, project, token, index_col):
+    dataset, table = tileset.split('.')
+    data = {
+        'projectId': project,
+        'datasetId': dataset,
+        'tableId': table,
+        'token': token
+    }
+    # TODO: fetch metadata
+    metadata = {
+        'idProperty': index_col,
+        'properties': {'geoid': {'type': 'category'}}
+    }
+    # TODO: fetch bounds
+    bounds = [[-120, -20], [80, 50]]
+    # TODO: fetch zoom mapping
+    zoom_fn = '''
+        (zoom) => {
+            if (zoom > 7) {
+                return 8;
+            }
+            if (zoom > 3) {
+                return 4;
+            }
+            return 0;
         }
+    '''
 
-    def compute_zoom_function(self):
-        # TODO: customize
-        return '''
-            (zoom) => {{
-                if (zoom >= {0}) {{
-                    return {0};
-                }}
-                return null;
-            }}
-        '''.format(self.zoom)
+    return GBQTilesetSource(data, metadata, bounds, zoom_fn)
+
+
+def _geo_data_frame_source(query, project, token, geom_col):
+    if not isinstance(query, str):
+        raise ValueError('Wrong source input. Valid values are str.')
+
+    manager = GBQManager(project, token=token)
+
+    if manager.estimated_data_size(query) < manager.DATA_SIZE_LIMIT:
+        log.info('Downloading data. This may take a few seconds')
+
+        begin = time.time()
+
+        df = manager.download_dataframe(query)
+
+        end = time.time()
+
+        print('DEBUG: time elapsed {:.2f}s'.format(end - begin))
+
+        return GeoDataFrameSource(df, geom_col=geom_col)
+    else:
+        raise Exception('''
+        To visualize this dataset you need to create a tileset:
+
+        >>> from cartoframes.io.gbq import create_tileset
+        >>> create_tileset(query, 'tileset_table')
+        >>> source = BigQuerySource(tileset='tileset_table')
+        ''')

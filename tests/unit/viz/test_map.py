@@ -1,6 +1,6 @@
 from cartoframes.auth import Credentials
 from cartoframes.viz import Map, Layer, popup_element, constants
-from cartoframes.viz.sources import CartoSource, DataFrameSource
+from cartoframes.viz.sources import CartoSource, GeoDataFrameSource
 
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
 from cartoframes.io.managers.context_manager import ContextManager
@@ -60,7 +60,7 @@ class TestMapInitialization(object):
 class TestMapLayer(object):
     def test_one_layer(self):
         """Map layer should be able to initialize one layer"""
-        source = DataFrameSource(build_geodataframe([-10, 0], [-10, 0]))
+        source = GeoDataFrameSource(build_geodataframe([-10, 0], [-10, 0]))
         layer = Layer(source)
         map = Map(layer)
 
@@ -76,8 +76,8 @@ class TestMapLayer(object):
 
     def test_two_layers(self):
         """Map layer should be able to initialize two layers in the correct order"""
-        source_1 = DataFrameSource(build_geodataframe([-10, 0], [-10, 0]))
-        source_2 = DataFrameSource(build_geodataframe([0, 10], [10, 0]))
+        source_1 = GeoDataFrameSource(build_geodataframe([-10, 0], [-10, 0]))
+        source_2 = GeoDataFrameSource(build_geodataframe([0, 10], [10, 0]))
         layer_1 = Layer(source_1)
         layer_2 = Layer(source_2)
         map = Map([layer_1, layer_2])
@@ -87,7 +87,7 @@ class TestMapLayer(object):
 
     def test_interactive_layer(self):
         """Map layer should indicate if the layer has interactivity configured"""
-        source_1 = DataFrameSource(build_geodataframe([-10, 0], [-10, 0], ['pop', 'name']))
+        source_1 = GeoDataFrameSource(build_geodataframe([-10, 0], [-10, 0], ['pop', 'name']))
         layer = Layer(
             source_1,
             popup_click=[
@@ -124,7 +124,7 @@ class TestMapLayer(object):
 
     def test_default_interactive_layer(self):
         """Map layer should get the default event if the interactivity is set to []"""
-        source_1 = DataFrameSource(build_geodataframe([-10, 0], [-10, 0]))
+        source_1 = GeoDataFrameSource(build_geodataframe([-10, 0], [-10, 0]))
         layer = Layer(
             source_1
         )

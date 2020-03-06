@@ -11,8 +11,8 @@ SOURCE_TYPE = 'GeoJSON'
 RFC_2822_DATETIME_FORMAT = "%a, %d %b %Y %T %z"
 
 
-class DataFrameSource(BaseSource):
-    """DataFrameSource
+class GeoDataFrameSource(BaseSource):
+    """GeoDataFrameSource
 
     Args:
         df (pandas.DataFrame, geopandas.GeoDataFrame): DataFrame or GeoDataFrame instance.
@@ -22,11 +22,11 @@ class DataFrameSource(BaseSource):
 
         DataFrame object.
 
-        >>> DataFrameSource(df, geom_col='my_geom')
+        >>> GeoDataFrameSource(df, geom_col='my_geom')
 
         GeoDataFrame object.
 
-        >>> DataFrameSource(gdf)
+        >>> GeoDataFrameSource(gdf)
 
     """
     def __init__(self, df, geom_col=None, encode_data=True):
