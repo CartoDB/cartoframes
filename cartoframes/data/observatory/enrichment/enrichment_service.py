@@ -21,7 +21,7 @@ class EnrichmentService(object):
 
     def __init__(self, credentials=None):
         auth_client = _create_auth_client(credentials or get_default_credentials())
-        self.bq_user_dataset = DODataset(auth_client=auth_client)
+        self.do_dataset = DODataset(auth_client=auth_client)
 
     @timelogger
     def _enrich(self, geom_type, dataframe, variables, geom_col=None, filters=None, aggregation=AGGREGATION_DEFAULT):
@@ -76,18 +76,18 @@ class EnrichmentService(object):
     def _upload_data(self, temp_table_name, geodataframe):
         reduced_geodataframe = geodataframe[[_ENRICHMENT_ID, _GEOM_COLUMN]]
 
-        bq_dataset = self.bq_user_dataset.name(temp_table_name) \
-                                         .column(_ENRICHMENT_ID, 'INT64') \
-                                         .column(_GEOM_COLUMN, 'GEOMETRY') \
-                                         .ttl_seconds(_TTL_IN_SECONDS)
-        bq_dataset.create()
+        dataset = self.do_dataset.name(temp_table_name) \
+            .column(_ENRICHMENT_ID, 'INT64') \
+            .column(_GEOM_COLUMN, 'GEOMETRY') \
+            .ttl_seconds(_TTL_IN_SECONDS)
+        dataset.create()
 
-        status = bq_dataset.upload_dataframe(reduced_geodataframe, _GEOM_COLUMN)
+        status = dataset.upload_dataframe(reduced_geodataframe, _GEOM_COLUMN)
 
         if status not in ['success']:
             raise EnrichmentError('Couldn\'t upload the dataframe to be enriched. The job hasn\'t finished successfuly')
 
-        return bq_dataset
+        return dataset
 
     @timelogger
     def _execute_enrichment(self, dataset, temp_table_name, geom_type, variables, filters, aggregation):
@@ -101,8 +101,7 @@ class EnrichmentService(object):
         if status not in ['success']:
             raise EnrichmentError('Couldn\'t enrich the dataframe. The job hasn\'t finished successfuly')
 
-        result = self.bq_user_dataset.name(output_name) \
-                                     .download_stream()
+        result = self.do_dataset.name(output_name).download_stream()
         enriched_dataframe = pandas.read_csv(result)
 
         return enriched_dataframe
