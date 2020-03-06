@@ -61,23 +61,21 @@ class TestDODataset(unittest.TestCase):
         sample = StringIO(CSV_SAMPLE_REDUCED)
         df = pandas.read_csv(sample)
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        self.do_dataset.name(unique_table_name) \
-                            .upload(df)
+        self.do_dataset.name(unique_table_name).upload(df)
 
     def test_can_upload_from_file_object(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         file_object = StringIO(CSV_SAMPLE_REDUCED)
-        self.do_dataset.name(unique_table_name) \
-                            .upload_file_object(file_object)
+        self.do_dataset.name(unique_table_name).upload_file_object(file_object)
 
     def test_can_import_a_dataset(self):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
         file_object = StringIO(CSV_SAMPLE_REDUCED)
 
         dataset = self.do_dataset.name(unique_table_name) \
-                                      .column(name='id', type='INT64') \
-                                      .column('geom', 'GEOMETRY') \
-                                      .ttl_seconds(30)
+            .column(name='id', type='INT64') \
+            .column('geom', 'GEOMETRY') \
+            .ttl_seconds(30)
         dataset.create()
         dataset.upload_file_object(file_object)
         job = dataset.import_dataset()
@@ -89,9 +87,9 @@ class TestDODataset(unittest.TestCase):
         file_object = StringIO(CSV_SAMPLE_REDUCED)
 
         dataset = self.do_dataset.name(unique_table_name) \
-                                      .column(name='id', type='INT64') \
-                                      .column('geom', 'GEOMETRY') \
-                                      .ttl_seconds(30)
+            .column(name='id', type='INT64') \
+            .column('geom', 'GEOMETRY') \
+            .ttl_seconds(30)
         dataset.create()
         dataset.upload_file_object(file_object)
         job = dataset.import_dataset()
@@ -104,9 +102,9 @@ class TestDODataset(unittest.TestCase):
         file_object = StringIO(CSV_SAMPLE_REDUCED)
 
         dataset = self.do_dataset.name(unique_table_name) \
-                                      .column(name='id', type='INT64') \
-                                      .column('geom', 'GEOMETRY') \
-                                      .ttl_seconds(30)
+            .column(name='id', type='INT64') \
+            .column('geom', 'GEOMETRY') \
+            .ttl_seconds(30)
         dataset.create()
         dataset.upload_file_object(file_object)
         job = dataset.import_dataset()
@@ -120,9 +118,9 @@ class TestDODataset(unittest.TestCase):
         df = pandas.read_csv(sample)
 
         dataset = self.do_dataset.name(unique_table_name) \
-                                      .column(name='id', type='INT64') \
-                                      .column('geom', 'GEOMETRY') \
-                                      .ttl_seconds(30)
+            .column(name='id', type='INT64') \
+            .column('geom', 'GEOMETRY') \
+            .ttl_seconds(30)
         dataset.create()
         status = dataset.upload_dataframe(df)
 
@@ -154,9 +152,9 @@ class TestDODataset(unittest.TestCase):
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
 
         dataset = self.do_dataset.name(unique_table_name) \
-                                      .column(name='cartodb_id', type='INT64') \
-                                      .column('the_geom', 'GEOMETRY') \
-                                      .ttl_seconds(30)
+            .column(name='cartodb_id', type='INT64') \
+            .column('the_geom', 'GEOMETRY') \
+            .ttl_seconds(30)
         dataset.create()
 
         # do a quick check on the resulting table
@@ -182,9 +180,9 @@ class TestDODataset(unittest.TestCase):
         df = pandas.read_csv(file_path('fixtures/enrichment_points.csv'))
 
         dataset = self.do_dataset.name(unique_table_name) \
-                                      .column(ENRICHMENT_ID, 'INT64') \
-                                      .column(GEOM_COLUMN, 'GEOMETRY') \
-                                      .ttl_seconds(3600)
+            .column(ENRICHMENT_ID, 'INT64') \
+            .column(GEOM_COLUMN, 'GEOMETRY') \
+            .ttl_seconds(3600)
         dataset.create()
         status = dataset.upload_dataframe(df)
 
@@ -197,8 +195,7 @@ class TestDODataset(unittest.TestCase):
 
         self.assertIn(status, ['success'])
 
-        result = self.do_dataset.name(output_name) \
-                                     .download_stream()
+        result = self.do_dataset.name(output_name).download_stream()
         df = pandas.read_csv(result)
 
         self.assertIn(variables[0], df.columns)
@@ -219,9 +216,9 @@ class TestDODataset(unittest.TestCase):
         df = pandas.read_csv(file_path('fixtures/enrichment_polygons.csv'))
 
         dataset = self.do_dataset.name(unique_table_name) \
-                                      .column(ENRICHMENT_ID, 'INT64') \
-                                      .column(GEOM_COLUMN, 'GEOMETRY') \
-                                      .ttl_seconds(3600)
+            .column(ENRICHMENT_ID, 'INT64') \
+            .column(GEOM_COLUMN, 'GEOMETRY') \
+            .ttl_seconds(3600)
         dataset.create()
         status = dataset.upload_dataframe(df)
 
@@ -234,8 +231,7 @@ class TestDODataset(unittest.TestCase):
 
         self.assertIn(status, ['success'])
 
-        result = self.do_dataset.name(output_name) \
-                                     .download_stream()
+        result = self.do_dataset.name(output_name).download_stream()
         df = pandas.read_csv(result)
 
         self.assertIn(variables[0], df.columns)
