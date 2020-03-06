@@ -109,7 +109,7 @@ class CatalogEntity(ABC):
 
         return self.id
 
-    def _download(self, credentials, file_path=None, limit=None):
+    def _download(self, credentials, file_path=None, limit=None, order_by=None):
         if not self._is_available_in('bq'):
             raise DOError('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
@@ -126,6 +126,8 @@ class CatalogEntity(ABC):
         column_names = bq_client.get_table_column_names(project, dataset, table)
 
         query = 'SELECT * FROM `{}`'.format(full_remote_table_name)
+        if order_by:
+            query = '{} ORDER BY {}'.format(query, order_by)
         if limit:
             query = '{} LIMIT {}'.format(query, limit)
 
