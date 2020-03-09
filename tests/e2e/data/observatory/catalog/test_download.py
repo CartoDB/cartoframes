@@ -85,7 +85,7 @@ class TestDownload(object):
         assert df.equals(expected_df)
 
     def test_geography_to_csv_public(self):
-        public_geography.to_csv(self.tmp_file, self.credentials, limit=PUBLIC_LIMIT)
+        public_geography.to_csv(self.tmp_file, self.credentials, limit=PUBLIC_LIMIT, order_by='geoid')
 
         assert os.path.isfile(self.tmp_file)
 
@@ -95,7 +95,7 @@ class TestDownload(object):
         assert df.equals(expected_df)
 
     def test_geography_to_csv_private(self):
-        private_geography.to_csv(self.tmp_file, self.credentials, limit=PRIVATE_LIMIT)
+        private_geography.to_csv(self.tmp_file, self.credentials, limit=PRIVATE_LIMIT, order_by='geoid')
 
         assert os.path.isfile(self.tmp_file)
 
@@ -105,7 +105,7 @@ class TestDownload(object):
         assert df.equals(expected_df)
 
     def test_geography_to_dataframe_public(self):
-        df = public_geography.to_dataframe(self.credentials, limit=PUBLIC_LIMIT)
+        df = public_geography.to_dataframe(self.credentials, limit=PUBLIC_LIMIT, order_by='geoid')
         df.to_csv(self.tmp_file, index=False)
 
         df = pandas.read_csv(self.tmp_file)
@@ -114,7 +114,7 @@ class TestDownload(object):
         assert df.equals(expected_df)
 
     def test_geography_to_dataframe_private(self):
-        df = private_geography.to_dataframe(self.credentials, limit=PRIVATE_LIMIT)
+        df = private_geography.to_dataframe(self.credentials, limit=PRIVATE_LIMIT, order_by='geoid')
         df.to_csv(self.tmp_file, index=False)
 
         df = pandas.read_csv(self.tmp_file)
