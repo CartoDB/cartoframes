@@ -561,3 +561,8 @@ def get_parameter_from_decorator(parameter_name, decorated_function, *args, **kw
             parameter = None
 
     return parameter
+
+
+def read_file(filepath):
+    with open(filepath, 'r') as file:
+        return file.read()

@@ -1,52 +1,44 @@
 """Functions to interact with the Google BigQuery platform"""
 
-import time
-
 from .managers.gbq_manager import GBQManager
-from ..viz.sources import GeoDataFrameSource, GBQTilesetSource
-from ..utils.utils import is_sql_query
+from ..utils.utils import create_hash, is_sql_query
 from ..utils.logger import log
 
 
-def create_tileset(data, name=None, project=None, credentials=None, index_col='geoid', geom_col='geom'):
-    raise NotImplementedError()
+def create_tileset(source_table, name=None, project=None, credentials=None, token=None, index_col='geoid',
+                   geom_col='geom', bbox=None, zooms=None, min_max=False, clean=False):
+    prepare_table = _get_prepate_table_name(name)
+    manager = GBQManager(project=project, credentials=credentials, token=token)
 
+    log.info('Preparing input data into {} table'.format(prepare_table))
+    manager.prepare_input_data(source_table, index_col, geom_col, prepare_table)
 
-def prepare_gbq_source(data, project=None, token=None, force_df=False, force_mvt=False):
-    if not isinstance(data, str):
-        raise ValueError('Wrong source input. Valid values are str.')
+    log.info('Creating empty tileset')
+    bbox_, quadkey_zoom = manager.create_empty_tileset(prepare_table, bbox, name)
 
-    query = _get_gbq_query(data)
-    manager = GBQManager(project, token)
+    log.info('Inserting data 1/2')
+    manager.insert_geojson_vt_data(prepare_table, bbox_, quadkey_zoom, zooms, name)
 
-    if not force_mvt and (force_df or manager.estimated_data_size(query) < manager.DATA_SIZE_LIMIT):
-        log.info('Downloading data. This may take a few seconds')
+    log.info('Inserting data 2/2')
+    manager.insert_wasm_data(prepare_table, bbox_, quadkey_zoom, zooms, name)
 
-        begin = time.time()
+    if clean:
+        log.info('Cleaning temporal data from the {} table'.format(prepare_table))
+        manager.clean_prepare_input_data(prepare_table)
 
-        df = manager.download_dataframe(query)
+    log.info('Generating metadata')
+    available_zooms = manager.get_available_zooms(name)
+    input_schema = manager.get_input_schema(source_table, index_col, geom_col, min_max)
+    manager.update_tileset_metadata(source_table, available_zooms, quadkey_zoom, bbox_, input_schema, name)
 
-        end = time.time()
-
-        print('DEBUG: time elapsed {:.2f}s'.format(end - begin))
-
-        return GeoDataFrameSource(df, geom_col='geom')
-    else:
-        log.info('Preparing data. This may take a few minutes')
-
-        begin = time.time()
-
-        data = manager.fetch_mvt_data(query)
-        metadata = manager.fetch_mvt_metadata(query)
-        bounds, zoom = manager.compute_bounds(query)
-        manager.trigger_mvt_generation(query, zoom)
-
-        end = time.time()
-
-        print('DEBUG: time elapsed {:.2f}s'.format(end - begin))
-
-        return GBQTilesetSource(data, metadata, bounds, zoom)
+    log.info('Tileset {} created'.format(name))
 
 
 def _get_gbq_query(source):
     return source if is_sql_query(source) else 'SELECT * FROM `{}`'.format(source)
+
+
+def _get_prepate_table_name(tileset_name):
+    project, dataset, table = GBQManager.split_table_name(tileset_name)
+    tileset_prefix = '{}.{}'.format(project, dataset) if project else dataset
+    return '{}.mvt_prepare_{}'.format(tileset_prefix, create_hash(table))

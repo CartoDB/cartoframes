@@ -4,6 +4,7 @@
 sandbox/
 
 # Misc
+credentials/
 creds.json
 credentials.json
 
