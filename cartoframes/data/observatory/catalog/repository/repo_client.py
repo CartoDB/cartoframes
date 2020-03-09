@@ -2,7 +2,7 @@ import os
 
 from carto.do_dataset import DODataset
 
-from .....auth import Credentials, get_default_credentials
+from .....auth import Credentials
 
 DEFAULT_USER = 'do-metadata'
 
@@ -10,13 +10,9 @@ DEFAULT_USER = 'do-metadata'
 class RepoClient:
 
     def __init__(self):
-        self._do_dataset = None
-        self._user_credentials = None
-
-    def set_user_credentials(self, credentials):
-        auth_client = credentials.get_api_key_auth_client()
-        self._do_dataset = DODataset(auth_client=auth_client)
-        self._user_credentials = credentials
+        default_credentials = Credentials(DEFAULT_USER)
+        default_auth_client = default_credentials.get_api_key_auth_client()
+        self._defautl_do_dataset = DODataset(auth_client=default_auth_client)
 
     def get_countries(self, filters=None):
         return self._get_entity('countries', filters)
@@ -70,8 +66,4 @@ class RepoClient:
             return self._fetch_entity(os.path.join(entity, filter_id))
 
     def _fetch_entity(self, entity, filters=None):
-        if self._do_dataset:
-            return self._do_dataset.metadata(entity, filters)
-
-    def _get_user_credentials(self):
-        return self._user_credentials or get_default_credentials() or Credentials(DEFAULT_USER)
+        return self._defautl_do_dataset.metadata(entity, filters)
