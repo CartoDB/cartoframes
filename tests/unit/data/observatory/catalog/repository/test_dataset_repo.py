@@ -100,7 +100,7 @@ class TestDatasetRepo(object):
         dataset = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with({'id': requested_id})
+        mocked_repo.assert_called_once_with({'id': [requested_id]})
         assert dataset == test_dataset1
 
     @patch.object(RepoClient, 'get_datasets')
@@ -125,7 +125,7 @@ class TestDatasetRepo(object):
         dataset = repo.get_by_id(requested_slug)
 
         # Then
-        mocked_repo.assert_called_once_with({'slug': requested_slug})
+        mocked_repo.assert_called_once_with({'slug': [requested_slug]})
         assert dataset == test_dataset1
 
     @patch.object(RepoClient, 'get_datasets')

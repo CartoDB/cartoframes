@@ -78,7 +78,7 @@ class TestCategoryRepo(object):
         category = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with({'id': requested_id})
+        mocked_repo.assert_called_once_with({'id': [requested_id]})
         assert category == test_category1
 
     @patch.object(RepoClient, 'get_categories')
