@@ -2,7 +2,7 @@ from ..legend import Legend
 
 
 def color_bins_legend(title=None, description=None, footer=None, prop='color',
-                      variable=None, dynamic=True):
+                      variable=None, dynamic=True, ascending=False):
     """Helper function for quickly creating a color bins legend.
 
     Args:
@@ -21,6 +21,9 @@ def color_bins_legend(title=None, description=None, footer=None, prop='color',
         dynamic (boolean, optional):
             Update and render the legend depending on viewport changes.
             Defaults to ``True``.
+        ascending (boolean, optional):
+            If set to ``True`` the values are sorted in ascending order.
+            Defaults to ``False``.
 
     Returns:
         cartoframes.viz.legend.Legend
@@ -33,4 +36,4 @@ def color_bins_legend(title=None, description=None, footer=None, prop='color',
         ...     dynamic=False)
 
     """
-    return Legend('color-bins', title, description, footer, prop, variable, dynamic)
+    return Legend('color-bins', title, description, footer, prop, variable, dynamic, ascending)

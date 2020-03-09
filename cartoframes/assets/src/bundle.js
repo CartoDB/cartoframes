@@ -119,9 +119,8 @@ var init = (function () {
     const stacktrace$ = document.getElementById('error-stacktrace');
 
     errors$[0].innerHTML = e.name;
-    errors$[1].innerHTML = e.name;
-    errors$[2].innerHTML = e.type;
-    errors$[3].innerHTML = e.message.replace(e.type, '');
+    errors$[1].innerHTML = e.type;
+    errors$[2].innerHTML = e.message.replace(e.type, '');
 
     error$.style.visibility = 'visible';
 
@@ -407,8 +406,9 @@ var init = (function () {
       const othersLabel = 'Others';   // TODO: i18n
       const prop = legend.prop;
       const dynamic = legend.dynamic;
+      const order = legend.ascending ? 'ASC' : 'DESC';
       const variable = legend.variable;
-      const config = { othersLabel, variable };
+      const config = { othersLabel, variable, order };
       const options = { format, config, dynamic };
 
       if (legend.type.startsWith('size-continuous')) {
@@ -429,7 +429,7 @@ var init = (function () {
 
   function GeoJSON(layer) {
     const options = JSON.parse(JSON.stringify(layer.options));
-    const data = _decodeJSONData(layer.data);
+    const data = _decodeJSONData(layer.data, layer.encode_data);
 
     return new carto.source.GeoJSON(data, options);
   }
@@ -451,8 +451,20 @@ var init = (function () {
     return new carto.source.MVT(layer.data.file, JSON.parse(layer.data.metadata));
   }
 
-  function _decodeJSONData(b64Data) {
-    return JSON.parse(pako.inflate(atob(b64Data), { to: 'string' }));
+  function _decodeJSONData(data, encodeData) {
+    try {
+      if (encodeData) {
+        const decodedJSON = pako.inflate(atob(data), { to: 'string' });
+        return JSON.parse(decodedJSON);
+      } else {
+        return JSON.parse(data);
+      }
+    } catch(error) {
+      throw new Error(`
+      Error: "${error}". CARTOframes is not able to parse your local data because it is too large.
+      Please, disable the data compresion with encode_data=False in your Layer class.
+    `);
+    }
   }
 
   const factory = new SourceFactory();
@@ -577,6 +589,10 @@ var init = (function () {
       mapIndex
     );
 
+    if (settings.layer_selector) {
+      addLayersSelector(layers.reverse(), mapLayers.reverse());
+    }
+
     setInteractiveLayers(map, layers, mapLayers);
 
     return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
@@ -610,6 +626,21 @@ var init = (function () {
     if (interactiveLayers && interactiveLayers.length > 0) {
       setInteractivity(map, interactiveLayers, interactiveMapLayers);
     }
+  }
+
+  function addLayersSelector(layers, mapLayers) {
+    const layerSelector$ = document.querySelector(`#layer-selector`);
+      const layersInfo = mapLayers.map((layer, index) => {
+        return {
+          title: layers[index].title || `Layer ${index}`,
+          id: layer.id,
+          checked: true
+        };
+      });
+    
+    const layerSelector = new AsBridge.VL.Layers(layerSelector$, carto, layersInfo, mapLayers);
+    
+    layerSelector.build();
   }
 
   function createMap(container, basemapStyle, bounds, accessToken) {
