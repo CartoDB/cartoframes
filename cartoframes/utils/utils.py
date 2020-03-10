@@ -148,10 +148,6 @@ def gen_variable_name(value):
     return 'v' + get_hash(value)[:6]
 
 
-def gen_column_name(value, operation=False):
-    return value if operation else '$' + value
-
-
 def get_hash(text):
     h = hashlib.sha1()
     h.update(text.encode('utf-8'))
@@ -401,7 +397,7 @@ def extract_viz_columns(viz):
     """Extract columns ($name) in viz"""
     columns = []
     viz_nocomments = remove_comments(viz)
-    viz_columns = re.findall(r'\$([A-Za-z0-9_]+)', viz_nocomments)
+    viz_columns = re.findall(r'prop\(\'(.*)\'\)', viz_nocomments)
     if viz_columns is not None:
         columns += viz_columns
     return list(set(columns))

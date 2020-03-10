@@ -1,4 +1,3 @@
-
 from .. import defaults
 
 
@@ -14,3 +13,7 @@ def get_value(value, default, geom_type=None):
             return defaults.STYLE.get(geom_type, {}).get(default)
         return default
     return value
+
+
+def prop(value):
+    return 'prop(\'{}\')'.format(value)
