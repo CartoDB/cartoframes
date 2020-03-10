@@ -1,4 +1,4 @@
-from .utils import serialize_palette, get_value
+from .utils import serialize_palette, get_value, prop
 from ..style import Style
 from ..legends import color_bins_legend
 from ..widgets import histogram_widget
@@ -49,12 +49,12 @@ def color_bins_style(value, method='quantiles', bins=5, breaks=None, palette=Non
         default_palette = 'purpor'
         breaks = list(breaks)
 
-    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
+    animation_filter = 'animation(linear({}), 20, fade(1,1))'.format(prop(animate)) if animate else '1'
 
     data = {
         'point': {
-            'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                func, value, breaks or bins,
+            'color': 'opacity(ramp({0}({1}, {2}), {3}),{4})'.format(
+                func, prop(value), breaks or bins,
                 serialize_palette(palette) or default_palette,
                 get_value(opacity, 1)),
             'width': get_value(size, 'width', 'point'),
@@ -63,16 +63,16 @@ def color_bins_style(value, method='quantiles', bins=5, breaks=None, palette=Non
             'filter': animation_filter
         },
         'line': {
-            'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                func, value, breaks or bins,
+            'color': 'opacity(ramp({0}({1}, {2}), {3}),{4})'.format(
+                func, prop(value), breaks or bins,
                 serialize_palette(palette) or default_palette,
                 get_value(opacity, 1)),
             'width': get_value(size, 'width', 'line'),
             'filter': animation_filter
         },
         'polygon': {
-            'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
-                func, value, breaks or bins,
+            'color': 'opacity(ramp({0}({1}, {2}), {3}), {4})'.format(
+                func, prop(value), breaks or bins,
                 serialize_palette(palette) or default_palette,
                 get_value(opacity, 0.9)),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),

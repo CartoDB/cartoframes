@@ -394,7 +394,7 @@ def create_hash(value):
 
 
 def extract_viz_columns(viz):
-    """Extract columns ($name) in viz"""
+    """Extract columns prop('name') in viz"""
     columns = []
     viz_nocomments = remove_comments(viz)
     viz_columns = re.findall(r'prop\(\'(.*)\'\)', viz_nocomments)

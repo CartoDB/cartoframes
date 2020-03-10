@@ -1,4 +1,4 @@
-from .utils import get_value
+from .utils import get_value, prop
 from ..constants import CLUSTER_KEYS, CLUSTER_OPERATIONS
 from ..style import Style
 from ..legends import size_continuous_legend
@@ -80,7 +80,7 @@ def _get_cluster_operation(operation, value):
     _check_valid_operation(operation)
 
     if value is not None and operation != 'count':
-        return '{0}(${1})'.format(CLUSTER_OPERATIONS[operation], value)
+        return '{0}({1})'.format(CLUSTER_OPERATIONS[operation], prop(value))
 
     return '{0}()'.format(CLUSTER_OPERATIONS[operation])
 
