@@ -24,9 +24,9 @@ MAX_QUADKEY_ZOOM = 20
 GEOJSON_VT_BASE_ZOOM = 12
 DEFAULT_ZOOMS = [0, 4, 8, 12, 14]
 
-TILE_BUFFER = 256
 TILE_EXTENT_WASM = 512
 TILE_EXTENT_GEOJSON_VT = 4096
+TILE_BUFFER = 256
 
 # https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#TableFieldSchema.FIELDS.type
 BIG_QUERY_NUMBER_TYPES = ['INTEGER', 'INT64', 'FLOAT', 'FLOAT64']
@@ -166,13 +166,14 @@ class GBQManager:
 
     def insert_geojson_vt_data(self, prepare_table, bbox, quadkey_zoom, zooms, output_table):
         zooms_ = zooms if zooms else DEFAULT_ZOOMS
+        geojson_vt_base_zooms = [GEOJSON_VT_BASE_ZOOM]
         geojson_vt_zooms = [zoom - GEOJSON_VT_BASE_ZOOM for zoom in zooms_ if zoom >= GEOJSON_VT_BASE_ZOOM]
 
         insert_geojson_vt_query = read_file(TILESET_SQL_FILEPATHS['insert_geojson_vt'])
         insert_geojson_vt_query = insert_geojson_vt_query.format(
             prepare_table=prepare_table, xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3],
-            geojson_vt_base_zoom=GEOJSON_VT_BASE_ZOOM, geojson_vt_zooms=geojson_vt_zooms, quadkey_zoom=quadkey_zoom,
-            tile_buffer=TILE_BUFFER, tile_extent=TILE_EXTENT_GEOJSON_VT, output_table=output_table)
+            geojson_vt_base_zooms=geojson_vt_base_zooms, geojson_vt_zooms=geojson_vt_zooms, quadkey_zoom=quadkey_zoom,
+            tile_extent=TILE_EXTENT_GEOJSON_VT, tile_buffer=TILE_BUFFER, output_table=output_table)
 
         self.execute_query(insert_geojson_vt_query)
 
@@ -183,7 +184,7 @@ class GBQManager:
         insert_wasm_query = read_file(TILESET_SQL_FILEPATHS['insert_wasm'])
         insert_wasm_query = insert_wasm_query.format(
             prepare_table=prepare_table, xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3], wasm_zooms=wasm_zooms,
-            quadkey_zoom=quadkey_zoom, tile_buffer=TILE_BUFFER, tile_extent=TILE_EXTENT_WASM, output_table=output_table)
+            quadkey_zoom=quadkey_zoom, tile_extent=TILE_EXTENT_WASM, tile_buffer=TILE_BUFFER, output_table=output_table)
 
         self.execute_query(insert_wasm_query)
 
