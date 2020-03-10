@@ -25,7 +25,7 @@ Try it Out
 
 If you do not have an API key, you can still use cartoframes for creating maps locally.
 
-    The example context only provides read access, so not all cartoframes features are available. For full access, `Start a free 14 day trial <https://carto.com/signup>`__ or get free access with a `GitHub Student Developer Pack <https://education.github.com/pack>`__.
+    The example context only provides read access, so not all cartoframes features are available. For full access, `Start a free trial <https://carto.com/signup>`__ or get free access with a `GitHub Student Developer Pack <https://education.github.com/pack>`__.
 
 Features
 ========
