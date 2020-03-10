@@ -16,4 +16,4 @@ def get_value(value, default, geom_type=None):
 
 
 def prop(value):
-    return 'prop(\'{}\')'.format(value)
+    return "prop('{}')".format(value)

@@ -397,7 +397,7 @@ def extract_viz_columns(viz):
     """Extract columns prop('name') in viz"""
     columns = []
     viz_nocomments = remove_comments(viz)
-    viz_columns = re.findall(r'prop\(\'(.*)\'\)', viz_nocomments)
+    viz_columns = re.findall(r'prop\(\'([^\)]*)\'\)', viz_nocomments)
     if viz_columns is not None:
         columns += viz_columns
     return list(set(columns))
