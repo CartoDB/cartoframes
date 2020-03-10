@@ -1,4 +1,5 @@
 from .legend import Legend
+from .constants import SINGLE_LEGEND
 
 
 class LegendList:
@@ -7,6 +8,7 @@ class LegendList:
             legends (list, Legend): List of legends for a layer.
 
     """
+
     def __init__(self, legends=None, default_legend=None, geom_type=None):
         self._legends = self._init_legends(legends, default_legend, geom_type)
 
@@ -16,7 +18,7 @@ class LegendList:
             for legend in legends:
                 if isinstance(legend, Legend):
                     if legend._type == 'default' or legend._type == 'basic':
-                        legend._type = 'color-category-' + layer_type
+                        legend._type = _get_simple_legend_geometry_type(layer_type)
                     if legend._type == 'default' and default_legend:
                         legend._prop = default_legend._prop
                     legend_list.append(legend)
@@ -33,3 +35,7 @@ class LegendList:
                 legends_info.append(legend.get_info())
 
         return legends_info
+
+
+def _get_simple_legend_geometry_type(layer_type):
+    return SINGLE_LEGEND + '-' + layer_type
