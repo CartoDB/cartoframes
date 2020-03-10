@@ -20,8 +20,7 @@ class EnrichmentService(object):
     """Base class for the Enrichment utility with commons auxiliary methods"""
 
     def __init__(self, credentials=None):
-        auth_client = _create_auth_client(credentials or get_default_credentials())
-        self.do_dataset = DODataset(auth_client=auth_client)
+        self.auth_client = _create_auth_client(credentials or get_default_credentials())
 
     @timelogger
     def _enrich(self, geom_type, dataframe, variables, geom_col=None, filters=None, aggregation=AGGREGATION_DEFAULT):
@@ -76,7 +75,7 @@ class EnrichmentService(object):
     def _upload_data(self, temp_table_name, geodataframe):
         reduced_geodataframe = geodataframe[[_ENRICHMENT_ID, _GEOM_COLUMN]]
 
-        dataset = self.do_dataset.name(temp_table_name) \
+        dataset = DODataset(auth_client=self.auth_client).name(temp_table_name) \
             .column(_ENRICHMENT_ID, 'INT64') \
             .column(_GEOM_COLUMN, 'GEOMETRY') \
             .ttl_seconds(_TTL_IN_SECONDS)
@@ -101,7 +100,7 @@ class EnrichmentService(object):
         if status not in ['success']:
             raise EnrichmentError('Couldn\'t enrich the dataframe. The job hasn\'t finished successfuly')
 
-        result = self.do_dataset.name(output_name).download_stream()
+        result = DODataset(auth_client=self.auth_client).name(output_name).download_stream()
         enriched_dataframe = pandas.read_csv(result)
 
         return enriched_dataframe
