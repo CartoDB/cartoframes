@@ -317,6 +317,19 @@ def is_sql_query(data):
     return isinstance(data, str) and re.match(r'^\s*(WITH|SELECT)\s+', data, re.IGNORECASE)
 
 
+def get_query_from_table(source):
+    source_is_query = is_sql_query(source)
+
+    if source_is_query and source.endswith(';'):
+        return source[:-1]
+
+    elif source_is_query:
+        return source
+
+    else:
+        return 'SELECT * FROM `{}`'.format(source)
+
+
 def is_geojson_file(data):
     return re.match(r'^.*\.(geojson|json)\s*$', data, re.IGNORECASE)
 

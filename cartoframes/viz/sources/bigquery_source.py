@@ -103,6 +103,7 @@ def _geo_data_frame_source(query, project, token, geom_col):
 
             >>> from cartoframes.io.gbq import create_tileset
             >>> from cartoframes.viz import BigQuerySource
+            >>>
             >>> create_tileset('input_table', 'tileset_table', project='project', credentials=credentials)
             >>> source = BigQuerySource(tileset='tileset_table', project='project', credentials=credentials)
         """)

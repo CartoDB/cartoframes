@@ -11,7 +11,7 @@ from google.oauth2.credentials import Credentials
 from pyproj import Proj, transform
 
 from ...utils.logger import log
-from ...utils.utils import read_file
+from ...utils.utils import get_query_from_table, read_file
 
 PROJECT_KEY = 'GOOGLE_CLOUD_PROJECT'
 
@@ -57,7 +57,7 @@ class GBQManager:
         self.project = project if project else os.environ[PROJECT_KEY]
         self.client = bigquery.Client(project=project, credentials=self.credentials)
 
-    def _execute_query(self, query):
+    def execute_query(self, query):
         query_job = self.client.query(query)
         return query_job.result()
 
@@ -99,20 +99,30 @@ class GBQManager:
         metadata_string = table_object.description
         return json.loads(metadata_string)
 
-    def prepare_input_data(self, source_table, index_col, geom_col, prepare_table):
+    def get_big_query_table_schema(self, table):
+        _, dataset, table_ = self.split_table_name(table)
+        table_object = self.get_table_object(dataset, table_)
+        return table_object.schema
+
+    def get_big_query_query_schema(self, query):
+        result = self.execute_query('{} LIMIT 1;'.format(query))
+        return result.schema
+
+    def prepare_input_data(self, source_query, index_col, geom_col, prepare_table):
         prepare_query = read_file(TILESET_SQL_FILEPATHS['prepare'])
         prepare_query = prepare_query.format(
-            input_table=source_table, index_col=index_col, geom_col=geom_col, prepare_partitions=PREPARE_PARTITIONS,
+            source_query=source_query, index_col=index_col, geom_col=geom_col, prepare_partitions=PREPARE_PARTITIONS,
             prepare_table=prepare_table)
 
-        self._execute_query(prepare_query)
+        self.execute_query(prepare_query)
 
     def create_empty_tileset(self, prepare_table, bbox, output_table):
+        # Get bounding box if not specified
         if not bbox:
             bbox_query = read_file(TILESET_SQL_FILEPATHS['bounding_box'])
             bbox_query = bbox_query.format(prepare_table=prepare_table)
 
-            bbox_result = self._execute_query(bbox_query)
+            bbox_result = self.execute_query(bbox_query)
 
             for row in bbox_result:
                 bbox_3857 = [row['xmin'], row['ymin'], row['xmax'], row['ymax']]
@@ -125,7 +135,7 @@ class GBQManager:
 
             bbox = [xmin, ymin, xmax, ymax]
 
-        # Create
+        # Guess best quadkey
         quadkey_zoom = 1
         while True:
             min_tile = mercantile.tile(bbox[0], bbox[3], quadkey_zoom)  # min_tile in quadkey is upper left
@@ -150,7 +160,7 @@ class GBQManager:
             min_decimal_quadkey=min_decimal_quadkey, max_decimal_quadkey=max_decimal_quadkey,
             step_decimal_queadkey=step_decimal_queadkey, output_table=output_table)
 
-        self._execute_query(create_table_query)
+        self.execute_query(create_table_query)
 
         return bbox, quadkey_zoom
 
@@ -164,7 +174,7 @@ class GBQManager:
             geojson_vt_base_zoom=GEOJSON_VT_BASE_ZOOM, geojson_vt_zooms=geojson_vt_zooms, quadkey_zoom=quadkey_zoom,
             tile_buffer=TILE_BUFFER, tile_extent=TILE_EXTENT_GEOJSON_VT, output_table=output_table)
 
-        self._execute_query(insert_geojson_vt_query)
+        self.execute_query(insert_geojson_vt_query)
 
     def insert_wasm_data(self, prepare_table, bbox, quadkey_zoom, zooms, output_table):
         zooms_ = zooms if zooms else DEFAULT_ZOOMS
@@ -175,19 +185,19 @@ class GBQManager:
             prepare_table=prepare_table, xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3], wasm_zooms=wasm_zooms,
             quadkey_zoom=quadkey_zoom, tile_buffer=TILE_BUFFER, tile_extent=TILE_EXTENT_WASM, output_table=output_table)
 
-        self._execute_query(insert_wasm_query)
+        self.execute_query(insert_wasm_query)
 
     def clean_prepare_input_data(self, prepare_table):
         clean_query = read_file(TILESET_SQL_FILEPATHS['clean'])
         clean_query = clean_query.format(prepare_table=prepare_table)
 
-        self._execute_query(clean_query)
+        self.execute_query(clean_query)
 
     def get_available_zooms(self, output_table):
         available_zooms_query = read_file(TILESET_SQL_FILEPATHS['available_zooms'])
         available_zooms_query = available_zooms_query.format(output_table=output_table)
 
-        available_zooms_result = self._execute_query(available_zooms_query)
+        available_zooms_result = self.execute_query(available_zooms_query)
         for row in available_zooms_result:
             available_zooms = [{
                 'zoom': zoom,
@@ -196,15 +206,20 @@ class GBQManager:
 
         return available_zooms
 
-    def get_input_schema(self, input_table, index_col, geom_col, min_max):
-        _, dataset, table = self.split_table_name(input_table)
-        table_object = self.get_table_object(dataset, table)
-        fields = table_object.schema
+    def get_input_schema(self, source, index_col, geom_col, min_max):
+        source_query = get_query_from_table(source)
+
+        if source_query in (source, source[:-1]):  # `source` is a SQL query
+            fields = self.get_big_query_query_schema(source_query)
+
+        else:  # `source` is a table
+            fields = self.get_big_query_table_schema(source)
 
         min_max_names = []
         min_max_select = []
         schema = {}
 
+        # Getting and formatting schema, and the query for min and max values
         for field in fields:
             if field.name == geom_col:
                 continue
@@ -221,9 +236,10 @@ class GBQManager:
                 'mode': field.mode
             }
 
+        # Obtaining min and max values for integers and floats
         if min_max:
-            min_max_query = 'SELECT {} FROM `{}`;'.format(', '.join(min_max_select), input_table)
-            min_max_result = self._execute_query(min_max_query)
+            min_max_query = 'SELECT {} FROM ({}) q;'.format(', '.join(min_max_select), source_query)
+            min_max_result = self.execute_query(min_max_query)
             for row in min_max_result:
                 for name in min_max_names:
                     schema[name]['min'] = row['{}_min'.format(name)]
@@ -231,10 +247,9 @@ class GBQManager:
 
         return schema
 
-    def update_tileset_metadata(self, input_table, available_zooms, quadkey_zoom, bbox, input_schema, output_table):
+    def update_tileset_metadata(self, source, available_zooms, quadkey_zoom, bbox, input_schema, output_table):
         metadata_dict = {
-            'input_table': input_table,
-            'output_table': output_table,
+            'source': source,
             'available_zooms': available_zooms,
             'geojson_vt_base_zoom': GEOJSON_VT_BASE_ZOOM,
             'quadkey_zoom': quadkey_zoom,
@@ -242,7 +257,7 @@ class GBQManager:
             'properties': input_schema
         }
 
-        _, dataset, table = self.split_table_name(input_table)
+        _, dataset, table = self.split_table_name(output_table)
         table_object = self.get_table_object(dataset, table)
 
         table_object.description = json.dumps(metadata_dict)
