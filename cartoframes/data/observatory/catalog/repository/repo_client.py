@@ -1,125 +1,83 @@
 import os
-import requests
-from urllib.parse import urlsplit, urlunsplit, SplitResult
-from .....auth import Credentials, get_default_credentials
+
+from carto.do_dataset import DODataset
+
+from .....auth import Credentials
 
 DEFAULT_USER = 'do-metadata'
-API_BASE_PATH = 'api/v4/data/observatory'
-REQUEST_VERIFY_SSL = True
 
 
 class RepoClient:
 
-    __instance = None
-
     def __init__(self):
-        self._user_credentials = None
+        self._do_dataset = None
+        default_credentials = Credentials(DEFAULT_USER)
+        default_auth_client = default_credentials.get_api_key_auth_client()
+        self._defautl_do_dataset = DODataset(auth_client=default_auth_client)
 
     def set_user_credentials(self, credentials):
-        self._user_credentials = credentials
+        if credentials is not None:
+            auth_client = credentials.get_api_key_auth_client()
+            self._do_dataset = DODataset(auth_client=auth_client)
+        else:
+            self._do_dataset = None
+
+    def reset_user_credentials(self):
+        self._do_dataset = None
 
     def get_countries(self, filters=None):
-        filters = filters or {}
-        api_path = 'metadata/countries'
-        id_filter = filters.get('id')
-        if id_filter:
-            return self._get_entities_by_id(api_path, id_filter)
-        else:
-            return self._make_request(api_path, filters)
+        return self._get_entity('countries', filters)
 
     def get_categories(self, filters=None):
-        filters = filters or {}
-        api_path = 'metadata/categories'
-        id_filter = filters.get('id')
-        if id_filter:
-            return self._get_entities_by_id(api_path, id_filter)
-        else:
-            return self._make_request(api_path, filters)
+        return self._get_entity('categories', filters)
 
     def get_providers(self, filters=None):
-        filters = filters or {}
-        api_path = 'metadata/providers'
-        provider_id = filters.get('id')
-        if provider_id:
-            return self._get_entities_by_id(api_path, provider_id)
-        else:
-            return self._make_request(api_path, filters)
-
-    def get_variables(self, filters=None):
-        filters = filters or {}
-        api_path = 'metadata/variables'
-        id_filter = filters.get('id') or filters.get('slug')
-        if id_filter:
-            return self._get_entities_by_id(api_path, id_filter)
-        else:
-            dataset_id = filters.get('dataset')  # Mandatory filter
-            api_path = 'metadata/datasets/{}/variables'.format(dataset_id)
-            return self._make_request(api_path, filters)
-
-    def get_variables_groups(self, filters=None):
-        filters = filters or {}
-        api_path = 'metadata/variables_groups'
-        id_filter = filters.get('id') or filters.get('slug')
-        if id_filter:
-            api_path = 'metadata/variables_groups'
-            return self._get_entities_by_id(api_path, id_filter)
-        else:
-            dataset_id = filters.get('dataset')  # Mandatory filter
-            api_path = 'metadata/datasets/{}/variables_groups'.format(dataset_id)
-            return self._make_request(api_path, filters)
-
-    def get_geographies(self, filters=None):
-        filters = filters or {}
-        api_path = 'metadata/geographies'
-        id_filter = filters.get('id') or filters.get('slug')
-        if id_filter:
-            return self._get_entities_by_id(api_path, id_filter)
-        else:
-            return self._make_request(api_path, filters)
+        return self._get_entity('providers', filters)
 
     def get_datasets(self, filters=None):
-        filters = filters or {}
-        api_path = 'metadata/datasets'
-        id_filter = filters.get('id') or filters.get('slug')
-        if id_filter:
-            return self._get_entities_by_id(api_path, id_filter)
+        return self._get_entity('datasets', filters, use_slug=True)
+
+    def get_geographies(self, filters=None):
+        return self._get_entity('geographies', filters, use_slug=True)
+
+    def get_variables(self, filters=None):
+        filter_id = self._get_filter_id(filters, use_slug=True)
+        if filter_id:
+            return self._fetch_entity_id('variables', filter_id)
         else:
-            return self._make_request(api_path, filters)
+            entity = 'datasets/{}/variables'.format(filters.pop('dataset'))
+            return self._fetch_entity(entity, filters)
 
-    def _get_entities_by_id(self, api_base_path, ids):
-        # ids can be an ID or a list of them
-        entities = []
-        entity_ids = ids if isinstance(ids, list) else [ids]
+    def get_variables_groups(self, filters=None):
+        filter_id = self._get_filter_id(filters, use_slug=True)
+        if filter_id:
+            return self._fetch_entity_id('variables_groups', filter_id)
+        else:
+            entity = 'datasets/{0}/variables_groups'.format(filters.pop('dataset'))
+            return self._fetch_entity(entity, filters)
 
-        for entity_id in entity_ids:
-            api_path = os.path.join(api_base_path, entity_id)
-            entity = self._make_request(api_path)
-            if entity is not None:
-                entities.append(entity)
+    def _get_filter_id(self, filters, use_slug=False):
+        if isinstance(filters, dict):
+            filter_id = filters.get('id')
+            if not filter_id and use_slug:
+                filter_id = filters.get('slug')
+            return filter_id
 
-        return entities
+    def _get_entity(self, entity, filters=None, use_slug=False):
+        filter_id = self._get_filter_id(filters, use_slug)
+        if filter_id:
+            return self._fetch_entity_id(entity, filter_id)
+        else:
+            return self._fetch_entity(entity, filters)
 
-    def _make_request(self, api_path, filters=None):
-        request_url = self._build_url(api_path, filters)
-        req = requests.get(request_url, verify=REQUEST_VERIFY_SSL)
-        return req.json()
+    def _fetch_entity_id(self, entity, filter_id):
+        if isinstance(filter_id, list):
+            return [self._fetch_entity(os.path.join(entity, _id)) for _id in filter_id]
+        else:
+            return self._fetch_entity(os.path.join(entity, filter_id))
 
-    def _build_url(self, api_path, filters):
-        credentials = self._get_user_credentials()
-        filters = filters or {}
-
-        url_params = ['api_key={}'.format(credentials.api_key)]
-        for key, value in filters.items():
-            url_params.append('{}={}'.format(key, value))
-
-        url = urlsplit(credentials.base_url)
-
-        path = os.path.join(url.path, API_BASE_PATH, api_path)
-        query = '&'.join(url_params)
-
-        return urlunsplit(SplitResult(
-            scheme=url.scheme, netloc=url.netloc, path=path, query=query, fragment=url.fragment
-        ))
-
-    def _get_user_credentials(self):
-        return self._user_credentials or get_default_credentials() or Credentials(DEFAULT_USER)
+    def _fetch_entity(self, entity, filters=None):
+        if self._do_dataset:
+            return self._do_dataset.metadata(entity, filters)
+        else:
+            return self._defautl_do_dataset.metadata(entity, filters)

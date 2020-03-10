@@ -99,7 +99,7 @@ class TestGeographyRepo(object):
         geography = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with({'id': requested_id})
+        mocked_repo.assert_called_once_with({'id': [requested_id]})
         assert isinstance(geography, Geography)
         assert geography == test_geography1
 
@@ -125,7 +125,7 @@ class TestGeographyRepo(object):
         geography = repo.get_by_id(requested_slug)
 
         # Then
-        mocked_repo.assert_called_once_with({'slug': requested_slug})
+        mocked_repo.assert_called_once_with({'slug': [requested_slug]})
         assert geography == test_geography1
 
     @patch.object(RepoClient, 'get_geographies')

@@ -21,7 +21,6 @@ class GeographyRepository(EntityRepository):
         super(GeographyRepository, self).__init__(_GEOGRAPHY_ID_FIELD, _ALLOWED_FILTERS, _GEOGRAPHY_SLUG_FIELD)
 
     def get_all(self, filters=None, credentials=None):
-        # If credentials are provided, then we only want the user's subscriptions:
         if credentials is not None:
             ids = get_subscription_ids(credentials)
             if len(ids) == 0:
@@ -30,7 +29,11 @@ class GeographyRepository(EntityRepository):
                 filters = filters or {}
                 filters['id'] = ids
 
-        return self._get_filtered_entities(filters)
+        # Using user credentials to fetch entities
+        self.client.set_user_credentials(credentials)
+        entities = self._get_filtered_entities(filters)
+        self.client.reset_user_credentials()
+        return entities
 
     @classmethod
     def _get_entity_class(cls):

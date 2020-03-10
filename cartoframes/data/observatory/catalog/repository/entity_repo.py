@@ -65,9 +65,9 @@ class EntityRepository(ABC):
 
     def _get_id_filter(self, id_):
         if self.slug_field is not None and is_slug_value(id_):
-            return {self.slug_field: id_}
+            return {self.slug_field: [id_]}
 
-        return {self.id_field: id_}
+        return {self.id_field: [id_]}
 
     def _get_id_list_filters(self, id_list):
         if self.slug_field is None:

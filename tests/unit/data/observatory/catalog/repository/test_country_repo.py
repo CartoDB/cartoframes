@@ -77,7 +77,7 @@ class TestCountryRepo(object):
         country = repo.get_by_id(requested_iso_code)
 
         # Then
-        mocked_repo.assert_called_once_with({'id': requested_iso_code})
+        mocked_repo.assert_called_once_with({'id': [requested_iso_code]})
         assert isinstance(country, Country)
         assert country == test_country1
 

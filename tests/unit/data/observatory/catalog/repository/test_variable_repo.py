@@ -80,7 +80,7 @@ class TestVariableRepo(object):
         variable = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with({'id': requested_id})
+        mocked_repo.assert_called_once_with({'id': [requested_id]})
         assert isinstance(variable, Variable)
         assert variable == test_variable1
 
@@ -106,7 +106,7 @@ class TestVariableRepo(object):
         variable = repo.get_by_id(requested_slug)
 
         # Then
-        mocked_repo.assert_called_once_with({'slug': requested_slug})
+        mocked_repo.assert_called_once_with({'slug': [requested_slug]})
         assert variable == test_variable1
 
     @patch.object(RepoClient, 'get_variables')
