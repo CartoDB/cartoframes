@@ -20,7 +20,7 @@ INSERT INTO `{output_table}` (z, x, y, mvt, quadkey)
     inter AS (
         SELECT b.__z AS z, b.__x AS x, b.__y AS y, a.__geoid AS geoid
             FROM `{prepare_table}` a, tiles b
-            WHERE (a.__visible_zoom <= (b.__z - LOG(4096 / 512, 2))
+            WHERE (a.__visible_zoom <= (b.__z - LOG(4096 / {tile_extent}, 2))
                 AND NOT ((a.__xmin > b.__xmax) OR (a.__xmax < b.__xmin) OR (a.__ymax < b.__ymin) OR (a.__ymin > b.__ymax)))
     ),
     nested_tiles AS (

@@ -26,7 +26,7 @@ INSERT INTO `{output_table}` (z, x, y, mvt, quadkey)
                     carto_tiler.ST_AsMVTGeom(a.__geom, b.__z, b.__x, b.__y, {tile_extent}, 2) AS geom
                 FROM tiles b
                     JOIN `{prepare_table}` a
-                        ON (a.__visible_zoom <= (b.__z - LOG(4096 / 512, 2))
+                        ON (a.__visible_zoom <= (b.__z - LOG(4096 / {tile_extent}, 2))
                             AND NOT ((a.__xmin > b.__xmax) OR (a.__xmax < b.__xmin) OR (a.__ymax < b.__ymin) OR (a.__ymin > b.__ymax)))
             ) __subquery
             WHERE geom IS NOT NULL
