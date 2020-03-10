@@ -6,6 +6,8 @@ from ..subscriptions import get_subscription_ids
 from .constants import COUNTRY_FILTER, CATEGORY_FILTER, PROVIDER_FILTER
 from .entity_repo import EntityRepository
 
+GEOGRAPHY_TYPE = 'geography'
+
 _GEOGRAPHY_ID_FIELD = 'id'
 _GEOGRAPHY_SLUG_FIELD = 'slug'
 _ALLOWED_FILTERS = [COUNTRY_FILTER, CATEGORY_FILTER, PROVIDER_FILTER]
@@ -22,7 +24,7 @@ class GeographyRepository(EntityRepository):
 
     def get_all(self, filters=None, credentials=None):
         if credentials is not None:
-            ids = get_subscription_ids(credentials)
+            ids = get_subscription_ids(credentials, GEOGRAPHY_TYPE)
             if len(ids) == 0:
                 return []
             elif len(ids) > 0:

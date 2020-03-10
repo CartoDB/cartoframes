@@ -2,6 +2,7 @@ from .constants import CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVID
 from ..subscriptions import get_subscription_ids
 from .entity_repo import EntityRepository
 
+DATASET_TYPE = 'dataset'
 
 _DATASET_ID_FIELD = 'id'
 _DATASET_SLUG_FIELD = 'slug'
@@ -19,7 +20,7 @@ class DatasetRepository(EntityRepository):
 
     def get_all(self, filters=None, credentials=None):
         if credentials is not None:
-            ids = get_subscription_ids(credentials)
+            ids = get_subscription_ids(credentials, DATASET_TYPE)
             if len(ids) == 0:
                 return []
             elif len(ids) > 0:

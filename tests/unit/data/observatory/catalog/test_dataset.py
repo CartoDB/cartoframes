@@ -378,7 +378,7 @@ class TestDataset(object):
         dataset.subscribe(credentials)
 
         # Then
-        mock_subscription_ids.assert_called_once_with(credentials)
+        mock_subscription_ids.assert_called_once_with(credentials, 'dataset')
         mock_display_form.assert_called_once_with(expected_id, 'dataset', credentials)
         assert not mock_display_message.called
 
@@ -397,7 +397,7 @@ class TestDataset(object):
         dataset.subscribe(credentials)
 
         # Then
-        mock_subscription_ids.assert_called_once_with(credentials)
+        mock_subscription_ids.assert_called_once_with(credentials, 'dataset')
         mock_display_message.assert_called_once_with(expected_id, 'dataset')
         assert not mock_display_form.called
 
@@ -414,7 +414,7 @@ class TestDataset(object):
         dataset.subscribe()
 
         # Then
-        mock_subscription_ids.assert_called_once_with(expected_credentials)
+        mock_subscription_ids.assert_called_once_with(expected_credentials, 'dataset')
         mock_display_form.assert_called_once_with(db_dataset1['id'], 'dataset', expected_credentials)
 
     def test_dataset_subscribe_wrong_credentials(self):

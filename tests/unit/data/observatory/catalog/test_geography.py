@@ -327,7 +327,7 @@ class TestGeography(object):
         geography.subscribe(credentials)
 
         # Then
-        mock_subscription_ids.assert_called_once_with(credentials)
+        mock_subscription_ids.assert_called_once_with(credentials, 'geography')
         mock_display_form.assert_called_once_with(expected_id, 'geography', credentials)
         assert not mock_display_message.called
 
@@ -346,7 +346,7 @@ class TestGeography(object):
         geography.subscribe(credentials)
 
         # Then
-        mock_subscription_ids.assert_called_once_with(credentials)
+        mock_subscription_ids.assert_called_once_with(credentials, 'geography')
         mock_display_message.assert_called_once_with(expected_id, 'geography')
         assert not mock_display_form.called
 
@@ -364,7 +364,7 @@ class TestGeography(object):
         geography.subscribe()
 
         # Then
-        mock_subscription_ids.assert_called_once_with(expected_credentials)
+        mock_subscription_ids.assert_called_once_with(expected_credentials, 'geography')
         mock_display_form.assert_called_once_with(db_geography1['id'], 'geography', expected_credentials)
 
     def test_geography_subscribe_wrong_credentials(self):
