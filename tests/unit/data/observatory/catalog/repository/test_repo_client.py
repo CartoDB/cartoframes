@@ -144,3 +144,16 @@ class TestRepoClient:
 
         fetch_entity_mock.assert_any_call('geographies/slug_1')
         fetch_entity_mock.assert_any_call('geographies/slug_2')
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_fetch_entity_id_list(self, fetch_entity_mock):
+        fetch_entity_mock.side_effect = lambda _id: None if _id == 'datasets/x' else _id
+        repo = RepoClient()
+        filters = {'id': ['x', 'a', 'b', 'x', 'c', 'x']}
+        datasets = repo.get_datasets(filters)
+
+        fetch_entity_mock.assert_any_call('datasets/a')
+        fetch_entity_mock.assert_any_call('datasets/b')
+        fetch_entity_mock.assert_any_call('datasets/c')
+        fetch_entity_mock.assert_any_call('datasets/x')
+        assert datasets == ['datasets/a', 'datasets/b', 'datasets/c']

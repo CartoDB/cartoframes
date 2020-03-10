@@ -72,7 +72,7 @@ class RepoClient:
 
     def _fetch_entity_id(self, entity, filter_id):
         if isinstance(filter_id, list):
-            return [self._fetch_entity(os.path.join(entity, _id)) for _id in filter_id]
+            return list(filter(None, [self._fetch_entity(os.path.join(entity, _id)) for _id in filter_id]))
         else:
             return self._fetch_entity(os.path.join(entity, filter_id))
 
