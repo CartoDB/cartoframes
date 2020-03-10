@@ -1,4 +1,5 @@
 from .widget import Widget
+from .styles.utils import prop
 
 
 class WidgetList:
@@ -41,6 +42,6 @@ class WidgetList:
         output = {}
         for widget in self._widgets:
             if widget._variable_name:
-                output[widget._variable_name] = '$' + widget._value if widget.has_bridge() else widget._value
+                output[widget._variable_name] = prop(widget._value) if widget.has_bridge() else widget._value
 
         return output
