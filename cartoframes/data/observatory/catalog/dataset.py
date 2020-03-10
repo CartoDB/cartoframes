@@ -4,7 +4,7 @@ import geopandas as gpd
 from shapely import wkt
 
 from .entity import CatalogEntity
-from .repository.dataset_repo import get_dataset_repo
+from .repository.dataset_repo import get_dataset_repo, DATASET_TYPE
 from .repository.geography_repo import get_geography_repo
 from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
@@ -16,8 +16,6 @@ from . import utils
 from ....utils.logger import log
 from ....utils.utils import get_credentials, check_credentials, check_do_enabled
 from ....exceptions import DOError
-
-DATASET_TYPE = 'dataset'
 
 
 class Dataset(CatalogEntity):
@@ -468,7 +466,7 @@ class Dataset(CatalogEntity):
 
         """
         _credentials = get_credentials(credentials)
-        _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials, DATASET_TYPE)
 
         if self.id in _subscribed_ids:
             utils.display_existing_subscription_message(self.id, DATASET_TYPE)

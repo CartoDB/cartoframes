@@ -1,14 +1,12 @@
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
-from .repository.geography_repo import get_geography_repo
+from .repository.geography_repo import get_geography_repo, GEOGRAPHY_TYPE
 from .repository.constants import GEOGRAPHY_FILTER
 from . import subscription_info
 from . import subscriptions
 from . import utils
 from ....utils.utils import get_credentials, check_credentials, check_do_enabled
 from ....exceptions import DOError
-
-GEOGRAPHY_TYPE = 'geography'
 
 
 class Geography(CatalogEntity):
@@ -270,7 +268,7 @@ class Geography(CatalogEntity):
 
         """
         _credentials = get_credentials(credentials)
-        _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials, GEOGRAPHY_TYPE)
 
         if self.id in _subscribed_ids:
             utils.display_existing_subscription_message(self.id, GEOGRAPHY_TYPE)

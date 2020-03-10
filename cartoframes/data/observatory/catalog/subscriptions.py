@@ -41,10 +41,9 @@ class Subscriptions:
         return self._subscriptions_geographies
 
 
-def get_subscription_ids(credentials):
-    subscriptions = fetch_subscriptions(credentials)
-    subscriptions_ids = list(map(lambda pd: pd.id, subscriptions))
-    return subscriptions_ids
+def get_subscription_ids(credentials, stype=None):
+    subs = fetch_subscriptions(credentials)
+    return [s.id for s in subs if stype is None or stype == s.type]
 
 
 def fetch_subscriptions(credentials):
