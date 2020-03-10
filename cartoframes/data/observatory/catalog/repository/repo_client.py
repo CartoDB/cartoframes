@@ -13,7 +13,7 @@ class RepoClient:
         self._do_dataset = None
         default_credentials = Credentials(DEFAULT_USER)
         default_auth_client = default_credentials.get_api_key_auth_client()
-        self._defautl_do_dataset = DODataset(auth_client=default_auth_client)
+        self._default_do_dataset = DODataset(auth_client=default_auth_client)
 
     def set_user_credentials(self, credentials):
         if credentials is not None:
@@ -80,4 +80,4 @@ class RepoClient:
         if self._do_dataset:
             return self._do_dataset.metadata(entity, filters)
         else:
-            return self._defautl_do_dataset.metadata(entity, filters)
+            return self._default_do_dataset.metadata(entity, filters)
