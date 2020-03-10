@@ -28,4 +28,3 @@ def pytest_unconfigure(config):
     """
     called before test process is exited.
     """
-    setup_metrics(True)
