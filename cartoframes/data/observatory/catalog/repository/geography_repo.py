@@ -1,4 +1,3 @@
-from pandas import DataFrame
 from geopandas import GeoDataFrame
 
 from .....utils.geom_utils import set_geometry
