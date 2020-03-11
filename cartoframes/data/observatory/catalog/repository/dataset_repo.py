@@ -1,5 +1,4 @@
 from .constants import CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER
-from ..subscriptions import get_subscription_ids
 from .entity_repo import EntityRepository
 
 DATASET_TYPE = 'dataset'
@@ -20,12 +19,9 @@ class DatasetRepository(EntityRepository):
 
     def get_all(self, filters=None, credentials=None):
         if credentials is not None:
-            ids = get_subscription_ids(credentials, DATASET_TYPE)
-            if len(ids) == 0:
+            filters = self._add_subscription_ids(filters, credentials, DATASET_TYPE)
+            if filters is None:
                 return []
-            elif len(ids) > 0:
-                filters = filters or {}
-                filters['id'] = ids
 
         # Using user credentials to fetch entities
         self.client.set_user_credentials(credentials)
