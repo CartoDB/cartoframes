@@ -8,8 +8,11 @@ from cartoframes.data.observatory.catalog.repository.country_repo import Country
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.repository.category_repo import CategoryRepository
 from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
-from .examples import test_country1, test_datasets, test_countries, test_geographies, db_country1, test_country2, \
+from cartoframes.data.observatory.catalog.repository.constants import COUNTRY_FILTER
+from .examples import (
+    test_country1, test_datasets, test_countries, test_geographies, db_country1, test_country2,
     db_country2, test_categories
+)
 
 
 class TestCountry(object):
@@ -36,7 +39,7 @@ class TestCountry(object):
         datasets = test_country1.datasets
 
         # Then
-        mocked_repo.assert_called_once_with({'country_id': test_country1.id})
+        mocked_repo.assert_called_once_with({COUNTRY_FILTER: test_country1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
@@ -50,7 +53,7 @@ class TestCountry(object):
         geographies = test_country1.geographies
 
         # Then
-        mocked_repo.assert_called_once_with({'country_id': test_country1.id})
+        mocked_repo.assert_called_once_with({COUNTRY_FILTER: test_country1.id})
         assert isinstance(geographies, list)
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
@@ -64,7 +67,7 @@ class TestCountry(object):
         categories = test_country1.categories
 
         # Then
-        mocked_repo.assert_called_once_with({'country_id': test_country1.id})
+        mocked_repo.assert_called_once_with({COUNTRY_FILTER: test_country1.id})
         assert isinstance(categories, list)
         assert isinstance(categories, CatalogList)
         assert categories == test_categories

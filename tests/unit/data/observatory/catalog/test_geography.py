@@ -10,8 +10,11 @@ from cartoframes.data.observatory.catalog.geography import Geography
 from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.subscription_info import SubscriptionInfo
-from .examples import test_geography1, test_geographies, test_datasets, db_geography1, \
+from cartoframes.data.observatory.catalog.repository.constants import GEOGRAPHY_FILTER
+from .examples import (
+    test_geography1, test_geographies, test_datasets, db_geography1,
     test_geography2, db_geography2, test_subscription_info
+)
 from .mocks import BigQueryClientMock
 
 
@@ -39,7 +42,7 @@ class TestGeography(object):
         datasets = test_geography1.datasets
 
         # Then
-        mocked_repo.assert_called_once_with({'geography_id': test_geography1.id})
+        mocked_repo.assert_called_once_with({GEOGRAPHY_FILTER: test_geography1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
@@ -324,7 +327,7 @@ class TestGeography(object):
         geography.subscribe(credentials)
 
         # Then
-        mock_subscription_ids.assert_called_once_with(credentials)
+        mock_subscription_ids.assert_called_once_with(credentials, 'geography')
         mock_display_form.assert_called_once_with(expected_id, 'geography', credentials)
         assert not mock_display_message.called
 
@@ -343,7 +346,7 @@ class TestGeography(object):
         geography.subscribe(credentials)
 
         # Then
-        mock_subscription_ids.assert_called_once_with(credentials)
+        mock_subscription_ids.assert_called_once_with(credentials, 'geography')
         mock_display_message.assert_called_once_with(expected_id, 'geography')
         assert not mock_display_form.called
 
@@ -361,7 +364,7 @@ class TestGeography(object):
         geography.subscribe()
 
         # Then
-        mock_subscription_ids.assert_called_once_with(expected_credentials)
+        mock_subscription_ids.assert_called_once_with(expected_credentials, 'geography')
         mock_display_form.assert_called_once_with(db_geography1['id'], 'geography', expected_credentials)
 
     def test_geography_subscribe_wrong_credentials(self):

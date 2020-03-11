@@ -13,9 +13,9 @@ def file_path(path):
 
 def clean_gdf(gdf, sort_column=None):
     if sort_column:
-        return gdf.sort_index(axis=1).sort_values(by=sort_column).round(5).reset_index(drop=True)
+        return gdf.sort_index(axis=1).sort_values(by=sort_column).round(3).reset_index(drop=True)
     else:
-        return gdf.sort_index(axis=1).round(5).reset_index(drop=True)
+        return gdf.sort_index(axis=1).round(3).reset_index(drop=True)
 
 
 public_variable1 = Variable.get('poverty_a86da569')   # FLOAT, AVG
@@ -28,15 +28,17 @@ private_variable3 = Variable.get('BLOCKGROUP_f1b3a750')  # STRING, NONE
 
 class TestEnrichment(object):
     def setup_method(self):
-        if (os.environ.get('APIKEY') and os.environ.get('USERNAME')):
+        if (os.environ.get('APIKEY') and os.environ.get('USERNAME') and os.environ.get('USERURL')):
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
+            self.base_url = os.environ['USERURL']
         else:
             creds = json.loads(open('tests/e2e/secret.json').read())
             self.apikey = creds['APIKEY']
             self.username = creds['USERNAME']
+            self.base_url = creds['USERURL']
 
-        self.credentials = Credentials(self.username, self.apikey)
+        self.credentials = Credentials(self.username, self.apikey, self.base_url)
         self.enrichment = Enrichment(self.credentials)
 
         self.points_gdf = read_file(file_path('files/points.geojson'))

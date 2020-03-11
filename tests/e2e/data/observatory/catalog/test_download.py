@@ -19,7 +19,6 @@ private = 'carto-do.ags.demographics_retailpotential_usa_blockgroup_2015_yearly_
 private_dataset = Dataset.get(private)
 private_geography = Geography.get(private_dataset.geography)
 
-
 PUBLIC_LIMIT = 2
 PRIVATE_LIMIT = 1
 
@@ -33,12 +32,14 @@ class TestDownload(object):
         if (os.environ.get('APIKEY') and os.environ.get('USERNAME')):
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
+            self.base_url = os.environ['USERURL']
         else:
             creds = json.loads(open('tests/e2e/secret.json').read())
             self.apikey = creds['APIKEY']
             self.username = creds['USERNAME']
+            self.base_url = creds['USERURL']
 
-        self.credentials = Credentials(self.username, self.apikey)
+        self.credentials = Credentials(username=self.username, api_key=self.apikey, base_url=self.base_url)
 
         self.tmp_file = file_path('tmp_file.csv')
 
@@ -85,7 +86,7 @@ class TestDownload(object):
         assert df.equals(expected_df)
 
     def test_geography_to_csv_public(self):
-        public_geography.to_csv(self.tmp_file, self.credentials, limit=PUBLIC_LIMIT)
+        public_geography.to_csv(self.tmp_file, self.credentials, limit=PUBLIC_LIMIT, order_by='geoid')
 
         assert os.path.isfile(self.tmp_file)
 
@@ -95,7 +96,7 @@ class TestDownload(object):
         assert df.equals(expected_df)
 
     def test_geography_to_csv_private(self):
-        private_geography.to_csv(self.tmp_file, self.credentials, limit=PRIVATE_LIMIT)
+        private_geography.to_csv(self.tmp_file, self.credentials, limit=PRIVATE_LIMIT, order_by='geoid')
 
         assert os.path.isfile(self.tmp_file)
 
@@ -105,7 +106,7 @@ class TestDownload(object):
         assert df.equals(expected_df)
 
     def test_geography_to_dataframe_public(self):
-        df = public_geography.to_dataframe(self.credentials, limit=PUBLIC_LIMIT)
+        df = public_geography.to_dataframe(self.credentials, limit=PUBLIC_LIMIT, order_by='geoid')
         df.to_csv(self.tmp_file, index=False)
 
         df = pandas.read_csv(self.tmp_file)
@@ -114,7 +115,7 @@ class TestDownload(object):
         assert df.equals(expected_df)
 
     def test_geography_to_dataframe_private(self):
-        df = private_geography.to_dataframe(self.credentials, limit=PRIVATE_LIMIT)
+        df = private_geography.to_dataframe(self.credentials, limit=PRIVATE_LIMIT, order_by='geoid')
         df.to_csv(self.tmp_file, index=False)
 
         df = pandas.read_csv(self.tmp_file)

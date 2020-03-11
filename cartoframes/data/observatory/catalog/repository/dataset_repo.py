@@ -1,11 +1,11 @@
-from .constants import CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER
+from .constants import CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER
 from .entity_repo import EntityRepository
-from ..entity import CatalogList
 
+DATASET_TYPE = 'dataset'
 
 _DATASET_ID_FIELD = 'id'
 _DATASET_SLUG_FIELD = 'slug'
-_ALLOWED_FILTERS = [CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER]
+_ALLOWED_FILTERS = [CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER]
 
 
 def get_dataset_repo():
@@ -18,10 +18,16 @@ class DatasetRepository(EntityRepository):
         super(DatasetRepository, self).__init__(_DATASET_ID_FIELD, _ALLOWED_FILTERS, _DATASET_SLUG_FIELD)
 
     def get_all(self, filters=None, credentials=None):
+        if credentials is not None:
+            filters = self._add_subscription_ids(filters, credentials, DATASET_TYPE)
+            if filters is None:
+                return []
+
+        # Using user credentials to fetch entities
         self.client.set_user_credentials(credentials)
-        response = self._get_filtered_entities(filters)
-        self.client.set_user_credentials(None)
-        return response
+        entities = self._get_filtered_entities(filters)
+        self.client.reset_user_credentials()
+        return entities
 
     @classmethod
     def _get_entity_class(cls):
@@ -55,11 +61,6 @@ class DatasetRepository(EntityRepository):
             'summary_json': self._normalize_field(row, 'summary_json'),
             'available_in': self._normalize_field(row, 'available_in')
         }
-
-    def get_datasets_for_geographies(self, geographies):
-        rows = self.client.get_datasets_for_geographies(geographies)
-        normalized_data = [self._get_entity_class()(self._map_row(row)) for row in rows]
-        return CatalogList(normalized_data)
 
 
 _REPO = DatasetRepository()

@@ -5,7 +5,7 @@ from .io.carto import read_carto, to_carto, has_table, delete_table, rename_tabl
 
 
 # Check installed packages versions
-check_package('carto', '>=1.8.3')
+check_package('carto', '>=1.9.1')
 check_package('pandas', '>=0.23.0')
 check_package('geopandas', '>=0.6.0')
 
