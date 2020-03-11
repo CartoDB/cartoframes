@@ -68,6 +68,8 @@ LEGEND_TYPES = [
     'size-continuous-point'
 ]
 
+SINGLE_LEGEND = 'color-category'
+
 WIDGET_TYPES = [
     'basic',
     'default',
