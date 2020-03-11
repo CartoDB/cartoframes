@@ -1,4 +1,4 @@
-from .utils import get_value
+from .utils import get_value, prop
 from ..style import Style
 from ..legends import size_continuous_legend
 from ..widgets import histogram_widget
@@ -30,35 +30,35 @@ def size_continuous_style(value, size_range=None, range_min=None, range_max=None
         cartoframes.viz.style.Style
 
     """
-    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
+    animation_filter = 'animation(linear({}), 20, fade(1,1))'.format(prop(animate)) if animate else '1'
 
     if range_min is None:
-        range_min = 'globalMIN(${0})'.format(value)
+        range_min = 'globalMIN({0})'.format(prop(value))
 
     if range_max is None:
-        range_max = 'globalMAX(${0})'.format(value)
+        range_max = 'globalMAX({0})'.format(prop(value))
 
     data = {
         'point': {
-            '@size_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                value, range_min, range_max, size_range or [2, 40]),
+            '@size_value': 'ramp(linear({0}, {1}, {2}), {3})'.format(
+                prop(value), range_min, range_max, size_range or [2, 40]),
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, '#FFB927'),
                 get_value(opacity, 0.8)),
-            'width': 'ramp(linear(sqrt(${0}), sqrt({1}), sqrt({2})), {3})'.format(
-                value, range_min, range_max, size_range or [2, 40]),
+            'width': 'ramp(linear(sqrt({0}), sqrt({1}), sqrt({2})), {3})'.format(
+                prop(value), range_min, range_max, size_range or [2, 40]),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
             'filter': animation_filter
         },
         'line': {
-            '@size_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                value, range_min, range_max, size_range or [1, 10]),
+            '@size_value': 'ramp(linear({0}, {1}, {2}), {3})'.format(
+                prop(value), range_min, range_max, size_range or [1, 10]),
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'line'),
                 get_value(opacity, 0.8)),
-            'width': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                value, range_min, range_max, size_range or [1, 10]),
+            'width': 'ramp(linear({0}, {1}, {2}), {3})'.format(
+                prop(value), range_min, range_max, size_range or [1, 10]),
             'filter': animation_filter
         }
     }

@@ -1,4 +1,5 @@
 from .popup import Popup
+from .styles.utils import prop
 
 
 class PopupList:
@@ -43,8 +44,7 @@ class PopupList:
                     popup_elements.append(
                         Popup('click',
                               value=popup.get('value'),
-                              title=popup.get('title'),
-                              operation=popup.get('operation', False))
+                              title=popup.get('title'))
                     )
 
         if hover_popup_elements is not None:
@@ -58,8 +58,7 @@ class PopupList:
                     popup_elements.append(
                         Popup('hover',
                               value=popup.get('value'),
-                              title=popup.get('title'),
-                              operation=popup.get('operation', False))
+                              title=popup.get('title'))
                     )
 
         return popup_elements
@@ -78,6 +77,6 @@ class PopupList:
 
         for popup in self._popups:
             if popup:
-                popups_variables[popup.variable.get('name')] = popup.variable.get('value')
+                popups_variables[popup.variable.get('name')] = prop(popup.variable.get('value'))
 
         return popups_variables

@@ -1,4 +1,4 @@
-from .utils import get_value
+from .utils import get_value, prop
 from ..style import Style
 from ..widgets import time_series_widget
 from ..popups import popup_element
@@ -64,4 +64,4 @@ def animation_style(value, duration=20, fade_in=1, fade_out=1, color=None,
 
 
 def _animation_filter(value, duration, fade):
-    return 'animation(linear(${0}), {1}, fade{2})'.format(value, duration, fade)
+    return 'animation(linear({0}), {1}, fade{2})'.format(prop(value), duration, fade)
