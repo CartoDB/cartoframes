@@ -62,9 +62,7 @@ class GeographyRepository(EntityRepository):
 
     def get_geographies_gdf(self):
         data = self.client.get_geographies({'get_geoms_coverage': True})
-        df = DataFrame(data)
-        gdf = GeoDataFrame(df, crs='epsg:4326')
-
+        gdf = GeoDataFrame(data, crs='epsg:4326')
         set_geometry(gdf, col='geom_coverage', inplace=True)
         return gdf
 
