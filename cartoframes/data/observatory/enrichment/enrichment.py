@@ -83,8 +83,7 @@ class Enrichment(EnrichmentService):
             ...     geom_col='the_geom')
 
         """
-        dataframe_enriched = self._enrich(GEOM_TYPE_POINTS, dataframe, variables, geom_col, filters or {})
-        return dataframe_enriched
+        return self._enrich(GEOM_TYPE_POINTS, dataframe, variables, geom_col, filters)
 
     def enrich_polygons(self, dataframe, variables, geom_col=None, filters=None, aggregation=AGGREGATION_DEFAULT):
         """Enrich your polygons `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset` in
@@ -245,6 +244,4 @@ class Enrichment(EnrichmentService):
             ...     geom_col='the_geom')
 
         """
-        dataframe_enriched = self._enrich(GEOM_TYPE_POLYGONS, dataframe, variables,
-                                          geom_col, filters or {}, aggregation)
-        return dataframe_enriched
+        return self._enrich(GEOM_TYPE_POLYGONS, dataframe, variables, geom_col, filters, aggregation)
