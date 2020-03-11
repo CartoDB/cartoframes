@@ -24,8 +24,7 @@ class EnrichmentService(object):
 
     @timelogger
     def _enrich(self, geom_type, dataframe, variables, geom_col=None, filters=None, aggregation=AGGREGATION_DEFAULT):
-        if filters is None:
-            filters = {}
+        filters = filters or {}
         variable_ids = self._prepare_variables(variables)
         geodataframe = self._prepare_data(dataframe, geom_col)
         temp_table_name = self._get_temp_table_name()
@@ -36,9 +35,7 @@ class EnrichmentService(object):
                                                       variable_ids,
                                                       filters,
                                                       aggregation)
-        result = self._merge(geodataframe, enriched_dataframe)
-
-        return result
+        return self._merge(geodataframe, enriched_dataframe)
 
     def _prepare_variables(self, variables):
         _variables = []
@@ -66,7 +63,6 @@ class EnrichmentService(object):
 
         # Add extra columns for the enrichment
         geodataframe[_ENRICHMENT_ID] = range(geodataframe.shape[0])
-        # TODO: rename strategy
         geodataframe[_GEOM_COLUMN] = geodataframe.geometry
 
         return geodataframe

@@ -1,8 +1,6 @@
-from pandas import DataFrame
 from geopandas import GeoDataFrame
 
 from .....utils.geom_utils import set_geometry
-from ..subscriptions import get_subscription_ids
 from .constants import COUNTRY_FILTER, CATEGORY_FILTER, PROVIDER_FILTER
 from .entity_repo import EntityRepository
 
@@ -24,12 +22,9 @@ class GeographyRepository(EntityRepository):
 
     def get_all(self, filters=None, credentials=None):
         if credentials is not None:
-            ids = get_subscription_ids(credentials, GEOGRAPHY_TYPE)
-            if len(ids) == 0:
+            filters = self._add_subscription_ids(filters, credentials, GEOGRAPHY_TYPE)
+            if filters is None:
                 return []
-            elif len(ids) > 0:
-                filters = filters or {}
-                filters['id'] = ids
 
         # Using user credentials to fetch entities
         self.client.set_user_credentials(credentials)
@@ -66,9 +61,7 @@ class GeographyRepository(EntityRepository):
 
     def get_geographies_gdf(self):
         data = self.client.get_geographies({'get_geoms_coverage': True})
-        df = DataFrame(data)
-        gdf = GeoDataFrame(df, crs='epsg:4326')
-
+        gdf = GeoDataFrame(data, crs='epsg:4326')
         set_geometry(gdf, col='geom_coverage', inplace=True)
         return gdf
 

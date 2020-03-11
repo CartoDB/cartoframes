@@ -32,7 +32,7 @@ class TestDatasetRepo(object):
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
-    @patch('cartoframes.data.observatory.catalog.repository.dataset_repo.get_subscription_ids')
+    @patch('cartoframes.data.observatory.catalog.repository.entity_repo.get_subscription_ids')
     def test_get_all_credentials(self, mocked_get_subscription_ids, mocked_get_datasets):
         # Given
         mocked_get_subscription_ids.return_value = [db_dataset1['id'], db_dataset2['id']]

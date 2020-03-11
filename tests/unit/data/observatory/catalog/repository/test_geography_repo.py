@@ -32,7 +32,7 @@ class TestGeographyRepo(object):
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch('cartoframes.data.observatory.catalog.repository.geography_repo.get_subscription_ids')
+    @patch('cartoframes.data.observatory.catalog.repository.entity_repo.get_subscription_ids')
     def test_get_all_credentials(self, mocked_get_subscription_ids, mocked_get_geographies):
         # Given
         mocked_get_subscription_ids.return_value = [db_geography1['id'], db_geography2['id']]

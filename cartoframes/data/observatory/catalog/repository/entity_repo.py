@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from .repo_client import RepoClient
 from ..entity import CatalogList, is_slug_value
 from .....exceptions import CatalogError
+from ..subscriptions import get_subscription_ids
 
 
 def check_catalog_connection(method):
@@ -89,6 +90,16 @@ class EntityRepository(ABC):
         if len(slugs) > 0:
             filters[self.slug_field] = slugs
 
+        return filters
+
+    def _add_subscription_ids(self, filters, credentials, entity_type):
+        ids = get_subscription_ids(credentials, entity_type)
+
+        if not isinstance(ids, list) or len(ids) == 0:
+            return None
+
+        filters = filters or {}
+        filters['id'] = ids
         return filters
 
     @classmethod
