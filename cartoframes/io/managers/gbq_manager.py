@@ -21,12 +21,16 @@ PREPARE_PARTITIONS = 100
 MAX_PARTITIONS = 10000
 MAX_QUADKEY_ZOOM = 20
 
+WASM_BREAK_ZOOM = 8
 GEOJSON_VT_BASE_ZOOM = 12
 DEFAULT_ZOOMS = [0, 4, 8, 12, 14]
 
-TILE_EXTENT_WASM = 512
-TILE_EXTENT_GEOJSON_VT = 4096
+COMPRESSION_FORMAT = 'pako'
+
+TILE_EXTENT = 4096
 TILE_BUFFER = 256
+
+OOM_BASE64 = 'T09N'
 
 # https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#TableFieldSchema.FIELDS.type
 BIG_QUERY_NUMBER_TYPES = ['INTEGER', 'INT64', 'FLOAT', 'FLOAT64']
@@ -42,7 +46,7 @@ TILESET_SQL_FILEPATHS = {
     'insert_geojson_vt': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'insert_geojson_vt.sql'),
     'insert_wasm': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'insert_wasm.sql'),
     'clean': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'clean.sql'),
-    'available_zooms': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'available_zooms.sql')
+    'available_zooms_oom': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'available_zooms_oom.sql')
 }
 
 
@@ -164,8 +168,10 @@ class GBQManager:
 
         return bbox, quadkey_zoom
 
-    def insert_geojson_vt_data(self, prepare_table, bbox, quadkey_zoom, zooms, output_table):
+    def insert_geojson_vt_data(self, prepare_table, bbox, quadkey_zoom, zooms, options, output_table):
         zooms_ = zooms if zooms else DEFAULT_ZOOMS
+        options_ = json.dumps(options)
+
         geojson_vt_base_zooms = [GEOJSON_VT_BASE_ZOOM]
         geojson_vt_zooms = [zoom - GEOJSON_VT_BASE_ZOOM for zoom in zooms_ if zoom >= GEOJSON_VT_BASE_ZOOM]
 
@@ -173,18 +179,29 @@ class GBQManager:
         insert_geojson_vt_query = insert_geojson_vt_query.format(
             prepare_table=prepare_table, xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3],
             geojson_vt_base_zooms=geojson_vt_base_zooms, geojson_vt_zooms=geojson_vt_zooms, quadkey_zoom=quadkey_zoom,
-            tile_extent=TILE_EXTENT_GEOJSON_VT, tile_buffer=TILE_BUFFER, output_table=output_table)
+            tile_extent=TILE_EXTENT, tile_buffer=TILE_BUFFER, options=options_, output_table=output_table)
 
         self.execute_query(insert_geojson_vt_query)
 
-    def insert_wasm_data(self, prepare_table, bbox, quadkey_zoom, zooms, output_table):
+    def insert_wasm_data(self, prepare_table, bbox, quadkey_zoom, zooms, options, output_table):
         zooms_ = zooms if zooms else DEFAULT_ZOOMS
+        options_ = json.dumps(options)
+
         wasm_zooms = [zoom for zoom in zooms_ if zoom < GEOJSON_VT_BASE_ZOOM]
 
+        wasm_little_zooms = [wasm_zoom for wasm_zoom in wasm_zooms if wasm_zoom <= WASM_BREAK_ZOOM]
+        wasm_big_zooms = [wasm_zoom for wasm_zoom in wasm_zooms if wasm_zoom > WASM_BREAK_ZOOM]
+
+        self._insert_wasm_data(prepare_table, bbox, quadkey_zoom, wasm_little_zooms, options_, output_table)
+        for wasm_big_zoom in wasm_big_zooms:
+            self._insert_wasm_data(prepare_table, bbox, quadkey_zoom, [wasm_big_zoom], options_, output_table)
+
+    def _insert_wasm_data(self, prepare_table, bbox, quadkey_zoom, wasm_zooms, options_, output_table):
         insert_wasm_query = read_file(TILESET_SQL_FILEPATHS['insert_wasm'])
         insert_wasm_query = insert_wasm_query.format(
             prepare_table=prepare_table, xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3], wasm_zooms=wasm_zooms,
-            quadkey_zoom=quadkey_zoom, tile_extent=TILE_EXTENT_WASM, tile_buffer=TILE_BUFFER, output_table=output_table)
+            quadkey_zoom=quadkey_zoom, tile_extent=TILE_EXTENT, tile_buffer=TILE_BUFFER, options=options_,
+            output_table=output_table)
 
         self.execute_query(insert_wasm_query)
 
@@ -194,16 +211,18 @@ class GBQManager:
 
         self.execute_query(clean_query)
 
-    def get_available_zooms(self, output_table):
-        available_zooms_query = read_file(TILESET_SQL_FILEPATHS['available_zooms'])
-        available_zooms_query = available_zooms_query.format(output_table=output_table)
+    def get_available_zooms_oom(self, output_table):
+        available_zooms_oom_query = read_file(TILESET_SQL_FILEPATHS['available_zooms_oom'])
+        available_zooms_oom_query = available_zooms_oom_query.format(oom_base64=OOM_BASE64, output_table=output_table)
 
-        available_zooms_result = self.execute_query(available_zooms_query)
-        for row in available_zooms_result:
-            available_zooms = [{
-                'zoom': zoom,
-                'extent': TILE_EXTENT_GEOJSON_VT if zoom >= GEOJSON_VT_BASE_ZOOM else TILE_EXTENT_WASM
-            } for zoom in row['available_zooms']]
+        available_zooms = []
+        available_zooms_oom_result = self.execute_query(available_zooms_oom_query)
+        for row in available_zooms_oom_result:
+            available_zooms.append({
+                'zoom': row['zoom'],
+                'extent': TILE_EXTENT,
+                'oom_ratio': row['oom_ratio']
+            })
 
         return available_zooms
 
@@ -248,12 +267,14 @@ class GBQManager:
 
         return schema
 
-    def update_tileset_metadata(self, source, available_zooms, quadkey_zoom, bbox, input_schema, output_table):
+    def update_tileset_metadata(self, source, available_zooms, quadkey_zoom, compression, bbox, input_schema,
+                                output_table):
         metadata_dict = {
             'source': source,
             'available_zooms': available_zooms,
             'geojson_vt_base_zoom': GEOJSON_VT_BASE_ZOOM,
             'quadkey_zoom': quadkey_zoom,
+            'compression': COMPRESSION_FORMAT if compression else None,
             'bbox': bbox,
             'properties': input_schema
         }

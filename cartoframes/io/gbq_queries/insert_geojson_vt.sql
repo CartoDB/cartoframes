@@ -30,6 +30,6 @@ INSERT INTO `{output_table}` (z, x, y, mvt, quadkey)
             GROUP BY z, x, y
     )
     SELECT flattened.z AS z, flattened.x AS x, flattened.y AS y, flattened.mvt AS mvt,
-            CAST(carto_tiler.ST_TileToQuadkeyDecimal(flattened.z, flattened.x, flattened.y, {quadkey_zoom}) AS INT64) AS quadkey
+            CAST(carto_tiler.ST_TileToParentIntegerQuadkey(flattened.z, flattened.x, flattened.y, {quadkey_zoom}) AS INT64) AS quadkey
         FROM nested_tiles
             CROSS JOIN UNNEST(nested_tiles.tile) flattened;

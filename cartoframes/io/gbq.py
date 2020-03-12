@@ -6,7 +6,7 @@ from ..utils.logger import log
 
 
 def create_tileset(source, name=None, project=None, credentials=None, token=None, index_col='geoid',
-                   geom_col='geom', bbox=None, zooms=None, min_max=False, clean=False):
+                   geom_col='geom', bbox=None, zooms=None, compression=True, min_max=False, clean=False):
     source_query = get_query_from_table(source)
     prepare_table = _get_prepate_table_name(name)
     manager = GBQManager(project=project, credentials=credentials, token=token)
@@ -17,20 +17,26 @@ def create_tileset(source, name=None, project=None, credentials=None, token=None
     log.info('Creating empty tileset{}'.format(' calculating bounding box' if not bbox else ''))
     bbox_, quadkey_zoom = manager.create_empty_tileset(prepare_table, bbox, name)
 
-    log.info('Inserting data 1/2')
-    manager.insert_geojson_vt_data(prepare_table, bbox_, quadkey_zoom, zooms, name)
+    options = {
+        'compression': 1
+    }
+    if not compression:
+        options['compression'] = 0
 
-    log.info('Inserting data 2/2')
-    manager.insert_wasm_data(prepare_table, bbox_, quadkey_zoom, zooms, name)
+    log.info('Inserting{} MVTs 1/2'.format(' compressed' if compression else ''))
+    # manager.insert_geojson_vt_data(prepare_table, bbox_, quadkey_zoom, zooms, options, name)
+
+    log.info('Inserting{} MVTs 2/2'.format(' compressed' if compression else ''))
+    manager.insert_wasm_data(prepare_table, bbox_, quadkey_zoom, zooms, options, name)
 
     if clean:
         log.info('Cleaning temporal data from the {} table'.format(prepare_table))
         manager.clean_prepare_input_data(prepare_table)
 
     log.info('Generating metadata{}'.format(' with min and max values' if min_max else ''))
-    available_zooms = manager.get_available_zooms(name)
+    available_zooms = manager.get_available_zooms_oom(name)
     input_schema = manager.get_input_schema(source, index_col, geom_col, min_max)
-    manager.update_tileset_metadata(source, available_zooms, quadkey_zoom, bbox_, input_schema, name)
+    manager.update_tileset_metadata(source, available_zooms, quadkey_zoom, compression, bbox_, input_schema, name)
 
     log.info('Tileset {} created'.format(name))
 

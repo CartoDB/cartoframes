@@ -31,7 +31,7 @@ INSERT INTO `{output_table}` (z, x, y, mvt, quadkey)
             ) __subquery
             WHERE geom IS NOT NULL
     )
-    SELECT z, x, y, carto_tiler.ST_AsMVT(ARRAY_AGG(data), {tile_extent}, '') AS mvt,
-            CAST(carto_tiler.ST_TileToQuadkeyDecimal(z, x, y, {quadkey_zoom}) AS INT64) AS quadkey
+    SELECT z, x, y, carto_tiler.ST_AsMVT(ARRAY_AGG(data), {tile_extent}, '{options}') AS mvt,
+            CAST(carto_tiler.ST_TileToParentIntegerQuadkey(z, x, y, {quadkey_zoom}) AS INT64) AS quadkey
         FROM tiles_with_data
         GROUP BY z, x, y;
