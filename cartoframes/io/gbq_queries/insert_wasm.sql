@@ -1,4 +1,4 @@
-INSERT INTO `{output_table}` (z, x, y, mvt, quadkey)
+INSERT INTO `{output_table}` (z, x, y, mvt, parent_quadkey)
     WITH tile_bbox AS (
         SELECT carto_tiler.ST_TileEnvelope_bbox({xmin}, {ymin}, {xmax}, {ymax}, z) AS tiles
             FROM UNNEST({wasm_zooms}) z
@@ -32,6 +32,6 @@ INSERT INTO `{output_table}` (z, x, y, mvt, quadkey)
             WHERE geom IS NOT NULL
     )
     SELECT z, x, y, carto_tiler.ST_AsMVT(ARRAY_AGG(data), {tile_extent}, '{options}') AS mvt,
-            CAST(carto_tiler.ST_TileToParentIntegerQuadkey(z, x, y, {quadkey_zoom}) AS INT64) AS quadkey
+            CAST(carto_tiler.ST_TileToParentIntegerQuadkey(z, x, y, {quadkey_zoom}) AS INT64) AS parent_quadkey
         FROM tiles_with_data
         GROUP BY z, x, y;

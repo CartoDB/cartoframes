@@ -1,4 +1,4 @@
-INSERT INTO `{output_table}` (z, x, y, mvt, quadkey)
+INSERT INTO `{output_table}` (z, x, y, mvt, parent_quadkey)
     WITH tile_bbox AS (
         SELECT carto_tiler.ST_TileEnvelope_bbox({xmin}, {ymin}, {xmax}, {ymax}, z) AS tiles
             FROM UNNEST({geojson_vt_base_zooms}) z
@@ -30,6 +30,6 @@ INSERT INTO `{output_table}` (z, x, y, mvt, quadkey)
             GROUP BY z, x, y
     )
     SELECT flattened.z AS z, flattened.x AS x, flattened.y AS y, flattened.mvt AS mvt,
-            CAST(carto_tiler.ST_TileToParentIntegerQuadkey(flattened.z, flattened.x, flattened.y, {quadkey_zoom}) AS INT64) AS quadkey
+            CAST(carto_tiler.ST_TileToParentIntegerQuadkey(flattened.z, flattened.x, flattened.y, {quadkey_zoom}) AS INT64) AS parent_quadkey
         FROM nested_tiles
             CROSS JOIN UNNEST(nested_tiles.tile) flattened;

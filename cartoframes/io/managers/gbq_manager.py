@@ -148,21 +148,21 @@ class GBQManager:
             min_quadkey = mercantile.quadkey(min_tile)
             max_quadkey = mercantile.quadkey(max_tile)
 
-            min_decimal_quadkey = int(min_quadkey, 4)
-            max_decimal_quadkey = int(max_quadkey, 4)
+            min_integer_quadkey = int(min_quadkey, 4)
+            max_integer_quadkey = int(max_quadkey, 4)
 
-            if (max_decimal_quadkey - min_decimal_quadkey) >= MAX_PARTITIONS or quadkey_zoom == MAX_QUADKEY_ZOOM:
+            if (max_integer_quadkey - min_integer_quadkey) >= MAX_PARTITIONS or quadkey_zoom == MAX_QUADKEY_ZOOM:
                 break
 
             else:
                 quadkey_zoom += 1
 
-        step_decimal_queadkey = math.ceil((max_decimal_quadkey - min_decimal_quadkey) / MAX_PARTITIONS)
+        step_integer_queadkey = math.ceil((max_integer_quadkey - min_integer_quadkey) / MAX_PARTITIONS)
 
         create_table_query = read_file(TILESET_SQL_FILEPATHS['create_table'])
         create_table_query = create_table_query.format(
-            min_decimal_quadkey=min_decimal_quadkey, max_decimal_quadkey=max_decimal_quadkey,
-            step_decimal_queadkey=step_decimal_queadkey, output_table=output_table)
+            min_integer_quadkey=min_integer_quadkey, max_integer_quadkey=max_integer_quadkey,
+            step_integer_queadkey=step_integer_queadkey, output_table=output_table)
 
         self.execute_query(create_table_query)
 
