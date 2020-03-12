@@ -1,5 +1,6 @@
 import os
 import json
+import numpy as np
 from pathlib import Path
 from geopandas import read_file
 
@@ -13,9 +14,24 @@ def file_path(path):
 
 def clean_gdf(gdf, sort_column=None):
     if sort_column:
-        return gdf.sort_index(axis=1).sort_values(by=sort_column).round(3).reset_index(drop=True)
+        return gdf.sort_index(axis=1).sort_values(by=sort_column).reset_index(drop=True)
     else:
-        return gdf.sort_index(axis=1).round(3).reset_index(drop=True)
+        return gdf.sort_index(axis=1).reset_index(drop=True)
+
+
+def assert_df_equals(enriched_gdf, expected_gdf):
+    assert (enriched_gdf.columns == expected_gdf.columns).all()
+    assert (enriched_gdf.count() == expected_gdf.count()).all()
+
+    for i in expected_gdf:
+        enriched_values = enriched_gdf[i].values
+        expected_values = expected_gdf[i].values
+        if isinstance(expected_values[0], str):
+            assert enriched_values.equals(expected_values)
+        elif i == 'geometry':
+            assert enriched_values.equals(expected_values).all()
+        else:
+            assert np.isclose(np.nan_to_num(enriched_values), np.nan_to_num(expected_values), rtol=0.01).all()
 
 
 public_variable1 = Variable.get('poverty_a86da569')   # FLOAT, AVG
@@ -75,7 +91,7 @@ class TestEnrichment(object):
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
 
-        assert enriched_gdf.equals(expected_gdf)
+        assert_df_equals(enriched_gdf, expected_gdf)
 
     def test_points_public_data_and_filters(self):
         enriched_gdf = self.enrichment.enrich_points(
@@ -92,7 +108,7 @@ class TestEnrichment(object):
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
 
-        assert enriched_gdf.equals(expected_gdf)
+        assert_df_equals(enriched_gdf, expected_gdf)
 
     def test_polygons_and_public_data(self):
         enriched_gdf = self.enrichment.enrich_polygons(
@@ -105,7 +121,7 @@ class TestEnrichment(object):
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
 
-        assert enriched_gdf.equals(expected_gdf)
+        assert_df_equals(enriched_gdf, expected_gdf)
 
     def test_polygons_private_data_and_agg_none(self):
         enriched_gdf = self.enrichment.enrich_polygons(
@@ -123,7 +139,7 @@ class TestEnrichment(object):
         enriched_gdf = clean_gdf(enriched_gdf, self.public_variable1.column_name)
         expected_gdf = clean_gdf(expected_gdf, self.public_variable1.column_name)
 
-        assert enriched_gdf.equals(expected_gdf)
+        assert_df_equals(enriched_gdf, expected_gdf)
 
     def test_polygons_private_data_and_agg_custom(self):
         enriched_gdf = self.enrichment.enrich_polygons(
@@ -137,7 +153,7 @@ class TestEnrichment(object):
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
 
-        assert enriched_gdf.equals(expected_gdf)
+        assert_df_equals(enriched_gdf, expected_gdf)
 
     def test_polygons_public_data_agg_custom_and_filters(self):
         enriched_gdf = self.enrichment.enrich_polygons(
@@ -178,5 +194,5 @@ class TestEnrichment(object):
         expected_geoids.sort()
         expected_gdf["geoid"] = None
 
-        assert enriched_gdf.equals(expected_gdf)
+        assert_df_equals(enriched_gdf, expected_gdf)
         assert enriched_geoids == expected_geoids
