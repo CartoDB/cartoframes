@@ -125,7 +125,7 @@ class TestEnrichment(object):
 
         assert_df_equals(enriched_gdf, expected_gdf)
 
-    def test_polygons_private_data_and_agg_none(self):
+    def test_polygons_public_data_and_agg_none(self):
         enriched_gdf = self.enrichment.enrich_polygons(
             self.polygons_gdf,
             variables=self.public_variables,
