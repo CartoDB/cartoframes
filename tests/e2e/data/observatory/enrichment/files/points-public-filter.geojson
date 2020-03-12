@@ -4,8 +4,8 @@
 "features": [
 { "type": "Feature", "properties": { "poverty": null, "one_car": null, "geoid": null, "do_area": null }, "geometry": { "type": "Point", "coordinates": [ -87.736916406250003, 41.88582102814744 ] } },
 { "type": "Feature", "properties": { "poverty": null, "one_car": null, "geoid": null, "do_area": null }, "geometry": { "type": "Point", "coordinates": [ -87.73681640625, 41.885921028147443 ] } },
-{ "type": "Feature", "properties": { "poverty": 167.0, "one_car": 301.0, "geoid": "55101002100", "do_area": 88948180.559350401 }, "geometry": { "type": "Point", "coordinates": [ -88.137817382809999, 42.670319772519058 ] } },
-{ "type": "Feature", "properties": { "poverty": 175.0, "one_car": 547.0, "geoid": "17201004300", "do_area": 183738986.63525927 }, "geometry": { "type": "Point", "coordinates": [ -89.357299804679997, 42.216313604344769 ] } },
+{ "type": "Feature", "properties": { "poverty": 167.0, "one_car": 301.0, "geoid": 55101002100, "do_area": 88948180.559350401 }, "geometry": { "type": "Point", "coordinates": [ -88.137817382809999, 42.670319772519058 ] } },
+{ "type": "Feature", "properties": { "poverty": 175.0, "one_car": 547.0, "geoid": 17201004300, "do_area": 183738986.63525927 }, "geometry": { "type": "Point", "coordinates": [ -89.357299804679997, 42.216313604344769 ] } },
 { "type": "Feature", "properties": { "poverty": null, "one_car": null, "geoid": null, "do_area": null }, "geometry": { "type": "Point", "coordinates": [ -88.52783203125, 41.141433026536284 ] } }
 ]
 }

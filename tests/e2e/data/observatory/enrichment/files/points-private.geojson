@@ -2,10 +2,10 @@
 "type": "FeatureCollection",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
-{ "type": "Feature", "properties": { "RSGCY7224": 20020, "MLTCY7224": 20020, "BLOCKGROUP": "170312604001", "do_area": 327680.71699525212 }, "geometry": { "type": "Point", "coordinates": [ -87.736916406250003, 41.88582102814744 ] } },
-{ "type": "Feature", "properties": { "RSGCY7224": 20020, "MLTCY7224": 20020, "BLOCKGROUP": "170312604001", "do_area": 327680.71699525212 }, "geometry": { "type": "Point", "coordinates": [ -87.73681640625, 41.885921028147443 ] } },
-{ "type": "Feature", "properties": { "RSGCY7224": -99700, "MLTCY7224": 39680, "BLOCKGROUP": "551010021003", "do_area": 28969878.741730917 }, "geometry": { "type": "Point", "coordinates": [ -88.137817382809999, 42.670319772519058 ] } },
-{ "type": "Feature", "properties": { "RSGCY7224": 132348, "MLTCY7224": 132348, "BLOCKGROUP": "172010043003", "do_area": 165765460.50189239 }, "geometry": { "type": "Point", "coordinates": [ -89.357299804679997, 42.216313604344769 ] } },
-{ "type": "Feature", "properties": { "RSGCY7224": 47627, "MLTCY7224": 47627, "BLOCKGROUP": "170630006003", "do_area": 280786919.78601474 }, "geometry": { "type": "Point", "coordinates": [ -88.52783203125, 41.141433026536284 ] } }
+{ "type": "Feature", "properties": { "RSGCY7224": 20020, "MLTCY7224": 20020, "BLOCKGROUP": 170312604001, "do_area": 327680.71699525212 }, "geometry": { "type": "Point", "coordinates": [ -87.736916406250003, 41.88582102814744 ] } },
+{ "type": "Feature", "properties": { "RSGCY7224": 20020, "MLTCY7224": 20020, "BLOCKGROUP": 170312604001, "do_area": 327680.71699525212 }, "geometry": { "type": "Point", "coordinates": [ -87.73681640625, 41.885921028147443 ] } },
+{ "type": "Feature", "properties": { "RSGCY7224": -99700, "MLTCY7224": 39680, "BLOCKGROUP": 551010021003, "do_area": 28969878.741730917 }, "geometry": { "type": "Point", "coordinates": [ -88.137817382809999, 42.670319772519058 ] } },
+{ "type": "Feature", "properties": { "RSGCY7224": 132348, "MLTCY7224": 132348, "BLOCKGROUP": 172010043003, "do_area": 165765460.50189239 }, "geometry": { "type": "Point", "coordinates": [ -89.357299804679997, 42.216313604344769 ] } },
+{ "type": "Feature", "properties": { "RSGCY7224": 47627, "MLTCY7224": 47627, "BLOCKGROUP": 170630006003, "do_area": 280786919.78601474 }, "geometry": { "type": "Point", "coordinates": [ -88.52783203125, 41.141433026536284 ] } }
 ]
 }
