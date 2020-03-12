@@ -30,6 +30,8 @@ def assert_df_equals(enriched_gdf, expected_gdf):
             assert enriched_values.equals(expected_values)
         elif i == 'geometry':
             assert enriched_values.equals(expected_values).all()
+        elif expected_values.all() is None:
+            assert enriched_values.all() is None
         else:
             assert np.isclose(np.nan_to_num(enriched_values), np.nan_to_num(expected_values), rtol=0.01).all()
 
@@ -168,7 +170,7 @@ class TestEnrichment(object):
         enriched_gdf = clean_gdf(enriched_gdf)
         expected_gdf = clean_gdf(expected_gdf)
 
-        assert enriched_gdf.equals(expected_gdf)
+        assert_df_equals(enriched_gdf, expected_gdf)
 
     def test_polygons_public_data_and_agg_custom_by_var(self):
         enriched_gdf = self.enrichment.enrich_polygons(
