@@ -7,6 +7,8 @@ from geopandas import read_file
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory import Enrichment, Variable
 
+RELATIVE_TOLERANCE = 0.001
+
 
 def file_path(path):
     return '{}/{}'.format(Path(__file__).parent.absolute(), path)
@@ -33,7 +35,11 @@ def assert_df_equals(enriched_gdf, expected_gdf):
         elif expected_values.all() is None:
             assert enriched_values.all() is None
         else:
-            assert np.isclose(np.nan_to_num(enriched_values), np.nan_to_num(expected_values), rtol=0.01).all()
+            assert np.isclose(
+                np.nan_to_num(enriched_values),
+                np.nan_to_num(expected_values),
+                rtol=RELATIVE_TOLERANCE
+            ).all()
 
 
 public_variable1 = Variable.get('poverty_a86da569')   # FLOAT, AVG
