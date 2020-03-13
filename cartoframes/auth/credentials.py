@@ -52,9 +52,6 @@ class Credentials:
         if not is_valid_str(username) and not is_valid_str(base_url):
             raise ValueError('You must set at least a `username` or a `base_url` parameters')
 
-        if base_url is not None and urlparse(base_url).scheme != 'https':
-            raise ValueError('`base_url`s need to be over `https`. Update your `base_url`.')
-
         self._api_key = api_key
         self._username = username
         self._base_url = base_url or self._base_url_from_username()

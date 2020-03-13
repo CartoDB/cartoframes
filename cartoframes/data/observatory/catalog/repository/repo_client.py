@@ -3,6 +3,7 @@ import os
 from carto.do_dataset import DODataset
 
 from .....auth import Credentials
+from .....utils import utils
 
 DEFAULT_USER = 'do-metadata'
 
@@ -11,7 +12,7 @@ class RepoClient:
 
     def __init__(self):
         self._do_dataset = None
-        default_credentials = Credentials(DEFAULT_USER)
+        default_credentials = utils.get_credentials() or Credentials(DEFAULT_USER)
         default_auth_client = default_credentials.get_api_key_auth_client()
         self._default_do_dataset = DODataset(auth_client=default_auth_client)
 
