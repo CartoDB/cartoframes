@@ -1,6 +1,5 @@
 import os
 import json
-import pytest
 import unittest
 import pandas
 import geopandas
@@ -8,10 +7,13 @@ from shapely import wkt
 import uuid
 from io import StringIO
 from pathlib import Path
+from geopandas import read_file
 
 from carto.do_dataset import DODataset, DODatasetJob
 
 from cartoframes.auth import Credentials
+from cartoframes.data.observatory.enrichment.enrichment import GEOM_TYPE_POINTS, GEOM_TYPE_POLYGONS
+from cartoframes.data.observatory.enrichment.enrichment_service import _ENRICHMENT_ID, _GEOM_COLUMN, _TTL_IN_SECONDS
 
 EXPECTED_CSV_SAMPLE = """state_fips_code,county_fips_code,geo_id,tract_name,internal_point_geo
 60,10,60010950100,9501.0,POINT (-170.5618796 -14.2587411)
@@ -28,9 +30,6 @@ CSV_SAMPLE_REDUCED = """id,geom
 4,POINT (-170.6651925 -14.2713653)
 5,POINT (-170.701028 -14.252446)
 """
-
-ENRICHMENT_ID = '__enrichment_id'
-GEOM_COLUMN = '__geom_column'
 
 
 def file_path(path):
@@ -164,68 +163,55 @@ class TestDODataset(unittest.TestCase):
         self.assertEqual(df.to_csv(index=False), 'cartodb_id,the_geom\n')
 
     def test_points_enrichment_dataset(self):
-        """FIXME: this test needs the DO_DATA_VARIABLE env variable, for instance:
-        $ DO_DATA_VARIABLE='cartodb-on-gcp-core-team.test_bq_enrichment_api.d1.nonfamily_households' \
-          pytest tests/e2e/data/services/test_bq_datasets.py::TestDODataset::test_points_enrichment_dataset
-        """
-
-        _do_data_variable = os.environ.get('DO_DATA_VARIABLE')
-
-        if not _do_data_variable:
-            raise unittest.SkipTest("No DO_DATA_VARIABLE env variable available")
-
-        self.assertIsNotNone(_do_data_variable)
+        variable_slug = 'poverty_a86da569'
+        variable_column_name = 'poverty'
 
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        df = pandas.read_csv(file_path('fixtures/enrichment_points.csv'))
+        gdf = read_file(file_path('../observatory/enrichment/files/points.geojson'))
+        gdf[_ENRICHMENT_ID] = range(gdf.shape[0])
+        gdf[_GEOM_COLUMN] = gdf.geometry
+        gdf = gdf[[_ENRICHMENT_ID, _GEOM_COLUMN]]
 
         dataset = self.do_dataset.name(unique_table_name) \
-            .column(ENRICHMENT_ID, 'INT64') \
-            .column(GEOM_COLUMN, 'GEOMETRY') \
-            .ttl_seconds(3600)
+            .column(_ENRICHMENT_ID, 'INT64') \
+            .column(_GEOM_COLUMN, 'GEOMETRY') \
+            .ttl_seconds(_TTL_IN_SECONDS)
         dataset.create()
-        status = dataset.upload_dataframe(df)
-
+        status = dataset.upload_dataframe(gdf)
         self.assertIn(status, ['success'])
 
-        geom_type = 'points'
-        variables = [_do_data_variable]
+        geom_type = GEOM_TYPE_POINTS
+        variables = [variable_slug]
         output_name = '{}_result'.format(unique_table_name)
         status = dataset.enrichment(geom_type=geom_type, variables=variables, output_name=output_name)
 
         self.assertIn(status, ['success'])
 
         result = self.do_dataset.name(output_name).download_stream()
-        df = pandas.read_csv(result)
+        result_df = pandas.read_csv(result)
 
-        self.assertIn(variables[0], df.columns)
+        self.assertIn(variable_column_name, result_df.columns)
 
-    @pytest.mark.skip()
     def test_polygons_enrichment_dataset(self):
-        """FIXME: this test needs the DO_DATA_VARIABLE env variable, for instance:
-        $ DO_DATA_VARIABLE='cartodb-on-gcp-core-team.test_bq_enrichment_api.d1.nonfamily_households' \
-          pytest tests/e2e/data/services/test_bq_datasets.py::TestDODataset::test_polygons_enrichment_dataset
-        """
-
-        _do_data_variable = os.environ.get('DO_DATA_VARIABLE')
-
-        if not _do_data_variable:
-            raise unittest.SkipTest("No DO_DATA_VARIABLE env variable available")
+        variable_slug = 'poverty_a86da569'
+        variable_column_name = 'poverty'
 
         unique_table_name = 'cf_test_table_' + str(uuid.uuid4()).replace('-', '_')
-        df = pandas.read_csv(file_path('fixtures/enrichment_polygons.csv'))
+        gdf = read_file(file_path('../observatory/enrichment/files/polygon.geojson'))
+        gdf[_ENRICHMENT_ID] = range(gdf.shape[0])
+        gdf[_GEOM_COLUMN] = gdf.geometry
+        gdf = gdf[[_ENRICHMENT_ID, _GEOM_COLUMN]]
 
         dataset = self.do_dataset.name(unique_table_name) \
-            .column(ENRICHMENT_ID, 'INT64') \
-            .column(GEOM_COLUMN, 'GEOMETRY') \
-            .ttl_seconds(3600)
+            .column(_ENRICHMENT_ID, 'INT64') \
+            .column(_GEOM_COLUMN, 'GEOMETRY') \
+            .ttl_seconds(_TTL_IN_SECONDS)
         dataset.create()
-        status = dataset.upload_dataframe(df)
-
+        status = dataset.upload_dataframe(gdf)
         self.assertIn(status, ['success'])
 
-        geom_type = 'points'
-        variables = [_do_data_variable]
+        geom_type = GEOM_TYPE_POLYGONS
+        variables = [variable_slug]
         output_name = '{}_result'.format(unique_table_name)
         status = dataset.enrichment(geom_type=geom_type, variables=variables, output_name=output_name)
 
@@ -234,4 +220,4 @@ class TestDODataset(unittest.TestCase):
         result = self.do_dataset.name(output_name).download_stream()
         df = pandas.read_csv(result)
 
-        self.assertIn(variables[0], df.columns)
+        self.assertIn(variable_column_name, df.columns)
