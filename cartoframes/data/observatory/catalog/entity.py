@@ -1,9 +1,10 @@
+import csv
 import pandas as pd
 
 from abc import ABC
 
 from ...clients.bigquery_client import BigQueryClient
-from ....utils.logger import log
+from carto.do_dataset import DODataset
 from ....exceptions import DOError
 
 
@@ -123,22 +124,17 @@ class CatalogEntity(ABC):
 
         project, dataset, table = full_remote_table_name.split('.')
 
-        column_names = bq_client.get_table_column_names(project, dataset, table)
-
-        query = 'SELECT * FROM `{}`'.format(full_remote_table_name)
-        if order_by:
-            query = '{} ORDER BY {}'.format(query, order_by)
-        if limit:
-            query = '{} LIMIT {}'.format(query, limit)
-
-        job = bq_client.query(query)
+        auth_client = credentials.get_api_key_auth_client()
+        rows = DODataset(auth_client=auth_client).name(table).download_stream()
 
         if file_path:
-            bq_client.download_to_file(job, file_path, column_names=column_names)
-            log.info('Data saved: {}.'.format(file_path))
-            log.info("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
+            with open(file_path, 'w') as csvfile:
+                csvwriter = csv.writer(csvfile)
+                for row in rows:
+                    csvwriter.writerow(row.values())
         else:
-            return bq_client.download_to_dataframe(job)
+            dataframe = pd.read_csv(rows)
+            return dataframe
 
     def _is_available_in(self, platform=_PLATFORM_BQ):
         return self.data['available_in'] and platform in self.data['available_in']
