@@ -2,7 +2,6 @@
 
 import os
 
-from urllib.parse import urlparse
 from carto.auth import APIKeyAuthClient
 from carto.do_token import DoTokenManager
 
