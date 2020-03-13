@@ -65,7 +65,7 @@ class TestBigQueryClient(unittest.TestCase):
 
     def test_refresh_token_raises_cartoexception(self):
         refresh_token_checker = RefreshTokenChecker('', 0)
-        original_query_method = BigQueryClient.query
+        original_query_method = bigquery.Client.query
         bigquery.Client.query = refresh_token_checker.query_raiser
 
         bq_client = BigQueryClient(self.credentials)
@@ -77,7 +77,7 @@ class TestBigQueryClient(unittest.TestCase):
     def test_refresh_token(self):
         expected_response = 'ok'
         refresh_token_checker = RefreshTokenChecker(expected_response, 2)
-        original_query_method = BigQueryClient.query
+        original_query_method = bigquery.Client.query
         bigquery.Client.query = refresh_token_checker.query_raiser
 
         bq_client = BigQueryClient(self.credentials)
