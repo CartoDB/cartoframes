@@ -234,6 +234,7 @@ class TestMapPublication(object):
             description=None,
             is_embed=True,
             is_static=None,
+            layer_selector=False,
             layers=[],
             show_info=False,
             size=None,
