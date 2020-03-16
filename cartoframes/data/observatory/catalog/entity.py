@@ -9,6 +9,19 @@ from ....exceptions import DOError
 
 _PLATFORM_BQ = 'bq'
 
+_DATASET_READ_MSG = '''To load it as a DataFrame you can do:
+
+    df = pandas.read_csv('{}')
+'''
+
+_GEOGRAPHY_READ_MSG = '''To load it as a GeoDataFrame you can do:
+
+    from cartoframes.utils import decode_geometry
+
+    df = pandas.read_csv('{}')
+    gdf = GeoDataFrame(df, geometry=decode_geometry(df['geom']))
+'''
+
 
 class CatalogEntity(ABC):
     """This is an internal class the rest of the classes related to the catalog discovery extend.
@@ -135,8 +148,11 @@ class CatalogEntity(ABC):
 
         if file_path:
             bq_client.download_to_file(job, file_path, column_names=column_names)
-            log.info('Data saved: {}.'.format(file_path))
-            log.info("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
+            log.info('Data saved: {}'.format(file_path))
+            if self.__class__.__name__ == 'Dataset':
+                log.info(_DATASET_READ_MSG.format(file_path))
+            elif self.__class__.__name__ == 'Geography':
+                log.info(_GEOGRAPHY_READ_MSG.format(file_path))
         else:
             return bq_client.download_to_dataframe(job)
 
