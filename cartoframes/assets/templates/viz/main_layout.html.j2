@@ -42,10 +42,10 @@
 
 <body class="as-app-body as-app">
   <main id="main-container" class="layout-map-container">
-  {% for i in range(n) %}
+  {% for i in range(m) %}
     <div class="layout-map-row">
-    {% for j in range(m) %}
-      {% set index = i * m + j %}
+    {% for j in range(n) %}
+      {% set index = i * n + j %}
       {% set title = maps[index]['title'] %}
       {% set has_legends = maps[index]['has_legends'] %}
       
