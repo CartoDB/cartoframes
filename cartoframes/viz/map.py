@@ -267,6 +267,7 @@ class Map:
             description=self.description,
             is_static=self.is_static,
             is_embed=True,
+            layer_selector=self.layer_selector,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
