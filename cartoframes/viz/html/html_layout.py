@@ -64,6 +64,7 @@ class HTMLLayout(object):
             is_embed=is_embed,
             is_static=is_static,
             map_height=map_height,
+            layer_selector=False,
             n=n_size,
             m=m_size
         )

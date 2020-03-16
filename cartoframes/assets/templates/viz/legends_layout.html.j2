@@ -1,20 +1,37 @@
-{% macro createLegend(legend_data, id) -%}
-  <as-legend-{{legend_data.type}} id="{{id}}" slot="legends"></as-legend-{{legend_data.type}}>
+{% macro createLegend(legend, id) -%}
+  <as-legend-{{legend.type}} id="{{id}}" slot="legends"></as-legend-{{legend.type}}>
 {%- endmacro %}
 
-<div id="legends" class="legends layout-legends">
-  {% for layer in layers|reverse %}
-    {% if layer.legend %}
-      <as-legend
-        class="layout-legend"
-        heading="{{layer.legend.title}}"
-        description="{{layer.legend.description}}"
-      >
-        {{ createLegend(layer.legend, 'layer%d_map%d_legend' | format(loop.index0, index)) }}
-        {% if layer.legend.footer %}
-          <span slot="footer">{{layer.legend.footer | safe }}</span>
-        {% endif %}
-      </as-legend>
-    {% endif %}
-  {% endfor %}
+<div class="as-panel__element" id="legends-{{index}}">
+  <as-layer-selector id="layer-selector-{{index}}">
+    {% for layer in layers|reverse %}
+      {% if layer.legends %}
+        {% set layer_index = loop.index0 %}
+        {% set slot = 'as-checkbox-layer-%d-slot' | format(layer_index) %}
+        <div slot="{{slot}}">
+          {% if layer.has_legend_list %}
+            {% for legend in layer.legends %}
+              <as-legend
+                heading="{{legend.title}}"
+                description="{{legend.description}}">
+                {{ createLegend(legend, 'layer%d_map%d_legend%d' | format(layer_index, 0, loop.index0)) }}
+                {% if legend.footer %}
+                  <span slot="footer">{{legend.footer | safe }}</span>
+                {% endif %}
+              </as-legend>
+            {% endfor %}
+          {% else %}
+            <as-legend
+              heading="{{layer.legends.title}}"
+              description="{{layer.legends.description}}">
+              {{ createLegend(layer.legends, 'layer%d_map%d_legend%d' | format(layer_index, 0, 0)) }}
+              {% if layer.legends.footer %}
+                <span slot="footer">{{layer.legends.footer | safe }}</span>
+              {% endif %}
+            </as-legend>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </as-layer-selector>
 </div>

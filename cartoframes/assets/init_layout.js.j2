@@ -1,14 +1,11 @@
 const maps = {{ maps|tojson }};
 const show_info = '{{show_info}}' === 'True';
 const is_static = '{{is_static}}' === 'True';
-
-maps.forEach((map) => {
-  map.has_legends = false;
-  map.layer_selector = false;
-});
+const layer_selector = '{{layer_selector}}' === 'True';
 
 init({
   show_info,
   is_static,
+  layer_selector,
   maps
 });
