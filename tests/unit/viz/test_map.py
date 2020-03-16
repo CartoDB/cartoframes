@@ -268,6 +268,7 @@ class TestMapPublication(object):
             description='description',
             is_embed=True,
             is_static=True,
+            layer_selector=False,
             layers=[],
             show_info=False,
             size=None,
