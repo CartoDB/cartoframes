@@ -186,7 +186,7 @@ class Layout:
 
         for layer in layers:
             layer.reset_legends(self._maps[layer.map_index])
-            layer_def = _get_layer_def(layer)
+            layer_def = layer._get_layer_def()
             self._maps[layer.map_index].layer_defs.append(layer_def)
 
         maps = _init_layout(self._maps, self._is_static, self._viewport)
@@ -259,21 +259,3 @@ def _get_is_static(map_settings_is_static, layout_is_static):
 
 def _get_publisher(credentials):
     return KuvizPublisher(credentials)
-
-
-def _get_layer_def(layer):
-    return {
-        'credentials': layer.credentials,
-        'interactivity': layer.interactivity,
-        'legends': layer.legends_info,
-        'has_legend_list': layer.has_legend_list,
-        'encode_data': layer.encode_data,
-        'widgets': layer.widgets_info,
-        'data': layer.source_data,
-        'type': layer.source_type,
-        'title': layer.title,
-        'options': layer.options,
-        'map_index': layer.map_index,
-        'source': layer.source_data,
-        'viz': layer.viz
-    }

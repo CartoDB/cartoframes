@@ -187,6 +187,23 @@ class Layer:
 
         return {}
 
+    def _get_layer_def(self):
+        return {
+            'credentials': self.credentials,
+            'interactivity': self.interactivity,
+            'legends': self.legends_info,
+            'has_legend_list': self.has_legend_list,
+            'encode_data': self.encode_data,
+            'widgets': self.widgets_info,
+            'data': self.source_data,
+            'type': self.source_type,
+            'title': self.title,
+            'options': self.options,
+            'map_index': self.map_index,
+            'source': self.source_data,
+            'viz': self.viz
+        }
+
     def _repr_html_(self):
         from .map import Map
         return Map(self)._repr_html_()
