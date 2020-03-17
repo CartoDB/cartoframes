@@ -48,6 +48,7 @@
       {% set map_index = i * n + j %}
       {% set title = maps[map_index]['title'] %}
       {% set has_legends = maps[map_index]['has_legends'] %}
+      {% set layer_selector = maps[map_index]['layer_selector'] %}
       
       <div class="layout-map-cell {{'layout-map-cell-legend' if has_legends }}" style="height: {{ map_height }}">
           {% if title %}
@@ -57,7 +58,7 @@
           {% endif %}
 
           <section class="layout-map-cell--section">
-            {% if has_legends %}
+            {% if has_legends or layer_selector %}
               {% set layers = maps[map_index]['layers'] %}
               <div class="as-map-panels" data-name="Legends">
                 <div class="as-panel as-panel--vertical as-panel--top as-panel--left">

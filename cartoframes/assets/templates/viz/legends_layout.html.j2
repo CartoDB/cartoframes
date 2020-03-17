@@ -1,13 +1,13 @@
 {% macro createLegend(legend, id) -%}
-  <as-legend-{{legend.type}} id="{{id}}" slot="legends"></as-legend-{{legend.type}}>
+  <as-legend-{{legend.type}} id="{{id}}" slot="legends-{{map_index}}"></as-legend-{{legend.type}}>
 {%- endmacro %}
 
 <div class="as-panel__element" id="legends-{{map_index}}">
-  <as-layer-selector id="layer-selector">
+  <as-layer-selector id="layer-selector-{{map_index}}">
     {% for layer in layers|reverse %}
       {% if layer.legends %}
         {% set layer_index = loop.index0 %}
-        {% set slot = 'as-checkbox-layer-%d-map-%d-slot' | format(layer_index, map_index) %}
+        {% set slot = 'as-checkbox-layer-%d-slot' | format(layer_index) %}
         <div slot="{{slot}}">
           {% if layer.has_legend_list %}
             {% for legend in layer.legends %}
