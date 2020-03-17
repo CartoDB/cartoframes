@@ -16,6 +16,14 @@ class Layout:
         M_SIZE (number, optional): Number of rows of the layout
         viewport (dict, optional): Properties for display of the maps viewport.
             Keys can be `bearing` or `pitch`.
+        is_static (boolean, optional): By default, all the maps in each visualization
+            are static images due to performance reasons. In order to set them interactive,
+            set `is_static` to True.
+        map_height (number, optional): Height in pixels for each visualization.
+            Default is 250.
+        full_height (boolean, optional): When a layout visualization is published, it
+            will fit the screen height. Otherwise, each visualization height will be
+            `map_height`. Default True.
 
     Raises:
         ValueError: if the input elements are not instances of :py:class:`Map <cartoframes.viz.Map>`.
@@ -58,6 +66,13 @@ class Layout:
         ...     Map(Layer('table_in_your_account'))
         >>> ], viewport={ 'zoom': 2 })
 
+        Create an interactive layout
+
+        >>> Layout([
+        ...    Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account')),
+        ...    Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account'))
+        >>> ], is_static=False)
+
     """
     def __init__(self,
                  maps,
@@ -65,7 +80,7 @@ class Layout:
                  m_size=None,
                  viewport=None,
                  map_height=250,
-                 full_height=False,
+                 full_height=True,
                  is_static=True,
                  **kwargs):
 
@@ -119,9 +134,12 @@ class Layout:
         Example:
             Publishing the map visualization.
 
-            >>> tmap = Layout(Map(Layer('tablename')))
-            >>> tmap.publish('Custom Map Title', password=None)
+            >>> tlayout = Layout([
+            ...    Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account')),
+            ...    Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account'))
+            >>> ])
 
+            >>> tlayout.publish('Custom Map Title', password=None)
         """
 
         _credentials = get_credentials(credentials)
