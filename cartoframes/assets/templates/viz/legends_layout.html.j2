@@ -2,19 +2,19 @@
   <as-legend-{{legend.type}} id="{{id}}" slot="legends"></as-legend-{{legend.type}}>
 {%- endmacro %}
 
-<div class="as-panel__element" id="legends-{{index}}">
-  <as-layer-selector id="layer-selector-{{index}}">
+<div class="as-panel__element" id="legends-{{map_index}}">
+  <as-layer-selector id="layer-selector">
     {% for layer in layers|reverse %}
       {% if layer.legends %}
         {% set layer_index = loop.index0 %}
-        {% set slot = 'as-checkbox-layer-%d-slot' | format(layer_index) %}
+        {% set slot = 'as-checkbox-layer-%d-map-%d-slot' | format(layer_index, map_index) %}
         <div slot="{{slot}}">
           {% if layer.has_legend_list %}
             {% for legend in layer.legends %}
               <as-legend
                 heading="{{legend.title}}"
                 description="{{legend.description}}">
-                {{ createLegend(legend, 'layer%d_map%d_legend%d' | format(layer_index, 0, loop.index0)) }}
+                {{ createLegend(legend, 'layer%d_map%d_legend%d' | format(layer_index, map_index, loop.index0)) }}
                 {% if legend.footer %}
                   <span slot="footer">{{legend.footer | safe }}</span>
                 {% endif %}
@@ -24,7 +24,7 @@
             <as-legend
               heading="{{layer.legends.title}}"
               description="{{layer.legends.description}}">
-              {{ createLegend(layer.legends, 'layer%d_map%d_legend%d' | format(layer_index, 0, 0)) }}
+              {{ createLegend(layer.legends, 'layer%d_map%d_legend%d' | format(layer_index, map_index, 0)) }}
               {% if layer.legends.footer %}
                 <span slot="footer">{{layer.legends.footer | safe }}</span>
               {% endif %}

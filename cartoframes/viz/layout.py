@@ -63,13 +63,17 @@ class Layout:
                  m_size=None,
                  viewport=None,
                  map_height=250,
-                 is_static=True):
+                 is_static=True,
+                 **kwargs):
         self._layout = _init_layout(maps, is_static, viewport)
         self._n_size = n_size if n_size is not None else len(self._layout)
         self._m_size = m_size if m_size is not None else constants.DEFAULT_LAYOUT_M_SIZE
         self._viewport = viewport
         self._is_static = is_static
         self._map_height = map_height
+
+        self._carto_vl_path = kwargs.get('_carto_vl_path', None)
+        self._airship_path = kwargs.get('_airship_path', None)
 
     def _repr_html_(self):
         self._html_layout = HTMLLayout()
@@ -79,7 +83,9 @@ class Layout:
             n_size=self._n_size,
             m_size=self._m_size,
             is_static=self._is_static,
-            map_height=self._map_height
+            map_height=self._map_height,
+            _carto_vl_path=self._carto_vl_path,
+            _airship_path=self._airship_path
         )
 
         return self._html_layout.html
