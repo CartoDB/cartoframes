@@ -45,9 +45,9 @@
   {% for i in range(m) %}
     <div class="layout-map-row">
     {% for j in range(n) %}
-      {% set index = i * n + j %}
-      {% set title = maps[index]['title'] %}
-      {% set has_legends = maps[index]['has_legends'] %}
+      {% set map_index = i * n + j %}
+      {% set title = maps[map_index]['title'] %}
+      {% set has_legends = maps[map_index]['has_legends'] %}
       
       <div class="layout-map-cell {{'layout-map-cell-legend' if has_legends }}" style="height: {{ map_height }}px">
           {% if title %}
@@ -58,18 +58,18 @@
 
           <section class="layout-map-cell--section">
             {% if has_legends %}
-              {% set layers = maps[index]['layers'] %}
+              {% set layers = maps[map_index]['layers'] %}
               <div class="as-map-panels" data-name="Legends">
                 <div class="as-panel as-panel--vertical as-panel--top as-panel--left">
-                  {% include 'templates/viz/legends.html.j2' %}
+                  {% include 'templates/viz/legends_layout.html.j2' %}
                 </div> <!-- as-panel -->
               </div> <!-- as-map-panels -->
             {% endif %}
 
-            <img id="map-image-{{ index }}" class="map-image" alt="Static Map {{index}}" />
-            <as-responsive-content id="main-container-{{index}}" class="layout-map">
+            <img id="map-image-{{ map_index }}" class="map-image" alt="Static Map {{map_index}}" />
+            <as-responsive-content id="main-container-{{map_index}}" class="layout-map">
               <div class="as-map-area">
-                <div id="map-{{ index }}" class="map"></div>
+                <div id="map-{{ map_index }}" class="map"></div>
               </div>
           </section>
       </div>

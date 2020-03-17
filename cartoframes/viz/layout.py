@@ -65,7 +65,9 @@ class Layout:
                  m_size=None,
                  viewport=None,
                  map_height=250,
-                 is_static=True):
+                 is_static=True,
+                 **kwargs):
+
         self._maps = maps
         self._init_layers()
         self._layout = _init_layout(self._maps, is_static, viewport)
@@ -75,6 +77,8 @@ class Layout:
         self._is_static = is_static
         self._map_height = map_height
         self._publisher = None
+        self._carto_vl_path = kwargs.get('_carto_vl_path', None)
+        self._airship_path = kwargs.get('_airship_path', None)
 
     def _init_layers(self):
         for index, viz_map in enumerate(self._maps):
@@ -90,7 +94,9 @@ class Layout:
             n_size=self._n_size,
             m_size=self._m_size,
             is_static=self._is_static,
-            map_height=self._map_height
+            map_height=self._map_height,
+            _carto_vl_path=self._carto_vl_path,
+            _airship_path=self._airship_path
         )
 
         return self._html_layout.html
