@@ -125,12 +125,16 @@ class Layout:
             >>> tmap.publish('Custom Map Title', password=None)
 
         """
-        _credentials = get_credentials(credentials)
 
-        self._publisher = _get_publisher(_credentials)
+        _credentials = get_credentials(credentials)
+        layers = []
 
         for viz_map in self._maps:
-            self._publisher.set_layers(viz_map.layers, maps_api_key)
+            for layer in viz_map.layers:
+                layers.append(layer)
+
+        self._publisher = _get_publisher(_credentials)
+        self._publisher.set_layers(layers, maps_api_key)
 
         html = self._get_publication_html()
         return self._publisher.publish(html, name, password, if_exists)
@@ -171,6 +175,10 @@ class Layout:
         return KuvizPublisher.all(_credentials)
 
     def _get_publication_html(self):
+        if not self._publisher:
+            _credentials = get_credentials(None)
+            self._publisher = _get_publisher(_credentials)
+
         html_layout = HTMLLayout('templates/viz/main_layout.html.j2')
 
         layers = self._publisher.get_layers()
