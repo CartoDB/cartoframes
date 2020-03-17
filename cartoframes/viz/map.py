@@ -314,6 +314,8 @@ def _get_layer_def(layer):
         'type': layer.source_type,
         'title': layer.title,
         'options': layer.options,
+        'map_index': layer.map_index,
+        'source': layer.source_data,
         'viz': layer.viz
     }
 
