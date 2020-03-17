@@ -216,6 +216,7 @@ class Layout:
             n_size=self._n_size,
             m_size=self._m_size,
             is_static=self._is_static,
+            is_embed=True,
             map_height=map_height
         )
 
