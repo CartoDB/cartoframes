@@ -70,7 +70,6 @@ class Layout:
                  **kwargs):
 
         self._maps = maps
-        self._init_layers()
         self._layout = _init_layout(self._maps, is_static, viewport)
         self._n_size = n_size if n_size is not None else len(self._layout)
         self._m_size = m_size if m_size is not None else constants.DEFAULT_LAYOUT_M_SIZE
@@ -81,11 +80,6 @@ class Layout:
         self._publisher = None
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
-
-    def _init_layers(self):
-        for index, viz_map in enumerate(self._maps):
-            for layer in viz_map.layers:
-                layer.map_index = index
 
     def _repr_html_(self):
         self._html_layout = HTMLLayout()
@@ -216,6 +210,10 @@ def _init_layout(maps, is_static, viewport):
     for map_index, viz in enumerate(maps):
         if not isinstance(viz, Map):
             raise ValueError('All the elements in the Layout should be an instance of Map.')
+
+        for layer in viz.layers:
+            layer.map_index = map_index
+
         map_settings = _get_map_settings(viz, is_static, viewport, map_index)
 
         layout.append(map_settings)
