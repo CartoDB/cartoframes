@@ -1,7 +1,7 @@
 from ..widget import Widget
 
 
-def category_widget(value, title=None, description=None, footer=None, read_only=False):
+def category_widget(value, title=None, description=None, footer=None, read_only=False, weight=1):
     """Helper function for quickly creating a category widget.
 
     Args:
@@ -24,4 +24,4 @@ def category_widget(value, title=None, description=None, footer=None, read_only=
 
     """
     return Widget('category', value, title, description, footer,
-                  read_only=read_only)
+                  read_only=read_only, weight=weight)
