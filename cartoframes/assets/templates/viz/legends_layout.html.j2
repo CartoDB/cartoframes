@@ -1,5 +1,5 @@
-{% macro createLegend(legend, id) -%}
-  <as-legend-{{legend.type}} id="{{id}}" slot="legends-{{map_index}}"></as-legend-{{legend.type}}>
+{% macro createLegend(legend, map_index, id) -%}
+  <as-legend-{{legend.type}} id="{{id}}" slot="legends"></as-legend-{{legend.type}}>
 {%- endmacro %}
 
 <div class="as-panel__element" id="legends-{{map_index}}">
@@ -14,7 +14,7 @@
               <as-legend
                 heading="{{legend.title}}"
                 description="{{legend.description}}">
-                {{ createLegend(legend, 'layer%d_map%d_legend%d' | format(layer_index, map_index, loop.index0)) }}
+                {{ createLegend(legend, map_index, 'layer%d_map%d_legend%d' | format(layer_index, map_index, loop.index0)) }}
                 {% if legend.footer %}
                   <span slot="footer">{{legend.footer | safe }}</span>
                 {% endif %}
@@ -24,7 +24,7 @@
             <as-legend
               heading="{{layer.legends.title}}"
               description="{{layer.legends.description}}">
-              {{ createLegend(layer.legends, 'layer%d_map%d_legend%d' | format(layer_index, map_index, 0)) }}
+              {{ createLegend(layer.legends, map_index, 'layer%d_map%d_legend%d' | format(layer_index, map_index, 0)) }}
               {% if layer.legends.footer %}
                 <span slot="footer">{{layer.legends.footer | safe }}</span>
               {% endif %}

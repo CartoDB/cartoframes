@@ -51,29 +51,29 @@
       {% set layer_selector = maps[map_index]['layer_selector'] %}
       
       <div class="layout-map-cell {{'layout-map-cell-legend' if has_legends }}" style="height: {{ map_height }}">
-          {% if title %}
+        {% if title %}
           <header class="layout-map-cell--header">
             <p>{{ title }}</p>
           </header>
-          {% endif %}
+        {% endif %}
 
-          <section class="layout-map-cell--section">
-            <img id="map-image-{{ map_index }}" class="map-image" alt="Static Map {{map_index}}" />
-            <as-responsive-content id="main-container-{{map_index}}" class="layout-map">
-              <div class="as-map-area">
-                <div id="map-{{ map_index }}" class="map"></div>
+        <section class="layout-map-cell--section">
+          <img id="map-image-{{ map_index }}" class="map-image" alt="Static Map {{map_index}}" />
+          <as-responsive-content id="main-container-{{map_index}}" class="layout-map">
+            <div class="as-map-area">
+              <div id="map-{{ map_index }}" class="map"></div>
+            </div>
+            {% if has_legends or layer_selector %}
+              {% set layers = maps[map_index]['layers'] %}
+              <div class="as-map-panels" data-name="Legends">
+                <div class="as-panel as-panel--vertical as-panel--top as-panel--left">
+                  {% include 'templates/viz/legends_layout.html.j2' %}
+                </div>
               </div>
-              {% if has_legends or layer_selector %}
-                {% set layers = maps[map_index]['layers'] %}
-                <div class="as-map-panels" data-name="Legends">
-                  <div class="as-panel as-panel--vertical as-panel--top as-panel--left">
-                    {% include 'templates/viz/legends_layout.html.j2' %}
-                  </div> <!-- as-panel -->
-                </div> <!-- as-map-panels -->
-              {% endif %}
+            {% endif %}
 
-            </as-responsive-content>
-          </section>
+          </as-responsive-content>
+        </section>
       </div>
     {% endfor %}
     </div>
