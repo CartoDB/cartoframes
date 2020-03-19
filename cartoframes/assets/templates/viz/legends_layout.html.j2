@@ -3,7 +3,7 @@
 {%- endmacro %}
 
 <div class="as-panel__element" id="legends-{{map_index}}">
-  <as-layer-selector id="layer-selector-{{map_index}}">
+  <as-layer-selector id="layer-selector-{{map_index}}" class="layer-selector">
     {% for layer in layers|reverse %}
       {% if layer.legends %}
         {% set layer_index = loop.index0 %}
