@@ -266,6 +266,7 @@ class Map:
             title=name,
             description=self.description,
             is_static=self.is_static,
+            layer_selector=self.layer_selector,
             is_embed=True,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
@@ -303,19 +304,7 @@ def _get_layer_defs(layers):
 
 
 def _get_layer_def(layer):
-    return {
-        'credentials': layer.credentials,
-        'interactivity': layer.interactivity,
-        'legends': layer.legends_info,
-        'has_legend_list': layer.has_legend_list,
-        'encode_data': layer.encode_data,
-        'widgets': layer.widgets_info,
-        'data': layer.source_data,
-        'type': layer.source_type,
-        'title': layer.title,
-        'options': layer.options,
-        'viz': layer.viz
-    }
+    return layer._get_layer_def()
 
 
 def _format_bounds(bounds):

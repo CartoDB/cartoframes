@@ -21,14 +21,14 @@ class HTMLLayout(object):
 
     def set_content(self, maps, size=None, show_info=None, theme=None, _carto_vl_path=None,
                     _airship_path=None, title='CARTOframes', is_embed=False,
-                    is_static=False, map_height=None, n_size=None, m_size=None):
+                    is_static=False, map_height=None, full_height=False, n_size=None, m_size=None):
         self.html = self._parse_html_content(
             maps, size, show_info, theme, _carto_vl_path, _airship_path, title,
-            is_embed, is_static, map_height, n_size, m_size)
+            is_embed, is_static, map_height, full_height, n_size, m_size)
 
     def _parse_html_content(self, maps, size, show_info=None, theme=None, _carto_vl_path=None,
                             _airship_path=None, title=None, is_embed=False, is_static=False,
-                            map_height=None, n_size=None, m_size=None):
+                            map_height=None, full_height=False, n_size=None, m_size=None):
 
         if _carto_vl_path is None:
             carto_vl_path = constants.CARTO_VL_URL
@@ -64,7 +64,7 @@ class HTMLLayout(object):
             is_embed=is_embed,
             is_static=is_static,
             map_height=map_height,
-            layer_selector=False,
+            full_height=full_height,
             n=n_size,
             m=m_size
         )

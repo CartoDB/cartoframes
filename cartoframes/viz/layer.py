@@ -122,6 +122,7 @@ class Layer:
         popups_variables = self.popups.get_variables()
         widget_variables = self.widgets.get_variables()
         external_variables = merge_dicts(popups_variables, widget_variables)
+        self._map_index = 0
 
         self.viz = self.style.compute_viz(self.geom_type, external_variables)
         viz_columns = extract_viz_columns(self.viz)
@@ -186,9 +187,36 @@ class Layer:
 
         return {}
 
+    def _get_layer_def(self):
+        return {
+            'credentials': self.credentials,
+            'interactivity': self.interactivity,
+            'legends': self.legends_info,
+            'has_legend_list': self.has_legend_list,
+            'encode_data': self.encode_data,
+            'widgets': self.widgets_info,
+            'data': self.source_data,
+            'type': self.source_type,
+            'title': self.title,
+            'options': self.options,
+            'map_index': self.map_index,
+            'source': self.source_data,
+            'viz': self.viz
+        }
+
     def _repr_html_(self):
         from .map import Map
         return Map(self)._repr_html_()
+
+    @property
+    def map_index(self):
+        """Layer map index"""
+        return self._map_index
+
+    @map_index.setter
+    def map_index(self, map_index):
+        """Set session"""
+        self._map_index = map_index
 
     def reset_legends(self, parent_map):
         if parent_map.layer_selector:

@@ -17,7 +17,6 @@ export function initMapLayer(layer, layerIndex, numLayers, hasLegends, map, mapI
     throw e;
   }
 
-
   mapLayer.addTo(map);
 
   setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);

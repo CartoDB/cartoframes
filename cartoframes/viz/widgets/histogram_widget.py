@@ -1,7 +1,7 @@
 from ..widget import Widget
 
 
-def histogram_widget(value, title=None, description=None, footer=None, read_only=False, buckets=20):
+def histogram_widget(value, title=None, description=None, footer=None, read_only=False, buckets=20, weight=1):
     """Helper function for quickly creating a histogram widget.
 
     Histogram widgets display the distribution of a numeric attribute, in buckets, to group
@@ -32,4 +32,4 @@ def histogram_widget(value, title=None, description=None, footer=None, read_only
 
     """
     return Widget('histogram', value, title, description, footer,
-                  read_only=read_only, buckets=buckets)
+                  read_only=read_only, buckets=buckets, weight=weight)
