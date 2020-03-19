@@ -32,7 +32,8 @@ class TestWidget(object):
             'variable_name': 'v9cb6ff',
             'options': {
                 'readOnly': False,
-                'buckets': 20
+                'buckets': 20,
+                'weight': 1
             }
         }
 
@@ -60,7 +61,8 @@ class TestWidget(object):
             'variable_name': '',
             'options': {
                 'readOnly': False,
-                'buckets': 20
+                'buckets': 20,
+                'weight': 1
             }
         }
 
@@ -79,6 +81,7 @@ class TestWidget(object):
             'variable_name': '',
             'options': {
                 'readOnly': False,
-                'buckets': 20
+                'buckets': 20,
+                'weight': 1
             }
         }

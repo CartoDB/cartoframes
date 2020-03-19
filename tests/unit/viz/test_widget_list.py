@@ -77,7 +77,8 @@ class TestWidgetList(object):
                 'variable_name': 'vb6dbcf',
                 'options': {
                     'readOnly': False,
-                    'buckets': 20
+                    'buckets': 20,
+                    'weight': 1
                 }
             }, {
                 'type': 'basic',
@@ -90,6 +91,7 @@ class TestWidgetList(object):
                 'variable_name': '',
                 'options': {
                     'readOnly': False,
-                    'buckets': 20
+                    'buckets': 20,
+                    'weight': 1
                 }
             }]
