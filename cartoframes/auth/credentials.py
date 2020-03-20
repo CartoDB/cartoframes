@@ -41,6 +41,7 @@ class Credentials:
             <http://docs.python-requests.org/en/master/user/advanced/>`__
             for more information.
         allow_non_secure (bool, optional): Allow non secure http connections.
+            By default is not allowed.
 
     Raises:
         ValueError: if not available `username` or `base_url` are found.
@@ -203,7 +204,7 @@ class Credentials:
             'username': self._username,
             'api_key': self._api_key,
             'base_url': self._base_url,
-            'allow_non_secure': self._base_url
+            'allow_non_secure': self._allow_non_secure
         }
 
         if config_file is None:
