@@ -1,4 +1,3 @@
-import csv
 import pandas as pd
 
 from abc import ABC
@@ -114,24 +113,12 @@ class CatalogEntity(ABC):
         if not self._is_available_in('bq'):
             raise DOError('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
-        bq_client = _get_bigquery_client(credentials)
-
-        full_remote_table_name = self._get_remote_full_table_name(
-            bq_client.bq_project,
-            bq_client.bq_dataset,
-            bq_client.bq_public_project
-        )
-
-        project, dataset, table = full_remote_table_name.split('.')
-
         auth_client = credentials.get_api_key_auth_client()
-        rows = DODataset(auth_client=auth_client).name(table).download_stream()
-
+        rows = DODataset(auth_client=auth_client).name(self.id).download_stream(limit=limit, order_by=order_by)
         if file_path:
             with open(file_path, 'w') as csvfile:
-                csvwriter = csv.writer(csvfile)
                 for row in rows:
-                    csvwriter.writerow(row.values())
+                    csvfile.write(row.decode('utf-8'))
         else:
             dataframe = pd.read_csv(rows)
             return dataframe
