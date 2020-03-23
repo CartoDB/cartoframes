@@ -6,7 +6,7 @@ _default_credentials = None
 
 def set_default_credentials(
         first=None, second=None, credentials=None, filepath=None,
-        username=None, base_url=None, api_key=None, session=None):
+        username=None, base_url=None, api_key=None, session=None, allow_non_secure=False):
     """Set default credentials for all operations that require authentication
     against a CARTO account.
 
@@ -100,9 +100,9 @@ def set_default_credentials(
 
     elif isinstance(_base_url or _username, str) and isinstance(_api_key, str):
         if _base_url and is_url(_base_url):
-            _default_credentials = Credentials(base_url=_base_url, api_key=_api_key)
+            _default_credentials = Credentials(base_url=_base_url, api_key=_api_key, allow_non_secure=allow_non_secure)
         else:
-            _default_credentials = Credentials(username=_username, api_key=_api_key)
+            _default_credentials = Credentials(username=_username, api_key=_api_key, allow_non_secure=allow_non_secure)
 
     else:
         _default_credentials = Credentials.from_file()

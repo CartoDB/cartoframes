@@ -40,6 +40,8 @@ class Credentials:
             documentation
             <http://docs.python-requests.org/en/master/user/advanced/>`__
             for more information.
+        allow_non_secure (bool, optional): Allow non secure http connections.
+            By default is not allowed.
 
     Raises:
         ValueError: if not available `username` or `base_url` are found.
@@ -48,12 +50,12 @@ class Credentials:
         >>> creds = Credentials(username='johnsmith', api_key='abcdefg')
 
     """
-    def __init__(self, username=None, api_key='default_public', base_url=None, session=None):
+    def __init__(self, username=None, api_key='default_public', base_url=None, session=None, allow_non_secure=False):
         if not is_valid_str(username) and not is_valid_str(base_url):
             raise ValueError('You must set at least a `username` or a `base_url` parameters')
 
-        if base_url is not None and urlparse(base_url).scheme != 'https':
-            raise ValueError('`base_url`s need to be over `https`. Update your `base_url`.')
+        if base_url is not None and urlparse(base_url).scheme != 'https' and not allow_non_secure:
+            raise ValueError('`base_url`s need to be over `https`. Update your `base_url` or set `allow_non_secure`.')
 
         self._api_key = api_key
         self._username = username
@@ -61,6 +63,7 @@ class Credentials:
         self._session = session
         self._user_id = None
         self._api_key_auth_client = None
+        self._allow_non_secure = allow_non_secure
 
         self._norm_credentials()
 
@@ -90,6 +93,11 @@ class Credentials:
     def base_url(self):
         """Credentials base_url"""
         return self._base_url
+
+    @property
+    def allow_non_secure(self):
+        """Allow connections non secure over http"""
+        return self._allow_non_secure
 
     @property
     def session(self):
@@ -145,7 +153,9 @@ class Credentials:
                 credentials.get('username'),
                 credentials.get('api_key'),
                 credentials.get('base_url'),
-                session)
+                session,
+                credentials.get('allow_non_secure'),
+            )
         except FileNotFoundError:
             raise FileNotFoundError('There is no default credentials file. '
                                     'Run `Credentials(...).save()` to create a credentials file.')
@@ -173,7 +183,8 @@ class Credentials:
             credentials.username,
             credentials.api_key,
             credentials.base_url,
-            credentials.session)
+            credentials.session,
+            credentials.allow_non_secure)
 
     def save(self, config_file=None):
         """Saves current user credentials to user directory.
@@ -192,7 +203,8 @@ class Credentials:
         content = {
             'username': self._username,
             'api_key': self._api_key,
-            'base_url': self._base_url
+            'base_url': self._base_url,
+            'allow_non_secure': self._allow_non_secure
         }
 
         if config_file is None:
