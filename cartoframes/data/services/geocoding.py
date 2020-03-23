@@ -324,12 +324,15 @@ class Geocoding(Service):
         aborted = False
 
         if not dry_run:
-            available_quota = self.available_quota()
-            if output['required_quota'] > available_quota:
-                raise Exception('Your CARTO account does not have enough Geocoding quota: {}/{}'.format(
-                    output['required_quota'],
-                    available_quota
-                ))
+            provider = self.provider()
+
+            if provider not in ['google']:  # Geocoder providers without server quota (use the client API key)
+                available_quota = self.available_quota()
+                if output['required_quota'] > available_quota:
+                    raise Exception('Your CARTO account does not have enough Geocoding quota: {}/{}'.format(
+                        output['required_quota'],
+                        available_quota
+                    ))
 
             if output['required_quota'] > 0:
                 with TableGeocodingLock(self._execute_query, table_name) as locked:
