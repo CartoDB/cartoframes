@@ -2,12 +2,25 @@ import pandas as pd
 
 from abc import ABC
 
-from ...clients.bigquery_client import BigQueryClient
 from carto.do_dataset import DODataset
+from ....utils.logger import log
 from ....exceptions import DOError
 
 
 _PLATFORM_BQ = 'bq'
+
+_DATASET_READ_MSG = '''To load it as a DataFrame you can do:
+
+    df = pandas.read_csv('{}')
+'''
+
+_GEOGRAPHY_READ_MSG = '''To load it as a GeoDataFrame you can do:
+
+    from cartoframes.utils import decode_geometry
+
+    df = pandas.read_csv('{}')
+    gdf = GeoDataFrame(df, geometry=decode_geometry(df['geom']))
+'''
 
 
 class CatalogEntity(ABC):
@@ -119,6 +132,12 @@ class CatalogEntity(ABC):
             with open(file_path, 'w') as csvfile:
                 for row in rows:
                     csvfile.write(row.decode('utf-8'))
+
+            log.info('Data saved: {}'.format(file_path))
+            if self.__class__.__name__ == 'Dataset':
+                log.info(_DATASET_READ_MSG.format(file_path))
+            elif self.__class__.__name__ == 'Geography':
+                log.info(_GEOGRAPHY_READ_MSG.format(file_path))
         else:
             dataframe = pd.read_csv(rows)
             return dataframe
@@ -137,10 +156,6 @@ class CatalogEntity(ABC):
             )
         else:
             return self.id
-
-
-def _get_bigquery_client(credentials):
-    return BigQueryClient(credentials)
 
 
 def is_slug_value(id_value):
