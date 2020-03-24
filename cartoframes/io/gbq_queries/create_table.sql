@@ -3,7 +3,7 @@ CREATE OR REPLACE TABLE `{output_table}`
         z INT64 NOT NULL,
         x INT64 NOT NULL,
         y INT64 NOT NULL,
-        mvt BYTES NOT NULL,
+        mvt BYTES,
         parent_quadkey INT64
     )
     -- The upper limit of the partition should be `{max_integer_quadkey} + 1`, but as it is right now, we can use the extra `__UNPARTITIONED__` partition

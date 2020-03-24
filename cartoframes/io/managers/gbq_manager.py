@@ -21,8 +21,8 @@ PREPARE_PARTITIONS = 100
 MAX_PARTITIONS = 10000
 MAX_QUADKEY_ZOOM = 20
 
-WASM_BREAK_ZOOM = 8
-GEOJSON_VT_BASE_ZOOM = 12
+MIN_MEDIUM_LEVEL_ZOOM = 9
+MAX_MEDIUM_LEVEL_ZOOM = 11
 DEFAULT_ZOOMS = [0, 4, 8, 12, 14]
 
 COMPRESSION_FORMAT = 'pako'
@@ -43,9 +43,11 @@ TILESET_SQL_FILEPATHS = {
     'prepare': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'prepare.sql'),
     'bounding_box': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'bounding_box.sql'),
     'create_table': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'create_table.sql'),
-    'insert_geojson_vt': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'insert_geojson_vt.sql'),
-    'insert_wasm': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'insert_wasm.sql'),
-    'clean': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'clean.sql'),
+    'insert_low_level': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'insert_low_level.sql'),
+    'insert_medium_level': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'insert_medium_level.sql'),
+    'insert_high_level': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'insert_high_level.sql'),
+    'clean_insert': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'clean_insert.sql'),
+    'clean_prepare': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'clean_prepare.sql'),
     'available_zooms_oom': Path(__file__).parent.parent.joinpath(TILESET_SQL_DIR, 'available_zooms_oom.sql')
 }
 
@@ -110,8 +112,8 @@ class GBQManager:
     def prepare_input_data(self, source_query, index_col, geom_col, prepare_table):
         prepare_query = read_file(TILESET_SQL_FILEPATHS['prepare'])
         prepare_query = prepare_query.format(
-            source_query=source_query, index_col=index_col, geom_col=geom_col, prepare_partitions=PREPARE_PARTITIONS,
-            prepare_table=prepare_table)
+            source_query=source_query, index_col=index_col, geom_col=geom_col, tile_extent=TILE_EXTENT,
+            prepare_partitions=PREPARE_PARTITIONS, prepare_table=prepare_table)
 
         self.execute_query(prepare_query)
 
@@ -163,54 +165,83 @@ class GBQManager:
 
         return bbox, quadkey_zoom
 
-    def insert_geojson_vt_data(self, prepare_table, bbox, quadkey_zoom, zooms, options, output_table):
+    def insert_low_level_zoom_data(self, prepare_table, bbox, quadkey_zoom, zooms, options, output_table):
         zooms_ = zooms if zooms else DEFAULT_ZOOMS
-        options_ = json.dumps(options)
-
-        geojson_vt_base_zooms = [GEOJSON_VT_BASE_ZOOM]
-        geojson_vt_zooms = [zoom - GEOJSON_VT_BASE_ZOOM for zoom in zooms_ if zoom >= GEOJSON_VT_BASE_ZOOM]
-
-        if not geojson_vt_zooms:
+        low_level_zooms = [zoom for zoom in zooms_ if zoom < MIN_MEDIUM_LEVEL_ZOOM]
+        if not low_level_zooms:
             return
 
-        insert_geojson_vt_query = read_file(TILESET_SQL_FILEPATHS['insert_geojson_vt'])
-        insert_geojson_vt_query = insert_geojson_vt_query.format(
-            prepare_table=prepare_table, xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3],
-            geojson_vt_base_zooms=geojson_vt_base_zooms, geojson_vt_zooms=geojson_vt_zooms, quadkey_zoom=quadkey_zoom,
-            tile_extent=TILE_EXTENT, tile_buffer=TILE_BUFFER, options=options_, output_table=output_table)
-
-        self.execute_query(insert_geojson_vt_query)
-
-    def insert_wasm_data(self, prepare_table, bbox, quadkey_zoom, zooms, options, output_table):
-        zooms_ = zooms if zooms else DEFAULT_ZOOMS
         options_ = json.dumps(options)
 
-        wasm_zooms = [zoom for zoom in zooms_ if zoom < GEOJSON_VT_BASE_ZOOM]
-
-        wasm_little_zooms = [wasm_zoom for wasm_zoom in wasm_zooms if wasm_zoom <= WASM_BREAK_ZOOM]
-        wasm_big_zooms = [wasm_zoom for wasm_zoom in wasm_zooms if wasm_zoom > WASM_BREAK_ZOOM]
-
-        self._insert_wasm_data(prepare_table, bbox, quadkey_zoom, wasm_little_zooms, options_, output_table)
-        for wasm_big_zoom in wasm_big_zooms:
-            self._insert_wasm_data(prepare_table, bbox, quadkey_zoom, [wasm_big_zoom], options_, output_table)
-
-    def _insert_wasm_data(self, prepare_table, bbox, quadkey_zoom, wasm_zooms, options_, output_table):
-        if not wasm_zooms:
-            return
-
-        insert_wasm_query = read_file(TILESET_SQL_FILEPATHS['insert_wasm'])
-        insert_wasm_query = insert_wasm_query.format(
-            prepare_table=prepare_table, xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3], wasm_zooms=wasm_zooms,
+        insert_low_level_zoom_query = read_file(TILESET_SQL_FILEPATHS['insert_low_level'])
+        insert_low_level_zoom_query = insert_low_level_zoom_query.format(
+            prepare_table=prepare_table, xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3], zooms=low_level_zooms,
             quadkey_zoom=quadkey_zoom, tile_extent=TILE_EXTENT, tile_buffer=TILE_BUFFER, options=options_,
             output_table=output_table)
 
-        self.execute_query(insert_wasm_query)
+        self.execute_query(insert_low_level_zoom_query)
+
+    def _complete_options(self, options):
+        options_ = {**options, 'mvt_geom': 1}
+        options_ = json.dumps(options_)
+        return options_[:-1] + ', "z": %d, "x": %d, "y": %d}'
+
+    def insert_medium_level_zoom_data(self, prepare_table, bbox, quadkey_zoom, zooms, options, output_table):
+        zooms_ = zooms if zooms else DEFAULT_ZOOMS
+        medium_level_zooms = [
+            zoom for zoom in zooms_ if zoom >= MIN_MEDIUM_LEVEL_ZOOM and zoom <= MAX_MEDIUM_LEVEL_ZOOM
+        ]
+        if not medium_level_zooms:
+            return
+
+        options_ = self._complete_options(options)
+
+        for zoom in medium_level_zooms:
+            self._insert_medium_level_zoom_data(prepare_table, bbox, quadkey_zoom, zoom, options_, output_table)
+
+    def _insert_medium_level_zoom_data(self, prepare_table, bbox, quadkey_zoom, zoom, options, output_table):
+        insert_medium_level_zoom_query = read_file(TILESET_SQL_FILEPATHS['insert_medium_level'])
+        insert_medium_level_zoom_query = insert_medium_level_zoom_query.format(
+            prepare_table=prepare_table, xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3], zooms=[zoom],
+            quadkey_zoom=quadkey_zoom, tile_extent=TILE_EXTENT, tile_buffer=TILE_BUFFER, options=options,
+            output_table=output_table)
+
+        self.execute_query(insert_medium_level_zoom_query)
+
+    def insert_high_level_zoom_data(self, prepare_table, bbox, quadkey_zoom, zooms, options, output_table):
+        zooms_ = zooms if zooms else DEFAULT_ZOOMS
+        high_level_zooms = [zoom for zoom in zooms_ if zoom > MAX_MEDIUM_LEVEL_ZOOM]
+        if not high_level_zooms:
+            return
+
+        options_ = self._complete_options(options)
+
+        for zoom in high_level_zooms:
+            self._insert_high_level_zoom_data(prepare_table, bbox, quadkey_zoom, zoom, options_, output_table)
+
+    def _insert_high_level_zoom_data(self, prepare_table, bbox, quadkey_zoom, zoom, options, output_table):
+        zooms = [MAX_MEDIUM_LEVEL_ZOOM]
+        depth = zoom - MAX_MEDIUM_LEVEL_ZOOM
+
+        insert_high_level_zoom_query = read_file(TILESET_SQL_FILEPATHS['insert_high_level'])
+        insert_high_level_zoom_query = insert_high_level_zoom_query.format(
+            prepare_table=prepare_table, xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3], zooms=zooms,
+            depth=depth, quadkey_zoom=quadkey_zoom, tile_extent=TILE_EXTENT, tile_buffer=TILE_BUFFER, options=options,
+            output_table=output_table)
+
+        self.execute_query(insert_high_level_zoom_query)
+
+    def clean_insert_data(self, output_table):
+        clean_insert_query = read_file(TILESET_SQL_FILEPATHS['clean_insert'])
+        clean_insert_query = clean_insert_query.format(output_table=output_table)
+
+        self.execute_query(clean_insert_query)
 
     def clean_prepare_input_data(self, prepare_table):
-        clean_query = read_file(TILESET_SQL_FILEPATHS['clean'])
-        clean_query = clean_query.format(prepare_table=prepare_table)
+        clean_prepare_query = read_file(TILESET_SQL_FILEPATHS['clean_prepare'])
+        clean_prepare_query = clean_prepare_query.format(prepare_table=prepare_table)
 
-        self.execute_query(clean_query)
+        self.execute_query(clean_prepare_query)
 
     def get_available_zooms_oom(self, output_table):
         available_zooms_oom_query = read_file(TILESET_SQL_FILEPATHS['available_zooms_oom'])
@@ -273,7 +304,7 @@ class GBQManager:
             'source': source,
             'available_zooms': available_zooms,
             'tile_extent': TILE_EXTENT,
-            'geojson_vt_base_zoom': GEOJSON_VT_BASE_ZOOM,
+            'tile_buffer': TILE_BUFFER,
             'quadkey_zoom': quadkey_zoom,
             'compression': COMPRESSION_FORMAT if compression else None,
             'bbox': bbox,

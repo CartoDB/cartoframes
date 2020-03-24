@@ -9,6 +9,9 @@ from ..utils.logger import log
 def create_tileset(source, name=None, project=None, credentials=None, token=None, index_col='geoid',
                    geom_col='geom', bbox=None, zooms=None, compression=True, min_max=False, already_prepared=False,
                    clean=False):
+    if not name:
+        raise Exception('Name can not be empty')
+
     source_query = get_query_from_table(source)
     prepare_table = _get_prepate_table_name(source, name)
     manager = GBQManager(project=project, credentials=credentials, token=token)
@@ -29,11 +32,17 @@ def create_tileset(source, name=None, project=None, credentials=None, token=None
     if not compression:
         options['compression'] = 0
 
-    log.info('Inserting{} MVTs 1/2'.format(' compressed' if compression else ''))
-    manager.insert_geojson_vt_data(prepare_table, bbox_, quadkey_zoom, zooms, options, name)
+    log.info('Inserting{} low level zoom MVTs (1/3)'.format(' compressed' if compression else ''))
+    manager.insert_low_level_zoom_data(prepare_table, bbox_, quadkey_zoom, zooms, options, name)
 
-    log.info('Inserting{} MVTs 2/2'.format(' compressed' if compression else ''))
-    manager.insert_wasm_data(prepare_table, bbox_, quadkey_zoom, zooms, options, name)
+    log.info('Inserting{} medium level zoom MVTs (2/3)'.format(' compressed' if compression else ''))
+    manager.insert_medium_level_zoom_data(prepare_table, bbox_, quadkey_zoom, zooms, options, name)
+
+    log.info('Inserting{} high level zoom MVTs (3/3)'.format(' compressed' if compression else ''))
+    manager.insert_high_level_zoom_data(prepare_table, bbox_, quadkey_zoom, zooms, options, name)
+
+    log.info('Cleaning generated tileset')
+    manager.clean_insert_data(name)
 
     if clean:
         log.info('Cleaning temporal data from the {} table'.format(prepare_table))

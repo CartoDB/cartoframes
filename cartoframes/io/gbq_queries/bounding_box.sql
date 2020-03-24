@@ -1,2 +1,2 @@
-SELECT MIN(__xmin) AS xmin, MIN(__ymin) AS ymin, MAX(__xmax) AS xmax, MAX(__ymax) AS ymax
+SELECT MIN(xmin) AS xmin, MIN(ymin) AS ymin, MAX(xmax) AS xmax, MAX(ymax) AS ymax
     FROM `{prepare_table}`;
