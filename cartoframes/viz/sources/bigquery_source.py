@@ -27,7 +27,7 @@ def _gbq_tileset_source(tileset, project, token, index_col):
 
     # How to get table metadata and an example of its content, remember the `min` & `max` values are optional
     # manager = GBQManager(project, credentials=None, token=None)
-    # table_metadata = manager.get_table_metadata(dataset, table)
+    # table_metadata = manager.get_table_metadata(table_id)
     """
     {
         "input_table": "josema_wip.geography_usa_block_2019_ri",

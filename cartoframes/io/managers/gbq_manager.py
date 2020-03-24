@@ -94,18 +94,13 @@ class GBQManager:
             log.info('DEBUG: big dataset ({:.2f} MB)'.format(estimated_size / 1024 / 1024))
         return estimated_size
 
-    def get_table_object(self, dataset, table):
-        table_ref = self.client.dataset(dataset).table(table)
-        return self.client.get_table(table_ref)
-
-    def get_table_metadata(self, dataset, table):
-        table_object = self.get_table_object(dataset, table)
+    def get_table_metadata(self, table_id):
+        table_object = self.client.get_table(table_id)
         metadata_string = table_object.description
         return json.loads(metadata_string)
 
-    def get_big_query_table_schema(self, table):
-        _, dataset, table_ = self.split_table_name(table)
-        table_object = self.get_table_object(dataset, table_)
+    def get_big_query_table_schema(self, table_id):
+        table_object = self.client.get_table(table_id)
         return table_object.schema
 
     def get_big_query_query_schema(self, query):
@@ -175,6 +170,9 @@ class GBQManager:
         geojson_vt_base_zooms = [GEOJSON_VT_BASE_ZOOM]
         geojson_vt_zooms = [zoom - GEOJSON_VT_BASE_ZOOM for zoom in zooms_ if zoom >= GEOJSON_VT_BASE_ZOOM]
 
+        if not geojson_vt_zooms:
+            return
+
         insert_geojson_vt_query = read_file(TILESET_SQL_FILEPATHS['insert_geojson_vt'])
         insert_geojson_vt_query = insert_geojson_vt_query.format(
             prepare_table=prepare_table, xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3],
@@ -197,6 +195,9 @@ class GBQManager:
             self._insert_wasm_data(prepare_table, bbox, quadkey_zoom, [wasm_big_zoom], options_, output_table)
 
     def _insert_wasm_data(self, prepare_table, bbox, quadkey_zoom, wasm_zooms, options_, output_table):
+        if not wasm_zooms:
+            return
+
         insert_wasm_query = read_file(TILESET_SQL_FILEPATHS['insert_wasm'])
         insert_wasm_query = insert_wasm_query.format(
             prepare_table=prepare_table, xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3], wasm_zooms=wasm_zooms,
@@ -220,7 +221,6 @@ class GBQManager:
         for row in available_zooms_oom_result:
             available_zooms.append({
                 'zoom': row['zoom'],
-                'extent': TILE_EXTENT,
                 'oom_ratio': row['oom_ratio']
             })
 
@@ -272,6 +272,7 @@ class GBQManager:
         metadata_dict = {
             'source': source,
             'available_zooms': available_zooms,
+            'tile_extent': TILE_EXTENT,
             'geojson_vt_base_zoom': GEOJSON_VT_BASE_ZOOM,
             'quadkey_zoom': quadkey_zoom,
             'compression': COMPRESSION_FORMAT if compression else None,
@@ -279,8 +280,6 @@ class GBQManager:
             'properties': input_schema
         }
 
-        _, dataset, table = self.split_table_name(output_table)
-        table_object = self.get_table_object(dataset, table)
-
+        table_object = self.client.get_table(output_table)
         table_object.description = json.dumps(metadata_dict)
         self.client.update_table(table_object, ['description'])
