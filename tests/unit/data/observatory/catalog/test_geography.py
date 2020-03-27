@@ -221,7 +221,6 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_geography_not_available_in_bq_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # mock geography
         get_by_id_mock.return_value = test_geography2
@@ -244,7 +243,6 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_geography_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography1
@@ -258,7 +256,6 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_geography_download_not_subscribed(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography2  # is private
@@ -278,7 +275,6 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_geography_download_not_subscribed_but_public(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography1  # is public
@@ -291,7 +287,6 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_geography_download_without_do_enabled(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography1

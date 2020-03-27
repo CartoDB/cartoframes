@@ -295,7 +295,6 @@ class TestDataset(object):
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_dataset_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_dataset1
@@ -309,7 +308,6 @@ class TestDataset(object):
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_dataset_not_subscribed_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # mock dataset
         get_by_id_mock.return_value = test_dataset2  # is private
@@ -329,7 +327,6 @@ class TestDataset(object):
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_dataset_download_not_subscribed_but_public(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_dataset1  # is public
@@ -342,7 +339,6 @@ class TestDataset(object):
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_dataset_download_without_do_enabled(self, mocked_bq_client, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_dataset1
