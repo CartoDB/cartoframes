@@ -16,7 +16,7 @@ from .examples import (
     test_dataset1, test_datasets, test_variables, test_variables_groups, db_dataset1, test_dataset2,
     db_dataset2, test_subscription_info
 )
-from .mocks import BigQueryClientMock
+from carto.do_dataset import DODataset
 
 
 class TestDataset(object):
@@ -295,12 +295,13 @@ class TestDataset(object):
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
-    def test_dataset_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_dataset_download(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_dataset1
         dataset = Dataset.get(test_dataset1.id)
         get_all_mock.return_value = [dataset]
-        mocked_bq_client.return_value = BigQueryClientMock()
+        download_stream_mock.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         # Then
@@ -308,12 +309,11 @@ class TestDataset(object):
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
-    def test_dataset_not_subscribed_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    def test_dataset_not_subscribed_download_fails(self, get_by_id_mock, get_all_mock):
         # mock dataset
         get_by_id_mock.return_value = test_dataset2  # is private
         dataset = Dataset.get(test_dataset2.id)
         get_all_mock.return_value = []
-        mocked_bq_client.return_value = BigQueryClientMock()
         credentials = Credentials('fake_user', '1234')
 
         # When
@@ -327,26 +327,29 @@ class TestDataset(object):
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
-    def test_dataset_download_not_subscribed_but_public(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_dataset_download_not_subscribed_but_public(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_dataset1  # is public
         dataset = Dataset.get(test_dataset1.id)
         get_all_mock.return_value = []
-        mocked_bq_client.return_value = BigQueryClientMock()
+        download_stream_mock.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         dataset.to_csv('fake_path', credentials)
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
-    def test_dataset_download_without_do_enabled(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_dataset_download_without_do_enabled(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_dataset1
         dataset = Dataset.get(test_dataset1.id)
         get_all_mock.return_value = []
-        mocked_bq_client.return_value = BigQueryClientMock(
-            ServerErrorException(['The user does not have Data Observatory enabled'])
-        )
+
+        def raise_exception(limit=None, order_by=None):
+            raise ServerErrorException(['The user does not have Data Observatory enabled'])
+        download_stream_mock.side_effect = raise_exception
         credentials = Credentials('fake_user', '1234')
 
         # When
