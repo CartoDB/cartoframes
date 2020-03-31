@@ -122,12 +122,23 @@ class CatalogEntity(ABC):
 
         return self.id
 
-    def _download(self, credentials, file_path=None, limit=None, order_by=None):
+    def _download(self, credentials, file_path=None, limit=None, order_by=None, sql_query=None, add_geom=None):
         if not self._is_available_in('bq'):
             raise DOError('{} is not ready for Download. Please, contact us for more information.'.format(self))
 
         auth_client = credentials.get_api_key_auth_client()
-        rows = DODataset(auth_client=auth_client).name(self.id).download_stream(limit=limit, order_by=order_by)
+
+        is_geography = None
+        if sql_query is not None:
+            is_geography = False
+            if self.__class__.__name__ == 'Geography':
+                is_geography = True
+
+        rows = DODataset(auth_client=auth_client).name(self.id).download_stream(limit=limit,
+                                                                                order_by=order_by,
+                                                                                sql_query=sql_query,
+                                                                                add_geom=add_geom,
+                                                                                is_geography=is_geography)
         if file_path:
             with open(file_path, 'w') as csvfile:
                 for row in rows:
