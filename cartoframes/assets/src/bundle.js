@@ -481,7 +481,6 @@ var init = (function () {
       throw e;
     }
 
-
     mapLayer.addTo(map);
 
     setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
@@ -590,7 +589,7 @@ var init = (function () {
     );
 
     if (settings.layer_selector) {
-      addLayersSelector(layers.reverse(), mapLayers.reverse());
+      addLayersSelector(layers.reverse(), mapLayers.reverse(), mapIndex);
     }
 
     setInteractiveLayers(map, layers, mapLayers);
@@ -628,16 +627,17 @@ var init = (function () {
     }
   }
 
-  function addLayersSelector(layers, mapLayers) {
-    const layerSelector$ = document.querySelector(`#layer-selector`);
-      const layersInfo = mapLayers.map((layer, index) => {
-        return {
-          title: layers[index].title || `Layer ${index}`,
-          id: layer.id,
-          checked: true
-        };
-      });
-    
+  function addLayersSelector(layers, mapLayers, mapIndex) {
+    const layerSelectorId = mapIndex !== undefined ? `#layer-selector-${mapIndex}` : '#layer-selector';
+    const layerSelector$ = document.querySelector(layerSelectorId);
+    const layersInfo = mapLayers.map((layer, index) => {
+      return {
+        title: layers[index].title || `Layer ${index}`,
+        id: layer.id,
+        checked: true
+      };
+    });
+
     const layerSelector = new AsBridge.VL.Layers(layerSelector$, carto, layersInfo, mapLayers);
     
     layerSelector.build();

@@ -252,6 +252,7 @@ class TestMapPublication(object):
             bounds={'west': 1, 'east': 2, 'north': 3, 'south': 4},
             viewport={'zoom': 5, 'lat': 50, 'lng': -10},
             is_static=True,
+            layer_selector=False,
             theme='dark',
             title='title',
             description='description'
