@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve to_csv info message (#1589)
 - Use default credentials in metrics (#1603)
 - Improve Layout map ordering (#1597)
+- Change numeric autoformat (remove scientific notation)
 
 ### Fixed
 - Allow using columns with symbols in visualization (#1585)
