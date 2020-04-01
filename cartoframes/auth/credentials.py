@@ -118,7 +118,9 @@ class Credentials:
 
             try:
                 user_me = api_key_auth_client.send(ME_SERVICE, 'get').json()
-                self._user_id = user_me.get('user_data', {}).get('id')
+                user_data = user_me.get('user_data')
+                if user_data:
+                    self._user_id = user_data.get('id')
 
             except ValueError:  # When the response isn't a JSON
                 pass
