@@ -1,4 +1,4 @@
-from .utils import get_value
+from .utils import get_value, prop
 from ..style import Style
 from ..legends import size_bins_legend
 from ..widgets import histogram_widget
@@ -44,15 +44,15 @@ def size_bins_style(value, method='quantiles', bins=5, breaks=None, size_range=N
         func = 'buckets'
         breaks = list(breaks)
 
-    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
+    animation_filter = 'animation(linear({}), 20, fade(1,1))'.format(prop(animate)) if animate else '1'
 
     data = {
         'point': {
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, '#EE5D5A'),
                 get_value(opacity, 0.8)),
-            'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                func, value, breaks or bins, size_range or [2, 14]),
+            'width': 'ramp({0}({1}, {2}), {3})'.format(
+                func, prop(value), breaks or bins, size_range or [2, 14]),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
             'filter': animation_filter
@@ -61,8 +61,8 @@ def size_bins_style(value, method='quantiles', bins=5, breaks=None, size_range=N
             'color': 'opacity({0}, {1})'.format(
                 get_value(color, 'color', 'line'),
                 get_value(opacity, 0.8)),
-            'width': 'ramp({0}(${1}, {2}), {3})'.format(
-                func, value, breaks or bins, size_range or [1, 10]),
+            'width': 'ramp({0}({1}, {2}), {3})'.format(
+                func, prop(value), breaks or bins, size_range or [1, 10]),
             'filter': animation_filter
         }
     }

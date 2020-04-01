@@ -11,7 +11,7 @@ class TestFormulaWidget(object):
         widget = widgets.formula_widget('value', title='Formula Widget')
         widget_info = widget.get_info()
         assert widget_info.get('type') == 'formula'
-        assert widget_info.get('value') == '$value'
+        assert widget_info.get('value') == "prop('value')"
         assert widget_info.get('title') == 'Formula Widget'
 
     def test_count_formula_viewport(self):
@@ -30,10 +30,10 @@ class TestFormulaWidget(object):
         "should create a formula widget to get a viewport operation"
         widget = widgets.formula_widget('value', operation='avg')
         widget_info = widget.get_info()
-        assert widget_info.get('value') == 'viewportAvg($value)'
+        assert widget_info.get('value') == "viewportAvg(prop('value'))"
 
     def test_formula_global(self):
         "should create a formula widget to get a global operation"
         widget = widgets.formula_widget('value', operation='avg', is_global=True)
         widget_info = widget.get_info()
-        assert widget_info.get('value') == 'globalAvg($value)'
+        assert widget_info.get('value') == "globalAvg(prop('value'))"

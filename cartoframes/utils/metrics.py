@@ -88,10 +88,9 @@ def build_metrics_data(event_name, extra_metrics_data):
 
 @silent_fail
 def post_metrics(event_name, extra_metrics_data):
-    if get_metrics_enabled():
-        json_data = build_metrics_data(event_name, extra_metrics_data)
-        result = requests.post('https://carto.com/api/metrics', json=json_data, timeout=2)
-        log.debug('Metrics sent! {0} {1}'.format(result.status_code, json_data))
+    json_data = build_metrics_data(event_name, extra_metrics_data)
+    result = requests.post('https://carto.com/api/metrics', json=json_data, timeout=2)
+    log.debug('Metrics sent! {0} {1}'.format(result.status_code, json_data))
 
 
 def send_metrics(event_name):
@@ -100,8 +99,9 @@ def send_metrics(event_name):
         def wrapper_func(*args, **kwargs):
             result = func(*args, **kwargs)
 
-            extra_metrics_data = build_extra_metrics_data(func, *args, **kwargs)
-            post_metrics(event_name, extra_metrics_data)
+            if get_metrics_enabled():
+                extra_metrics_data = build_extra_metrics_data(func, *args, **kwargs)
+                post_metrics(event_name, extra_metrics_data)
 
             return result
         return wrapper_func
@@ -114,10 +114,7 @@ def build_extra_metrics_data(decorated_function, *args, **kwargs):
             'credentials', decorated_function, *args, **kwargs)
         credentials = get_credentials(credentials)
         return {'user_id': credentials.user_id} if credentials and credentials.user_id else {}
-
-    # ValueError: When the decorated function doesn't contain `credentials`, e.g. creating a map
-    # AttributeError: When no user is set, e.g., reading a public table
-    except (ValueError, AttributeError):
+    except Exception:
         return {}
 
 

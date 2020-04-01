@@ -1,4 +1,4 @@
-from ..utils.utils import gen_variable_name, gen_column_name
+from ..utils.utils import gen_variable_name
 
 
 class Popup:
@@ -9,15 +9,15 @@ class Popup:
     Layer popup.
 
     """
-    def __init__(self, event=None, value=None, title=None, operation=False):
-        self._init_popup(event, value, title, operation)
+    def __init__(self, event=None, value=None, title=None):
+        self._init_popup(event, value, title)
 
-    def _init_popup(self, event=None, value=None, title=None, operation=False):
+    def _init_popup(self, event=None, value=None, title=None):
         if not isinstance(event, str) and not isinstance(value, str):
             raise ValueError('Wrong popup input')
 
         self._event = event
-        self._value = gen_column_name(value, operation)
+        self._value = value
         self._title = title if title else value
 
         self._interactivity = self._get_interactivity()

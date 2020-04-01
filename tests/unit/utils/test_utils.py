@@ -211,7 +211,7 @@ class TestUtils(unittest.TestCase):
         assert encode_row(np.nan) == b'NaN'
 
     def test_extract_viz_columns(self):
-        viz = 'color: $hello + $A_0123'
+        viz = "color: prop('hello') + prop('A_0123')"
         assert 'hello' in extract_viz_columns(viz)
         assert 'A_0123' in extract_viz_columns(viz)
 
