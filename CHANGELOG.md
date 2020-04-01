@@ -7,7 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.2] - 2020-xx-xx
 
+### Added
+- Add geometry icon to single legends (#1580)
+- Publish Layout (#1598)
 
+### Changed
+- Use Enrichment API and Metadata API for DO features (#1575)
+- Improve to_csv info message (#1589)
+- Use default credentials in metrics (#1603)
+- Improve Layout map ordering (#1597)
+
+### Fixed
+- Allow using columns with symbols in visualization (#1585)
+- Fix layer_selector without style helpers (#1580)
+- Fix layer_selector in published maps (#1595)
+- Fix Google geocoding (#1600)
+- Fix legends in Layout (#1597)
 
 ## [1.0.1] - 2020-02-28
 
