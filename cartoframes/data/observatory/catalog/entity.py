@@ -6,9 +6,6 @@ from carto.do_dataset import DODataset
 from ....utils.logger import log
 from ....exceptions import DOError
 
-
-_PLATFORM_BQ = 'bq'
-
 _DATASET_READ_MSG = '''To load it as a DataFrame you can do:
 
     df = pandas.read_csv('{}')
@@ -123,9 +120,6 @@ class CatalogEntity(ABC):
         return self.id
 
     def _download(self, credentials, file_path=None, limit=None, order_by=None):
-        if not self._is_available_in('bq'):
-            raise DOError('{} is not ready for Download. Please, contact us for more information.'.format(self))
-
         auth_client = credentials.get_api_key_auth_client()
         rows = DODataset(auth_client=auth_client).name(self.id).download_stream(limit=limit, order_by=order_by)
         if file_path:
@@ -141,9 +135,6 @@ class CatalogEntity(ABC):
         else:
             dataframe = pd.read_csv(rows)
             return dataframe
-
-    def _is_available_in(self, platform=_PLATFORM_BQ):
-        return self.data['available_in'] and platform in self.data['available_in']
 
     def _get_remote_full_table_name(self, user_project, user_dataset, public_project):
         project, dataset, table = self.id.split('.')
