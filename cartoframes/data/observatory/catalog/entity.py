@@ -4,7 +4,6 @@ from abc import ABC
 
 from carto.do_dataset import DODataset
 from ....utils.logger import log
-from ....exceptions import DOError
 
 _DATASET_READ_MSG = '''To load it as a DataFrame you can do:
 
