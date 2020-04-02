@@ -1,3 +1,5 @@
+import re
+
 from .popup import Popup
 from .styles.utils import prop
 
@@ -77,6 +79,11 @@ class PopupList:
 
         for popup in self._popups:
             if popup:
-                popups_variables[popup.variable.get('name')] = prop(popup.variable.get('value'))
+                name = popup.variable.get('name')
+                value = popup.variable.get('value')
+                if re.match(r'^cluster[a-zA-Z]+\(.*\)$', value):
+                    popups_variables[name] = value
+                else:
+                    popups_variables[name] = prop(value)
 
         return popups_variables

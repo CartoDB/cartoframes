@@ -114,10 +114,7 @@ def build_extra_metrics_data(decorated_function, *args, **kwargs):
             'credentials', decorated_function, *args, **kwargs)
         credentials = get_credentials(credentials)
         return {'user_id': credentials.user_id} if credentials and credentials.user_id else {}
-
-    # ValueError: When the decorated function doesn't contain `credentials`, e.g. creating a map
-    # AttributeError: When no user is set, e.g., reading a public table
-    except (ValueError, AttributeError):
+    except Exception:
         return {}
 
 

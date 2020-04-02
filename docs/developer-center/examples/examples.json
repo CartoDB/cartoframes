@@ -385,6 +385,11 @@
             "desc": "Publish a visualization from a GeoDataFrame",
             "file": "publish_visualization_gdf",
             "path": "publish_and_share"
+        }, {
+            "title": "Publish Layout Visualization",
+            "desc": "Publish a layout visualization",
+            "file": "publish_layout",
+            "path": "publish_and_share"
         }]
     }, {
         "title": "Use cases",

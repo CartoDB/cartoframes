@@ -15,7 +15,7 @@ class Widget:
 
     """
     def __init__(self, widget_type, value=None, title=None, description=None,
-                 footer=None, prop=None, read_only=False, buckets=20):
+                 footer=None, prop=None, read_only=False, buckets=20, weight=1):
         self._check_type(widget_type)
 
         self._type = widget_type
@@ -26,6 +26,7 @@ class Widget:
         self._prop = self._get_prop(prop)
         self._read_only = read_only
         self._buckets = buckets
+        self._weight = weight
         self._variable_name = gen_variable_name(self._value) if self._value else ''
         self._options = self._build_options()
 
@@ -68,7 +69,8 @@ class Widget:
     def _build_options(self):
         options = {
             'read_only': self._read_only,
-            'buckets': self._buckets
+            'buckets': self._buckets,
+            'weight': self._weight
         }
 
         return camel_dictionary(options)

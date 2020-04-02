@@ -529,15 +529,17 @@ def silent_fail(method):
 
 
 def get_parameter_from_decorator(parameter_name, decorated_function, *args, **kwargs):
+    parameter = None
+
     try:
         parameter = kwargs[parameter_name]
-
     except KeyError:
         try:
-            parameter_arg_index = inspect.getargspec(decorated_function).args.index(parameter_name)
-            parameter = args[parameter_arg_index]
-
+            parameter_args = inspect.getargspec(decorated_function).args
+            if parameter_name in parameter_args:
+                parameter_arg_index = parameter_args.index(parameter_name)
+                parameter = args[parameter_arg_index]
         except IndexError:
-            parameter = None
+            pass
 
     return parameter
