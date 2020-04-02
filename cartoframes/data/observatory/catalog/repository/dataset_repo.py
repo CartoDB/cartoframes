@@ -44,7 +44,6 @@ class DatasetRepository(EntityRepository):
             'name': self._normalize_field(row, 'name'),
             'description': self._normalize_field(row, 'description'),
             'country_id': self._normalize_field(row, 'country_id'),
-            'country_name': self._normalize_field(row, 'country_name'),
             'geography_id': self._normalize_field(row, 'geography_id'),
             'geography_name': self._normalize_field(row, 'geography_name'),
             'geography_description': self._normalize_field(row, 'geography_description'),
