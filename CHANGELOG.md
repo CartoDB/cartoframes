@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add geometry icon to single legends (#1580)
 - Publish Layout (#1598)
+- Upgrade carto-python to version [1.10.0](https://github.com/CartoDB/carto-python/releases/tag/v1.10.0)
 
 ### Changed
 - Use Enrichment API and Metadata API for DO features (#1575)
@@ -142,13 +143,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix DataObsClient (#1319)
 - Fix CartoDataFrame plot (#1339)
 - Fix enrichment without subscriptions (#1314)
-- Fix encoding detection with all Nones (#1346) 
+- Fix encoding detection with all Nones (#1346)
 
 ## [1.0b6] - 2019-12-02
 ### Added
 - Add new properties in Catalog Dataset and Geography (#1209)
 - Add IO functions and CartoDataFrame class (#1130, #1245)
-  - IO functions: read_carto, to_carto, has_table, describe_table, 
+  - IO functions: read_carto, to_carto, has_table, describe_table,
     update_table, copy_table, create_table_from_query, delete_table.
   - CartoDataFrame class: inherit GeoDataFrame class + from_carto, to_carto, viz.
   - Refactor internals: ContextManager, SourceManager.
