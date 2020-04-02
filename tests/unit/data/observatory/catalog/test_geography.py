@@ -15,7 +15,7 @@ from .examples import (
     test_geography1, test_geographies, test_datasets, db_geography1,
     test_geography2, db_geography2, test_subscription_info
 )
-from .mocks import BigQueryClientMock
+from carto.do_dataset import DODataset
 
 
 class TestGeography(object):
@@ -221,8 +221,8 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_not_available_in_bq_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_geography_not_available_in_bq_download_fails(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # mock geography
         get_by_id_mock.return_value = test_geography2
         geography = Geography.get(test_geography2.id)
@@ -231,7 +231,7 @@ class TestGeography(object):
         get_all_mock.return_value = [geography]
 
         # mock big query client
-        mocked_bq_client.return_value = BigQueryClientMock()
+        download_stream_mock.return_value = []
 
         # test
         credentials = Credentials('fake_user', '1234')
@@ -244,13 +244,13 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_geography_download(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography1
         geography = Geography.get(test_geography1.id)
         get_all_mock.return_value = [geography]
-        mocked_bq_client.return_value = BigQueryClientMock()
+        download_stream_mock.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         # Then
@@ -258,14 +258,14 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download_not_subscribed(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_geography_download_not_subscribed(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography2  # is private
         get_by_id_mock.return_value = test_geography2
         geography = Geography.get(test_geography2.id)
         get_all_mock.return_value = []
-        mocked_bq_client.return_value = BigQueryClientMock()
+        download_stream_mock.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         with pytest.raises(Exception) as e:
@@ -278,28 +278,29 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download_not_subscribed_but_public(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_geography_download_not_subscribed_but_public(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography1  # is public
         geography = Geography.get(test_geography1.id)
         get_all_mock.return_value = []
-        mocked_bq_client.return_value = BigQueryClientMock()
+        download_stream_mock.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         geography.to_csv('fake_path', credentials)
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download_without_do_enabled(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_geography_download_without_do_enabled(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography1
         geography = Geography.get(test_geography1.id)
         get_all_mock.return_value = []
-        mocked_bq_client.return_value = BigQueryClientMock(
-            ServerErrorException(['The user does not have Data Observatory enabled'])
-        )
+
+        def raise_exception(limit=None, order_by=None):
+            raise ServerErrorException(['The user does not have Data Observatory enabled'])
+        download_stream_mock.side_effect = raise_exception
         credentials = Credentials('fake_user', '1234')
 
         # When
