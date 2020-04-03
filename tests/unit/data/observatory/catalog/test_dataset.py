@@ -116,7 +116,7 @@ class TestDataset(object):
     def test_dataset_is_exported_as_dict(self):
         # Given
         dataset = Dataset(db_dataset1)
-        excluded_fields = ['summary_json', 'available_in']
+        excluded_fields = ['summary_json']
         expected_dict = {key: value for key, value in db_dataset1.items() if key not in excluded_fields}
 
         # When
@@ -281,7 +281,6 @@ class TestDataset(object):
         datasets = test_datasets
         dataset = datasets[0]
         expected_dataset_df = dataset.to_series()
-        del expected_dataset_df['available_in']
         del expected_dataset_df['summary_json']
 
         # When
@@ -521,21 +520,3 @@ class TestDataset(object):
             'We are sorry, the Data Observatory is not enabled for your account yet. '
             'Please contact your customer success manager or send an email to '
             'sales@carto.com to request access to it.')
-
-    def test_dataset_is_available_in(self):
-        # Given
-        dataset_in_bq = Dataset(db_dataset1)
-        dataset_not_in_bq = Dataset(db_dataset2)
-
-        # Then
-        assert dataset_in_bq._is_available_in('bq')
-        assert not dataset_not_in_bq._is_available_in('bq')
-
-    def test_dataset_is_available_in_with_empty_field(self):
-        # Given
-        db_dataset = dict(db_dataset1)
-        db_dataset['available_in'] = None
-        dataset_null = Dataset(db_dataset)
-
-        # Then
-        assert not dataset_null._is_available_in('bq')
