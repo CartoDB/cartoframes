@@ -53,7 +53,6 @@ class TestVariable(object):
         dataset = variable.dataset
         agg_method = variable.agg_method
         variable_group = variable.variable_group
-        starred = variable.starred
         summary = variable.summary
 
         # Then
@@ -66,7 +65,6 @@ class TestVariable(object):
         assert dataset == db_variable1['dataset_id']
         assert agg_method == db_variable1['agg_method']
         assert variable_group == db_variable1['variable_group_id']
-        assert starred == db_variable1['starred']
         assert summary == db_variable1['summary_json']
 
     def test_variable_is_exported_as_series(self):
