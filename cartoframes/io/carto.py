@@ -81,6 +81,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         cartodbfy (bool, optional): convert the table to CARTO format. Default True. More info
             `here <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
 
+    Returns:
+        string: the table name normalized.
+
     Raises:
         ValueError: if the dataframe or table name provided are wrong or the if_exists param is not valid.
 
@@ -120,6 +123,8 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     if log_enabled:
         log.info('Success! Data uploaded to table "{}" correctly'.format(table_name))
+
+    return table_name
 
 
 def has_table(table_name, credentials=None, schema=None):
