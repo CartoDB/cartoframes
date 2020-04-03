@@ -387,8 +387,8 @@
             "path": "publish_and_share"
         }, {
             "title": "Publish Layout Visualization",
-            "desc": "Publish a layout visualization",
-            "file": "publish_layout",
+            "desc": "Publish a visualization of a layout",
+            "file": "publish_visualization_layout",
             "path": "publish_and_share"
         }]
     }, {
