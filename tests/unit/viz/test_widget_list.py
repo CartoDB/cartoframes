@@ -78,7 +78,8 @@ class TestWidgetList(object):
                 'options': {
                     'readOnly': False,
                     'buckets': 20,
-                    'weight': 1
+                    'weight': 1,
+                    'autoplay': True
                 }
             }, {
                 'type': 'basic',
@@ -92,6 +93,7 @@ class TestWidgetList(object):
                 'options': {
                     'readOnly': False,
                     'buckets': 20,
-                    'weight': 1
+                    'weight': 1,
+                    'autoplay': True
                 }
             }]
