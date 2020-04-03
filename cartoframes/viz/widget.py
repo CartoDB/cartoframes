@@ -70,7 +70,10 @@ class Widget:
         options = {
             'read_only': self._read_only,
             'buckets': self._buckets,
-            'weight': self._weight
+            'weight': self._weight,
+            'autoplay': True
+            # TODO: `autoplay: False` is not working on Airship,
+            # so it should be fixed when autoplay param is exposed in CF API
         }
 
         return camel_dictionary(options)
