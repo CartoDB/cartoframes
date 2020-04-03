@@ -135,7 +135,6 @@ class TestSource(object):
         gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.lon, df.lat))
 
         assert df.dtypes['date_column'] == np.dtype('datetime64[ns]')
-
         source = Source(gdf)
 
         assert source.datetime_column_names == ['date_column']
@@ -184,12 +183,9 @@ class TestSource(object):
     def test_empty_geometries(self):
         geojson = {
             "type": "FeatureCollection",
-            "features": [POINT, EMPTY]
+            "features": [EMPTY, POINT, EMPTY, EMPTY, POINT, EMPTY]
         }
         gdf = gpd.GeoDataFrame.from_features(geojson)
+        source = Source(gdf)
 
-        with pytest.raises(ValueError) as e:
-            Source(gdf)
-
-        assert str(e.value).startswith(
-            'Empty geometries found. Please remove the empty geometries first')
+        assert len(source.gdf) == 2
