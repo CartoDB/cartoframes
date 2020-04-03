@@ -33,7 +33,7 @@ class CatalogEntity(ABC):
     """
     id_field = 'id'
     _entity_repo = None
-    export_excluded_fields = ['summary_json', 'available_in', 'geom_coverage']
+    export_excluded_fields = ['summary_json', 'geom_coverage']
 
     def __init__(self, data):
         self.data = data
@@ -174,9 +174,6 @@ class CatalogList(list):
 
         """
         df = pd.DataFrame([item.data for item in self])
-
-        if 'available_in' in df:
-            del df['available_in']
 
         if 'summary_json' in df:
             del df['summary_json']

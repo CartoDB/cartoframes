@@ -58,8 +58,7 @@ class DatasetRepository(EntityRepository):
             'update_frequency': self._normalize_field(row, 'update_frequency'),
             'version': self._normalize_field(row, 'version'),
             'is_public_data': self._normalize_field(row, 'is_public_data'),
-            'summary_json': self._normalize_field(row, 'summary_json'),
-            'available_in': self._normalize_field(row, 'available_in')
+            'summary_json': self._normalize_field(row, 'summary_json')
         }
 
 

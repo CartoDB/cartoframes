@@ -204,8 +204,7 @@ class TestGeographyRepo(object):
             'update_frequency': None,
             'version': None,
             'is_public_data': None,
-            'summary_json': None,
-            'available_in': None
+            'summary_json': None
         })])
 
         # When
