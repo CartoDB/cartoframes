@@ -73,6 +73,15 @@ MULTIPOLYGON = {
     }
 }
 
+EMPTY = {
+    "type": "Feature",
+    "geometry": {
+        "type": "GeometryCollection",
+        "coordinates": None
+    },
+    "properties": {}
+}
+
 
 def setup_mocks(mocker):
     mocker.patch.object(ContextManager, 'compute_query')
@@ -171,3 +180,16 @@ class TestSource(object):
             Source(gdf)
 
         assert str(e.value).startswith('No valid geometry column types')
+
+    def test_empty_geometries(self):
+        geojson = {
+            "type": "FeatureCollection",
+            "features": [POINT, EMPTY]
+        }
+        gdf = gpd.GeoDataFrame.from_features(geojson)
+
+        with pytest.raises(ValueError) as e:
+            Source(gdf)
+
+        assert str(e.value).startswith(
+            'Empty geometries found. Please remove the empty geometries first')
