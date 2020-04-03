@@ -10,10 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add geometry icon to single legends (#1580)
 - Publish Layout (#1598)
-- Upgrade carto-python to version [1.10.0](https://github.com/CartoDB/carto-python/releases/tag/v1.10.0)
 
 ### Changed
-- Use Enrichment API and Metadata API for DO features (#1575)
+- Use Enrichment API and Metadata API for DO features (#1575, #1594)
 - Improve to_csv info message (#1589)
 - Use default credentials in metrics (#1603)
 - Improve Layout map ordering (#1597)
