@@ -118,12 +118,6 @@ And, finally, open a Pull Request against the docs branch.
 
 After that, in order to see the changes applied in the developer center, deploy the production version through Jenkins.
 
-Guides
-------
-
-Guides are placed in the `/docs/developer-center/guides` directory. They're written using markdown format.
-There's a `guide-boilerplate<./guide-boilerplate.md>`_. that can be used as a starting point.
-
 Examples
 --------
 
