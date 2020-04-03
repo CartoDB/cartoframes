@@ -135,7 +135,6 @@ db_variable1 = {
     'dataset_id': 'dataset1',
     'agg_method': '',
     'variable_group_id': 'vargroup1',
-    'starred': True,
     'summary_json': None
 }
 db_variable2 = {
@@ -148,7 +147,6 @@ db_variable2 = {
     'dataset_id': 'dataset1',
     'agg_method': '',
     'variable_group_id': 'vargroup1',
-    'starred': False,
     'summary_json': [{'key': 'value'}]
 }
 test_variable1 = Variable(db_variable1)
@@ -171,15 +169,13 @@ db_variable_group1 = {
     'id': 'carto-do.variable_group.vargroup1',
     'slug': 'vargroup1',
     'name': 'Population',
-    'dataset_id': 'dataset1',
-    'starred': True
+    'dataset_id': 'dataset1'
 }
 db_variable_group2 = {
     'id': 'carto-do.variable_group.vargroup2',
     'slug': 'vargroup2',
     'name': 'Date',
-    'dataset_id': 'dataset1',
-    'starred': False
+    'dataset_id': 'dataset1'
 }
 test_variable_group1 = VariableGroup(db_variable_group1)
 test_variable_group2 = VariableGroup(db_variable_group2)

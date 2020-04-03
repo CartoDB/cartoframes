@@ -167,7 +167,6 @@ class TestVariableRepo(object):
             'dataset_id': None,
             'agg_method': None,
             'variable_group_id': None,
-            'starred': None,
             'summary_json': None
         })])
 

@@ -160,8 +160,7 @@ class TestVariableGroupRepo(object):
             'id': 'variable_group1',
             'slug': None,
             'name': None,
-            'dataset_id': None,
-            'starred': None
+            'dataset_id': None
         })])
 
         # When
