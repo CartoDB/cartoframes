@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use default credentials in metrics (#1603)
 - Improve Layout map ordering (#1597)
 - Change numeric autoformat (remove scientific notation)
+- Return normalized table name in to_carto (#1609)
+- Remove empty geometries in Source (#1610)
+- Improve docs and examples (#1608, #1611)
+- Update catalog info structure (#1612, #1606)
 
 ### Fixed
 - Allow using columns with symbols in visualization (#1585)
