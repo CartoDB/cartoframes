@@ -113,7 +113,8 @@ class TestCountryRepo(object):
         repo = CountryRepository()
 
         expected_countries = CatalogList([Country({
-            'id': None
+            'id': None,
+            'name': None
         })])
 
         # When
