@@ -7,8 +7,8 @@ from cartoframes.data.observatory.catalog.provider import Provider
 from cartoframes.data.observatory.catalog.variable_group import VariableGroup
 from cartoframes.data.observatory.catalog.entity import CatalogList
 
-db_country1 = {'id': 'esp'}
-db_country2 = {'id': 'usa'}
+db_country1 = {'id': 'esp', 'name': 'Spain'}
+db_country2 = {'id': 'usa', 'name': 'United States of America'}
 test_country1 = Country(db_country1)
 test_country2 = Country(db_country2)
 test_countries = CatalogList([test_country1, test_country2])
@@ -39,8 +39,7 @@ db_geography1 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': True,
-    'summary_json': {},
-    'available_in': ['bq']
+    'summary_json': {}
 }
 db_geography2 = {
     'id': 'carto-do-public.tiger.geography_esp_municipalities_2019',
@@ -56,8 +55,7 @@ db_geography2 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'summary_json': {},
-    'available_in': []
+    'summary_json': {}
 }
 test_geography1 = Geography(db_geography1)
 test_geography2 = Geography(db_geography2)
@@ -83,8 +81,7 @@ db_dataset1 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': True,
-    'summary_json': None,
-    'available_in': ['bq']
+    'summary_json': None
 }
 db_dataset2 = {
     'id': 'carto-do-public.project.basicstats-municipalities',
@@ -122,8 +119,7 @@ db_dataset2 = {
             'string': 1,
             'integer': 1
         }
-    },
-    'available_in': []
+    }
 }
 test_dataset1 = Dataset(db_dataset1)
 test_dataset2 = Dataset(db_dataset2)
@@ -139,7 +135,6 @@ db_variable1 = {
     'dataset_id': 'dataset1',
     'agg_method': '',
     'variable_group_id': 'vargroup1',
-    'starred': True,
     'summary_json': None
 }
 db_variable2 = {
@@ -152,7 +147,6 @@ db_variable2 = {
     'dataset_id': 'dataset1',
     'agg_method': '',
     'variable_group_id': 'vargroup1',
-    'starred': False,
     'summary_json': [{'key': 'value'}]
 }
 test_variable1 = Variable(db_variable1)
@@ -175,15 +169,13 @@ db_variable_group1 = {
     'id': 'carto-do.variable_group.vargroup1',
     'slug': 'vargroup1',
     'name': 'Population',
-    'dataset_id': 'dataset1',
-    'starred': True
+    'dataset_id': 'dataset1'
 }
 db_variable_group2 = {
     'id': 'carto-do.variable_group.vargroup2',
     'slug': 'vargroup2',
     'name': 'Date',
-    'dataset_id': 'dataset1',
-    'starred': False
+    'dataset_id': 'dataset1'
 }
 test_variable_group1 = VariableGroup(db_variable_group1)
 test_variable_group2 = VariableGroup(db_variable_group2)

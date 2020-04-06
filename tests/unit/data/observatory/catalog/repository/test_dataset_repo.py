@@ -1,6 +1,6 @@
 import pytest
 
-from unittest.mock import patch, call
+from unittest.mock import patch
 
 from cartoframes.auth import Credentials
 from cartoframes.exceptions import CatalogError
@@ -8,6 +8,10 @@ from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.dataset import Dataset
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.catalog.repository.constants import (
+    CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER,
+    VARIABLE_GROUP_FILTER
+)
 from ..examples import test_dataset1, test_datasets, db_dataset1, db_dataset2
 
 
@@ -28,9 +32,10 @@ class TestDatasetRepo(object):
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
-    @patch.object(RepoClient, 'set_user_credentials')
-    def test_get_all_credentials(self, mocked_set_user_credentials, mocked_get_datasets):
+    @patch('cartoframes.data.observatory.catalog.repository.entity_repo.get_subscription_ids')
+    def test_get_all_credentials(self, mocked_get_subscription_ids, mocked_get_datasets):
         # Given
+        mocked_get_subscription_ids.return_value = [db_dataset1['id'], db_dataset2['id']]
         mocked_get_datasets.return_value = [db_dataset1, db_dataset2]
         credentials = Credentials('user', '1234')
         repo = DatasetRepository()
@@ -39,8 +44,7 @@ class TestDatasetRepo(object):
         datasets = repo.get_all(credentials=credentials)
 
         # Then
-        mocked_set_user_credentials.assert_has_calls([call(credentials), call(None)])
-        mocked_get_datasets.assert_called_once_with(None)
+        mocked_get_datasets.assert_called_once_with({'id': [db_dataset1['id'], db_dataset2['id']]})
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -63,12 +67,12 @@ class TestDatasetRepo(object):
         mocked_repo.return_value = [db_dataset1, db_dataset2]
         repo = DatasetRepository()
         filters = {
-            'country_id': 'usa',
-            'category_id': 'demographics',
-            'variable_id': 'population',
-            'geography_id': 'census-geo',
-            'variable_group_id': 'var-group',
-            'provider_id': 'open_data',
+            COUNTRY_FILTER: 'usa',
+            CATEGORY_FILTER: 'demographics',
+            VARIABLE_FILTER: 'population',
+            GEOGRAPHY_FILTER: 'census-geo',
+            VARIABLE_GROUP_FILTER: 'var-group',
+            PROVIDER_FILTER: 'open_data',
             'fake_field_id': 'fake_value'
         }
 
@@ -77,11 +81,11 @@ class TestDatasetRepo(object):
 
         # Then
         mocked_repo.assert_called_once_with({
-            'country_id': 'usa',
-            'category_id': 'demographics',
-            'variable_id': 'population',
-            'geography_id': 'census-geo',
-            'provider_id': 'open_data'
+            COUNTRY_FILTER: 'usa',
+            CATEGORY_FILTER: 'demographics',
+            # VARIABLE_FILTER: 'population',
+            GEOGRAPHY_FILTER: 'census-geo',
+            PROVIDER_FILTER: 'open_data'
         })
         assert datasets == test_datasets
 
@@ -96,7 +100,7 @@ class TestDatasetRepo(object):
         dataset = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with({'id': requested_id})
+        mocked_repo.assert_called_once_with({'id': [requested_id]})
         assert dataset == test_dataset1
 
     @patch.object(RepoClient, 'get_datasets')
@@ -121,7 +125,7 @@ class TestDatasetRepo(object):
         dataset = repo.get_by_id(requested_slug)
 
         # Then
-        mocked_repo.assert_called_once_with({'slug': requested_slug})
+        mocked_repo.assert_called_once_with({'slug': [requested_slug]})
         assert dataset == test_dataset1
 
     @patch.object(RepoClient, 'get_datasets')
@@ -192,8 +196,7 @@ class TestDatasetRepo(object):
             'update_frequency': None,
             'version': None,
             'is_public_data': None,
-            'summary_json': None,
-            'available_in': None
+            'summary_json': None
         })])
 
         # When

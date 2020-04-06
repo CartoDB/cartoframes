@@ -1,4 +1,4 @@
-from .utils import serialize_palette, get_value
+from .utils import serialize_palette, get_value, prop
 from ..style import Style
 from ..legends import color_category_legend
 from ..widgets import category_widget
@@ -31,12 +31,12 @@ def color_category_style(value, top=11, cat=None, palette=None, size=None, opaci
     """
     func = 'buckets' if cat else 'top'
     default_palette = 'bold'
-    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
+    animation_filter = 'animation(linear({}), 20, fade(1,1))'.format(prop(animate)) if animate else '1'
 
     data = {
           'point': {
-              'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                  func, value, cat or top,
+              'color': 'opacity(ramp({0}({1}, {2}), {3}),{4})'.format(
+                  func, prop(value), cat or top,
                   serialize_palette(palette) or default_palette,
                   get_value(opacity, 1)),
               'width': get_value(size, 'width', 'point'),
@@ -45,16 +45,16 @@ def color_category_style(value, top=11, cat=None, palette=None, size=None, opaci
               'filter': animation_filter
           },
           'line': {
-              'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                  func, value, cat or top,
+              'color': 'opacity(ramp({0}({1}, {2}), {3}),{4})'.format(
+                  func, prop(value), cat or top,
                   serialize_palette(palette) or default_palette,
                   get_value(opacity, 1)),
               'width': get_value(size, 'width', 'line'),
               'filter': animation_filter
           },
           'polygon': {
-              'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
-                  func, value, cat or top,
+              'color': 'opacity(ramp({0}({1}, {2}), {3}), {4})'.format(
+                  func, prop(value), cat or top,
                   serialize_palette(palette) or default_palette,
                   get_value(opacity, 0.9)
               ),

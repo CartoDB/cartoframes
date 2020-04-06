@@ -6,6 +6,7 @@ from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.variable import Variable
 from cartoframes.data.observatory.catalog.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.catalog.repository.constants import VARIABLE_FILTER
 from .examples import test_datasets, test_variable1, test_variables, db_variable1, test_variable2, db_variable2
 
 
@@ -33,7 +34,7 @@ class TestVariable(object):
         datasets = test_variable1.datasets
 
         # Then
-        mocked_repo.assert_called_once_with({'variable_id': test_variable1.id})
+        mocked_repo.assert_called_once_with({VARIABLE_FILTER: test_variable1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
@@ -52,7 +53,6 @@ class TestVariable(object):
         dataset = variable.dataset
         agg_method = variable.agg_method
         variable_group = variable.variable_group
-        starred = variable.starred
         summary = variable.summary
 
         # Then
@@ -65,7 +65,6 @@ class TestVariable(object):
         assert dataset == db_variable1['dataset_id']
         assert agg_method == db_variable1['agg_method']
         assert variable_group == db_variable1['variable_group_id']
-        assert starred == db_variable1['starred']
         assert summary == db_variable1['summary_json']
 
     def test_variable_is_exported_as_series(self):

@@ -1,5 +1,6 @@
 from ..constants import FORMULA_OPERATIONS_GLOBAL, FORMULA_OPERATIONS_VIEWPORT
 from ..widget import Widget
+from ..styles.utils import prop
 
 
 def formula_widget(value, operation=None, title=None, description=None, footer=None, is_global=False):
@@ -50,9 +51,9 @@ def _get_value_expression(operation, value, is_global):
         return formula_operation + '()'
     elif operation in ['avg', 'max', 'min', 'sum']:
         formula_operation = _get_formula_operation(operation, is_global)
-        return formula_operation + '($' + value + ')'
+        return formula_operation + '(' + prop(value) + ')'
     else:
-        return '$' + value
+        return prop(value)
 
 
 def _get_formula_operation(operation, is_global):

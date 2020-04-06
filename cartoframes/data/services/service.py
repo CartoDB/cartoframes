@@ -29,6 +29,10 @@ class Service:
                 return {k: row.get(k) for k in QUOTA_INFO_KEYS}
         return None
 
+    def provider(self):
+        info = self._quota_info(self._quota_service)
+        return info and info.get('provider')
+
     def used_quota(self):
         info = self._quota_info(self._quota_service)
         return info and info.get('used_quota')

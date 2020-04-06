@@ -1,65 +1,159 @@
 from unittest.mock import patch
 
-from cartoframes.io.managers.context_manager import ContextManager
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 
-from ..examples import db_dataset1, db_dataset2
 
+class TestRepoClient:
 
-class TestRepoClient(object):
-
-    @patch.object(ContextManager, 'execute_query')
-    def test_run_query_with_one_filter(self, mocked_client):
-        # Given
-        mocked_client.return_value = {'rows': [db_dataset1, db_dataset2]}
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_countries_with_filters(self, fetch_entity_mock):
         repo = RepoClient()
-        query = 'SELECT t.* FROM datasets t'
-        filters = {'category_id': 'demographics'}
-        expected_query = "SELECT t.* FROM datasets t WHERE t.category_id = 'demographics'"
+        filters = {'key': 'value'}
+        repo.get_countries(filters)
 
-        # When
-        categories = repo._run_query(query, filters)
+        fetch_entity_mock.assert_called_once_with('countries', filters)
 
-        # Then
-        mocked_client.assert_called_once_with(expected_query)
-        assert categories == [db_dataset1, db_dataset2]
-
-    @patch.object(ContextManager, 'execute_query')
-    def test_run_query_with_multiple_filter(self, mocked_client):
-        # Given
-        mocked_client.return_value = {'rows': [db_dataset1, db_dataset2]}
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_categories_with_filters(self, fetch_entity_mock):
         repo = RepoClient()
-        query = 'SELECT t.* FROM datasets t'
-        filters = {
-            'category_id': 'demographics',
-            'country_id': 'usa'}
-        expected_select = 'SELECT t.* FROM datasets t WHERE'
-        expected_filter_category = "t.category_id = 'demographics'"
-        expected_filter_country = "t.country_id = 'usa'"
+        filters = {'key': 'value'}
+        repo.get_categories(filters)
 
-        # When
-        datasets = repo._run_query(query, filters)
+        fetch_entity_mock.assert_called_once_with('categories', filters)
 
-        # Then
-        actual_query = str(mocked_client.call_args_list)
-        assert expected_select in actual_query
-        assert expected_filter_category in actual_query
-        assert expected_filter_country in actual_query
-        assert datasets == [db_dataset1, db_dataset2]
-
-    @patch.object(ContextManager, 'execute_query')
-    def test_run_query_with_id_list(self, mocked_client):
-        # Given
-        mocked_client.return_value = {'rows': [db_dataset1, db_dataset2]}
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_providers_with_filters(self, fetch_entity_mock):
         repo = RepoClient()
-        query = 'SELECT t.* FROM datasets t'
-        filters = {'id': ['carto-do.dataset.census', 'carto-do.dataset.municipalities']}
-        expected_query = "SELECT t.* FROM datasets t " \
-                         "WHERE t.id IN ('carto-do.dataset.census','carto-do.dataset.municipalities')"
+        filters = {'key': 'value'}
+        repo.get_providers(filters)
 
-        # When
-        datasets = repo._run_query(query, filters)
+        fetch_entity_mock.assert_called_once_with('providers', filters)
 
-        # Then
-        mocked_client.assert_called_once_with(expected_query)
-        assert datasets == [db_dataset1, db_dataset2]
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_variables_with_filters(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'key': 'value', 'dataset': 'd_1'}
+        repo.get_variables(filters)
+
+        fetch_entity_mock.assert_called_once_with('datasets/d_1/variables', {'key': 'value'})
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_variables_with_id(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'id': 'id_1'}
+        repo.get_variables(filters)
+
+        fetch_entity_mock.assert_called_once_with('variables/id_1')
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_variables_groups_with_filters(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'key': 'value', 'dataset': 'd_1'}
+        repo.get_variables_groups(filters)
+
+        fetch_entity_mock.assert_called_once_with('datasets/d_1/variables_groups', {'key': 'value'})
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_variables_groups_with_id(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'id': 'id_1'}
+        repo.get_variables_groups(filters)
+
+        fetch_entity_mock.assert_called_once_with('variables_groups/id_1')
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_datasets_with_filters(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'key': 'value'}
+        repo.get_datasets(filters)
+
+        fetch_entity_mock.assert_called_once_with('datasets', filters)
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_datasets_with_id(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'id': 'id_1'}
+        repo.get_datasets(filters)
+
+        fetch_entity_mock.assert_called_once_with('datasets/id_1')
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_datasets_with_id_list(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'id': ['id_1', 'id_2']}
+        repo.get_datasets(filters)
+
+        fetch_entity_mock.assert_any_call('datasets/id_1')
+        fetch_entity_mock.assert_any_call('datasets/id_2')
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_datasets_with_slug(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'slug': 'slug_1'}
+        repo.get_datasets(filters)
+
+        fetch_entity_mock.assert_called_once_with('datasets/slug_1')
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_datasets_slug_list(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'slug': ['slug_1', 'slug_2']}
+        repo.get_datasets(filters)
+
+        fetch_entity_mock.assert_any_call('datasets/slug_1')
+        fetch_entity_mock.assert_any_call('datasets/slug_2')
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_geographies_with_filters(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'key': 'value'}
+        repo.get_geographies(filters)
+
+        fetch_entity_mock.assert_called_once_with('geographies', filters)
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_geographies_with_id(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'id': 'id_1'}
+        repo.get_geographies(filters)
+
+        fetch_entity_mock.assert_called_once_with('geographies/id_1')
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_geographies_with_id_list(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'id': ['id_1', 'id_2']}
+        repo.get_geographies(filters)
+
+        fetch_entity_mock.assert_any_call('geographies/id_1')
+        fetch_entity_mock.assert_any_call('geographies/id_2')
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_geographies_with_slug(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'slug': 'slug_1'}
+        repo.get_geographies(filters)
+
+        fetch_entity_mock.assert_called_once_with('geographies/slug_1')
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_get_geographies_slug_list(self, fetch_entity_mock):
+        repo = RepoClient()
+        filters = {'slug': ['slug_1', 'slug_2']}
+        repo.get_geographies(filters)
+
+        fetch_entity_mock.assert_any_call('geographies/slug_1')
+        fetch_entity_mock.assert_any_call('geographies/slug_2')
+
+    @patch.object(RepoClient, '_fetch_entity')
+    def test_fetch_entity_id_list(self, fetch_entity_mock):
+        fetch_entity_mock.side_effect = lambda _id: None if _id == 'datasets/x' else _id
+        repo = RepoClient()
+        filters = {'id': ['x', 'a', 'b', 'x', 'c', 'x']}
+        datasets = repo.get_datasets(filters)
+
+        fetch_entity_mock.assert_any_call('datasets/a')
+        fetch_entity_mock.assert_any_call('datasets/b')
+        fetch_entity_mock.assert_any_call('datasets/c')
+        fetch_entity_mock.assert_any_call('datasets/x')
+        assert datasets == ['datasets/a', 'datasets/b', 'datasets/c']

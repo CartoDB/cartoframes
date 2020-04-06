@@ -82,11 +82,6 @@ class Variable(CatalogEntity):
         return self.data['variable_group_id']
 
     @property
-    def starred(self):
-        """Boolean indicating whether this variable is a starred one or not. Internal usage only"""
-        return self.data['starred']
-
-    @property
     def summary(self):
         """JSON object with extra metadata that summarizes different properties of this variable."""
         return self.data['summary_json']

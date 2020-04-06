@@ -7,6 +7,10 @@ from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.variable import Variable
 from cartoframes.data.observatory.catalog.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.catalog.repository.constants import (
+    CATEGORY_FILTER, COUNTRY_FILTER, DATASET_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER,
+    VARIABLE_GROUP_FILTER
+)
 from ..examples import test_variable1, test_variables, db_variable1, db_variable2
 
 
@@ -45,13 +49,13 @@ class TestVariableRepo(object):
         mocked_repo.return_value = [db_variable1, db_variable2]
         repo = VariableRepository()
         filters = {
-            'country_id': 'usa',
-            'dataset_id': 'carto-do.project.census2011',
-            'category_id': 'demographics',
-            'variable_id': 'population',
-            'geography_id': 'census-geo',
-            'variable_group_id': 'var-group',
-            'provider_id': 'open_data',
+            COUNTRY_FILTER: 'usa',
+            DATASET_FILTER: 'carto-do.project.census2011',
+            CATEGORY_FILTER: 'demographics',
+            VARIABLE_FILTER: 'population',
+            GEOGRAPHY_FILTER: 'census-geo',
+            VARIABLE_GROUP_FILTER: 'var-group',
+            PROVIDER_FILTER: 'open_data',
             'fake_field_id': 'fake_value'
         }
 
@@ -60,8 +64,8 @@ class TestVariableRepo(object):
 
         # Then
         mocked_repo.assert_called_once_with({
-            'dataset_id': 'carto-do.project.census2011',
-            'variable_group_id': 'var-group'
+            DATASET_FILTER: 'carto-do.project.census2011',
+            VARIABLE_GROUP_FILTER: 'var-group'
         })
         assert variables == test_variables
 
@@ -76,7 +80,7 @@ class TestVariableRepo(object):
         variable = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with({'id': requested_id})
+        mocked_repo.assert_called_once_with({'id': [requested_id]})
         assert isinstance(variable, Variable)
         assert variable == test_variable1
 
@@ -102,7 +106,7 @@ class TestVariableRepo(object):
         variable = repo.get_by_id(requested_slug)
 
         # Then
-        mocked_repo.assert_called_once_with({'slug': requested_slug})
+        mocked_repo.assert_called_once_with({'slug': [requested_slug]})
         assert variable == test_variable1
 
     @patch.object(RepoClient, 'get_variables')
@@ -163,7 +167,6 @@ class TestVariableRepo(object):
             'dataset_id': None,
             'agg_method': None,
             'variable_group_id': None,
-            'starred': None,
             'summary_json': None
         })])
 

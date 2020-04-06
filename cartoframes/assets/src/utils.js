@@ -21,19 +21,12 @@ export function formatValue(value) {
 }
 
 export function formatNumber(value) {
-  const log = Math.log10(Math.abs(value));
-
-  if ((log > 4 || log < -2.00000001) && value) {
-    return value.toExponential(2);
-  }
-  
   if (!Number.isInteger(value)) {
     return value.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 3
     });
   }
-  
   return value.toLocaleString();
 }
 

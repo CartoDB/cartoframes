@@ -5,24 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.1] - 2020-
+## [1.0.2] - 2020-04-06
+
+### Added
+- Add geometry icon to single legends (#1580)
+- Publish Layout (#1598)
+
+### Changed
+- Use Enrichment API and Metadata API for DO features (#1575, #1594)
+- Improve to_csv info message (#1589)
+- Use default credentials in metrics (#1603)
+- Improve Layout map ordering (#1597)
+- Change numeric autoformat (remove scientific notation)
+- Return normalized table name in to_carto (#1609)
+- Remove empty geometries in Source (#1610)
+- Improve docs and examples (#1608, #1611)
+- Update catalog info structure (#1612, #1606)
+
+### Fixed
+- Allow using columns with symbols in visualization (#1585)
+- Fix layer_selector without style helpers (#1580)
+- Fix layer_selector in published maps (#1595)
+- Fix Google geocoding (#1600)
+- Fix legends in Layout (#1597)
+
+## [1.0.1] - 2020-02-28
 
 ### Added
 - Add encode_data param to Layer (#1536)
 - Add WKT case in CSV example (#1545)
 - Add Data Management guide (#1547)
+- Layer selector in legends (#1551, #1558)
+- New 'ascending' parameter to sort numeric legends in ascending or descending order (#1537)
 
 ### Changed
 - Include user_id in metrics (#1539)
-- Disable default param exclusive for isolines (#1540)
+- Disable default param exclusive for isolines (1540)
 - Raise an error when trying to visualise a multi-geom GeoDataFrame (#1541)
 - Update installation guide structure (#1549)
 - Minor examples/guides improvements (#1534, #1552)
+- Numeric legends are sorted in descending order by default (#1537)
 
 ### Fixed
 - Fix legend footer in published maps (#1523)
 - Fix default legend for cluster_size_style (#1533)
 - Fix DO doc reference generation (#1550)
+- Fix get token for Mapbox styles (#1565)
 
 ## [1.0.0] - 2020-01-20
 
@@ -118,13 +146,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix DataObsClient (#1319)
 - Fix CartoDataFrame plot (#1339)
 - Fix enrichment without subscriptions (#1314)
-- Fix encoding detection with all Nones (#1346) 
+- Fix encoding detection with all Nones (#1346)
 
 ## [1.0b6] - 2019-12-02
 ### Added
 - Add new properties in Catalog Dataset and Geography (#1209)
 - Add IO functions and CartoDataFrame class (#1130, #1245)
-  - IO functions: read_carto, to_carto, has_table, describe_table, 
+  - IO functions: read_carto, to_carto, has_table, describe_table,
     update_table, copy_table, create_table_from_query, delete_table.
   - CartoDataFrame class: inherit GeoDataFrame class + from_carto, to_carto, viz.
   - Refactor internals: ContextManager, SourceManager.

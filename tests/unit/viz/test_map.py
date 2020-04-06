@@ -104,19 +104,19 @@ class TestMapLayer(object):
             {
                 'event': 'click',
                 'attrs': {
-                    'name': 'v8e0f74',
+                    'name': 'v6ae999',
                     'title': 'name'
                 }
             }, {
                 'event': 'click',
                 'attrs': {
-                    'name': 'v559339',
+                    'name': 'v4f197c',
                     'title': 'pop'
                 }
             }, {
                 'event': 'hover',
                 'attrs': {
-                    'name': 'v559339',
+                    'name': 'v4f197c',
                     'title': 'Pop'
                 }
             }
@@ -234,6 +234,7 @@ class TestMapPublication(object):
             description=None,
             is_embed=True,
             is_static=None,
+            layer_selector=False,
             layers=[],
             show_info=False,
             size=None,
@@ -251,6 +252,7 @@ class TestMapPublication(object):
             bounds={'west': 1, 'east': 2, 'north': 3, 'south': 4},
             viewport={'zoom': 5, 'lat': 50, 'lng': -10},
             is_static=True,
+            layer_selector=False,
             theme='dark',
             title='title',
             description='description'
@@ -268,6 +270,7 @@ class TestMapPublication(object):
             description='description',
             is_embed=True,
             is_static=True,
+            layer_selector=False,
             layers=[],
             show_info=False,
             size=None,

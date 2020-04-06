@@ -113,17 +113,18 @@ class Layer:
         self.style = _set_style(style)
         self.encode_data = encode_data
         self.parent_map = None
+        self.geom_type = self.source.get_geom_type()
         self.popups = self._init_popups(
             popup_hover, popup_click, default_popup_hover, default_popup_click, title)
         self.legends = self._init_legends(legends, default_legend, title)
         self.widgets = self._init_widgets(widgets, default_widget, title)
         self.title = title
-        geom_type = self.source.get_geom_type()
         popups_variables = self.popups.get_variables()
         widget_variables = self.widgets.get_variables()
         external_variables = merge_dicts(popups_variables, widget_variables)
+        self._map_index = 0
 
-        self.viz = self.style.compute_viz(geom_type, external_variables)
+        self.viz = self.style.compute_viz(self.geom_type, external_variables)
         viz_columns = extract_viz_columns(self.viz)
 
         self.source.compute_metadata(viz_columns)
@@ -139,13 +140,13 @@ class Layer:
 
     def _init_legends(self, legends, default_legend, title):
         if legends:
-            return _set_legends(legends, self.style.default_legend)
+            return _set_legends(legends, self.style.default_legend, self.geom_type)
 
         if default_legend is True:
             default_legend = self.style.default_legend
             if default_legend is not None:
                 default_legend.set_title(title)
-            return _set_legends(default_legend)
+            return _set_legends(default_legend, geom_type=self.geom_type)
 
         return LegendList()
 
@@ -186,13 +187,41 @@ class Layer:
 
         return {}
 
+    def _get_layer_def(self):
+        return {
+            'credentials': self.credentials,
+            'interactivity': self.interactivity,
+            'legends': self.legends_info,
+            'has_legend_list': self.has_legend_list,
+            'encode_data': self.encode_data,
+            'widgets': self.widgets_info,
+            'data': self.source_data,
+            'type': self.source_type,
+            'title': self.title,
+            'options': self.options,
+            'map_index': self.map_index,
+            'source': self.source_data,
+            'viz': self.viz
+        }
+
     def _repr_html_(self):
         from .map import Map
         return Map(self)._repr_html_()
 
+    @property
+    def map_index(self):
+        """Layer map index"""
+        return self._map_index
+
+    @map_index.setter
+    def map_index(self, map_index):
+        """Set session"""
+        self._map_index = map_index
+
     def reset_legends(self, parent_map):
         if parent_map.layer_selector:
-            self.style.default_legend.set_title('')
+            if self.style.default_legend:
+                self.style.default_legend.set_title('')
             self.legends = self._init_legends(self.legends, self.default_legend, '')
             self.legends_info = self.legends.get_info() if self.legends is not None else None
 
@@ -218,15 +247,15 @@ def _set_style(style):
         return Style()
 
 
-def _set_legends(legends, default_legend=None):
+def _set_legends(legends, default_legend=None, geom_type=None):
     if isinstance(legends, list):
-        return LegendList(legends, default_legend)
+        return LegendList(legends, default_legend, geom_type)
     if isinstance(legends, Legend):
-        return LegendList([legends], default_legend)
+        return LegendList([legends], default_legend, geom_type)
     if isinstance(legends, LegendList):
         return legends
     else:
-        return LegendList()
+        return LegendList(geom_type=geom_type)
 
 
 def _set_widgets(widgets, default_widget=None):

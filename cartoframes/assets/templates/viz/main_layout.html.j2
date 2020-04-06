@@ -42,25 +42,38 @@
 
 <body class="as-app-body as-app">
   <main id="main-container" class="layout-map-container">
-  {% for i in range(n) %}
+  {% for i in range(m) %}
     <div class="layout-map-row">
-    {% for j in range(m) %}
-      {% set index = i * m + j %}
-      {% set title = maps[index]['title'] %}
-      {% set has_legends = maps[index]['has_legends'] %}
+    {% for j in range(n) %}
+      {% set map_index = i * n + j %}
+      {% set title = maps[map_index]['title'] %}
+      {% set has_legends = maps[map_index]['has_legends'] %}
+      {% set layer_selector = maps[map_index]['layer_selector'] %}
       
-      <div class="layout-map-cell {{'layout-map-cell-legend' if has_legends }}" style="height: {{ map_height }}px">
-          {% if title %}<p>{{ title }}</p>{% endif %}
-          {% if has_legends %}
-            {% set layers = maps[index]['layers'] %}
-            {% include 'templates/viz/legends_layout.html.j2' %}
-          {% endif %}
-          <img id="map-image-{{ index }}" class="map-image" alt="Static Map {{index}}" />
-          <div class="as-main layout-map" id="main-container-{{index}}">
+      <div class="layout-map-cell {{'layout-map-cell-legend' if has_legends }}" style="height: {{ map_height }}">
+        {% if title %}
+          <header class="layout-map-cell--header">
+            <p>{{ title }}</p>
+          </header>
+        {% endif %}
+
+        <section class="layout-map-cell--section">
+          <img id="map-image-{{ map_index }}" class="map-image" alt="Static Map {{map_index}}" />
+          <as-responsive-content id="main-container-{{map_index}}" class="layout-map">
             <div class="as-map-area">
-              <div id="map-{{ index }}" class="map"></div>
-            </div> <!-- as-map-area -->
-          </div> <!-- as-main -->
+              <div id="map-{{ map_index }}" class="map"></div>
+            </div>
+            {% if has_legends or layer_selector %}
+              {% set layers = maps[map_index]['layers'] %}
+              <div class="as-map-panels" data-name="Legends">
+                <div class="as-panel as-panel--vertical as-panel--top as-panel--left">
+                  {% include 'templates/viz/legends_layout.html.j2' %}
+                </div>
+              </div>
+            {% endif %}
+
+          </as-responsive-content>
+        </section>
       </div>
     {% endfor %}
     </div>

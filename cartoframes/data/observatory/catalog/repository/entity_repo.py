@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from .repo_client import RepoClient
 from ..entity import CatalogList, is_slug_value
 from .....exceptions import CatalogError
+from ..subscriptions import get_subscription_ids
 
 
 def check_catalog_connection(method):
@@ -65,9 +66,9 @@ class EntityRepository(ABC):
 
     def _get_id_filter(self, id_):
         if self.slug_field is not None and is_slug_value(id_):
-            return {self.slug_field: id_}
+            return {self.slug_field: [id_]}
 
-        return {self.id_field: id_}
+        return {self.id_field: [id_]}
 
     def _get_id_list_filters(self, id_list):
         if self.slug_field is None:
@@ -91,16 +92,23 @@ class EntityRepository(ABC):
 
         return filters
 
+    def _add_subscription_ids(self, filters, credentials, entity_type):
+        ids = get_subscription_ids(credentials, entity_type)
+
+        if not isinstance(ids, list) or len(ids) == 0:
+            return None
+
+        filters = filters or {}
+        filters['id'] = ids
+        return filters
+
     @classmethod
     def _to_catalog_entity(cls, result):
         return cls._get_entity_class()(result)
 
     @classmethod
     def _normalize_field(cls, row, field):
-        if field in row:
-            return row[field]
-
-        return None
+        return row.get(field, None)
 
     @classmethod
     @abstractmethod
