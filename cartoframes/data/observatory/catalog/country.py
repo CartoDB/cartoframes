@@ -122,3 +122,7 @@ class Country(CatalogEntity):
 
         """
         return get_category_repo().get_all({COUNTRY_FILTER: self.id})
+
+    def __repr__(self):
+        return "<{classname}.get('{entity_id}')> #'{descr}'" \
+               .format(classname=self.__class__.__name__, entity_id=self._get_print_id(), descr=self.data['name'])

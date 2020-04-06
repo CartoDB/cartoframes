@@ -105,7 +105,7 @@ class TestDODataset(unittest.TestCase):
             .column('geom', 'GEOMETRY') \
             .ttl_seconds(30)
         dataset.create()
-        dataset.upload_file_object(file_object)
+        dataset.upload_file_object(file_object, geom_column='geom')
         job = dataset.import_dataset()
         status = job.result()
 
@@ -121,7 +121,7 @@ class TestDODataset(unittest.TestCase):
             .column('geom', 'GEOMETRY') \
             .ttl_seconds(30)
         dataset.create()
-        status = dataset.upload_dataframe(df)
+        status = dataset.upload_dataframe(df, geom_column='geom')
 
         self.assertIn(status, ['success'])
 
@@ -177,7 +177,7 @@ class TestDODataset(unittest.TestCase):
             .column(_GEOM_COLUMN, 'GEOMETRY') \
             .ttl_seconds(_TTL_IN_SECONDS)
         dataset.create()
-        status = dataset.upload_dataframe(gdf)
+        status = dataset.upload_dataframe(gdf, geom_column=_GEOM_COLUMN)
         self.assertIn(status, ['success'])
 
         geom_type = GEOM_TYPE_POINTS
@@ -207,7 +207,7 @@ class TestDODataset(unittest.TestCase):
             .column(_GEOM_COLUMN, 'GEOMETRY') \
             .ttl_seconds(_TTL_IN_SECONDS)
         dataset.create()
-        status = dataset.upload_dataframe(gdf)
+        status = dataset.upload_dataframe(gdf, geom_column=_GEOM_COLUMN)
         self.assertIn(status, ['success'])
 
         geom_type = GEOM_TYPE_POLYGONS

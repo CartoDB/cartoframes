@@ -33,7 +33,8 @@ class TestWidget(object):
             'options': {
                 'readOnly': False,
                 'buckets': 20,
-                'weight': 1
+                'weight': 1,
+                'autoplay': True
             }
         }
 
@@ -62,7 +63,8 @@ class TestWidget(object):
             'options': {
                 'readOnly': False,
                 'buckets': 20,
-                'weight': 1
+                'weight': 1,
+                'autoplay': True
             }
         }
 
@@ -82,6 +84,7 @@ class TestWidget(object):
             'options': {
                 'readOnly': False,
                 'buckets': 20,
-                'weight': 1
+                'weight': 1,
+                'autoplay': True
             }
         }

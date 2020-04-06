@@ -112,7 +112,8 @@ class TestCountry(object):
         country_repr = repr(country)
 
         # Then
-        assert country_repr == "<Country.get('{id}')>".format(id=db_country1['id'])
+        assert country_repr == "<Country.get('{id}')> #'{descr}'" \
+                               .format(id=db_country1['id'], descr=db_country1['name'])
 
     def test_country_is_printed_with_classname(self):
         # Given
@@ -145,8 +146,9 @@ class TestCountry(object):
         countries_str = str(countries)
 
         # Then
-        assert countries_str == "[<Country.get('{id1}')>, <Country.get('{id2}')>]" \
-                                .format(id1=db_country1['id'], id2=db_country2['id'])
+        assert countries_str == "[<Country.get('{id1}')> #'{descr1}', <Country.get('{id2}')> #'{descr2}']" \
+                                .format(id1=db_country1['id'], descr1=db_country1['name'],
+                                        id2=db_country2['id'], descr2=db_country2['name'])
 
     def test_country_list_is_represented_with_classname_and_ids(self):
         # Given
@@ -156,8 +158,9 @@ class TestCountry(object):
         countries_repr = repr(countries)
 
         # Then
-        assert countries_repr == "[<Country.get('{id1}')>, <Country.get('{id2}')>]"\
-                                 .format(id1=db_country1['id'], id2=db_country2['id'])
+        assert countries_repr == "[<Country.get('{id1}')> #'{descr1}', <Country.get('{id2}')> #'{descr2}']" \
+                                 .format(id1=db_country1['id'], descr1=db_country1['name'],
+                                         id2=db_country2['id'], descr2=db_country2['name'])
 
     def test_countries_items_are_obtained_as_country(self):
         # Given

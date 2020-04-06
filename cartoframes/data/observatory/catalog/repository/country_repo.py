@@ -26,6 +26,7 @@ class CountryRepository(EntityRepository):
     def _map_row(self, row):
         return {
             'id': self._normalize_field(row, 'id'),
+            'name': self._normalize_field(row, 'name')
         }
 
 

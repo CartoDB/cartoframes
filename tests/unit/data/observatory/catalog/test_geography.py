@@ -93,7 +93,7 @@ class TestGeography(object):
     def test_geography_is_exported_as_dict(self):
         # Given
         geography = Geography(db_geography1)
-        excluded_fields = ['summary_json', 'available_in', 'geom_coverage']
+        excluded_fields = ['summary_json', 'geom_coverage']
         expected_dict = {key: value for key, value in db_geography1.items() if key not in excluded_fields}
 
         # When
@@ -207,7 +207,6 @@ class TestGeography(object):
         geographies = test_geographies
         geography = geographies[0]
         expected_geography_df = geography.to_series()
-        del expected_geography_df['available_in']
         del expected_geography_df['summary_json']
 
         # When
@@ -218,29 +217,6 @@ class TestGeography(object):
         assert isinstance(geography_df, pd.DataFrame)
         assert isinstance(sliced_geography, pd.Series)
         assert sliced_geography.equals(expected_geography_df)
-
-    @patch.object(GeographyRepository, 'get_all')
-    @patch.object(GeographyRepository, 'get_by_id')
-    @patch.object(DODataset, 'download_stream')
-    def test_geography_not_available_in_bq_download_fails(self, download_stream_mock, get_by_id_mock, get_all_mock):
-        # mock geography
-        get_by_id_mock.return_value = test_geography2
-        geography = Geography.get(test_geography2.id)
-
-        # mock subscriptions
-        get_all_mock.return_value = [geography]
-
-        # mock big query client
-        download_stream_mock.return_value = []
-
-        # test
-        credentials = Credentials('fake_user', '1234')
-
-        with pytest.raises(Exception) as e:
-            geography.to_csv('fake_path', credentials)
-
-        error = '{} is not ready for Download. Please, contact us for more information.'.format(geography)
-        assert str(e.value) == error
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
@@ -473,16 +449,3 @@ class TestGeography(object):
             'We are sorry, the Data Observatory is not enabled for your account yet. '
             'Please contact your customer success manager or send an email to '
             'sales@carto.com to request access to it.')
-
-    def test_geography_is_available_in(self):
-        geography_in_bq = Geography(db_geography1)
-        geography_not_in_bq = Geography(db_geography2)
-
-        assert geography_in_bq._is_available_in('bq')
-        assert not geography_not_in_bq._is_available_in('bq')
-
-    def test_geography_is_available_in_with_empty_field(self):
-        db_geography = dict(db_geography1)
-        db_geography['available_in'] = None
-        geography_null = Geography(db_geography)
-        assert not geography_null._is_available_in('bq')

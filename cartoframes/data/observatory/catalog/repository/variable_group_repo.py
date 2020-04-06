@@ -30,8 +30,7 @@ class VariableGroupRepository(EntityRepository):
             'id': self._normalize_field(row, self.id_field),
             'slug': self._normalize_field(row, 'slug'),
             'name': self._normalize_field(row, 'name'),
-            'dataset_id': self._normalize_field(row, 'dataset_id'),
-            'starred': self._normalize_field(row, 'starred')
+            'dataset_id': self._normalize_field(row, 'dataset_id')
         }
 
 

@@ -73,6 +73,15 @@ MULTIPOLYGON = {
     }
 }
 
+EMPTY = {
+    "type": "Feature",
+    "geometry": {
+        "type": "GeometryCollection",
+        "coordinates": None
+    },
+    "properties": {}
+}
+
 
 def setup_mocks(mocker):
     mocker.patch.object(ContextManager, 'compute_query')
@@ -126,7 +135,6 @@ class TestSource(object):
         gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.lon, df.lat))
 
         assert df.dtypes['date_column'] == np.dtype('datetime64[ns]')
-
         source = Source(gdf)
 
         assert source.datetime_column_names == ['date_column']
@@ -171,3 +179,13 @@ class TestSource(object):
             Source(gdf)
 
         assert str(e.value).startswith('No valid geometry column types')
+
+    def test_empty_geometries(self):
+        geojson = {
+            "type": "FeatureCollection",
+            "features": [EMPTY, POINT, EMPTY, EMPTY, POINT, EMPTY]
+        }
+        gdf = gpd.GeoDataFrame.from_features(geojson)
+        source = Source(gdf)
+
+        assert len(source.gdf) == 2

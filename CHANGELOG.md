@@ -12,11 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Publish Layout (#1598)
 
 ### Changed
-- Use Enrichment API and Metadata API for DO features (#1575)
+- Use Enrichment API and Metadata API for DO features (#1575, #1594)
 - Improve to_csv info message (#1589)
 - Use default credentials in metrics (#1603)
 - Improve Layout map ordering (#1597)
 - Change numeric autoformat (remove scientific notation)
+- Return normalized table name in to_carto (#1609)
+- Remove empty geometries in Source (#1610)
+- Improve docs and examples (#1608, #1611)
+- Update catalog info structure (#1612, #1606)
 
 ### Fixed
 - Allow using columns with symbols in visualization (#1585)
@@ -142,13 +146,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix DataObsClient (#1319)
 - Fix CartoDataFrame plot (#1339)
 - Fix enrichment without subscriptions (#1314)
-- Fix encoding detection with all Nones (#1346) 
+- Fix encoding detection with all Nones (#1346)
 
 ## [1.0b6] - 2019-12-02
 ### Added
 - Add new properties in Catalog Dataset and Geography (#1209)
 - Add IO functions and CartoDataFrame class (#1130, #1245)
-  - IO functions: read_carto, to_carto, has_table, describe_table, 
+  - IO functions: read_carto, to_carto, has_table, describe_table,
     update_table, copy_table, create_table_from_query, delete_table.
   - CartoDataFrame class: inherit GeoDataFrame class + from_carto, to_carto, viz.
   - Refactor internals: ContextManager, SourceManager.

@@ -88,6 +88,9 @@ class Source:
                 raise ValueError('No valid geometry found. Please provide an input source with ' +
                                  'a valid geometry or specify the "geom_col" param with a geometry column.')
 
+            # Remove empty geometries
+            self.gdf = self.gdf[~self.gdf.geometry.is_empty]
+
             # Checking the uniqueness of the geometry type
             geometry_types = set(self.gdf.geom_type.unique())
             if geometry_types not in VALID_GEOMETRY_TYPES:

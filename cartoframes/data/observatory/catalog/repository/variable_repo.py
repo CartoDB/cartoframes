@@ -26,17 +26,16 @@ class VariableRepository(EntityRepository):
 
     def _map_row(self, row):
         return {
-            'id': self._normalize_field(row, self.id_field),
             'slug': self._normalize_field(row, 'slug'),
             'name': self._normalize_field(row, 'name'),
             'description': self._normalize_field(row, 'description'),
-            'column_name': self._normalize_field(row, 'column_name'),
             'db_type': self._normalize_field(row, 'db_type'),
-            'dataset_id': self._normalize_field(row, 'dataset_id'),
             'agg_method': self._normalize_field(row, 'agg_method'),
+            'summary_json': self._normalize_field(row, 'summary_json'),
+            'column_name': self._normalize_field(row, 'column_name'),
             'variable_group_id': self._normalize_field(row, 'variable_group_id'),
-            'starred': self._normalize_field(row, 'starred'),
-            'summary_json': self._normalize_field(row, 'summary_json')
+            'dataset_id': self._normalize_field(row, 'dataset_id'),
+            'id': self._normalize_field(row, self.id_field),
         }
 
 
