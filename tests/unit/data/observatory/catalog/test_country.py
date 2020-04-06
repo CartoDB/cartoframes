@@ -147,8 +147,8 @@ class TestCountry(object):
 
         # Then
         assert countries_str == "[<Country.get('{id1}')> #'{descr1}', <Country.get('{id2}')> #'{descr2}']" \
-                                 .format(id1=db_country1['id'], descr1=db_country1['name'],
-                                         id2=db_country2['id'], descr2=db_country2['name'])
+                                .format(id1=db_country1['id'], descr1=db_country1['name'],
+                                        id2=db_country2['id'], descr2=db_country2['name'])
 
     def test_country_list_is_represented_with_classname_and_ids(self):
         # Given
