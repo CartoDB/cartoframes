@@ -25,7 +25,7 @@ def get_version():
 
 REQUIRES = [
     'appdirs>=1.4.3,<2.0',
-    'carto>=1.10.1,<2.0',
+    'carto@git+https://github.com/cartodb/carto-python.git@dgaubert/ch58107/add-sql-filter-to-do-datasets#egg=carto',
     'jinja2>=2.10.1,<3.0',
     'geopandas>=0.6.0,<1.0',
     'tqdm>=4.32.1,<5.0',
