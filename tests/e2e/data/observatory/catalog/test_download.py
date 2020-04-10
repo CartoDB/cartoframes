@@ -42,8 +42,7 @@ class TestDownload(object):
 
         self.credentials = Credentials(username=self.username,
                                        api_key=self.apikey,
-                                       base_url=self.base_url,
-                                       allow_non_secure=True)
+                                       base_url=self.base_url)
 
         self.tmp_file = file_path('tmp_file.csv')
 
