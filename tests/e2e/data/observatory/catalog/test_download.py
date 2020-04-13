@@ -48,8 +48,7 @@ class TestDownload(object):
 
     def teardown_method(self):
         if os.path.isfile(self.tmp_file):
-            print(self.tmp_file)
-            # os.remove(self.tmp_file)
+            os.remove(self.tmp_file)
 
     def test_dataset_to_csv_public(self):
         public_dataset.to_csv(self.tmp_file, self.credentials, limit=PUBLIC_LIMIT)
