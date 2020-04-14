@@ -346,7 +346,7 @@ class TestDataset(object):
         dataset = Dataset.get(test_dataset1.id)
         get_all_mock.return_value = []
 
-        def raise_exception(limit=None, order_by=None):
+        def raise_exception(limit=None, order_by=None, sql_query=None, add_geom=None, is_geography=None):
             raise ServerErrorException(['The user does not have Data Observatory enabled'])
         download_stream_mock.side_effect = raise_exception
         credentials = Credentials('fake_user', '1234')
