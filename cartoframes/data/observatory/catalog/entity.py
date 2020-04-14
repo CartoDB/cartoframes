@@ -123,9 +123,7 @@ class CatalogEntity(ABC):
 
         is_geography = None
         if sql_query is not None:
-            is_geography = False
-            if self.__class__.__name__ == 'Geography':
-                is_geography = True
+            is_geography = self.__class__.__name__ == 'Geography'
 
         rows = DODataset(auth_client=auth_client).name(self.id).download_stream(limit=limit,
                                                                                 order_by=order_by,
