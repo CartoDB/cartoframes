@@ -2,7 +2,7 @@ from ..widget import Widget
 
 
 def time_series_widget(value, title=None, description=None, footer=None, read_only=False,
-                       buckets=20, prop='filter', weight=1):
+                       buckets=20, prop='filter', weight=1, format_number=None):
     """Helper function for quickly creating a time series widget.
 
     The time series widget enables you to display animated data (by aggregation) over a specified date or numeric field.
@@ -17,6 +17,8 @@ def time_series_widget(value, title=None, description=None, footer=None, read_on
         read_only (boolean, optional): Interactively filter a range of numeric values by selecting them in the widget.
           Set to "False" by default.
         buckets (number, optional): Number of histogram buckets. Set to 20 by default.
+        format_number (str, optional): Format to apply to number values in the widget, based on d3-format
+          specifier (https://github.com/d3/d3-format#locale_format).
 
     Returns:
         cartoframes.viz.widget.Widget
@@ -27,8 +29,9 @@ def time_series_widget(value, title=None, description=None, footer=None, read_on
         ...     title='Widget title',
         ...     description='Widget description',
         ...     footer='Widget footer',
-        ...     buckets=10)
+        ...     buckets=10,
+        ...     format_number='.2~s')
 
     """
     return Widget('time-series', value, title, description, footer,
-                  read_only=read_only, buckets=buckets, prop=prop, weight=weight)
+                  read_only=read_only, buckets=buckets, prop=prop, weight=weight, format_number=format_number)
