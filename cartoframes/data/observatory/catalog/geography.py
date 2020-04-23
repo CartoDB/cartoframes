@@ -226,7 +226,6 @@ class Geography(CatalogEntity):
                 `{geography}` is mandatory and it will be replaced by the actual geography dataset before running
                 the query. You can build any arbitrary query.
 
-
         Returns:
             pandas.DataFrame
 
