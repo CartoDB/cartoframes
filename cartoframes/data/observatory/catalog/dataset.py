@@ -386,7 +386,11 @@ class Dataset(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
-            limit (int, optional): number of rows to be downloaded.
+            sql_query (str, optional): a query to select, filter or aggregate the content of the dataset.
+                For instance, to download just one row: `select * from {dataset} limit 1`. The placeholder
+                `{dataset}` is mandatory and it will be replaced by the actual dataset before running the query.
+                You can build any arbitrary query.
+            add_geom (boolean, optional): to include the geography when using the `sql_query` argument. Default to True.
 
         Raises:
             DOError: if you have not a valid license for the dataset being downloaded,
@@ -415,7 +419,12 @@ class Dataset(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
-            limit (int, optional): number of rows to be downloaded.
+            sql_query (str, optional): a query to select, filter or aggregate the content of the dataset.
+                For instance, to download just one row: `select * from {dataset} limit 1`. The placeholder
+                `{dataset}` is mandatory and it will be replaced by the actual dataset before running the query.
+                You can build any arbitrary query.
+            add_geom (boolean, optional): to include the geography when using the `sql_query` argument. Default to True.
+
 
         Returns:
             pandas.DataFrame
