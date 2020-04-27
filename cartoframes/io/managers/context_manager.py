@@ -179,7 +179,7 @@ class ContextManager:
 
     def get_table_names(self, query):
         # Used to detect tables in queries in the publication.
-        query = 'SELECT CDB_QueryTablesText(\'{}\') as tables'.format(query)
+        query = 'SELECT CDB_QueryTablesText($q${}$q$) as tables'.format(query)
         result = self.execute_query(query)
         tables = []
         if result['total_rows'] > 0 and result['rows'][0]['tables']:
