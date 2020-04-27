@@ -1,16 +1,20 @@
+import { format as d3Format } from 'd3-format';
 
-export function format(value) {
+export function format(value, formatString) {
+  // TODO:  Check what to do with legend's format call with parameters (legends.html.j2 e.g.)
+  const formatFunc = formatString ? d3Format(formatString) : formatValue;
+
   if (Array.isArray(value)) {
     const [first, second] = value;
     if (first === -Infinity) {
-      return `< ${formatValue(second)}`;
+      return `< ${formatFunc(second)}`;
     }
     if (second === Infinity) {
-      return `> ${formatValue(first)}`;
+      return `> ${formatFunc(first)}`;
     }
-    return `${formatValue(first)} - ${formatValue(second)}`;
+    return `${formatFunc(first)} - ${formatFunc(second)}`;
   }
-  return formatValue(value);
+  return formatFunc(value);
 }
 
 export function formatValue(value) {

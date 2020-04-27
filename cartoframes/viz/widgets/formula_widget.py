@@ -4,7 +4,7 @@ from ..styles.utils import prop
 
 
 def formula_widget(value, operation=None, title=None, description=None, footer=None,
-                   is_global=False, format_number=None):
+                   is_global=False, format=None):
     """Helper function for quickly creating a formula widget.
 
     Formula widgets calculate aggregated values ('avg', 'max', 'min', 'sum') from numeric columns
@@ -21,7 +21,7 @@ def formula_widget(value, operation=None, title=None, description=None, footer=N
         footer (str, optional): Footer text placed on the widget bottom.
         is_global (boolean, optional): Account for calculations based on the entire dataset ('global') vs.
             the default of 'viewport' features.
-        format_number (str, optional): Format to apply to number values in the widget, based on d3-format
+        format (str, optional): Format to apply to number values in the widget, based on d3-format
             specifier (https://github.com/d3/d3-format#locale_format).
 
     Returns:
@@ -40,13 +40,13 @@ def formula_widget(value, operation=None, title=None, description=None, footer=N
         ...     title='Widget title',
         ...     description='Widget description',
         ...     footer='Widget footer',
-        ...     format_number='.2~s')
+        ...     format='.2~s')
 
     """
     if isinstance(operation, str):
         operation = operation.lower()
     value = _get_value_expression(operation, value, is_global)
-    return Widget('formula', value, title, description, footer, format_number=format_number)
+    return Widget('formula', value, title, description, footer, format=format)
 
 
 def _get_value_expression(operation, value, is_global):

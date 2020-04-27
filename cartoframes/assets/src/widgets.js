@@ -4,7 +4,7 @@ export function renderWidget(widget, value) {
   widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
 
   if (value && widget.element) {
-    widget.element.innerText = typeof value === 'number' ? format(value) : value;
+    widget.element.innerText = typeof value === 'number' ? format(value, widget.options.format) : value;
   }
 }
 
