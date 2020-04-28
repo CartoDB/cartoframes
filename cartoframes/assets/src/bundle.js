@@ -572,7 +572,7 @@ var init = (function () {
           const variable = feature.variables[item.name];
           if (variable) {
             let value = variable.value;
-            value = formatValue(value);
+            value = format$1(value, item.format);
 
             popupHTML = `
             <span class="popup-name">${item.title}</span>
@@ -715,7 +715,11 @@ var init = (function () {
       const order = legend.ascending ? 'ASC' : 'DESC';
       const variable = legend.variable;
       const config = { othersLabel, variable, order };
-      const options = { format: format$1, config, dynamic };
+      const formatString = legend.format;
+      const formatFunc = formatString
+        ? (value) => format$1(value, formatString)
+        : format$1;
+      const options = { format: formatFunc, config, dynamic };
 
       if (legend.type.startsWith('size-continuous')) {
         config.samples = 4;

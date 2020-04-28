@@ -46,7 +46,9 @@ class PopupList:
                     popup_elements.append(
                         Popup('click',
                               value=popup.get('value'),
-                              title=popup.get('title'))
+                              title=popup.get('title'),
+                              format=popup.get('format')
+                              )
                     )
 
         if hover_popup_elements is not None:
@@ -60,7 +62,9 @@ class PopupList:
                     popup_elements.append(
                         Popup('hover',
                               value=popup.get('value'),
-                              title=popup.get('title'))
+                              title=popup.get('title'),
+                              format=popup.get('format')
+                              )
                     )
 
         return popup_elements
