@@ -1,7 +1,8 @@
-from .dataset import Dataset
 from .entity import is_slug_value
-from .category import Category
 from .country import Country
+from .category import Category
+from .provider import Provider
+from .dataset import Dataset
 from .geography import Geography
 from .subscriptions import Subscriptions
 from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER
@@ -142,6 +143,19 @@ class Catalog:
 
         """
         return Category.get_all(self.filters)
+
+    @property
+    def providers(self):
+        """Get all the providers in the Catalog.
+
+        Returns:
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
+
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
+
+        """
+        return Provider.get_all(self.filters)
 
     @property
     def datasets(self):
