@@ -39,7 +39,8 @@ class TestLegend(object):
             'description': '[description]',
             'footer': '[footer]',
             'dynamic': True,
-            'variable': ''
+            'variable': '',
+            'format': None
         }
 
     def test_wrong_type(self):
