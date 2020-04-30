@@ -1,9 +1,9 @@
-from .constants import COUNTRY_FILTER
+from .constants import COUNTRY_FILTER, PROVIDER_FILTER
 from .entity_repo import EntityRepository
 
 
 _CATEGORY_ID_FIELD = 'id'
-_ALLOWED_FILTERS = [COUNTRY_FILTER]
+_ALLOWED_FILTERS = [COUNTRY_FILTER, PROVIDER_FILTER]
 
 
 def get_category_repo():
