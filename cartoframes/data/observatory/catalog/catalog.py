@@ -4,7 +4,7 @@ from .category import Category
 from .country import Country
 from .geography import Geography
 from .subscriptions import Subscriptions
-from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER
+from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, PUBLIC_FILTER
 
 from ....utils.utils import get_credentials
 
@@ -229,6 +229,20 @@ class Catalog:
 
         """
         self.filters[PROVIDER_FILTER] = provider_id
+        return self
+
+    def public(self, is_public=True):
+        """Add a public filter to the current Catalog instance
+
+        Args:
+            is_public (str, optional):
+              Flag to filter public (True) or private (False) datasets. Default is True.
+
+        Returns:
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
+
+        """
+        self.filters[PUBLIC_FILTER] = 'true' if is_public else 'false'
         return self
 
     def clear_filters(self):
