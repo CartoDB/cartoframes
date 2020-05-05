@@ -39,4 +39,4 @@ def size_bins_legend(title=None, description=None, footer=None, prop='size',
         ...     format='.2~s')
 
     """
-    return Legend('size-bins', title, description, footer, prop, variable, dynamic, ascending)
+    return Legend('size-bins', title, description, footer, prop, variable, dynamic, ascending, format)

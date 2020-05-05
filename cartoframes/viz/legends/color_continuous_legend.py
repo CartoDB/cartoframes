@@ -39,4 +39,4 @@ def color_continuous_legend(title=None, description=None, footer=None, prop='col
         ...     format='.2~s')
 
     """
-    return Legend('color-continuous', title, description, footer, prop, variable, dynamic, ascending)
+    return Legend('color-continuous', title, description, footer, prop, variable, dynamic, ascending, format)
