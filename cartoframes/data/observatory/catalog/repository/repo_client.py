@@ -1,5 +1,3 @@
-import os
-
 from carto.do_dataset import DODataset
 
 from .....auth import Credentials, defaults
@@ -72,9 +70,9 @@ class RepoClient:
 
     def _fetch_entity_id(self, entity, filter_id):
         if isinstance(filter_id, list):
-            return list(filter(None, [self._fetch_entity(os.path.join(entity, _id)) for _id in filter_id]))
+            return list(filter(None, [self._fetch_entity('{0}/{1}'.format(entity, _id)) for _id in filter_id]))
         else:
-            return self._fetch_entity(os.path.join(entity, filter_id))
+            return self._fetch_entity('{0}/{1}'.format(entity, filter_id))
 
     def _fetch_entity(self, entity, filters=None):
         if self._do_dataset:
