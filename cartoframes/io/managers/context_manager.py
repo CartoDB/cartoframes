@@ -13,7 +13,7 @@ from ...auth.defaults import get_default_credentials
 from ...utils.logger import log
 from ...utils.geom_utils import encode_geometry_ewkb
 from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
-from ...utils.columns import Column, get_dataframe_columns_info, obtain_converters, \
+from ...utils.columns import get_dataframe_columns_info, get_query_columns_info, obtain_converters, \
                       date_columns_names, normalize_name
 
 DEFAULT_RETRY_TIMES = 3
@@ -47,16 +47,21 @@ class ContextManager:
         table_name = self.normalize_table_name(table_name)
         columns = get_dataframe_columns_info(gdf)
 
-        if if_exists == 'replace' or not self.has_table(table_name, schema):
-            log.debug('Creating table "{}"'.format(table_name))
-            self._create_table_from_columns(table_name, columns, schema, cartodbfy)
-        elif if_exists == 'fail':
-            raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
-                            'Please choose a different `table_name` or use '
-                            'if_exists="replace" to overwrite it.'.format(
-                                table_name=table_name, schema=schema))
-        else:  # 'append'
-            pass
+        if self.has_table(table_name, schema):
+            if if_exists == 'replace':
+                if self._compare_columns(table_name, schema, columns):
+                    self._truncate_table_from_columns(table_name, schema, columns, cartodbfy)
+                else:
+                    self._drop_create_table_from_columns(table_name, schema, columns, cartodbfy)
+            elif if_exists == 'fail':
+                raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
+                                'Please choose a different `table_name` or use '
+                                'if_exists="replace" to overwrite it.'.format(
+                                    table_name=table_name, schema=schema))
+            else:  # 'append'
+                pass
+        else:
+            self._drop_create_table_from_columns(table_name, schema, columns, cartodbfy)
 
         self._copy_from(gdf, table_name, columns)
         return table_name
@@ -65,16 +70,18 @@ class ContextManager:
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
 
-        if if_exists == 'replace' or not self.has_table(table_name, schema):
-            log.debug('Creating table "{}"'.format(table_name))
-            self._create_table_from_query(query, table_name, schema, cartodbfy)
-        elif if_exists == 'fail':
-            raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
-                            'Please choose a different `table_name` or use '
-                            'if_exists="replace" to overwrite it.'.format(
-                                table_name=table_name, schema=schema))
-        else:  # 'append'
-            pass
+        if self.has_table(table_name, schema):
+            if if_exists == 'replace':
+                self._drop_create_table_from_query(table_name, schema, query, cartodbfy)
+            elif if_exists == 'fail':
+                raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
+                                'Please choose a different `table_name` or use '
+                                'if_exists="replace" to overwrite it.'.format(
+                                    table_name=table_name, schema=schema))
+            else:  # 'append'
+                pass
+        else:
+            self._drop_create_table_from_query(table_name, schema, query, cartodbfy)
 
         return table_name
 
@@ -187,7 +194,19 @@ class ContextManager:
             tables = [table.split('.')[1] if '.' in table else table for table in result['rows'][0]['tables']]
         return tables
 
-    def _create_table_from_query(self, query, table_name, schema, cartodbfy=True):
+    def _compare_columns(self, table_name, schema, columns):
+        GEOM_COL = 'the_geom_webmercator'
+
+        query = self._compute_query_from_table(table_name, schema)
+        existing_columns = [c for c in self._get_query_columns_info(query) if (c.name != GEOM_COL)]
+
+        existing_columns.sort()
+        columns.sort()
+
+        return existing_columns == columns
+
+    def _drop_create_table_from_query(self, table_name, schema, query, cartodbfy):
+        log.debug('DROP + CREATE table "{}"'.format(table_name))
         query = 'BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'.format(
             drop=_drop_table_query(table_name),
             create=_create_table_from_query_query(table_name, query),
@@ -195,10 +214,19 @@ class ContextManager:
         )
         self.execute_long_running_query(query)
 
-    def _create_table_from_columns(self, table_name, columns, schema, cartodbfy=True):
+    def _drop_create_table_from_columns(self, table_name, schema, columns, cartodbfy):
+        log.debug('DROP + CREATE table "{}"'.format(table_name))
         query = 'BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'.format(
             drop=_drop_table_query(table_name),
             create=_create_table_from_columns_query(table_name, columns),
+            cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else ''
+        )
+        self.execute_long_running_query(query)
+
+    def _truncate_table_from_columns(self, table_name, schema, columns, cartodbfy):
+        log.debug('TRUNCATE table "{}"'.format(table_name))
+        query = 'BEGIN; {truncate}; {cartodbfy}; COMMIT;'.format(
+            truncate=_truncate_table_query(table_name),
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else ''
         )
         self.execute_long_running_query(query)
@@ -226,7 +254,7 @@ class ContextManager:
     def _get_query_columns_info(self, query):
         query = 'SELECT * FROM ({}) _q LIMIT 0'.format(query)
         table_info = self.execute_query(query)
-        return Column.from_sql_api_fields(table_info['fields'])
+        return get_query_columns_info(table_info['fields'])
 
     def _get_copy_query(self, query, columns, limit):
         query_columns = [
@@ -245,6 +273,7 @@ class ContextManager:
         return query
 
     def _copy_to(self, query, columns, retry_times):
+        log.debug('COPY TO')
         copy_query = 'COPY ({0}) TO stdout WITH (FORMAT csv, HEADER true, NULL \'{1}\')'.format(query, PG_NULL)
 
         try:
@@ -272,6 +301,7 @@ class ContextManager:
         return df
 
     def _copy_from(self, dataframe, table_name, columns):
+        log.debug('COPY FROM')
         query = """
             COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '{null}');
         """.format(
@@ -295,6 +325,11 @@ def _drop_table_query(table_name, if_exists=True):
     return '''DROP TABLE {if_exists} {table_name}'''.format(
         table_name=table_name,
         if_exists='IF EXISTS' if if_exists else '')
+
+
+def _truncate_table_query(table_name):
+    return '''TRUNCATE TABLE {table_name}'''.format(
+        table_name=table_name)
 
 
 def _create_table_from_columns_query(table_name, columns):

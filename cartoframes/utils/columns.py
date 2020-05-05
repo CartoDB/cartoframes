@@ -3,15 +3,14 @@
 import re
 
 from unidecode import unidecode
-from collections import namedtuple
 
-from .utils import dtypes2pg, PG_NULL
+from .utils import dtypes2pg, pg2dtypes, PG_NULL
 
-BOOL_DTYPE = 'bool'
-OBJECT_DTYPE = 'object'
-INT_DTYPES = ['int16', 'int32', 'int64']
-FLOAT_DTYPES = ['float32', 'float64']
-DATETIME_DTYPES = ['datetime64[D]', 'datetime64[ns]', 'datetime64[ns, UTC]']
+BOOL_DBTYPES = ['bool', 'boolean']
+OBJECT_DBTYPES = ['text']
+INT_DBTYPES = ['int2', 'int4', 'int2', 'int', 'int8', 'smallint', 'integer', 'bigint']
+FLOAT_DBTYPES = ['float4', 'float8', 'real', 'double precision', 'numeric', 'decimal']
+DATETIME_DBTYPES = ['date', 'timestamp', 'timestampz']
 FORBIDDEN_COLUMN_NAMES = ['the_geom_webmercator']
 MAX_LENGTH = 63
 MAX_COLLISION_LENGTH = MAX_LENGTH - 4
@@ -28,48 +27,74 @@ RESERVED_WORDS = ('ALL', 'ANALYSE', 'ANALYZE', 'AND', 'ANY', 'ARRAY', 'AS', 'ASC
                   'XMIN', 'XMAX', 'FORMAT', 'CONTROLLER', 'ACTION')
 
 
-ColumnInfo = namedtuple('ColumnInfo', ['name', 'dbname', 'dbtype', 'is_geom'])
+class ColumnInfo:
+
+    def __init__(self, name, dbname, dbtype, is_geom):
+        self.name = name
+        self.dbname = dbname
+        self.dbtype = dbtype
+        self.is_geom = is_geom
+
+    def __repr__(self):
+        params = ', '.join([self.name, self.dbname, self.dbtype, str(self.is_geom)])
+        return 'ColumnInfo({})'.format(params)
+
+    def __eq__(self, other):
+        if self.name == 'cartodb_id':
+            # Skip cartodb_id comparison because cartodbfy converts bigint to integer
+            return True
+        else:
+            return self.name == other.name and \
+                   self.dbname == other.dbname and \
+                   self.dbtype == other.dbtype and \
+                   self.is_geom == other.is_geom
+
+    def __gt__(self, other):
+        return self.name > other.name
+
+    def __ge__(self, other):
+        return self.name >= other.name
+
+    def __lt__(self, other):
+        return self.name < other.name
+
+    def __le__(self, other):
+        return self.name <= other.name
 
 
 def get_dataframe_columns_info(df):
     columns = []
-    df_columns = [(name, df.dtypes[name]) for name in df.columns]
 
-    for name, dtype in df_columns:
+    for name in df.columns:
         if _is_valid_column(name):
-            columns.append(_compute_column_info(name, dtype))
+            dbtype = dtypes2pg(str(df.dtypes[name]))
+            columns.append(_create_column_info(name, dbtype))
 
     return columns
 
 
 def get_query_columns_info(fields):
     columns = []
-    field_columns = [(name, _dtype_from_field(fields[name])) for name in fields]
 
-    for name, dtype in field_columns:
-        columns.append(_compute_column_info(name, dtype))
+    for name in fields:
+        field = fields[name]
+        pgtype = field.get('pgtype')
+        dbtype = dtypes2pg(pg2dtypes(pgtype)) if pgtype else field.get('type')
+        columns.append(_create_column_info(name, dbtype))
 
     return columns
-
-
-def _dtype_from_field(field):
-    if field:
-        return field.get('pgtype', field.get('type'))
 
 
 def _is_valid_column(name):
     return name.lower() not in FORBIDDEN_COLUMN_NAMES
 
 
-def _compute_column_info(name, dtype=None):
-    name = name
+def _create_column_info(name, dbtype=None):
+    is_geom = False
     dbname = normalize_name(name)
-    if str(dtype) == 'geometry':
+    if dbtype == 'geometry':
         dbtype = 'geometry(Geometry, 4326)'
         is_geom = True
-    else:
-        dbtype = dtypes2pg(dtype)
-        is_geom = False
     return ColumnInfo(name, dbname, dbtype, is_geom)
 
 
@@ -160,39 +185,27 @@ def _is_unsupported(value):
 def obtain_converters(columns):
     converters = {}
 
-    for int_column_name in int_columns_names(columns):
+    for int_column_name in type_columns_names(columns, INT_DBTYPES):
         converters[int_column_name] = _convert_int
 
-    for float_column_name in float_columns_names(columns):
+    for float_column_name in type_columns_names(columns, FLOAT_DBTYPES):
         converters[float_column_name] = _convert_float
 
-    for bool_column_name in bool_columns_names(columns):
+    for bool_column_name in type_columns_names(columns, BOOL_DBTYPES):
         converters[bool_column_name] = _convert_bool
 
-    for object_column_name in object_columns_names(columns):
+    for object_column_name in type_columns_names(columns, OBJECT_DBTYPES):
         converters[object_column_name] = _convert_object
 
     return converters
 
 
 def date_columns_names(columns):
-    return [x.name for x in columns if x.dtype in DATETIME_DTYPES]
+    return type_columns_names(columns, DATETIME_DBTYPES)
 
 
-def int_columns_names(columns):
-    return [x.name for x in columns if x.dtype in INT_DTYPES]
-
-
-def float_columns_names(columns):
-    return [x.name for x in columns if x.dtype in FLOAT_DTYPES]
-
-
-def bool_columns_names(columns):
-    return [x.name for x in columns if x.dtype == BOOL_DTYPE]
-
-
-def object_columns_names(columns):
-    return [x.name for x in columns if x.dtype == OBJECT_DTYPE]
+def type_columns_names(columns, dbtypes):
+    return [x.name for x in columns if x.dbtype in dbtypes]
 
 
 def _convert_int(x):

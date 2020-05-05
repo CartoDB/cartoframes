@@ -14,8 +14,6 @@ from ..utils.metrics import send_metrics
 
 GEOM_COLUMN_NAME = 'the_geom'
 
-IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
-
 
 @send_metrics('data_downloaded')
 def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True):
@@ -94,6 +92,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
+    IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
     if if_exists not in IF_EXISTS_OPTIONS:
         raise ValueError('Wrong option for the `if_exists` param. You should provide: {}.'.format(
             ', '.join(IF_EXISTS_OPTIONS)))
@@ -228,6 +227,7 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
     if not is_valid_str(new_table_name):
         raise ValueError('Wrong new table name. You should provide a valid table name.')
 
+    IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
     if if_exists not in IF_EXISTS_OPTIONS:
         raise ValueError('Wrong option for the `if_exists` param. You should provide: {}.'.format(
             ', '.join(IF_EXISTS_OPTIONS)))
@@ -261,6 +261,7 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
     if not is_valid_str(new_table_name):
         raise ValueError('Wrong new table name. You should provide a valid table name.')
 
+    IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
     if if_exists not in IF_EXISTS_OPTIONS:
         raise ValueError('Wrong option for the `if_exists` param. You should provide: {}.'.format(
             ', '.join(IF_EXISTS_OPTIONS)))
