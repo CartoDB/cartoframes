@@ -9,7 +9,6 @@ from .style import Style
 from .widget import Widget
 from .widget_list import WidgetList
 
-from ..utils.logger import log
 from ..utils.utils import merge_dicts, extract_viz_columns
 
 
@@ -222,7 +221,6 @@ class Layer:
     def reset_ui(self, parent_map):
         if parent_map.is_static:
             # Remove legends/widgets if the map is static
-            log.info('Legends and widgets are not compatible with static maps')
             self.legends = []
             self.widgets = []
             self.legends_info = []

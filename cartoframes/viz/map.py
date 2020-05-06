@@ -273,6 +273,10 @@ class Map:
 
         return html_map.html
 
+    def _reload_layers(self):
+        self.layers = _init_layers(self.layers, self)
+        self.layer_defs = _get_layer_defs(self.layers)
+
 
 def _get_publisher(credentials):
     return KuvizPublisher(credentials)

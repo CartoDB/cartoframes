@@ -233,21 +233,20 @@ def _init_layout(maps, is_static, viewport):
         for layer in viz.layers:
             layer.map_index = map_index
 
-        map_settings = _get_map_settings(viz, is_static, viewport, map_index)
+        map_settings = _get_map_settings(viz, is_static, viewport)
 
         layout.append(map_settings)
 
     return layout
 
 
-def _get_map_settings(viz, is_static, viewport, map_index):
-    map_settings = viz.get_content()
+def _get_map_settings(viz, is_static, viewport):
+    viz.viewport = _get_viewport(viz.viewport, viewport)
+    viz.camera = _get_camera(viz.viewport)
+    viz.is_static = _get_is_static(viz.is_static, is_static)
 
-    map_settings['viewport'] = _get_viewport(map_settings['viewport'], viewport)
-    map_settings['camera'] = _get_camera(map_settings['viewport'])
-    map_settings['is_static'] = _get_is_static(map_settings['is_static'], is_static)
-
-    return map_settings
+    viz._reload_layers()
+    return viz.get_content()
 
 
 def _get_viewport(map_settings_viewport, layout_viewport):
