@@ -271,9 +271,9 @@
             "path": "popups",
             "group": "Popups"
         }, {
-            "title": "Customize popup title",
-            "desc": "Change the title for the popup values",
-            "file": "popup_titles",
+            "title": "Customize popup title and format",
+            "desc": "Change the title and format for the popup values",
+            "file": "popup_titles_and_format",
             "path": "popups",
             "group": "Popups"
         }, {
