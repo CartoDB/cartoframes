@@ -9,6 +9,7 @@ from .style import Style
 from .widget import Widget
 from .widget_list import WidgetList
 
+from ..utils.logger import log
 from ..utils.utils import merge_dicts, extract_viz_columns
 
 
@@ -218,8 +219,15 @@ class Layer:
         """Set session"""
         self._map_index = map_index
 
-    def reset_legends(self, parent_map):
-        if parent_map.layer_selector:
+    def reset_ui(self, parent_map):
+        if parent_map.is_static:
+            # Remove legends/widgets if the map is static
+            log.info('Legends and widgets are not compatible with static maps')
+            self.legends = []
+            self.widgets = []
+            self.legends_info = []
+            self.widgets_info = []
+        elif parent_map.layer_selector:
             if self.style.default_legend:
                 self.style.default_legend.set_title('')
             self.legends = self._init_legends(self.legends, self.default_legend, '')

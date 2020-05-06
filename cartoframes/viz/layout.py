@@ -203,7 +203,7 @@ class Layout:
             viz_map.layer_defs = []
 
         for layer in layers:
-            layer.reset_legends(self._maps[layer.map_index])
+            layer.reset_ui(self._maps[layer.map_index])
             layer_def = layer._get_layer_def()
             self._maps[layer.map_index].layer_defs.append(layer_def)
 
