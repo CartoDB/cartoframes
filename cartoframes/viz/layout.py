@@ -16,8 +16,8 @@ class Layout:
         M_SIZE (number, optional): Number of rows of the layout
         viewport (dict, optional): Properties for display of the maps viewport.
             Keys can be `bearing` or `pitch`.
-        is_static (boolean, optional): By default, all the maps in each visualization
-            are static images due to performance reasons. In order to set them interactive,
+        is_static (boolean, optional): By default is False. All the maps in each visualization
+            are interactive. In order to set them static images for performance reasons
             set `is_static` to True.
         map_height (number, optional): Height in pixels for each visualization.
             Default is 250.
@@ -66,12 +66,12 @@ class Layout:
         ...     Map(Layer('table_in_your_account'))
         >>> ], viewport={ 'zoom': 2 })
 
-        Create an interactive layout
+        Create an static layout
 
         >>> Layout([
         ...    Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account')),
         ...    Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account'))
-        >>> ], is_static=False)
+        >>> ], is_static=True)
 
     """
     def __init__(self,
@@ -81,7 +81,7 @@ class Layout:
                  viewport=None,
                  map_height=250,
                  full_height=True,
-                 is_static=True,
+                 is_static=False,
                  **kwargs):
 
         self._maps = maps
