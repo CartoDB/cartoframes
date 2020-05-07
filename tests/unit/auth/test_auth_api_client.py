@@ -33,8 +33,9 @@ class TestAuthAPIClient(object):
         api_key_name = 'fake_name'
 
         auth_api_client = AuthAPIClient()
-        token, tables = auth_api_client.create_api_key([source], name=api_key_name)
+        name, token, tables = auth_api_client.create_api_key([source], name=api_key_name)
 
+        assert name == api_key_name
         assert token == TOKEN_MOCK
 
     def test_create_api_key_several_sources(self, mocker):
@@ -44,6 +45,7 @@ class TestAuthAPIClient(object):
         api_key_name = 'fake_name'
 
         auth_api_client = AuthAPIClient()
-        token, tables = auth_api_client.create_api_key([source, source, source], name=api_key_name)
+        name, token, tables = auth_api_client.create_api_key([source, source, source], name=api_key_name)
 
+        assert name == api_key_name
         assert token == TOKEN_MOCK
