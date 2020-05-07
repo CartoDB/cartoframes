@@ -61,6 +61,7 @@ htmlcov
 test_*.json
 .pytest_cache
 tmp_file.csv
+fake_path
 
 # Sphinx documentation
 docs/build/

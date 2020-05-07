@@ -1,10 +1,11 @@
-from .dataset import Dataset
 from .entity import is_slug_value
-from .category import Category
 from .country import Country
+from .category import Category
+from .provider import Provider
+from .dataset import Dataset
 from .geography import Geography
 from .subscriptions import Subscriptions
-from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER
+from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, PUBLIC_FILTER
 
 from ....utils.utils import get_credentials
 
@@ -144,6 +145,19 @@ class Catalog:
         return Category.get_all(self.filters)
 
     @property
+    def providers(self):
+        """Get all the providers in the Catalog.
+
+        Returns:
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
+
+        Raises:
+            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
+
+        """
+        return Provider.get_all(self.filters)
+
+    @property
     def datasets(self):
         """Get all the datasets in the Catalog.
 
@@ -229,6 +243,20 @@ class Catalog:
 
         """
         self.filters[PROVIDER_FILTER] = provider_id
+        return self
+
+    def public(self, is_public=True):
+        """Add a public filter to the current Catalog instance
+
+        Args:
+            is_public (str, optional):
+              Flag to filter public (True) or private (False) datasets. Default is True.
+
+        Returns:
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
+
+        """
+        self.filters[PUBLIC_FILTER] = 'true' if is_public else 'false'
         return self
 
     def clear_filters(self):

@@ -218,8 +218,14 @@ class Layer:
         """Set session"""
         self._map_index = map_index
 
-    def reset_legends(self, parent_map):
-        if parent_map.layer_selector:
+    def reset_ui(self, parent_map):
+        if parent_map.is_static:
+            # Remove legends/widgets if the map is static
+            self.legends = []
+            self.widgets = []
+            self.legends_info = []
+            self.widgets_info = []
+        elif parent_map.layer_selector:
             if self.style.default_legend:
                 self.style.default_legend.set_title('')
             self.legends = self._init_legends(self.legends, self.default_legend, '')

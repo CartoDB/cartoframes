@@ -1,7 +1,9 @@
+from .constants import CATEGORY_FILTER, COUNTRY_FILTER
 from .entity_repo import EntityRepository
 
 
 _PROVIDER_ID_FIELD = 'id'
+_ALLOWED_FILTERS = [CATEGORY_FILTER, COUNTRY_FILTER]
 
 
 def get_provider_repo():
@@ -11,7 +13,7 @@ def get_provider_repo():
 class ProviderRepository(EntityRepository):
 
     def __init__(self):
-        super(ProviderRepository, self).__init__(_PROVIDER_ID_FIELD, [])
+        super(ProviderRepository, self).__init__(_PROVIDER_ID_FIELD, _ALLOWED_FILTERS)
 
     @classmethod
     def _get_entity_class(cls):

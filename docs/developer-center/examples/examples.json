@@ -307,9 +307,9 @@
             "path": "map_layout",
             "group": "Layout"
         }, {
-            "title": "Make layout interactive",
-            "desc": "Create an interactive visualization layout",
-            "file": "interactive_layout",
+            "title": "Make layout static",
+            "desc": "Create a static visualization layout",
+            "file": "static_layout",
             "path": "map_layout",
             "group": "Layout"
         }]

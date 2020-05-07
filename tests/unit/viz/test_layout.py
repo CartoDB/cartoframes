@@ -22,7 +22,7 @@ class TestLayoutInitialization(object):
         assert layout._n_size == 0
         assert layout._m_size == 1
         assert layout._viewport is None
-        assert layout._is_static is True
+        assert layout._is_static is False
 
     def test__init_maps(self):
         """Layout should init properly"""
@@ -97,7 +97,7 @@ class TestLayoutSettings(object):
         layout = Layout([
             Map(Layer(Source(SOURCE))),
             Map(Layer(Source(SOURCE)))
-        ], viewport={'zoom': 5})
+        ], is_static=True)
 
         assert layout._layout[0].get('is_static') is True
         assert layout._layout[1].get('is_static') is True

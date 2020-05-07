@@ -7,15 +7,17 @@ from cartoframes.data.observatory.catalog.dataset import Dataset
 from cartoframes.data.observatory.catalog.geography import Geography
 from cartoframes.data.observatory.catalog.country import Country
 from cartoframes.data.observatory.catalog.category import Category
+from cartoframes.data.observatory.catalog.provider import Provider
 from cartoframes.data.observatory.catalog.catalog import Catalog
 from cartoframes.data.observatory.catalog.subscriptions import Subscriptions
 from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.catalog.repository.constants import (
-    CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER
+    CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PUBLIC_FILTER
 )
 from .examples import (
     test_country2, test_country1, test_category1, test_category2, test_dataset1, test_dataset2,
-    test_geographies, test_datasets, test_categories, test_countries, test_geography1, test_geography2
+    test_geographies, test_datasets, test_categories, test_countries, test_geography1, test_geography2,
+    test_provider1, test_provider2
 )
 
 
@@ -47,6 +49,19 @@ class TestCatalog(object):
         # Then
         assert categories == expected_categories
 
+    @patch.object(Provider, 'get_all')
+    def test_providers(self, mocked_providers):
+        # Given
+        expected_providers = [test_provider1, test_provider2]
+        mocked_providers.return_value = expected_providers
+        catalog = Catalog()
+
+        # When
+        providers = catalog.providers
+
+        # Then
+        assert providers == expected_providers
+
     @patch.object(Dataset, 'get_all')
     def test_datasets(self, mocked_datasets):
         # Given
@@ -70,7 +85,7 @@ class TestCatalog(object):
         countries = catalog.category('demographics').countries
 
         # Then
-        mocked_countries.called_once_with({CATEGORY_FILTER: 'demographics'})
+        mocked_countries.assert_called_once_with({CATEGORY_FILTER: 'demographics'})
         assert countries == test_countries
 
     @patch.object(Category, 'get_all')
@@ -83,7 +98,7 @@ class TestCatalog(object):
         categories = catalog.country('usa').categories
 
         # Then
-        mocked_categories.called_once_with({COUNTRY_FILTER: 'usa'})
+        mocked_categories.assert_called_once_with({COUNTRY_FILTER: 'usa'})
         assert categories == test_categories
 
     @patch.object(Dataset, 'get_all')
@@ -96,7 +111,7 @@ class TestCatalog(object):
         datasets = catalog.country('usa').category('demographics').datasets
 
         # Then
-        mocked_datasets.called_once_with({COUNTRY_FILTER: 'usa', CATEGORY_FILTER: 'demographics'})
+        mocked_datasets.assert_called_once_with({COUNTRY_FILTER: 'usa', CATEGORY_FILTER: 'demographics'})
         assert datasets == test_datasets
 
     @patch.object(Geography, 'get_all')
@@ -109,8 +124,64 @@ class TestCatalog(object):
         geographies = catalog.country('usa').category('demographics').geographies
 
         # Then
-        mocked_geographies.called_once_with({COUNTRY_FILTER: 'usa', CATEGORY_FILTER: 'demographics'})
+        mocked_geographies.assert_called_once_with({COUNTRY_FILTER: 'usa', CATEGORY_FILTER: 'demographics'})
         assert geographies == test_geographies
+
+    @patch.object(Dataset, 'get_all')
+    def test_filters_public_datasets(self, mocked_datasets):
+        # Given
+        expected_datasets = [test_dataset1, test_dataset2]
+        mocked_datasets.return_value = expected_datasets
+        catalog = Catalog()
+
+        # When
+        datasets = catalog.public().datasets
+
+        # Then
+        mocked_datasets.assert_called_once_with({PUBLIC_FILTER: 'true'})
+        assert datasets == expected_datasets
+
+    @patch.object(Geography, 'get_all')
+    def test_filters_public_geographies(self, mocked_geographies):
+        # Given
+        expected_geographies = [test_geography1, test_geography2]
+        mocked_geographies.return_value = expected_geographies
+        catalog = Catalog()
+
+        # When
+        geographies = catalog.public().geographies
+
+        # Then
+        mocked_geographies.assert_called_once_with({PUBLIC_FILTER: 'true'})
+        assert geographies == expected_geographies
+
+    @patch.object(Dataset, 'get_all')
+    def test_filters_private_datasets(self, mocked_datasets):
+        # Given
+        expected_datasets = [test_dataset1, test_dataset2]
+        mocked_datasets.return_value = expected_datasets
+        catalog = Catalog()
+
+        # When
+        datasets = catalog.public(False).datasets
+
+        # Then
+        mocked_datasets.assert_called_once_with({PUBLIC_FILTER: 'false'})
+        assert datasets == expected_datasets
+
+    @patch.object(Geography, 'get_all')
+    def test_filters_private_geographies(self, mocked_geographies):
+        # Given
+        expected_geographies = [test_geography1, test_geography2]
+        mocked_geographies.return_value = expected_geographies
+        catalog = Catalog()
+
+        # When
+        geographies = catalog.public(False).geographies
+
+        # Then
+        mocked_geographies.assert_called_once_with({PUBLIC_FILTER: 'false'})
+        assert geographies == expected_geographies
 
     @patch.object(Dataset, 'get_all')
     def test_all_filters(self, mocked_datasets):
@@ -119,13 +190,14 @@ class TestCatalog(object):
         catalog = Catalog()
 
         # When
-        datasets = catalog.country('usa').category('demographics') \
+        datasets = catalog.country('usa').category('demographics').public() \
             .geography('carto-do-public-data.tiger.geography_esp_census_2019').datasets
 
         # Then
-        mocked_datasets.called_once_with({
+        mocked_datasets.assert_called_once_with({
             COUNTRY_FILTER: 'usa',
             CATEGORY_FILTER: 'demographics',
+            PUBLIC_FILTER: 'true',
             GEOGRAPHY_FILTER: 'carto-do-public-data.tiger.geography_esp_census_2019'})
 
         assert datasets == test_datasets

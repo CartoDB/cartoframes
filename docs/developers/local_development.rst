@@ -6,79 +6,42 @@ Let's run a local Jupyter Notebook with CARTOFrames, CARTO VL and Airship for lo
 Jupyter Notebook
 ^^^^^^^^^^^^^^^^
 
-1. Install Python
+1. Install Python 3
 
-MacOS:
+https://www.python.org/downloads/
 
-.. code::
-
-  brew install python3
+2. Create virtualenv
 
 .. code::
 
-  brew postinstall python3
+  python3 -m virtualenv venv
 
-Linux:
-
-.. code::
-
-  sudo apt-get install python3.6
-
-2. Install Pipenv
-
-MacOS:
+3. Activate virtualenv
 
 .. code::
 
-  brew install pipenv
+  source venv/bin/activate
 
-Linux:
+In order to deactivate the virtualenv, run:
+
+.. code::
+  
+  deactivate
+
+4. Install jupyter
 
 .. code::
 
-  pip install pipenv
+  pip install jupyter
 
-3. Create directory and clone CARTOFrames repository
-
-  Note: This is a recommendation to set up your workspace.
+5. Install cartoframes package in dev mode
 
 .. code::
 
-  mkdir jupyter-cartoframes
-  cd jupyter-cartoframes
-  git clone git@github.com:CartoDB/cartoframes.git
+  cd cartoframes
+  pip install -e .
 
-4. Create virtualenv
-
-.. code::
-
-  python3 -m virtualenv <your env name>
-
-or
-
-.. code::
-
-  pipenv --three
-
-5. Install jupyter
-
-.. code::
-
-  pipenv install jupyter
-
-6. Install cartoframes package in dev mode using pipenv
-
-.. code::
-
-  pipenv install -e cartoframes
-
-7. Launch virtual environment
-
-.. code::
-
-  pipenv shell
-
-8. Launch Jupyter notebook
+6. Launch Jupyter notebook
 
 .. code::
 
@@ -92,7 +55,6 @@ We're going to clone the repository. We can do it in the jupyter-cartoframes dir
 
 .. code::
 
-  cd jupyter-cartoframes
   git clone git@github.com:CartoDB/carto-vl.git
   cd carto-vl
 
@@ -100,13 +62,12 @@ We're going to clone the repository. We can do it in the jupyter-cartoframes dir
 The local installation of CARTO VL is explained `in this guide <https://github.com/CartoDB/carto-vl/blob/master/DEVELOPERS.md/>`__
 
 Airship
-^^^^^^^^
+^^^^^^^
 
 Let's clone the Airship repository as well.
 
 .. code::
 
-  cd jupyter-cartoframes
   git clone git@github.com:CartoDB/airship.git
   cd airship
 
@@ -114,7 +75,7 @@ Let's clone the Airship repository as well.
 The local installation of Airship is explained `in this guide <https://github.com/CartoDB/airship/blob/master/DEVELOPERS.md/>`__
 
 CARTOframes JavaScript code
-^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The JavaScript code is generated using Rollup, a module bundler. In order to save changes in the all the .js files, we need to bundle the code:
 
@@ -170,10 +131,7 @@ In order to get Airship and CARTO VL libraries we're serving locally in CARTOFra
   from cartoframes.auth import set_default_credentials
   from cartoframes.viz import Map, Layer
 
-  set_default_credentials(
-      base_url='https://cartoframes.carto.com/', # or https://cartovl.carto.com/
-      api_key='default_public'
-  )
+  set_default_credentials('cartoframes')
 
   Map(
       Layer('dataset_name'),
