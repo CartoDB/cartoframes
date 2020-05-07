@@ -259,6 +259,12 @@
             "path": "widgets",
             "group": "Widgets"
         }, {
+            "title": "Default popup",
+            "desc": "Set the default popup needed for the style helper",
+            "file": "default_popup",
+            "path": "popups",
+            "group": "Popups"
+        }, {
             "title": "Popup on click",
             "desc": "Display a popup triggered by a click event",
             "file": "popup_on_click",
