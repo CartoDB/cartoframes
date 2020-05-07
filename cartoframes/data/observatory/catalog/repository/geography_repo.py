@@ -1,14 +1,14 @@
 from geopandas import GeoDataFrame
 
 from .....utils.geom_utils import set_geometry
-from .constants import CATEGORY_FILTER, COUNTRY_FILTER, PROVIDER_FILTER
+from .constants import COUNTRY_FILTER, CATEGORY_FILTER, PROVIDER_FILTER, PUBLIC_FILTER
 from .entity_repo import EntityRepository
 
 GEOGRAPHY_TYPE = 'geography'
 
 _GEOGRAPHY_ID_FIELD = 'id'
 _GEOGRAPHY_SLUG_FIELD = 'slug'
-_ALLOWED_FILTERS = [CATEGORY_FILTER, COUNTRY_FILTER, PROVIDER_FILTER]
+_ALLOWED_FILTERS = [COUNTRY_FILTER, CATEGORY_FILTER, PROVIDER_FILTER, PUBLIC_FILTER]
 
 
 def get_geography_repo():

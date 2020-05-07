@@ -37,8 +37,7 @@ class Enrichment(EnrichmentService):
             dataframe (pandas.DataFrame, geopandas.GeoDataFrame: a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
-                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`. The maximum number of
-                variables is 50.
+                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (dict, optional): dictionary to filter results by variable values. As a key it receives the
                 variable id, and as value receives a SQL operator, for example: `{variable1.id: "> 30"}`. It works by
@@ -101,8 +100,7 @@ class Enrichment(EnrichmentService):
             dataframe (pandas.DataFrame, geopandas.GeoDataFrame): a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
-                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`. The maximum number of
-                variables is 50.
+                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (dict, optional): dictionary to filter results by variable values. As a key it receives the
                 variable id, and as value receives a SQL operator, for example: `{variable1.id: "> 30"}`. It works by
