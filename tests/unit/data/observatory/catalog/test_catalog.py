@@ -7,6 +7,7 @@ from cartoframes.data.observatory.catalog.dataset import Dataset
 from cartoframes.data.observatory.catalog.geography import Geography
 from cartoframes.data.observatory.catalog.country import Country
 from cartoframes.data.observatory.catalog.category import Category
+from cartoframes.data.observatory.catalog.provider import Provider
 from cartoframes.data.observatory.catalog.catalog import Catalog
 from cartoframes.data.observatory.catalog.subscriptions import Subscriptions
 from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
@@ -15,7 +16,8 @@ from cartoframes.data.observatory.catalog.repository.constants import (
 )
 from .examples import (
     test_country2, test_country1, test_category1, test_category2, test_dataset1, test_dataset2,
-    test_geographies, test_datasets, test_categories, test_countries, test_geography1, test_geography2
+    test_geographies, test_datasets, test_categories, test_countries, test_geography1, test_geography2,
+    test_provider1, test_provider2
 )
 
 
@@ -46,6 +48,19 @@ class TestCatalog(object):
 
         # Then
         assert categories == expected_categories
+
+    @patch.object(Provider, 'get_all')
+    def test_providers(self, mocked_providers):
+        # Given
+        expected_providers = [test_provider1, test_provider2]
+        mocked_providers.return_value = expected_providers
+        catalog = Catalog()
+
+        # When
+        providers = catalog.providers
+
+        # Then
+        assert providers == expected_providers
 
     @patch.object(Dataset, 'get_all')
     def test_datasets(self, mocked_datasets):
