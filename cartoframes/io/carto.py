@@ -13,7 +13,6 @@ from ..utils.metrics import send_metrics
 
 
 GEOM_COLUMN_NAME = 'the_geom'
-
 IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
 
 

@@ -121,6 +121,7 @@ def dtypes2pg(dtype):
         'bool': 'boolean',
         'datetime64[ns]': 'timestamp',
         'datetime64[ns, UTC]': 'timestamp',
+        'geometry': 'geometry'
     }
     return mapping.get(str(dtype), 'text')
 
