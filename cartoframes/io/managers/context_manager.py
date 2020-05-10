@@ -78,6 +78,7 @@ class ContextManager:
 
         if self.has_table(table_name, schema):
             if if_exists == 'replace':
+                # TODO: review logic copy_from
                 self._drop_create_table_from_query(table_name, schema, query, cartodbfy)
             elif if_exists == 'fail':
                 raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
@@ -234,7 +235,7 @@ class ContextManager:
         self.execute_long_running_query(query)
 
     def _drop_add_columns(self, table_name, schema, df_columns, table_columns, cartodbfy):
-        log.debug('DROP + ADD table "{}" columns'.format(table_name))
+        log.debug('DROP + ADD columns table "{}"'.format(table_name))
         query = 'BEGIN; {truncate}; {drop_columns}; {add_columns}; {cartodbfy}; COMMIT;'.format(
             truncate=_truncate_table_query(table_name),
             drop_columns=_drop_columns_query(table_name, table_columns),
@@ -333,7 +334,7 @@ class ContextManager:
 
 
 def _drop_table_query(table_name, if_exists=True):
-    return '''DROP TABLE {if_exists} {table_name}'''.format(
+    return 'DROP TABLE {if_exists} {table_name}'.format(
         table_name=table_name,
         if_exists='IF EXISTS' if if_exists else '')
 
@@ -344,17 +345,22 @@ def _truncate_table_query(table_name):
 
 
 def _drop_columns_query(table_name, columns):
-    columns = ['DROP COLUMN {0} CASCADE'.format(c.dbname) for c in columns]
+    columns = ['DROP COLUMN {0}'.format(c.dbname) for c in columns if _not_reserved(c.dbname)]
     return 'ALTER TABLE {table_name} {drop_columns}'.format(
         table_name=table_name,
         drop_columns=', '.join(columns))
 
 
 def _add_columns_query(table_name, columns):
-    columns = ['ADD COLUMN {0} {1}'.format(c.dbname, c.dbtype) for c in columns]
+    columns = ['ADD COLUMN {0} {1}'.format(c.dbname, c.dbtype) for c in columns if _not_reserved(c.dbname)]
     return 'ALTER TABLE {table_name} {add_columns}'.format(
         table_name=table_name,
         add_columns=', '.join(columns))
+
+
+def _not_reserved(column):
+    RESERVED_COLUMNS = ['cartodb_id', 'the_geom', 'the_geom_webmercator']
+    return column not in RESERVED_COLUMNS
 
 
 def _create_table_from_columns_query(table_name, columns):
