@@ -190,8 +190,8 @@ class Geography(CatalogEntity):
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
             sql_query (str, optional): a query to select, filter or aggregate the content of the geography dataset.
-                For instance, to download just one row: `select * from {geography} limit 1`. The placeholder
-                `{geography}` is mandatory and it will be replaced by the actual geography dataset before running
+                For instance, to download just one row: `select * from $geography$ limit 1`. The placeholder
+                `$geography$` is mandatory and it will be replaced by the actual geography dataset before running
                 the query. You can build any arbitrary query.
 
         Raises:
@@ -222,8 +222,8 @@ class Geography(CatalogEntity):
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
             sql_query (str, optional): a query to select, filter or aggregate the content of the geography dataset.
-                For instance, to download just one row: `select * from {geography} limit 1`. The placeholder
-                `{geography}` is mandatory and it will be replaced by the actual geography dataset before running
+                For instance, to download just one row: `select * from $geography$ limit 1`. The placeholder
+                `$geography$` is mandatory and it will be replaced by the actual geography dataset before running
                 the query. You can build any arbitrary query.
 
         Returns:
