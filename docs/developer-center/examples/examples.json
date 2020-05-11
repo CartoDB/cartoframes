@@ -259,6 +259,12 @@
             "path": "widgets",
             "group": "Widgets"
         }, {
+            "title": "Default popup",
+            "desc": "Set the default popup needed for the style helper",
+            "file": "default_popup",
+            "path": "popups",
+            "group": "Popups"
+        }, {
             "title": "Popup on click",
             "desc": "Display a popup triggered by a click event",
             "file": "popup_on_click",
@@ -271,9 +277,9 @@
             "path": "popups",
             "group": "Popups"
         }, {
-            "title": "Customize popup title",
-            "desc": "Change the title for the popup values",
-            "file": "popup_titles",
+            "title": "Customize popup title and format",
+            "desc": "Change the title and format for the popup values",
+            "file": "popup_titles_and_format",
             "path": "popups",
             "group": "Popups"
         }, {
@@ -307,9 +313,9 @@
             "path": "map_layout",
             "group": "Layout"
         }, {
-            "title": "Make layout static",
-            "desc": "Create a static visualization layout",
-            "file": "static_layout",
+            "title": "Make layout interactive",
+            "desc": "Create an interactive visualization layout",
+            "file": "interactive_layout",
             "path": "map_layout",
             "group": "Layout"
         }]
@@ -340,30 +346,35 @@
             "path": "data_services"
         }]
     }, {
-        "title": "Data enrichment",
-        "desc": "Learn how to augment your public and private datasets through spatial operations and CARTO's Data Observatory",
-        "file": "data_enrichment.md",
+        "title": "Data Observatory",
+        "desc": "Learn how to discover third party datasets and enrich your data through CARTO's Data Observatory",
+        "file": "data_observatory.md",
         "hide_sidebar_samples": true,
         "samples": [{
             "title": "Discover a dataset",
             "desc": "Basic steps to discover a Dataset in the Data Observatory",
             "file": "discover_dataset",
-            "path": "data_enrichment"
+            "path": "data_observatory"
+        }, {
+            "title": "Download a dataset",
+            "desc": "Download a dataset applying filters",
+            "file": "download_dataset",
+            "path": "data_observatory"
         }, {
             "title": "Enrich points",
             "desc": "Use the enrichment to enrich points for a dataset",
             "file": "points_enrichment_dataset",
-            "path": "data_enrichment"
+            "path": "data_observatory"
         }, {
             "title": "Enrich polygons",
             "desc": "Use the enrichment to enrich polygons for a dataset",
             "file": "polygons_enrichment_dataset",
-            "path": "data_enrichment"
+            "path": "data_observatory"
         }, {
             "title": "Subscribe to a premium dataset",
             "desc": "Basic steps to subscribe to a premium dataset in the Data Observatory to start enriching your data",
             "file": "enrichment_subscription_workflow",
-            "path": "data_enrichment"
+            "path": "data_observatory"
         }]
     }, {
         "title": "Publish and share",
