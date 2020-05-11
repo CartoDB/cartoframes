@@ -1,8 +1,7 @@
 import { format as d3Format } from 'd3-format';
 
-export function format(value, formatString) {
-  // TODO:  Check what to do with legend's format call with parameters (legends.html.j2 e.g.)
-  const formatFunc = formatString ? d3Format(formatString) : formatValue;
+export function formatter(value, specifier) {
+  const formatFunc = specifier ? d3Format(specifier) : formatValue;
 
   if (Array.isArray(value)) {
     const [first, second] = value;

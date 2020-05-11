@@ -1,10 +1,10 @@
-import { format } from './utils';
+import { formatter } from './utils';
 
 export function renderWidget(widget, value) {
   widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
 
   if (value && widget.element) {
-    widget.element.innerText = typeof value === 'number' ? format(value, widget.options.format) : value;
+    widget.element.innerText = typeof value === 'number' ? formatter(value, widget.options.format) : value;
   }
 }
 
@@ -16,7 +16,6 @@ export function renderBridge(bridge, widget, mapLayer) {
       const type = _getWidgetType(mapLayer, widget.value, widget.prop);
       const histogram = type === 'category' ? 'categoricalHistogram' : 'numericalHistogram';
       bridge[histogram](widget.element, widget.value, widget.options);
-
       break;
     case 'category':
       bridge.category(widget.element, widget.value, widget.options);

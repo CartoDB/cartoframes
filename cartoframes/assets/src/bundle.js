@@ -445,9 +445,8 @@ var init = (function () {
     return locale;
   }
 
-  function format$1(value, formatString) {
-    // TODO:  Check what to do with legend's format call with parameters (legends.html.j2 e.g.)
-    const formatFunc = formatString ? format(formatString) : formatValue;
+  function formatter(value, specifier) {
+    const formatFunc = specifier ? format(specifier) : formatValue;
 
     if (Array.isArray(value)) {
       const [first, second] = value;
@@ -572,7 +571,7 @@ var init = (function () {
           const variable = feature.variables[item.name];
           if (variable) {
             let value = variable.value;
-            value = format$1(value, item.format);
+            value = formatter(value, item.format);
 
             popupHTML = `
             <span class="popup-name">${item.title}</span>
@@ -642,7 +641,7 @@ var init = (function () {
     widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
 
     if (value && widget.element) {
-      widget.element.innerText = typeof value === 'number' ? format$1(value, widget.options.format) : value;
+      widget.element.innerText = typeof value === 'number' ? formatter(value, widget.options.format) : value;
     }
   }
 
@@ -654,7 +653,6 @@ var init = (function () {
         const type = _getWidgetType(mapLayer, widget.value, widget.prop);
         const histogram = type === 'category' ? 'categoricalHistogram' : 'numericalHistogram';
         bridge[histogram](widget.element, widget.value, widget.options);
-
         break;
       case 'category':
         bridge.category(widget.element, widget.value, widget.options);
@@ -715,10 +713,7 @@ var init = (function () {
       const order = legend.ascending ? 'ASC' : 'DESC';
       const variable = legend.variable;
       const config = { othersLabel, variable, order };
-      const formatString = legend.format;
-      const formatFunc = formatString
-        ? (value) => format$1(value, formatString)
-        : format$1;
+      const formatFunc = (value) => formatter(value, legend.format);
       const options = { format: formatFunc, config, dynamic };
 
       if (legend.type.startsWith('size-continuous')) {
