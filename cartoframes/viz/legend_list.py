@@ -17,9 +17,10 @@ class LegendList:
             legend_list = []
             for legend in legends:
                 if isinstance(legend, Legend):
-                    if legend._type == 'default' or legend._type == 'basic':
+                    if legend._type == 'basic':
                         legend._type = _get_simple_legend_geometry_type(layer_type)
-                    if legend._type == 'default' and default_legend:
+                    elif legend._type == 'default' and default_legend:
+                        legend._type = default_legend._type
                         legend._prop = default_legend._prop
                     legend_list.append(legend)
                 else:
