@@ -89,7 +89,7 @@ def build_metrics_data(event_name, extra_metrics_data):
 @silent_fail
 def post_metrics(event_name, extra_metrics_data):
     json_data = build_metrics_data(event_name, extra_metrics_data)
-    result = requests.post('https://carto.com/api/metrics', json=json_data, timeout=2)
+    result = requests.post('https://bmetrics.cartodb.net', json=json_data, timeout=2)
     log.debug('Metrics sent! {0} {1}'.format(result.status_code, json_data))
 
 
