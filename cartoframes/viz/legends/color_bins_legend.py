@@ -2,7 +2,7 @@ from ..legend import Legend
 
 
 def color_bins_legend(title=None, description=None, footer=None, prop='color',
-                      variable=None, dynamic=True, ascending=False):
+                      variable=None, dynamic=True, ascending=False, format=None):
     """Helper function for quickly creating a color bins legend.
 
     Args:
@@ -24,6 +24,8 @@ def color_bins_legend(title=None, description=None, footer=None, prop='color',
         ascending (boolean, optional):
             If set to ``True`` the values are sorted in ascending order.
             Defaults to ``False``.
+        format (str, optional): Format to apply to number values in the widget, based on d3-format
+            specifier (https://github.com/d3/d3-format#locale_format).
 
     Returns:
         cartoframes.viz.legend.Legend
@@ -33,7 +35,8 @@ def color_bins_legend(title=None, description=None, footer=None, prop='color',
         ...     title='Legend title',
         ...     description='Legend description',
         ...     footer='Legend footer',
-        ...     dynamic=False)
+        ...     dynamic=False,
+        ...     format='.2~s')
 
     """
-    return Legend('color-bins', title, description, footer, prop, variable, dynamic, ascending)
+    return Legend('color-bins', title, description, footer, prop, variable, dynamic, ascending, format)

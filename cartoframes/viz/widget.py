@@ -15,7 +15,7 @@ class Widget:
 
     """
     def __init__(self, widget_type, value=None, title=None, description=None,
-                 footer=None, prop=None, read_only=False, buckets=20, weight=1):
+                 footer=None, prop=None, read_only=False, buckets=20, weight=1, format=None):
         self._check_type(widget_type)
 
         self._type = widget_type
@@ -27,6 +27,7 @@ class Widget:
         self._read_only = read_only
         self._buckets = buckets
         self._weight = weight
+        self._format = format
         self._variable_name = gen_variable_name(self._value) if self._value else ''
         self._options = self._build_options()
 
@@ -71,6 +72,7 @@ class Widget:
             'read_only': self._read_only,
             'buckets': self._buckets,
             'weight': self._weight,
+            'format': self._format,
             'autoplay': True
             # TODO: `autoplay: False` is not working on Airship,
             # so it should be fixed when autoplay param is exposed in CF API

@@ -9,16 +9,17 @@ class Popup:
     Layer popup.
 
     """
-    def __init__(self, event=None, value=None, title=None):
-        self._init_popup(event, value, title)
+    def __init__(self, event=None, value=None, title=None, format=None):
+        self._init_popup(event, value, title, format)
 
-    def _init_popup(self, event=None, value=None, title=None):
+    def _init_popup(self, event=None, value=None, title=None, format=None):
         if not isinstance(event, str) and not isinstance(value, str):
             raise ValueError('Wrong popup input')
 
         self._event = event
         self._value = value
         self._title = title if title else value
+        self._format = format
 
         self._interactivity = self._get_interactivity()
         self._variable = self._get_variable()
@@ -48,7 +49,8 @@ class Popup:
     def _get_attrs(self):
         return {
             'name': gen_variable_name(self._value),
-            'title': self._title
+            'title': self._title,
+            'format': self._format
         }
 
     def _get_variable(self):

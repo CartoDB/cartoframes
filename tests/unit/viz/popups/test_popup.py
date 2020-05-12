@@ -28,7 +28,8 @@ class TestPopup(object):
             'event': 'click',
             'attrs': {
                 'name': 'v4f197c',
-                'title': 'pop'
+                'title': 'pop',
+                'format': None
             }
         }
 
@@ -36,7 +37,8 @@ class TestPopup(object):
             'event': 'hover',
             'attrs': {
                 'name': 'v4f197c',
-                'title': 'Pop'
+                'title': 'Pop',
+                'format': None
             }
         }
 
