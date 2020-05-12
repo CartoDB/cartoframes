@@ -7,7 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.3] - 2020-05-12
 
+### Added
+- Add SQL query param to DO download (#1604, #1618, #1621, #1620)
+- Add public filter to catalog (#1623)
+- Add providers property to catalog (#1625)
+- Add format attribute to map elements (#1626)
+- Add download dataset example (#1634)
 
+### Changed
+- Require pandas >= 0.25 (#1622)
+- Remove enrichment max number of variables restriction from reference (#1624)
+- Make Layout interactive by default (#1630)
+- UI elements removed in static layout (#1631)
+- Improve replace table strategy (#1628, #1633)
+- Improve installation guide (#1635)
+- Allow multi-selection in category widget
+
+### Fixed
+- Scape quotes in SQL function calls (#1619)
+- Fix viz palettes (#1627)
+- Fix metadata entity request (#1629)
 
 ## [1.0.2] - 2020-04-06
 
