@@ -44,7 +44,7 @@ The procedure to deploy to staging the documentation of the new release is:
     - A micro release requires updating the micro number from the latest release
     - A minor, or more, release requires to create a new section and update the latest release
   - Point to the release branch in `config.js`, in the `'cartoframes'` section:
-    - Remove the tag attribute: `tag: '',`
+    - Comment the tag attribute: `// tag: '...',`
     - Add the release branch: `branch: 'release/M.m.u',`
 - Create a pull request pointing to the CARTOframes release branch (this will deploys the Developer Center in a "staging" environment)
 
