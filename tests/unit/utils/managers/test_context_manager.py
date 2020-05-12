@@ -70,12 +70,12 @@ class TestContextManager(object):
                                 'Please choose a different `table_name` or use '
                                 'if_exists="replace" to overwrite it.')
 
-    def test_copy_from_exists_replace_drop_add_columns(self, mocker):
+    def test_copy_from_exists_replace_truncate_and_drop_add_columns(self, mocker):
         # Given
         mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mocker.patch.object(ContextManager, 'has_table', return_value=True)
         mocker.patch.object(ContextManager, 'get_schema', return_value='schema')
-        mock = mocker.patch.object(ContextManager, '_drop_add_columns')
+        mock = mocker.patch.object(ContextManager, '_truncate_and_drop_add_columns')
         df = DataFrame({'A': [1]})
         columns = [ColumnInfo('A', 'a', 'bigint', False)]
 

@@ -56,8 +56,8 @@ class ContextManager:
                     # Equal columns: truncate table
                     self._truncate_table(table_name, schema, cartodbfy)
                 else:
-                    # Diff columns: drop + add columns
-                    self._drop_add_columns(table_name, schema, df_columns, table_columns, cartodbfy)
+                    # Diff columns: truncate table and drop + add columns
+                    self._truncate_and_drop_add_columns(table_name, schema, df_columns, table_columns, cartodbfy)
 
             elif if_exists == 'fail':
                 raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
@@ -234,8 +234,8 @@ class ContextManager:
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
         self.execute_long_running_query(query)
 
-    def _drop_add_columns(self, table_name, schema, df_columns, table_columns, cartodbfy):
-        log.debug('DROP + ADD columns table "{}"'.format(table_name))
+    def _truncate_and_drop_add_columns(self, table_name, schema, df_columns, table_columns, cartodbfy):
+        log.debug('TRUNCATE AND DROP + ADD columns table "{}"'.format(table_name))
         query = 'BEGIN; {truncate}; {drop_columns}; {add_columns}; {cartodbfy}; COMMIT;'.format(
             truncate=_truncate_table_query(table_name),
             drop_columns=_drop_columns_query(table_name, table_columns),
