@@ -1,4 +1,4 @@
-import { format } from './utils';
+import { formatter } from './utils';
 
 export function createLegends(layer, legends, layerIndex, mapIndex=0) {
   if (legends.length) {
@@ -18,7 +18,8 @@ function _createLegend(layer, legend, layerIndex, legendIndex, mapIndex=0) {
     const order = legend.ascending ? 'ASC' : 'DESC';
     const variable = legend.variable;
     const config = { othersLabel, variable, order };
-    const options = { format, config, dynamic };
+    const formatFunc = (value) => formatter(value, legend.format);
+    const options = { format: formatFunc, config, dynamic };
 
     if (legend.type.startsWith('size-continuous')) {
       config.samples = 4;

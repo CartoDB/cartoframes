@@ -1,6 +1,6 @@
 {
   "name": "cartoframes",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "*********** CARTOframes ***********",
   "main": "./cartoframes/assets/src/index.js",
   "directories": {
@@ -27,5 +27,8 @@
     "jshint": "^2.10.2",
     "rollup": "^1.17.0",
     "rollup-plugin-node-resolve": "^5.2.0"
+  },
+  "dependencies": {
+    "d3-format": "^1.4.4"
   }
 }

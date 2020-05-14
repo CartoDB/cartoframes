@@ -41,7 +41,7 @@ class AuthAPIClient:
             else:
                 raise e
 
-        return api_key.token, tables_names
+        return api_key.name, api_key.token, tables_names
 
 
 def _get_table_dict(schema, name, permissions):

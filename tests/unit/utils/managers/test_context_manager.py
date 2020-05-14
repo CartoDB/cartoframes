@@ -70,12 +70,12 @@ class TestContextManager(object):
                                 'Please choose a different `table_name` or use '
                                 'if_exists="replace" to overwrite it.')
 
-    def test_copy_from_exists_replace(self, mocker):
+    def test_copy_from_exists_replace_truncate_and_drop_add_columns(self, mocker):
         # Given
         mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mocker.patch.object(ContextManager, 'has_table', return_value=True)
         mocker.patch.object(ContextManager, 'get_schema', return_value='schema')
-        mock = mocker.patch.object(ContextManager, '_create_table_from_columns')
+        mock = mocker.patch.object(ContextManager, '_truncate_and_drop_add_columns')
         df = DataFrame({'A': [1]})
         columns = [ColumnInfo('A', 'a', 'bigint', False)]
 
@@ -84,7 +84,23 @@ class TestContextManager(object):
         cm.copy_from(df, 'TABLE NAME', 'replace')
 
         # Then
-        mock.assert_called_once_with('table_name', columns, 'schema', True)
+        mock.assert_called_once_with('table_name', 'schema', columns, [], True)
+
+    def test_copy_from_exists_replace_truncate(self, mocker):
+        # Given
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
+        mocker.patch.object(ContextManager, 'has_table', return_value=True)
+        mocker.patch.object(ContextManager, 'get_schema', return_value='schema')
+        mocker.patch.object(ContextManager, '_compare_columns', return_value=True)
+        mock = mocker.patch.object(ContextManager, '_truncate_table')
+        df = DataFrame({'A': [1]})
+
+        # When
+        cm = ContextManager(self.credentials)
+        cm.copy_from(df, 'TABLE NAME', 'replace')
+
+        # Then
+        mock.assert_called_once_with('table_name', 'schema', True)
 
     def test_internal_copy_from(self, mocker):
         # Given

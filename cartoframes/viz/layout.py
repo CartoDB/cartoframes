@@ -16,8 +16,8 @@ class Layout:
         M_SIZE (number, optional): Number of rows of the layout
         viewport (dict, optional): Properties for display of the maps viewport.
             Keys can be `bearing` or `pitch`.
-        is_static (boolean, optional): By default, all the maps in each visualization
-            are static images due to performance reasons. In order to set them interactive,
+        is_static (boolean, optional): By default is False. All the maps in each visualization
+            are interactive. In order to set them static images for performance reasons
             set `is_static` to True.
         map_height (number, optional): Height in pixels for each visualization.
             Default is 250.
@@ -66,12 +66,12 @@ class Layout:
         ...     Map(Layer('table_in_your_account'))
         >>> ], viewport={ 'zoom': 2 })
 
-        Create an interactive layout
+        Create an static layout
 
         >>> Layout([
         ...    Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account')),
         ...    Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account'))
-        >>> ], is_static=False)
+        >>> ], is_static=True)
 
     """
     def __init__(self,
@@ -81,7 +81,7 @@ class Layout:
                  viewport=None,
                  map_height=250,
                  full_height=True,
-                 is_static=True,
+                 is_static=False,
                  **kwargs):
 
         self._maps = maps
@@ -203,7 +203,7 @@ class Layout:
             viz_map.layer_defs = []
 
         for layer in layers:
-            layer.reset_legends(self._maps[layer.map_index])
+            layer.reset_ui(self._maps[layer.map_index])
             layer_def = layer._get_layer_def()
             self._maps[layer.map_index].layer_defs.append(layer_def)
 
@@ -233,21 +233,20 @@ def _init_layout(maps, is_static, viewport):
         for layer in viz.layers:
             layer.map_index = map_index
 
-        map_settings = _get_map_settings(viz, is_static, viewport, map_index)
+        map_settings = _get_map_settings(viz, is_static, viewport)
 
         layout.append(map_settings)
 
     return layout
 
 
-def _get_map_settings(viz, is_static, viewport, map_index):
-    map_settings = viz.get_content()
+def _get_map_settings(viz, is_static, viewport):
+    viz.viewport = _get_viewport(viz.viewport, viewport)
+    viz.camera = _get_camera(viz.viewport)
+    viz.is_static = _get_is_static(viz.is_static, is_static)
 
-    map_settings['viewport'] = _get_viewport(map_settings['viewport'], viewport)
-    map_settings['camera'] = _get_camera(map_settings['viewport'])
-    map_settings['is_static'] = _get_is_static(map_settings['is_static'], is_static)
-
-    return map_settings
+    viz._reload_layers()
+    return viz.get_content()
 
 
 def _get_viewport(map_settings_viewport, layout_viewport):

@@ -373,7 +373,7 @@ class Dataset(CatalogEntity):
         return join_gdf['id'].unique()
 
     @check_do_enabled
-    def to_csv(self, file_path, credentials=None, limit=None, order_by=None):
+    def to_csv(self, file_path, credentials=None, limit=None, order_by=None, sql_query=None, add_geom=None):
         """Download dataset data as a local csv file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
@@ -386,7 +386,11 @@ class Dataset(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
-            limit (int, optional): number of rows to be downloaded.
+            sql_query (str, optional): a query to select, filter or aggregate the content of the dataset.
+                For instance, to download just one row: `select * from $dataset$ limit 1`. The placeholder
+                `$dataset$` is mandatory and it will be replaced by the actual dataset before running the query.
+                You can build any arbitrary query.
+            add_geom (boolean, optional): to include the geography when using the `sql_query` argument. Default to True.
 
         Raises:
             DOError: if you have not a valid license for the dataset being downloaded,
@@ -400,10 +404,10 @@ class Dataset(CatalogEntity):
             raise DOError('You are not subscribed to this Dataset yet. '
                           'Please, use the subscribe method first.')
 
-        self._download(_credentials, file_path, limit, order_by)
+        self._download(_credentials, file_path, limit=limit, order_by=order_by, sql_query=sql_query, add_geom=add_geom)
 
     @check_do_enabled
-    def to_dataframe(self, credentials=None, limit=None, order_by=None):
+    def to_dataframe(self, credentials=None, limit=None, order_by=None, sql_query=None, add_geom=None):
         """Download dataset data as a pandas.DataFrame. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
@@ -415,7 +419,12 @@ class Dataset(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
-            limit (int, optional): number of rows to be downloaded.
+            sql_query (str, optional): a query to select, filter or aggregate the content of the dataset.
+                For instance, to download just one row: `select * from $dataset$ limit 1`. The placeholder
+                `$dataset$` is mandatory and it will be replaced by the actual dataset before running the query.
+                You can build any arbitrary query.
+            add_geom (boolean, optional): to include the geography when using the `sql_query` argument. Default to True.
+
 
         Returns:
             pandas.DataFrame
@@ -432,7 +441,7 @@ class Dataset(CatalogEntity):
             raise DOError('You are not subscribed to this Dataset yet. '
                           'Please, use the subscribe method first.')
 
-        return self._download(_credentials, limit=limit, order_by=order_by)
+        return self._download(_credentials, limit=limit, order_by=order_by, sql_query=sql_query, add_geom=add_geom)
 
     @check_do_enabled
     def subscribe(self, credentials=None):

@@ -5,7 +5,7 @@ from .layout import Layout
 
 from .themes import Themes as themes
 from .basemaps import Basemaps as basemaps
-from .defaults import COLOR_PALETTES as palettes
+from .palettes import Palettes as palettes
 
 from .styles import animation_style
 from .styles import basic_style

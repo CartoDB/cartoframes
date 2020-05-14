@@ -62,7 +62,8 @@ class TestCountryRepo(object):
 
         # Then
         mocked_repo.assert_called_once_with({
-            CATEGORY_FILTER: 'demographics'
+            CATEGORY_FILTER: 'demographics',
+            PROVIDER_FILTER: 'open_data'
         })
         assert countries == test_countries
 

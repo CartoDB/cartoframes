@@ -19,25 +19,29 @@ class TestPopupList(object):
             'event': 'click',
             'attrs': {
                 'name': 'v72224b',
-                'title': 'value_2'
+                'title': 'value_2',
+                'format': None
             }
           }, {
             'event': 'click',
             'attrs': {
                 'name': 'vbc6799',
-                'title': 'value_1'
+                'title': 'value_1',
+                'format': None
             }
           }, {
             'event': 'hover',
             'attrs': {
                 'name': 'vc266e3',
-                'title': 'value_3'
+                'title': 'value_3',
+                'format': None
             }
           }, {
             'event': 'hover',
             'attrs': {
                 'name': 'vbc6799',
-                'title': 'value_1'
+                'title': 'value_1',
+                'format': None
             }
           }
         ]
