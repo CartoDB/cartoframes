@@ -6,7 +6,9 @@ from pandas import DataFrame
 from geopandas import GeoDataFrame
 
 from cartoframes.utils.geom_utils import set_geometry
-from cartoframes.utils.columns import ColumnInfo, get_dataframe_columns_info, normalize_names
+from cartoframes.utils.columns import ColumnInfo, get_dataframe_columns_info, normalize_names, \
+                                      obtain_converters, _convert_int, _convert_float, \
+                                      _convert_bool, _convert_generic
 
 
 class TestColumns(object):
@@ -113,3 +115,21 @@ class TestColumns(object):
             ColumnInfo('the_geom', 'the_geom', 'geometry(Geometry, 4326)', True),
             ColumnInfo('g-e-o-m-e-t-r-y', 'g_e_o_m_e_t_r_y', 'text', False)
         ]
+
+    def test_converters(self):
+        columns = [
+            ColumnInfo('cartodb_id', 'cartodb_id', 'integer', False),
+            ColumnInfo('the_geom', 'the_geom', 'geometry(Geometry, 4326)', True),
+            ColumnInfo('name', 'name', 'text', False),
+            ColumnInfo('flag', 'flag', 'boolean', False),
+            ColumnInfo('number', 'number', 'double precision', False)
+        ]
+
+        converters = obtain_converters(columns)
+
+        assert type(converters) == dict
+        assert converters['cartodb_id'] == _convert_int
+        assert converters['the_geom'] == _convert_generic
+        assert converters['name'] == _convert_generic
+        assert converters['flag'] == _convert_bool
+        assert converters['number'] == _convert_float
