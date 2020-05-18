@@ -6,8 +6,9 @@ from unidecode import unidecode
 
 from .utils import dtypes2pg, pg2dtypes, PG_NULL
 
+GEOMETRY_DB_TYPE = 'geometry(Geometry, 4326)'
+GENERIC_DBTYPES = ['text', GEOMETRY_DB_TYPE]
 BOOL_DBTYPES = ['bool', 'boolean']
-OBJECT_DBTYPES = ['text']
 INT_DBTYPES = ['int2', 'int4', 'int2', 'int', 'int8', 'smallint', 'integer', 'bigint']
 FLOAT_DBTYPES = ['float4', 'float8', 'real', 'double precision', 'numeric', 'decimal']
 DATETIME_DBTYPES = ['date', 'timestamp', 'timestampz']
@@ -93,7 +94,7 @@ def _create_column_info(name, dbtype=None):
     is_geom = False
     dbname = normalize_name(name)
     if dbtype == 'geometry':
-        dbtype = 'geometry(Geometry, 4326)'
+        dbtype = GEOMETRY_DB_TYPE
         is_geom = True
     return ColumnInfo(name, dbname, dbtype, is_geom)
 
@@ -194,8 +195,8 @@ def obtain_converters(columns):
     for bool_column_name in type_columns_names(columns, BOOL_DBTYPES):
         converters[bool_column_name] = _convert_bool
 
-    for object_column_name in type_columns_names(columns, OBJECT_DBTYPES):
-        converters[object_column_name] = _convert_object
+    for generic_column_name in type_columns_names(columns, GENERIC_DBTYPES):
+        converters[generic_column_name] = _convert_generic
 
     return converters
 
@@ -230,7 +231,7 @@ def _convert_bool(x):
     return bool(x)
 
 
-def _convert_object(x):
+def _convert_generic(x):
     if _is_none_null(x):
         return None
     return x
@@ -238,10 +239,3 @@ def _convert_object(x):
 
 def _is_none_null(x):
     return x is None or x == PG_NULL
-
-
-def _first_value(series):
-    series = series.loc[~series.isnull()]  # Remove null values
-    if len(series) > 0:
-        return series.iloc[0]
-    return None

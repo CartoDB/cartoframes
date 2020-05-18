@@ -266,7 +266,6 @@ def get_geodataframe_data(data, encode_data=True):
         return data
 
 
-# Dup
 def _first_value(series):
     series = series.loc[~series.isnull()]  # Remove null values
     if len(series) > 0:
