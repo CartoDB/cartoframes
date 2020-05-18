@@ -6,8 +6,6 @@ from unidecode import unidecode
 
 from .utils import dtypes2pg, pg2dtypes, PG_NULL
 
-GEOMETRY_DB_TYPE = 'geometry(Geometry, 4326)'
-GENERIC_DBTYPES = ['text', GEOMETRY_DB_TYPE]
 BOOL_DBTYPES = ['bool', 'boolean']
 INT_DBTYPES = ['int2', 'int4', 'int2', 'int', 'int8', 'smallint', 'integer', 'bigint']
 FLOAT_DBTYPES = ['float4', 'float8', 'real', 'double precision', 'numeric', 'decimal']
@@ -94,7 +92,7 @@ def _create_column_info(name, dbtype=None):
     is_geom = False
     dbname = normalize_name(name)
     if dbtype == 'geometry':
-        dbtype = GEOMETRY_DB_TYPE
+        dbtype = 'geometry(Geometry, 4326)'
         is_geom = True
     return ColumnInfo(name, dbname, dbtype, is_geom)
 
@@ -186,27 +184,21 @@ def _is_unsupported(value):
 def obtain_converters(columns):
     converters = {}
 
-    for int_column_name in type_columns_names(columns, INT_DBTYPES):
-        converters[int_column_name] = _convert_int
-
-    for float_column_name in type_columns_names(columns, FLOAT_DBTYPES):
-        converters[float_column_name] = _convert_float
-
-    for bool_column_name in type_columns_names(columns, BOOL_DBTYPES):
-        converters[bool_column_name] = _convert_bool
-
-    for generic_column_name in type_columns_names(columns, GENERIC_DBTYPES):
-        converters[generic_column_name] = _convert_generic
+    for column in columns:
+        if column.dbtype in INT_DBTYPES:
+            converters[column.name] = _convert_int
+        elif column.dbtype in FLOAT_DBTYPES:
+            converters[column.name] = _convert_float
+        elif column.dbtype in BOOL_DBTYPES:
+            converters[column.name] = _convert_bool
+        else:
+            converters[column.name] = _convert_generic
 
     return converters
 
 
 def date_columns_names(columns):
-    return type_columns_names(columns, DATETIME_DBTYPES)
-
-
-def type_columns_names(columns, dbtypes):
-    return [x.name for x in columns if x.dbtype in dbtypes]
+    return [x.name for x in columns if x.dbtype in DATETIME_DBTYPES]
 
 
 def _convert_int(x):
