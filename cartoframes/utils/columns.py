@@ -7,7 +7,6 @@ from unidecode import unidecode
 from .utils import dtypes2pg, pg2dtypes, PG_NULL
 
 BOOL_DBTYPES = ['bool', 'boolean']
-OBJECT_DBTYPES = ['text']
 INT_DBTYPES = ['int2', 'int4', 'int2', 'int', 'int8', 'smallint', 'integer', 'bigint']
 FLOAT_DBTYPES = ['float4', 'float8', 'real', 'double precision', 'numeric', 'decimal']
 DATETIME_DBTYPES = ['date', 'timestamp', 'timestampz']
@@ -185,27 +184,21 @@ def _is_unsupported(value):
 def obtain_converters(columns):
     converters = {}
 
-    for int_column_name in type_columns_names(columns, INT_DBTYPES):
-        converters[int_column_name] = _convert_int
-
-    for float_column_name in type_columns_names(columns, FLOAT_DBTYPES):
-        converters[float_column_name] = _convert_float
-
-    for bool_column_name in type_columns_names(columns, BOOL_DBTYPES):
-        converters[bool_column_name] = _convert_bool
-
-    for object_column_name in type_columns_names(columns, OBJECT_DBTYPES):
-        converters[object_column_name] = _convert_object
+    for column in columns:
+        if column.dbtype in INT_DBTYPES:
+            converters[column.name] = _convert_int
+        elif column.dbtype in FLOAT_DBTYPES:
+            converters[column.name] = _convert_float
+        elif column.dbtype in BOOL_DBTYPES:
+            converters[column.name] = _convert_bool
+        else:
+            converters[column.name] = _convert_generic
 
     return converters
 
 
 def date_columns_names(columns):
-    return type_columns_names(columns, DATETIME_DBTYPES)
-
-
-def type_columns_names(columns, dbtypes):
-    return [x.name for x in columns if x.dbtype in dbtypes]
+    return [x.name for x in columns if x.dbtype in DATETIME_DBTYPES]
 
 
 def _convert_int(x):
@@ -230,7 +223,7 @@ def _convert_bool(x):
     return bool(x)
 
 
-def _convert_object(x):
+def _convert_generic(x):
     if _is_none_null(x):
         return None
     return x
@@ -238,10 +231,3 @@ def _convert_object(x):
 
 def _is_none_null(x):
     return x is None or x == PG_NULL
-
-
-def _first_value(series):
-    series = series.loc[~series.isnull()]  # Remove null values
-    if len(series) > 0:
-        return series.iloc[0]
-    return None
