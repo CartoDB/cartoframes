@@ -5,6 +5,7 @@ We follow the git-flow model to generate the releases. The version numbers are M
 - M: major
 - m: minor
 - u: micro
+- p: patch (only for hotfixes)
 
 ## The release branch
 

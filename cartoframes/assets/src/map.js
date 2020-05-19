@@ -25,7 +25,8 @@ export function initMap(settings, mapIndex) {
   const map = createMap(container, basemapStyle, settings.bounds, settings.mapboxtoken);
 
   if (settings.show_info) {
-    updateViewport(map);
+    const id = mapIndex !== undefined ? `map-info-${mapIndex}` : 'map-info';
+    updateViewport(id, map);
   }
 
   if (settings.camera) {
