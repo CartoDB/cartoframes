@@ -33,9 +33,9 @@ export function formatNumber(value) {
   return value.toLocaleString();
 }
 
-export function updateViewport(map) {
+export function updateViewport(id, map) {
   function updateMapInfo() {
-    const mapInfo$ = document.getElementById('map-info');
+    const mapInfo$ = document.getElementById(id);
     const center = map.getCenter();
     const lat = center.lat.toFixed(6);
     const lng = center.lng.toFixed(6);
