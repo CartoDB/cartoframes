@@ -62,6 +62,9 @@
           <as-responsive-content id="main-container-{{map_index}}" class="layout-map">
             <div class="as-map-area">
               <div id="map-{{ map_index }}" class="map"></div>
+              {% if maps[map_index]['show_info'] %}
+                <div id="map-info-{{ map_index }}" class="map-info"></div>
+              {% endif %}
             </div>
             {% if has_legends or layer_selector %}
               {% set layers = maps[map_index]['layers'] %}

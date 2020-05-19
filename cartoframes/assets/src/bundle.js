@@ -478,9 +478,9 @@ var init = (function () {
     return value.toLocaleString();
   }
 
-  function updateViewport(map) {
+  function updateViewport(id, map) {
     function updateMapInfo() {
-      const mapInfo$ = document.getElementById('map-info');
+      const mapInfo$ = document.getElementById(id);
       const center = map.getCenter();
       const lat = center.lat.toFixed(6);
       const lng = center.lng.toFixed(6);
@@ -870,7 +870,8 @@ var init = (function () {
     const map = createMap(container, basemapStyle, settings.bounds, settings.mapboxtoken);
 
     if (settings.show_info) {
-      updateViewport(map);
+      const id = mapIndex !== undefined ? `map-info-${mapIndex}` : 'map-info';
+      updateViewport(id, map);
     }
 
     if (settings.camera) {
