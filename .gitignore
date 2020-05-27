@@ -2,11 +2,13 @@
 *.pyc
 .ipynb_checkpoints/
 sandbox/
+sandbox_*
 
 # Misc
 credentials/
 creds.json
 credentials.json
+docker-compose.yml
 
 __pycache__
 .*.sw[nop]
