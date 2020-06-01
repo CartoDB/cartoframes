@@ -1,0 +1,11 @@
+async function initialize() {
+  carto.setDefaultCredentials({
+    username: '{{layers[0]['credentials']['username']}}',
+    apiKey: '{{layers[0]['credentials']['api_key']}}'
+  });
+  const deckMap = carto.viz.createMap();
+  const incidentsLayer = new carto.viz.Layer('{{layers[0]['source']}}');
+  incidentsLayer.addTo(deckMap);
+}
+
+initialize();

@@ -105,7 +105,8 @@ class Layer:
                  default_popup_click=False,
                  title=None,
                  parent_map=None,
-                 encode_data=True):
+                 encode_data=True,
+                 render='carto-vl'):
 
         self.is_basemap = False
         self.default_legend = default_legend
@@ -137,6 +138,8 @@ class Layer:
         self.legends_info = self.legends.get_info() if self.legends is not None else None
         self.options = self._set_options()
         self.has_legend_list = isinstance(self.legends, LegendList)
+
+        self._render = render
 
     def _init_legends(self, legends, default_legend, title):
         if legends:
@@ -206,7 +209,7 @@ class Layer:
 
     def _repr_html_(self):
         from .map import Map
-        return Map(self)._repr_html_()
+        return Map(self, render=self._render)._repr_html_()
 
     @property
     def map_index(self):
