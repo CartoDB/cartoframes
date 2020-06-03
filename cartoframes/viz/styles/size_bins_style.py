@@ -6,7 +6,7 @@ from ..popups import popup_element
 
 
 def size_bins_style(value, method='quantiles', bins=5, breaks=None, size_range=None, color=None,
-                    opacity=None, stroke_width=None, stroke_color=None, animate=None):
+                    opacity=None, stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a size bind style with
     classification method/buckets.
 
@@ -64,6 +64,21 @@ def size_bins_style(value, method='quantiles', bins=5, breaks=None, size_range=N
             'width': 'ramp({0}({1}, {2}), {3})'.format(
                 func, prop(value), breaks or bins, size_range or [1, 10]),
             'filter': animation_filter
+        },
+        'web-sdk': {
+            'name': 'sizeBinsStyle',
+            'value': value,
+            'properties': {
+                'method': method,
+                'bins': bins,
+                'breaks': breaks,
+                'sizeRange': size_range,
+                'color': color,
+                'opacity': opacity,
+                'strokeColor': stroke_color,
+                'strokeWidth': stroke_width,
+                'animate': animate
+            }
         }
     }
 

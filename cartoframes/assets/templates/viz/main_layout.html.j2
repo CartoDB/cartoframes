@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
 
   <!-- External libraries -->
-  
+
   <!-- pako -->
   <script src="https://libs.cartocdn.com/cartoframes/dependencies/pako_inflate.min.js"></script>
 
@@ -49,7 +49,7 @@
       {% set title = maps[map_index]['title'] %}
       {% set has_legends = maps[map_index]['has_legends'] %}
       {% set layer_selector = maps[map_index]['layer_selector'] %}
-      
+
       <div class="layout-map-cell {{'layout-map-cell-legend' if has_legends }}" style="height: {{ map_height }}">
         {% if title %}
           <header class="layout-map-cell--header">

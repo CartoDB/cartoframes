@@ -2,7 +2,7 @@ CARTO_VL_VERSION = 'v1.4'
 CARTO_VL_DEV = '/dist/carto-vl.js'
 CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/{}/carto-vl.min.js'.format(CARTO_VL_VERSION)
 
-# TODO: Set right values
+# TODO: Set the right values
 WEB_SDK_VERSION = None
 WEB_SDK_DEV = None
 WEB_SDK_URL = 'https://toolkit-wheat.now.sh/packages/toolkit/dist/umd/index.min.js'
@@ -120,3 +120,5 @@ CLUSTER_OPERATIONS = {
 THEMES = ['dark', 'light']
 
 DEFAULT_LAYOUT_M_SIZE = 1
+
+RENDERERS = ['carto-vl', 'web-sdk']

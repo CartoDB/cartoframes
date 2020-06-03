@@ -1,3 +1,5 @@
+import json
+
 from . import defaults
 from ..utils.utils import merge_dicts, text_match
 
@@ -42,7 +44,10 @@ class Style:
     def default_popup_click(self):
         return self._default_popup_click
 
-    def compute_viz(self, geom_type, variables={}):
+    def compute_viz(self, geom_type, variables={}, render='carto-vl'):
+        if render != 'carto-vl':
+            return self._parse_web_sdk_style()
+
         style = self._style
         default_style = defaults.STYLE[geom_type]
 
@@ -73,6 +78,19 @@ class Style:
         serialized_default_properties = self._serialize_properties(default_properties)
 
         return serialized_variables + serialized_default_properties + style
+
+    def _parse_web_sdk_style(self):
+        style = self._style.get('web-sdk')
+        if not style:
+            return None
+
+        name = style.get('name')
+        value = style.get('value')
+        value = '"{0}", '.format(value) if value else ''
+        options = {k: v for k, v in style.get('properties').items() if v is not None}
+        options = json.dumps(options)
+
+        return name + '(' + value + options + ')'
 
     def _serialize_variables(self, variables={}):
         output = ''

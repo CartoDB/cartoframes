@@ -122,10 +122,10 @@ class Layer:
         self.title = title
         popups_variables = self.popups.get_variables()
         widget_variables = self.widgets.get_variables()
-        external_variables = merge_dicts(popups_variables, widget_variables)
+        self._external_variables = merge_dicts(popups_variables, widget_variables)  # In `self` because we need it after
         self._map_index = 0
 
-        self.viz = self.style.compute_viz(self.geom_type, external_variables)
+        self.viz = self.style.compute_viz(self.geom_type, self._external_variables, render)
         viz_columns = extract_viz_columns(self.viz)
 
         self.source.compute_metadata(viz_columns)
@@ -138,7 +138,6 @@ class Layer:
         self.legends_info = self.legends.get_info() if self.legends is not None else None
         self.options = self._set_options()
         self.has_legend_list = isinstance(self.legends, LegendList)
-
         self._render = render
 
     def _init_legends(self, legends, default_legend, title):
@@ -222,6 +221,10 @@ class Layer:
         self._map_index = map_index
 
     def reset_ui(self, parent_map):
+        # TODO: Temporal fix for getting the render of the parent map and re-create the viz style for the `Web-SDK`
+        self._render = parent_map._render
+        self.viz = self.style.compute_viz(self.geom_type, self._external_variables, self._render)
+
         if parent_map.is_static:
             # Remove legends/widgets if the map is static
             self.legends = []

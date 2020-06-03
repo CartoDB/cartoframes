@@ -3,9 +3,30 @@ async function initialize() {
     username: '{{layers[0]['credentials']['username']}}',
     apiKey: '{{layers[0]['credentials']['api_key']}}'
   });
-  const deckMap = carto.viz.createMap();
-  const incidentsLayer = new carto.viz.Layer('{{layers[0]['source']}}');
-  incidentsLayer.addTo(deckMap);
+  const deckMap = carto.viz.createMap({
+    basemap: '{{basemap}}'
+  });
+
+  const layers = {{layers|tojson}};
+
+  let layer = null;
+  let style = null;
+  {% for layer in layers %}
+    {% if layer['viz'] is not none %}
+      style = carto.viz.{{layer['viz']}};
+      layer = new carto.viz.Layer('{{layer['source']}}', style);
+    {% else %}
+      layer = new carto.viz.Layer('{{layer['source']}}');
+    {% endif %}
+
+    await layer.addTo(deckMap);
+  {% endfor %}
+
+  const {viewport} = deckMap.layerManager.context;
+  const {longitude, latitude, zoom} = viewport.fitBounds({{bounds}});
+  deckMap.viewManager.setProps({
+    viewState: {longitude, latitude, zoom}
+  });
 }
 
 initialize();
