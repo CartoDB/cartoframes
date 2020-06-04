@@ -6,7 +6,7 @@ from ..popups import popup_element
 
 
 def size_continuous_style(value, size_range=None, range_min=None, range_max=None, color=None, opacity=None,
-                          stroke_color=None, stroke_width=None, animate=None, credentials=None):
+                          stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a size continuous style.
 
     Args:
@@ -60,6 +60,20 @@ def size_continuous_style(value, size_range=None, range_min=None, range_max=None
             'width': 'ramp(linear({0}, {1}, {2}), {3})'.format(
                 prop(value), range_min, range_max, size_range or [1, 10]),
             'filter': animation_filter
+        },
+        'web-sdk': {
+            'name': 'sizeContinuousStyle',
+            'value': value,
+            'properties': {
+                'sizeRange': size_range,
+                'rangeMin': range_min,
+                'rangeMax': range_max,
+                'color': color,
+                'opacity': opacity,
+                'strokeColor': stroke_color,
+                'strokeWidth': stroke_width,
+                'animate': animate
+            }
         }
     }
 

@@ -66,6 +66,20 @@ def color_continuous_style(value, size=None, range_min=None, range_max=None, pal
             'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon'),
             'filter': animation_filter
+        },
+        'web-sdk': {
+            'name': 'colorContinuousStyle',
+            'value': value,
+            'properties': {
+                'size': size,
+                'rangeMin': range_min,
+                'rangeMax': range_max,
+                'palette': palette,
+                'opacity': opacity,
+                'strokeColor': stroke_color,
+                'strokeWidth': stroke_width,
+                'animate': animate
+            }
         }
     }
 

@@ -107,7 +107,10 @@ class Map:
                  description=None,
                  is_static=None,
                  layer_selector=False,
+                 render='carto-vl',
                  **kwargs):
+
+        self._render = render  # It needs to be before `self.layers`
 
         self.layer_selector = layer_selector
         self.basemap = basemap
@@ -126,6 +129,7 @@ class Map:
         self.basecolor = get_basecolor(basemap)
 
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
+        self._web_sdk_path = kwargs.get('_web_sdk_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
 
         self._publisher = None
@@ -139,6 +143,13 @@ class Map:
                 'bearing': viewport.get('bearing'),
                 'pitch': viewport.get('pitch')
             }
+
+        if render not in constants.RENDERERS:
+            raise ValueError(
+                    '`render` is "{render}", when it must be one of {renderers}'.format(
+                        render=render, renderers=constants.RENDERERS
+                    )
+                )
 
     @send_metrics('map_created')
     def _repr_html_(self):
@@ -156,7 +167,9 @@ class Map:
             description=self.description,
             is_static=self.is_static,
             layer_selector=self.layer_selector,
+            _render=self._render,
             _carto_vl_path=self._carto_vl_path,
+            _web_sdk_path=self._web_sdk_path,
             _airship_path=self._airship_path)
 
         return self._html_map.html

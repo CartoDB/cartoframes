@@ -29,7 +29,7 @@ def basic_style(color=None, size=None, opacity=None, stroke_color=None, stroke_w
             ),
             'width': get_value(size, 'width', 'point'),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
-            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
+            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point')
         },
         'line': {
             'color': 'opacity({0}, {1})'.format(
@@ -45,6 +45,16 @@ def basic_style(color=None, size=None, opacity=None, stroke_color=None, stroke_w
             ),
             'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon')
+        },
+        'web-sdk': {
+            'name': 'basicStyle',
+            'properties': {
+                'color': color,
+                'size': size,
+                'opacity': opacity,
+                'strokeColor': stroke_color,
+                'strokeWidth': stroke_width
+            }
         }
     }
 

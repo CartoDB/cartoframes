@@ -78,6 +78,21 @@ def color_bins_style(value, method='quantiles', bins=5, breaks=None, palette=Non
             'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
             'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon'),
             'filter': animation_filter
+        },
+        'web-sdk': {
+            'name': 'colorBinsStyle',
+            'value': value,
+            'properties': {
+                'method': method,
+                'bins': bins,
+                'breaks': breaks,
+                'palette': palette,
+                'size': size,
+                'opacity': opacity,
+                'strokeColor': stroke_color,
+                'strokeWidth': stroke_width,
+                'animate': animate
+            }
         }
     }
 
