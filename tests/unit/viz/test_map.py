@@ -268,7 +268,7 @@ class TestMapPublication(object):
             _airship_path=None,
             _carto_vl_path=None,
             basemap='yellow',
-            bounds=[[1, 2], [4, 3]],
+            bounds=[[1, 4], [2, 3]],
             camera={'bearing': None, 'center': [-10, 50], 'pitch': None, 'zoom': 5},
             description='description',
             is_embed=True,
