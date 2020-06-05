@@ -136,13 +136,23 @@ class Map:
         self._kuviz = None
 
         self.camera = None
-        if viewport is not None:
+        if viewport is not None and render == 'carto-vl':
             self.camera = {
                 'center': get_center(viewport),
                 'zoom': viewport.get('zoom'),
                 'bearing': viewport.get('bearing'),
                 'pitch': viewport.get('pitch')
             }
+
+        elif viewport is not None and render == 'web-sdk':
+            self.camera = {
+                'latitude': viewport.get('lat'),
+                'longitude': viewport.get('lng'),
+                'zoom': viewport.get('zoom'),
+                'bearing': viewport.get('bearing'),
+                'pitch': viewport.get('pitch')
+            }
+            self.camera = {k: v for k, v in self.camera.items() if v is not None}
 
         if render not in constants.RENDERERS:
             raise ValueError(
@@ -355,8 +365,8 @@ def _format_dict_bounds(bounds):
 
     return _clamp_and_format_bounds(
         bounds.get('west'),
-        bounds.get('east'),
         bounds.get('south'),
+        bounds.get('east'),
         bounds.get('north'))
 
 
