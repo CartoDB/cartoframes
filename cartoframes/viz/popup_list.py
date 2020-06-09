@@ -17,7 +17,8 @@ class PopupList:
         >>> })
 
     """
-    def __init__(self, popups=None, default_popup_hover=None, default_popup_click=None):
+    def __init__(self, popups=None, default_popup_hover=None, default_popup_click=None, render='carto-vl'):
+        self._render = render
         self._popups = self._init_popups(popups, default_popup_hover, default_popup_click)
 
     def _init_popups(self, popups, default_popup_hover, default_popup_click):
@@ -47,7 +48,8 @@ class PopupList:
                         Popup('click',
                               value=popup.get('value'),
                               title=popup.get('title'),
-                              format=popup.get('format'))
+                              format=popup.get('format'),
+                              render=self._render)
                     )
 
         if hover_popup_elements is not None:
@@ -62,7 +64,8 @@ class PopupList:
                         Popup('hover',
                               value=popup.get('value'),
                               title=popup.get('title'),
-                              format=popup.get('format'))
+                              format=popup.get('format'),
+                              render=self._render)
                     )
 
         return popup_elements
@@ -73,6 +76,16 @@ class PopupList:
         for popup in self._popups:
             if popup:
                 popups_interactivity.append(popup.interactivity)
+
+        if self._render != 'carto-vl':
+            popups_interactivity_list = popups_interactivity.copy()
+            popups_interactivity = {
+                'hover': [p['attrs'] for p in popups_interactivity_list if p['event'] == 'hover'],
+                'click': [p['attrs'] for p in popups_interactivity_list if p['event'] == 'click']
+            }
+            for event, attrs in popups_interactivity.items():
+                if not attrs:
+                    popups_interactivity[event] = None
 
         return popups_interactivity
 

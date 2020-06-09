@@ -9,7 +9,8 @@ class Popup:
     Layer popup.
 
     """
-    def __init__(self, event=None, value=None, title=None, format=None):
+    def __init__(self, event=None, value=None, title=None, format=None, render='carto-vl'):
+        self._render = render
         self._init_popup(event, value, title, format)
 
     def _init_popup(self, event=None, value=None, title=None, format=None):
@@ -47,14 +48,21 @@ class Popup:
         }
 
     def _get_attrs(self):
-        return {
-            'name': gen_variable_name(self._value),
+        attrs = {
             'title': self._title,
             'format': self._format
         }
 
+        if self._render == 'carto-vl':
+            attrs['name'] = gen_variable_name(self._value)
+
+        else:
+            attrs['attr'] = self._value
+
+        return attrs
+
     def _get_variable(self):
         return {
-            'name': gen_variable_name(self._value),
+            'name': gen_variable_name(self._value) if self._render == 'carto-vl' else self._value,
             'value': self._value
         }

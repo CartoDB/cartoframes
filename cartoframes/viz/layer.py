@@ -108,6 +108,7 @@ class Layer:
                  encode_data=True,
                  render='carto-vl'):
 
+        self._render = render  # It's here because we need it pretty soon
         self.is_basemap = False
         self.default_legend = default_legend
         self.source = _set_source(source, credentials, geom_col, encode_data)
@@ -115,6 +116,10 @@ class Layer:
         self.encode_data = encode_data
         self.parent_map = None
         self.geom_type = self.source.get_geom_type()
+        self._popup_hover = popup_hover  # In `self` because we need it after
+        self._popup_click = popup_click
+        self._default_popup_hover = default_popup_hover
+        self._default_popup_click = default_popup_click  # Until here
         self.popups = self._init_popups(
             popup_hover, popup_click, default_popup_hover, default_popup_click, title)
         self.legends = self._init_legends(legends, default_legend, title)
@@ -138,7 +143,6 @@ class Layer:
         self.legends_info = self.legends.get_info() if self.legends is not None else None
         self.options = self._set_options()
         self.has_legend_list = isinstance(self.legends, LegendList)
-        self._render = render
 
     def _init_legends(self, legends, default_legend, title):
         if legends:
@@ -179,7 +183,7 @@ class Layer:
             popups['click'] = self.style.default_popup_click
             popups['click']['title'] = title
 
-        return _set_popups(popups, self.style.default_popup_hover, self.style.default_popup_click)
+        return _set_popups(popups, self.style.default_popup_hover, self.style.default_popup_click, self._render)
 
     def _set_options(self):
         date_column_names = self.source.get_datetime_column_names()
@@ -223,7 +227,10 @@ class Layer:
     def reset_ui(self, parent_map):
         # TODO: Temporal fix for getting the render of the parent map and re-create the viz style for the `Web-SDK`
         self._render = parent_map._render
+        self.popups = self._init_popups(self._popup_hover, self._popup_click, self._default_popup_hover,
+                                        self._default_popup_click, self.title)
         self.viz = self.style.compute_viz(self.geom_type, self._external_variables, self._render)
+        self.interactivity = self.popups.get_interactivity()
 
         if parent_map.is_static:
             # Remove legends/widgets if the map is static
@@ -281,8 +288,8 @@ def _set_widgets(widgets, default_widget=None):
         return WidgetList()
 
 
-def _set_popups(popups, default_popup_hover=None, default_popup_click=None):
+def _set_popups(popups, default_popup_hover=None, default_popup_click=None, render='carto-vl'):
     if isinstance(popups, (dict, Popup)):
-        return PopupList(popups, default_popup_hover, default_popup_click)
+        return PopupList(popups, default_popup_hover, default_popup_click, render=render)
     else:
         return PopupList()
