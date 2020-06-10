@@ -80,10 +80,11 @@ class PopupList:
         if self._render != 'carto-vl':
             popups_interactivity_list = popups_interactivity.copy()
             popups_interactivity = {
-                'hover': [p['attrs'] for p in popups_interactivity_list if p['event'] == 'hover'],
-                'click': [p['attrs'] for p in popups_interactivity_list if p['event'] == 'click']
+                'hover': list(reversed([p['attrs'] for p in popups_interactivity_list if p['event'] == 'hover'])),
+                'click': list(reversed([p['attrs'] for p in popups_interactivity_list if p['event'] == 'click']))
             }
             for event, attrs in popups_interactivity.items():
+
                 if not attrs:
                     popups_interactivity[event] = None
 
