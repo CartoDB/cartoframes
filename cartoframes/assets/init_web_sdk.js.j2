@@ -1,31 +1,37 @@
 async function initialize() {
   carto.setDefaultCredentials({
-    username: '{{layers[0]['credentials']['username']}}',
-    apiKey: '{{layers[0]['credentials']['api_key']}}'
+    username: '{{ layers[0]['credentials']['username'] }}',
+    apiKey: '{{ layers[0]['credentials']['api_key'] }}'
   });
 
   let initialViewState = undefined;
   {% if camera is not none %}
-    initialViewState = {{camera|tojson}};
+    initialViewState = {{ camera|tojson }};
   {% endif %}
 
   const deckMap = carto.viz.createMap({
-    basemap: '{{basemap}}',
+    basemap: '{{ basemap }}',
     initialViewState: initialViewState
   });
-
-  const layers = {{layers|tojson}};
 
   let layer = null;
   let style = null;
   {% for layer in layers %}
     {% if layer['viz'] is not none %}
-      style = carto.viz.{{layer['viz']}};
+      style = carto.viz.{{ layer['viz'] }};
     {% else %}
       style = undefined;
     {% endif %}
 
-    layer = new carto.viz.Layer('{{layer['source']}}', style);
+    layer = new carto.viz.Layer('{{ layer['source'] }}', style);
+
+    {% if layer['interactivity']['hover'] is not none %}
+      await layer.setPopupHover({{ layer['interactivity']['hover']|tojson }});
+    {% endif %}
+
+    {% if layer['interactivity']['click'] is not none %}
+      await layer.setPopupClick({{ layer['interactivity']['click']|tojson }});
+    {% endif %}
 
     await layer.addTo(deckMap);
   {% endfor %}
