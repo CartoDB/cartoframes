@@ -208,3 +208,35 @@ class TestContextManager(object):
         # Then
         mock.assert_called_once_with('table_name', 'new_table_name')
         assert result == 'new_table_name'
+
+    def test_list_tables(self, mocker):
+        # Given
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
+        mock = mocker.patch.object(ContextManager, 'execute_query')
+        mock.side_effect = [
+            {'rows': [{'current_schema': self.credentials._username}]},
+            {'rows': [{'relname': 'table_zero'}, {'relname': 'table_one'}]}
+        ]
+
+        # When
+        cm = ContextManager(self.credentials)
+        tables = cm.list_tables()
+
+        # Then
+        assert DataFrame(['table_zero', 'table_one'], columns=['tables']).equals(tables)
+
+    def test_list_tables_empty(self, mocker):
+        # Given
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
+        mock = mocker.patch.object(ContextManager, 'execute_query')
+        mock.side_effect = [
+            {'rows': [{'current_schema': self.credentials._username}]},
+            {'rows': []}
+        ]
+
+        # When
+        cm = ContextManager(self.credentials)
+        tables = cm.list_tables()
+
+        # Then
+        assert DataFrame(columns=['tables']).equals(tables)

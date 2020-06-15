@@ -126,6 +126,23 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     return table_name
 
 
+def list_tables(credentials=None, schema=None):
+    """List all of the tables in the CARTO account.
+
+    Args:
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            instance of Credentials (username, api_key, etc).
+        schema (str, optional): prefix of the table. By default, it gets the
+            `current_schema()` using the credentials.
+
+    Returns:
+        DataFrame: A DataFrame with all the table names for the given credentials and schema.
+
+    """
+    context_manager = ContextManager(credentials)
+    return context_manager.list_tables(schema)
+
+
 def has_table(table_name, credentials=None, schema=None):
     """Check if the table exists in the CARTO account.
 

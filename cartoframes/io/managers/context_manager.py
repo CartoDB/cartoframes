@@ -1,6 +1,7 @@
 import time
 
-from pandas import read_csv
+import pandas as pd
+
 from warnings import warn
 
 from carto.auth import APIKeyAuthClient
@@ -91,6 +92,24 @@ class ContextManager:
             self._drop_create_table_from_query(table_name, schema, query, cartodbfy)
 
         return table_name
+
+    def list_tables(self, schema=None):
+        schema_ = schema if schema else self.get_schema()
+        query = """
+            SELECT pg_class.relname
+                FROM pg_class, pg_roles, pg_namespace
+                WHERE pg_roles.oid = pg_class.relowner
+                    AND pg_roles.rolname = current_user
+                    AND pg_namespace.oid = pg_class.relnamespace
+                    AND pg_class.relkind = 'r'
+                    AND pg_namespace.nspname = '{}'
+                ORDER BY pg_class.relfilenode DESC
+            """.format(schema_)
+
+        tables = self.execute_query(query, do_post=False)
+        tables = [table['relname'] for table in tables.get('rows', [])]
+
+        return pd.DataFrame(tables, columns=['tables'])
 
     def has_table(self, table_name, schema=None):
         query = self.compute_query(table_name, schema)
@@ -305,7 +324,7 @@ class ContextManager:
         converters = obtain_converters(columns)
         parse_dates = date_columns_names(columns)
 
-        df = read_csv(
+        df = pd.read_csv(
             raw_result,
             converters=converters,
             parse_dates=parse_dates)
