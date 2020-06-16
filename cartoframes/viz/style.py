@@ -86,11 +86,17 @@ class Style:
 
         name = style.get('name')
         value = style.get('value')
-        value = '"{0}", '.format(value) if value else ''
         options = {k: v for k, v in style.get('properties').items() if v is not None}
-        options = json.dumps(options)
 
-        return name + '(' + value + options + ')'
+        style_result = {
+            'name': name,
+            'options': options
+        }
+
+        if value:
+            style_result['value'] = value
+
+        return style_result
 
     def _serialize_variables(self, variables={}):
         output = ''

@@ -4,7 +4,7 @@ from .legend import Legend
 from .legend_list import LegendList
 from .popup import Popup
 from .popup_list import PopupList
-from .source import Source
+from .source import Source, SourceType
 from .style import Style
 from .widget import Widget
 from .widget_list import WidgetList
@@ -225,12 +225,18 @@ class Layer:
         self._map_index = map_index
 
     def reset_ui(self, parent_map):
-        # TODO: Temporal fix for getting the render of the parent map and re-create the viz style for the `Web-SDK`
-        self._render = parent_map._render
-        self.popups = self._init_popups(self._popup_hover, self._popup_click, self._default_popup_hover,
-                                        self._default_popup_click, self.title)
-        self.viz = self.style.compute_viz(self.geom_type, self._external_variables, self._render)
-        self.interactivity = self.popups.get_interactivity()
+        # TODO: Temporal fix for getting the render of the parent map and re-create the layer for the `Web-SDK`
+        if parent_map._render != 'carto-vl':
+            self._render = parent_map._render
+
+            if self.source.type == SourceType.GEOJSON:
+                self.source.create_decoded_data()
+                self.source_data = self.source.data
+
+            self.popups = self._init_popups(self._popup_hover, self._popup_click, self._default_popup_hover,
+                                            self._default_popup_click, self.title)
+            self.viz = self.style.compute_viz(self.geom_type, self._external_variables, self._render)
+            self.interactivity = self.popups.get_interactivity()
 
         if parent_map.is_static:
             # Remove legends/widgets if the map is static
