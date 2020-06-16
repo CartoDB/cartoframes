@@ -1,5 +1,3 @@
-import json
-
 from . import defaults
 from ..utils.utils import merge_dicts, text_match
 
