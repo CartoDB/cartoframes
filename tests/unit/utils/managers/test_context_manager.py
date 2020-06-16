@@ -217,9 +217,6 @@ class TestContextManager(object):
         Dataset = namedtuple('Dataset', ['name', 'updated_at'])
 
         mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
-        mocker.patch.object(ContextManager, 'execute_query', return_value={
-            'rows': [{'current_schema': self.credentials._username}]
-        })
         mocker.patch.object(DatasetManager, 'filter', return_value=[
             Dataset('table_zero', 1), Dataset('table_one', 0)
         ])
@@ -234,9 +231,6 @@ class TestContextManager(object):
     def test_list_tables_empty(self, mocker):
         # Given
         mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
-        mocker.patch.object(ContextManager, 'execute_query', return_value={
-            'rows': [{'current_schema': self.credentials._username}]
-        })
         mocker.patch.object(DatasetManager, 'filter', return_value=[])
 
         # When
