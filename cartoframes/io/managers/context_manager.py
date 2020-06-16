@@ -5,6 +5,7 @@ import pandas as pd
 from warnings import warn
 
 from carto.auth import APIKeyAuthClient
+from carto.datasets import DatasetManager
 from carto.exceptions import CartoException, CartoRateLimitException
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
@@ -94,22 +95,19 @@ class ContextManager:
         return table_name
 
     def list_tables(self, schema=None):
-        schema_ = schema if schema else self.get_schema()
-        query = """
-            SELECT pg_class.relname
-                FROM pg_class, pg_roles, pg_namespace
-                WHERE pg_roles.oid = pg_class.relowner
-                    AND pg_roles.rolname = current_user
-                    AND pg_namespace.oid = pg_class.relnamespace
-                    AND pg_class.relkind = 'r'
-                    AND pg_namespace.nspname = '{}'
-                ORDER BY pg_class.relfilenode DESC
-            """.format(schema_)
-
-        tables = self.execute_query(query, do_post=False)
-        tables = [table['relname'] for table in tables.get('rows', [])]
-
-        return pd.DataFrame(tables, columns=['tables'])
+        datasets = DatasetManager(self.auth_client).filter(
+            show_table_size_and_row_count='false',
+            show_table='false',
+            show_stats='false',
+            show_likes='false',
+            show_liked='false',
+            show_permission='false',
+            show_uses_builder_features='false',
+            show_synchronization='false',
+            load_totals='false'
+        )
+        datasets.sort(key=lambda x: x.updated_at, reverse=True)
+        return pd.DataFrame([dataset.name for dataset in datasets], columns=['tables'])
 
     def has_table(self, table_name, schema=None):
         query = self.compute_query(table_name, schema)

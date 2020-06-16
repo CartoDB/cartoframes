@@ -126,7 +126,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     return table_name
 
 
-def list_tables(credentials=None, schema=None):
+def list_tables(credentials=None):
     """List all of the tables in the CARTO account.
 
     Args:
@@ -140,7 +140,7 @@ def list_tables(credentials=None, schema=None):
 
     """
     context_manager = ContextManager(credentials)
-    return context_manager.list_tables(schema)
+    return context_manager.list_tables()
 
 
 def has_table(table_name, credentials=None, schema=None):

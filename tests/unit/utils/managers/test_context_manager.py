@@ -1,5 +1,8 @@
+from collections import namedtuple
+
 import pytest
 
+from carto.datasets import DatasetManager
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
 from pandas import DataFrame
@@ -211,12 +214,15 @@ class TestContextManager(object):
 
     def test_list_tables(self, mocker):
         # Given
+        Dataset = namedtuple('Dataset', ['name', 'updated_at'])
+
         mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
-        mock = mocker.patch.object(ContextManager, 'execute_query')
-        mock.side_effect = [
-            {'rows': [{'current_schema': self.credentials._username}]},
-            {'rows': [{'relname': 'table_zero'}, {'relname': 'table_one'}]}
-        ]
+        mocker.patch.object(ContextManager, 'execute_query', return_value={
+            'rows': [{'current_schema': self.credentials._username}]
+        })
+        mocker.patch.object(DatasetManager, 'filter', return_value=[
+            Dataset('table_zero', 1), Dataset('table_one', 0)
+        ])
 
         # When
         cm = ContextManager(self.credentials)
@@ -228,11 +234,10 @@ class TestContextManager(object):
     def test_list_tables_empty(self, mocker):
         # Given
         mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
-        mock = mocker.patch.object(ContextManager, 'execute_query')
-        mock.side_effect = [
-            {'rows': [{'current_schema': self.credentials._username}]},
-            {'rows': []}
-        ]
+        mocker.patch.object(ContextManager, 'execute_query', return_value={
+            'rows': [{'current_schema': self.credentials._username}]
+        })
+        mocker.patch.object(DatasetManager, 'filter', return_value=[])
 
         # When
         cm = ContextManager(self.credentials)
