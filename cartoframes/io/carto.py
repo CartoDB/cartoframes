@@ -87,15 +87,8 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         ValueError: if the dataframe or table name provided are wrong or the if_exists param is not valid.
 
     """
-    is_geodataframe = False  # We'll use it twice later
-    if isinstance(dataframe, GeoDataFrame):
-        is_geodataframe = True
-
     if not isinstance(dataframe, DataFrame):
         raise ValueError('Wrong dataframe. You should provide a valid DataFrame instance.')
-
-    if not is_geodataframe and GEOM_COLUMN_NAME not in dataframe.columns:  # Pandas' DataFrame and not `the_geom` col
-        log.warning('No `the_geom` column in the DataFrame, CARTO won\'t detect a geometry column if it exists.')
 
     if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')
@@ -125,8 +118,8 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         # Prepare geometry column for the upload
         gdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
 
-    elif is_geodataframe:
-        log.warning('Geometry column not found in the GeoDataFrame, CARTO won\'t detect it if it exists.')
+    elif GEOM_COLUMN_NAME not in gdf.columns:
+        log.warning('Geometry column not found in the [Geo]DataFrame.')
 
     table_name = context_manager.copy_from(gdf, table_name, if_exists, cartodbfy)
 
