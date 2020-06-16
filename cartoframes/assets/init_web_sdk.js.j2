@@ -4,26 +4,25 @@ async function initialize() {
   const camera = {{ camera|tojson }};
   const layersDef = {{ layers|tojson }};
 
-  for (const layerDef of layersDef) {
-    if (!!layerDef.credentials) {
-      carto.setDefaultCredentials({
-        username: layerDef.credentials.username,
-        apiKey: layerDef.credentials.api_key,
-        serverUrlTemplate: layerDef.credentials.base_url
-      });
-
-      break;
-    }
-  }
+  let credentials = null;
+  let layer = null;
+  let source = null;
+  let style = null;
 
   const deckMap = carto.viz.createMap({
     basemap: basemap,
     initialViewState: camera
   });
 
-  let layer = null;
-  let style = null;
   for (const layerDef of layersDef) {
+    if (layerDef.type === 'Query') {
+        credentials = new carto.Credentials(layerDef.credentials.username, layerDef.credentials.api_key, layerDef.credentials.base_url);
+        source = new carto.viz.CARTOSource(layerDef.data, {credentials});
+
+    } else {
+        source = new carto.viz.GeoJsonSource(layerDef.data);
+    }
+
     if (!!layerDef.viz && !!layerDef.viz.value) {
       style = carto.viz[layerDef.viz.name](layerDef.viz.value, layerDef.viz.options);
 
@@ -31,7 +30,7 @@ async function initialize() {
       style = carto.viz[layerDef.viz.name](layerDef.viz.options);
     }
 
-    layer = new carto.viz.Layer(layerDef.data, style);
+    layer = new carto.viz.Layer(source, style);
 
     if (!!layerDef.interactivity.hover) {
       await layer.setPopupHover(layerDef.interactivity.hover);
