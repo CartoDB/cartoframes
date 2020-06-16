@@ -1,5 +1,8 @@
+from collections import namedtuple
+
 import pytest
 
+from carto.datasets import DatasetManager
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
 from pandas import DataFrame
@@ -208,3 +211,31 @@ class TestContextManager(object):
         # Then
         mock.assert_called_once_with('table_name', 'new_table_name')
         assert result == 'new_table_name'
+
+    def test_list_tables(self, mocker):
+        # Given
+        Dataset = namedtuple('Dataset', ['name', 'updated_at'])
+
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
+        mocker.patch.object(DatasetManager, 'filter', return_value=[
+            Dataset('table_zero', 1), Dataset('table_one', 0)
+        ])
+
+        # When
+        cm = ContextManager(self.credentials)
+        tables = cm.list_tables()
+
+        # Then
+        assert DataFrame(['table_zero', 'table_one'], columns=['tables']).equals(tables)
+
+    def test_list_tables_empty(self, mocker):
+        # Given
+        mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
+        mocker.patch.object(DatasetManager, 'filter', return_value=[])
+
+        # When
+        cm = ContextManager(self.credentials)
+        tables = cm.list_tables()
+
+        # Then
+        assert DataFrame(columns=['tables']).equals(tables)
