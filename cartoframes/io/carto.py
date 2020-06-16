@@ -118,7 +118,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         # Prepare geometry column for the upload
         gdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
 
-    elif GEOM_COLUMN_NAME not in gdf.columns:
+    elif isinstance(dataframe, GeoDataFrame):
         log.warning('Geometry column not found in the [Geo]DataFrame.')
 
     table_name = context_manager.copy_from(gdf, table_name, if_exists, cartodbfy)
