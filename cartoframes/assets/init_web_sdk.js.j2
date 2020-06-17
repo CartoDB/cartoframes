@@ -1,44 +1,51 @@
 async function initialize() {
-  carto.setDefaultCredentials({
-    username: '{{ layers[0]['credentials']['username'] }}',
-    apiKey: '{{ layers[0]['credentials']['api_key'] }}'
-  });
+  const basemap = '{{ basemap }}';
+  const bounds = {{ bounds }};
+  const camera = {{ camera|tojson }};
+  const layersDef = {{ layers|tojson }};
 
-  let initialViewState = undefined;
-  {% if camera is not none %}
-    initialViewState = {{ camera|tojson }};
-  {% endif %}
+  let credentials = null;
+  let layer = null;
+  let source = null;
+  let style = null;
 
   const deckMap = carto.viz.createMap({
-    basemap: '{{ basemap }}',
-    initialViewState: initialViewState
+    basemap: basemap,
+    initialViewState: camera
   });
 
-  let layer = null;
-  let style = null;
-  {% for layer in layers %}
-    {% if layer['viz'] is not none %}
-      style = carto.viz.{{ layer['viz'] }};
-    {% else %}
-      style = undefined;
-    {% endif %}
+  for (const layerDef of layersDef) {
+    if (layerDef.type === 'Query') {
+        credentials = new carto.Credentials(layerDef.credentials.username, layerDef.credentials.api_key, layerDef.credentials.base_url);
+        source = new carto.viz.CARTOSource(layerDef.data, {credentials});
 
-    layer = new carto.viz.Layer('{{ layer['source'] }}', style);
+    } else {
+        source = new carto.viz.GeoJsonSource(layerDef.data);
+    }
 
-    {% if layer['interactivity']['hover'] is not none %}
-      await layer.setPopupHover({{ layer['interactivity']['hover']|tojson }});
-    {% endif %}
+    if (!!layerDef.viz && !!layerDef.viz.value) {
+      style = carto.viz[layerDef.viz.name](layerDef.viz.value, layerDef.viz.options);
 
-    {% if layer['interactivity']['click'] is not none %}
-      await layer.setPopupClick({{ layer['interactivity']['click']|tojson }});
-    {% endif %}
+    } else if (!!layerDef.viz) {
+      style = carto.viz[layerDef.viz.name](layerDef.viz.options);
+    }
+
+    layer = new carto.viz.Layer(source, style);
+
+    if (!!layerDef.interactivity.hover) {
+      await layer.setPopupHover(layerDef.interactivity.hover);
+    }
+
+    if (!!layerDef.interactivity.click) {
+      await layer.setPopupClick(layerDef.interactivity.click);
+    }
 
     await layer.addTo(deckMap);
-  {% endfor %}
+  }
 
   const {viewport} = deckMap.layerManager.context;
-  const {longitude, latitude, zoom} = viewport.fitBounds({{bounds}});
-  const viewState = Object.assign({}, {longitude, latitude, zoom}, initialViewState);
+  const {longitude, latitude, zoom} = viewport.fitBounds(bounds);
+  const viewState = Object.assign({}, {longitude, latitude, zoom}, camera);
 
   deckMap.viewManager.setProps({
     viewState: viewState

@@ -259,7 +259,7 @@ def get_geodataframe_data(data, encode_data=True):
     filtered_geometries = _filter_null_geometries(data)
     data = _set_time_cols_epoc(filtered_geometries).to_json(cls=CustomJSONEncoder, separators=(',', ':'))
 
-    if (encode_data):
+    if encode_data:
         compressed_data = gzip.compress(data.encode('utf-8'))
         return base64.b64encode(compressed_data).decode('utf-8')
     else:
