@@ -7,6 +7,9 @@ WEB_SDK_VERSION = None
 WEB_SDK_DEV = None
 WEB_SDK_URL = 'https://web-sdk-git-develop.carto-frontend.now.sh/dist/umd/index.min.js'
 
+# Last PR merged as 2020-06-17T15:26:00Z
+# WEB_SDK_URL = 'https://web-sdk-git-oleurud-ch84011review-ensureproperpropstyles.carto-frontend.vercel.app/dist/umd/index.min.js'
+
 AIRSHIP_VERSION = 'v2.3'
 AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
 AIRSHIP_BRIDGE_DEV = '/packages/bridge/dist/asbridge.js'
