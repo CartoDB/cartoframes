@@ -121,7 +121,7 @@ class Layer:
         self._default_popup_hover = default_popup_hover
         self._default_popup_click = default_popup_click  # Until here
         self.popups = self._init_popups(
-            popup_hover, popup_click, default_popup_hover, default_popup_click, title)
+            popup_hover, popup_click, default_popup_hover, default_popup_click, title, 'carto-vl')
         self.legends = self._init_legends(legends, default_legend, title)
         self.widgets = self._init_widgets(widgets, default_widget, title)
         self.title = title
@@ -130,7 +130,7 @@ class Layer:
         self._external_variables = merge_dicts(popups_variables, widget_variables)  # In `self` because we need it after
         self._map_index = 0
 
-        self.viz = self.style.compute_viz(self.geom_type, self._external_variables, render)
+        self.viz = self.style.compute_viz(self.geom_type, self._external_variables, render='carto-vl')
         viz_columns = extract_viz_columns(self.viz)
 
         self.source.compute_metadata(viz_columns)
@@ -168,7 +168,7 @@ class Layer:
 
         return WidgetList()
 
-    def _init_popups(self, popup_hover, popup_click, default_popup_hover, default_popup_click, title):
+    def _init_popups(self, popup_hover, popup_click, default_popup_hover, default_popup_click, title, render):
         popups = {}
 
         if popup_hover:
@@ -183,7 +183,7 @@ class Layer:
             popups['click'] = self.style.default_popup_click
             popups['click']['title'] = title
 
-        return _set_popups(popups, self.style.default_popup_hover, self.style.default_popup_click, self._render)
+        return _set_popups(popups, self.style.default_popup_hover, self.style.default_popup_click, render)
 
     def _set_options(self):
         date_column_names = self.source.get_datetime_column_names()
@@ -234,7 +234,7 @@ class Layer:
                 self.source_data = self.source.data
 
             self.popups = self._init_popups(self._popup_hover, self._popup_click, self._default_popup_hover,
-                                            self._default_popup_click, self.title)
+                                            self._default_popup_click, self.title, self._render)
             self.viz = self.style.compute_viz(self.geom_type, self._external_variables, self._render)
             self.interactivity = self.popups.get_interactivity()
 
