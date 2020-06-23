@@ -4,7 +4,7 @@ import pandas as pd
 import geopandas as gpd
 
 from shapely.geos import lgeos
-from shapely.geometry import Point, base
+from shapely.geometry import Point
 
 from cartoframes.utils.geom_utils import (ENC_EWKT, ENC_SHAPELY, ENC_WKB,
                                           ENC_WKB_BHEX, ENC_WKB_HEX, ENC_WKT,
@@ -44,7 +44,7 @@ class TestGeomUtils(object):
 
     def test_decode_geometry_none(self):
         geom_none = gpd.GeoSeries([None, None])
-        expected_decoded_geom = gpd.GeoSeries([base.BaseGeometry(), base.BaseGeometry()])
+        expected_decoded_geom = gpd.GeoSeries([None, None])
 
         decoded_geom = decode_geometry(geom_none)
         assert str(decoded_geom) == str(expected_decoded_geom)

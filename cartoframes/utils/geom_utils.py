@@ -186,7 +186,7 @@ def decode_geometry_item(geom, enc_type):
             ENC_EWKT: lambda: _load_ewkt(geom)
         }.get(enc_type)
         return func() if func else geom
-    return shapely.geometry.base.BaseGeometry()
+    return None
 
 
 def _load_wkb(geom):
