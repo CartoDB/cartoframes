@@ -226,17 +226,20 @@ class Layer:
 
     def reset_ui(self, parent_map):
         # TODO: Temporal fix for getting the render of the parent map and re-create the layer for the `Web-SDK`
-        if parent_map._render != 'carto-vl':
-            self._render = parent_map._render
+        self._render = parent_map._render
 
-            if self.source.type == SourceType.GEOJSON:
-                self.source.create_decoded_data()
-                self.source_data = self.source.data
+        if self.source.type == SourceType.GEOJSON:
+            encode_data = True if parent_map._render == 'carto-vl' else False
+            self.source.recreate_data(encode_data=encode_data)
+            self.source_data = self.source.data
 
-            self.popups = self._init_popups(self._popup_hover, self._popup_click, self._default_popup_hover,
-                                            self._default_popup_click, self.title, self._render)
-            self.viz = self.style.compute_viz(self.geom_type, self._external_variables, self._render)
-            self.interactivity = self.popups.get_interactivity()
+        self.popups = self._init_popups(self._popup_hover, self._popup_click, self._default_popup_hover,
+                                        self._default_popup_click, self.title, self._render)
+        self.viz = self.style.compute_viz(self.geom_type, self._external_variables, self._render)
+        self.interactivity = self.popups.get_interactivity()
+
+        # The TODO block above was only necesary only for `render='web-sdk` but because
+        # the layers can be reused we need to do it also for `render='carto-vl' layers`
 
         if parent_map.is_static:
             # Remove legends/widgets if the map is static
