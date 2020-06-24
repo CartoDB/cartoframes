@@ -4,14 +4,11 @@ from cartoframes.auth import Credentials
 from cartoframes.viz import Layer, Layout, Map
 from cartoframes.viz.source import Source
 
-from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
 from cartoframes.io.managers.context_manager import ContextManager
 
 from .utils import build_geodataframe
 
-from ..mocks.kuviz_mock import CartoKuvizMock
-
-import copy
+from ..mocks.kuviz_mock import KuvizPublisherMock
 
 
 def setup_mocks(mocker):
@@ -22,28 +19,6 @@ def setup_mocks(mocker):
 
 
 SOURCE = build_geodataframe([-10, 0], [-10, 0])
-
-
-class KuvizPublisherMock(KuvizPublisher):
-    def __init__(self):
-        self._layers = []
-
-    def get_layers(self):
-        return self._layers
-
-    def set_layers(self, layers, maps_api_key):
-        if maps_api_key:
-            layers_copy = []
-            for layer in layers:
-                layer_copy = copy.deepcopy(layer)
-                layer_copy.credentials['api_key'] = maps_api_key
-                layers_copy.append(layer_copy)
-            layers = layers_copy
-        self._layers = layers
-
-    def publish(self, html, name, password, if_exists='fail'):
-        self.kuviz = CartoKuvizMock(name, password=password)
-        return kuviz_to_dict(self.kuviz)
 
 
 class TestLayout(object):

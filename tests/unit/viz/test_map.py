@@ -2,17 +2,16 @@ from cartoframes.auth import Credentials
 from cartoframes.viz import Map, Layer, popup_element, constants
 from cartoframes.viz.source import Source
 
-from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
 from cartoframes.io.managers.context_manager import ContextManager
 
 from .utils import build_geodataframe
 
-from ..mocks.kuviz_mock import CartoKuvizMock
+from ..mocks.kuviz_mock import KuvizPublisherMock
 
 
 def setup_mocks(mocker):
     mocker.patch('cartoframes.viz.map._get_publisher', return_value=KuvizPublisherMock())
-    mocker.patch.object(ContextManager, 'compute_query')
+    mocker.patch.object(ContextManager, 'compute_query', return_value='select * from fake_table')
     mocker.patch.object(ContextManager, 'get_geom_type', return_value='point')
     mocker.patch.object(ContextManager, 'get_bounds', return_value=None)
 
@@ -176,21 +175,6 @@ class TestMapDevelopmentPath(object):
         assert _airship_path + constants.AIRSHIP_ICONS_DEV in template
 
 
-class KuvizPublisherMock(KuvizPublisher):
-    def __init__(self):
-        pass
-
-    def get_layers(self):
-        return []
-
-    def set_layers(self, layers, map_api_key):
-        pass
-
-    def publish(self, html, name, password, if_exists='fail'):
-        self.kuviz = CartoKuvizMock(name, password=password)
-        return kuviz_to_dict(self.kuviz)
-
-
 class TestMapPublication(object):
     def setup_method(self):
         self.username = 'fake_username'
@@ -238,7 +222,28 @@ class TestMapPublication(object):
             is_embed=True,
             is_static=None,
             layer_selector=False,
-            layers=[],
+            layers=[{
+                    'credentials': {
+                        'username': 'fake_username',
+                        'api_key': 'fake_api_key',
+                        'base_url': 'https://fake_username.carto.com'
+                    },
+                    'interactivity': [],
+                    'legends': [],
+                    'has_legend_list': True,
+                    'encode_data': True,
+                    'widgets': [],
+                    'data': 'select * from fake_table',
+                    'type': 'Query',
+                    'title': None,
+                    'options': {},
+                    'map_index': 0,
+                    'source': 'select * from fake_table',
+                    'viz': '''color: hex("#EE4D5A")
+width: ramp(linear(zoom(),0,18),[2,10])
+strokeWidth: ramp(linear(zoom(),0,18),[0,1])
+strokeColor: opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))
+'''}],
             show_info=False,
             size=None,
             theme=None,
@@ -262,7 +267,7 @@ class TestMapPublication(object):
         )
 
         name = 'cf_publish'
-        kuviz_dict = vmap.publish(name, None, self.credentials)
+        kuviz_dict = vmap.publish(name, None, self.credentials, maps_api_key='1234567890')
         self.assert_kuviz_dict(kuviz_dict, name, 'public')
         mock_set_content.assert_called_once_with(
             _airship_path=None,
@@ -274,7 +279,28 @@ class TestMapPublication(object):
             is_embed=True,
             is_static=True,
             layer_selector=False,
-            layers=[],
+            layers=[{
+                    'credentials': {
+                        'username': 'fake_username',
+                        'api_key': '1234567890',
+                        'base_url': 'https://fake_username.carto.com'
+                    },
+                    'interactivity': [],
+                    'legends': [],
+                    'has_legend_list': True,
+                    'encode_data': True,
+                    'widgets': [],
+                    'data': 'select * from fake_table',
+                    'type': 'Query',
+                    'title': None,
+                    'options': {},
+                    'map_index': 0,
+                    'source': 'select * from fake_table',
+                    'viz': '''color: hex("#EE4D5A")
+width: ramp(linear(zoom(),0,18),[2,10])
+strokeWidth: ramp(linear(zoom(),0,18),[0,1])
+strokeColor: opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))
+'''}],
             show_info=False,
             size=None,
             theme='dark',
