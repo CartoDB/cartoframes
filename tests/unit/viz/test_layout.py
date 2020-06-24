@@ -179,9 +179,9 @@ class TestLayoutPublication:
                     'map_index': 0,
                     'source': 'select * from fake_table',
                     'viz': '''color: hex("#EE4D5A")
-width: ramp(linear(zoom(),0,18),[2,10])
-strokeWidth: ramp(linear(zoom(),0,18),[0,1])
 strokeColor: opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))
+strokeWidth: ramp(linear(zoom(),0,18),[0,1])
+width: ramp(linear(zoom(),0,18),[2,10])
 '''
                 }],
                 'bounds': [[-180, -90], [180, 90]],
@@ -249,9 +249,9 @@ strokeColor: opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))
                     'map_index': 0,
                     'source': 'select * from fake_table',
                     'viz': '''color: hex("#EE4D5A")
-width: ramp(linear(zoom(),0,18),[2,10])
-strokeWidth: ramp(linear(zoom(),0,18),[0,1])
 strokeColor: opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))
+strokeWidth: ramp(linear(zoom(),0,18),[0,1])
+width: ramp(linear(zoom(),0,18),[2,10])
 '''
                 }],
                 'bounds': [[1, 2], [4, 3]],

@@ -240,9 +240,9 @@ class TestMapPublication(object):
                     'map_index': 0,
                     'source': 'select * from fake_table',
                     'viz': '''color: hex("#EE4D5A")
-width: ramp(linear(zoom(),0,18),[2,10])
-strokeWidth: ramp(linear(zoom(),0,18),[0,1])
 strokeColor: opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))
+strokeWidth: ramp(linear(zoom(),0,18),[0,1])
+width: ramp(linear(zoom(),0,18),[2,10])
 '''}],
             show_info=False,
             size=None,
@@ -297,9 +297,9 @@ strokeColor: opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))
                     'map_index': 0,
                     'source': 'select * from fake_table',
                     'viz': '''color: hex("#EE4D5A")
-width: ramp(linear(zoom(),0,18),[2,10])
-strokeWidth: ramp(linear(zoom(),0,18),[0,1])
 strokeColor: opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))
+strokeWidth: ramp(linear(zoom(),0,18),[0,1])
+width: ramp(linear(zoom(),0,18),[2,10])
 '''}],
             show_info=False,
             size=None,
