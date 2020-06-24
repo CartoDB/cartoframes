@@ -8,10 +8,7 @@ DEFAULT_USER = 'do-metadata'
 class RepoClient:
 
     def __init__(self):
-        self._do_dataset = None
-        default_credentials = defaults.get_default_credentials() or Credentials(DEFAULT_USER)
-        default_auth_client = default_credentials.get_api_key_auth_client()
-        self._default_do_dataset = DODataset(auth_client=default_auth_client)
+        self.reset_user_credentials()
 
     def set_user_credentials(self, credentials):
         if credentials is not None:
@@ -22,6 +19,9 @@ class RepoClient:
 
     def reset_user_credentials(self):
         self._do_dataset = None
+        default_credentials = defaults.get_default_credentials() or Credentials(DEFAULT_USER)
+        default_auth_client = default_credentials.get_api_key_auth_client()
+        self._default_do_dataset = DODataset(auth_client=default_auth_client)
 
     def get_countries(self, filters=None):
         return self._get_entity('countries', filters)

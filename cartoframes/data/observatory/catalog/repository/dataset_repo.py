@@ -17,11 +17,14 @@ class DatasetRepository(EntityRepository):
     def __init__(self):
         super(DatasetRepository, self).__init__(_DATASET_ID_FIELD, _ALLOWED_FILTERS, _DATASET_SLUG_FIELD)
 
-    def get_all(self, filters=None, credentials=None):
+    def get_all(self, filters=None, credentials=None, default_credentials=None):
         if credentials is not None:
             filters = self._add_subscription_ids(filters, credentials, DATASET_TYPE)
             if filters is None:
                 return []
+
+        elif credentials is None and default_credentials is not None:
+            credentials = default_credentials
 
         # Using user credentials to fetch entities
         self.client.set_user_credentials(credentials)
