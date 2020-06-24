@@ -220,7 +220,7 @@ class TestDataset(object):
         datasets = Dataset.get_all(credentials=credentials)
 
         # Then
-        mocked_repo.assert_called_once_with(None, credentials)
+        mocked_repo.assert_called_once_with(None, credentials, None)
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
@@ -228,7 +228,7 @@ class TestDataset(object):
     @patch.object(DatasetRepository, 'get_all')
     def test_get_all_datasets_credentials_without_do_enabled(self, mocked_repo):
         # Given
-        def raise_exception(a, b):
+        def raise_exception(a, b, c):
             raise ServerErrorException(['The user does not have Data Observatory enabled'])
         mocked_repo.side_effect = raise_exception
         credentials = Credentials('fake_user', '1234')
