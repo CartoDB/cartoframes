@@ -51,6 +51,7 @@ class PopupList:
                               format=popup.get('format'),
                               render=self._render)
                     )
+            click_popup_elements.reverse()  # Restoring list order, the layer can be reused
 
         if hover_popup_elements is not None:
             if not isinstance(hover_popup_elements, list):
@@ -67,6 +68,7 @@ class PopupList:
                               format=popup.get('format'),
                               render=self._render)
                     )
+            hover_popup_elements.reverse()  # Restoring list order, the layer can be reused
 
         return popup_elements
 
