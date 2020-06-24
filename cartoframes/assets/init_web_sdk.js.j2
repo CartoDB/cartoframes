@@ -8,12 +8,14 @@ async function initialize() {
   let layer = null;
   let source = null;
   let style = null;
+  let widget = null;
 
   const deckMap = carto.viz.createMap({
     basemap: basemap,
     initialViewState: camera
   });
 
+  let layerI = layersDef.length - 1;  // Their "IDs" are reversed
   for (const layerDef of layersDef) {
     if (layerDef.type === 'Query') {
         credentials = new carto.Credentials(layerDef.credentials.username, layerDef.credentials.api_key, layerDef.credentials.base_url);
@@ -41,6 +43,26 @@ async function initialize() {
     }
 
     await layer.addTo(deckMap);
+
+    let widgetI = 0;
+    for (const widgetDef of layerDef.widgets) {
+      if (widgetDef.type === 'category') {
+        widget = new carto.dataview.Category(layer, widgetDef.value, {
+          operation: 'count',
+          operationColumn: 'cartodb_id',
+          mode: 'local'
+        });
+      }
+
+      new carto.widget.Category(`as-category-widget#layer${layerI}_widget${widgetI}`, widget, {
+        showClearButton: true,
+        disableInteractivity: widgetDef.options.readOnly
+      });
+
+      widgetI++;
+    }
+
+    layerI--;
   }
 
   const {viewport} = deckMap.layerManager.context;
