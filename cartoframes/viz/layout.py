@@ -245,7 +245,6 @@ def _get_map_settings(viz, is_static, viewport):
     viz.camera = _get_camera(viz.viewport)
     viz.is_static = _get_is_static(viz.is_static, is_static)
 
-    viz._reload_layers()
     return viz.get_content()
 
 

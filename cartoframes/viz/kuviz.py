@@ -83,7 +83,7 @@ class KuvizPublisher:
             )
             log.info(
                 'The map has been published. '
-                'The "{0}" Maps API key with value "{1}" is being used for these datasets: {2}. '
+                'The "{0}" Maps API key with value "{1}" is being used for the datasets: {2}. '
                 'You can manage your API keys on your account.'.format(
                     key_name, key_value, ', '.join(['"{}"'.format(name) for name in private_tables_names])))
             return key_value
