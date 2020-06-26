@@ -22,7 +22,7 @@ class Layer:
 
     Args:
         source (str, pandas.DataFrame, geopandas.GeoDataFrame): The source data:
-            table name, SQL query or a dataframe.
+            table name, SQL query or a dataframe. If dataframe, the geometry's CRS must be WGS 84 (EPSG:4326).
         style (dict, or :py:class:`Style <cartoframes.viz.style.Style>`, optional):
             The style of the visualization.
         legends (bool, :py:class:`Legend <cartoframes.viz.legend.Legend>` list, optional):
