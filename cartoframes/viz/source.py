@@ -75,7 +75,7 @@ class Source:
             self.query = self.manager.compute_query(source)
             self.credentials = self.manager.credentials
         elif isinstance(source, DataFrame):
-            if isinstance(source, GeoDataFrame): # Checking CRS
+            if isinstance(source, GeoDataFrame):  # Checking CRS
                 check_crs_4326(source)
 
             # DataFrame, GeoDataFrame
