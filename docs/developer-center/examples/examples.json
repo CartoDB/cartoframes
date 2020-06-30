@@ -39,6 +39,11 @@
             "file": "load_data_from_carto_query",
             "path": "data_management"
         }, {
+            "title": "Load data with a different CRS",
+            "desc": "Load data with a different CRS than EPGS:4326",
+            "file": "load_data_different_crs",
+            "path": "data_management"
+        }, {
             "title": "Upload to CARTO",
             "desc": "Upload data to CARTO",
             "file": "upload_data_to_carto",

@@ -6,7 +6,7 @@ from geopandas import GeoDataFrame
 from carto.exceptions import CartoException
 
 from .managers.context_manager import ContextManager
-from ..utils.geom_utils import set_geometry, has_geometry
+from ..utils.geom_utils import check_crs, has_geometry, set_geometry
 from ..utils.logger import log
 from ..utils.utils import is_valid_str, is_sql_query
 from ..utils.metrics import send_metrics
@@ -65,7 +65,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 @send_metrics('data_uploaded')
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
              cartodbfy=True, log_enabled=True):
-    """Upload a DataFrame to CARTO.
+    """Upload a DataFrame to CARTO. The geometry's CRS must be WGS 84 (EPSG:4326) so you can use it on CARTO.
 
     Args:
         dataframe (pandas.DataFrame, geopandas.GeoDataFrame`): data to be uploaded.
@@ -89,6 +89,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     """
     if not isinstance(dataframe, DataFrame):
         raise ValueError('Wrong dataframe. You should provide a valid DataFrame instance.')
+
+    if isinstance(dataframe, GeoDataFrame):
+        check_crs(dataframe)
 
     if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')
