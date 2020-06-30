@@ -111,8 +111,7 @@ class TestCatalog(object):
         datasets = catalog.country('usa').category('demographics').datasets
 
         # Then
-        mocked_datasets.assert_called_once_with({COUNTRY_FILTER: 'usa', CATEGORY_FILTER: 'demographics'},
-                                                credentials=None, default_credentials=None)
+        mocked_datasets.assert_called_once_with({COUNTRY_FILTER: 'usa', CATEGORY_FILTER: 'demographics'})
         assert datasets == test_datasets
 
     @patch.object(Geography, 'get_all')
@@ -125,8 +124,7 @@ class TestCatalog(object):
         geographies = catalog.country('usa').category('demographics').geographies
 
         # Then
-        mocked_geographies.assert_called_once_with({COUNTRY_FILTER: 'usa', CATEGORY_FILTER: 'demographics'},
-                                                   credentials=None, default_credentials=None)
+        mocked_geographies.assert_called_once_with({COUNTRY_FILTER: 'usa', CATEGORY_FILTER: 'demographics'})
         assert geographies == test_geographies
 
     @patch.object(Dataset, 'get_all')
@@ -140,7 +138,7 @@ class TestCatalog(object):
         datasets = catalog.public().datasets
 
         # Then
-        mocked_datasets.assert_called_once_with({PUBLIC_FILTER: 'true'}, credentials=None, default_credentials=None)
+        mocked_datasets.assert_called_once_with({PUBLIC_FILTER: 'true'})
         assert datasets == expected_datasets
 
     @patch.object(Geography, 'get_all')
@@ -154,7 +152,7 @@ class TestCatalog(object):
         geographies = catalog.public().geographies
 
         # Then
-        mocked_geographies.assert_called_once_with({PUBLIC_FILTER: 'true'}, credentials=None, default_credentials=None)
+        mocked_geographies.assert_called_once_with({PUBLIC_FILTER: 'true'})
         assert geographies == expected_geographies
 
     @patch.object(Dataset, 'get_all')
@@ -168,7 +166,7 @@ class TestCatalog(object):
         datasets = catalog.public(False).datasets
 
         # Then
-        mocked_datasets.assert_called_once_with({PUBLIC_FILTER: 'false'}, credentials=None, default_credentials=None)
+        mocked_datasets.assert_called_once_with({PUBLIC_FILTER: 'false'})
         assert datasets == expected_datasets
 
     @patch.object(Geography, 'get_all')
@@ -182,7 +180,7 @@ class TestCatalog(object):
         geographies = catalog.public(False).geographies
 
         # Then
-        mocked_geographies.assert_called_once_with({PUBLIC_FILTER: 'false'}, credentials=None, default_credentials=None)
+        mocked_geographies.assert_called_once_with({PUBLIC_FILTER: 'false'})
         assert geographies == expected_geographies
 
     @patch.object(Dataset, 'get_all')
@@ -201,7 +199,7 @@ class TestCatalog(object):
             CATEGORY_FILTER: 'demographics',
             PUBLIC_FILTER: 'true',
             GEOGRAPHY_FILTER: 'carto-do-public-data.tiger.geography_esp_census_2019'
-        }, credentials=None, default_credentials=None)
+        })
 
         assert datasets == test_datasets
 
@@ -219,8 +217,7 @@ class TestCatalog(object):
 
         # Then
         mocked_repo.assert_called_once_with(slug)
-        mocked_datasets.assert_called_once_with({GEOGRAPHY_FILTER: test_geography1.id}, credentials=None,
-                                                default_credentials=None)
+        mocked_datasets.assert_called_once_with({GEOGRAPHY_FILTER: test_geography1.id})
         assert datasets == test_datasets
 
     @patch.object(Dataset, 'get_all')

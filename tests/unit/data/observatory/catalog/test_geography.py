@@ -146,7 +146,7 @@ class TestGeography(object):
         geographies = Geography.get_all(credentials=credentials)
 
         # Then
-        mocked_repo.assert_called_once_with(None, credentials, None)
+        mocked_repo.assert_called_once_with(None, credentials)
         assert isinstance(geographies, list)
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
@@ -154,7 +154,7 @@ class TestGeography(object):
     @patch.object(GeographyRepository, 'get_all')
     def test_get_all_geographies_credentials_without_do_enabled(self, mocked_repo):
         # Given
-        def raise_exception(a, b, c):
+        def raise_exception(a, b):
             raise ServerErrorException(['The user does not have Data Observatory enabled'])
         mocked_repo.side_effect = raise_exception
         credentials = Credentials('fake_user', '1234')
