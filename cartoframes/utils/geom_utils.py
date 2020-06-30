@@ -263,7 +263,10 @@ def check_crs(gdf):
 
 
 def get_crs(gdf):
+    if gdf.crs is None:
+        return None
+
     if type(gdf.crs) == dict:
         return gdf.crs['init']
     else:
-        return gdf.crs
+        return str(gdf.crs)
