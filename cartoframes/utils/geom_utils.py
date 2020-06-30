@@ -4,7 +4,6 @@ import shapely
 import binascii as ba
 
 from geopandas import GeoSeries, GeoDataFrame, points_from_xy
-from geopandas.tools.crs import CRS
 
 ENC_SHAPELY = 'shapely'
 ENC_WKB = 'wkb'
@@ -256,7 +255,15 @@ def to_geojson(geom, buffer_simplify=True):
             return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)
 
 
-def check_crs_4326(gdf):
-    crs_4326 = CRS('epsg:4326')
-    if gdf.crs is not None and not gdf.crs.equals(crs_4326):
-        raise ValueError('{} no valid geometry\' CRS, it must be {}.'.format(gdf.crs.name, crs_4326.name))
+def check_crs(gdf):
+    current_crs = get_crs(gdf)
+    expected_crs = 'epsg:4326'
+    if current_crs is not None and current_crs != expected_crs:
+        raise ValueError('No valid geometry CRS "{}", it must be "{}".'.format(current_crs, expected_crs))
+
+
+def get_crs(gdf):
+    if type(gdf.crs) == dict:
+        return gdf.crs['init']
+    else:
+        return gdf.crs
