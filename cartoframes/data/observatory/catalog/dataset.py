@@ -316,7 +316,7 @@ class Dataset(CatalogEntity):
 
     @classmethod
     @check_do_enabled
-    def get_all(cls, filters=None, credentials=None, default_credentials=None):
+    def get_all(cls, filters=None, credentials=None):
         """Get all the Dataset instances that comply with the indicated filters (or all of them if no filters
         are passed). If credentials are given, only the datasets granted for those credentials are returned.
 
@@ -340,13 +340,10 @@ class Dataset(CatalogEntity):
         if credentials is not None:
             check_credentials(credentials)
 
-        if default_credentials is not None:
-            check_credentials(default_credentials)
-
-        return cls._entity_repo.get_all(filters, credentials, default_credentials)
+        return cls._entity_repo.get_all(filters, credentials)
 
     @classmethod
-    def get_datasets_spatial_filtered(cls, filter_dataset, credentials=None, default_credentials=None):
+    def get_datasets_spatial_filtered(cls, filter_dataset, credentials=None):
         user_gdf = cls._get_user_geodataframe(filter_dataset)
 
         # TODO: check if the dataframe has a geometry column if not exception
@@ -358,12 +355,9 @@ class Dataset(CatalogEntity):
         if credentials is not None:
             check_credentials(credentials)
 
-        if default_credentials is not None:
-            check_credentials(default_credentials)
-
         # Get Dataset objects
         return get_dataset_repo().get_all(
-            {'geography_id': list(matched_geographies_ids)}, credentials, default_credentials
+            {'geography_id': list(matched_geographies_ids)}, credentials
         )
 
     @staticmethod

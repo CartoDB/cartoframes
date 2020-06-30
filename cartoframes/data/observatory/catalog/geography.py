@@ -149,7 +149,7 @@ class Geography(CatalogEntity):
 
     @classmethod
     @check_do_enabled
-    def get_all(cls, filters=None, credentials=None, default_credentials=None):
+    def get_all(cls, filters=None, credentials=None):
         """Get all the Geography instances that comply with the indicated filters (or all of them if no filters
         are passed. If credentials are given, only the geographies granted for those credentials are returned.
 
@@ -173,10 +173,7 @@ class Geography(CatalogEntity):
         if credentials is not None:
             check_credentials(credentials)
 
-        if default_credentials is not None:
-            check_credentials(default_credentials)
-
-        return cls._entity_repo.get_all(filters, credentials, default_credentials)
+        return cls._entity_repo.get_all(filters, credentials)
 
     @check_do_enabled
     def to_csv(self, file_path, credentials=None, limit=None, order_by=None, sql_query=None):

@@ -115,8 +115,7 @@ class Catalog:
     for more information.
 
     """
-    def __init__(self, credentials=None):
-        self.credentials = credentials
+    def __init__(self):
         self.filters = {}
 
     @property
@@ -169,7 +168,7 @@ class Catalog:
             CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
-        return Dataset.get_all(self.filters, credentials=None, default_credentials=self.credentials)
+        return Dataset.get_all(self.filters)
 
     @property
     def geographies(self):
@@ -182,7 +181,7 @@ class Catalog:
             CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
-        return Geography.get_all(self.filters, credentials=None, default_credentials=self.credentials)
+        return Geography.get_all(self.filters)
 
     def country(self, country_id):
         """Add a country filter to the current Catalog instance.
@@ -295,6 +294,4 @@ class Catalog:
             :py:class:`Dataset <cartoframes.data.observatory.Dataset>`
 
         """
-        return Dataset.get_datasets_spatial_filtered(
-            filter_dataset, credentials=None, default_credentials=self.credentials
-        )
+        return Dataset.get_datasets_spatial_filtered(filter_dataset)
