@@ -39,26 +39,21 @@ class ColumnInfo:
         return 'ColumnInfo({})'.format(params)
 
     def __eq__(self, other):
-        if self.name == 'cartodb_id':
-            # Skip cartodb_id comparison because cartodbfy converts bigint to integer
-            return True
-        else:
-            return self.name == other.name and \
-                   self.dbname == other.dbname and \
-                   self.dbtype == other.dbtype and \
-                   self.is_geom == other.is_geom
+        return self.dbname == other.dbname and \
+                self.dbtype == other.dbtype and \
+                self.is_geom == other.is_geom
 
     def __gt__(self, other):
-        return self.name > other.name
+        return self.dbname > other.dbname
 
     def __ge__(self, other):
-        return self.name >= other.name
+        return self.dbname >= other.dbname
 
     def __lt__(self, other):
-        return self.name < other.name
+        return self.dbname < other.dbname
 
     def __le__(self, other):
-        return self.name <= other.name
+        return self.dbname <= other.dbname
 
 
 def get_dataframe_columns_info(df):

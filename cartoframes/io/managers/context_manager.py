@@ -219,10 +219,8 @@ class ContextManager:
         return tables
 
     def _compare_columns(self, a, b):
-        GEOM_COL = 'the_geom_webmercator'
-
-        a_copy = [i for i in a if (i.name != GEOM_COL)]
-        b_copy = [i for i in b if (i.name != GEOM_COL)]
+        a_copy = [i for i in a if _not_reserved(i.name)]
+        b_copy = [i for i in b if _not_reserved(i.name)]
 
         a_copy.sort()
         b_copy.sort()
