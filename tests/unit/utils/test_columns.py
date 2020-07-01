@@ -133,3 +133,27 @@ class TestColumns(object):
         assert converters['name'] == _convert_generic
         assert converters['flag'] == _convert_bool
         assert converters['number'] == _convert_float
+
+    def test_column_info_sort(self):
+        columns = [
+            ColumnInfo('cartodb_id', 'cartodb_id', 'integer', False),
+            ColumnInfo('the_geom', 'the_geom', 'geometry(Geometry, 4326)', True),
+            ColumnInfo('Name', 'name', 'text', False),
+            ColumnInfo('flag', 'flag', 'boolean', False),
+            ColumnInfo('NUMBER', 'number', 'double precision', False)
+        ]
+
+        columns.sort()
+
+        assert columns == [
+            ColumnInfo('cartodb_id', 'cartodb_id', 'integer', False),
+            ColumnInfo('flag', 'flag', 'boolean', False),
+            ColumnInfo('Name', 'name', 'text', False),
+            ColumnInfo('NUMBER', 'number', 'double precision', False),
+            ColumnInfo('the_geom', 'the_geom', 'geometry(Geometry, 4326)', True)
+        ]
+
+    def test_column_info_compare(self):
+        column = ColumnInfo('cartodb_id', 'cartodb_id', 'integer', False)
+
+        assert column == ColumnInfo('CARTODB_ID', 'cartodb_id', 'integer', False)
