@@ -6,8 +6,9 @@ CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/{}/carto-vl.min.js'.format(CA
 WEB_SDK_VERSION = None
 WEB_SDK_DEV = None
 WEB_SDK_URL = 'https://web-sdk.now.sh/dist/umd/index.min.js'
+# WEB_SDK_URL = 'https://web-sdk-6kwzwedcy.vercel.app/dist/umd/index.min.js'
 
-AIRSHIP_VERSION = 'v2.3'
+AIRSHIP_VERSION = 'v2.4.0-rc.0'
 AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
 AIRSHIP_BRIDGE_DEV = '/packages/bridge/dist/asbridge.js'
 AIRSHIP_MODULE_DEV = '/packages/components/dist/airship/airship.esm.js'

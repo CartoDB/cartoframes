@@ -1,10 +1,7 @@
-from ..constants import FORMULA_OPERATIONS_GLOBAL, FORMULA_OPERATIONS_VIEWPORT
 from ..widget import Widget
-from ..styles.utils import prop
 
 
-def formula_widget(value, operation=None, title=None, description=None, footer=None,
-                   is_global=False, format=None):
+def formula_widget(value, operation=None, title=None, description=None, footer=None, is_global=False, format=None):
     """Helper function for quickly creating a formula widget.
 
     Formula widgets calculate aggregated values ('avg', 'max', 'min', 'sum') from numeric columns
@@ -45,23 +42,4 @@ def formula_widget(value, operation=None, title=None, description=None, footer=N
     """
     if isinstance(operation, str):
         operation = operation.lower()
-    value = _get_value_expression(operation, value, is_global)
-    return Widget('formula', value, title, description, footer, format=format)
-
-
-def _get_value_expression(operation, value, is_global):
-    if value == 'count':
-        formula_operation = _get_formula_operation(value, is_global)
-        return formula_operation + '()'
-    elif operation in ['avg', 'max', 'min', 'sum']:
-        formula_operation = _get_formula_operation(operation, is_global)
-        return formula_operation + '(' + prop(value) + ')'
-    else:
-        return prop(value)
-
-
-def _get_formula_operation(operation, is_global):
-    if is_global:
-        return FORMULA_OPERATIONS_GLOBAL.get(operation)
-    else:
-        return FORMULA_OPERATIONS_VIEWPORT.get(operation)
+    return Widget('formula', value, title, description, footer, operation=operation, format=format, is_global=is_global)

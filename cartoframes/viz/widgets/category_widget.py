@@ -1,7 +1,7 @@
 from ..widget import Widget
 
 
-def category_widget(value, title=None, description=None, footer=None, read_only=False, weight=1):
+def category_widget(value, title=None, description=None, footer=None, read_only=False, weight=1, is_global=False):
     """Helper function for quickly creating a category widget.
 
     Args:
@@ -11,6 +11,8 @@ def category_widget(value, title=None, description=None, footer=None, read_only=
         footer (str, optional): Footer text placed on the widget bottom.
         read_only (boolean, optional): Interactively filter a category by selecting it in the widget.
           Set to "False" by default.
+        is_global (boolean, optional): Account for calculations based on the entire dataset ('global') vs.
+            the default of 'viewport' features.
 
     Returns:
         cartoframes.viz.widget.Widget
@@ -23,5 +25,5 @@ def category_widget(value, title=None, description=None, footer=None, read_only=
         ...     footer='Widget footer')
 
     """
-    return Widget('category', value, title, description, footer,
-                  read_only=read_only, weight=weight)
+    return Widget('category', value, title, description, footer, read_only=read_only, weight=weight,
+                  is_global=is_global)

@@ -1,8 +1,8 @@
 from ..widget import Widget
 
 
-def histogram_widget(value, title=None, description=None, footer=None, read_only=False,
-                     buckets=20, weight=1):
+def histogram_widget(value, title=None, description=None, footer=None, read_only=False, buckets=20, weight=1,
+                     is_global=False):
     """Helper function for quickly creating a histogram widget.
 
     Histogram widgets display the distribution of a numeric attribute, in buckets, to group
@@ -19,6 +19,8 @@ def histogram_widget(value, title=None, description=None, footer=None, read_only
         read_only (boolean, optional): Interactively filter a range of numeric values by
             selecting them in the widget. Set to "False" by default.
         buckets (number, optional): Number of histogram buckets. Set to 20 by default.
+        is_global (boolean, optional): Account for calculations based on the entire dataset ('global') vs.
+            the default of 'viewport' features.
 
     Returns:
         cartoframes.viz.widget.Widget
@@ -32,5 +34,5 @@ def histogram_widget(value, title=None, description=None, footer=None, read_only
         ...     buckets=9)
 
     """
-    return Widget('histogram', value, title, description, footer,
-                  read_only=read_only, buckets=buckets, weight=weight)
+    return Widget('histogram', value, title, description, footer, read_only=read_only, buckets=buckets, weight=weight,
+                  is_global=is_global)
