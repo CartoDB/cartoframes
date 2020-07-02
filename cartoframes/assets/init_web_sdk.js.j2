@@ -1,5 +1,4 @@
 function cleanStyleName(name) {
-  return name;
   return name.replace('Style','');
 }
 
@@ -18,27 +17,24 @@ async function initialize() {
 
   const deckMap = carto.viz.createMap({
     basemap: basemap,
-    initialViewState: camera
+    viewState: camera
   });
 
   let layerI = layersDef.length - 1;  // Their "IDs" are reversed
   for (const layerDef of layersDef) {
     if (layerDef.type === 'Query') {
-      // credentials = new carto.auth.Credentials(layerDef.credentials.username, layerDef.credentials.api_key, layerDef.credentials.base_url);
-      // source = new carto.viz.source.SQL(layerDef.data, {credentials});
-
-      carto.auth.setDefaultCredentials({username: layerDef.credentials.username, apiKey: layerDef.credentials.api_key, baseUrl: layerDef.credentials.base_url});
-      source = new carto.viz.source.SQL(layerDef.data);
+      credentials = new carto.auth.Credentials(layerDef.credentials.username, layerDef.credentials.api_key, layerDef.credentials.base_url);
+      source = new carto.viz.source.SQL(layerDef.data, {credentials});
 
     } else {
       source = new carto.viz.source.GeoJSON(layerDef.data);
     }
 
     if (!!layerDef.viz && !!layerDef.viz.value) {
-      style = carto.viz[cleanStyleName(layerDef.viz.name)](layerDef.viz.value, layerDef.viz.options);
+      style = carto.viz.style[cleanStyleName(layerDef.viz.name)](layerDef.viz.value, layerDef.viz.options);
 
     } else if (!!layerDef.viz) {
-      style = carto.viz[cleanStyleName(layerDef.viz.name)](layerDef.viz.options);
+      style = carto.viz.style[cleanStyleName(layerDef.viz.name)](layerDef.viz.options);
     }
 
     layer = new carto.viz.Layer(source, style);
@@ -76,6 +72,19 @@ async function initialize() {
         new carto.viz.widget.Formula(`as-formula-widget#layer${layerI}_widget${widgetI}`, dataview, {
           format: widgetDef.options.format
         });
+
+      } else if (widgetDef.type === 'histogram') {
+        dataview = new carto.viz.dataview.Histogram(layer, widgetDef.value, {
+            bins: widgetDef.options.buckets,
+            mode: widgetDef.is_global ? 'remote' : 'remote-filtered'
+          }
+        );
+
+        new carto.viz.widget.Histogram(`as-histogram-widget#layer${layerI}_widget${widgetI}`, dataview, {
+          showClearButton: true,
+          disableInteractivity: widgetDef.options.readOnly,
+          format: widgetDef.options.format
+        });
       }
 
       widgetI++;
@@ -84,7 +93,7 @@ async function initialize() {
     layerI--;
   }
 
-  const {viewport} = deckMap.layerManager.context;
+  const viewport = deckMap.getViewports()[0];
   const {longitude, latitude, zoom} = viewport.fitBounds(bounds);
   const viewState = Object.assign({}, {longitude, latitude, zoom}, camera);
 
