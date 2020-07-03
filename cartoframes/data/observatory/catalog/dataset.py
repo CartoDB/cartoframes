@@ -343,7 +343,7 @@ class Dataset(CatalogEntity):
         return cls._entity_repo.get_all(filters, credentials)
 
     @classmethod
-    def get_datasets_spatial_filtered(cls, filter_dataset):
+    def get_datasets_spatial_filtered(cls, filter_dataset, credentials=None):
         user_gdf = cls._get_user_geodataframe(filter_dataset)
 
         # TODO: check if the dataframe has a geometry column if not exception
@@ -352,8 +352,13 @@ class Dataset(CatalogEntity):
         catalog_geographies_gdf = get_geography_repo().get_geographies_gdf()
         matched_geographies_ids = cls._join_geographies_geodataframes(catalog_geographies_gdf, user_gdf)
 
+        if credentials is not None:
+            check_credentials(credentials)
+
         # Get Dataset objects
-        return get_dataset_repo().get_all({'geography_id': list(matched_geographies_ids)})
+        return get_dataset_repo().get_all(
+            {'geography_id': list(matched_geographies_ids)}, credentials
+        )
 
     @staticmethod
     def _get_user_geodataframe(filter_dataset):
