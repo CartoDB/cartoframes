@@ -106,7 +106,7 @@ class Layer:
                  title=None,
                  parent_map=None,
                  encode_data=True,
-                 render='carto-vl'):
+                 render='web-sdk'):
 
         self._render = render  # It's here because we need it pretty soon
         self.is_basemap = False
