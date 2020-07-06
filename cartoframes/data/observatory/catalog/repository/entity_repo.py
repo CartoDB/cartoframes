@@ -54,7 +54,7 @@ class EntityRepository(ABC):
         rows = self._get_rows(cleaned_filters)
 
         if len(rows) == 0:
-            return None
+            return CatalogList([])
 
         normalized_data = [self._get_entity_class()(self._map_row(row)) for row in rows]
         return CatalogList(normalized_data)
