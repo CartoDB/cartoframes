@@ -44,7 +44,7 @@ class Widget:
             info = {
                 'type': self._type,
                 'prop': self._prop,
-                'value': self._value,
+                'value': self._value or '',
                 'variable_name': self._variable_name,
                 'title': self._title or '',
                 'description': self._description or '',
