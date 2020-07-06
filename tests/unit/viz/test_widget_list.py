@@ -65,6 +65,10 @@ class TestWidgetList(object):
 
         widget_list = WidgetList([WIDGET_A, WIDGET_B])
         widgets_info = widget_list.get_widgets_info()
+
+        # print(widgets_info)
+        # raise Exception('manolo')
+
         assert widgets_info == [
             {
                 'type': 'formula',
@@ -74,6 +78,7 @@ class TestWidgetList(object):
                 'description': '[description]',
                 'footer': '[footer]',
                 'has_bridge': False,
+                'is_global': False,
                 'variable_name': 'vdb8cc1',
                 'options': {
                     'readOnly': False,
@@ -90,6 +95,7 @@ class TestWidgetList(object):
                 'description': '',
                 'footer': '',
                 'has_bridge': False,
+                'is_global': False,
                 'variable_name': '',
                 'options': {
                     'readOnly': False,
