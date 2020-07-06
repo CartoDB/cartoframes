@@ -1,3 +1,6 @@
+const GLOBAL = 'remote';
+const LOCAL = 'remote-filtered';
+
 function cleanStyleName(name) {
   return name.replace('Style','');
 }
@@ -54,7 +57,7 @@ async function initialize() {
       if (widgetDef.type === 'category') {
         dataview = new carto.viz.dataview.Category(layer, widgetDef.value, {
           operation: 'count',
-          mode: widgetDef.is_global ? 'remote' : 'remote-filtered'
+          mode: widgetDef.is_global ? GLOBAL : LOCAL
         });
 
         new carto.viz.widget.Category(`as-category-widget#layer${layerI}_widget${widgetI}`, dataview, {
@@ -66,7 +69,7 @@ async function initialize() {
       } else if (widgetDef.type === 'formula') {
         dataview = new carto.viz.dataview.Formula(layer, widgetDef.value, {
           operation: widgetDef.operation,
-          mode: widgetDef.is_global ? 'remote' : 'remote-filtered'
+          mode: widgetDef.is_global ? GLOBAL : LOCAL
         });
 
         new carto.viz.widget.Formula(`as-formula-widget#layer${layerI}_widget${widgetI}`, dataview, {
@@ -76,7 +79,7 @@ async function initialize() {
       } else if (widgetDef.type === 'histogram') {
         dataview = new carto.viz.dataview.Histogram(layer, widgetDef.value, {
             bins: widgetDef.options.buckets,
-            mode: widgetDef.is_global ? 'remote' : 'remote-filtered'
+            mode: widgetDef.is_global ? GLOBAL : LOCAL
           }
         );
 
