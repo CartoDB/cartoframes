@@ -4,7 +4,7 @@ CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/{}/carto-vl.min.js'.format(CA
 
 # TODO: Set the right values
 WEB_SDK_VERSION = 'v1.0.0-alpha.0'
-WEB_SDK_DEV = None
+WEB_SDK_DEV = '/dist/web-sdk.js'
 WEB_SDK_URL = 'https://libs.cartocdn.com/web-sdk/{}/index.min.js'.format(WEB_SDK_VERSION)
 
 AIRSHIP_VERSION = 'v2.4.0'
