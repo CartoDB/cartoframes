@@ -1,6 +1,6 @@
 {
   "name": "cartoframes",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "*********** CARTOframes ***********",
   "main": "./cartoframes/assets/src/index.js",
   "directories": {
