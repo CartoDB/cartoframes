@@ -165,9 +165,6 @@ class Map:
     def _repr_html_(self):
         self._html_map = HTMLMap()
 
-        print('########## 0')
-        print(self.layer_defs)
-
         self._html_map.set_content(
             layers=self.layer_defs,
             bounds=self.bounds,
