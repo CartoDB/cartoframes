@@ -84,7 +84,7 @@ async function initialize() {
         );
 
         new carto.viz.widget.Histogram(`as-histogram-widget#layer${layerI}_widget${widgetI}`, dataview, {
-          showClearButton: true,
+          showClear: true,
           disableInteractivity: widgetDef.options.readOnly,
           format: widgetDef.options.format
         });
