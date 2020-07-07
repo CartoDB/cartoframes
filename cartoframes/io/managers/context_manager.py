@@ -1,9 +1,11 @@
 import time
 
-from pandas import read_csv
+import pandas as pd
+
 from warnings import warn
 
 from carto.auth import APIKeyAuthClient
+from carto.datasets import DatasetManager
 from carto.exceptions import CartoException, CartoRateLimitException
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
@@ -91,6 +93,21 @@ class ContextManager:
             self._drop_create_table_from_query(table_name, schema, query, cartodbfy)
 
         return table_name
+
+    def list_tables(self, schema=None):
+        datasets = DatasetManager(self.auth_client).filter(
+            show_table_size_and_row_count='false',
+            show_table='false',
+            show_stats='false',
+            show_likes='false',
+            show_liked='false',
+            show_permission='false',
+            show_uses_builder_features='false',
+            show_synchronization='false',
+            load_totals='false'
+        )
+        datasets.sort(key=lambda x: x.updated_at, reverse=True)
+        return pd.DataFrame([dataset.name for dataset in datasets], columns=['tables'])
 
     def has_table(self, table_name, schema=None):
         query = self.compute_query(table_name, schema)
@@ -202,10 +219,8 @@ class ContextManager:
         return tables
 
     def _compare_columns(self, a, b):
-        GEOM_COL = 'the_geom_webmercator'
-
-        a_copy = [i for i in a if (i.name != GEOM_COL)]
-        b_copy = [i for i in b if (i.name != GEOM_COL)]
+        a_copy = [i for i in a if _not_reserved(i.name)]
+        b_copy = [i for i in b if _not_reserved(i.name)]
 
         a_copy.sort()
         b_copy.sort()
@@ -305,7 +320,7 @@ class ContextManager:
         converters = obtain_converters(columns)
         parse_dates = date_columns_names(columns)
 
-        df = read_csv(
+        df = pd.read_csv(
             raw_result,
             converters=converters,
             parse_dates=parse_dates)

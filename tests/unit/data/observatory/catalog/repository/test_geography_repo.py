@@ -59,7 +59,7 @@ class TestGeographyRepo(object):
 
         # Then
         mocked_repo.assert_called_once_with(None)
-        assert geographies is None
+        assert geographies == []
 
     @patch.object(RepoClient, 'get_geographies')
     def test_get_all_only_uses_allowed_filters(self, mocked_repo):

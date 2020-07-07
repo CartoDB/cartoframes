@@ -198,7 +198,8 @@ class TestCatalog(object):
             COUNTRY_FILTER: 'usa',
             CATEGORY_FILTER: 'demographics',
             PUBLIC_FILTER: 'true',
-            GEOGRAPHY_FILTER: 'carto-do-public-data.tiger.geography_esp_census_2019'})
+            GEOGRAPHY_FILTER: 'carto-do-public-data.tiger.geography_esp_census_2019'
+        })
 
         assert datasets == test_datasets
 

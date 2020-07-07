@@ -148,3 +148,18 @@ Custom
     - CatalogError.
     - EnrichmentError.
 - PublishError.
+
+
+Development with Staging
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before releasing to production we need to test everything in staging. In order to do that, we need to configure CARTOframes to point to staging.
+There is a set of internal functions to configure the default DO credentials used by the DO Catalog.
+
+.. code::
+    from cartoframes.auth.defaults import set_default_do_credentials
+
+    set_default_do_credentials(username='USER', base_url='https://ORG.carto-staging.com')
+
+    # After that, every request to the DO Catalog will be done with the provided credentials
+    # instead of the default ones for production (user 'do-metadata').

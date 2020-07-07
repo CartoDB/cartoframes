@@ -50,8 +50,8 @@ def formula_widget(value, operation=None, title=None, description=None, footer=N
 
 
 def _get_value_expression(operation, value, is_global):
-    if value == 'count':
-        formula_operation = _get_formula_operation(value, is_global)
+    if value == 'count' or operation == 'count':
+        formula_operation = _get_formula_operation('count', is_global)
         return formula_operation + '()'
     elif operation in ['avg', 'max', 'min', 'sum']:
         formula_operation = _get_formula_operation(operation, is_global)

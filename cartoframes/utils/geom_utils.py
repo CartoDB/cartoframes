@@ -186,7 +186,7 @@ def decode_geometry_item(geom, enc_type):
             ENC_EWKT: lambda: _load_ewkt(geom)
         }.get(enc_type)
         return func() if func else geom
-    return shapely.geometry.base.BaseGeometry()
+    return None
 
 
 def _load_wkb(geom):
@@ -253,3 +253,20 @@ def to_geojson(geom, buffer_simplify=True):
             ), sort_keys=True)
         else:
             return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)
+
+
+def check_crs(gdf):
+    current_crs = get_crs(gdf)
+    expected_crs = 'epsg:4326'
+    if current_crs is not None and current_crs != expected_crs:
+        raise ValueError('No valid geometry CRS "{}", it must be "{}".'.format(current_crs, expected_crs))
+
+
+def get_crs(gdf):
+    if gdf.crs is None:
+        return None
+
+    if type(gdf.crs) == dict:
+        return gdf.crs['init']
+    else:
+        return str(gdf.crs)

@@ -40,7 +40,7 @@ class TestCountryRepo(object):
         countries = repo.get_all()
 
         # Then
-        assert countries is None
+        assert countries == []
 
     @patch.object(RepoClient, 'get_countries')
     def test_get_all_only_uses_allowed_filters(self, mocked_repo):

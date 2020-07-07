@@ -76,7 +76,7 @@ class Style:
 
     def _serialize_variables(self, variables={}):
         output = ''
-        for var in variables:
+        for var in sorted(variables):
             output += '@{name}: {value}\n'.format(
                 name=var,
                 value=variables.get(var)
@@ -85,7 +85,7 @@ class Style:
 
     def _serialize_properties(self, properties={}):
         output = ''
-        for prop in properties:
+        for prop in sorted(properties):
             if prop == 'vars':
                 continue
             output += '{name}: {value}\n'.format(
