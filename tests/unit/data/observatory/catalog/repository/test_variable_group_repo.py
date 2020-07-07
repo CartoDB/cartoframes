@@ -41,7 +41,7 @@ class TestVariableGroupRepo(object):
 
         # Then
         mocked_repo.assert_called_once_with(None)
-        assert variables_groups is None
+        assert variables_groups == []
 
     @patch.object(RepoClient, 'get_variables_groups')
     def test_get_all_only_uses_allowed_filters(self, mocked_repo):
