@@ -199,13 +199,11 @@ class Layout:
 
         layers = self._publisher.get_layers()
 
+        layer_index = 0
         for viz_map in self._maps:
-            viz_map.layer_defs = []
-
-        for layer in layers:
-            layer.reset_ui(self._maps[layer.map_index])
-            layer_def = layer._get_layer_def()
-            self._maps[layer.map_index].layer_defs.append(layer_def)
+            for layer in viz_map.layers:
+                layer.credentials = layers[layer_index].credentials
+                layer_index += 1
 
         maps = _init_layout(self._maps, self._is_static, self._viewport)
         map_height = '100%' if self._full_height else '{}px'.format(self._map_height)
@@ -230,22 +228,17 @@ def _init_layout(maps, is_static, viewport):
         if not isinstance(viz, Map):
             raise ValueError('All the elements in the Layout should be an instance of Map.')
 
+        viz.is_static = _get_is_static(viz.is_static, is_static)
+        viz.viewport = _get_viewport(viz.viewport, viewport)
+        viz.camera = _get_camera(viz.viewport)
+
         for layer in viz.layers:
             layer.map_index = map_index
+            layer.reset_ui(viz)
 
-        map_settings = _get_map_settings(viz, is_static, viewport)
-
-        layout.append(map_settings)
+        layout.append(viz.get_content())
 
     return layout
-
-
-def _get_map_settings(viz, is_static, viewport):
-    viz.viewport = _get_viewport(viz.viewport, viewport)
-    viz.camera = _get_camera(viz.viewport)
-    viz.is_static = _get_is_static(viz.is_static, is_static)
-
-    return viz.get_content()
 
 
 def _get_viewport(map_settings_viewport, layout_viewport):

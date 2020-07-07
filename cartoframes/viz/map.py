@@ -118,7 +118,6 @@ class Map:
         self.show_info = show_info
         self.is_static = is_static
         self.layers = _init_layers(layers, self)
-        self.layer_defs = _get_layer_defs(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
         self.theme = _get_theme(theme, basemap)
 
@@ -145,7 +144,7 @@ class Map:
         self._html_map = HTMLMap()
 
         self._html_map.set_content(
-            layers=self.layer_defs,
+            layers=_get_layer_defs(self.layers),
             bounds=self.bounds,
             size=self.size,
             camera=self.camera,
@@ -162,11 +161,13 @@ class Map:
         return self._html_map.html
 
     def get_content(self):
-        has_legends = any(layer['legends'] for layer in self.layer_defs)
-        has_widgets = any(len(layer['widgets']) != 0 for layer in self.layer_defs)
+        layer_defs = _get_layer_defs(self.layers)
+
+        has_legends = any(layer['legends'] for layer in layer_defs)
+        has_widgets = any(len(layer['widgets']) != 0 for layer in layer_defs)
 
         return {
-            'layers': self.layer_defs,
+            'layers': layer_defs,
             'bounds': self.bounds,
             'size': self.size,
             'viewport': self.viewport,
@@ -304,7 +305,7 @@ def _get_layer_defs(layers):
 
 
 def _get_layer_def(layer):
-    return layer._get_layer_def()
+    return layer.get_layer_def()
 
 
 def _format_bounds(bounds):

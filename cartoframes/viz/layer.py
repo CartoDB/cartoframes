@@ -187,7 +187,7 @@ class Layer:
 
         return {}
 
-    def _get_layer_def(self):
+    def get_layer_def(self):
         return {
             'credentials': self.credentials,
             'interactivity': self.interactivity,

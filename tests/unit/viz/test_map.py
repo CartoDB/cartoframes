@@ -64,14 +64,14 @@ class TestMapLayer(object):
         map = Map(layer)
 
         assert map.layers == [layer]
-        assert len(map.layer_defs) == 1
-        assert map.layer_defs[0].get('interactivity') == []
-        assert map.layer_defs[0].get('credentials') is None
-        assert map.layer_defs[0].get('legends') is not None
-        assert map.layer_defs[0].get('widgets') is not None
-        assert map.layer_defs[0].get('data') is not None
-        assert map.layer_defs[0].get('type') == 'GeoJSON'
-        assert map.layer_defs[0].get('viz') is not None
+        layer_def = map.layers[0].get_layer_def()
+        assert layer_def.get('interactivity') == []
+        assert layer_def.get('credentials') is None
+        assert layer_def.get('legends') is not None
+        assert layer_def.get('widgets') is not None
+        assert layer_def.get('data') is not None
+        assert layer_def.get('type') == 'GeoJSON'
+        assert layer_def.get('viz') is not None
 
     def test_two_layers(self):
         """Map layer should be able to initialize two layers in the correct order"""
@@ -82,7 +82,6 @@ class TestMapLayer(object):
         map = Map([layer_1, layer_2])
 
         assert map.layers == [layer_1, layer_2]
-        assert len(map.layer_defs) == 2
 
     def test_interactive_layer(self):
         """Map layer should indicate if the layer has interactivity configured"""
@@ -99,7 +98,8 @@ class TestMapLayer(object):
         )
 
         map = Map(layer)
-        assert map.layer_defs[0].get('interactivity') == [
+        layer_def = map.layers[0].get_layer_def()
+        assert layer_def.get('interactivity') == [
             {
                 'event': 'click',
                 'attrs': {
@@ -132,7 +132,8 @@ class TestMapLayer(object):
         )
 
         map = Map(layer)
-        assert map.layer_defs[0].get('interactivity') == []
+        layer_def = map.layers[0].get_layer_def()
+        assert layer_def.get('interactivity') == []
 
 
 class TestMapDevelopmentPath(object):
