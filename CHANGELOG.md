@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix Layout publication API key issue (#1654)
 - Fix ColumnInfo comparison when replacing a table (#1660)
 - Fix formula count (#1662)
+- Fix catalog empty output (#1663)
 
 ## [1.0.3.1] - 2020-05-19
 
