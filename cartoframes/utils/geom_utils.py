@@ -5,13 +5,14 @@ import binascii as ba
 
 from geopandas import GeoSeries, GeoDataFrame, points_from_xy
 
-
 ENC_SHAPELY = 'shapely'
 ENC_WKB = 'wkb'
 ENC_WKB_HEX = 'wkb-hex'
 ENC_WKB_BHEX = 'wkb-bhex'
 ENC_WKT = 'wkt'
 ENC_EWKT = 'ewkt'
+SPHERICAL_TOLERANCE = 0.0001
+SIMPLIFY_TOLERANCE = 0.001
 
 
 def set_geometry(gdf, col, drop=False, inplace=False, crs=None):
@@ -185,7 +186,7 @@ def decode_geometry_item(geom, enc_type):
             ENC_EWKT: lambda: _load_ewkt(geom)
         }.get(enc_type)
         return func() if func else geom
-    return shapely.geometry.base.BaseGeometry()
+    return None
 
 
 def _load_wkb(geom):
@@ -244,6 +245,28 @@ def encode_geometry_ewkb(geom, srid=4326):
         return shapely.wkb.dumps(geom, hex=True, include_srid=True)
 
 
-def to_geojson(geom):
+def to_geojson(geom, buffer_simplify=True):
     if geom is not None and str(geom) != 'GEOMETRYCOLLECTION EMPTY':
-        return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)
+        if buffer_simplify and geom.geom_type in ('Polygon', 'MultiPolygon'):
+            return json.dumps(shapely.geometry.mapping(
+                geom.buffer(SPHERICAL_TOLERANCE).simplify(SIMPLIFY_TOLERANCE)
+            ), sort_keys=True)
+        else:
+            return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)
+
+
+def check_crs(gdf):
+    current_crs = get_crs(gdf)
+    expected_crs = 'epsg:4326'
+    if current_crs is not None and current_crs != expected_crs:
+        raise ValueError('No valid geometry CRS "{}", it must be "{}".'.format(current_crs, expected_crs))
+
+
+def get_crs(gdf):
+    if gdf.crs is None:
+        return None
+
+    if type(gdf.crs) == dict:
+        return gdf.crs['init']
+    else:
+        return str(gdf.crs)

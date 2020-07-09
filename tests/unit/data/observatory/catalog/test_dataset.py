@@ -11,9 +11,12 @@ from cartoframes.data.observatory.catalog.repository.variable_repo import Variab
 from cartoframes.data.observatory.catalog.repository.variable_group_repo import VariableGroupRepository
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.subscription_info import SubscriptionInfo
-from .examples import test_dataset1, test_datasets, test_variables, test_variables_groups, db_dataset1, test_dataset2, \
+from cartoframes.data.observatory.catalog.repository.constants import DATASET_FILTER
+from .examples import (
+    test_dataset1, test_datasets, test_variables, test_variables_groups, db_dataset1, test_dataset2,
     db_dataset2, test_subscription_info
-from .mocks import BigQueryClientMock
+)
+from carto.do_dataset import DODataset
 
 
 class TestDataset(object):
@@ -40,7 +43,7 @@ class TestDataset(object):
         variables = test_dataset1.variables
 
         # Then
-        mocked_repo.assert_called_once_with({'dataset_id': test_dataset1.id})
+        mocked_repo.assert_called_once_with({DATASET_FILTER: test_dataset1.id})
         assert isinstance(variables, list)
         assert isinstance(variables, CatalogList)
         assert variables == test_variables
@@ -54,7 +57,7 @@ class TestDataset(object):
         variables_groups = test_dataset1.variables_groups
 
         # Then
-        mocked_repo.assert_called_once_with({'dataset_id': test_dataset1.id})
+        mocked_repo.assert_called_once_with({DATASET_FILTER: test_dataset1.id})
         assert isinstance(variables_groups, list)
         assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
@@ -113,7 +116,7 @@ class TestDataset(object):
     def test_dataset_is_exported_as_dict(self):
         # Given
         dataset = Dataset(db_dataset1)
-        excluded_fields = ['summary_json', 'available_in']
+        excluded_fields = ['summary_json']
         expected_dict = {key: value for key, value in db_dataset1.items() if key not in excluded_fields}
 
         # When
@@ -278,7 +281,6 @@ class TestDataset(object):
         datasets = test_datasets
         dataset = datasets[0]
         expected_dataset_df = dataset.to_series()
-        del expected_dataset_df['available_in']
         del expected_dataset_df['summary_json']
 
         # When
@@ -292,13 +294,13 @@ class TestDataset(object):
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_dataset_download(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_dataset1
         dataset = Dataset.get(test_dataset1.id)
         get_all_mock.return_value = [dataset]
-        mocked_bq_client.return_value = BigQueryClientMock()
+        download_stream_mock.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         # Then
@@ -306,13 +308,11 @@ class TestDataset(object):
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_not_subscribed_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    def test_dataset_not_subscribed_download_fails(self, get_by_id_mock, get_all_mock):
         # mock dataset
         get_by_id_mock.return_value = test_dataset2  # is private
         dataset = Dataset.get(test_dataset2.id)
         get_all_mock.return_value = []
-        mocked_bq_client.return_value = BigQueryClientMock()
         credentials = Credentials('fake_user', '1234')
 
         # When
@@ -326,28 +326,29 @@ class TestDataset(object):
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_download_not_subscribed_but_public(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_dataset_download_not_subscribed_but_public(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_dataset1  # is public
         dataset = Dataset.get(test_dataset1.id)
         get_all_mock.return_value = []
-        mocked_bq_client.return_value = BigQueryClientMock()
+        download_stream_mock.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         dataset.to_csv('fake_path', credentials)
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_dataset_download_without_do_enabled(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_dataset_download_without_do_enabled(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_dataset1
         dataset = Dataset.get(test_dataset1.id)
         get_all_mock.return_value = []
-        mocked_bq_client.return_value = BigQueryClientMock(
-            ServerErrorException(['The user does not have Data Observatory enabled'])
-        )
+
+        def raise_exception(limit=None, order_by=None, sql_query=None, add_geom=None, is_geography=None):
+            raise ServerErrorException(['The user does not have Data Observatory enabled'])
+        download_stream_mock.side_effect = raise_exception
         credentials = Credentials('fake_user', '1234')
 
         # When
@@ -375,7 +376,7 @@ class TestDataset(object):
         dataset.subscribe(credentials)
 
         # Then
-        mock_subscription_ids.assert_called_once_with(credentials)
+        mock_subscription_ids.assert_called_once_with(credentials, 'dataset')
         mock_display_form.assert_called_once_with(expected_id, 'dataset', credentials)
         assert not mock_display_message.called
 
@@ -394,7 +395,7 @@ class TestDataset(object):
         dataset.subscribe(credentials)
 
         # Then
-        mock_subscription_ids.assert_called_once_with(credentials)
+        mock_subscription_ids.assert_called_once_with(credentials, 'dataset')
         mock_display_message.assert_called_once_with(expected_id, 'dataset')
         assert not mock_display_form.called
 
@@ -411,7 +412,7 @@ class TestDataset(object):
         dataset.subscribe()
 
         # Then
-        mock_subscription_ids.assert_called_once_with(expected_credentials)
+        mock_subscription_ids.assert_called_once_with(expected_credentials, 'dataset')
         mock_display_form.assert_called_once_with(db_dataset1['id'], 'dataset', expected_credentials)
 
     def test_dataset_subscribe_wrong_credentials(self):
@@ -519,21 +520,3 @@ class TestDataset(object):
             'We are sorry, the Data Observatory is not enabled for your account yet. '
             'Please contact your customer success manager or send an email to '
             'sales@carto.com to request access to it.')
-
-    def test_dataset_is_available_in(self):
-        # Given
-        dataset_in_bq = Dataset(db_dataset1)
-        dataset_not_in_bq = Dataset(db_dataset2)
-
-        # Then
-        assert dataset_in_bq._is_available_in('bq')
-        assert not dataset_not_in_bq._is_available_in('bq')
-
-    def test_dataset_is_available_in_with_empty_field(self):
-        # Given
-        db_dataset = dict(db_dataset1)
-        db_dataset['available_in'] = None
-        dataset_null = Dataset(db_dataset)
-
-        # Then
-        assert not dataset_null._is_available_in('bq')

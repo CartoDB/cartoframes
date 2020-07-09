@@ -1,14 +1,12 @@
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
-from .repository.geography_repo import get_geography_repo
+from .repository.geography_repo import get_geography_repo, GEOGRAPHY_TYPE
 from .repository.constants import GEOGRAPHY_FILTER
 from . import subscription_info
 from . import subscriptions
 from . import utils
 from ....utils.utils import get_credentials, check_credentials, check_do_enabled
 from ....exceptions import DOError
-
-GEOGRAPHY_TYPE = 'geography'
 
 
 class Geography(CatalogEntity):
@@ -178,7 +176,7 @@ class Geography(CatalogEntity):
         return cls._entity_repo.get_all(filters, credentials)
 
     @check_do_enabled
-    def to_csv(self, file_path, credentials=None, limit=None):
+    def to_csv(self, file_path, credentials=None, limit=None, order_by=None, sql_query=None):
         """Download geography data as a local csv file. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
@@ -191,7 +189,10 @@ class Geography(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
-            limit (int, optional): number of rows to be downloaded.
+            sql_query (str, optional): a query to select, filter or aggregate the content of the geography dataset.
+                For instance, to download just one row: `select * from $geography$ limit 1`. The placeholder
+                `$geography$` is mandatory and it will be replaced by the actual geography dataset before running
+                the query. You can build any arbitrary query.
 
         Raises:
             DOError: if you have not a valid license for the geography being downloaded,
@@ -205,10 +206,10 @@ class Geography(CatalogEntity):
             raise DOError('You are not subscribed to this Geography yet. '
                           'Please, use the subscribe method first.')
 
-        self._download(_credentials, file_path, limit)
+        self._download(_credentials, file_path, limit=limit, order_by=order_by, sql_query=sql_query)
 
     @check_do_enabled
-    def to_dataframe(self, credentials=None, limit=None):
+    def to_dataframe(self, credentials=None, limit=None, order_by=None, sql_query=None):
         """Download geography data as a pandas.DataFrame. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
@@ -220,7 +221,10 @@ class Geography(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
-            limit (int, optional): number of rows to be downloaded.
+            sql_query (str, optional): a query to select, filter or aggregate the content of the geography dataset.
+                For instance, to download just one row: `select * from $geography$ limit 1`. The placeholder
+                `$geography$` is mandatory and it will be replaced by the actual geography dataset before running
+                the query. You can build any arbitrary query.
 
         Returns:
             pandas.DataFrame
@@ -237,7 +241,7 @@ class Geography(CatalogEntity):
             raise DOError('You are not subscribed to this Geography yet. '
                           'Please, use the subscribe method first.')
 
-        return self._download(_credentials, limit=limit)
+        return self._download(_credentials, limit=limit, order_by=order_by, sql_query=sql_query)
 
     @check_do_enabled
     def subscribe(self, credentials=None):
@@ -270,7 +274,7 @@ class Geography(CatalogEntity):
 
         """
         _credentials = get_credentials(credentials)
-        _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials, GEOGRAPHY_TYPE)
 
         if self.id in _subscribed_ids:
             utils.display_existing_subscription_message(self.id, GEOGRAPHY_TYPE)

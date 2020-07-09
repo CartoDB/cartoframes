@@ -1,100 +1,98 @@
-from ..subscriptions import get_subscription_ids
-from .....auth import Credentials
-from .....io.managers.context_manager import ContextManager
+from carto.do_dataset import DODataset
+
+from .....auth import Credentials, defaults
+
+DEFAULT_USER = 'do-metadata'
 
 
 class RepoClient:
 
-    __instance = None
-
     def __init__(self):
-        self._user_credentials = None
-        self._do_credentials = Credentials('do-metadata', 'default_public')
-        self._context_manager = ContextManager(self._do_credentials)
+        default_credentials = Credentials(DEFAULT_USER)
+        default_auth_client = default_credentials.get_api_key_auth_client()
+        self._default_do_dataset = DODataset(auth_client=default_auth_client)
+        self._user_do_dataset = None
+        self._external_do_dataset = None
 
     def set_user_credentials(self, credentials):
-        self._user_credentials = credentials
+        if credentials is not None:
+            auth_client = credentials.get_api_key_auth_client()
+            self._user_do_dataset = DODataset(auth_client=auth_client)
+        else:
+            self._user_do_dataset = None
+
+    def reset_user_credentials(self):
+        self._user_do_dataset = None
+
+    def set_external_credentials(self):
+        # This must be checked every time to allow the definition of
+        # "default_do_credentials" at any point in the code because
+        # every repo uses a singleton instance of this client
+        external_credentials = defaults.get_default_do_credentials()
+        if external_credentials is not None:
+            external_auth_client = external_credentials.get_api_key_auth_client()
+            self._external_do_dataset = DODataset(auth_client=external_auth_client)
+        else:
+            self._external_do_dataset = None
 
     def get_countries(self, filters=None):
-        query = 'SELECT DISTINCT t.country_id AS id FROM datasets_public t'
-        return self._run_query(query, filters)
+        self.set_external_credentials()
+        return self._get_entity('countries', filters)
 
     def get_categories(self, filters=None):
-        query = 'SELECT t.* FROM categories_public t'
-        return self._run_query(query, filters)
-
-    def get_categories_joined_datasets(self, filters=None):
-        query = 'SELECT DISTINCT c.* FROM categories_public c, datasets_public t'
-        return self._run_query(query, filters, ['c.id = t.category_id'])
+        self.set_external_credentials()
+        return self._get_entity('categories', filters)
 
     def get_providers(self, filters=None):
-        query = 'SELECT t.* FROM providers_public t'
-        return self._run_query(query, filters)
-
-    def get_variables(self, filters=None):
-        query = 'SELECT t.* FROM variables_public t'
-        return self._run_query(query, filters)
-
-    def get_variables_groups(self, filters=None):
-        query = 'SELECT t.* FROM variables_groups_public t'
-        return self._run_query(query, filters)
-
-    def get_geographies(self, filters=None):
-        query = 'SELECT t.* FROM geographies_public t'
-
-        extra_condition = []
-        if self._user_credentials is not None:
-            ids = get_subscription_ids(self._user_credentials)
-            if len(ids) == 0:
-                return []
-            elif len(ids) > 0:
-                extra_condition.append('t.id IN ({})'.format(ids))
-
-        return self._run_query(query, filters, extra_condition)
-
-    def get_geographies_joined_datasets(self, filters=None):
-        query = 'SELECT DISTINCT g.* FROM geographies_public g, datasets_public t'
-        return self._run_query(query, filters, ['g.id = t.geography_id'])
+        self.set_external_credentials()
+        return self._get_entity('providers', filters)
 
     def get_datasets(self, filters=None):
-        query = 'SELECT t.* FROM datasets_public t'
+        self.set_external_credentials()
+        return self._get_entity('datasets', filters, use_slug=True)
 
-        extra_condition = []
-        if self._user_credentials is not None:
-            ids = get_subscription_ids(self._user_credentials)
-            if len(ids) == 0:
-                return []
-            elif len(ids) > 0:
-                extra_condition.append('t.id IN ({})'.format(ids))
+    def get_geographies(self, filters=None):
+        self.set_external_credentials()
+        return self._get_entity('geographies', filters, use_slug=True)
 
-        return self._run_query(query, filters, extra_condition)
+    def get_variables(self, filters=None):
+        self.set_external_credentials()
+        filter_id = self._get_filter_id(filters, use_slug=True)
+        if filter_id:
+            return self._fetch_entity_id('variables', filter_id)
+        else:
+            entity = 'datasets/{}/variables'.format(filters.pop('dataset'))
+            return self._fetch_entity(entity, filters)
 
-    def _run_query(self, query, filters, extra_conditions=None):
-        conditions = self._compute_conditions(filters, extra_conditions)
+    def get_variables_groups(self, filters=None):
+        self.set_external_credentials()
+        filter_id = self._get_filter_id(filters, use_slug=True)
+        if filter_id:
+            return self._fetch_entity_id('variables_groups', filter_id)
+        else:
+            entity = 'datasets/{0}/variables_groups'.format(filters.pop('dataset'))
+            return self._fetch_entity(entity, filters)
 
-        if len(conditions) > 0:
-            where_clause = ' AND '.join(conditions)
-            query += ' WHERE {}'.format(where_clause)
+    def _get_filter_id(self, filters, use_slug=False):
+        if isinstance(filters, dict):
+            filter_id = filters.get('id')
+            if not filter_id and use_slug:
+                filter_id = filters.get('slug')
+            return filter_id
 
-        return self._context_manager.execute_query(query).get('rows')
+    def _get_entity(self, entity, filters=None, use_slug=False):
+        filter_id = self._get_filter_id(filters, use_slug)
+        if filter_id:
+            return self._fetch_entity_id(entity, filter_id)
+        else:
+            return self._fetch_entity(entity, filters)
 
-    def _compute_conditions(self, filters, extra_conditions):
-        conditions = extra_conditions or []
+    def _fetch_entity_id(self, entity, filter_id):
+        if isinstance(filter_id, list):
+            return list(filter(None, [self._fetch_entity('{0}/{1}'.format(entity, _id)) for _id in filter_id]))
+        else:
+            return self._fetch_entity('{0}/{1}'.format(entity, filter_id))
 
-        if filters is not None and len(filters) > 0:
-            conditions.extend([self._generate_condition(key, value) for key, value in sorted(filters.items())])
-
-        return conditions
-
-    @staticmethod
-    def _generate_condition(key, value):
-        if isinstance(value, list):
-            value_list = ','.join(["'" + v + "'" for v in value])
-            return "t.{} IN ({})".format(key, value_list)
-
-        return "t.{} = '{}'".format(key, value)
-
-    def __new__(cls):
-        if not RepoClient.__instance:
-            RepoClient.__instance = object.__new__(cls)
-        return RepoClient.__instance
+    def _fetch_entity(self, entity, filters=None):
+        do_dataset = self._user_do_dataset or self._external_do_dataset or self._default_do_dataset
+        return do_dataset.metadata(entity, filters)

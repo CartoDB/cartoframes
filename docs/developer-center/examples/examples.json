@@ -24,6 +24,11 @@
             "file": "load_data_from_geojson",
             "path": "data_management"
         }, {
+            "title": "Load a shapefile",
+            "desc": "Load data from a shapefile",
+            "file": "load_data_from_shapefile",
+            "path": "data_management"
+        }, {
             "title": "Load a CARTO table",
             "desc": "Load data from a CARTO table",
             "file": "load_data_from_carto_table",
@@ -34,6 +39,11 @@
             "file": "load_data_from_carto_query",
             "path": "data_management"
         }, {
+            "title": "Load data with a different CRS",
+            "desc": "Load data with a different CRS than EPGS:4326",
+            "file": "load_data_different_crs",
+            "path": "data_management"
+        }, {
             "title": "Upload to CARTO",
             "desc": "Upload data to CARTO",
             "file": "upload_data_to_carto",
@@ -42,11 +52,6 @@
             "title": "Change CARTO table privacy",
             "desc": "Change the privacy of a CARTO table",
             "file": "change_carto_table_privacy",
-            "path": "data_management"
-        }, {
-            "title": "Use dates in a DataFrame",
-            "desc": "Animate a visualization using date columns",
-            "file": "date_columns_in_dataframes",
             "path": "data_management"
         }]
     }, {
@@ -211,12 +216,6 @@
             "path": "legends",
             "group": "Legends"
         }, {
-            "title": "Opacity",
-            "desc": "Use opacity in legend",
-            "file": "opacity_in_legend",
-            "path": "legends",
-            "group": "Legends"
-        }, {
             "title": "Default widget",
             "desc": "Set the default widget needed for the style helper",
             "file": "default_widget",
@@ -265,6 +264,12 @@
             "path": "widgets",
             "group": "Widgets"
         }, {
+            "title": "Default popup",
+            "desc": "Set the default popup needed for the style helper",
+            "file": "default_popup",
+            "path": "popups",
+            "group": "Popups"
+        }, {
             "title": "Popup on click",
             "desc": "Display a popup triggered by a click event",
             "file": "popup_on_click",
@@ -277,9 +282,9 @@
             "path": "popups",
             "group": "Popups"
         }, {
-            "title": "Customize popup title",
-            "desc": "Change the title for the popup values",
-            "file": "popup_titles",
+            "title": "Customize popup title and format",
+            "desc": "Change the title and format for the popup values",
+            "file": "popup_titles_and_format",
             "path": "popups",
             "group": "Popups"
         }, {
@@ -293,31 +298,31 @@
             "desc": "Create a default visualization layout",
             "file": "default_layout",
             "path": "map_layout",
-            "group": "layout"
+            "group": "Layout"
         }, {
             "title": "Custom layout",
             "desc": "Use different settings to create a custom visualization layout",
             "file": "custom_layout",
             "path": "map_layout",
-            "group": "layout"
+            "group": "Layout"
         }, {
             "title": "Add layout titles",
             "desc": "Use different custom titles to create a visualization layout",
             "file": "layout_titles",
             "path": "map_layout",
-            "group": "layout"
+            "group": "Layout"
         }, {
             "title": "Customize layout viewport",
             "desc": "Use different viewport settings to create a visualization layout",
             "file": "layout_viewport",
             "path": "map_layout",
-            "group": "layout"
+            "group": "Layout"
         }, {
-            "title": "Make layout interactive",
-            "desc": "Create an interactive visualization layout",
-            "file": "interactive_layout",
+            "title": "Make layout static",
+            "desc": "Create a static visualization layout",
+            "file": "static_layout",
             "path": "map_layout",
-            "group": "layout"
+            "group": "Layout"
         }]
     }, {
         "title": "Data services",
@@ -346,30 +351,35 @@
             "path": "data_services"
         }]
     }, {
-        "title": "Data enrichment",
-        "desc": "Learn how to augment your public and private datasets through spatial operations and CARTO's Data Observatory",
-        "file": "data_enrichment.md",
+        "title": "Data Observatory",
+        "desc": "Learn how to discover third party datasets and enrich your data through CARTO's Data Observatory",
+        "file": "data_observatory.md",
         "hide_sidebar_samples": true,
         "samples": [{
             "title": "Discover a dataset",
             "desc": "Basic steps to discover a Dataset in the Data Observatory",
             "file": "discover_dataset",
-            "path": "data_enrichment"
+            "path": "data_observatory"
+        }, {
+            "title": "Download a dataset",
+            "desc": "Download a dataset applying filters",
+            "file": "download_dataset",
+            "path": "data_observatory"
         }, {
             "title": "Enrich points",
             "desc": "Use the enrichment to enrich points for a dataset",
             "file": "points_enrichment_dataset",
-            "path": "data_enrichment"
+            "path": "data_observatory"
         }, {
             "title": "Enrich polygons",
             "desc": "Use the enrichment to enrich polygons for a dataset",
             "file": "polygons_enrichment_dataset",
-            "path": "data_enrichment"
+            "path": "data_observatory"
         }, {
             "title": "Subscribe to a premium dataset",
             "desc": "Basic steps to subscribe to a premium dataset in the Data Observatory to start enriching your data",
             "file": "enrichment_subscription_workflow",
-            "path": "data_enrichment"
+            "path": "data_observatory"
         }]
     }, {
         "title": "Publish and share",
@@ -377,14 +387,24 @@
         "file": "publish_share.md",
         "hide_sidebar_samples": true,
         "samples": [{
-            "title": "Publish a map with local data",
-            "desc": "Publish a public visualization",
-            "file": "publish_a_public_visualization",
+            "title": "Publish Public Table Visualization",
+            "desc": "Publish a visualization from a public table",
+            "file": "publish_visualization_public_table",
             "path": "publish_and_share"
         }, {
-            "title": "Publish a map with local data with password",
-            "desc": "Publish a protected visualization",
-            "file": "publish_a_protected_visualization",
+            "title": "Publish Private Table Visualization",
+            "desc": "Publish a visualization from a private table",
+            "file": "publish_visualization_private_table",
+            "path": "publish_and_share"
+        }, {
+            "title": "Publish GeoDataFrame Visualization",
+            "desc": "Publish a visualization from a GeoDataFrame",
+            "file": "publish_visualization_gdf",
+            "path": "publish_and_share"
+        }, {
+            "title": "Publish Layout Visualization",
+            "desc": "Publish a visualization of a layout",
+            "file": "publish_visualization_layout",
             "path": "publish_and_share"
         }]
     }, {

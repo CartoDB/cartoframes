@@ -113,7 +113,7 @@ def test_read_carto_index_col_exists(mocker):
             Point([10, 15]),
             Point([20, 30])
         ]
-    }, geometry='the_geom', index=Index([1, 2, 3], 'cartodb_id'))
+    }, geometry='the_geom', index=Index([1, 2, 3], name='cartodb_id'))
 
     # When
     gdf = read_carto('__source__', CREDENTIALS, index_col='cartodb_id')
@@ -140,7 +140,7 @@ def test_read_carto_index_col_not_exists(mocker):
             Point([10, 15]),
             Point([20, 30])
         ]
-    }, geometry='the_geom', index=Index([0, 1, 2], 'rename_index'))
+    }, geometry='the_geom', index=Index([0, 1, 2], name='rename_index'))
 
     # When
     gdf = read_carto('__source__', CREDENTIALS, index_col='rename_index')
@@ -178,16 +178,19 @@ def test_read_carto_decode_geom_false(mocker):
 
 def test_to_carto(mocker):
     # Given
+    table_name = '__table_name__'
     cm_mock = mocker.patch.object(ContextManager, 'copy_from')
+    cm_mock.return_value = table_name
     df = GeoDataFrame({'geometry': [Point([0, 0])]})
 
     # When
-    to_carto(df, '__table_name__', CREDENTIALS)
+    norm_table_name = to_carto(df, table_name, CREDENTIALS)
 
     # Then
-    assert cm_mock.call_args[0][1] == '__table_name__'
+    assert cm_mock.call_args[0][1] == table_name
     assert cm_mock.call_args[0][2] == 'fail'
     assert cm_mock.call_args[0][3] is True
+    assert norm_table_name == table_name
 
 
 def test_to_carto_wrong_dataframe(mocker):

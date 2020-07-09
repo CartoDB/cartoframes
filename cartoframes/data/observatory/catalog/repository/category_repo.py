@@ -1,9 +1,9 @@
-from .constants import COUNTRY_FILTER
+from .constants import COUNTRY_FILTER, PROVIDER_FILTER, PUBLIC_FILTER
 from .entity_repo import EntityRepository
 
 
 _CATEGORY_ID_FIELD = 'id'
-_ALLOWED_FILTERS = [COUNTRY_FILTER]
+_ALLOWED_FILTERS = [COUNTRY_FILTER, PROVIDER_FILTER, PUBLIC_FILTER]
 
 
 def get_category_repo():
@@ -21,9 +21,6 @@ class CategoryRepository(EntityRepository):
         return Category
 
     def _get_rows(self, filters=None):
-        if filters is not None and COUNTRY_FILTER in filters.keys():
-            return self.client.get_categories_joined_datasets(filters)
-
         return self.client.get_categories(filters)
 
     def _map_row(self, row):

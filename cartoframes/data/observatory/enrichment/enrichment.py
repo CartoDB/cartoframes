@@ -1,4 +1,7 @@
-from .enrichment_service import EnrichmentService, prepare_variables, AGGREGATION_DEFAULT
+from .enrichment_service import EnrichmentService, AGGREGATION_DEFAULT
+
+GEOM_TYPE_POINTS = 'points'
+GEOM_TYPE_POLYGONS = 'polygons'
 
 
 class Enrichment(EnrichmentService):
@@ -22,7 +25,7 @@ class Enrichment(EnrichmentService):
     def __init__(self, credentials=None):
         super(Enrichment, self).__init__(credentials)
 
-    def enrich_points(self, dataframe, variables, geom_col=None, filters={}):
+    def enrich_points(self, dataframe, variables, geom_col=None, filters=None):
         """Enrich your points `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset`
         in the Data Observatory, intersecting the points in the source `DataFrame` with the geographies in the
         Data Observatory.
@@ -34,8 +37,7 @@ class Enrichment(EnrichmentService):
             dataframe (pandas.DataFrame, geopandas.GeoDataFrame: a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
-                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`. The maximum number of
-                variables is 50.
+                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (dict, optional): dictionary to filter results by variable values. As a key it receives the
                 variable id, and as value receives a SQL operator, for example: `{variable1.id: "> 30"}`. It works by
@@ -80,16 +82,9 @@ class Enrichment(EnrichmentService):
             ...     geom_col='the_geom')
 
         """
-        variables = prepare_variables(variables, self.credentials)
-        geodataframe = self._prepare_data(dataframe, geom_col)
+        return self._enrich(GEOM_TYPE_POINTS, dataframe, variables, geom_col, filters)
 
-        temp_table_name = self._get_temp_table_name()
-        self._upload_data(temp_table_name, geodataframe)
-
-        queries = self._get_points_enrichment_sql(temp_table_name, variables, filters)
-        return self._execute_enrichment(queries, geodataframe)
-
-    def enrich_polygons(self, dataframe, variables, geom_col=None, filters={}, aggregation=AGGREGATION_DEFAULT):
+    def enrich_polygons(self, dataframe, variables, geom_col=None, filters=None, aggregation=AGGREGATION_DEFAULT):
         """Enrich your polygons `DataFrame` with columns (:obj:`Variable`) from one or more :obj:`Dataset` in
         the Data Observatory by intersecting the polygons in the source `DataFrame` with geographies in the
         Data Observatory.
@@ -105,8 +100,7 @@ class Enrichment(EnrichmentService):
             dataframe (pandas.DataFrame, geopandas.GeoDataFrame): a `DataFrame` instance to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Variable>`, list, str):
                 variable ID, slug or :obj:`Variable` instance or list of variable IDs, slugs
-                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`. The maximum number of
-                variables is 50.
+                or :obj:`Variable` instances taken from the Data Observatory :obj:`Catalog`.
             geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
             filters (dict, optional): dictionary to filter results by variable values. As a key it receives the
                 variable id, and as value receives a SQL operator, for example: `{variable1.id: "> 30"}`. It works by
@@ -248,12 +242,4 @@ class Enrichment(EnrichmentService):
             ...     geom_col='the_geom')
 
         """
-        variables = prepare_variables(variables, self.credentials, aggregation)
-
-        geodataframe = self._prepare_data(dataframe, geom_col)
-        temp_table_name = self._get_temp_table_name()
-
-        self._upload_data(temp_table_name, geodataframe)
-
-        queries = self._get_polygon_enrichment_sql(temp_table_name, variables, filters, aggregation)
-        return self._execute_enrichment(queries, geodataframe)
+        return self._enrich(GEOM_TYPE_POLYGONS, dataframe, variables, geom_col, filters, aggregation)

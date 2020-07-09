@@ -2,7 +2,7 @@ from ..legend import Legend
 
 
 def color_continuous_legend(title=None, description=None, footer=None, prop='color',
-                            variable=None, dynamic=True):
+                            variable=None, dynamic=True, ascending=False, format=None):
     """Helper function for quickly creating a color continuous legend.
 
     Args:
@@ -21,6 +21,11 @@ def color_continuous_legend(title=None, description=None, footer=None, prop='col
         dynamic (boolean, optional):
             Update and render the legend depending on viewport changes.
             Defaults to ``True``.
+        ascending (boolean, optional):
+            If set to ``True`` the values are sorted in ascending order.
+            Defaults to ``False``.
+        format (str, optional): Format to apply to number values in the widget, based on d3-format
+            specifier (https://github.com/d3/d3-format#locale_format).
 
     Returns:
         cartoframes.viz.legend.Legend
@@ -30,7 +35,8 @@ def color_continuous_legend(title=None, description=None, footer=None, prop='col
         ...     title='Legend title',
         ...     description='Legend description',
         ...     footer='Legend footer',
-        ...     dynamic=False)
+        ...     dynamic=False,
+        ...     format='.2~s')
 
     """
-    return Legend('color-continuous', title, description, footer, prop, variable, dynamic)
+    return Legend('color-continuous', title, description, footer, prop, variable, dynamic, ascending, format)

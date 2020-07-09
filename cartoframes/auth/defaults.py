@@ -2,11 +2,12 @@ from .credentials import Credentials
 from ..utils.utils import is_url, is_json_filepath
 
 _default_credentials = None
+_default_do_credentials = None
 
 
 def set_default_credentials(
         first=None, second=None, credentials=None, filepath=None,
-        username=None, base_url=None, api_key=None, session=None):
+        username=None, base_url=None, api_key=None, session=None, allow_non_secure=False):
     """Set default credentials for all operations that require authentication
     against a CARTO account.
 
@@ -85,30 +86,10 @@ def set_default_credentials(
 
     """
     global _default_credentials
-
-    _base_url = base_url if first is None else first
-    _username = username if first is None else first
-    _filepath = filepath if first is None else first
-    _api_key = (api_key if second is None else second) or 'default_public'
-    _credentials = credentials if first is None else first
-
-    if isinstance(_credentials, Credentials):
-        _default_credentials = _credentials
-
-    elif isinstance(_filepath, str) and is_json_filepath(_filepath):
-        _default_credentials = Credentials.from_file(_filepath)
-
-    elif isinstance(_base_url or _username, str) and isinstance(_api_key, str):
-        if _base_url and is_url(_base_url):
-            _default_credentials = Credentials(base_url=_base_url, api_key=_api_key)
-        else:
-            _default_credentials = Credentials(username=_username, api_key=_api_key)
-
-    else:
-        _default_credentials = Credentials.from_file()
-
-    if session:
-        _default_credentials.session = session
+    _default_credentials = _set_credentials(
+        first, second, credentials, filepath, username,
+        base_url, api_key, session, allow_non_secure
+    )
 
 
 def get_default_credentials():
@@ -126,3 +107,67 @@ def get_default_credentials():
 
     """
     return _default_credentials
+
+
+def unset_default_credentials():
+    """Unset the default credentials if previously set with
+    :func:`cartoframes.auth.set_default_credentials` in Python session.
+
+    Example:
+        >>> set_default_credentials('creds.json')
+        >>> unset_default_credentials()
+
+    """
+    global _default_credentials
+    _default_credentials = None
+
+
+def set_default_do_credentials(
+        first=None, second=None, credentials=None, filepath=None,
+        username=None, base_url=None, api_key=None, session=None, allow_non_secure=False):
+
+    global _default_do_credentials
+    _default_do_credentials = _set_credentials(
+        first, second, credentials, filepath, username,
+        base_url, api_key, session, allow_non_secure
+    )
+
+
+def get_default_do_credentials():
+    return _default_do_credentials
+
+
+def unset_default_do_credentials():
+    global _default_do_credentials
+    _default_do_credentials = None
+
+
+def _set_credentials(
+        first=None, second=None, credentials=None, filepath=None,
+        username=None, base_url=None, api_key=None, session=None, allow_non_secure=False):
+
+    _base_url = base_url if first is None else first
+    _username = username if first is None else first
+    _filepath = filepath if first is None else first
+    _api_key = (api_key if second is None else second) or 'default_public'
+    _credentials = credentials if first is None else first
+
+    if isinstance(_credentials, Credentials):
+        pass
+
+    elif isinstance(_filepath, str) and is_json_filepath(_filepath):
+        _credentials = Credentials.from_file(_filepath)
+
+    elif isinstance(_base_url or _username, str) and isinstance(_api_key, str):
+        if _base_url and is_url(_base_url):
+            _credentials = Credentials(base_url=_base_url, api_key=_api_key, allow_non_secure=allow_non_secure)
+        else:
+            _credentials = Credentials(username=_username, api_key=_api_key, allow_non_secure=allow_non_secure)
+
+    else:
+        _credentials = Credentials.from_file()
+
+    if session:
+        _credentials.session = session
+
+    return _credentials

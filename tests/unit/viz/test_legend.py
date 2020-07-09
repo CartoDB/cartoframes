@@ -32,13 +32,15 @@ class TestLegend(object):
                         footer='[footer]')
 
         assert legend.get_info() == {
+            'ascending': False,
             'type': 'color-category',
             'prop': 'color',
             'title': '[title]',
             'description': '[description]',
             'footer': '[footer]',
             'dynamic': True,
-            'variable': ''
+            'variable': '',
+            'format': None
         }
 
     def test_wrong_type(self):

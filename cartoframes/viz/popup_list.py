@@ -1,4 +1,7 @@
+import re
+
 from .popup import Popup
+from .styles.utils import prop
 
 
 class PopupList:
@@ -44,7 +47,7 @@ class PopupList:
                         Popup('click',
                               value=popup.get('value'),
                               title=popup.get('title'),
-                              operation=popup.get('operation', False))
+                              format=popup.get('format'))
                     )
 
         if hover_popup_elements is not None:
@@ -59,7 +62,7 @@ class PopupList:
                         Popup('hover',
                               value=popup.get('value'),
                               title=popup.get('title'),
-                              operation=popup.get('operation', False))
+                              format=popup.get('format'))
                     )
 
         return popup_elements
@@ -78,6 +81,11 @@ class PopupList:
 
         for popup in self._popups:
             if popup:
-                popups_variables[popup.variable.get('name')] = popup.variable.get('value')
+                name = popup.variable.get('name')
+                value = popup.variable.get('value')
+                if re.match(r'^cluster[a-zA-Z]+\(.*\)$', value):
+                    popups_variables[name] = value
+                else:
+                    popups_variables[name] = prop(value)
 
         return popups_variables

@@ -2,10 +2,10 @@
 CARTOframes
 ***********
 
-.. image:: https://travis-ci.org/CartoDB/cartoframes.svg
-    :target: https://travis-ci.org/CartoDB/CARTOframes
-.. image:: https://img.shields.io/badge/pypi-v1.0rc1-orange
-    :target: https://pypi.org/project/cartoframes/1.0rc1
+.. image:: https://travis-ci.org/CartoDB/cartoframes.svg?branch=develop
+    :target: https://travis-ci.org/CartoDB/cartoframes
+.. image:: https://img.shields.io/badge/pypi-v1.0.4-orange
+    :target: https://pypi.org/project/cartoframes/1.0.4
 
 A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
 
@@ -14,22 +14,18 @@ Python data analysis workflows often rely on the de facto standards `pandas <htt
 Try it Out
 ==========
 
-* Stable (v0.10.1): |stable|
-* Release Candidate (v1.0rc1): |rc|
+* Stable (1.0.4): |stable|
 * Latest (develop branch): |develop|
 
 .. |stable| image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v0.10.1?filepath=examples
-
-.. |rc| image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0rc1?filepath=examples
+    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0.4?filepath=examples
 
 .. |develop| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/develop?filepath=examples
 
 If you do not have an API key, you can still use cartoframes for creating maps locally.
 
-    The example context only provides read access, so not all cartoframes features are available. For full access, `Start a free 14 day trial <https://carto.com/signup>`__ or get free access with a `GitHub Student Developer Pack <https://education.github.com/pack>`__.
+    The example context only provides read access, so not all cartoframes features are available. For full access, `Start a free trial <https://carto.com/signup>`__ or get free access with a `GitHub Student Developer Pack <https://education.github.com/pack>`__.
 
 Features
 ========

@@ -1,4 +1,4 @@
-cartoframes==1.0rc1
+cartoframes==1.0.4
 # Additional dependencies from examples
 matplotlib
 dask

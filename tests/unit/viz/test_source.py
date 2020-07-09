@@ -7,6 +7,81 @@ from cartoframes.auth import Credentials
 from cartoframes.viz.source import Source
 from cartoframes.io.managers.context_manager import ContextManager
 
+POINT = {
+    "type": "Feature",
+    "geometry": {
+        "type": "Point",
+        "coordinates": [102.0, 0.5]
+    },
+    "properties": {
+        "prop0": "value0"
+    }
+}
+
+MULTIPOINT = {
+    "type": "Feature",
+    "geometry": {
+        "type": "MultiPoint",
+        "coordinates": [[102.0, 0.0], [103.0, 1.0]]
+    },
+    "properties": {
+        "prop0": "value0"
+    }
+}
+
+LINESTRING = {
+    "type": "Feature",
+    "geometry": {
+        "type": "LineString",
+        "coordinates": [[102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]]
+    },
+    "properties": {
+        "prop0": "value0"
+    }
+}
+
+MULTILINESTRING = {
+    "type": "Feature",
+    "geometry": {
+        "type": "MultiLineString",
+        "coordinates": [[[102.0, 0.0], [103.0, 1.0]], [[104.0, 0.0], [105.0, 1.0]]]
+    },
+    "properties": {
+        "prop0": "value0"
+    }
+}
+
+POLYGON = {
+    "type": "Feature",
+    "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]]
+    },
+    "properties": {
+        "prop0": "value0"
+    }
+}
+
+MULTIPOLYGON = {
+    "type": "Feature",
+    "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [[[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0]]], [[[100.0, 1.0], [100.0, 0.0], [100.0, 0.0]]]]
+    },
+    "properties": {
+        "prop0": "value0"
+    }
+}
+
+EMPTY = {
+    "type": "Feature",
+    "geometry": {
+        "type": "GeometryCollection",
+        "coordinates": None
+    },
+    "properties": {}
+}
+
 
 def setup_mocks(mocker):
     mocker.patch.object(ContextManager, 'compute_query')
@@ -60,8 +135,57 @@ class TestSource(object):
         gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.lon, df.lat))
 
         assert df.dtypes['date_column'] == np.dtype('datetime64[ns]')
-
         source = Source(gdf)
 
         assert source.datetime_column_names == ['date_column']
         assert source.gdf.dtypes['date_column'] == np.object
+
+    @pytest.mark.parametrize('features', [
+        [POINT],
+        [MULTIPOINT],
+        [LINESTRING],
+        [MULTILINESTRING],
+        [LINESTRING, MULTILINESTRING],
+        [POLYGON],
+        [MULTIPOLYGON],
+        [POLYGON, MULTIPOLYGON]
+    ])
+    def test_different_geometry_types_source(self, features):
+        geojson = {
+            "type": "FeatureCollection",
+            "features": features
+        }
+        gdf = gpd.GeoDataFrame.from_features(geojson)
+        source = Source(gdf)
+
+        assert source.gdf.equals(gdf)
+
+    @pytest.mark.parametrize('features', [
+        [POINT, LINESTRING],
+        [POINT, POLYGON],
+        [LINESTRING, POLYGON],
+        [POINT, LINESTRING, POLYGON],
+        [MULTIPOINT, MULTILINESTRING, MULTIPOLYGON],
+        [POINT, MULTIPOINT]
+    ])
+    def test_different_geometry_types_source_fail(self, features):
+        geojson = {
+            "type": "FeatureCollection",
+            "features": features
+        }
+        gdf = gpd.GeoDataFrame.from_features(geojson)
+
+        with pytest.raises(ValueError) as e:
+            Source(gdf)
+
+        assert str(e.value).startswith('No valid geometry column types')
+
+    def test_empty_geometries(self):
+        geojson = {
+            "type": "FeatureCollection",
+            "features": [EMPTY, POINT, EMPTY, EMPTY, POINT, EMPTY]
+        }
+        gdf = gpd.GeoDataFrame.from_features(geojson)
+        source = Source(gdf)
+
+        assert len(source.gdf) == 2

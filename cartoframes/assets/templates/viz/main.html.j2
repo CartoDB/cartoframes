@@ -51,11 +51,11 @@
       <div class="as-map-area">
         <div id="map" class="map"></div>
         {% if show_info %}
-          {% include 'templates/viz/info.html.j2' %}
+          <div id="map-info" class="map-info"></div>
         {% endif %}
-        {% if has_legends %}
+        {% if has_legends or layer_selector %}
           <div class="as-map-panels" data-name="Legends">
-            <div class="as-panel as-panel--left as-panel--top">
+            <div class="as-panel as-panel--vertical as-panel--left as-panel--top">
               {% include 'templates/viz/legends.html.j2' %}
             </div> <!-- as-panel -->
           </div> <!-- as-map-panels -->

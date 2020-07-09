@@ -26,7 +26,6 @@ def setup_mocks(mocker, credentials, is_public=True, token=None):
     mocker.patch.object(ContextManager, 'is_public', return_value=is_public)
     mocker.patch.object(ContextManager, 'get_geom_type', return_value='point')
     mocker.patch.object(ContextManager, 'get_bounds', return_value=None)
-    mocker.patch.object(KuvizPublisher, '_sync_layer', return_value=Layer('fake_table', credentials=credentials))
 
 
 class TestKuvizPublisher(object):
@@ -47,7 +46,6 @@ class TestKuvizPublisher(object):
         kuviz_publisher = KuvizPublisher(None)
 
         assert isinstance(kuviz_publisher, KuvizPublisher)
-        assert kuviz_publisher._maps_api_key == DEFAULT_PUBLIC
         assert kuviz_publisher._layers == []
 
     def test_kuviz_publisher_set_layers(self, mocker):
@@ -63,42 +61,25 @@ class TestKuvizPublisher(object):
         ])
 
         kuviz_publisher = KuvizPublisher(None)
-        kuviz_publisher.set_layers(vmap.layers, 'fake_name', 'fake_table_name')
+        kuviz_publisher.set_layers(vmap.layers)
 
         assert kuviz_publisher._layers != vmap.layers
         assert len(kuviz_publisher._layers) == len(vmap.layers)
 
-    def test_kuviz_publisher_has_layers_copy(self, mocker):
-        setup_mocks(mocker, self.credentials)
-
-        source_1 = Source('fake_table_2', credentials=self.credentials)
-        layer_1 = Layer(source_1)
-        vmap = Map([layer_1])
-
-        kuviz_publisher = KuvizPublisher(None)
-        kuviz_publisher.set_layers(vmap.layers, 'fake_name', 'fake_table_name')
-
-        assert len(kuviz_publisher._layers) == len(vmap.layers)
-        assert kuviz_publisher._layers == vmap.layers
-
-        vmap.layers = []
-        assert len(kuviz_publisher._layers) != len(vmap.layers)
-        assert len(kuviz_publisher._layers) > 0
-
-    def test_kuviz_publisher_use_defaul_public(self, mocker):
+    def test_kuviz_publisher_use_custom_api_key(self, mocker):
         setup_mocks(mocker, self.credentials)
 
         vmap = Map(Layer('fake_table', credentials=self.credentials))
 
         kuviz_publisher = KuvizPublisher(None)
-        kuviz_publisher.set_layers(vmap.layers, 'fake_name', 'fake_table_name')
+        kuviz_publisher.set_layers(vmap.layers, 'fake_api_key')
 
         layers = kuviz_publisher.get_layers()
 
         assert layers[0].source.credentials == self.credentials
         assert layers[0].credentials == ({
             'username': self.username,
-            'api_key': DEFAULT_PUBLIC,
+            'api_key': 'fake_api_key',
             'base_url': 'https://{}.carto.com'.format(self.username)})
 
     def test_kuviz_publisher_use_only_base_url(self, mocker):
@@ -108,7 +89,7 @@ class TestKuvizPublisher(object):
         vmap = Map(Layer('fake_table', credentials=credentials))
 
         kuviz_publisher = KuvizPublisher(None)
-        kuviz_publisher.set_layers(vmap.layers, 'fake_name', 'fake_table_name')
+        kuviz_publisher.set_layers(vmap.layers)
 
         layers = kuviz_publisher.get_layers()
 
@@ -125,11 +106,8 @@ class TestKuvizPublisher(object):
         layers = [Layer('fake_table', credentials=self.credentials)]
 
         kuviz_publisher = KuvizPublisher(None)
-        kuviz_publisher._layers = layers
 
-        assert kuviz_publisher._maps_api_key == DEFAULT_PUBLIC
-        kuviz_publisher._create_maps_api_keys('fake_name')
-        assert kuviz_publisher._maps_api_key == token
+        assert kuviz_publisher._create_maps_api_keys(layers) == token
 
     def test_kuviz_publisher_publish(self, mocker):
         setup_mocks(mocker, self.credentials)
@@ -143,7 +121,7 @@ class TestKuvizPublisher(object):
         kuviz_name = 'fake_name'
 
         kuviz_publisher = KuvizPublisher(None)
-        kuviz_publisher.set_layers(vmap.layers, kuviz_name, 'fake_table_name')
+        kuviz_publisher.set_layers(vmap.layers)
         result = kuviz_publisher.publish(html, kuviz_name, None)
 
         assert kuviz_publisher.kuviz == kuviz
@@ -158,7 +136,7 @@ class TestKuvizPublisher(object):
         kuviz_name = 'fake_name'
 
         kuviz_publisher = KuvizPublisher(None)
-        kuviz_publisher.set_layers(vmap.layers, kuviz_name, 'fake_table_name')
+        kuviz_publisher.set_layers(vmap.layers)
 
         with pytest.raises(Exception):
             kuviz_publisher.update(html, kuviz_name, None)
@@ -175,7 +153,7 @@ class TestKuvizPublisher(object):
         kuviz_name = 'fake_name'
 
         kuviz_publisher = KuvizPublisher(None)
-        kuviz_publisher.set_layers(vmap.layers, kuviz_name, 'fake_table_name')
+        kuviz_publisher.set_layers(vmap.layers)
         result_publish = kuviz_publisher.publish(html, kuviz_name, None)
 
         kuviz.name = 'fake_name_2'

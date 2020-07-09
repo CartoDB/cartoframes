@@ -1,9 +1,9 @@
-from .constants import CATEGORY_FILTER
+from .constants import CATEGORY_FILTER, PROVIDER_FILTER, PUBLIC_FILTER
 from .entity_repo import EntityRepository
 
 
-_COUNTRY_ID_FIELD = 'country_id'
-_ALLOWED_FILTERS = [CATEGORY_FILTER]
+_COUNTRY_ID_FIELD = 'id'
+_ALLOWED_FILTERS = [CATEGORY_FILTER, PROVIDER_FILTER, PUBLIC_FILTER]
 
 
 def get_country_repo():
@@ -26,6 +26,7 @@ class CountryRepository(EntityRepository):
     def _map_row(self, row):
         return {
             'id': self._normalize_field(row, 'id'),
+            'name': self._normalize_field(row, 'name')
         }
 
 

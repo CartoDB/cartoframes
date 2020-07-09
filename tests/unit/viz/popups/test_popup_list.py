@@ -18,34 +18,38 @@ class TestPopupList(object):
           {
             'event': 'click',
             'attrs': {
-                'name': 'vbacecf',
-                'title': 'value_2'
+                'name': 'v72224b',
+                'title': 'value_2',
+                'format': None
             }
           }, {
             'event': 'click',
             'attrs': {
-                'name': 'v1a58b5',
-                'title': 'value_1'
+                'name': 'vbc6799',
+                'title': 'value_1',
+                'format': None
             }
           }, {
             'event': 'hover',
             'attrs': {
-                'name': 'v700930',
-                'title': 'value_3'
+                'name': 'vc266e3',
+                'title': 'value_3',
+                'format': None
             }
           }, {
             'event': 'hover',
             'attrs': {
-                'name': 'v1a58b5',
-                'title': 'value_1'
+                'name': 'vbc6799',
+                'title': 'value_1',
+                'format': None
             }
           }
         ]
 
     def test_should_get_all_popup_variables(self):
         assert popup_list.get_variables() == {
-          'v1a58b5': '$value_1',
-          'vbacecf': '$value_2',
-          'v1a58b5': '$value_1',
-          'v700930': '$value_3'
+          'vbc6799': "prop('value_1')",
+          'v72224b': "prop('value_2')",
+          'vbc6799': "prop('value_1')",
+          'vc266e3': "prop('value_3')"
         }

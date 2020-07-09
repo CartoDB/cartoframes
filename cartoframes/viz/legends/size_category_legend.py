@@ -22,7 +22,6 @@ def size_category_legend(title=None, description=None, footer=None, prop='size',
             Update and render the legend depending on viewport changes.
             Defaults to ``True``.
 
-
     Returns:
         cartoframes.viz.legend.Legend
 
@@ -34,4 +33,4 @@ def size_category_legend(title=None, description=None, footer=None, prop='size',
         ...     dynamic=False)
 
     """
-    return Legend('size-category', title, description, footer, prop, variable, dynamic)
+    return Legend('size-category', title, description, footer, prop, variable, dynamic, ascending=True)

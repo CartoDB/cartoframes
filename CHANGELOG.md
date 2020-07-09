@@ -5,10 +5,121 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.4] - 2020-07-06
+
+## Added
+- Add list_tables function (#1649)
+- Add catalog public filter to providers, countries and categories (#1658)
+- Add set_default_do_credentials function for DO authentication (#1655)
+
+## Changed
+- Open publication link in another window (#1647)
+- Show a warning when uploading a GeoDataFrame without geometry (#1650)
+- Improve GeoDataFrame CRS check, docs and examples (#1656)
+
+## Fixed
+- Fix empty geometries issue (#1652)
+- Fix Layout publication API key issue (#1654)
+- Fix ColumnInfo comparison when replacing a table (#1660)
+- Fix formula count (#1662)
+- Fix catalog empty output (#1663)
+
+## [1.0.3.1] - 2020-05-19
+
+### Fixed
+- Fix read null geoms from carto (#1637)
+- Fix show_info in layout maps (#1638)
+
+## [1.0.3] - 2020-05-14
+
+### Added
+- Add SQL query param to DO download (#1604, #1618, #1621, #1620)
+- Add public filter to catalog (#1623)
+- Add providers property to catalog (#1625)
+- Add format attribute to map elements (#1626)
+- Add download dataset example (#1634)
+
+### Changed
+- Require pandas >= 0.25 (#1622)
+- Remove enrichment max number of variables restriction from reference (#1624)
+- Make Layout interactive by default (#1630)
+- UI elements removed in static layout (#1631)
+- Improve replace table strategy (#1628, #1633)
+- Improve installation guide (#1635)
+- Allow multi-selection in category widget
+
+### Fixed
+- Scape quotes in SQL function calls (#1619)
+- Fix viz palettes (#1627)
+- Fix metadata entity request (#1629)
+
+## [1.0.2] - 2020-04-06
+
+### Added
+- Add geometry icon to single legends (#1580)
+- Publish Layout (#1598)
+
+### Changed
+- Use Enrichment API and Metadata API for DO features (#1575, #1594)
+- Improve to_csv info message (#1589)
+- Use default credentials in metrics (#1603)
+- Improve Layout map ordering (#1597)
+- Change numeric autoformat (remove scientific notation)
+- Return normalized table name in to_carto (#1609)
+- Remove empty geometries in Source (#1610)
+- Improve docs and examples (#1608, #1611)
+- Update catalog info structure (#1612, #1606)
+
+### Fixed
+- Allow using columns with symbols in visualization (#1585)
+- Fix layer_selector without style helpers (#1580)
+- Fix layer_selector in published maps (#1595)
+- Fix Google geocoding (#1600)
+- Fix legends in Layout (#1597)
+
+## [1.0.1] - 2020-02-28
+
+### Added
+- Add encode_data param to Layer (#1536)
+- Add WKT case in CSV example (#1545)
+- Add Data Management guide (#1547)
+- Layer selector in legends (#1551, #1558)
+- New 'ascending' parameter to sort numeric legends in ascending or descending order (#1537)
+
+### Changed
+- Include user_id in metrics (#1539)
+- Disable default param exclusive for isolines (1540)
+- Raise an error when trying to visualise a multi-geom GeoDataFrame (#1541)
+- Update installation guide structure (#1549)
+- Minor examples/guides improvements (#1534, #1552)
+- Numeric legends are sorted in descending order by default (#1537)
+
+### Fixed
+- Fix legend footer in published maps (#1523)
+- Fix default legend for cluster_size_style (#1533)
+- Fix DO doc reference generation (#1550)
+- Fix get token for Mapbox styles (#1565)
+
+## [1.0.0] - 2020-01-20
+
+[1.0.0 Migration Guide](/docs/developers/migrations/1.0.0.md)
 
 ### Added
 - Add metrics and utils.setup_metrics function (#1457)
+- Add support for Python 3.8 (#1455)
+- Add migration guides (#828)
+
+### Changed
+- Allow to update a published map (#1451)
+- Generate guides from Jupyter Notebooks (#1479)
+- Review examples/guides (#1473, #1201, #1500)
+- Manage kuviz quota (#1471)
+- Explicit map.publish behaviour (#1485)
+- Use Airship v2.2 (#1499)
+
+### Fixed
+- Replace geometry from geom_col (#1487)
+- Fix size_continuous_style/_legend not displaying totals (#1488)
 
 ## [1.0rc1] - 2020-01-10
 
@@ -83,13 +194,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix DataObsClient (#1319)
 - Fix CartoDataFrame plot (#1339)
 - Fix enrichment without subscriptions (#1314)
-- Fix encoding detection with all Nones (#1346) 
+- Fix encoding detection with all Nones (#1346)
 
 ## [1.0b6] - 2019-12-02
 ### Added
 - Add new properties in Catalog Dataset and Geography (#1209)
 - Add IO functions and CartoDataFrame class (#1130, #1245)
-  - IO functions: read_carto, to_carto, has_table, describe_table, 
+  - IO functions: read_carto, to_carto, has_table, describe_table,
     update_table, copy_table, create_table_from_query, delete_table.
   - CartoDataFrame class: inherit GeoDataFrame class + from_carto, to_carto, viz.
   - Refactor internals: ContextManager, SourceManager.

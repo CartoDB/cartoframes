@@ -5,6 +5,6 @@
     heading="{{widget.title}}">
   </as-histogram-widget>
   {% if widget.footer %}
-    <footer>{{widget.footer}}</footer>
+    <footer>{{widget.footer | safe }}</footer>
   {% endif %}
 </div>

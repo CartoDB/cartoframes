@@ -6,14 +6,13 @@ from geopandas import GeoDataFrame
 from carto.exceptions import CartoException
 
 from .managers.context_manager import ContextManager
-from ..utils.geom_utils import set_geometry, has_geometry
+from ..utils.geom_utils import check_crs, has_geometry, set_geometry
 from ..utils.logger import log
 from ..utils.utils import is_valid_str, is_sql_query
 from ..utils.metrics import send_metrics
 
 
 GEOM_COLUMN_NAME = 'the_geom'
-
 IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
 
 
@@ -66,7 +65,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 @send_metrics('data_uploaded')
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
              cartodbfy=True, log_enabled=True):
-    """Upload a DataFrame to CARTO.
+    """Upload a DataFrame to CARTO. The geometry's CRS must be WGS 84 (EPSG:4326) so you can use it on CARTO.
 
     Args:
         dataframe (pandas.DataFrame, geopandas.GeoDataFrame`): data to be uploaded.
@@ -81,12 +80,18 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         cartodbfy (bool, optional): convert the table to CARTO format. Default True. More info
             `here <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
 
+    Returns:
+        string: the table name normalized.
+
     Raises:
         ValueError: if the dataframe or table name provided are wrong or the if_exists param is not valid.
 
     """
     if not isinstance(dataframe, DataFrame):
         raise ValueError('Wrong dataframe. You should provide a valid DataFrame instance.')
+
+    if isinstance(dataframe, GeoDataFrame):
+        check_crs(dataframe)
 
     if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')
@@ -116,10 +121,32 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         # Prepare geometry column for the upload
         gdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
 
+    elif isinstance(dataframe, GeoDataFrame):
+        log.warning('Geometry column not found in the GeoDataFrame.')
+
     table_name = context_manager.copy_from(gdf, table_name, if_exists, cartodbfy)
 
     if log_enabled:
         log.info('Success! Data uploaded to table "{}" correctly'.format(table_name))
+
+    return table_name
+
+
+def list_tables(credentials=None):
+    """List all of the tables in the CARTO account.
+
+    Args:
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            instance of Credentials (username, api_key, etc).
+        schema (str, optional): prefix of the table. By default, it gets the
+            `current_schema()` using the credentials.
+
+    Returns:
+        DataFrame: A DataFrame with all the table names for the given credentials and schema.
+
+    """
+    context_manager = ContextManager(credentials)
+    return context_manager.list_tables()
 
 
 def has_table(table_name, credentials=None, schema=None):

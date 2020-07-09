@@ -9,6 +9,7 @@ import base64
 import appdirs
 import decimal
 import hashlib
+import inspect
 import requests
 import geopandas
 import numpy as np
@@ -120,6 +121,7 @@ def dtypes2pg(dtype):
         'bool': 'boolean',
         'datetime64[ns]': 'timestamp',
         'datetime64[ns, UTC]': 'timestamp',
+        'geometry': 'geometry'
     }
     return mapping.get(str(dtype), 'text')
 
@@ -145,10 +147,6 @@ def pg2dtypes(pgtype):
 
 def gen_variable_name(value):
     return 'v' + get_hash(value)[:6]
-
-
-def gen_column_name(value, operation=False):
-    return value if operation else '$' + value
 
 
 def get_hash(text):
@@ -257,7 +255,17 @@ def get_geodataframe_geom_type(gdf):
     return None
 
 
-# Dup
+def get_geodataframe_data(data, encode_data=True):
+    filtered_geometries = _filter_null_geometries(data)
+    data = _set_time_cols_epoc(filtered_geometries).to_json(cls=CustomJSONEncoder, separators=(',', ':'))
+
+    if (encode_data):
+        compressed_data = gzip.compress(data.encode('utf-8'))
+        return base64.b64encode(compressed_data).decode('utf-8')
+    else:
+        return data
+
+
 def _first_value(series):
     series = series.loc[~series.isnull()]  # Remove null values
     if len(series) > 0:
@@ -270,13 +278,6 @@ class CustomJSONEncoder(json.JSONEncoder):
         if isinstance(o, decimal.Decimal):
             return float(o)
         return super(CustomJSONEncoder, self).default(o)
-
-
-def encode_geodataframe(data):
-    filtered_geometries = _filter_null_geometries(data)
-    data = _set_time_cols_epoc(filtered_geometries).to_json(cls=CustomJSONEncoder, separators=(',', ':'))
-    compressed_data = gzip.compress(data.encode('utf-8'))
-    return base64.b64encode(compressed_data).decode('utf-8')
 
 
 def _filter_null_geometries(data):
@@ -388,11 +389,15 @@ def encode_row(row):
     return '{}'.format(row).encode('utf-8')
 
 
+def create_hash(value):
+    return hashlib.md5(str(value).encode()).hexdigest()
+
+
 def extract_viz_columns(viz):
-    """Extract columns ($name) in viz"""
+    """Extract columns prop('name') in viz"""
     columns = []
     viz_nocomments = remove_comments(viz)
-    viz_columns = re.findall(r'\$([A-Za-z0-9_]+)', viz_nocomments)
+    viz_columns = re.findall(r'prop\([\'\"]([^\)]*)[\'\"]\)', viz_nocomments)
     if viz_columns is not None:
         columns += viz_columns
     return list(set(columns))
@@ -441,10 +446,11 @@ def check_package(pkg_name, spec='*', is_optional=False):
                             'Please run: pip install {0}'.format(pkg_name))
 
 
-def check_do_enabled(method):
-    def fn(*args, **kw):
+def check_do_enabled(func):
+    @wraps(func)
+    def wrapper(*args, **kw):
         try:
-            return method(*args, **kw)
+            return func(*args, **kw)
         except ServerErrorException as e:
             if str(e) == "['The user does not have Data Observatory enabled']":
                 raise DOError(
@@ -453,7 +459,7 @@ def check_do_enabled(method):
                     'sales@carto.com to request access to it.')
             else:
                 raise e
-    return fn
+    return wrapper
 
 
 def get_datetime_column_names(df):
@@ -520,3 +526,20 @@ def silent_fail(method):
         except Exception:
             pass
     return fn
+
+
+def get_parameter_from_decorator(parameter_name, decorated_function, *args, **kwargs):
+    parameter = None
+
+    try:
+        parameter = kwargs[parameter_name]
+    except KeyError:
+        try:
+            parameter_args = inspect.getargspec(decorated_function).args
+            if parameter_name in parameter_args:
+                parameter_arg_index = parameter_args.index(parameter_name)
+                parameter = args[parameter_arg_index]
+        except IndexError:
+            pass
+
+    return parameter

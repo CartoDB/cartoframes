@@ -1,8 +1,10 @@
 from ..constants import FORMULA_OPERATIONS_GLOBAL, FORMULA_OPERATIONS_VIEWPORT
 from ..widget import Widget
+from ..styles.utils import prop
 
 
-def formula_widget(value, operation=None, title=None, description=None, footer=None, is_global=False):
+def formula_widget(value, operation=None, title=None, description=None, footer=None,
+                   is_global=False, format=None):
     """Helper function for quickly creating a formula widget.
 
     Formula widgets calculate aggregated values ('avg', 'max', 'min', 'sum') from numeric columns
@@ -19,6 +21,8 @@ def formula_widget(value, operation=None, title=None, description=None, footer=N
         footer (str, optional): Footer text placed on the widget bottom.
         is_global (boolean, optional): Account for calculations based on the entire dataset ('global') vs.
             the default of 'viewport' features.
+        format (str, optional): Format to apply to number values in the widget, based on d3-format
+            specifier (https://github.com/d3/d3-format#locale_format).
 
     Returns:
         cartoframes.viz.widget.Widget
@@ -35,24 +39,25 @@ def formula_widget(value, operation=None, title=None, description=None, footer=N
         ...     operation='sum',
         ...     title='Widget title',
         ...     description='Widget description',
-        ...     footer='Widget footer')
+        ...     footer='Widget footer',
+        ...     format='.2~s')
 
     """
     if isinstance(operation, str):
         operation = operation.lower()
     value = _get_value_expression(operation, value, is_global)
-    return Widget('formula', value, title, description, footer)
+    return Widget('formula', value, title, description, footer, format=format)
 
 
 def _get_value_expression(operation, value, is_global):
-    if value == 'count':
-        formula_operation = _get_formula_operation(value, is_global)
+    if value == 'count' or operation == 'count':
+        formula_operation = _get_formula_operation('count', is_global)
         return formula_operation + '()'
     elif operation in ['avg', 'max', 'min', 'sum']:
         formula_operation = _get_formula_operation(operation, is_global)
-        return formula_operation + '($' + value + ')'
+        return formula_operation + '(' + prop(value) + ')'
     else:
-        return '$' + value
+        return prop(value)
 
 
 def _get_formula_operation(operation, is_global):

@@ -7,6 +7,10 @@ from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.variable_group import VariableGroup
 from cartoframes.data.observatory.catalog.repository.variable_group_repo import VariableGroupRepository
 from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.catalog.repository.constants import (
+    CATEGORY_FILTER, COUNTRY_FILTER, DATASET_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER,
+    VARIABLE_GROUP_FILTER
+)
 from ..examples import test_variable_group1, test_variables_groups, db_variable_group1, db_variable_group2
 
 
@@ -37,7 +41,7 @@ class TestVariableGroupRepo(object):
 
         # Then
         mocked_repo.assert_called_once_with(None)
-        assert variables_groups is None
+        assert variables_groups == []
 
     @patch.object(RepoClient, 'get_variables_groups')
     def test_get_all_only_uses_allowed_filters(self, mocked_repo):
@@ -45,13 +49,13 @@ class TestVariableGroupRepo(object):
         mocked_repo.return_value = [db_variable_group1, db_variable_group2]
         repo = VariableGroupRepository()
         filters = {
-            'country_id': 'usa',
-            'dataset_id': 'carto-do.project.census2011',
-            'category_id': 'demographics',
-            'variable_id': 'population',
-            'geography_id': 'census-geo',
-            'variable_group_id': 'var-group',
-            'provider_id': 'open_data',
+            COUNTRY_FILTER: 'usa',
+            DATASET_FILTER: 'carto-do.project.census2011',
+            CATEGORY_FILTER: 'demographics',
+            VARIABLE_FILTER: 'population',
+            GEOGRAPHY_FILTER: 'census-geo',
+            VARIABLE_GROUP_FILTER: 'var-group',
+            PROVIDER_FILTER: 'open_data',
             'fake_field_id': 'fake_value'
         }
 
@@ -60,7 +64,7 @@ class TestVariableGroupRepo(object):
 
         # Then
         mocked_repo.assert_called_once_with({
-            'dataset_id': 'carto-do.project.census2011'
+            DATASET_FILTER: 'carto-do.project.census2011'
         })
         assert variables_groups == test_variables_groups
 
@@ -75,7 +79,7 @@ class TestVariableGroupRepo(object):
         variable_group = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with({'id': requested_id})
+        mocked_repo.assert_called_once_with({'id': [requested_id]})
         assert isinstance(variable_group, VariableGroup)
         assert variable_group == test_variable_group1
 
@@ -101,7 +105,7 @@ class TestVariableGroupRepo(object):
         variable = repo.get_by_id(requested_slug)
 
         # Then
-        mocked_repo.assert_called_once_with({'slug': requested_slug})
+        mocked_repo.assert_called_once_with({'slug': [requested_slug]})
         assert variable == test_variable_group1
 
     @patch.object(RepoClient, 'get_variables_groups')
@@ -156,8 +160,7 @@ class TestVariableGroupRepo(object):
             'id': 'variable_group1',
             'slug': None,
             'name': None,
-            'dataset_id': None,
-            'starred': None
+            'dataset_id': None
         })])
 
         # When

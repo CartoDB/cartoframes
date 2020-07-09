@@ -1,16 +1,19 @@
+import { format as d3Format } from 'd3-format';
 
-export function format(value) {
+export function formatter(value, specifier) {
+  const formatFunc = specifier ? d3Format(specifier) : formatValue;
+
   if (Array.isArray(value)) {
     const [first, second] = value;
     if (first === -Infinity) {
-      return `< ${formatValue(second)}`;
+      return `< ${formatFunc(second)}`;
     }
     if (second === Infinity) {
-      return `> ${formatValue(first)}`;
+      return `> ${formatFunc(first)}`;
     }
-    return `${formatValue(first)} - ${formatValue(second)}`;
+    return `${formatFunc(first)} - ${formatFunc(second)}`;
   }
-  return formatValue(value);
+  return formatFunc(value);
 }
 
 export function formatValue(value) {
@@ -21,25 +24,18 @@ export function formatValue(value) {
 }
 
 export function formatNumber(value) {
-  const log = Math.log10(Math.abs(value));
-
-  if ((log > 4 || log < -2.00000001) && value) {
-    return value.toExponential(2);
-  }
-  
   if (!Number.isInteger(value)) {
     return value.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 3
     });
   }
-  
   return value.toLocaleString();
 }
 
-export function updateViewport(map) {
+export function updateViewport(id, map) {
   function updateMapInfo() {
-    const mapInfo$ = document.getElementById('map-info');
+    const mapInfo$ = document.getElementById(id);
     const center = map.getCenter();
     const lat = center.lat.toFixed(6);
     const lng = center.lng.toFixed(6);

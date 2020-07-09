@@ -23,7 +23,7 @@ class TestWidgetList(object):
         widget_list = WidgetList([WIDGET_A])
 
         assert widget_list._widgets[0]._type == 'formula'
-        assert widget_list._widgets[0]._value == 'viewportSum($amount)'
+        assert widget_list._widgets[0]._value == "viewportSum(prop('amount'))"
         assert widget_list._widgets[0]._title == '[TITLE]'
         assert widget_list._widgets[0]._description == '[description]'
         assert widget_list._widgets[0]._footer == '[footer]'
@@ -35,7 +35,7 @@ class TestWidgetList(object):
         widget_list = WidgetList([WIDGET_A, WIDGET_B])
 
         assert widget_list._widgets[0]._type == 'formula'
-        assert widget_list._widgets[0]._value == 'viewportSum($amount)'
+        assert widget_list._widgets[0]._value == "viewportSum(prop('amount'))"
         assert widget_list._widgets[0]._title == '[TITLE]'
         assert widget_list._widgets[0]._description == '[description]'
         assert widget_list._widgets[0]._footer == '[footer]'
@@ -68,16 +68,19 @@ class TestWidgetList(object):
         assert widgets_info == [
             {
                 'type': 'formula',
-                'value': 'viewportSum($amount)',
+                'value': "viewportSum(prop('amount'))",
                 'title': '[TITLE]',
                 'prop': '',
                 'description': '[description]',
                 'footer': '[footer]',
                 'has_bridge': False,
-                'variable_name': 'vb6dbcf',
+                'variable_name': 'vdb8cc1',
                 'options': {
                     'readOnly': False,
-                    'buckets': 20
+                    'buckets': 20,
+                    'weight': 1,
+                    'autoplay': True,
+                    'format': None
                 }
             }, {
                 'type': 'basic',
@@ -90,6 +93,9 @@ class TestWidgetList(object):
                 'variable_name': '',
                 'options': {
                     'readOnly': False,
-                    'buckets': 20
+                    'buckets': 20,
+                    'weight': 1,
+                    'autoplay': True,
+                    'format': None
                 }
             }]

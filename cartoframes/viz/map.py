@@ -106,19 +106,21 @@ class Map:
                  title=None,
                  description=None,
                  is_static=None,
+                 layer_selector=False,
                  **kwargs):
 
-        self.layers = _init_layers(layers)
+        self.layer_selector = layer_selector
         self.basemap = basemap
         self.size = size
         self.viewport = viewport
         self.title = title
         self.description = description
         self.show_info = show_info
-        self.layer_defs = _get_layer_defs(self.layers)
+        self.is_static = is_static
+        self.layers = _init_layers(layers, self)
         self.bounds = _get_bounds(bounds, self.layers)
         self.theme = _get_theme(theme, basemap)
-        self.is_static = is_static
+
         self.token = get_token(basemap)
         self.basecolor = get_basecolor(basemap)
 
@@ -142,7 +144,7 @@ class Map:
         self._html_map = HTMLMap()
 
         self._html_map.set_content(
-            layers=self.layer_defs,
+            layers=_get_layer_defs(self.layers),
             bounds=self.bounds,
             size=self.size,
             camera=self.camera,
@@ -152,17 +154,20 @@ class Map:
             title=self.title,
             description=self.description,
             is_static=self.is_static,
+            layer_selector=self.layer_selector,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
         return self._html_map.html
 
     def get_content(self):
-        has_legends = any(layer['legends'] for layer in self.layer_defs)
-        has_widgets = any(len(layer['widgets']) != 0 for layer in self.layer_defs)
+        layer_defs = _get_layer_defs(self.layers)
+
+        has_legends = any(layer['legends'] for layer in layer_defs)
+        has_widgets = any(len(layer['widgets']) != 0 for layer in layer_defs)
 
         return {
-            'layers': self.layer_defs,
+            'layers': layer_defs,
             'bounds': self.bounds,
             'size': self.size,
             'viewport': self.viewport,
@@ -177,12 +182,13 @@ class Map:
             'title': self.title,
             'description': self.description,
             'is_static': self.is_static,
+            'layer_selector': self.layer_selector,
             '_carto_vl_path': self._carto_vl_path,
             '_airship_path': self._airship_path
         }
 
     @send_metrics('map_published')
-    def publish(self, name, password, if_exists='fail', table_name=None, credentials=None):
+    def publish(self, name, password, credentials=None, if_exists='fail', maps_api_key=None):
         """Publish the map visualization as a CARTO custom visualization.
 
         Args:
@@ -190,17 +196,13 @@ class Map:
             password (str): By setting it, your visualization will be protected by
                 password. When someone tries to show the visualization, the password
                 will be requested. To disable password you must set it to None.
-            if_exists (str, optional): 'fail' or 'replace'. Behavior in case a publication with the same name already
-                exists in your account. Default is 'fail'.
-            table_name (str, optional): Desired table name for the dataset in CARTO.
-                It is required for working with local data (we need to upload it to CARTO).
-                If name does not conform to SQL naming conventions, it will be
-                'normalized' (e.g., all lower case, adding `_` in place of spaces.
-                and other special characters.
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 A Credentials instance. If not provided, the credentials will be automatically
                 obtained from the default credentials if available. It is used to create the
                 publication and also to save local data (if exists) into your CARTO account.
+            if_exists (str, optional): 'fail' or 'replace'. Behavior in case a publication with
+                the same name already exists in your account. Default is 'fail'.
+            maps_api_key (str, optional): The Maps API key used for private datasets.
 
         Example:
             Publishing the map visualization.
@@ -209,8 +211,10 @@ class Map:
             >>> tmap.publish('Custom Map Title', password=None)
 
         """
-        self._publisher = _get_publisher(table_name, credentials)
-        self._publisher.set_layers(self.layers, name, table_name)
+        _credentials = get_credentials(credentials)
+
+        self._publisher = _get_publisher(_credentials)
+        self._publisher.set_layers(self.layers, maps_api_key)
 
         html = self._get_publication_html(name)
         return self._publisher.publish(html, name, password, if_exists)
@@ -242,7 +246,9 @@ class Map:
                 obtained from the default credentials if available.
 
         """
-        return KuvizPublisher.all(credentials)
+        _credentials = get_credentials(credentials)
+
+        return KuvizPublisher.all(_credentials)
 
     @staticmethod
     def delete_publication(name, credentials=None):
@@ -273,13 +279,14 @@ class Map:
             description=self.description,
             is_static=self.is_static,
             is_embed=True,
+            layer_selector=self.layer_selector,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
         return html_map.html
 
 
-def _get_publisher(self, credentials):
+def _get_publisher(credentials):
     return KuvizPublisher(credentials)
 
 
@@ -290,12 +297,15 @@ def _get_bounds(bounds, layers):
         return _compute_bounds(layers)
 
 
-def _init_layers(layers):
+def _init_layers(layers, parent_map):
     if layers is None:
         return []
     if not isinstance(layers, collections.Iterable):
+        layers.reset_ui(parent_map)
         return [layers]
     else:
+        for layer in layers:
+            layer.reset_ui(parent_map)
         return layers
 
 
@@ -306,17 +316,7 @@ def _get_layer_defs(layers):
 
 
 def _get_layer_def(layer):
-    return {
-        'credentials': layer.credentials,
-        'interactivity': layer.interactivity,
-        'legends': layer.legends_info,
-        'has_legend_list': layer.has_legend_list,
-        'widgets': layer.widgets_info,
-        'data': layer.source_data,
-        'type': layer.source_type,
-        'options': layer.options,
-        'viz': layer.viz
-    }
+    return layer.get_layer_def()
 
 
 def _format_bounds(bounds):
@@ -412,7 +412,8 @@ def _get_theme(theme, basemap):
 
 def get_token(basemap):
     if isinstance(basemap, dict):
-        return get_token(basemap)
+        if 'token' in basemap:
+            return basemap.get('token')
     return ''
 
 

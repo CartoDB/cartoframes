@@ -7,6 +7,7 @@ document
     const camera = {{ camera|tojson }};
     const has_legends = '{{has_legends}}' === 'True';
     const is_static = '{{is_static}}' === 'True';
+    const layer_selector = '{{layer_selector}}' === 'True';
     const layers = {{ layers|tojson }};
     const mapboxtoken = '{{mapboxtoken}}';
     const show_info = '{{show_info}}' === 'True';
@@ -18,6 +19,7 @@ document
       camera,
       has_legends,
       is_static,
+      layer_selector,
       layers,
       mapboxtoken,
       show_info

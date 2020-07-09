@@ -3,138 +3,100 @@
 import re
 
 from unidecode import unidecode
-from collections import namedtuple
 
 from .utils import dtypes2pg, pg2dtypes, PG_NULL
-from .geom_utils import decode_geometry_item, detect_encoding_type
+
+BOOL_DBTYPES = ['bool', 'boolean']
+INT_DBTYPES = ['int2', 'int4', 'int2', 'int', 'int8', 'smallint', 'integer', 'bigint']
+FLOAT_DBTYPES = ['float4', 'float8', 'real', 'double precision', 'numeric', 'decimal']
+DATETIME_DBTYPES = ['date', 'timestamp', 'timestampz']
+FORBIDDEN_COLUMN_NAMES = ['the_geom_webmercator']
+MAX_LENGTH = 63
+MAX_COLLISION_LENGTH = MAX_LENGTH - 4
+RESERVED_WORDS = ('ALL', 'ANALYSE', 'ANALYZE', 'AND', 'ANY', 'ARRAY', 'AS', 'ASC', 'ASYMMETRIC', 'AUTHORIZATION',
+                  'BETWEEN', 'BINARY', 'BOTH', 'CASE', 'CAST', 'CHECK', 'COLLATE', 'COLUMN', 'CONSTRAINT',
+                  'CREATE', 'CROSS', 'CURRENT_DATE', 'CURRENT_ROLE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP',
+                  'CURRENT_USER', 'DEFAULT', 'DEFERRABLE', 'DESC', 'DISTINCT', 'DO', 'ELSE', 'END', 'EXCEPT',
+                  'FALSE', 'FOR', 'FOREIGN', 'FREEZE', 'FROM', 'FULL', 'GRANT', 'GROUP', 'HAVING', 'ILIKE', 'IN',
+                  'INITIALLY', 'INNER', 'INTERSECT', 'INTO', 'IS', 'ISNULL', 'JOIN', 'LEADING', 'LEFT', 'LIKE',
+                  'LIMIT', 'LOCALTIME', 'LOCALTIMESTAMP', 'NATURAL', 'NEW', 'NOT', 'NOTNULL', 'NULL', 'OFF',
+                  'OFFSET', 'OLD', 'ON', 'ONLY', 'OR', 'ORDER', 'OUTER', 'OVERLAPS', 'PLACING', 'PRIMARY',
+                  'REFERENCES', 'RIGHT', 'SELECT', 'SESSION_USER', 'SIMILAR', 'SOME', 'SYMMETRIC', 'TABLE', 'THEN',
+                  'TO', 'TRAILING', 'TRUE', 'UNION', 'UNIQUE', 'USER', 'USING', 'VERBOSE', 'WHEN', 'WHERE',
+                  'XMIN', 'XMAX', 'FORMAT', 'CONTROLLER', 'ACTION')
 
 
-class Column(object):
-    BOOL_DTYPE = 'bool'
-    OBJECT_DTYPE = 'object'
-    INT_DTYPES = ['int16', 'int32', 'int64']
-    FLOAT_DTYPES = ['float32', 'float64']
-    DATETIME_DTYPES = ['datetime64[D]', 'datetime64[ns]', 'datetime64[ns, UTC]']
-    INDEX_COLUMN_NAME = 'cartodb_id'
-    FORBIDDEN_COLUMN_NAMES = ['the_geom_webmercator']
-    MAX_LENGTH = 63
-    MAX_COLLISION_LENGTH = MAX_LENGTH - 4
-    RESERVED_WORDS = ('ALL', 'ANALYSE', 'ANALYZE', 'AND', 'ANY', 'ARRAY', 'AS', 'ASC', 'ASYMMETRIC', 'AUTHORIZATION',
-                      'BETWEEN', 'BINARY', 'BOTH', 'CASE', 'CAST', 'CHECK', 'COLLATE', 'COLUMN', 'CONSTRAINT',
-                      'CREATE', 'CROSS', 'CURRENT_DATE', 'CURRENT_ROLE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP',
-                      'CURRENT_USER', 'DEFAULT', 'DEFERRABLE', 'DESC', 'DISTINCT', 'DO', 'ELSE', 'END', 'EXCEPT',
-                      'FALSE', 'FOR', 'FOREIGN', 'FREEZE', 'FROM', 'FULL', 'GRANT', 'GROUP', 'HAVING', 'ILIKE', 'IN',
-                      'INITIALLY', 'INNER', 'INTERSECT', 'INTO', 'IS', 'ISNULL', 'JOIN', 'LEADING', 'LEFT', 'LIKE',
-                      'LIMIT', 'LOCALTIME', 'LOCALTIMESTAMP', 'NATURAL', 'NEW', 'NOT', 'NOTNULL', 'NULL', 'OFF',
-                      'OFFSET', 'OLD', 'ON', 'ONLY', 'OR', 'ORDER', 'OUTER', 'OVERLAPS', 'PLACING', 'PRIMARY',
-                      'REFERENCES', 'RIGHT', 'SELECT', 'SESSION_USER', 'SIMILAR', 'SOME', 'SYMMETRIC', 'TABLE', 'THEN',
-                      'TO', 'TRAILING', 'TRUE', 'UNION', 'UNIQUE', 'USER', 'USING', 'VERBOSE', 'WHEN', 'WHERE',
-                      'XMIN', 'XMAX', 'FORMAT', 'CONTROLLER', 'ACTION', )
-    NORMALIZED_GEOM_COL_NAME = 'the_geom'
+class ColumnInfo:
 
-    @staticmethod
-    def from_sql_api_fields(fields):
-        return [Column(column, normalize=False, pgtype=_extract_pgtype(fields[column])) for column in fields]
+    def __init__(self, name, dbname, dbtype, is_geom):
+        self.name = name
+        self.dbname = dbname
+        self.dbtype = dbtype
+        self.is_geom = is_geom
 
-    def __init__(self, name, normalize=True, pgtype=None):
-        if not name:
-            raise ValueError('Column name cannot be null or empty')
+    def __repr__(self):
+        params = ', '.join([self.name, self.dbname, self.dbtype, str(self.is_geom)])
+        return 'ColumnInfo({})'.format(params)
 
-        self.name = str(name)
-        self.pgtype = pgtype
-        self.dtype = pg2dtypes(pgtype)
-        if normalize:
-            self.normalize()
+    def __eq__(self, other):
+        return self.dbname == other.dbname and \
+                self.dbtype == other.dbtype and \
+                self.is_geom == other.is_geom
 
-    def normalize(self, forbidden_column_names=None):
-        self._sanitize()
-        self.name = self._truncate()
+    def __gt__(self, other):
+        return self.dbname > other.dbname
 
-        if forbidden_column_names:
-            i = 1
-            while self.name in forbidden_column_names:
-                self.name = '{}_{}'.format(self._truncate(length=Column.MAX_COLLISION_LENGTH), str(i))
-                i += 1
+    def __ge__(self, other):
+        return self.dbname >= other.dbname
 
-        return self
+    def __lt__(self, other):
+        return self.dbname < other.dbname
 
-    def _sanitize(self):
-        self.name = self._slugify(self.name)
-
-        if self._is_reserved() or self._is_unsupported():
-            self.name = '_{}'.format(self.name)
-
-    def _is_reserved(self):
-        return self.name.upper() in Column.RESERVED_WORDS
-
-    def _is_unsupported(self):
-        return not re.match(r'^[a-z_]+[a-z_0-9]*$', self.name)
-
-    def _truncate(self, length=MAX_LENGTH):
-        return self.name[:length]
-
-    def _slugify(self, value):
-        value = unidecode(str(value).lower())
-
-        value = re.sub(r'<[^>]+>', '', value)
-        value = re.sub(r'&.+?;', '-', value)
-        value = re.sub(r'[^a-z0-9 _-]', '-', value).strip().lower()
-        value = re.sub(r'\s+', '-', value)
-        value = re.sub(r' ', '-', value)
-        value = re.sub(r'-+', '-', value)
-        value = re.sub(r'-', '_', value)
-
-        return value
-
-
-ColumnInfo = namedtuple('ColumnInfo', ['name', 'dbname', 'dbtype', 'is_geom'])
-
-
-def _extract_pgtype(fields):
-    if 'pgtype' in fields:
-        return fields['pgtype']
-    return None
+    def __le__(self, other):
+        return self.dbname <= other.dbname
 
 
 def get_dataframe_columns_info(df):
     columns = []
-    geom_type = _get_geometry_type(df)
-    df_columns = [(name, df.dtypes[name]) for name in df.columns]
 
-    for name, dtype in df_columns:
+    for name in df.columns:
         if _is_valid_column(name):
-            columns.append(_compute_column_info(name, dtype, geom_type))
+            dbtype = dtypes2pg(str(df.dtypes[name]))
+            columns.append(_create_column_info(name, dbtype))
 
     return columns
 
 
-def _get_geom_col_name(df):
-    return getattr(df, '_geometry_column_name', None)
+def get_query_columns_info(fields):
+    columns = []
 
+    for name in fields:
+        field = fields[name]
+        pgtype = field.get('pgtype')
+        dbtype = dtypes2pg(pg2dtypes(pgtype)) if pgtype else field.get('type')
+        columns.append(_create_column_info(name, dbtype))
 
-def _get_geometry_type(df):
-    geom_column = _get_geom_col_name(df)
-    if geom_column in df:
-        first_geom = _first_value(df[geom_column])
-        if first_geom:
-            enc_type = detect_encoding_type(first_geom)
-            return decode_geometry_item(first_geom, enc_type).geom_type
+    return columns
 
 
 def _is_valid_column(name):
-    return name.lower() not in Column.FORBIDDEN_COLUMN_NAMES
+    return name.lower() not in FORBIDDEN_COLUMN_NAMES
 
 
-def _compute_column_info(name, dtype=None, geom_type=None):
-    name = name
+def _create_column_info(name, dbtype=None):
+    is_geom = False
     dbname = normalize_name(name)
-    if str(dtype) == 'geometry':
-        dbtype = 'geometry({}, 4326)'.format(geom_type or 'Point')
+    if dbtype == 'geometry':
+        dbtype = 'geometry(Geometry, 4326)'
         is_geom = True
-    else:
-        dbtype = dtypes2pg(dtype)
-        is_geom = False
     return ColumnInfo(name, dbname, dbtype, is_geom)
+
+
+def normalize_name(column_name):
+    if column_name is None:
+        return None
+
+    return normalize_names([column_name])[0]
 
 
 def normalize_names(column_names):
@@ -156,9 +118,9 @@ def normalize_names(column_names):
             * 'SELECT' -> '_select',
             * 'à' -> 'a',
             * 'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow' -> \
-             'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabespli',
+              'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabespli',
             * 'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow' -> \
-             'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabe_1',
+              'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabe_1',
             * 'all' -> '_all'
 
         Args:
@@ -167,56 +129,71 @@ def normalize_names(column_names):
             list: List of SQL-normalized column names
     """
     result = []
+
     for column_name in column_names:
-        column = Column(column_name).normalize(forbidden_column_names=result)
-        result.append(column.name)
+        result.append(_normalize(column_name, forbidden_column_names=result))
 
     return result
 
 
-def normalize_name(column_name):
-    if column_name is None:
-        return None
+def _normalize(column_name, forbidden_column_names=None):
+    column_name = _truncate(_sanitize(_slugify(column_name)))
 
-    return normalize_names([column_name])[0]
+    if forbidden_column_names:
+        i = 1
+        while column_name in forbidden_column_names:
+            column_name = '{}_{}'.format(_truncate(column_name, length=MAX_COLLISION_LENGTH), i)
+            i += 1
+
+    return column_name
+
+
+def _slugify(value):
+    value = unidecode(str(value).lower())
+    value = re.sub(r'<[^>]+>', '', value)
+    value = re.sub(r'&.+?;', '-', value)
+    value = re.sub(r'[^a-z0-9 _-]', '-', value).strip().lower()
+    value = re.sub(r'\s+', '-', value)
+    value = re.sub(r' ', '-', value)
+    value = re.sub(r'-+', '-', value)
+    value = re.sub(r'-', '_', value)
+    return value
+
+
+def _sanitize(value):
+    return '_{}'.format(value) if _is_reserved(value) or _is_unsupported(value) else value
+
+
+def _truncate(value, length=MAX_LENGTH):
+    return value[:length]
+
+
+def _is_reserved(value):
+    return value.upper() in RESERVED_WORDS
+
+
+def _is_unsupported(value):
+    return not re.match(r'^[a-z_]+[a-z_0-9]*$', value)
 
 
 def obtain_converters(columns):
     converters = {}
 
-    for int_column_name in int_columns_names(columns):
-        converters[int_column_name] = _convert_int
-
-    for float_column_name in float_columns_names(columns):
-        converters[float_column_name] = _convert_float
-
-    for bool_column_name in bool_columns_names(columns):
-        converters[bool_column_name] = _convert_bool
-
-    for object_column_name in object_columns_names(columns):
-        converters[object_column_name] = _convert_object
+    for column in columns:
+        if column.dbtype in INT_DBTYPES:
+            converters[column.name] = _convert_int
+        elif column.dbtype in FLOAT_DBTYPES:
+            converters[column.name] = _convert_float
+        elif column.dbtype in BOOL_DBTYPES:
+            converters[column.name] = _convert_bool
+        else:
+            converters[column.name] = _convert_generic
 
     return converters
 
 
 def date_columns_names(columns):
-    return [x.name for x in columns if x.dtype in Column.DATETIME_DTYPES]
-
-
-def int_columns_names(columns):
-    return [x.name for x in columns if x.dtype in Column.INT_DTYPES]
-
-
-def float_columns_names(columns):
-    return [x.name for x in columns if x.dtype in Column.FLOAT_DTYPES]
-
-
-def bool_columns_names(columns):
-    return [x.name for x in columns if x.dtype == Column.BOOL_DTYPE]
-
-
-def object_columns_names(columns):
-    return [x.name for x in columns if x.dtype == Column.OBJECT_DTYPE]
+    return [x.name for x in columns if x.dbtype in DATETIME_DBTYPES]
 
 
 def _convert_int(x):
@@ -241,7 +218,7 @@ def _convert_bool(x):
     return bool(x)
 
 
-def _convert_object(x):
+def _convert_generic(x):
     if _is_none_null(x):
         return None
     return x
@@ -249,10 +226,3 @@ def _convert_object(x):
 
 def _is_none_null(x):
     return x is None or x == PG_NULL
-
-
-def _first_value(series):
-    series = series.loc[~series.isnull()]  # Remove null values
-    if len(series) > 0:
-        return series.iloc[0]
-    return None

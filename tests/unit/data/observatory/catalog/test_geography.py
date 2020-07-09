@@ -10,9 +10,12 @@ from cartoframes.data.observatory.catalog.geography import Geography
 from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.catalog.subscription_info import SubscriptionInfo
-from .examples import test_geography1, test_geographies, test_datasets, db_geography1, \
+from cartoframes.data.observatory.catalog.repository.constants import GEOGRAPHY_FILTER
+from .examples import (
+    test_geography1, test_geographies, test_datasets, db_geography1,
     test_geography2, db_geography2, test_subscription_info
-from .mocks import BigQueryClientMock
+)
+from carto.do_dataset import DODataset
 
 
 class TestGeography(object):
@@ -39,7 +42,7 @@ class TestGeography(object):
         datasets = test_geography1.datasets
 
         # Then
-        mocked_repo.assert_called_once_with({'geography_id': test_geography1.id})
+        mocked_repo.assert_called_once_with({GEOGRAPHY_FILTER: test_geography1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
@@ -90,7 +93,7 @@ class TestGeography(object):
     def test_geography_is_exported_as_dict(self):
         # Given
         geography = Geography(db_geography1)
-        excluded_fields = ['summary_json', 'available_in', 'geom_coverage']
+        excluded_fields = ['summary_json', 'geom_coverage']
         expected_dict = {key: value for key, value in db_geography1.items() if key not in excluded_fields}
 
         # When
@@ -204,7 +207,6 @@ class TestGeography(object):
         geographies = test_geographies
         geography = geographies[0]
         expected_geography_df = geography.to_series()
-        del expected_geography_df['available_in']
         del expected_geography_df['summary_json']
 
         # When
@@ -218,36 +220,13 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_not_available_in_bq_download_fails(self, mocked_bq_client, get_by_id_mock, get_all_mock):
-        # mock geography
-        get_by_id_mock.return_value = test_geography2
-        geography = Geography.get(test_geography2.id)
-
-        # mock subscriptions
-        get_all_mock.return_value = [geography]
-
-        # mock big query client
-        mocked_bq_client.return_value = BigQueryClientMock()
-
-        # test
-        credentials = Credentials('fake_user', '1234')
-
-        with pytest.raises(Exception) as e:
-            geography.to_csv('fake_path', credentials)
-
-        error = '{} is not ready for Download. Please, contact us for more information.'.format(geography)
-        assert str(e.value) == error
-
-    @patch.object(GeographyRepository, 'get_all')
-    @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_geography_download(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography1
         geography = Geography.get(test_geography1.id)
         get_all_mock.return_value = [geography]
-        mocked_bq_client.return_value = BigQueryClientMock()
+        download_stream_mock.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         # Then
@@ -255,14 +234,14 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download_not_subscribed(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_geography_download_not_subscribed(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography2  # is private
         get_by_id_mock.return_value = test_geography2
         geography = Geography.get(test_geography2.id)
         get_all_mock.return_value = []
-        mocked_bq_client.return_value = BigQueryClientMock()
+        download_stream_mock.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         with pytest.raises(Exception) as e:
@@ -275,28 +254,29 @@ class TestGeography(object):
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download_not_subscribed_but_public(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_geography_download_not_subscribed_but_public(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography1  # is public
         geography = Geography.get(test_geography1.id)
         get_all_mock.return_value = []
-        mocked_bq_client.return_value = BigQueryClientMock()
+        download_stream_mock.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         geography.to_csv('fake_path', credentials)
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
-    def test_geography_download_without_do_enabled(self, mocked_bq_client, get_by_id_mock, get_all_mock):
+    @patch.object(DODataset, 'download_stream')
+    def test_geography_download_without_do_enabled(self, download_stream_mock, get_by_id_mock, get_all_mock):
         # Given
         get_by_id_mock.return_value = test_geography1
         geography = Geography.get(test_geography1.id)
         get_all_mock.return_value = []
-        mocked_bq_client.return_value = BigQueryClientMock(
-            ServerErrorException(['The user does not have Data Observatory enabled'])
-        )
+
+        def raise_exception(limit=None, order_by=None, sql_query=None, add_geom=None, is_geography=None):
+            raise ServerErrorException(['The user does not have Data Observatory enabled'])
+        download_stream_mock.side_effect = raise_exception
         credentials = Credentials('fake_user', '1234')
 
         # When
@@ -324,7 +304,7 @@ class TestGeography(object):
         geography.subscribe(credentials)
 
         # Then
-        mock_subscription_ids.assert_called_once_with(credentials)
+        mock_subscription_ids.assert_called_once_with(credentials, 'geography')
         mock_display_form.assert_called_once_with(expected_id, 'geography', credentials)
         assert not mock_display_message.called
 
@@ -343,7 +323,7 @@ class TestGeography(object):
         geography.subscribe(credentials)
 
         # Then
-        mock_subscription_ids.assert_called_once_with(credentials)
+        mock_subscription_ids.assert_called_once_with(credentials, 'geography')
         mock_display_message.assert_called_once_with(expected_id, 'geography')
         assert not mock_display_form.called
 
@@ -361,7 +341,7 @@ class TestGeography(object):
         geography.subscribe()
 
         # Then
-        mock_subscription_ids.assert_called_once_with(expected_credentials)
+        mock_subscription_ids.assert_called_once_with(expected_credentials, 'geography')
         mock_display_form.assert_called_once_with(db_geography1['id'], 'geography', expected_credentials)
 
     def test_geography_subscribe_wrong_credentials(self):
@@ -469,16 +449,3 @@ class TestGeography(object):
             'We are sorry, the Data Observatory is not enabled for your account yet. '
             'Please contact your customer success manager or send an email to '
             'sales@carto.com to request access to it.')
-
-    def test_geography_is_available_in(self):
-        geography_in_bq = Geography(db_geography1)
-        geography_not_in_bq = Geography(db_geography2)
-
-        assert geography_in_bq._is_available_in('bq')
-        assert not geography_not_in_bq._is_available_in('bq')
-
-    def test_geography_is_available_in_with_empty_field(self):
-        db_geography = dict(db_geography1)
-        db_geography['available_in'] = None
-        geography_null = Geography(db_geography)
-        assert not geography_null._is_available_in('bq')

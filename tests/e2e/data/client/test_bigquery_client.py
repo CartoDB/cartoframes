@@ -3,12 +3,13 @@ import json
 import pytest
 import unittest
 
-from carto.exceptions import CartoException
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery
 
 from cartoframes.auth import Credentials
+from cartoframes.exceptions import DOError
 from cartoframes.data.clients.bigquery_client import BigQueryClient
+
 
 _WORKING_PROJECT = 'carto-do-customers'
 
@@ -21,7 +22,7 @@ class RefreshTokenChecker(object):
 
     def query_raiser(self, query, **kwargs):
         self.number_of_calls += 1
-        if self.number_of_calls > self.raise_after:
+        if self.number_of_calls < self.raise_after:
             return self.response
         else:
             raise RefreshError()
@@ -41,7 +42,6 @@ class QueryJobMock(object):
         return ResponseMock(self.response)
 
 
-@pytest.mark.skip()
 class TestBigQueryClient(unittest.TestCase):
     def setUp(self):
         if (os.environ.get('APIKEY') is None or os.environ.get('USERNAME') is None):
@@ -64,20 +64,20 @@ class TestBigQueryClient(unittest.TestCase):
         assert isinstance(bq_client, BigQueryClient)
 
     def test_refresh_token_raises_cartoexception(self):
-        refresh_token_checker = RefreshTokenChecker('', 10)
-        original_query_method = BigQueryClient.query
+        refresh_token_checker = RefreshTokenChecker('', 0)
+        original_query_method = bigquery.Client.query
         bigquery.Client.query = refresh_token_checker.query_raiser
 
         bq_client = BigQueryClient(self.credentials)
-        with pytest.raises(CartoException):
+        with pytest.raises(DOError):
             bq_client.query('select * from')
 
         bigquery.Client.query = original_query_method
 
     def test_refresh_token(self):
         expected_response = 'ok'
-        refresh_token_checker = RefreshTokenChecker(expected_response, 1)
-        original_query_method = BigQueryClient.query
+        refresh_token_checker = RefreshTokenChecker(expected_response, 2)
+        original_query_method = bigquery.Client.query
         bigquery.Client.query = refresh_token_checker.query_raiser
 
         bq_client = BigQueryClient(self.credentials)
@@ -98,5 +98,5 @@ class TestBigQueryClient(unittest.TestCase):
         job = bq_client.query(query)
 
         with open(file_path, 'w'):
-            with self.assertRaises(CartoException):
+            with self.assertRaises(OSError):
                 bq_client.download_to_file(job, file_path, fail_if_exists=True, progress_bar=False)

@@ -25,8 +25,9 @@ def get_version():
 
 REQUIRES = [
     'appdirs>=1.4.3,<2.0',
-    'carto>=1.8.4,<2.0',
+    'carto>=1.11.1,<2.0',
     'jinja2>=2.10.1,<3.0',
+    'pandas>=0.25.0',
     'geopandas>=0.6.0,<1.0',
     'tqdm>=4.32.1,<5.0',
     'unidecode>=1.1.0,<2.0',
@@ -34,8 +35,7 @@ REQUIRES = [
     'google-cloud-bigquery==1.22.0',
     'google-cloud-bigquery-storage==0.7.0',
     'fastavro==0.22.7',
-    'semantic_version>=2.8.0,<3',
-    # 'Rtree>=0.8.3,<1.0'
+    'semantic_version>=2.8.0,<3'
 ]
 
 
@@ -63,8 +63,8 @@ DISTNAME = 'cartoframes'
 DESCRIPTION = 'CARTO Python package for data scientists'
 LICENSE = 'BSD'
 URL = 'https://github.com/CartoDB/cartoframes'
-AUTHOR = 'Andy Eschbacher'
-EMAIL = 'andy@carto.com'
+AUTHOR = 'CARTO'
+EMAIL = 'contact@carto.com'
 
 
 setup(
@@ -81,7 +81,7 @@ setup(
     author_email=EMAIL,
 
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: BSD License',
@@ -103,5 +103,5 @@ setup(
     extras_requires={
         'tests': EXTRAS_REQUIRES_TESTS
     },
-    python_requires=">=3.5"
+    python_requires='>=3.5'
 )

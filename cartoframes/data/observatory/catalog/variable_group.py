@@ -27,8 +27,3 @@ class VariableGroup(CatalogEntity):
     def dataset(self):
         """ID of the dataset related to this variable group."""
         return self.data['dataset_id']
-
-    @property
-    def starred(self):
-        """Boolean indicating whether this variable group is a starred one or not.."""
-        return self.data['starred']

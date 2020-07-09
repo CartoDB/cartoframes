@@ -2,11 +2,22 @@ from pandas import DataFrame
 from geopandas import GeoDataFrame
 
 from ..io.managers.context_manager import ContextManager
-from ..utils.geom_utils import set_geometry, has_geometry
-from ..utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type, \
-                          get_datetime_column_names
+from ..utils.geom_utils import check_crs, has_geometry, set_geometry
+from ..utils.utils import get_geodataframe_data, get_geodataframe_bounds, \
+                          get_geodataframe_geom_type, get_datetime_column_names
 
 RFC_2822_DATETIME_FORMAT = "%a, %d %b %Y %T %z"
+
+VALID_GEOMETRY_TYPES = [
+    {'Point'},
+    {'MultiPoint'},
+    {'LineString'},
+    {'MultiLineString'},
+    {'LineString', 'MultiLineString'},
+    {'Polygon'},
+    {'MultiPolygon'},
+    {'Polygon', 'MultiPolygon'}
+]
 
 
 class SourceType:
@@ -52,9 +63,10 @@ class Source:
         >>> Source('table_name', credentials)
 
     """
-    def __init__(self, source, credentials=None, geom_col=None):
+    def __init__(self, source, credentials=None, geom_col=None, encode_data=True):
         self.credentials = None
         self.datetime_column_names = None
+        self.encode_data = encode_data
 
         if isinstance(source, str):
             # Table, SQL query
@@ -63,6 +75,9 @@ class Source:
             self.query = self.manager.compute_query(source)
             self.credentials = self.manager.credentials
         elif isinstance(source, DataFrame):
+            if isinstance(source, GeoDataFrame):
+                check_crs(source)
+
             # DataFrame, GeoDataFrame
             self.type = SourceType.GEOJSON
             self.gdf = GeoDataFrame(source, copy=True)
@@ -75,18 +90,31 @@ class Source:
             else:
                 raise ValueError('No valid geometry found. Please provide an input source with ' +
                                  'a valid geometry or specify the "geom_col" param with a geometry column.')
+
+            # Remove empty geometries
+            self.gdf = self.gdf[~self.gdf.geometry.is_empty]
+
+            # Checking the uniqueness of the geometry type
+            geometry_types = set(self.gdf.geom_type.unique())
+            if geometry_types not in VALID_GEOMETRY_TYPES:
+                raise ValueError('No valid geometry column types ({}), it has '.format(geometry_types) +
+                                 'to be one of the next type sets: {}.'.format(VALID_GEOMETRY_TYPES))
+
         else:
             raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 
     def get_credentials(self):
-        if self.credentials:
-            return {
-                # CARTO VL requires a username but CARTOframes allows passing only the base_url.
-                # That's why 'user' is used by default if username is empty.
-                'username': self.credentials.username or 'user',
-                'api_key': self.credentials.api_key,
-                'base_url': self.credentials.base_url
-            }
+        if self.type == SourceType.QUERY:
+            if self.credentials:
+                return {
+                    # CARTO VL requires a username but CARTOframes allows passing only the base_url.
+                    # That's why 'user' is used by default if username is empty.
+                    'username': self.credentials.username or 'user',
+                    'api_key': self.credentials.api_key,
+                    'base_url': self.credentials.base_url
+                }
+        elif self.type == SourceType.GEOJSON:
+            return None
 
     def set_datetime_columns(self):
         if self.type == SourceType.GEOJSON:
@@ -113,7 +141,7 @@ class Source:
             if columns is not None:
                 columns += [self.gdf.geometry.name]
                 self.gdf = self.gdf[columns]
-            self.data = encode_geodataframe(self.gdf)
+            self.data = get_geodataframe_data(self.gdf, self.encode_data)
             self.bounds = get_geodataframe_bounds(self.gdf)
 
     def is_local(self):

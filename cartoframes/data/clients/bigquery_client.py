@@ -6,14 +6,15 @@ import pandas as pd
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery, storage, bigquery_storage_v1beta1 as bigquery_storage
 from google.oauth2.credentials import Credentials as GoogleCredentials
+from google.api_core.exceptions import DeadlineExceeded
 
 from ...auth import get_default_credentials
 from ...utils.logger import log
 from ...utils.utils import timelogger, is_ipython_notebook
 from ...exceptions import DOError
 
-
 _GCS_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB. This must be a multiple of 256 KB per the API specification.
+_BQS_TIMEOUT = 2 * 3600  # 2 hours in seconds
 
 
 def refresh_clients(func):
@@ -89,16 +90,14 @@ class BigQueryClient:
             rows = self._download_by_bq_storage_api(job)
         except Exception:
             log.debug('Cannot download using BigQuery Storage API, fallback to standard')
+            rows = _get_job_result(job, 'Error downloading data')
 
-            try:
-                rows = job.result()
-            except Exception:
-                if job.errors:
-                    log.error([error['message'] for error in job.errors if 'message' in error])
-
-                raise DOError('Error downloading data')
-
-        _rows_to_file(rows, file_path, column_names, progress_bar)
+        try:
+            _rows_to_file(rows, file_path, column_names, progress_bar)
+        except DeadlineExceeded:
+            log.debug('Cannot download using BigQuery Storage API, fallback to standard')
+            rows = _get_job_result(job, 'Error downloading data')
+            _rows_to_file(rows, file_path, column_names, progress_bar)
 
     @timelogger
     def download_to_dataframe(self, job):
@@ -117,7 +116,7 @@ class BigQueryClient:
 
                 raise DOError('Error downloading data')
 
-    def _download_by_bq_storage_api(self, job):
+    def _download_by_bq_storage_api(self, job, timeout=_BQS_TIMEOUT):
         table_ref = job.destination.to_bqstorage()
 
         parent = 'projects/{}'.format(self._gcp_execution_project)
@@ -132,7 +131,8 @@ class BigQueryClient:
         )
 
         reader = self.bq_storage_client.read_rows(
-            bigquery_storage.types.StreamPosition(stream=session.streams[0])
+            bigquery_storage.types.StreamPosition(stream=session.streams[0]),
+            timeout=timeout
         )
 
         return reader.rows(session)
@@ -167,13 +167,7 @@ class BigQueryClient:
             uri, table_ref, job_config=job_config
         )
 
-        try:
-            job.result()  # Waits for table load to complete.
-        except Exception:
-            if job.errors:
-                log.error([error['message'] for error in job.errors if 'message' in error])
-
-            raise DOError('Error uploading data')
+        _get_job_result(job, 'Error uploading data')
 
     def get_table_column_names(self, project, dataset, table):
         table_info = self._get_table(project, dataset, table)
@@ -201,3 +195,13 @@ def _rows_to_file(rows, file_path, column_names=None, progress_bar=True):
             csvwriter.writerow(row.values())
             if show_progress_bar:
                 pb.update(1)
+
+
+def _get_job_result(job, error_message):
+    try:
+        return job.result()
+    except Exception:
+        if job.errors:
+            log.error([error['message'] for error in job.errors if 'message' in error])
+
+        raise DOError(error_message)
