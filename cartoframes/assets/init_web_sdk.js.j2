@@ -1,3 +1,10 @@
+const GLOBAL = 'remote';
+const LOCAL = 'remote-filtered';
+
+function cleanStyleName(name) {
+  return name.replace('Style','');
+}
+
 async function initialize() {
   const basemap = '{{ basemap }}';
   const bounds = {{ bounds }};
@@ -5,31 +12,32 @@ async function initialize() {
   const layersDef = {{ layers|tojson }};
 
   let credentials = null;
+  let dataview = null;
   let layer = null;
   let source = null;
   let style = null;
-  let widget = null;
+  let styleName = null;
 
   const deckMap = carto.viz.createMap({
     basemap: basemap,
-    initialViewState: camera
+    viewState: camera
   });
 
   let layerI = layersDef.length - 1;  // Their "IDs" are reversed
   for (const layerDef of layersDef) {
     if (layerDef.type === 'Query') {
-        credentials = new carto.Credentials(layerDef.credentials.username, layerDef.credentials.api_key, layerDef.credentials.base_url);
-        source = new carto.viz.CARTOSource(layerDef.data, {credentials});
+      credentials = new carto.auth.Credentials(layerDef.credentials.username, layerDef.credentials.api_key, layerDef.credentials.base_url);
+      source = new carto.viz.source.SQL(layerDef.data, {credentials});
 
     } else {
-        source = new carto.viz.GeoJsonSource(layerDef.data);
+      source = new carto.viz.source.GeoJSON(layerDef.data);
     }
 
     if (!!layerDef.viz && !!layerDef.viz.value) {
-      style = carto.viz[layerDef.viz.name](layerDef.viz.value, layerDef.viz.options);
+      style = carto.viz.style[cleanStyleName(layerDef.viz.name)](layerDef.viz.value, layerDef.viz.options);
 
     } else if (!!layerDef.viz) {
-      style = carto.viz[layerDef.viz.name](layerDef.viz.options);
+      style = carto.viz.style[cleanStyleName(layerDef.viz.name)](layerDef.viz.options);
     }
 
     layer = new carto.viz.Layer(source, style);
@@ -47,17 +55,40 @@ async function initialize() {
     let widgetI = 0;
     for (const widgetDef of layerDef.widgets) {
       if (widgetDef.type === 'category') {
-        widget = new carto.dataview.Category(layer, widgetDef.value, {
+        dataview = new carto.viz.dataview.Category(layer, widgetDef.value, {
           operation: 'count',
-          operationColumn: 'cartodb_id',
-          mode: 'local'
+          mode: widgetDef.is_global ? GLOBAL : LOCAL
+        });
+
+        new carto.viz.widget.Category(`as-category-widget#layer${layerI}_widget${widgetI}`, dataview, {
+          showClearButton: true,
+          disableInteractivity: widgetDef.options.readOnly,
+          format: widgetDef.options.format
+        });
+
+      } else if (widgetDef.type === 'formula') {
+        dataview = new carto.viz.dataview.Formula(layer, widgetDef.value, {
+          operation: widgetDef.operation,
+          mode: widgetDef.is_global ? GLOBAL : LOCAL
+        });
+
+        new carto.viz.widget.Formula(`as-formula-widget#layer${layerI}_widget${widgetI}`, dataview, {
+          format: widgetDef.options.format
+        });
+
+      } else if (widgetDef.type === 'histogram') {
+        dataview = new carto.viz.dataview.Histogram(layer, widgetDef.value, {
+            bins: widgetDef.options.buckets,
+            mode: widgetDef.is_global ? GLOBAL : LOCAL
+          }
+        );
+
+        new carto.viz.widget.Histogram(`as-histogram-widget#layer${layerI}_widget${widgetI}`, dataview, {
+          showClear: true,
+          disableInteractivity: widgetDef.options.readOnly,
+          format: widgetDef.options.format
         });
       }
-
-      new carto.widget.Category(`as-category-widget#layer${layerI}_widget${widgetI}`, widget, {
-        showClearButton: true,
-        disableInteractivity: widgetDef.options.readOnly
-      });
 
       widgetI++;
     }
@@ -65,11 +96,11 @@ async function initialize() {
     layerI--;
   }
 
-  const {viewport} = deckMap.layerManager.context;
+  const viewport = deckMap.getViewports()[0];
   const {longitude, latitude, zoom} = viewport.fitBounds(bounds);
   const viewState = Object.assign({}, {longitude, latitude, zoom}, camera);
 
-  deckMap.viewManager.setProps({
+  deckMap.setProps({
     viewState: viewState
   });
 }

@@ -30,11 +30,11 @@ class WidgetList:
         else:
             return []
 
-    def get_widgets_info(self):
+    def get_widgets_info(self, render='carto-vl'):
         widgets_info = []
         for widget in self._widgets:
             if widget:
-                widgets_info.append(widget.get_info())
+                widgets_info.append(widget.get_info(render))
 
         return widgets_info
 

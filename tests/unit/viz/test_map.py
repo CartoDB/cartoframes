@@ -66,13 +66,13 @@ class TestMapLayer(object):
 
         assert map.layers == [layer]
         assert len(map.layer_defs) == 1
-        assert map.layer_defs[0].get('interactivity') == []
+        assert map.layer_defs[0].get('interactivity') == {'click': None, 'hover': None}
         assert map.layer_defs[0].get('credentials') is None
         assert map.layer_defs[0].get('legends') is not None
         assert map.layer_defs[0].get('widgets') is not None
         assert map.layer_defs[0].get('data') is not None
         assert map.layer_defs[0].get('type') == 'GeoJSON'
-        assert map.layer_defs[0].get('viz') is not None
+        assert map.layer_defs[0].get('viz') is None
 
     def test_two_layers(self):
         """Map layer should be able to initialize two layers in the correct order"""
@@ -100,32 +100,27 @@ class TestMapLayer(object):
         )
 
         map = Map(layer)
-        assert map.layer_defs[0].get('interactivity') == [
-            {
-                'event': 'click',
-                'attrs': {
-                    'name': 'v6ae999',
-                    'title': 'name',
-                    'format': None
+        assert map.layer_defs[0].get('interactivity') == {
+            'hover': [
+                {
+                    'format': None,
+                    'attr': 'pop',
+                    'title': 'Pop'
                 }
-            },
-            {
-                'event': 'click',
-                'attrs': {
-                    'name': 'v4f197c',
-                    'title': 'pop',
-                    'format': None
+            ],
+            'click': [
+                {
+                    'format': None,
+                    'attr': 'name',
+                    'title': 'name'
+                },
+                {
+                    'format': None,
+                    'attr': 'pop',
+                    'title': 'pop'
                 }
-            },
-            {
-                'event': 'hover',
-                'attrs': {
-                    'name': 'v4f197c',
-                    'title': 'Pop',
-                    'format': None
-                }
-            }
-        ]
+            ]
+        }
 
     def test_default_interactive_layer(self):
         """Map layer should get the default event if the interactivity is set to []"""
@@ -135,24 +130,24 @@ class TestMapLayer(object):
         )
 
         map = Map(layer)
-        assert map.layer_defs[0].get('interactivity') == []
+        assert map.layer_defs[0].get('interactivity') == {'click': None, 'hover': None}
 
 
 class TestMapDevelopmentPath(object):
-    def test_default_carto_vl_path(self):
+    def test_default_web_sdk_path(self):
         """Map dev path should use default paths if none are given"""
         map = Map()
         map._repr_html_()
         template = map._html_map.html
-        assert constants.CARTO_VL_URL in template
+        assert constants.WEB_SDK_URL in template
 
-    def test_custom_carto_vl_path(self):
+    def test_custom_web_sdk_path(self):
         """Map dev path should use custom paths"""
-        _carto_vl_path = 'custom_carto_vl_path'
-        map = Map(_carto_vl_path=_carto_vl_path)
+        _web_sdk_path = 'custom_web_sdk_path'
+        map = Map(_web_sdk_path=_web_sdk_path)
         map._repr_html_()
         template = map._html_map.html
-        assert _carto_vl_path + constants.CARTO_VL_DEV in template
+        assert _web_sdk_path + constants.WEB_SDK_DEV in template
 
     def test_default_airship_path(self):
         """Map dev path should use default paths if none are given"""
@@ -271,7 +266,7 @@ class TestMapPublication(object):
             _carto_vl_path=None,
             basemap='yellow',
             bounds=[[1, 4], [2, 3]],
-            camera={'bearing': None, 'center': [-10, 50], 'pitch': None, 'zoom': 5},
+            camera={'latitude': 50, 'zoom': 5, 'longitude': -10},
             description='description',
             is_embed=True,
             is_static=True,

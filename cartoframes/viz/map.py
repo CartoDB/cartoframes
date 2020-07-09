@@ -107,7 +107,7 @@ class Map:
                  description=None,
                  is_static=None,
                  layer_selector=False,
-                 render='carto-vl',
+                 render='web-sdk',
                  **kwargs):
 
         self._render = render  # It needs to be before `self.layers`

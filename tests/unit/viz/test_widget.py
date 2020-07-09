@@ -23,13 +23,14 @@ class TestWidget(object):
 
         assert widget.get_info() == {
             'type': 'formula',
-            'value': 'amount',
+            'value': "prop('amount')",
             'title': '[title]',
             'description': '[description]',
+            'is_global': False,
             'footer': '[footer]',
             'has_bridge': False,
             'prop': '',
-            'variable_name': 'v9cb6ff',
+            'variable_name': 'v6476eb',
             'options': {
                 'readOnly': False,
                 'buckets': 20,
@@ -67,7 +68,8 @@ class TestWidget(object):
                 'weight': 1,
                 'autoplay': True,
                 'format': None
-            }
+            },
+            'is_global': False
         }
 
     def test_animation_widget_prop(self):
@@ -82,6 +84,7 @@ class TestWidget(object):
             'footer': '',
             'has_bridge': True,
             'prop': 'width',
+            'is_global': False,
             'variable_name': '',
             'options': {
                 'readOnly': False,

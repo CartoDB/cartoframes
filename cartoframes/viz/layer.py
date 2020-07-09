@@ -106,7 +106,7 @@ class Layer:
                  title=None,
                  parent_map=None,
                  encode_data=True,
-                 render='carto-vl'):
+                 render='web-sdk'):
 
         self._render = render  # It's here because we need it pretty soon
         self.is_basemap = False
@@ -237,6 +237,9 @@ class Layer:
                                         self._default_popup_click, self.title, self._render)
         self.viz = self.style.compute_viz(self.geom_type, self._external_variables, self._render)
         self.interactivity = self.popups.get_interactivity()
+
+        if self._render != 'carto-vl':
+            self.widgets_info = self.widgets.get_widgets_info(self._render)
 
         # The TODO block above was only necesary only for `render='web-sdk` but because
         # the layers can be reused we need to do it also for `render='carto-vl' layers`
