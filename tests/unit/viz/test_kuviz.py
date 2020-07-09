@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from collections import namedtuple
+
 import pytest
 
 from cartoframes.auth import Credentials
-from cartoframes.viz import Map, Layer
+from cartoframes.viz import all_publications, delete_publication, Layer, Map
 from cartoframes.viz.source import Source
 from cartoframes.viz.kuviz import KuvizPublisher, DEFAULT_PUBLIC, kuviz_to_dict
 from cartoframes.io.managers.context_manager import ContextManager
@@ -162,3 +164,48 @@ class TestKuvizPublisher(object):
         assert kuviz_publisher.kuviz == kuviz
         assert result_update == kuviz_to_dict(kuviz)
         assert result_publish != kuviz_to_dict(kuviz)
+
+    def test_kuviz_all_publications(self, mocker):
+        setup_mocks(mocker, self.credentials)
+
+        html = 'fake_html'
+        kuviz_name = 'fake_name'
+        kuviz = CartoKuvizMock(kuviz_name)
+
+        KuvizManagerNamedtuple = namedtuple('KuvizManager', ['all'])
+        kuviz_manager_namedtuple = KuvizManagerNamedtuple(lambda: [kuviz])
+
+        mocker.patch('cartoframes.viz.kuviz._create_kuviz', return_value=kuviz)
+        mocker.patch('cartoframes.viz.kuviz._get_kuviz_manager', return_value=kuviz_manager_namedtuple)
+
+        vmap = Map(Layer('fake_table', credentials=self.credentials))
+
+        kuviz_publisher = KuvizPublisher(None)
+        kuviz_publisher.set_layers(vmap.layers)
+        kuviz_publisher.publish(html, kuviz_name, None)
+
+        assert all_publications(credentials=self.credentials)[0]['name'] == kuviz_name
+
+    def test_kuviz_delete_publication(self, mocker):
+        setup_mocks(mocker, self.credentials)
+
+        html = 'fake_html'
+        kuviz_name = 'fake_name'
+        kuviz = CartoKuvizMock(kuviz_name)
+
+        KuvizManagerNamedtuple = namedtuple('KuvizManager', ['all'])
+        kuviz_manager_namedtuple = KuvizManagerNamedtuple(lambda: [kuviz])
+
+        mocker.patch('cartoframes.viz.kuviz._create_kuviz', return_value=kuviz)
+        mocker.patch('cartoframes.viz.kuviz._get_kuviz_manager', return_value=kuviz_manager_namedtuple)
+        mock = mocker.patch('tests.unit.mocks.kuviz_mock.CartoKuvizMock.delete')
+
+        vmap = Map(Layer('fake_table', credentials=self.credentials))
+
+        kuviz_publisher = KuvizPublisher(None)
+        kuviz_publisher.set_layers(vmap.layers)
+        kuviz_publisher.publish(html, kuviz_name, None)
+
+        delete_publication(kuviz_name, credentials=self.credentials)
+
+        mock.assert_called_once_with()
