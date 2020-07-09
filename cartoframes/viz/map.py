@@ -236,35 +236,6 @@ class Map:
         html = self._get_publication_html(name)
         return self._publisher.update(html, name, password, if_exists)
 
-    @staticmethod
-    def all_publications(credentials=None):
-        """Get all map visualization published by the current user.
-
-        Args:
-            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-                A Credentials instance. If not provided, the credentials will be automatically
-                obtained from the default credentials if available.
-
-        """
-        _credentials = get_credentials(credentials)
-
-        return KuvizPublisher.all(_credentials)
-
-    @staticmethod
-    def delete_publication(name, credentials=None):
-        """Delete a map visualization published by id.
-
-        Args:
-            name (str): name of the publication to be deleted.
-            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-                A Credentials instance. If not provided, the credentials will be automatically
-                obtained from the default credentials if available.
-
-        """
-        _credentials = get_credentials(credentials)
-
-        return KuvizPublisher.delete(name, _credentials)
-
     def _get_publication_html(self, name):
         html_map = HTMLMap('templates/viz/main.html.j2')
         html_map.set_content(
