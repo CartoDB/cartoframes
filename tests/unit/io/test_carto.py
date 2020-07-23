@@ -3,6 +3,7 @@ import pytest
 from pandas import Index
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
+from shapely.geometry.base import BaseGeometry
 
 from cartoframes.auth import Credentials
 from cartoframes.io.managers.context_manager import ContextManager
@@ -36,6 +37,58 @@ def test_read_carto(mocker):
     gdf = read_carto('__source__', CREDENTIALS)
 
     # Then
+    cm_mock.assert_called_once_with('__source__', None, None, 3)
+    assert expected.equals(gdf)
+    assert gdf.crs == 'epsg:4326'
+
+
+def test_read_carto_none_as_null_geom_value(mocker):
+    # Given
+    cm_mock = mocker.patch.object(ContextManager, 'copy_to')
+    cm_mock.return_value = GeoDataFrame({
+        'cartodb_id': [1],
+        'the_geom': [
+            None
+        ]
+    })
+
+    # When
+    gdf = read_carto('__source__', CREDENTIALS)
+
+    # Then
+    expected = GeoDataFrame({
+        'cartodb_id': [1],
+        'the_geom': [
+            None
+        ]
+    }, geometry='the_geom')
+
+    cm_mock.assert_called_once_with('__source__', None, None, 3)
+    assert expected.equals(gdf)
+    assert gdf.crs == 'epsg:4326'
+
+
+def test_read_carto_basegeometry_as_null_geom_value(mocker):
+    # Given
+    cm_mock = mocker.patch.object(ContextManager, 'copy_to')
+    cm_mock.return_value = GeoDataFrame({
+        'cartodb_id': [1],
+        'the_geom': [
+            None
+        ]
+    })
+
+    # When
+    gdf = read_carto('__source__', CREDENTIALS, null_geom_value=BaseGeometry())
+
+    # Then
+    expected = GeoDataFrame({
+        'cartodb_id': [1],
+        'the_geom': [
+            BaseGeometry()
+        ]
+    }, geometry='the_geom')
+
     cm_mock.assert_called_once_with('__source__', None, None, 3)
     assert expected.equals(gdf)
     assert gdf.crs == 'epsg:4326'
