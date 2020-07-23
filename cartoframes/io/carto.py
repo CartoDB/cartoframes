@@ -17,7 +17,8 @@ IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
 
 
 @send_metrics('data_downloaded')
-def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True):
+def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True,
+               null_geom_value=None):
     """Read a table or a SQL query from the CARTO account.
 
     Args:
@@ -32,6 +33,8 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
             `current_schema()` using the credentials.
         index_col (str, optional): name of the column to be loaded as index. It can be used also to set the index name.
         decode_geom (bool, optional): convert the "the_geom" column into a valid geometry column.
+        null_geom_value (Object, optional): value for the `the_geom` column when it's null.
+            Defaults to None
 
     Returns:
         geopandas.GeoDataFrame
@@ -58,6 +61,9 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
     if decode_geom and GEOM_COLUMN_NAME in gdf:
         # Decode geometry column
         set_geometry(gdf, GEOM_COLUMN_NAME, inplace=True)
+
+        if null_geom_value is not None:
+            gdf[GEOM_COLUMN_NAME].fillna(null_geom_value, inplace=True)
 
     return gdf
 
