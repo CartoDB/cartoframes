@@ -485,14 +485,14 @@ var init = (function () {
       const lat = center.lat.toFixed(6);
       const lng = center.lng.toFixed(6);
       const zoom = map.getZoom().toFixed(2);
-    
+
       mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
     }
 
     updateMapInfo();
 
     map.on('zoom', updateMapInfo);
-    map.on('move', updateMapInfo); 
+    map.on('move', updateMapInfo);
   }
 
   function getBasecolorSettings(basecolor) {
@@ -566,7 +566,7 @@ var init = (function () {
         }
         // Track layers to add only one feature per layer
         layerIDs.push(feature.layerId);
-    
+
         for (const item of attrs) {
           const variable = feature.variables[item.name];
           if (variable) {
@@ -945,7 +945,7 @@ var init = (function () {
     });
 
     const layerSelector = new AsBridge.VL.Layers(layerSelector$, carto, layersInfo, mapLayers);
-    
+
     layerSelector.build();
   }
 
