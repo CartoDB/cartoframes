@@ -304,5 +304,5 @@ class Catalog:
 
     def _global_message(self):
         if self.filters and self.filters.get(COUNTRY_FILTER) != GLOBAL_COUNTRY_FILTER:
-            log.info('You can find more entities with the Global Global filter. To apply that filter run:\n\tCatalog().'
-                     "country('glo')")
+            log.info('You can find more entities with the Global country filter. To apply that filter run:'
+                     "\n\tCatalog().country('glo')")
