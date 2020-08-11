@@ -1,7 +1,3 @@
-from . import defaults
-from ..utils.utils import merge_dicts, text_match
-
-
 class Style:
 
     def __init__(self, data=None, value=None,
@@ -15,12 +11,10 @@ class Style:
         self._default_popup_click = default_popup_click
 
     def _init_style(self, data):
-        if data is None:
-            return defaults.STYLE
-        elif isinstance(data, (str, dict)):
+        if isinstance(data, (str, dict)):
             return data
         else:
-            raise ValueError('`style` must be a dictionary')
+            return None
 
     @property
     def value(self):
@@ -42,88 +36,20 @@ class Style:
     def default_popup_click(self):
         return self._default_popup_click
 
-    def compute_viz(self, geom_type, variables={}, render='carto-vl'):
-        if render != 'carto-vl':
-            return self._parse_web_sdk_style()
-
-        style = self._style
-        default_style = defaults.STYLE[geom_type]
-
-        if isinstance(style, str):
-            # Only for testing purposes
-            return self._parse_style_str(style, default_style, variables)
-        elif isinstance(style, dict):
-            if geom_type in style:
-                style = style.get(geom_type)
-            return self._parse_style_dict(style, default_style, variables)
-        else:
-            raise ValueError('`style` must be a dictionary')
-
-    def _parse_style_dict(self, style, default_style, ext_vars):
-        variables = merge_dicts(style.get('vars', {}), ext_vars)
-        properties = merge_dicts(default_style, style)
-
-        serialized_variables = self._serialize_variables(variables)
-        serialized_properties = self._serialize_properties(properties)
-
-        return serialized_variables + serialized_properties
-
-    def _parse_style_str(self, style, default_style, ext_vars):
-        variables = ext_vars
-        default_properties = self._prune_defaults(default_style, style)
-
-        serialized_variables = self._serialize_variables(variables)
-        serialized_default_properties = self._serialize_properties(default_properties)
-
-        return serialized_variables + serialized_default_properties + style
-
-    def _parse_web_sdk_style(self):
-        style = self._style.get('web-sdk')
-        if not style:
+    def compute_viz(self, variables={}):
+        if not self._style:
             return None
 
-        name = style.get('name')
-        value = style.get('value')
-        options = {k: v for k, v in style.get('properties').items() if v is not None}
+        name = self._style.get('name')
+        value = self._style.get('value')
+        options = {k: v for k, v in self._style.get('properties').items() if v is not None}
 
-        style_result = {
+        style = {
             'name': name,
             'options': options
         }
 
         if value:
-            style_result['value'] = value
+            style['value'] = value
 
-        return style_result
-
-    def _serialize_variables(self, variables={}):
-        output = ''
-        for var in variables:
-            output += '@{name}: {value}\n'.format(
-                name=var,
-                value=variables.get(var)
-            )
-        return output
-
-    def _serialize_properties(self, properties={}):
-        output = ''
-        for prop in properties:
-            if prop == 'vars':
-                continue
-            output += '{name}: {value}\n'.format(
-                name=prop,
-                value=properties.get(prop)
-            )
-        return output
-
-    def _prune_defaults(self, default_style, style):
-        output = default_style.copy()
-        if 'color' in output and text_match(r'color\s*:', style):
-            del output['color']
-        if 'width' in output and text_match(r'width\s*:', style):
-            del output['width']
-        if 'strokeColor' in output and text_match(r'strokeColor\s*:', style):
-            del output['strokeColor']
-        if 'strokeWidth' in output and text_match(r'strokeWidth\s*:', style):
-            del output['strokeWidth']
-        return output
+        return style

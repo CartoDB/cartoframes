@@ -1,4 +1,3 @@
-from .utils import serialize_palette, get_value, prop
 from ..style import Style
 from ..legends import color_bins_legend
 from ..widgets import histogram_widget
@@ -33,66 +32,22 @@ def color_bins_style(value, method='quantiles', bins=5, breaks=None, palette=Non
     if method not in ('quantiles', 'equal', 'stdev'):
         raise ValueError('Available methods are: "quantiles", "equal", "stdev".')
 
-    if breaks is None:
-        func = {
-            'quantiles': 'globalQuantiles',
-            'equal': 'globalEqIntervals',
-            'stdev': 'globalStandardDev'
-        }.get(method)
-        default_palette = {
-            'quantiles': 'purpor',
-            'equal': 'purpor',
-            'stdev': 'temps'
-        }.get(method)
-    else:
-        func = 'buckets'
-        default_palette = 'purpor'
-        breaks = list(breaks)
-
-    animation_filter = 'animation(linear({}), 20, fade(1,1))'.format(prop(animate)) if animate else '1'
+    if animate:
+        raise NotImplementedError('`animate` parameter for `color_bins_style` not implemented yet in WebSDK.')
 
     data = {
-        'point': {
-            'color': 'opacity(ramp({0}({1}, {2}), {3}),{4})'.format(
-                func, prop(value), breaks or bins,
-                serialize_palette(palette) or default_palette,
-                get_value(opacity, 1)),
-            'width': get_value(size, 'width', 'point'),
-            'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
-            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
-            'filter': animation_filter
-        },
-        'line': {
-            'color': 'opacity(ramp({0}({1}, {2}), {3}),{4})'.format(
-                func, prop(value), breaks or bins,
-                serialize_palette(palette) or default_palette,
-                get_value(opacity, 1)),
-            'width': get_value(size, 'width', 'line'),
-            'filter': animation_filter
-        },
-        'polygon': {
-            'color': 'opacity(ramp({0}({1}, {2}), {3}), {4})'.format(
-                func, prop(value), breaks or bins,
-                serialize_palette(palette) or default_palette,
-                get_value(opacity, 0.9)),
-            'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
-            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon'),
-            'filter': animation_filter
-        },
-        'web-sdk': {
-            'name': 'colorBinsStyle',
-            'value': value,
-            'properties': {
-                'method': method,
-                'bins': bins,
-                'breaks': breaks,
-                'palette': palette,
-                'size': size,
-                'opacity': opacity,
-                'strokeColor': stroke_color,
-                'strokeWidth': stroke_width,
-                'animate': animate
-            }
+        'name': 'colorBinsStyle',
+        'value': value,
+        'properties': {
+            'method': method,
+            'bins': bins,
+            'breaks': breaks,
+            'palette': palette,
+            'size': size,
+            'opacity': opacity,
+            'strokeColor': stroke_color,
+            'strokeWidth': stroke_width,
+            'animate': animate
         }
     }
 

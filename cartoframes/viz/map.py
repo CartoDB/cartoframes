@@ -7,7 +7,7 @@ from . import constants
 from .html import HTMLMap
 from .basemaps import Basemaps
 from .kuviz import KuvizPublisher
-from ..utils.utils import get_center, get_credentials
+from ..utils.utils import get_credentials
 from ..utils.metrics import send_metrics
 
 WORLD_BOUNDS = [[-180, -90], [180, 90]]
@@ -107,11 +107,7 @@ class Map:
                  description=None,
                  is_static=None,
                  layer_selector=False,
-                 render='web-sdk',
                  **kwargs):
-
-        self._render = render  # It needs to be before `self.layers`
-
         self.layer_selector = layer_selector
         self.basemap = basemap
         self.size = size
@@ -128,7 +124,6 @@ class Map:
         self.token = get_token(basemap)
         self.basecolor = get_basecolor(basemap)
 
-        self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._web_sdk_path = kwargs.get('_web_sdk_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
 
@@ -136,15 +131,7 @@ class Map:
         self._kuviz = None
 
         self.camera = None
-        if viewport is not None and render == 'carto-vl':
-            self.camera = {
-                'center': get_center(viewport),
-                'zoom': viewport.get('zoom'),
-                'bearing': viewport.get('bearing'),
-                'pitch': viewport.get('pitch')
-            }
-
-        elif viewport is not None and render == 'web-sdk':
+        if viewport is not None:
             self.camera = {
                 'latitude': viewport.get('lat'),
                 'longitude': viewport.get('lng'),
@@ -153,13 +140,6 @@ class Map:
                 'pitch': viewport.get('pitch')
             }
             self.camera = {k: v for k, v in self.camera.items() if v is not None}
-
-        if render not in constants.RENDERERS:
-            raise ValueError(
-                    '`render` is "{render}", when it must be one of {renderers}'.format(
-                        render=render, renderers=constants.RENDERERS
-                    )
-                )
 
     @send_metrics('map_created')
     def _repr_html_(self):
@@ -177,8 +157,6 @@ class Map:
             description=self.description,
             is_static=self.is_static,
             layer_selector=self.layer_selector,
-            _render=self._render,
-            _carto_vl_path=self._carto_vl_path,
             _web_sdk_path=self._web_sdk_path,
             _airship_path=self._airship_path)
 
@@ -205,7 +183,6 @@ class Map:
             'description': self.description,
             'is_static': self.is_static,
             'layer_selector': self.layer_selector,
-            '_carto_vl_path': self._carto_vl_path,
             '_airship_path': self._airship_path
         }
 
@@ -291,7 +268,6 @@ class Map:
             is_static=self.is_static,
             is_embed=True,
             layer_selector=self.layer_selector,
-            _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
         return html_map.html

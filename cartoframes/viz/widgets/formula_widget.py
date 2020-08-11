@@ -1,7 +1,7 @@
 from ..widget import Widget
 
 
-def formula_widget(value, operation=None, title=None, description=None, footer=None, is_global=False, format=None):
+def formula_widget(value, operation=None, title=None, description=None, footer=None, format=None, is_global=False):
     """Helper function for quickly creating a formula widget.
 
     Formula widgets calculate aggregated values ('avg', 'max', 'min', 'sum') from numeric columns
@@ -16,10 +16,10 @@ def formula_widget(value, operation=None, title=None, description=None, footer=N
         title (str, optional): Title of widget.
         description (str, optional): Description text widget placed under widget title.
         footer (str, optional): Footer text placed on the widget bottom.
-        is_global (boolean, optional): Account for calculations based on the entire dataset ('global') vs.
-            the default of 'viewport' features.
         format (str, optional): Format to apply to number values in the widget, based on d3-format
             specifier (https://github.com/d3/d3-format#locale_format).
+        is_global (boolean, optional): Account for calculations based on the entire dataset ('global') vs.
+            the default of 'viewport' features.
 
     Returns:
         cartoframes.viz.widget.Widget

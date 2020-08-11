@@ -1,8 +1,25 @@
-const GLOBAL = 'remote';
-const LOCAL = 'remote-filtered';
+const GLOBAL_FILTER = 'global';
+const LOCAL_FILTER = 'viewport';
+const LOCAL_MODE = 'fast';
 
 function cleanStyleName(name) {
-  return name.replace('Style','');
+  return name.replace('Style', '');
+}
+
+function decodeJSONData(data, encodeData) {
+  try {
+    if (encodeData) {
+      const decodedJSON = pako.inflate(atob(data), { to: 'string' });
+      return JSON.parse(decodedJSON);
+    } else {
+      return JSON.parse(data);
+    }
+  } catch(error) {
+    throw new Error(`
+    Error: "${error}". CARTOframes is not able to parse your local data because it is too large.
+    Please, disable the data compresion with encode_data=False in your Layer class.
+  `);
+  }
 }
 
 async function initialize() {
@@ -17,6 +34,7 @@ async function initialize() {
   let source = null;
   let style = null;
   let styleName = null;
+  let widgetMode = null;
 
   const deckMap = carto.viz.createMap({
     basemap: basemap,
@@ -30,7 +48,7 @@ async function initialize() {
       source = new carto.viz.source.SQL(layerDef.data, {credentials});
 
     } else {
-      source = new carto.viz.source.GeoJSON(layerDef.data);
+      source = new carto.viz.source.GeoJSON(decodeJSONData(layerDef.data, layerDef.encode_data));
     }
 
     if (!!layerDef.viz && !!layerDef.viz.value) {
@@ -43,10 +61,22 @@ async function initialize() {
     layer = new carto.viz.Layer(source, style);
 
     if (!!layerDef.interactivity.hover) {
+      for (const hover of layerDef.interactivity.hover) {
+        if (typeof hover.format === 'string') {
+            hover.format = d3.format(hover.format);
+        }
+      }
+
       await layer.setPopupHover(layerDef.interactivity.hover);
     }
 
     if (!!layerDef.interactivity.click) {
+      for (const hover of layerDef.interactivity.hover) {
+        if (typeof hover.format === 'string') {
+            hover.format = d3.format(hover.format);
+        }
+      }
+
       await layer.setPopupClick(layerDef.interactivity.click);
     }
 
@@ -54,10 +84,21 @@ async function initialize() {
 
     let widgetI = 0;
     for (const widgetDef of layerDef.widgets) {
+      widgetMode = widgetDef.is_global ? {
+        spatialFilter: 'global'
+      } : {
+        spatialFilter: 'viewport',
+        mode: 'fast'
+      };
+
+      if (typeof widgetDef.options.format === 'string') {
+        widgetDef.options.format = d3.format(widgetDef.options.format);
+      }
+
       if (widgetDef.type === 'category') {
         dataview = new carto.viz.dataview.Category(layer, widgetDef.value, {
           operation: 'count',
-          mode: widgetDef.is_global ? GLOBAL : LOCAL
+          ...widgetMode
         });
 
         new carto.viz.widget.Category(`as-category-widget#layer${layerI}_widget${widgetI}`, dataview, {
@@ -69,7 +110,7 @@ async function initialize() {
       } else if (widgetDef.type === 'formula') {
         dataview = new carto.viz.dataview.Formula(layer, widgetDef.value, {
           operation: widgetDef.operation,
-          mode: widgetDef.is_global ? GLOBAL : LOCAL
+          ...widgetMode
         });
 
         new carto.viz.widget.Formula(`as-formula-widget#layer${layerI}_widget${widgetI}`, dataview, {
@@ -78,10 +119,9 @@ async function initialize() {
 
       } else if (widgetDef.type === 'histogram') {
         dataview = new carto.viz.dataview.Histogram(layer, widgetDef.value, {
-            bins: widgetDef.options.buckets,
-            mode: widgetDef.is_global ? GLOBAL : LOCAL
-          }
-        );
+          bins: widgetDef.options.buckets,
+          ...widgetMode
+        });
 
         new carto.viz.widget.Histogram(`as-histogram-widget#layer${layerI}_widget${widgetI}`, dataview, {
           showClear: true,

@@ -6,13 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
 
-  <!-- Include CARTO VL or Web-SDK -->
-  {% if render == 'carto-vl' %}
-    <script src="{{carto_vl_path}}"></script>
-  {% else %}
-    <script src="https://unpkg.com/deck.gl@8.2.0/dist.min.js"></script>
-    <script src="{{web_sdk_path}}"></script>
-  {% endif %}
+  <!-- Include Web-SDK -->
+  <script src="https://unpkg.com/deck.gl@8.2.0/dist.min.js"></script>
+  <script src="{{web_sdk_path}}"></script>
 
   <!-- Include Mapbox -->
   <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js"></script>
@@ -31,6 +27,9 @@
 
   <!-- pako -->
   <script src="https://libs.cartocdn.com/cartoframes/dependencies/pako_inflate.min.js"></script>
+
+  <!-- d3 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-format/1.3.0/d3-format.min.js"></script>
 
   <!-- html2canvas -->
   {% if is_static %}
@@ -77,16 +76,7 @@
   {% include 'templates/error/basic.html.j2' %}
 </body>
 
-{% if render == 'carto-vl' %}
-  <script>
-    {% include 'src/bundle.js' %}
-  </script>
-  <script>
-    {% include 'init_carto_vl.js.j2' %}
-  </script>
-{% else %}
-  <script>
-    {% include 'init_web_sdk.js.j2' %}
-  </script>
-{% endif %}
+<script>
+  {% include 'init_web_sdk.js.j2' %}
+</script>
 </html>

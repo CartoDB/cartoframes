@@ -1,4 +1,3 @@
-from .utils import serialize_palette, get_value, prop
 from ..style import Style
 from ..legends import color_category_legend
 from ..widgets import category_widget
@@ -29,52 +28,21 @@ def color_category_style(value, top=11, cat=None, palette=None, size=None, opaci
         cartoframes.viz.style.Style
 
     """
-    func = 'buckets' if cat else 'top'
-    default_palette = 'bold'
-    animation_filter = 'animation(linear({}), 20, fade(1,1))'.format(prop(animate)) if animate else '1'
+    if animate:
+        raise NotImplementedError('`animate` parameter for `color_category_style` not implemented yet in WebSDK.')
 
     data = {
-        'point': {
-            'color': 'opacity(ramp({0}({1}, {2}), {3}),{4})'.format(
-                func, prop(value), cat or top,
-                serialize_palette(palette) or default_palette,
-                get_value(opacity, 1)),
-            'width': get_value(size, 'width', 'point'),
-            'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
-            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
-            'filter': animation_filter
-        },
-        'line': {
-            'color': 'opacity(ramp({0}({1}, {2}), {3}),{4})'.format(
-                func, prop(value), cat or top,
-                serialize_palette(palette) or default_palette,
-                get_value(opacity, 1)),
-            'width': get_value(size, 'width', 'line'),
-            'filter': animation_filter
-        },
-        'polygon': {
-            'color': 'opacity(ramp({0}({1}, {2}), {3}), {4})'.format(
-                func, prop(value), cat or top,
-                serialize_palette(palette) or default_palette,
-                get_value(opacity, 0.9)
-            ),
-            'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
-            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon'),
-            'filter': animation_filter
-        },
-        'web-sdk': {
-            'name': 'colorCategoriesStyle',
-            'value': value,
-            'properties': {
-                'top': top,
-                'cat': cat,
-                'palette': palette,
-                'size': size,
-                'opacity': opacity,
-                'strokeColor': stroke_color,
-                'strokeWidth': stroke_width,
-                'animate': animate
-            }
+        'name': 'colorCategoriesStyle',
+        'value': value,
+        'properties': {
+            'top': top,
+            'cat': cat,
+            'palette': palette,
+            'size': size,
+            'opacity': opacity,
+            'strokeColor': stroke_color,
+            'strokeWidth': stroke_width,
+            'animate': animate
         }
     }
 

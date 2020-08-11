@@ -1,4 +1,3 @@
-from .utils import get_value, prop
 from ..style import Style
 from ..legends import size_category_legend
 from ..widgets import category_widget
@@ -29,42 +28,21 @@ def size_category_style(value, top=5, cat=None, size_range=None, color=None, opa
         cartoframes.viz.style.Style
 
     """
-    func = 'buckets' if cat else 'top'
-    animation_filter = 'animation(linear({}), 20, fade(1,1))'.format(prop(animate)) if animate else '1'
-    opacity = opacity if opacity else '0.8'
+    if animate:
+        raise NotImplementedError('`animate` parameter for `size_category_style` not implemented yet in WebSDK.')
 
     data = {
-        'point': {
-            'color': 'opacity({0}, {1})'.format(
-                get_value(color, '#F46D43'),
-                get_value(opacity, 1)),
-            'width': 'ramp({0}({1}, {2}), {3})'.format(
-                func, prop(value), cat or top, size_range or [2, 20]),
-            'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
-            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
-            'filter': animation_filter
-        },
-        'line': {
-            'color': 'opacity({0}, {1})'.format(
-                get_value(color, 'color', 'line'),
-                get_value(opacity, 1)),
-            'width': 'ramp({0}({1}, {2}), {3})'.format(
-                func, prop(value), cat or top, size_range or [1, 10]),
-            'filter': animation_filter
-        },
-        'web-sdk': {
-            'name': 'sizeCategoriesStyle',
-            'value': value,
-            'properties': {
-                'top': top,
-                'cat': cat,
-                'sizeRange': size_range,
-                'color': color,
-                'opacity': opacity,
-                'strokeColor': stroke_color,
-                'strokeWidth': stroke_width,
-                'animate': animate
-            }
+        'name': 'sizeCategoriesStyle',
+        'value': value,
+        'properties': {
+            'top': top,
+            'cat': cat,
+            'sizeRange': size_range,
+            'color': color,
+            'opacity': opacity,
+            'strokeColor': stroke_color,
+            'strokeWidth': stroke_width,
+            'animate': animate
         }
     }
 

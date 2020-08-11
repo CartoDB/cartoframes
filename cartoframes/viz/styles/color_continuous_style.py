@@ -1,4 +1,3 @@
-from .utils import serialize_palette, get_value, prop
 from ..style import Style
 from ..legends import color_continuous_legend
 from ..widgets import histogram_widget
@@ -30,56 +29,21 @@ def color_continuous_style(value, size=None, range_min=None, range_max=None, pal
         cartoframes.viz.style.Style
 
     """
-    default_palette = 'bluyl'
-    animation_filter = 'animation(linear({}), 20, fade(1,1))'.format(prop(animate)) if animate else '1'
-
-    if range_min is None:
-        range_min = 'globalMIN({0})'.format(prop(value))
-
-    if range_max is None:
-        range_max = 'globalMAX({0})'.format(prop(value))
+    if animate:
+        raise NotImplementedError('`animate` parameter for `color_continuous_style` not implemented yet in WebSDK.')
 
     data = {
-        'point': {
-            'color': 'opacity(ramp(linear({0}, {1}, {2}), {3}), {4})'.format(
-                prop(value), range_min, range_max,
-                serialize_palette(palette) or default_palette,
-                get_value(opacity, 1)),
-            'width': get_value(size, 'width', 'point'),
-            'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
-            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
-            'filter': animation_filter
-        },
-        'line': {
-            'color': 'opacity(ramp(linear({0}, {1}, {2}), {3}), {4})'.format(
-                prop(value), range_min, range_max,
-                serialize_palette(palette) or default_palette,
-                get_value(opacity, 1)),
-            'width': get_value(size, 'width', 'line'),
-            'filter': animation_filter
-        },
-        'polygon': {
-            'color': 'opacity(ramp(linear({0}, {1}, {2}), {3}), {4})'.format(
-                prop(value), range_min, range_max,
-                serialize_palette(palette) or default_palette,
-                get_value(opacity, 0.9)),
-            'strokeColor': get_value(stroke_color, 'strokeColor', 'polygon'),
-            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'polygon'),
-            'filter': animation_filter
-        },
-        'web-sdk': {
-            'name': 'colorContinuousStyle',
-            'value': value,
-            'properties': {
-                'size': size,
-                'rangeMin': range_min,
-                'rangeMax': range_max,
-                'palette': palette,
-                'opacity': opacity,
-                'strokeColor': stroke_color,
-                'strokeWidth': stroke_width,
-                'animate': animate
-            }
+        'name': 'colorContinuousStyle',
+        'value': value,
+        'properties': {
+            'size': size,
+            'rangeMin': range_min,
+            'rangeMax': range_max,
+            'palette': palette,
+            'opacity': opacity,
+            'strokeColor': stroke_color,
+            'strokeWidth': stroke_width,
+            'animate': animate
         }
     }
 

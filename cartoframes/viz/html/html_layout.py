@@ -19,21 +19,21 @@ class HTMLLayout(object):
         self.html = None
         self._template = self._env.get_template(template_path)
 
-    def set_content(self, maps, size=None, show_info=None, theme=None, _carto_vl_path=None,
+    def set_content(self, maps, size=None, show_info=None, theme=None, _web_sdk_path=None,
                     _airship_path=None, title='CARTOframes', is_embed=False,
                     is_static=False, map_height=None, full_height=False, n_size=None, m_size=None):
         self.html = self._parse_html_content(
-            maps, size, show_info, theme, _carto_vl_path, _airship_path, title,
+            maps, size, show_info, theme, _web_sdk_path, _airship_path, title,
             is_embed, is_static, map_height, full_height, n_size, m_size)
 
-    def _parse_html_content(self, maps, size, show_info=None, theme=None, _carto_vl_path=None,
+    def _parse_html_content(self, maps, size, show_info=None, theme=None, _web_sdk_path=None,
                             _airship_path=None, title=None, is_embed=False, is_static=False,
                             map_height=None, full_height=False, n_size=None, m_size=None):
 
-        if _carto_vl_path is None:
-            carto_vl_path = constants.CARTO_VL_URL
+        if _web_sdk_path is None:
+            web_sdk_path = constants.WEB_SDK_URL
         else:
-            carto_vl_path = _carto_vl_path + constants.CARTO_VL_DEV
+            web_sdk_path = _web_sdk_path + constants.WEB_SDK_DEV
 
         if _airship_path is None:
             airship_components_path = constants.AIRSHIP_COMPONENTS_URL
@@ -54,7 +54,7 @@ class HTMLLayout(object):
             maps=maps,
             show_info=show_info,
             theme=theme,
-            carto_vl_path=carto_vl_path,
+            web_sdk_path=web_sdk_path,
             airship_components_path=airship_components_path,
             airship_module_path=airship_module_path,
             airship_bridge_path=airship_bridge_path,

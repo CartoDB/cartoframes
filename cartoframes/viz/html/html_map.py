@@ -26,19 +26,19 @@ class HTMLMap(object):
 
     def set_content(
             self, size, layers, bounds, camera=None, basemap=None, show_info=None,
-            theme=None, _render='carto-vl', _carto_vl_path=None, _web_sdk_path=None,
+            theme=None, _web_sdk_path=None,
             _airship_path=None, title='CARTOframes', description=None,
             is_embed=False, is_static=False, layer_selector=False):
 
         self.html = self._parse_html_content(
             size, layers, bounds, camera, basemap,
-            show_info, theme, _render, _carto_vl_path, _web_sdk_path, _airship_path, title, description,
+            show_info, theme, _web_sdk_path, _airship_path, title, description,
             is_embed, is_static, layer_selector)
 
     def _parse_html_content(
             self, size, layers, bounds, camera=None,
             basemap=None, show_info=None,
-            theme=None, _render=None, _carto_vl_path=None, _web_sdk_path=None, _airship_path=None,
+            theme=None, _web_sdk_path=None, _airship_path=None,
             title=None, description=None, is_embed=False, is_static=False, layer_selector=False):
 
         token = ''
@@ -63,11 +63,6 @@ class HTMLMap(object):
                 raise ValueError(
                     'If basemap is a dict, it must have a `style` key'
                 )
-
-        if _carto_vl_path is None:
-            carto_vl_path = constants.CARTO_VL_URL
-        else:
-            carto_vl_path = _carto_vl_path + constants.CARTO_VL_DEV
 
         if _web_sdk_path is None:
             web_sdk_path = constants.WEB_SDK_URL
@@ -103,8 +98,6 @@ class HTMLMap(object):
             has_widgets=has_widgets,
             show_info=show_info,
             theme=theme,
-            render=_render,
-            carto_vl_path=carto_vl_path,
             web_sdk_path=web_sdk_path,
             airship_components_path=airship_components_path,
             airship_module_path=airship_module_path,

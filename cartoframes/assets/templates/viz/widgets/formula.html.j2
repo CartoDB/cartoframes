@@ -1,24 +1,9 @@
 <div>
-  {% if render == 'carto-vl' %}
-    <as-widget-header
-      header="{{widget.title}}"
-      subheader="{{widget.description}}">
-    </as-widget-header>
-
-    <p class="as-title as-m--4 as-p--0 as-font--medium" id="{{id}}-value">
-      <span class="as-loading as-loading--s">
-        <svg viewBox="0 0 50 50">
-          <circle cx="25" cy="25" r="20" fill="none" />
-        </svg>
-      </span>
-    </p>
-  {% else %}
-    <as-formula-widget
-      id="{{id}}"
-      description="{{widget.description}}"
-      heading="{{widget.title}}">
-    </as-formula-widget>
-  {% endif %}
+  <as-formula-widget
+    id="{{id}}"
+    description="{{widget.description}}"
+    heading="{{widget.title}}">
+  </as-formula-widget>
   {% if widget.footer %}
     <footer>{{widget.footer | safe }}</footer>
   {% endif %}

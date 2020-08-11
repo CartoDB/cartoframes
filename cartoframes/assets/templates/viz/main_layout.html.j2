@@ -4,11 +4,13 @@
   <title>{{title}}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
-  <!-- Include CARTO VL JS -->
-  <script src="{{carto_vl_path}}"></script>
-  <!-- Include Mapbox GL JS -->
+
+  <!-- Include Web-SDK -->
+  <script src="https://unpkg.com/deck.gl@8.2.0/dist.min.js"></script>
+  <script src="{{web_sdk_path}}"></script>
+
+  <!-- Include Mapbox GL -->
   <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js"></script>
-  <!-- Include Mapbox GL CSS -->
   <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.css" rel="stylesheet" />
 
   <!-- Include Airship -->
@@ -24,6 +26,9 @@
 
   <!-- pako -->
   <script src="https://libs.cartocdn.com/cartoframes/dependencies/pako_inflate.min.js"></script>
+
+  <!-- d3 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-format/1.3.0/d3-format.min.js"></script>
 
   <!-- base64-js -->
   <script src='https://libs.cartocdn.com/cartoframes/dependencies/base64.js'></script>
@@ -89,10 +94,8 @@
 
   {% include 'templates/error/basic.html.j2' %}
 </body>
+
 <script>
-  {% include 'src/bundle.js' %}
-</script>
-<script>
-  {% include 'init_layout.js.j2' %}
+  {% include 'init_web_sdk.js.j2' %}
 </script>
 </html>
