@@ -1,7 +1,7 @@
 WEB_SDK_VERSION = 'v1.0.0-alpha.2'
 WEB_SDK_DEV = '/dist/web-sdk.js'
 # WEB_SDK_URL = 'https://libs.cartocdn.com/web-sdk/{}/index.min.js'.format(WEB_SDK_VERSION)
-WEB_SDK_URL = 'https://web-sdk.now.sh/dist/umd/index.min.js'
+WEB_SDK_URL = 'https://web-sdk-git-feature-ch95759legends-add-custom-options.carto-frontend.vercel.app/dist/umd/index.min.js'
 
 AIRSHIP_VERSION = 'v2.4.0'
 AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
