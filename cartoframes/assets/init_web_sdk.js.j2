@@ -2,23 +2,27 @@ const GLOBAL_FILTER = 'global';
 const LOCAL_FILTER = 'viewport';
 const LOCAL_MODE = 'fast';
 
+// Removing the 'Style' suffix from the suffix name
 function cleanStyleName(name) {
   return name.replace('Style', '');
 }
 
+// Decoding encoding GeoJSON
 function decodeJSONData(data, encodeData) {
   try {
     if (encodeData) {
-      const decodedJSON = pako.inflate(atob(data), { to: 'string' });
+      const decodedJSON = pako.inflate(atob(data), {to: 'string'});
       return JSON.parse(decodedJSON);
+
     } else {
       return JSON.parse(data);
     }
+
   } catch(error) {
     throw new Error(`
-    Error: "${error}". CARTOframes is not able to parse your local data because it is too large.
-    Please, disable the data compresion with encode_data=False in your Layer class.
-  `);
+      Error: "${error}". CARTOframes is not able to parse your local data because it is too large.
+      Please, disable the data compresion with encode_data=False in your Layer class.
+    `);
   }
 }
 
@@ -33,7 +37,6 @@ async function initialize() {
   let layer = null;
   let source = null;
   let style = null;
-  let styleName = null;
   let widgetMode = null;
 
   const deckMap = carto.viz.createMap({
@@ -43,23 +46,37 @@ async function initialize() {
 
   let layerI = layersDef.length - 1;  // Their "IDs" are reversed
   for (const layerDef of layersDef) {
+
+    // Source
+    // CAROT source
     if (layerDef.type === 'Query') {
       credentials = new carto.auth.Credentials(layerDef.credentials.username, layerDef.credentials.api_key, layerDef.credentials.base_url);
       source = new carto.viz.source.SQL(layerDef.data, {credentials});
 
+    // GeoJSON source for DataFrames
     } else {
       source = new carto.viz.source.GeoJSON(decodeJSONData(layerDef.data, layerDef.encode_data));
     }
 
+    // Style
+    // Style from variable
     if (!!layerDef.viz && !!layerDef.viz.value) {
       style = carto.viz.style[cleanStyleName(layerDef.viz.name)](layerDef.viz.value, layerDef.viz.options);
 
+    // Style from no variable
     } else if (!!layerDef.viz) {
       style = carto.viz.style[cleanStyleName(layerDef.viz.name)](layerDef.viz.options);
+
+    // No style
+    } else {
+      style = null;
     }
 
-    layer = new carto.viz.Layer(source, style);
+    // Layer
+    layer = style ? new carto.viz.Layer(source, style) : new carto.viz.Layer(source);
 
+    // Interactivity
+    // Hover interactivity
     if (!!layerDef.interactivity.hover) {
       for (const hover of layerDef.interactivity.hover) {
         if (typeof hover.format === 'string') {
@@ -70,6 +87,7 @@ async function initialize() {
       await layer.setPopupHover(layerDef.interactivity.hover);
     }
 
+    // Click interactivity
     if (!!layerDef.interactivity.click) {
       for (const hover of layerDef.interactivity.hover) {
         if (typeof hover.format === 'string') {
@@ -82,8 +100,11 @@ async function initialize() {
 
     await layer.addTo(deckMap);
 
+    // Widgets
     let widgetI = 0;
     for (const widgetDef of layerDef.widgets) {
+
+      // Widget mode
       widgetMode = widgetDef.is_global ? {
         spatialFilter: 'global'
       } : {
@@ -91,10 +112,12 @@ async function initialize() {
         mode: 'fast'
       };
 
+      // Widget format
       if (typeof widgetDef.options.format === 'string') {
         widgetDef.options.format = d3.format(widgetDef.options.format);
       }
 
+      // Category widget
       if (widgetDef.type === 'category') {
         dataview = new carto.viz.dataview.Category(layer, widgetDef.value, {
           operation: 'count',
@@ -107,6 +130,7 @@ async function initialize() {
           format: widgetDef.options.format
         });
 
+      // Formula widget
       } else if (widgetDef.type === 'formula') {
         dataview = new carto.viz.dataview.Formula(layer, widgetDef.value, {
           operation: widgetDef.operation,
@@ -117,6 +141,7 @@ async function initialize() {
           format: widgetDef.options.format
         });
 
+      // Histogram widget
       } else if (widgetDef.type === 'histogram') {
         dataview = new carto.viz.dataview.Histogram(layer, widgetDef.value, {
           bins: widgetDef.options.buckets,
@@ -133,11 +158,16 @@ async function initialize() {
       widgetI++;
     }
 
-    new carto.viz.Legend('as-legend-color-category-point', layer, {label: 'manolo'});
+    // Legends
+    // TODO: layer i, map j, legend k
+    // TODO: Format
+    console.log(layerDef);
+    new carto.viz.Legend('#layer0_map0_legend0', layer);
 
     layerI--;
   }
 
+  // Setting the right zoom and center, and optional pitch and bearing
   const viewport = deckMap.getViewports()[0];
   const {longitude, latitude, zoom} = viewport.fitBounds(bounds);
   const viewState = Object.assign({}, {longitude, latitude, zoom}, camera);
