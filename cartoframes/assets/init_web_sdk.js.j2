@@ -2,11 +2,6 @@ const GLOBAL_FILTER = 'global';
 const LOCAL_FILTER = 'viewport';
 const LOCAL_MODE = 'fast';
 
-// Removing the 'Style' suffix from the suffix name
-function cleanStyleName(name) {
-  return name.replace('Style', '');
-}
-
 // Decoding encoding GeoJSON
 function decodeJSONData(data, encodeData) {
   try {
@@ -39,12 +34,16 @@ async function initialize() {
   let style = null;
   let widgetMode = null;
 
+  let layerI = 0;
+  let legendI = 0;
+  let widgetI = 0;
+
   const deckMap = carto.viz.createMap({
     basemap: basemap,
     viewState: camera
   });
 
-  let layerI = layersDef.length - 1;  // Their "IDs" are reversed
+  layerI = layersDef.length - 1;  // Their "IDs" are reversed
   for (const layerDef of layersDef) {
 
     // Source
@@ -61,11 +60,11 @@ async function initialize() {
     // Style
     // Style from variable
     if (!!layerDef.viz && !!layerDef.viz.value) {
-      style = carto.viz.style[cleanStyleName(layerDef.viz.name)](layerDef.viz.value, layerDef.viz.options);
+      style = carto.viz.style[layerDef.viz.name](layerDef.viz.value, layerDef.viz.options);
 
     // Style from no variable
     } else if (!!layerDef.viz) {
-      style = carto.viz.style[cleanStyleName(layerDef.viz.name)](layerDef.viz.options);
+      style = carto.viz.style[layerDef.viz.name](layerDef.viz.options);
 
     // No style
     } else {
@@ -101,7 +100,7 @@ async function initialize() {
     await layer.addTo(deckMap);
 
     // Widgets
-    let widgetI = 0;
+    widgetI = 0;
     for (const widgetDef of layerDef.widgets) {
 
       // Widget mode
@@ -158,11 +157,16 @@ async function initialize() {
       widgetI++;
     }
 
-    // Legends
-    // TODO: layer i, map j, legend k
-    // TODO: Format
-    console.log(layerDef);
-    new carto.viz.Legend('#layer0_map0_legend0', layer);
+    legendI = 0;
+    for (const legendDef of layerDef.legends) {
+      if (typeof legendDef.format === 'string') {
+        legendDef.format = d3.format(legendDef.format);
+      }
+
+      new carto.viz.Legend(`as-legend-${legendDef.type}#layer${layerI}_map${layerDef.map_index}_legend${legendI}`, layer, legendDef);
+
+      legendI++;
+    }
 
     layerI--;
   }

@@ -32,11 +32,15 @@ def size_continuous_style(value, size_range=None, range_min=None, range_max=None
     if animate:
         raise NotImplementedError('`animate` parameter for `size_continuous_style` not implemented yet in WebSDK.')
 
+    size_range_ = None
+    if size_range and isinstance(size_range, (list, tuple)) and len(size_range) >= 2:
+        size_range_ = [size_range[0], size_range[-1]]
+
     data = {
-        'name': 'sizeContinuousStyle',
+        'name': 'sizeContinuous',
         'value': value,
         'properties': {
-            'sizeRange': size_range,
+            'sizeRange': size_range_,
             'rangeMin': range_min,
             'rangeMax': range_max,
             'color': color,

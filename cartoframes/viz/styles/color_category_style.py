@@ -32,7 +32,7 @@ def color_category_style(value, top=11, cat=None, palette=None, size=None, opaci
         raise NotImplementedError('`animate` parameter for `color_category_style` not implemented yet in WebSDK.')
 
     data = {
-        'name': 'colorCategoriesStyle',
+        'name': 'colorCategories',
         'value': value,
         'properties': {
             'top': top,

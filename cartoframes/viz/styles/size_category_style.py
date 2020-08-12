@@ -31,13 +31,17 @@ def size_category_style(value, top=5, cat=None, size_range=None, color=None, opa
     if animate:
         raise NotImplementedError('`animate` parameter for `size_category_style` not implemented yet in WebSDK.')
 
+    size_range_ = None
+    if size_range and isinstance(size_range, (list, tuple)) and len(size_range) >= 2:
+        size_range_ = [size_range[0], size_range[-1]]
+
     data = {
-        'name': 'sizeCategoriesStyle',
+        'name': 'sizeCategories',
         'value': value,
         'properties': {
             'top': top,
             'cat': cat,
-            'sizeRange': size_range,
+            'sizeRange': size_range_,
             'color': color,
             'opacity': opacity,
             'strokeColor': stroke_color,

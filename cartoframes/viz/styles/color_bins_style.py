@@ -36,7 +36,7 @@ def color_bins_style(value, method='quantiles', bins=5, breaks=None, palette=Non
         raise NotImplementedError('`animate` parameter for `color_bins_style` not implemented yet in WebSDK.')
 
     data = {
-        'name': 'colorBinsStyle',
+        'name': 'colorBins',
         'value': value,
         'properties': {
             'method': method,

@@ -21,7 +21,7 @@ def basic_style(color=None, size=None, opacity=None, stroke_color=None, stroke_w
     """
     value = None
     data = {
-        'name': 'basicStyle',
+        'name': 'basic',
         'properties': {
             'color': color,
             'size': size,

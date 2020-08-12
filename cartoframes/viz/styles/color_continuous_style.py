@@ -33,7 +33,7 @@ def color_continuous_style(value, size=None, range_min=None, range_max=None, pal
         raise NotImplementedError('`animate` parameter for `color_continuous_style` not implemented yet in WebSDK.')
 
     data = {
-        'name': 'colorContinuousStyle',
+        'name': 'colorContinuous',
         'value': value,
         'properties': {
             'size': size,

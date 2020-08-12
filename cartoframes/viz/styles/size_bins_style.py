@@ -36,14 +36,18 @@ def size_bins_style(value, method='quantiles', bins=5, breaks=None, size_range=N
     if animate:
         raise NotImplementedError('`animate` parameter for `size_bins_style` not implemented yet in WebSDK.')
 
+    size_range_ = None
+    if size_range and isinstance(size_range, (list, tuple)) and len(size_range) >= 2:
+        size_range_ = [size_range[0], size_range[-1]]
+
     data = {
-        'name': 'sizeBinsStyle',
+        'name': 'sizeBins',
         'value': value,
         'properties': {
             'method': method,
             'bins': bins,
             'breaks': breaks,
-            'sizeRange': size_range,
+            'sizeRange': size_range_,
             'color': color,
             'opacity': opacity,
             'strokeColor': stroke_color,
