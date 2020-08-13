@@ -163,6 +163,8 @@ async function initialize() {
         legendDef.format = d3.format(legendDef.format);
       }
 
+      console.log(legendDef);
+
       new carto.viz.Legend(`as-legend-${legendDef.type}#layer${layerI}_map${layerDef.map_index}_legend${legendI}`, layer, legendDef);
 
       legendI++;
