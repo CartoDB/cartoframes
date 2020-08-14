@@ -9,7 +9,7 @@ from .style import Style
 from .widget import Widget
 from .widget_list import WidgetList
 
-from ..utils.utils import merge_dicts, extract_viz_columns
+from ..utils.utils import extract_viz_columns
 
 
 class Layer:
@@ -117,13 +117,9 @@ class Layer:
         self.widgets = self._init_widgets(widgets, default_widget, title)
         self.title = title
         self._map_index = 0
-        popups_variables = self.popups.get_variables()
-        widget_variables = self.widgets.get_variables()
-        external_variables = merge_dicts(popups_variables, widget_variables)
-        self.viz = self.style.compute_viz(external_variables)
-        viz_columns = extract_viz_columns(self.viz)
-        columns = list(set(external_variables.values()).union(set(viz_columns)))
-        self.source.compute_metadata(columns)
+        self.viz = self.style.compute_viz()
+        viz_columns = extract_viz_columns(self.popups, self.widgets, self.viz)
+        self.source.compute_metadata(viz_columns)
         self.source_type = self.source.type
         self.source_data = self.source.data
         self.bounds = bounds or self.source.bounds

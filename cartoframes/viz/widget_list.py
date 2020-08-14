@@ -36,11 +36,3 @@ class WidgetList:
                 widgets_info.append(widget.get_info())
 
         return widgets_info
-
-    def get_variables(self):
-        output = {}
-        for widget in self._widgets:
-            if widget._variable_name:
-                output[widget._variable_name] = widget._value
-
-        return output

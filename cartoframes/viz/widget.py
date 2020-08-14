@@ -1,5 +1,5 @@
 from . import constants
-from ..utils.utils import camel_dictionary, gen_variable_name
+from ..utils.utils import camel_dictionary
 
 
 class Widget:
@@ -27,7 +27,6 @@ class Widget:
         self._read_only = read_only
         self._buckets = buckets
         self._weight = weight
-        self._variable_name = gen_variable_name(self._value) if self._value else ''
         self._operation = operation
         self._format = format
         self._is_global = is_global
@@ -43,7 +42,6 @@ class Widget:
                 'type': self._type,
                 'prop': self._prop,
                 'value': self._value,
-                'variable_name': self._variable_name,
                 'operation': self._operation,
                 'title': self._title or '',
                 'description': self._description,

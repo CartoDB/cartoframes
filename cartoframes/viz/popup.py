@@ -1,6 +1,3 @@
-from ..utils.utils import gen_variable_name
-
-
 class Popup:
     """Popups can be added to each layer and displayed in the visualization when clicking or hovering
     features.

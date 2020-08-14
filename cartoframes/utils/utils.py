@@ -145,20 +145,10 @@ def pg2dtypes(pgtype):
     return mapping.get(str(pgtype), 'object')
 
 
-def gen_variable_name(value):
-    return 'v' + get_hash(value)[:6]
-
-
 def get_hash(text):
     h = hashlib.sha1()
     h.update(text.encode('utf-8'))
     return h.hexdigest()
-
-
-def merge_dicts(dict1, dict2):
-    d = dict1.copy()
-    d.update(dict2)
-    return d
 
 
 def text_match(regex, text):
@@ -393,8 +383,11 @@ def create_hash(value):
     return hashlib.md5(str(value).encode()).hexdigest()
 
 
-def extract_viz_columns(viz):
-    return [viz.get('name')] if viz and viz.get('name') else []
+def extract_viz_columns(popups, widgets, viz):
+    popups_columns = [popup._value for popup in popups._popups]
+    widgets_columns = [widget._value for widget in widgets._widgets]
+    viz_columns = [viz.get('value')] if viz and viz.get('value') else []
+    return list(set(popups_columns + widgets_columns + viz_columns))
 
 
 def get_local_time():

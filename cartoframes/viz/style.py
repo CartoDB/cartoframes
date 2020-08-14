@@ -36,7 +36,7 @@ class Style:
     def default_popup_click(self):
         return self._default_popup_click
 
-    def compute_viz(self, variables={}):
+    def compute_viz(self):
         if not self._style:
             return None
 

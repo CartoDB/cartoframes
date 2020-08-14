@@ -88,9 +88,9 @@ async function initialize() {
 
     // Click interactivity
     if (!!layerDef.interactivity.click) {
-      for (const hover of layerDef.interactivity.hover) {
-        if (typeof hover.format === 'string') {
-            hover.format = d3.format(hover.format);
+      for (const click of layerDef.interactivity.click) {
+        if (typeof click.format === 'string') {
+            click.format = d3.format(click.format);
         }
       }
 
@@ -162,8 +162,6 @@ async function initialize() {
       if (typeof legendDef.format === 'string') {
         legendDef.format = d3.format(legendDef.format);
       }
-
-      console.log(legendDef);
 
       new carto.viz.Legend(`as-legend-${legendDef.type}#layer${layerI}_map${layerDef.map_index}_legend${legendI}`, layer, legendDef);
 
