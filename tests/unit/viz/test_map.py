@@ -227,7 +227,7 @@ class TestMapPublication(object):
         self.assert_kuviz_dict(kuviz_dict, name, 'public')
         mock_set_content.assert_called_once_with(
             _airship_path=None,
-            _carto_vl_path=None,
+            _web_sdk_path=None,
             basemap='Positron',
             bounds=[[-180, -90], [180, 90]],
             camera=None,
@@ -263,7 +263,7 @@ class TestMapPublication(object):
         self.assert_kuviz_dict(kuviz_dict, name, 'public')
         mock_set_content.assert_called_once_with(
             _airship_path=None,
-            _carto_vl_path=None,
+            _web_sdk_path=None,
             basemap='yellow',
             bounds=[[1, 4], [2, 3]],
             camera={'latitude': 50, 'zoom': 5, 'longitude': -10},

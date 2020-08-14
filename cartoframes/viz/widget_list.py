@@ -1,5 +1,4 @@
 from .widget import Widget
-from .styles.utils import prop
 
 
 class WidgetList:
@@ -30,18 +29,10 @@ class WidgetList:
         else:
             return []
 
-    def get_widgets_info(self, render='carto-vl'):
+    def get_widgets_info(self):
         widgets_info = []
         for widget in self._widgets:
             if widget:
-                widgets_info.append(widget.get_info(render))
+                widgets_info.append(widget.get_info())
 
         return widgets_info
-
-    def get_variables(self):
-        output = {}
-        for widget in self._widgets:
-            if widget._variable_name:
-                output[widget._variable_name] = prop(widget._value) if widget.has_bridge() else widget._value
-
-        return output

@@ -54,18 +54,6 @@ def dict_items(indict):
     return indict.items()
 
 
-def cssify(css_dict):
-    """Function to get CartoCSS from Python dicts"""
-    css = ''
-    for key, value in dict_items(css_dict):
-        css += '{key} {{ '.format(key=key)
-        for field, field_value in dict_items(value):
-            css += ' {field}: {field_value};'.format(field=field,
-                                                     field_value=field_value)
-        css += '} '
-    return css.strip()
-
-
 def unique_colname(suggested, existing):
     """Given a suggested column name and a list of existing names, returns
     a name that is not present at existing by prepending _ characters."""
@@ -145,20 +133,10 @@ def pg2dtypes(pgtype):
     return mapping.get(str(pgtype), 'object')
 
 
-def gen_variable_name(value):
-    return 'v' + get_hash(value)[:6]
-
-
 def get_hash(text):
     h = hashlib.sha1()
     h.update(text.encode('utf-8'))
     return h.hexdigest()
-
-
-def merge_dicts(dict1, dict2):
-    d = dict1.copy()
-    d.update(dict2)
-    return d
 
 
 def text_match(regex, text):
@@ -393,26 +371,11 @@ def create_hash(value):
     return hashlib.md5(str(value).encode()).hexdigest()
 
 
-def extract_viz_columns(viz):
-    """Extract columns prop('name') in viz"""
-    columns = []
-    viz_nocomments = remove_comments(viz)
-    viz_columns = re.findall(r'prop\([\'\"]([^\)]*)[\'\"]\)', viz_nocomments)
-    if viz_columns is not None:
-        columns += viz_columns
-    return list(set(columns))
-
-
-def remove_comments(text):
-    """Remove C-style comments"""
-    def replacer(match):
-        s = match.group(0)
-        return ' ' if s.startswith('/') else s
-    pattern = re.compile(
-        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
-        re.DOTALL | re.MULTILINE
-    )
-    return re.sub(pattern, replacer, text).strip()
+def extract_layer_columns(popups, widgets, viz):
+    popups_columns = [popup._value for popup in popups._popups] if popups else []
+    widgets_columns = [widget._value for widget in widgets._widgets] if widgets else []
+    viz_columns = [viz.get('value')] if viz and viz.get('value') else []
+    return list(set(popups_columns + widgets_columns + viz_columns))
 
 
 def get_local_time():

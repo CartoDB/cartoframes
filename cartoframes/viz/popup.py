@@ -1,6 +1,3 @@
-from ..utils.utils import gen_variable_name
-
-
 class Popup:
     """Popups can be added to each layer and displayed in the visualization when clicking or hovering
     features.
@@ -9,8 +6,7 @@ class Popup:
     Layer popup.
 
     """
-    def __init__(self, event=None, value=None, title=None, format=None, render='carto-vl'):
-        self._render = render
+    def __init__(self, event=None, value=None, title=None, format=None):
         self._init_popup(event, value, title, format)
 
     def _init_popup(self, event=None, value=None, title=None, format=None):
@@ -48,21 +44,14 @@ class Popup:
         }
 
     def _get_attrs(self):
-        attrs = {
+        return {
             'title': self._title,
-            'format': self._format
+            'format': self._format,
+            'attr': self._value
         }
-
-        if self._render == 'carto-vl':
-            attrs['name'] = gen_variable_name(self._value)
-
-        else:
-            attrs['attr'] = self._value
-
-        return attrs
 
     def _get_variable(self):
         return {
-            'name': gen_variable_name(self._value) if self._render == 'carto-vl' else self._value,
+            'name': self._value,
             'value': self._value
         }

@@ -1,4 +1,3 @@
-import json
 
 from pandas import DataFrame
 from geopandas import GeoDataFrame
@@ -163,9 +162,3 @@ class Source:
             return self.manager.get_table_names(self.query)
         elif self.type == SourceType.GEOJSON:
             return []
-
-    # Temporal function, we need to call it again when rendering a `web-sdk` map with a default (`carto-vl`) layer
-    def recreate_data(self, encode_data):
-        self.encode_data = encode_data
-        data = get_geodataframe_data(self.gdf, self.encode_data)
-        self.data = data if self.encode_data else json.loads(data)

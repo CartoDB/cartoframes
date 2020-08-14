@@ -23,7 +23,8 @@ class TestWidgetList(object):
         widget_list = WidgetList([WIDGET_A])
 
         assert widget_list._widgets[0]._type == 'formula'
-        assert widget_list._widgets[0]._value == "viewportSum(prop('amount'))"
+        assert widget_list._widgets[0]._value == 'amount'
+        assert widget_list._widgets[0]._operation == 'sum'
         assert widget_list._widgets[0]._title == '[TITLE]'
         assert widget_list._widgets[0]._description == '[description]'
         assert widget_list._widgets[0]._footer == '[footer]'
@@ -35,7 +36,8 @@ class TestWidgetList(object):
         widget_list = WidgetList([WIDGET_A, WIDGET_B])
 
         assert widget_list._widgets[0]._type == 'formula'
-        assert widget_list._widgets[0]._value == "viewportSum(prop('amount'))"
+        assert widget_list._widgets[0]._value == 'amount'
+        assert widget_list._widgets[0]._operation == 'sum'
         assert widget_list._widgets[0]._title == '[TITLE]'
         assert widget_list._widgets[0]._description == '[description]'
         assert widget_list._widgets[0]._footer == '[footer]'
@@ -66,20 +68,17 @@ class TestWidgetList(object):
         widget_list = WidgetList([WIDGET_A, WIDGET_B])
         widgets_info = widget_list.get_widgets_info()
 
-        # print(widgets_info)
-        # raise Exception('manolo')
-
         assert widgets_info == [
             {
                 'type': 'formula',
-                'value': "viewportSum(prop('amount'))",
+                'value': 'amount',
+                'operation': 'sum',
                 'title': '[TITLE]',
                 'prop': '',
                 'description': '[description]',
                 'footer': '[footer]',
                 'has_bridge': False,
                 'is_global': False,
-                'variable_name': 'vdb8cc1',
                 'options': {
                     'readOnly': False,
                     'buckets': 20,
@@ -90,13 +89,13 @@ class TestWidgetList(object):
             }, {
                 'type': 'basic',
                 'title': 'Custom Info',
-                'value': '',
+                'value': None,
+                'operation': None,
                 'prop': '',
-                'description': '',
+                'description': None,
                 'footer': '',
                 'has_bridge': False,
                 'is_global': False,
-                'variable_name': '',
                 'options': {
                     'readOnly': False,
                     'buckets': 20,

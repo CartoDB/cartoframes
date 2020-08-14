@@ -1,11 +1,7 @@
-CARTO_VL_VERSION = 'v1.4'
-CARTO_VL_DEV = '/dist/carto-vl.js'
-CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/{}/carto-vl.min.js'.format(CARTO_VL_VERSION)
-
-# TODO: Set the right values
-WEB_SDK_VERSION = 'v1.0.0-alpha.0'
+WEB_SDK_VERSION = 'v1.0.0-alpha.2'
 WEB_SDK_DEV = '/dist/web-sdk.js'
-WEB_SDK_URL = 'https://libs.cartocdn.com/web-sdk/{}/index.min.js'.format(WEB_SDK_VERSION)
+# WEB_SDK_URL = 'https://libs.cartocdn.com/web-sdk/{}/index.min.js'.format(WEB_SDK_VERSION)
+WEB_SDK_URL = 'https://web-sdk-git-feature-ch95759legends-add-custom-options.carto-frontend.vercel.app/dist/umd/index.min.js'  # noqa
 
 AIRSHIP_VERSION = 'v2.4.0'
 AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
@@ -120,5 +116,3 @@ CLUSTER_OPERATIONS = {
 THEMES = ['dark', 'light']
 
 DEFAULT_LAYOUT_M_SIZE = 1
-
-RENDERERS = ['carto-vl', 'web-sdk']

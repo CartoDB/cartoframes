@@ -1,6 +1,5 @@
 from . import constants
-from ..utils.utils import camel_dictionary, gen_variable_name
-from ..viz.styles.utils import prop as utils_prop
+from ..utils.utils import camel_dictionary
 
 
 class Widget:
@@ -20,8 +19,7 @@ class Widget:
         self._check_type(widget_type)
 
         self._type = widget_type
-        self._value_original = value
-        self._value = self._get_formula_value_expression(widget_type, value, operation, is_global)
+        self._value = value
         self._title = title
         self._description = description
         self._footer = footer
@@ -29,7 +27,6 @@ class Widget:
         self._read_only = read_only
         self._buckets = buckets
         self._weight = weight
-        self._variable_name = gen_variable_name(self._value) if self._value else ''
         self._operation = operation
         self._format = format
         self._is_global = is_global
@@ -39,26 +36,20 @@ class Widget:
         if title is not None:
             self._title = title
 
-    def get_info(self, render='carto-vl'):
+    def get_info(self):
         if self._type or self._title or self._description or self._footer:
-            info = {
+            return {
                 'type': self._type,
                 'prop': self._prop,
-                'value': self._value or '',
-                'variable_name': self._variable_name,
+                'value': self._value,
+                'operation': self._operation,
                 'title': self._title or '',
-                'description': self._description or '',
+                'description': self._description,
                 'footer': self._footer or '',
                 'has_bridge': self.has_bridge(),
                 'is_global': self._is_global,
                 'options': self._options
             }
-
-            if self._type == 'formula' and render != 'carto-vl':
-                info['value'] = self._value_original
-                info['operation'] = self._operation
-
-            return info
 
         else:
             return {}
@@ -90,24 +81,3 @@ class Widget:
         }
 
         return camel_dictionary(options)
-
-    @classmethod
-    def _get_formula_value_expression(cls, widget_type, value, operation, is_global):
-        if widget_type != 'formula':
-            return value
-
-        if value == 'count':
-            formula_operation = cls._get_formula_operation(value, is_global)
-            return formula_operation + '()'
-        elif operation in ['avg', 'max', 'min', 'sum']:
-            formula_operation = cls._get_formula_operation(operation, is_global)
-            return formula_operation + '(' + utils_prop(value) + ')'
-        else:
-            return utils_prop(value)
-
-    @staticmethod
-    def _get_formula_operation(value_operation, is_global):
-        if is_global:
-            return constants.FORMULA_OPERATIONS_GLOBAL.get(value_operation)
-        else:
-            return constants.FORMULA_OPERATIONS_VIEWPORT.get(value_operation)

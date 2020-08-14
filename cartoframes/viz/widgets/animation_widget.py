@@ -24,5 +24,4 @@ def animation_widget(title=None, description=None, footer=None, prop='filter'):
         ...     footer='Widget footer')
 
     """
-    return Widget('animation', None, title, description, footer,
-                  prop=prop)
+    return Widget('animation', None, title, description, footer, prop=prop)

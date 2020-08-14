@@ -1,4 +1,3 @@
-from .utils import get_value, prop
 from ..style import Style
 from ..legends import size_bins_legend
 from ..widgets import histogram_widget
@@ -34,51 +33,26 @@ def size_bins_style(value, method='quantiles', bins=5, breaks=None, size_range=N
     if method not in ('quantiles', 'equal', 'stdev'):
         raise ValueError('Available methods are: "quantiles", "equal", "stdev".')
 
-    if breaks is None:
-        func = {
-            'quantiles': 'globalQuantiles',
-            'equal': 'globalEqIntervals',
-            'stdev': 'globalStandardDev'
-        }.get(method)
-    else:
-        func = 'buckets'
-        breaks = list(breaks)
+    if animate:
+        raise NotImplementedError('`animate` parameter for `size_bins_style` not implemented yet in WebSDK.')
 
-    animation_filter = 'animation(linear({}), 20, fade(1,1))'.format(prop(animate)) if animate else '1'
+    size_range_ = None
+    if size_range and isinstance(size_range, (list, tuple)) and len(size_range) >= 2:
+        size_range_ = [size_range[0], size_range[-1]]
 
     data = {
-        'point': {
-            'color': 'opacity({0}, {1})'.format(
-                get_value(color, '#EE5D5A'),
-                get_value(opacity, 0.8)),
-            'width': 'ramp({0}({1}, {2}), {3})'.format(
-                func, prop(value), breaks or bins, size_range or [2, 14]),
-            'strokeColor': get_value(stroke_color, 'strokeColor', 'point'),
-            'strokeWidth': get_value(stroke_width, 'strokeWidth', 'point'),
-            'filter': animation_filter
-        },
-        'line': {
-            'color': 'opacity({0}, {1})'.format(
-                get_value(color, 'color', 'line'),
-                get_value(opacity, 0.8)),
-            'width': 'ramp({0}({1}, {2}), {3})'.format(
-                func, prop(value), breaks or bins, size_range or [1, 10]),
-            'filter': animation_filter
-        },
-        'web-sdk': {
-            'name': 'sizeBinsStyle',
-            'value': value,
-            'properties': {
-                'method': method,
-                'bins': bins,
-                'breaks': breaks,
-                'sizeRange': size_range,
-                'color': color,
-                'opacity': opacity,
-                'strokeColor': stroke_color,
-                'strokeWidth': stroke_width,
-                'animate': animate
-            }
+        'name': 'sizeBins',
+        'value': value,
+        'properties': {
+            'method': method,
+            'bins': bins,
+            'breaks': breaks,
+            'sizeRange': size_range_,
+            'color': color,
+            'opacity': opacity,
+            'strokeColor': stroke_color,
+            'strokeWidth': stroke_width,
+            'animate': animate
         }
     }
 

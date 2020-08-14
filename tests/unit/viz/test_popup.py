@@ -27,7 +27,7 @@ class TestPopup(object):
         assert popup_click_1.interactivity == {
             'event': 'click',
             'attrs': {
-                'name': 'v4f197c',
+                'attr': 'pop',
                 'title': 'pop',
                 'format': None
             }
@@ -36,7 +36,7 @@ class TestPopup(object):
         assert popup_hover_1.interactivity == {
             'event': 'hover',
             'attrs': {
-                'name': 'v4f197c',
+                'attr': 'pop',
                 'title': 'Pop',
                 'format': None
             }
@@ -49,12 +49,12 @@ class TestPopup(object):
         popup_hover_1 = Popup('hover', 'pop', 'Pop')
 
         assert popup_click_1.variable == {
-            'name': 'v4f197c',
+            'name': 'pop',
             'value': 'pop'
         }
 
         assert popup_hover_1.variable == {
-            'name': 'v4f197c',
+            'name': 'pop',
             'value': 'pop'
         }
 

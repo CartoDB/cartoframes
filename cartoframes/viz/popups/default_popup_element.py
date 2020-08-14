@@ -6,7 +6,7 @@ def default_popup_element(title=None, operation=None, format=None):
         title (str, optional): Title for the given value. By default, it's the name of the value.
         operation (str, optional): Cluster operation, defaults to 'count'. Other options
           available are 'avg', 'min', 'max', and 'sum'.
-        format (str, optional): Format to apply to number values in the widget, based on d3-format
+        format (str, optional): Format to apply to number values in the popup, based on d3-format
             specifier (https://github.com/d3/d3-format#locale_format).
 
     Example:

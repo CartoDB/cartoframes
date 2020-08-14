@@ -4,12 +4,12 @@ from .legend import Legend
 from .legend_list import LegendList
 from .popup import Popup
 from .popup_list import PopupList
-from .source import Source, SourceType
+from .source import Source
 from .style import Style
 from .widget import Widget
 from .widget_list import WidgetList
 
-from ..utils.utils import merge_dicts, extract_viz_columns
+from ..utils.utils import extract_layer_columns
 
 
 class Layer:
@@ -104,35 +104,21 @@ class Layer:
                  default_popup_hover=True,
                  default_popup_click=False,
                  title=None,
-                 parent_map=None,
-                 encode_data=True,
-                 render='web-sdk'):
+                 encode_data=True):
 
-        self._render = render  # It's here because we need it pretty soon
         self.is_basemap = False
         self.default_legend = default_legend
         self.source = _set_source(source, credentials, geom_col, encode_data)
         self.style = _set_style(style)
         self.encode_data = encode_data
-        self.parent_map = None
         self.geom_type = self.source.get_geom_type()
-        self._popup_hover = popup_hover  # In `self` because we need it after
-        self._popup_click = popup_click
-        self._default_popup_hover = default_popup_hover
-        self._default_popup_click = default_popup_click  # Until here
-        self.popups = self._init_popups(
-            popup_hover, popup_click, default_popup_hover, default_popup_click, title, 'carto-vl')
+        self.popups = self._init_popups(popup_hover, popup_click, default_popup_hover, default_popup_click, title)
         self.legends = self._init_legends(legends, default_legend, title)
         self.widgets = self._init_widgets(widgets, default_widget, title)
         self.title = title
-        popups_variables = self.popups.get_variables()
-        widget_variables = self.widgets.get_variables()
-        self._external_variables = merge_dicts(popups_variables, widget_variables)  # In `self` because we need it after
         self._map_index = 0
-
-        self.viz = self.style.compute_viz(self.geom_type, self._external_variables, render='carto-vl')
-        viz_columns = extract_viz_columns(self.viz)
-
+        self.viz = self.style.compute_viz()
+        viz_columns = extract_layer_columns(self.popups, self.widgets, self.viz)
         self.source.compute_metadata(viz_columns)
         self.source_type = self.source.type
         self.source_data = self.source.data
@@ -168,7 +154,7 @@ class Layer:
 
         return WidgetList()
 
-    def _init_popups(self, popup_hover, popup_click, default_popup_hover, default_popup_click, title, render):
+    def _init_popups(self, popup_hover, popup_click, default_popup_hover, default_popup_click, title):
         popups = {}
 
         if popup_hover:
@@ -183,7 +169,7 @@ class Layer:
             popups['click'] = self.style.default_popup_click
             popups['click']['title'] = title
 
-        return _set_popups(popups, self.style.default_popup_hover, self.style.default_popup_click, render)
+        return _set_popups(popups, self.style.default_popup_hover, self.style.default_popup_click)
 
     def _set_options(self):
         date_column_names = self.source.get_datetime_column_names()
@@ -212,7 +198,7 @@ class Layer:
 
     def _repr_html_(self):
         from .map import Map
-        return Map(self, render=self._render)._repr_html_()
+        return Map(self)._repr_html_()
 
     @property
     def map_index(self):
@@ -225,25 +211,6 @@ class Layer:
         self._map_index = map_index
 
     def reset_ui(self, parent_map):
-        # TODO: Temporal fix for getting the render of the parent map and re-create the layer for the `Web-SDK`
-        self._render = parent_map._render
-
-        if self.source.type == SourceType.GEOJSON:
-            encode_data = True if parent_map._render == 'carto-vl' else False
-            self.source.recreate_data(encode_data=encode_data)
-            self.source_data = self.source.data
-
-        self.popups = self._init_popups(self._popup_hover, self._popup_click, self._default_popup_hover,
-                                        self._default_popup_click, self.title, self._render)
-        self.viz = self.style.compute_viz(self.geom_type, self._external_variables, self._render)
-        self.interactivity = self.popups.get_interactivity()
-
-        if self._render != 'carto-vl':
-            self.widgets_info = self.widgets.get_widgets_info(self._render)
-
-        # The TODO block above was only necesary only for `render='web-sdk` but because
-        # the layers can be reused we need to do it also for `render='carto-vl' layers`
-
         if parent_map.is_static:
             # Remove legends/widgets if the map is static
             self.legends = []
@@ -300,8 +267,8 @@ def _set_widgets(widgets, default_widget=None):
         return WidgetList()
 
 
-def _set_popups(popups, default_popup_hover=None, default_popup_click=None, render='carto-vl'):
+def _set_popups(popups, default_popup_hover=None, default_popup_click=None):
     if isinstance(popups, (dict, Popup)):
-        return PopupList(popups, default_popup_hover, default_popup_click, render=render)
+        return PopupList(popups, default_popup_hover, default_popup_click)
     else:
         return PopupList()

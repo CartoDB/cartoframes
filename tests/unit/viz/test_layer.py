@@ -32,7 +32,7 @@ class TestLayer(object):
         assert isinstance(layer.popups, PopupList)
         assert isinstance(layer.legends, LegendList)
         assert isinstance(layer.widgets, WidgetList)
-        assert layer.interactivity == []
+        assert layer.interactivity == {'click': None, 'hover': None}
 
     def test_initialization_simple(self, mocker):
         """Layer should initialize layer attributes"""
@@ -46,4 +46,4 @@ class TestLayer(object):
         assert isinstance(layer.popups, PopupList)
         assert isinstance(layer.legends, LegendList)
         assert isinstance(layer.widgets, WidgetList)
-        assert layer.interactivity == []
+        assert layer.interactivity == {'click': None, 'hover': None}

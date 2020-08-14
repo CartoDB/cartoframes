@@ -45,11 +45,13 @@ class Legend:
                 'prop': _prop,
                 'variable': self._variable,
                 'dynamic': self._dynamic,
-                'ascending': self._ascending,
                 'title': self._title or '',
                 'description': self._description or '',
                 'footer': self._footer or '',
-                'format': self._format
+                'format': self._format,
+                'config': {
+                    'order': 'ASC' if self._ascending else 'DESC'
+                }
             }
         else:
             return {}

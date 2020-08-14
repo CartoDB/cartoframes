@@ -32,7 +32,9 @@ class TestLegend(object):
                         footer='[footer]')
 
         assert legend.get_info() == {
-            'ascending': False,
+            'config': {
+                'order': 'DESC'
+            },
             'type': 'color-category',
             'prop': 'color',
             'title': '[title]',

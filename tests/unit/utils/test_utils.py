@@ -7,9 +7,8 @@ from collections import OrderedDict
 import requests
 import numpy as np
 
-from cartoframes.utils.utils import (camel_dictionary, cssify, debug_print, dict_items,
-                                     importify_params, snake_to_camel, dtypes2pg, pg2dtypes,
-                                     encode_row, extract_viz_columns, remove_comments)
+from cartoframes.utils.utils import (camel_dictionary, debug_print, dict_items, importify_params, snake_to_camel,
+                                     dtypes2pg, pg2dtypes, encode_row, extract_layer_columns)
 
 
 class TestUtils(unittest.TestCase):
@@ -78,46 +77,6 @@ class TestUtils(unittest.TestCase):
         self.assertDictEqual(OrderedDict(complex_style_dict),
                              self.complex_style,
                              msg="multi-layer styling")
-
-    def test_cssify(self):
-        """utils.cssify"""
-        # point style
-        point_stylecss = cssify(self.point_style)
-        self.assertEqual(point_stylecss,
-                         ("#layer['mapnik::geometry_type'=1] {  "
-                          "marker-width: 6; marker-fill: yellow; "
-                          "marker-fill-opacity: 1; marker-allow-overlap: "
-                          "true; marker-line-width: 0.5; marker-line-color: "
-                          "black; marker-line-opacity: 1;}"),
-                         msg="point style")
-
-        # polygon style
-        polygon_stylecss = cssify(self.polygon_style)
-        self.assertEqual(polygon_stylecss,
-                         ("#layer['mapnik::geometry_type'=3] {  "
-                          "polygon-fill: ramp([column], (#ffc6c4, #ee919b, "
-                          "#cc607d, #9e3963, #672044), quantiles); "
-                          "polygon-opacity: 0.9; polygon-gamma: 0.5; "
-                          "line-color: #FFF; line-width: 0.5; line-opacity: "
-                          "0.25; line-comp-op: hard-light;}"),
-                         msg="polygon style")
-
-        # complex style
-        complex_stylecss = cssify(self.complex_style)
-        self.assertEqual(complex_stylecss,
-                         ("#layer['mapnik::geometry_type'=1] {  "
-                          "marker-width: 5; marker-fill: yellow; "
-                          "marker-fill-opacity: 1; marker-allow-overlap: "
-                          "true; marker-line-width: 0.5; marker-line-color: "
-                          "black; marker-line-opacity: 1;} "
-                          "#layer['mapnik::geometry_type'=2] {  "
-                          "line-width: 1.5; line-color: black;} "
-                          "#layer['mapnik::geometry_type'=3] {  "
-                          "polygon-fill: blue; polygon-opacity: 0.9; "
-                          "polygon-gamma: 0.5; line-color: #FFF; line-width: "
-                          "0.5; line-opacity: 0.25; "
-                          "line-comp-op: hard-light;}"),
-                         msg="multi-layer styling")
 
     def test_importify_params(self):
         """utils.importify_params"""
@@ -210,15 +169,9 @@ class TestUtils(unittest.TestCase):
         assert encode_row(-np.inf) == b'-Infinity'
         assert encode_row(np.nan) == b'NaN'
 
-    def test_extract_viz_columns(self):
-        viz = "color: prop('hello') + prop('A_0123')"
-        assert 'hello' in extract_viz_columns(viz)
-        assert 'A_0123' in extract_viz_columns(viz)
-
-    def test_remove_comments(self):
-        viz = """
-        color: blue // This is a line comment
-        /* This is a
-           multiline comment */
-        """
-        assert remove_comments(viz) == 'color: blue'
+    def test_extract_layer_columns(self):
+        viz = {
+            'name': 'sizeBins',
+            'value': 'columns'
+        }
+        assert 'columns' in extract_layer_columns(None, None, viz)
