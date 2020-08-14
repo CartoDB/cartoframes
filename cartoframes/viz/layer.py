@@ -9,7 +9,7 @@ from .style import Style
 from .widget import Widget
 from .widget_list import WidgetList
 
-from ..utils.utils import extract_viz_columns
+from ..utils.utils import extract_layer_columns
 
 
 class Layer:
@@ -118,7 +118,7 @@ class Layer:
         self.title = title
         self._map_index = 0
         self.viz = self.style.compute_viz()
-        viz_columns = extract_viz_columns(self.popups, self.widgets, self.viz)
+        viz_columns = extract_layer_columns(self.popups, self.widgets, self.viz)
         self.source.compute_metadata(viz_columns)
         self.source_type = self.source.type
         self.source_data = self.source.data

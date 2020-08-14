@@ -23,14 +23,14 @@ class TestWidget(object):
 
         assert widget.get_info() == {
             'type': 'formula',
-            'value': "prop('amount')",
+            'value': 'amount',
             'title': '[title]',
             'description': '[description]',
             'is_global': False,
             'footer': '[footer]',
             'has_bridge': False,
             'prop': '',
-            'variable_name': 'v6476eb',
+            'operation': None,
             'options': {
                 'readOnly': False,
                 'buckets': 20,
@@ -56,12 +56,12 @@ class TestWidget(object):
         assert widget.get_info() == {
             'type': 'animation',
             'title': '',
-            'value': '',
-            'description': '',
+            'value': None,
+            'description': None,
             'footer': '',
             'has_bridge': True,
             'prop': 'filter',
-            'variable_name': '',
+            'operation': None,
             'options': {
                 'readOnly': False,
                 'buckets': 20,
@@ -79,13 +79,13 @@ class TestWidget(object):
         assert widget.get_info() == {
             'type': 'animation',
             'title': '',
-            'value': '',
-            'description': '',
+            'value': None,
+            'description': None,
             'footer': '',
             'has_bridge': True,
             'prop': 'width',
             'is_global': False,
-            'variable_name': '',
+            'operation': None,
             'options': {
                 'readOnly': False,
                 'buckets': 20,

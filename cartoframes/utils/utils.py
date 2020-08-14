@@ -54,18 +54,6 @@ def dict_items(indict):
     return indict.items()
 
 
-def cssify(css_dict):
-    """Function to get CartoCSS from Python dicts"""
-    css = ''
-    for key, value in dict_items(css_dict):
-        css += '{key} {{ '.format(key=key)
-        for field, field_value in dict_items(value):
-            css += ' {field}: {field_value};'.format(field=field,
-                                                     field_value=field_value)
-        css += '} '
-    return css.strip()
-
-
 def unique_colname(suggested, existing):
     """Given a suggested column name and a list of existing names, returns
     a name that is not present at existing by prepending _ characters."""
@@ -383,9 +371,9 @@ def create_hash(value):
     return hashlib.md5(str(value).encode()).hexdigest()
 
 
-def extract_viz_columns(popups, widgets, viz):
-    popups_columns = [popup._value for popup in popups._popups]
-    widgets_columns = [widget._value for widget in widgets._widgets]
+def extract_layer_columns(popups, widgets, viz):
+    popups_columns = [popup._value for popup in popups._popups] if popups else []
+    widgets_columns = [widget._value for widget in widgets._widgets] if widgets else []
     viz_columns = [viz.get('value')] if viz and viz.get('value') else []
     return list(set(popups_columns + widgets_columns + viz_columns))
 

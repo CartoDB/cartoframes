@@ -268,6 +268,7 @@ class Map:
             is_static=self.is_static,
             is_embed=True,
             layer_selector=self.layer_selector,
+            _web_sdk_path=self._web_sdk_path,
             _airship_path=self._airship_path)
 
         return html_map.html
