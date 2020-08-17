@@ -1,0 +1,29 @@
+name: Run CARTOFrames tests
+
+on:
+  push:
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        python-version: [3.5, 3.6, 3.7, 3.8]
+
+    steps:
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+          python -m pip install --upgrade pip
+          pip install tox
+
+    - name: Test with tox
+      run: |
+        tox
