@@ -110,14 +110,18 @@ class Credentials:
         self._session = session
 
     @property
+    def me_data(self):
+        api_key_auth_client = self.get_api_key_auth_client()
+        return api_key_auth_client.send(ME_SERVICE, 'get').json()
+
+    @property
     def user_id(self):
         """Credentials user ID"""
         if not self._user_id:
             log.debug('Getting `user_id` for {}'.format(self._username))
-            api_key_auth_client = self.get_api_key_auth_client()
 
             try:
-                user_me = api_key_auth_client.send(ME_SERVICE, 'get').json()
+                user_me = self.me_data()
                 user_data = user_me.get('user_data')
                 if user_data:
                     self._user_id = user_data.get('id')
