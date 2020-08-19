@@ -108,12 +108,14 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     context_manager = ContextManager(credentials)
 
-    dataframe_size = dataframe.memory_usage(index=False, deep=True).sum()
-    remaining_byte_quota = context_manager.credentials.me_data.get('user_data').get('remaining_byte_quota')
-    if remaining_byte_quota is not None and dataframe_size > remaining_byte_quota:
-        raise CartoException('DB Quota will be exceeded. '
-                             'The remaining quota is {} bytes and the dataset size is {} bytes.'.format(
-                                remaining_byte_quota, dataframe_size))
+    if context_manager.credentials.me_data is not None and context_manager.credentials.me_data.get('user_data'):
+        dataframe_size = dataframe.memory_usage(index=False, deep=True).sum()
+        remaining_byte_quota = context_manager.credentials.me_data.get('user_data').get('remaining_byte_quota')
+
+        if remaining_byte_quota is not None and dataframe_size > remaining_byte_quota:
+            raise CartoException('DB Quota will be exceeded. '
+                                 'The remaining quota is {} bytes and the dataset size is {} bytes.'.format(
+                                    remaining_byte_quota, dataframe_size))
 
     gdf = GeoDataFrame(dataframe, copy=True)
 

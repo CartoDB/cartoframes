@@ -111,8 +111,14 @@ class Credentials:
 
     @property
     def me_data(self):
-        api_key_auth_client = self.get_api_key_auth_client()
-        return api_key_auth_client.send(ME_SERVICE, 'get').json()
+        me_data = {}
+
+        try:
+            me_data = self.get_api_key_auth_client().send(ME_SERVICE, 'get').json()
+        except Exception:
+            pass
+
+        return me_data
 
     @property
     def user_id(self):
