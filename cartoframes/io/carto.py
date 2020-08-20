@@ -70,7 +70,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 @send_metrics('data_uploaded')
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
-             cartodbfy=True, log_enabled=True):
+             cartodbfy=True, log_enabled=True, ignore_quota_warning=False):
     """Upload a DataFrame to CARTO. The geometry's CRS must be WGS 84 (EPSG:4326) so you can use it on CARTO.
 
     Args:
@@ -85,6 +85,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             uses the name of the index from the dataframe.
         cartodbfy (bool, optional): convert the table to CARTO format. Default True. More info
             `here <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
+        ignore_quota_warning (bool, optional): ignore the warning of the possible quota exceeded
+            and force the upload.
+            (The upload will still fail if the size of the dataset exceeds the remaining DB quota).
 
     Returns:
         string: the table name normalized.
@@ -108,14 +111,15 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     context_manager = ContextManager(credentials)
 
-    if context_manager.credentials.me_data is not None and context_manager.credentials.me_data.get('user_data'):
-        dataframe_size = dataframe.memory_usage(index=False, deep=True).sum()
-        remaining_byte_quota = context_manager.credentials.me_data.get('user_data').get('remaining_byte_quota')
+    if not ignore_quota_warning:
+        if context_manager.credentials.me_data is not None and context_manager.credentials.me_data.get('user_data'):
+            dataframe_size = len(dataframe.to_csv())
+            remaining_byte_quota = context_manager.credentials.me_data.get('user_data').get('remaining_byte_quota')
 
-        if remaining_byte_quota is not None and dataframe_size > remaining_byte_quota:
-            raise CartoException('DB Quota will be exceeded. '
-                                 'The remaining quota is {} bytes and the dataset size is {} bytes.'.format(
-                                    remaining_byte_quota, dataframe_size))
+            if remaining_byte_quota is not None and dataframe_size > remaining_byte_quota:
+                raise CartoException('DB Quota will be exceeded. '
+                                     'The remaining quota is {} bytes and the dataset size is {} bytes.'.format(
+                                        remaining_byte_quota, dataframe_size))
 
     gdf = GeoDataFrame(dataframe, copy=True)
 
