@@ -335,7 +335,7 @@ class ContextManager:
             COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '{null}');
         """.format(
             table_name=table_name, null=PG_NULL,
-            columns=','.join('"{c}"'.format(column.dbname) for column in columns)).strip()
+            columns=','.join('"{c}"'.format(c=column.dbname) for column in columns)).strip()
         data = _compute_copy_data(dataframe, columns)
         self.copy_client.copyfrom(query, data)
 
