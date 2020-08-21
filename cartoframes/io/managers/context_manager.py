@@ -365,14 +365,14 @@ def _drop_columns_query(table_name, columns):
     columns = ['DROP COLUMN {0}'.format(c.dbname) for c in columns if _not_reserved(c.dbname)]
     return 'ALTER TABLE {table_name} {drop_columns}'.format(
         table_name=table_name,
-        drop_columns=', '.join('"{c}"'.format(columns)))
+        drop_columns=', '.join(['"{c}"'.format(c=c) for c in columns]))
 
 
 def _add_columns_query(table_name, columns):
     columns = ['ADD COLUMN {0} {1}'.format(c.dbname, c.dbtype) for c in columns if _not_reserved(c.dbname)]
     return 'ALTER TABLE {table_name} {add_columns}'.format(
         table_name=table_name,
-        add_columns=', '.join('"{c}"'.format(columns)))
+        add_columns=', '.join(['"{c}"'.format(c=c) for c in columns]))
 
 
 def _not_reserved(column):
@@ -384,7 +384,7 @@ def _create_table_from_columns_query(table_name, columns):
     columns = ['{name} {type}'.format(name=c.dbname, type=c.dbtype) for c in columns]
     return 'CREATE TABLE {table_name} ({columns})'.format(
         table_name=table_name,
-        columns=', '.join('"{c}"'.format(columns)))
+        columns=', '.join(['"{c}"'.format(c=c) for c in columns]))
 
 
 def _create_table_from_query_query(table_name, query):
