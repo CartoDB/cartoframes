@@ -285,7 +285,9 @@ class ContextManager:
 
     def _get_copy_query(self, query, columns, limit):
         query_columns = [
-            column.name for column in columns if (column.name != 'the_geom_webmercator')]
+            '"{c}"'.format(c=column.name) for column in columns
+            if (column.name != 'the_geom_webmercator')
+        ]
 
         query = 'SELECT {columns} FROM ({query}) _q'.format(
             query=query,
@@ -333,7 +335,7 @@ class ContextManager:
             COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '{null}');
         """.format(
             table_name=table_name, null=PG_NULL,
-            columns=','.join(column.dbname for column in columns)).strip()
+            columns=','.join('"{c}"'.format(column.dbname) for column in columns)).strip()
         data = _compute_copy_data(dataframe, columns)
         self.copy_client.copyfrom(query, data)
 
@@ -363,14 +365,14 @@ def _drop_columns_query(table_name, columns):
     columns = ['DROP COLUMN {0}'.format(c.dbname) for c in columns if _not_reserved(c.dbname)]
     return 'ALTER TABLE {table_name} {drop_columns}'.format(
         table_name=table_name,
-        drop_columns=', '.join(columns))
+        drop_columns=', '.join('"{c}"'.format(columns)))
 
 
 def _add_columns_query(table_name, columns):
     columns = ['ADD COLUMN {0} {1}'.format(c.dbname, c.dbtype) for c in columns if _not_reserved(c.dbname)]
     return 'ALTER TABLE {table_name} {add_columns}'.format(
         table_name=table_name,
-        add_columns=', '.join(columns))
+        add_columns=', '.join('"{c}"'.format(columns)))
 
 
 def _not_reserved(column):
@@ -382,7 +384,7 @@ def _create_table_from_columns_query(table_name, columns):
     columns = ['{name} {type}'.format(name=c.dbname, type=c.dbtype) for c in columns]
     return 'CREATE TABLE {table_name} ({columns})'.format(
         table_name=table_name,
-        columns=', '.join(columns))
+        columns=', '.join('"{c}"'.format(columns)))
 
 
 def _create_table_from_query_query(table_name, query):
