@@ -122,7 +122,7 @@ class TestContextManager(object):
 
         # Then
         assert mock.call_args[0][0] == '''
-            COPY table_name(a,b) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+            COPY table_name("a","b") FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
         '''.strip()
         assert list(mock.call_args[0][1]) == [
             b'1|0101000020E610000000000000000000000000000000000000\n',
