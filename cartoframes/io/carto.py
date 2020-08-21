@@ -1,11 +1,12 @@
 """Functions to interact with the CARTO platform"""
+import math
 
 from pandas import DataFrame
 from geopandas import GeoDataFrame
 
 from carto.exceptions import CartoException
 
-from .managers.context_manager import ContextManager
+from .managers.context_manager import ContextManager, _compute_copy_data, get_dataframe_columns_info
 from ..utils.geom_utils import check_crs, has_geometry, set_geometry
 from ..utils.logger import log
 from ..utils.utils import is_valid_str, is_sql_query
@@ -14,6 +15,8 @@ from ..utils.metrics import send_metrics
 
 GEOM_COLUMN_NAME = 'the_geom'
 IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
+
+MAX_UPLOAD_SIZE_BYTES = 2000000000  # 2GB
 
 
 @send_metrics('data_downloaded')
@@ -93,6 +96,11 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         ValueError: if the dataframe or table name provided are wrong or the if_exists param is not valid.
 
     """
+    def estimate_csv_size(gdf):
+        n = min(100, len(gdf))
+        return len(''.join([x.decode("utf-8") for x in
+                            _compute_copy_data(gdf.sample(n=n), get_dataframe_columns_info(gdf))])) * len(gdf) / n
+
     if not isinstance(dataframe, DataFrame):
         raise ValueError('Wrong dataframe. You should provide a valid DataFrame instance.')
 
@@ -130,7 +138,14 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     elif isinstance(dataframe, GeoDataFrame):
         log.warning('Geometry column not found in the GeoDataFrame.')
 
-    table_name = context_manager.copy_from(gdf, table_name, if_exists, cartodbfy)
+    chunk_count = int(math.ceil(estimate_csv_size(gdf) / MAX_UPLOAD_SIZE_BYTES))
+    chunk_row_size = int(math.ceil(len(gdf) / chunk_count))
+    chunked_gdf = [gdf[i:i + chunk_row_size] for i in range(0, gdf.shape[0], chunk_row_size)]
+
+    for i, chunk in enumerate(chunked_gdf):
+        if i > 0:
+            if_exists = 'append'
+        table_name = context_manager.copy_from(chunk, table_name, if_exists, cartodbfy)
 
     if log_enabled:
         log.info('Success! Data uploaded to table "{}" correctly'.format(table_name))
