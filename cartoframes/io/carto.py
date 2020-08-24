@@ -73,7 +73,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 @send_metrics('data_uploaded')
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
-             cartodbfy=True, log_enabled=True):
+             cartodbfy=True, log_enabled=True, retry_times=3, max_upload_size=MAX_UPLOAD_SIZE_BYTES):
     """Upload a DataFrame to CARTO. The geometry's CRS must be WGS 84 (EPSG:4326) so you can use it on CARTO.
 
     Args:
@@ -138,14 +138,14 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     elif isinstance(dataframe, GeoDataFrame):
         log.warning('Geometry column not found in the GeoDataFrame.')
 
-    chunk_count = int(math.ceil(estimate_csv_size(gdf) / MAX_UPLOAD_SIZE_BYTES))
+    chunk_count = int(math.ceil(estimate_csv_size(gdf) / max_upload_size))
     chunk_row_size = int(math.ceil(len(gdf) / chunk_count))
     chunked_gdf = [gdf[i:i + chunk_row_size] for i in range(0, gdf.shape[0], chunk_row_size)]
 
     for i, chunk in enumerate(chunked_gdf):
         if i > 0:
             if_exists = 'append'
-        table_name = context_manager.copy_from(chunk, table_name, if_exists, cartodbfy)
+        table_name = context_manager.copy_from(chunk, table_name, if_exists, cartodbfy, retry_times)
 
     if log_enabled:
         log.info('Success! Data uploaded to table "{}" correctly'.format(table_name))
