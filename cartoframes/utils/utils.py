@@ -96,6 +96,11 @@ def pgquote(string):
     return '\'{}\''.format(string) if string else 'null'
 
 
+def double_quote(text):
+    """double-quotes a text"""
+    return '"{}"'.format(text)
+
+
 def temp_ignore_warnings(func):
     """Temporarily ignores warnings like those emitted by the carto python sdk
     """
