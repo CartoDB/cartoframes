@@ -141,7 +141,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     elif isinstance(dataframe, GeoDataFrame):
         log.warning('Geometry column not found in the GeoDataFrame.')
 
-    chunk_count = int(math.ceil(estimate_csv_size(gdf) / max_upload_size))
+    chunk_count = math.ceil(estimate_csv_size(gdf) / max_upload_size)
     chunk_row_size = int(math.ceil(len(gdf) / chunk_count))
     chunked_gdf = [gdf[i:i + chunk_row_size] for i in range(0, gdf.shape[0], chunk_row_size)]
 
