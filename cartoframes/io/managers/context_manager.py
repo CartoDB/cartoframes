@@ -14,9 +14,10 @@ from ... import __version__
 from ...auth.defaults import get_default_credentials
 from ...utils.logger import log
 from ...utils.geom_utils import encode_geometry_ewkb
-from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
+from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL, \
+                           double_quote
 from ...utils.columns import get_dataframe_columns_info, get_query_columns_info, obtain_converters, \
-                      date_columns_names, normalize_name
+                             date_columns_names, normalize_name
 
 DEFAULT_RETRY_TIMES = 3
 
@@ -285,7 +286,7 @@ class ContextManager:
 
     def _get_copy_query(self, query, columns, limit):
         query_columns = [
-            '"{c}"'.format(c=column.name) for column in columns
+            double_quote(column.name) for column in columns
             if (column.name != 'the_geom_webmercator')
         ]
 
@@ -335,7 +336,7 @@ class ContextManager:
             COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '{null}');
         """.format(
             table_name=table_name, null=PG_NULL,
-            columns=','.join('"{c}"'.format(c=column.dbname) for column in columns)).strip()
+            columns=','.join(double_quote(column.dbname) for column in columns)).strip()
         data = _compute_copy_data(dataframe, columns)
         self.copy_client.copyfrom(query, data)
 
@@ -365,14 +366,14 @@ def _drop_columns_query(table_name, columns):
     columns = ['DROP COLUMN {0}'.format(c.dbname) for c in columns if _not_reserved(c.dbname)]
     return 'ALTER TABLE {table_name} {drop_columns}'.format(
         table_name=table_name,
-        drop_columns=', '.join(['"{c}"'.format(c=c) for c in columns]))
+        drop_columns=', '.join([double_quote(c) for c in columns]))
 
 
 def _add_columns_query(table_name, columns):
     columns = ['ADD COLUMN {0} {1}'.format(c.dbname, c.dbtype) for c in columns if _not_reserved(c.dbname)]
     return 'ALTER TABLE {table_name} {add_columns}'.format(
         table_name=table_name,
-        add_columns=', '.join(['"{c}"'.format(c=c) for c in columns]))
+        add_columns=', '.join([double_quote(c) for c in columns]))
 
 
 def _not_reserved(column):
@@ -384,7 +385,7 @@ def _create_table_from_columns_query(table_name, columns):
     columns = ['{name} {type}'.format(name=c.dbname, type=c.dbtype) for c in columns]
     return 'CREATE TABLE {table_name} ({columns})'.format(
         table_name=table_name,
-        columns=', '.join(['"{c}"'.format(c=c) for c in columns]))
+        columns=', '.join([double_quote(c) for c in columns]))
 
 
 def _create_table_from_query_query(table_name, query):
