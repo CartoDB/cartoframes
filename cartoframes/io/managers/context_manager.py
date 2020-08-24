@@ -39,7 +39,7 @@ class ContextManager:
     def execute_long_running_query(self, query):
         return self.batch_sql_client.create_and_wait_for_completion(query.strip())
 
-    def copy_to(self, source, schema, limit=None, retry_times=DEFAULT_RETRY_TIMES):
+    def copy_to(self, source, schema=None, limit=None, retry_times=DEFAULT_RETRY_TIMES):
         query = self.compute_query(source, schema)
         columns = self._get_query_columns_info(query)
         copy_query = self._get_copy_query(query, columns, limit)

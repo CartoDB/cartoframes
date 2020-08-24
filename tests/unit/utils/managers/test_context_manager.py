@@ -41,6 +41,21 @@ class TestContextManager(object):
         # Then
         mock.assert_called_once_with('query')
 
+    def test_copy_to(self, mocker):
+        # Given
+        query = '__query__'
+        columns = [ColumnInfo('A', 'a', 'bigint', False)]
+        mocker.patch.object(ContextManager, 'compute_query', return_value=query)
+        mocker.patch.object(ContextManager, '_get_query_columns_info', return_value=columns)
+        mock = mocker.patch.object(ContextManager, '_copy_to')
+
+        # When
+        cm = ContextManager(self.credentials)
+        cm.copy_to(query)
+
+        # Then
+        mock.assert_called_once_with('SELECT "A" FROM (__query__) _q', columns, 3)
+
     def test_copy_from(self, mocker):
         # Given
         mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
