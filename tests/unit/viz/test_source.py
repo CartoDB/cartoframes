@@ -76,8 +76,7 @@ MULTIPOLYGON = {
 EMPTY = {
     "type": "Feature",
     "geometry": {
-        "type": "GeometryCollection",
-        "coordinates": []
+        "type": "GeometryCollection"
     },
     "properties": {}
 }
