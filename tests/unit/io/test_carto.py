@@ -255,7 +255,7 @@ def test_to_carto_chunks(mocker):
     cm_mock = mocker.patch.object(ContextManager, 'copy_from')
     cm_mock.return_value = table_name
 
-    size = 4000  # About 1MB
+    size = 4000  # About 1MB (1150000 bytes)
     gdf = GeoDataFrame([
         ['Calle Gran Vía 46',
          round(random.uniform(10, 100), 2),
@@ -271,7 +271,7 @@ def test_to_carto_chunks(mocker):
     norm_table_name = to_carto(gdf, table_name, CREDENTIALS, max_upload_size=100000)
 
     # Then
-    assert cm_mock.call_count == 12
+    assert cm_mock.call_count == 12  # 12 chunks as max_upload_size is 100000 bytes and we are uploading 1150000 bytes
     assert cm_mock.call_args[0][1] == table_name
     assert cm_mock.call_args[0][2] in ['fail', 'append']
     assert cm_mock.call_args[0][3] is True
