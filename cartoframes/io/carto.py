@@ -100,8 +100,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     """
     def estimate_csv_size(gdf):
         n = min(100, len(gdf))
+        columns = get_dataframe_columns_info(gdf)
         return len(''.join([x.decode("utf-8") for x in
-                            _compute_copy_data(gdf.sample(n=n), get_dataframe_columns_info(gdf))])) * len(gdf) / n
+                            _compute_copy_data(gdf.sample(n=n), columns)])) * len(gdf) / n
 
     if not isinstance(dataframe, DataFrame):
         raise ValueError('Wrong dataframe. You should provide a valid DataFrame instance.')
