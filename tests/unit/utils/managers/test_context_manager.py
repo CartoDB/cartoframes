@@ -4,11 +4,12 @@ import pytest
 
 from carto.datasets import DatasetManager
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
+from carto.exceptions import CartoRateLimitException
 
 from pandas import DataFrame
 from geopandas import GeoDataFrame
 from cartoframes.auth import Credentials
-from cartoframes.io.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager, DEFAULT_RETRY_TIMES, retry_copy
 from cartoframes.utils.columns import ColumnInfo
 
 
@@ -54,7 +55,7 @@ class TestContextManager(object):
         cm.copy_from(df, 'TABLE NAME')
 
         # Then
-        mock.assert_called_once_with(df, 'table_name', columns)
+        mock.assert_called_once_with(df, 'table_name', columns, DEFAULT_RETRY_TIMES)
 
     def test_copy_from_exists_fail(self, mocker):
         # Given
@@ -239,3 +240,21 @@ class TestContextManager(object):
 
         # Then
         assert DataFrame(columns=['tables']).equals(tables)
+
+    def test_retry_copy_decorator(self):
+        @retry_copy
+        def test_function():
+            class ResponseMock:
+                def __init__(self):
+                    self.text = 'My text'
+                    self.headers = {
+                        'Carto-Rate-Limit-Limit': 1,
+                        'Carto-Rate-Limit-Remaining': 1,
+                        'Retry-After': 1,
+                        'Carto-Rate-Limit-Reset': 1
+                    }
+            response_mock = ResponseMock()
+            raise CartoRateLimitException(response_mock)
+
+        with pytest.raises(CartoRateLimitException):
+            test_function()

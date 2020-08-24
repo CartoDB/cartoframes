@@ -21,6 +21,27 @@ from ...utils.columns import get_dataframe_columns_info, get_query_columns_info,
 DEFAULT_RETRY_TIMES = 3
 
 
+def retry_copy(func):
+    def wrapper(*args, **kwargs):
+        m_retry_times = kwargs.get('retry_times', DEFAULT_RETRY_TIMES)
+        while m_retry_times >= 1:
+            try:
+                return func(*args, **kwargs)
+            except CartoRateLimitException as err:
+                m_retry_times -= 1
+
+                if m_retry_times <= 0:
+                    warn(('Read call was rate-limited. '
+                          'This usually happens when there are multiple queries being read at the same time.'))
+                    raise err
+
+                warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
+                time.sleep(err.retry_after)
+                warn('Retrying...')
+        return func(*args, **kwargs)
+    return wrapper
+
+
 class ContextManager:
 
     def __init__(self, credentials):
@@ -44,7 +65,7 @@ class ContextManager:
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
-    def copy_from(self, gdf, table_name, if_exists='fail', cartodbfy=True):
+    def copy_from(self, gdf, table_name, if_exists='fail', cartodbfy=True, retry_times=DEFAULT_RETRY_TIMES):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
         df_columns = get_dataframe_columns_info(gdf)
@@ -71,7 +92,7 @@ class ContextManager:
         else:
             self._create_table_from_columns(table_name, schema, df_columns, cartodbfy)
 
-        self._copy_from(gdf, table_name, df_columns)
+        self._copy_from(gdf, table_name, df_columns, retry_times)
         return table_name
 
     def create_table_from_query(self, query, table_name, if_exists, cartodbfy=True):
@@ -299,23 +320,12 @@ class ContextManager:
 
         return query
 
-    def _copy_to(self, query, columns, retry_times):
+    @retry_copy
+    def _copy_to(self, query, columns, retry_times=DEFAULT_RETRY_TIMES):
         log.debug('COPY TO')
         copy_query = 'COPY ({0}) TO stdout WITH (FORMAT csv, HEADER true, NULL \'{1}\')'.format(query, PG_NULL)
 
-        try:
-            raw_result = self.copy_client.copyto_stream(copy_query)
-        except CartoRateLimitException as err:
-            if retry_times > 0:
-                retry_times -= 1
-                warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
-                time.sleep(err.retry_after)
-                warn('Retrying...')
-                return self._copy_to(query, columns, retry_times)
-            else:
-                warn(('Read call was rate-limited. '
-                      'This usually happens when there are multiple queries being read at the same time.'))
-                raise err
+        raw_result = self.copy_client.copyto_stream(copy_query)
 
         converters = obtain_converters(columns)
         parse_dates = date_columns_names(columns)
@@ -327,7 +337,8 @@ class ContextManager:
 
         return df
 
-    def _copy_from(self, dataframe, table_name, columns):
+    @retry_copy
+    def _copy_from(self, dataframe, table_name, columns, retry_times=DEFAULT_RETRY_TIMES):
         log.debug('COPY FROM')
         query = """
             COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '{null}');
@@ -335,6 +346,7 @@ class ContextManager:
             table_name=table_name, null=PG_NULL,
             columns=','.join(column.dbname for column in columns)).strip()
         data = _compute_copy_data(dataframe, columns)
+
         self.copy_client.copyfrom(query, data)
 
     def _rename_table(self, table_name, new_table_name):

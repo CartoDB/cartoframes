@@ -1,9 +1,12 @@
 import pytest
 
+import random
+
 from pandas import Index
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
 from shapely.geometry.base import BaseGeometry
+from shapely import wkt
 
 from cartoframes.auth import Credentials
 from cartoframes.io.managers.context_manager import ContextManager
@@ -242,6 +245,35 @@ def test_to_carto(mocker):
     # Then
     assert cm_mock.call_args[0][1] == table_name
     assert cm_mock.call_args[0][2] == 'fail'
+    assert cm_mock.call_args[0][3] is True
+    assert norm_table_name == table_name
+
+
+def test_to_carto_chunks(mocker):
+    # Given
+    table_name = '__table_name__'
+    cm_mock = mocker.patch.object(ContextManager, 'copy_from')
+    cm_mock.return_value = table_name
+
+    size = 4000  # About 1MB (1150000 bytes)
+    gdf = GeoDataFrame([
+        ['Calle Gran Vía 46',
+         round(random.uniform(10, 100), 2),
+         round(random.uniform(100, 1000), 2),
+         round(random.uniform(1000, 10000), 2),
+         'POLYGON((-3.68831 40.42478, -3.68841 40.42478, -3.68841 40.42488, -3.68831 40.42478))']
+        for _ in range(size)],
+        columns=['address', 'value1', 'value2', 'value3', 'polygon']
+    )
+    gdf.set_geometry(gdf['polygon'].apply(wkt.loads), inplace=True)
+
+    # When
+    norm_table_name = to_carto(gdf, table_name, CREDENTIALS, max_upload_size=100000)
+
+    # Then
+    assert cm_mock.call_count == 12  # 12 chunks as max_upload_size is 100000 bytes and we are uploading 1150000 bytes
+    assert cm_mock.call_args[0][1] == table_name
+    assert cm_mock.call_args[0][2] in ['fail', 'append']
     assert cm_mock.call_args[0][3] is True
     assert norm_table_name == table_name
 
