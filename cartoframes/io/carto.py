@@ -15,6 +15,9 @@ from ..utils.metrics import send_metrics
 GEOM_COLUMN_NAME = 'the_geom'
 IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
 
+SAMPLE_ROWS_NUMBER = 100
+CSV_TO_CARTO_RATIO = 1.4
+
 
 @send_metrics('data_downloaded')
 def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True,
@@ -113,7 +116,8 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     if not ignore_quota_warning:
         if context_manager.credentials.me_data is not None and context_manager.credentials.me_data.get('user_data'):
-            dataframe_size = len(dataframe.to_csv())
+            n = min(SAMPLE_ROWS_NUMBER, len(dataframe))
+            dataframe_size = len(dataframe.sample(n=n).to_csv(header=False)) * len(dataframe) / n / CSV_TO_CARTO_RATIO
             remaining_byte_quota = context_manager.credentials.me_data.get('user_data').get('remaining_byte_quota')
 
             if remaining_byte_quota is not None and dataframe_size > remaining_byte_quota:
