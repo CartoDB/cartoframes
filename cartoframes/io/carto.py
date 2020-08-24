@@ -125,7 +125,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             n = min(SAMPLE_ROWS_NUMBER, len(dataframe))
             estimated_byte_size = len(dataframe.sample(n=n).to_csv(header=False)) * len(dataframe) \
                 / n / CSV_TO_CARTO_RATIO
-            remaining_byte_quota = context_manager.credentials.me_data.get('user_data').get('remaining_byte_quota')
+            remaining_byte_quota = me_data.get('user_data').get('remaining_byte_quota')
 
             if remaining_byte_quota is not None and estimated_byte_size > remaining_byte_quota:
                 raise CartoException('DB Quota will be exceeded. '
