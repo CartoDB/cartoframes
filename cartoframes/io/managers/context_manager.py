@@ -21,27 +21,25 @@ from ...utils.columns import get_dataframe_columns_info, get_query_columns_info,
 DEFAULT_RETRY_TIMES = 3
 
 
-def retry_copy():
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            m_retry_times = kwargs.get('retry_times', DEFAULT_RETRY_TIMES)
-            while m_retry_times >= 1:
-                try:
-                    return func(*args, **kwargs)
-                except CartoRateLimitException as err:
-                    m_retry_times -= 1
+def retry_copy(func):
+    def wrapper(*args, **kwargs):
+        m_retry_times = kwargs.get('retry_times', DEFAULT_RETRY_TIMES)
+        while m_retry_times >= 1:
+            try:
+                return func(*args, **kwargs)
+            except CartoRateLimitException as err:
+                m_retry_times -= 1
 
-                    if m_retry_times <= 0:
-                        warn(('Read call was rate-limited. '
-                              'This usually happens when there are multiple queries being read at the same time.'))
-                        raise err
+                if m_retry_times <= 0:
+                    warn(('Read call was rate-limited. '
+                          'This usually happens when there are multiple queries being read at the same time.'))
+                    raise err
 
-                    warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
-                    time.sleep(err.retry_after)
-                    warn('Retrying...')
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
+                warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
+                time.sleep(err.retry_after)
+                warn('Retrying...')
+        return func(*args, **kwargs)
+    return wrapper
 
 
 class ContextManager:
@@ -322,7 +320,7 @@ class ContextManager:
 
         return query
 
-    @retry_copy()
+    @retry_copy
     def _copy_to(self, query, columns, retry_times=DEFAULT_RETRY_TIMES):
         log.debug('COPY TO')
         copy_query = 'COPY ({0}) TO stdout WITH (FORMAT csv, HEADER true, NULL \'{1}\')'.format(query, PG_NULL)
@@ -339,7 +337,7 @@ class ContextManager:
 
         return df
 
-    @retry_copy()
+    @retry_copy
     def _copy_from(self, dataframe, table_name, columns, retry_times=DEFAULT_RETRY_TIMES):
         log.debug('COPY FROM')
         query = """
