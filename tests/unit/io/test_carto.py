@@ -264,12 +264,38 @@ def test_to_carto_quota_warning(mocker):
     table_name = '__table_name__'
     cm_mock = mocker.patch.object(ContextManager, 'copy_from')
     cm_mock.return_value = table_name
+    df = GeoDataFrame({'geometry': [Point([0, 0])]})
 
+    # Then
+    with pytest.raises(CartoException):
+        to_carto(df, table_name, NoQuotaCredentials('fake_user', 'fake_api_key'))
+
+
+def test_to_carto_quota_warning_skip(mocker):
+    class NoQuotaCredentials(Credentials):
+        @property
+        def me_data(self):
+            return {
+                'user_data': {
+                    'remaining_byte_quota': 0
+                }
+            }
+
+    # Given
+    table_name = '__table_name__'
+    cm_mock = mocker.patch.object(ContextManager, 'copy_from')
+    cm_mock.return_value = table_name
     df = GeoDataFrame({'geometry': [Point([0, 0])]})
 
     # When
-    with pytest.raises(CartoException):
-        to_carto(df, table_name, NoQuotaCredentials('fake_user', 'fake_api_key'))
+    norm_table_name = to_carto(df, table_name, NoQuotaCredentials('fake_user', 'fake_api_key'),
+                               skip_quota_warning=True)
+
+    # Then
+    assert cm_mock.call_args[0][1] == table_name
+    assert cm_mock.call_args[0][2] == 'fail'
+    assert cm_mock.call_args[0][3] is True
+    assert norm_table_name == table_name
 
 
 def test_to_carto_chunks(mocker):
