@@ -17,6 +17,7 @@ GEOM_COLUMN_NAME = 'the_geom'
 IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
 
 MAX_UPLOAD_SIZE_BYTES = 2000000000  # 2GB
+SAMPLE_ROWS_NUMBER = 100
 
 
 @send_metrics('data_downloaded')
@@ -98,12 +99,6 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         ValueError: if the dataframe or table name provided are wrong or the if_exists param is not valid.
 
     """
-    def estimate_csv_size(gdf):
-        n = min(100, len(gdf))
-        columns = get_dataframe_columns_info(gdf)
-        return sum([len(x) for x in
-                    _compute_copy_data(gdf.sample(n=n), columns)]) * len(gdf) / n
-
     if not isinstance(dataframe, DataFrame):
         raise ValueError('Wrong dataframe. You should provide a valid DataFrame instance.')
 
@@ -382,3 +377,10 @@ def update_privacy_table(table_name, privacy, credentials=None, log_enabled=True
 
     if log_enabled:
         log.info('Success! Table "{}" privacy updated correctly'.format(table_name))
+
+
+def estimate_csv_size(gdf):
+    n = min(SAMPLE_ROWS_NUMBER, len(gdf))
+    columns = get_dataframe_columns_info(gdf)
+    return sum([len(x) for x in
+                _compute_copy_data(gdf.sample(n=n), columns)]) * len(gdf) / n
