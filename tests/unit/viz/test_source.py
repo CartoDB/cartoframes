@@ -77,7 +77,7 @@ EMPTY = {
     "type": "Feature",
     "geometry": {
         "type": "GeometryCollection",
-        "coordinates": None
+        "coordinates": []
     },
     "properties": {}
 }
