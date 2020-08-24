@@ -88,6 +88,8 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             uses the name of the index from the dataframe.
         cartodbfy (bool, optional): convert the table to CARTO format. Default True. More info
             `here <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
+        retry_times (int, optional):
+            Number of time to retry the upload in case it fails. Default is 3.
 
     Returns:
         string: the table name normalized.
