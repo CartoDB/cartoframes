@@ -144,9 +144,8 @@ class CatalogEntity(ABC):
                 log.info(_GEOGRAPHY_READ_MSG.format(file_path))
         else:
             dataframe = pd.read_csv(rows)
-            geodataframe = gpd.GeoDataFrame(dataframe, geometry=decode_geometry(df['geom']))
+            geodataframe = gpd.GeoDataFrame(dataframe, geometry=decode_geometry(dataframe['geom']))
             return geodataframe
-
 
     def _get_remote_full_table_name(self, user_project, user_dataset, public_project):
         project, dataset, table = self.id.split('.')
