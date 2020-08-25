@@ -31,6 +31,7 @@ def set_log_level(level):
         'notset': logging.NOTSET
     }
 
+    level = level.lower()
     if level not in levels:
         return ValueError('Wrong log level. Valid log levels are: critical, error, warning, info, debug, notset.')
 
