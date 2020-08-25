@@ -191,7 +191,7 @@ class ContextManager:
 
     def get_num_rows(self, query):
         """Get the number of rows in the query"""
-        result = self.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=query))
+        result = self.execute_query('SELECT COUNT(*) FROM ({query}) _query'.format(query=query))
         return result.get('rows')[0].get('count')
 
     def get_bounds(self, query):
@@ -375,17 +375,19 @@ def _truncate_table_query(table_name):
 
 
 def _drop_columns_query(table_name, columns):
-    columns = ['DROP COLUMN {0}'.format(c.dbname) for c in columns if _not_reserved(c.dbname)]
+    columns = ['DROP COLUMN {name}'.format(name=double_quote(c.dbname))
+               for c in columns if _not_reserved(c.dbname)]
     return 'ALTER TABLE {table_name} {drop_columns}'.format(
         table_name=table_name,
-        drop_columns=', '.join([double_quote(c) for c in columns]))
+        drop_columns=','.join(columns))
 
 
 def _add_columns_query(table_name, columns):
-    columns = ['ADD COLUMN {0} {1}'.format(c.dbname, c.dbtype) for c in columns if _not_reserved(c.dbname)]
+    columns = ['ADD COLUMN {name} {type}'.format(name=double_quote(c.dbname), type=c.dbtype)
+               for c in columns if _not_reserved(c.dbname)]
     return 'ALTER TABLE {table_name} {add_columns}'.format(
         table_name=table_name,
-        add_columns=', '.join([double_quote(c) for c in columns]))
+        add_columns=','.join(columns))
 
 
 def _not_reserved(column):
@@ -394,10 +396,10 @@ def _not_reserved(column):
 
 
 def _create_table_from_columns_query(table_name, columns):
-    columns = ['{name} {type}'.format(name=c.dbname, type=c.dbtype) for c in columns]
+    columns = ['{name} {type}'.format(name=double_quote(c.dbname), type=c.dbtype) for c in columns]
     return 'CREATE TABLE {table_name} ({columns})'.format(
         table_name=table_name,
-        columns=', '.join([double_quote(c) for c in columns]))
+        columns=','.join(columns))
 
 
 def _create_table_from_query_query(table_name, query):
@@ -405,7 +407,7 @@ def _create_table_from_query_query(table_name, query):
 
 
 def _cartodbfy_query(table_name, schema):
-    return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')".format(
+    return 'SELECT CDB_CartodbfyTable(\'{schema}\', \'{table_name}\')'.format(
         schema=schema, table_name=table_name)
 
 

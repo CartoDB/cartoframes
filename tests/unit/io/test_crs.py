@@ -37,7 +37,7 @@ def test_wrong_crs_to_carto():
 
     # When
     with pytest.raises(ValueError) as e:
-        to_carto(gdf, 'table_name')
+        to_carto(gdf, 'table_name', skip_quota_warning=True)
 
     # Then
     assert str(e.value) == 'No valid geometry CRS "epsg:2263", it must be "epsg:4326".'
@@ -50,7 +50,7 @@ def test_transform_crs_to_carto(mocker):
     gdf = GeoDataFrame({'geometry': [Point([0, 0])]}, crs='epsg:4326')
 
     # When
-    to_carto(gdf, 'table_name', CREDENTIALS)
+    to_carto(gdf, 'table_name', CREDENTIALS, skip_quota_warning=True)
 
     # Then
     cm_mock.assert_called_once_with(mocker.ANY, 'table_name', 'fail', True, 3)

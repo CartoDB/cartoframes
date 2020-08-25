@@ -61,6 +61,8 @@ class TestContextManager(object):
         # Given
         mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mocker.patch.object(ContextManager, 'has_table', return_value=False)
+        mocker.patch.object(ContextManager, 'get_schema', return_value='schema')
+        mock_create_table = mocker.patch.object(ContextManager, 'execute_long_running_query')
         mock = mocker.patch.object(ContextManager, '_copy_from')
         df = DataFrame({'A': [1]})
         columns = [ColumnInfo('A', 'a', 'bigint', False)]
@@ -70,6 +72,9 @@ class TestContextManager(object):
         cm.copy_from(df, 'TABLE NAME')
 
         # Then
+        mock_create_table.assert_called_once_with('''
+            BEGIN; CREATE TABLE table_name ("a" bigint); SELECT CDB_CartodbfyTable(\'schema\', \'table_name\'); COMMIT;
+        '''.strip())
         mock.assert_called_once_with(df, 'table_name', columns, DEFAULT_RETRY_TIMES)
 
     def test_copy_from_exists_fail(self, mocker):
@@ -258,7 +263,7 @@ class TestContextManager(object):
 
     def test_retry_copy_decorator(self):
         @retry_copy
-        def test_function():
+        def test_function(retry_times):
             class ResponseMock:
                 def __init__(self):
                     self.text = 'My text'
@@ -272,4 +277,4 @@ class TestContextManager(object):
             raise CartoRateLimitException(response_mock)
 
         with pytest.raises(CartoRateLimitException):
-            test_function()
+            test_function(retry_times=0)
