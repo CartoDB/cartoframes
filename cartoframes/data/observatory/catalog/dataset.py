@@ -408,7 +408,7 @@ class Dataset(CatalogEntity):
 
     @check_do_enabled
     def to_dataframe(self, credentials=None, limit=None, order_by=None, sql_query=None, add_geom=None):
-        """Download dataset data as a pandas.DataFrame. You need Data Observatory enabled in your CARTO
+        """Download dataset data as a geopandas.GeoDataFrame. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
         For premium datasets (those with `is_public_data` set to False), you need a subscription to the dataset.
@@ -427,7 +427,7 @@ class Dataset(CatalogEntity):
 
 
         Returns:
-            pandas.DataFrame
+            geopandas.GeoDataFrame
 
         Raises:
             DOError: if you have not a valid license for the dataset being downloaded,

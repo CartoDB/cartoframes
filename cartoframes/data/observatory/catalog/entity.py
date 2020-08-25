@@ -1,8 +1,10 @@
 import pandas as pd
+import geopandas as gpd
 
 from abc import ABC
 
 from carto.do_dataset import DODataset
+from ....utils.geom_utils import decode_geometry
 from ....utils.logger import log
 
 _DATASET_READ_MSG = '''To load it as a DataFrame you can do:
@@ -142,7 +144,9 @@ class CatalogEntity(ABC):
                 log.info(_GEOGRAPHY_READ_MSG.format(file_path))
         else:
             dataframe = pd.read_csv(rows)
-            return dataframe
+            geodataframe = GeoDataFrame(df, geometry=decode_geometry(df['geom']))
+            return geodataframe
+
 
     def _get_remote_full_table_name(self, user_project, user_dataset, public_project):
         project, dataset, table = self.id.split('.')
