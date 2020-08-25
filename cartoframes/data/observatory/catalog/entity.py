@@ -144,7 +144,7 @@ class CatalogEntity(ABC):
                 log.info(_GEOGRAPHY_READ_MSG.format(file_path))
         else:
             dataframe = pd.read_csv(rows)
-            geodataframe = GeoDataFrame(df, geometry=decode_geometry(df['geom']))
+            geodataframe = gpd.GeoDataFrame(dataframe, geometry=decode_geometry(df['geom']))
             return geodataframe
 
 
