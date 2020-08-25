@@ -18,6 +18,7 @@ IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
 
 MAX_UPLOAD_SIZE_BYTES = 2000000000  # 2GB
 SAMPLE_ROWS_NUMBER = 100
+CSV_TO_CARTO_RATIO = 1.4
 
 
 @send_metrics('data_downloaded')
@@ -74,7 +75,8 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 @send_metrics('data_uploaded')
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
-             cartodbfy=True, log_enabled=True, retry_times=3, max_upload_size=MAX_UPLOAD_SIZE_BYTES):
+             cartodbfy=True, log_enabled=True, retry_times=3, max_upload_size=MAX_UPLOAD_SIZE_BYTES,
+             skip_quota_warning=False):
     """Upload a DataFrame to CARTO. The geometry's CRS must be WGS 84 (EPSG:4326) so you can use it on CARTO.
 
     Args:
@@ -89,6 +91,9 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             uses the name of the index from the dataframe.
         cartodbfy (bool, optional): convert the table to CARTO format. Default True. More info
             `here <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
+        skip_quota_warning (bool, optional): skip the quota exceeded check and force the upload.
+            (The upload will still fail if the size of the dataset exceeds the remaining DB quota).
+            Default is False.
         retry_times (int, optional):
             Number of time to retry the upload in case it fails. Default is 3.
 
@@ -113,6 +118,19 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             ', '.join(IF_EXISTS_OPTIONS)))
 
     context_manager = ContextManager(credentials)
+
+    if not skip_quota_warning:
+        me_data = context_manager.credentials.me_data
+        if me_data is not None and me_data.get('user_data'):
+            n = min(SAMPLE_ROWS_NUMBER, len(dataframe))
+            estimated_byte_size = len(dataframe.sample(n=n).to_csv(header=False)) * len(dataframe) \
+                / n / CSV_TO_CARTO_RATIO
+            remaining_byte_quota = me_data.get('user_data').get('remaining_byte_quota')
+
+            if remaining_byte_quota is not None and estimated_byte_size > remaining_byte_quota:
+                raise CartoException('DB Quota will be exceeded. '
+                                     'The remaining quota is {} bytes and the dataset size is {} bytes.'.format(
+                                        remaining_byte_quota, estimated_byte_size))
 
     gdf = GeoDataFrame(dataframe, copy=True)
 
