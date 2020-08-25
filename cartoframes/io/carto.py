@@ -129,10 +129,10 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     elif has_geometry(dataframe):
         gdf.set_geometry(dataframe.geometry.name, inplace=True)
 
+    if has_geometry(gdf):
         if GEOM_COLUMN_NAME in gdf and dataframe.geometry.name != GEOM_COLUMN_NAME:
             gdf.drop(columns=[GEOM_COLUMN_NAME], inplace=True)
 
-    if has_geometry(gdf):
         # Prepare geometry column for the upload
         gdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
 

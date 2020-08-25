@@ -267,6 +267,24 @@ def test_to_carto_two_geom_columns(mocker):
     assert norm_table_name == table_name
 
 
+def test_to_carto_two_geom_columns_and_geom_col(mocker):
+    # Given
+    table_name = '__table_name__'
+    cm_mock = mocker.patch.object(ContextManager, 'copy_from')
+    cm_mock.return_value = table_name
+    df = GeoDataFrame({'geometry': [Point([0, 0])],
+                       'the_geom': '010100000000000000000000000000000000000000'})
+
+    # When
+    norm_table_name = to_carto(df, table_name, CREDENTIALS, geom_col='geometry')
+
+    # Then
+    assert cm_mock.call_args[0][1] == table_name
+    assert cm_mock.call_args[0][2] == 'fail'
+    assert cm_mock.call_args[0][3] is True
+    assert norm_table_name == table_name
+
+
 def test_to_carto_chunks(mocker):
     # Given
     table_name = '__table_name__'
