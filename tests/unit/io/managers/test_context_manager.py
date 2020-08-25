@@ -263,7 +263,7 @@ class TestContextManager(object):
 
     def test_retry_copy_decorator(self):
         @retry_copy
-        def test_function():
+        def test_function(retry_times):
             class ResponseMock:
                 def __init__(self):
                     self.text = 'My text'
@@ -277,4 +277,4 @@ class TestContextManager(object):
             raise CartoRateLimitException(response_mock)
 
         with pytest.raises(CartoRateLimitException):
-            test_function()
+            test_function(retry_times=0)
