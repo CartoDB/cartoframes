@@ -2,7 +2,9 @@ import os
 import json
 import pandas
 import pytest
+
 from pathlib import Path
+from geopandas import GeoDataFrame
 
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory import Dataset, Geography
@@ -72,6 +74,8 @@ class TestDownload(object):
 
     def test_dataset_to_dataframe_public(self):
         df = public_dataset.to_dataframe(self.credentials, limit=PUBLIC_LIMIT)
+        assert isinstance(df, GeoDataFrame)
+
         df.to_csv(self.tmp_file, index=False)
 
         df = pandas.read_csv(self.tmp_file)
@@ -81,6 +85,8 @@ class TestDownload(object):
 
     def test_dataset_to_dataframe_private(self):
         df = private_dataset.to_dataframe(self.credentials, limit=PRIVATE_LIMIT)
+        assert isinstance(df, GeoDataFrame)
+
         df.to_csv(self.tmp_file, index=False)
 
         df = pandas.read_csv(self.tmp_file)
@@ -111,6 +117,8 @@ class TestDownload(object):
     @pytest.mark.skip()  # TODO implement equals check using a tolerance
     def test_geography_to_dataframe_public(self):
         df = public_geography.to_dataframe(self.credentials, limit=PUBLIC_LIMIT, order_by='geoid')
+        assert isinstance(df, GeoDataFrame)
+
         df.to_csv(self.tmp_file, index=False)
 
         df = pandas.read_csv(self.tmp_file)
@@ -121,6 +129,8 @@ class TestDownload(object):
     @pytest.mark.skip()  # TODO implement equals check using a tolerance
     def test_geography_to_dataframe_private(self):
         df = private_geography.to_dataframe(self.credentials, limit=PRIVATE_LIMIT, order_by='geoid')
+        assert isinstance(df, GeoDataFrame)
+
         df.to_csv(self.tmp_file, index=False)
 
         df = pandas.read_csv(self.tmp_file)
@@ -165,6 +175,8 @@ class TestDownload(object):
     def test_dataset_to_dataframe_public_with_sql_query(self):
         sql_query = 'select * from {dataset} order by geoid limit 2'
         df = public_dataset.to_dataframe(self.credentials, sql_query=sql_query)
+        assert isinstance(df, GeoDataFrame)
+
         df.to_csv(self.tmp_file, index=False)
 
         df = pandas.read_csv(self.tmp_file)
@@ -177,6 +189,8 @@ class TestDownload(object):
         sql_query = 'select * from {dataset} order by geoid limit 2'
         add_geom = True
         df = public_dataset.to_dataframe(self.credentials, sql_query=sql_query, add_geom=add_geom)
+        assert isinstance(df, GeoDataFrame)
+
         df.to_csv(self.tmp_file, index=False)
 
         df = pandas.read_csv(self.tmp_file)
@@ -188,6 +202,8 @@ class TestDownload(object):
     def test_geography_to_dataframe_public_with_sql_query(self):
         sql_query = 'select * from {geography} order by geoid limit 2'
         df = public_geography.to_dataframe(self.credentials, sql_query=sql_query)
+        assert isinstance(df, GeoDataFrame)
+
         df.to_csv(self.tmp_file, index=False)
 
         df = pandas.read_csv(self.tmp_file)
