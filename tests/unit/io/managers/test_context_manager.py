@@ -4,11 +4,12 @@ import pytest
 
 from carto.datasets import DatasetManager
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
+from carto.exceptions import CartoRateLimitException
 
 from pandas import DataFrame
 from geopandas import GeoDataFrame
 from cartoframes.auth import Credentials
-from cartoframes.io.managers.context_manager import ContextManager
+from cartoframes.io.managers.context_manager import ContextManager, DEFAULT_RETRY_TIMES, retry_copy
 from cartoframes.utils.columns import ColumnInfo
 
 
@@ -41,10 +42,27 @@ class TestContextManager(object):
         # Then
         mock.assert_called_once_with('query')
 
+    def test_copy_to(self, mocker):
+        # Given
+        query = '__query__'
+        columns = [ColumnInfo('A', 'a', 'bigint', False)]
+        mocker.patch.object(ContextManager, 'compute_query', return_value=query)
+        mocker.patch.object(ContextManager, '_get_query_columns_info', return_value=columns)
+        mock = mocker.patch.object(ContextManager, '_copy_to')
+
+        # When
+        cm = ContextManager(self.credentials)
+        cm.copy_to(query)
+
+        # Then
+        mock.assert_called_once_with('SELECT "A" FROM (__query__) _q', columns, 3)
+
     def test_copy_from(self, mocker):
         # Given
         mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mocker.patch.object(ContextManager, 'has_table', return_value=False)
+        mocker.patch.object(ContextManager, 'get_schema', return_value='schema')
+        mock_create_table = mocker.patch.object(ContextManager, 'execute_long_running_query')
         mock = mocker.patch.object(ContextManager, '_copy_from')
         df = DataFrame({'A': [1]})
         columns = [ColumnInfo('A', 'a', 'bigint', False)]
@@ -54,7 +72,10 @@ class TestContextManager(object):
         cm.copy_from(df, 'TABLE NAME')
 
         # Then
-        mock.assert_called_once_with(df, 'table_name', columns)
+        mock_create_table.assert_called_once_with('''
+            BEGIN; CREATE TABLE table_name ("a" bigint); SELECT CDB_CartodbfyTable(\'schema\', \'table_name\'); COMMIT;
+        '''.strip())
+        mock.assert_called_once_with(df, 'table_name', columns, DEFAULT_RETRY_TIMES)
 
     def test_copy_from_exists_fail(self, mocker):
         # Given
@@ -122,7 +143,7 @@ class TestContextManager(object):
 
         # Then
         assert mock.call_args[0][0] == '''
-            COPY table_name(a,b) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+            COPY table_name("a","b") FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
         '''.strip()
         assert list(mock.call_args[0][1]) == [
             b'1|0101000020E610000000000000000000000000000000000000\n',
@@ -239,3 +260,21 @@ class TestContextManager(object):
 
         # Then
         assert DataFrame(columns=['tables']).equals(tables)
+
+    def test_retry_copy_decorator(self):
+        @retry_copy
+        def test_function(retry_times):
+            class ResponseMock:
+                def __init__(self):
+                    self.text = 'My text'
+                    self.headers = {
+                        'Carto-Rate-Limit-Limit': 1,
+                        'Carto-Rate-Limit-Remaining': 1,
+                        'Retry-After': 1,
+                        'Carto-Rate-Limit-Reset': 1
+                    }
+            response_mock = ResponseMock()
+            raise CartoRateLimitException(response_mock)
+
+        with pytest.raises(CartoRateLimitException):
+            test_function(retry_times=0)
