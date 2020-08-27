@@ -1,11 +1,12 @@
 """Functions to interact with the CARTO platform"""
+import math
 
 from pandas import DataFrame
 from geopandas import GeoDataFrame
 
 from carto.exceptions import CartoException
 
-from .managers.context_manager import ContextManager
+from .managers.context_manager import ContextManager, _compute_copy_data, get_dataframe_columns_info
 from ..utils.geom_utils import check_crs, has_geometry, set_geometry
 from ..utils.logger import log
 from ..utils.utils import is_valid_str, is_sql_query
@@ -15,9 +16,14 @@ from ..utils.metrics import send_metrics
 GEOM_COLUMN_NAME = 'the_geom'
 IF_EXISTS_OPTIONS = ['fail', 'replace', 'append']
 
+MAX_UPLOAD_SIZE_BYTES = 2000000000  # 2GB
+SAMPLE_ROWS_NUMBER = 100
+CSV_TO_CARTO_RATIO = 1.4
+
 
 @send_metrics('data_downloaded')
-def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True):
+def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True,
+               null_geom_value=None):
     """Read a table or a SQL query from the CARTO account.
 
     Args:
@@ -32,6 +38,8 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
             `current_schema()` using the credentials.
         index_col (str, optional): name of the column to be loaded as index. It can be used also to set the index name.
         decode_geom (bool, optional): convert the "the_geom" column into a valid geometry column.
+        null_geom_value (Object, optional): value for the `the_geom` column when it's null.
+            Defaults to None
 
     Returns:
         geopandas.GeoDataFrame
@@ -59,12 +67,16 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
         # Decode geometry column
         set_geometry(gdf, GEOM_COLUMN_NAME, inplace=True)
 
+        if null_geom_value is not None:
+            gdf[GEOM_COLUMN_NAME].fillna(null_geom_value, inplace=True)
+
     return gdf
 
 
 @send_metrics('data_uploaded')
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
-             cartodbfy=True, log_enabled=True):
+             cartodbfy=True, log_enabled=True, retry_times=3, max_upload_size=MAX_UPLOAD_SIZE_BYTES,
+             skip_quota_warning=False):
     """Upload a DataFrame to CARTO. The geometry's CRS must be WGS 84 (EPSG:4326) so you can use it on CARTO.
 
     Args:
@@ -79,6 +91,11 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             uses the name of the index from the dataframe.
         cartodbfy (bool, optional): convert the table to CARTO format. Default True. More info
             `here <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
+        skip_quota_warning (bool, optional): skip the quota exceeded check and force the upload.
+            (The upload will still fail if the size of the dataset exceeds the remaining DB quota).
+            Default is False.
+        retry_times (int, optional):
+            Number of time to retry the upload in case it fails. Default is 3.
 
     Returns:
         string: the table name normalized.
@@ -102,6 +119,19 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     context_manager = ContextManager(credentials)
 
+    if not skip_quota_warning:
+        me_data = context_manager.credentials.me_data
+        if me_data is not None and me_data.get('user_data'):
+            n = min(SAMPLE_ROWS_NUMBER, len(dataframe))
+            estimated_byte_size = len(dataframe.sample(n=n).to_csv(header=False)) * len(dataframe) \
+                / n / CSV_TO_CARTO_RATIO
+            remaining_byte_quota = me_data.get('user_data').get('remaining_byte_quota')
+
+            if remaining_byte_quota is not None and estimated_byte_size > remaining_byte_quota:
+                raise CartoException('DB Quota will be exceeded. '
+                                     'The remaining quota is {} bytes and the dataset size is {} bytes.'.format(
+                                        remaining_byte_quota, estimated_byte_size))
+
     gdf = GeoDataFrame(dataframe, copy=True)
 
     if index:
@@ -118,13 +148,23 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         gdf.set_geometry(dataframe.geometry.name, inplace=True)
 
     if has_geometry(gdf):
+        if GEOM_COLUMN_NAME in gdf and dataframe.geometry.name != GEOM_COLUMN_NAME:
+            gdf.drop(columns=[GEOM_COLUMN_NAME], inplace=True)
+
         # Prepare geometry column for the upload
         gdf.rename_geometry(GEOM_COLUMN_NAME, inplace=True)
 
     elif isinstance(dataframe, GeoDataFrame):
         log.warning('Geometry column not found in the GeoDataFrame.')
 
-    table_name = context_manager.copy_from(gdf, table_name, if_exists, cartodbfy)
+    chunk_count = math.ceil(estimate_csv_size(gdf) / max_upload_size)
+    chunk_row_size = int(math.ceil(len(gdf) / chunk_count))
+    chunked_gdf = [gdf[i:i + chunk_row_size] for i in range(0, gdf.shape[0], chunk_row_size)]
+
+    for i, chunk in enumerate(chunked_gdf):
+        if i > 0:
+            if_exists = 'append'
+        table_name = context_manager.copy_from(chunk, table_name, if_exists, cartodbfy, retry_times)
 
     if log_enabled:
         log.info('Success! Data uploaded to table "{}" correctly'.format(table_name))
@@ -358,3 +398,10 @@ def update_privacy_table(table_name, privacy, credentials=None, log_enabled=True
 
     if log_enabled:
         log.info('Success! Table "{}" privacy updated correctly'.format(table_name))
+
+
+def estimate_csv_size(gdf):
+    n = min(SAMPLE_ROWS_NUMBER, len(gdf))
+    columns = get_dataframe_columns_info(gdf)
+    return sum([len(x) for x in
+                _compute_copy_data(gdf.sample(n=n), columns)]) * len(gdf) / n

@@ -5,19 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Pending]
+
+### Changed
+- Allow to set a value for null geometries in the `read_carto` and `Geocoding.geocode` methods (#1667)
+
 ## [1.0.4] - 2020-07-06
 
-## Added
+### Added
 - Add list_tables function (#1649)
 - Add catalog public filter to providers, countries and categories (#1658)
 - Add set_default_do_credentials function for DO authentication (#1655)
 
-## Changed
+### Changed
 - Open publication link in another window (#1647)
 - Show a warning when uploading a GeoDataFrame without geometry (#1650)
 - Improve GeoDataFrame CRS check, docs and examples (#1656)
 
-## Fixed
+### Fixed
 - Fix empty geometries issue (#1652)
 - Fix Layout publication API key issue (#1654)
 - Fix ColumnInfo comparison when replacing a table (#1660)

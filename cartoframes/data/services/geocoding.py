@@ -57,7 +57,8 @@ class Geocoding(Service):
                 city=None, state=None, country=None,
                 status=geocoding_constants.DEFAULT_STATUS,
                 table_name=None, if_exists='fail',
-                dry_run=False, cached=None):
+                dry_run=False, cached=None,
+                null_geom_value=None):
         """Geocode method.
 
         Args:
@@ -92,6 +93,8 @@ class Geocoding(Service):
                 table. This parameter should be used along with ``table_name``.
             dry_run (bool, optional): no actual geocoding will be performed (useful to
                 check the needed quota)
+            null_geom_value (Object, optional): value for the `the_geom` column when it's null.
+                Defaults to None
 
         Returns:
             A named-tuple ``(data, metadata)`` containing  either a ``data`` geopandas.GeoDataFrame
@@ -184,7 +187,7 @@ class Geocoding(Service):
         if dry_run:
             return self.result(data=None, metadata=metadata)
 
-        gdf = read_carto(input_table_name, self._credentials)
+        gdf = read_carto(input_table_name, self._credentials, null_geom_value=null_geom_value)
 
         if self._source_manager.is_dataframe() and CARTO_INDEX_KEY in gdf:
             del gdf[CARTO_INDEX_KEY]
