@@ -4,7 +4,7 @@ from abc import ABC
 from geopandas import GeoDataFrame
 
 from carto.do_dataset import DODataset
-from ....utils.geom_utils import has_geometry
+from ....utils.geom_utils import set_geometry
 from ....utils.logger import log
 
 _DATASET_READ_MSG = '''To load it as a DataFrame you can do:
@@ -19,6 +19,8 @@ _GEOGRAPHY_READ_MSG = '''To load it as a GeoDataFrame you can do:
     df = pandas.read_csv('{}')
     gdf = GeoDataFrame(df, geometry=decode_geometry(df['geom']))
 '''
+
+GEOM_COL = 'geom'
 
 
 class CatalogEntity(ABC):
@@ -146,8 +148,8 @@ class CatalogEntity(ABC):
             dataframe = pd.read_csv(rows)
             gdf = GeoDataFrame(dataframe)
 
-            if has_geometry(dataframe):
-                gdf.set_geometry(dataframe.geometry.name, inplace=True)
+            if GEOM_COL in gdf:
+                set_geometry(gdf, GEOM_COL, inplace=True)
 
             return gdf
 
