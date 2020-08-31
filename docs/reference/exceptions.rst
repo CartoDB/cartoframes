@@ -1,7 +1,8 @@
-Data Clients
-------------
+Exceptions
+----------
 
-.. automodule:: cartoframes.data.clients
+.. automodule:: cartoframes.exceptions
+    :noindex:
     :members:
     :member-order: bysource
     :undoc-members:

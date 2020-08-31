@@ -1,7 +1,8 @@
-Data Services
--------------
+Data Clients
+------------
 
-.. automodule:: cartoframes.data.services
+.. automodule:: cartoframes.data.clients
+    :noindex:
     :members:
     :member-order: bysource
     :undoc-members:

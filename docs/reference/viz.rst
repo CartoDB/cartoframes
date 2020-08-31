@@ -7,6 +7,7 @@ Map
 ^^^
 
 .. autoclass:: cartoframes.viz.Map
+    :noindex:
     :members:
     :member-order: bysource
     :show-inheritance:
@@ -15,6 +16,7 @@ Layer
 ^^^^^
 
 .. autoclass:: cartoframes.viz.Layer
+    :noindex:
     :members:
     :member-order: bysource
     :show-inheritance:
@@ -23,6 +25,7 @@ Source
 ^^^^^^
 
 .. autoclass:: cartoframes.viz.Source
+    :noindex:
     :members:
     :member-order: bysource
     :show-inheritance:
@@ -31,6 +34,7 @@ Layout
 ^^^^^^
 
 .. autoclass:: cartoframes.viz.Layout
+    :noindex:
     :members:
     :member-order: bysource
     :show-inheritance:

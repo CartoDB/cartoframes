@@ -1,7 +1,8 @@
-Exceptions
-----------
+Data Services
+-------------
 
-.. automodule:: cartoframes.exceptions
+.. automodule:: cartoframes.data.services
+    :noindex:
     :members:
     :member-order: bysource
     :undoc-members:

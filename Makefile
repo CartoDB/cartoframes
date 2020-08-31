@@ -2,9 +2,16 @@ init:
 	pip install -e .
 
 test:
-	pytest
+	pytest tests/unit/
 
-docs:
-	cd docs && make html
+clean:
+	rm -fr build/* dist/* .egg cartoframes.egg-info
 
-.PHONY: docs
+dist:
+	python setup.py sdist bdist_wheel --universal
+
+send:
+	twine upload dist/*
+
+publish:
+	clean dist send

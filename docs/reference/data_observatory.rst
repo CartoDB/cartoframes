@@ -9,6 +9,7 @@ users in a private beta. We're still open to more beta testers, so if you're int
 `please get in touch. <https://carto.com/contact/?campaign_details=data-observatory-betatester>`__
 
 .. automodule:: cartoframes.data.observatory
+    :noindex:
     :members:
     :member-order: bysource
     :exclude-members: get_datasets_spatial_filtered
