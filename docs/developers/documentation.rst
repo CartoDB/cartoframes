@@ -22,17 +22,18 @@ The docs directory
 
 The docs directory contains:
 
-- developer-center: Guides and examples extructure to be published in the developer center
-- developers: Internal documentation
-- guides: Old guides. These guides will be moved to the new ones and deleted eventually
-- includes: Contains the different doc sections, which are included in `cartoframes.rst` file
+- developers: Internal documentation.
+- examples: Contains the examples (notebooks) for the Developer Center.
+- guides: Contains the guides (notebooks) for the Developer Center.
+- reference: Contains the rst index documents to generate the reference for the Developer Center.
+- support: Contains the support files for the Developer Center.
 
 Structure
 ~~~~~~~~~
 
 `cartoframes.rst` file is the main entry point for the rest of the documentation.
 We generate a single document file from this one to build the result documentation.
-In the `includes` directory we place the different sections, that are included from `cartoframes.rst`.
+In the `reference` directory we place the different sections, that are included from `cartoframes.rst`.
 
 Generating docs locally
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,7 +64,7 @@ Adding documentation
 
 Add documentation to the API reference:
 
-- If you want to add a new section, create a file with the name of this section in `docs/includes`, and include it in `docs/cartoframes.rst`.
+- If you want to add a new section, create a file with the name of this section in `docs/reference`, and include it in `docs/cartoframes.rst`.
 - Use `automodule` syntax to include module content:
 
 .. code::
@@ -88,7 +89,7 @@ we have separated branches in order to be able to change the docs after the rele
 Writing Documentation
 ~~~~~~~~~~~~~~~~~~~~~
 
-Documentation is placed in `/docs/developer-center` directory.
+Documentation is placed in `/docs` directory.
 
 - In order to test it in the developer center, it's necessary to change the branch to be tested in the `config.js` (instructions are explained in the developer center repository)
 - In order to modify the documentation of a specific version, just:
@@ -117,14 +118,6 @@ And, finally, open a Pull Request against the docs branch.
     Note: Don't forget to add a reviewer
 
 After that, in order to see the changes applied in the developer center, deploy the production version through Jenkins.
-
-Examples
---------
-
-Examples are placed in the `/examples` directory. These examples are Jupyter Notebooks, that are converted to `html` to be rendered in the developer center.
-The `examples.json` file placed in `/docs/developer-center/examples` is used to select and organize the examples to expose in the developer center.
-When adding a new notebook, if it needs to be published in the developer center, it must be included in this config file.
-
 
 Errors and Exceptions
 ~~~~~~~~~~~~~~~~~~~~~
