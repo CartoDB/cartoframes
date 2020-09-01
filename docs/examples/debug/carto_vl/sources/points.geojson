@@ -1,0 +1,35 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [-73.944158, 40.678178]
+            },
+            "properties": {
+                "address": "Brooklyn, New York"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [-3.70379, 40.416775]
+            },
+            "properties": {
+                "address": "Madrid, Spain"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [-77.036871, 38.907192]
+            },
+            "properties": {
+                "address": "Washington, DC"
+            }
+        }
+    ]
+}

@@ -1,17 +1,27 @@
 cartoframes package
 ===================
 
+Subpackages
+-----------
+
+.. toctree::
+
+   cartoframes.auth
+   cartoframes.viz
+
 Submodules
 ----------
 
 .. toctree::
 
    cartoframes.analysis
-   cartoframes.batch
+   cartoframes.columns
    cartoframes.context
    cartoframes.credentials
    cartoframes.dataobs
+   cartoframes.dataset
    cartoframes.examples
+   cartoframes.geojson
    cartoframes.layer
    cartoframes.maps
    cartoframes.styling
@@ -21,6 +31,6 @@ Module contents
 ---------------
 
 .. automodule:: cartoframes
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
