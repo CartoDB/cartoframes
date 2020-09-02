@@ -21,15 +21,32 @@ function decodeJSONData(data, encodeData) {
   }
 }
 
+// Adding a `style` HTML element to the `head` one
+function addCSS(css) {
+  let head = document.head || document.getElementsByTagName('head')[0];
+  let styleNode = document.createElement('style');
+  head.appendChild(styleNode);
+
+  styleNode.type = 'text/css';
+  if (styleNode.styleSheet){
+    styleNode.styleSheet.cssText = css;
+
+  } else {
+    styleNode.appendChild(document.createTextNode(css));
+  }
+}
+
 async function initialize() {
   const basemap = '{{ basemap }}';
   const bounds = {{ bounds }};
   const camera = {{ camera|tojson }};
   const layersDef = {{ layers|tojson }};
+  const layerSelector = '{{ layer_selector }}' === 'False' ? false : true;
 
   let credentials = null;
   let dataview = null;
   let layer = null;
+  let layers = {};
   let source = null;
   let style = null;
   let widgetMode = null;
@@ -83,7 +100,7 @@ async function initialize() {
         }
       }
 
-      await layer.setPopupHover(layerDef.interactivity.hover);
+      await layer.setPopupHover(layerDef.interactivity.hover, {autoWidth: true, closeButton: false});
     }
 
     // Click interactivity
@@ -94,7 +111,7 @@ async function initialize() {
         }
       }
 
-      await layer.setPopupClick(layerDef.interactivity.click);
+      await layer.setPopupClick(layerDef.interactivity.click,  {autoWidth: true, closeButton: true});
     }
 
     await layer.addTo(deckMap);
@@ -148,7 +165,7 @@ async function initialize() {
         });
 
         new carto.viz.widget.Histogram(`as-histogram-widget#layer${layerI}_widget${widgetI}`, dataview, {
-          showClear: true,
+          showClearButton: true,
           disableInteractivity: widgetDef.options.readOnly,
           format: widgetDef.options.format
         });
@@ -157,18 +174,45 @@ async function initialize() {
       widgetI++;
     }
 
+    // Legends
     legendI = 0;
     for (const legendDef of layerDef.legends) {
       if (typeof legendDef.format === 'string') {
         legendDef.format = d3.format(legendDef.format);
       }
 
-      new carto.viz.Legend(`as-legend-${legendDef.type}#layer${layerI}_map${layerDef.map_index}_legend${legendI}`, layer, legendDef);
+      let legendId = `layer${layerI}_map${layerDef.map_index}_legend${legendI}`;
+      new carto.viz.Legend(`as-legend-${legendDef.type}#${legendId}`, layer, legendDef);
+
+      // Legend with layer selector
+      if (layerSelector) {
+        let selectorId = `${legendId}_selector`;
+        let selectorElement = document.getElementById(selectorId);
+        layers[selectorId] = layer;
+
+        selectorElement.addEventListener('change', (event) => {
+          let targetElement = event.target || event.srcElement;
+          let targetLayer = layers[selectorId];
+
+          if (targetLayer.isVisible()){
+            targetLayer.hide();
+
+          } else {
+            targetLayer.show();
+          }
+        });
+      }
 
       legendI++;
     }
 
     layerI--;
+  }
+
+  // Adding CSS for layer selectors
+  if (layerSelector) {
+    addCSS('div.as-legend--wrapper {display: inline; padding-left: 0px;};');
+    addCSS('div.as-legend--wrapper as-widget-header {display: inline-block;};');
   }
 
   // Setting the right zoom and center, and optional pitch and bearing
