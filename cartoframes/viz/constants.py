@@ -1,7 +1,6 @@
-WEB_SDK_VERSION = 'v1.0.0-alpha.2'
+WEB_SDK_VERSION = 'v1.0.0-alpha.3'
 WEB_SDK_DEV = '/dist/web-sdk.js'
-# WEB_SDK_URL = 'https://libs.cartocdn.com/web-sdk/{}/index.min.js'.format(WEB_SDK_VERSION)
-WEB_SDK_URL = 'https://web-sdk-git-develop.carto-frontend.now.sh/dist/umd/index.min.js'
+WEB_SDK_URL = 'https://libs.cartocdn.com/web-sdk/{}/index.min.js'.format(WEB_SDK_VERSION)
 
 AIRSHIP_VERSION = 'v2.4.1'
 AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
