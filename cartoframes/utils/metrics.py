@@ -6,9 +6,8 @@ import functools
 from urllib.parse import urlparse
 
 from .logger import log
-from .utils import default_config_path, read_from_config, save_in_config, \
-                   is_uuid, get_local_time, silent_fail, get_runtime_env, \
-                   get_credentials, get_parameter_from_decorator
+from .utils import (default_config_path, read_from_config, save_in_config, is_uuid, get_local_time, silent_fail,
+                    get_runtime_env, get_credentials, get_parameter_from_decorator)
 from .. import __version__
 
 EVENT_VERSION = '1'
@@ -87,7 +86,7 @@ def build_metrics_data(event_name, extra_metrics_data, server_domain_tld):
         'source_version': __version__,
         'installation_id': get_metrics_uuid(),
         'runtime_env': get_runtime_env(),
-        'api_used': CLOUD_API if server_domain_tld in [PROD_DOMAIN_TLD, STAG_DOMAIN_TLD] else CUSTOM_API
+        'api_used': get_api_used(server_domain_tld)
     }
 
     if isinstance(extra_metrics_data, dict):
@@ -126,9 +125,7 @@ def build_extra_metrics_data(decorated_function, *args, **kwargs):
     try:
         credentials = get_parameter_from_decorator('credentials', decorated_function, *args, **kwargs)
         credentials = get_credentials(credentials)
-
-        hostname = urlparse(credentials.base_url).hostname
-        server_domain_tld = '.'.join(hostname.split('.')[-2:])
+        server_domain_tld = get_server_domain_tld(credentials.base_url)
 
         if credentials and credentials.user_id:
             extra_metrics['user_id'] = credentials.user_id
@@ -137,6 +134,15 @@ def build_extra_metrics_data(decorated_function, *args, **kwargs):
 
     except Exception:
         return extra_metrics, server_domain_tld
+
+
+def get_server_domain_tld(server_url):
+    hostname = urlparse(server_url).hostname
+    return '.'.join(hostname.split('.')[-2:])
+
+
+def get_api_used(server_domain_tld):
+    return CLOUD_API if server_domain_tld in [PROD_DOMAIN_TLD, STAG_DOMAIN_TLD] else CUSTOM_API
 
 
 # Run this once
