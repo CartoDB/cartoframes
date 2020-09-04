@@ -1,4 +1,3 @@
-import functools
 import time
 
 import pandas as pd
@@ -44,21 +43,18 @@ def retry_copy(func):
     return wrapper
 
 
-def not_found():
-    def decorator_func(func):
-        @functools.wraps(func)
-        def wrapper_func(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
+def not_found(func):
+    def decorator_func(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
 
-            except CartoException as e:
-                if hasattr(e, 'args') and isinstance(e.args, (list, tuple)) and type(e.args[0]) == NotFoundException:
-                    raise NotFoundException('User and/or table do not exist') from None
+        except CartoException as e:
+            if hasattr(e, 'args') and isinstance(e.args, (list, tuple)) and type(e.args[0]) == NotFoundException:
+                raise NotFoundException('User and/or table do not exist') from None
 
-                else:
-                    raise e
+            else:
+                raise e
 
-        return wrapper_func
     return decorator_func
 
 
@@ -73,11 +69,11 @@ class ContextManager:
         self.copy_client = CopySQLClient(self.auth_client)
         self.batch_sql_client = BatchSQLClient(self.auth_client)
 
-    @not_found()
+    @not_found
     def execute_query(self, query, parse_json=True, do_post=True, format=None, **request_args):
         return self.sql_client.send(query.strip(), parse_json, do_post, format, **request_args)
 
-    @not_found()
+    @not_found
     def execute_long_running_query(self, query):
         return self.batch_sql_client.create_and_wait_for_completion(query.strip())
 
