@@ -3,13 +3,13 @@
 import os
 
 from urllib.parse import urlparse
+
 from carto.auth import APIKeyAuthClient
 from carto.do_token import DoTokenManager
 
 from .. import __version__
 from ..utils.logger import log
-from ..utils.utils import is_valid_str, check_do_enabled, save_in_config, \
-                          read_from_config, default_config_path
+from ..utils.utils import is_valid_str, check_do_enabled, save_in_config, read_from_config, default_config_path
 
 from warnings import filterwarnings
 filterwarnings('ignore', category=FutureWarning, module='carto')
@@ -64,6 +64,7 @@ class Credentials:
         self._user_id = None
         self._api_key_auth_client = None
         self._allow_non_secure = allow_non_secure
+        self._do_credentials = None
 
         self._norm_credentials()
 
@@ -256,11 +257,15 @@ class Credentials:
         except OSError:
             log.warning('No credential file found at {}.'.format(path_to_remove))
 
-    @check_do_enabled
-    def get_do_credentials(self):
-        """Returns the Data Observatory v2 credentials"""
-        do_token_manager = DoTokenManager(self.get_api_key_auth_client())
-        return do_token_manager.get()
+    def is_instant_licensing_active(self):
+        """Returns if the user has instant licensing activated for the Data Observatory v2"""
+        do_credentials = self._get_do_credentials()
+        return do_credentials.instant_licensing
+
+    def get_gcloud_auth_info(self):
+        """Returns the Data Observatory v2 Google Cloud token and project"""
+        do_credentials = self._get_do_credentials()
+        return do_credentials.access_token, do_credentials.bq_project
 
     def get_api_key_auth_client(self):
         if not self._api_key_auth_client:
@@ -273,6 +278,16 @@ class Credentials:
             )
 
         return self._api_key_auth_client
+
+    @check_do_enabled
+    def _get_do_credentials(self):
+        """Returns the Data Observatory v2 credentials"""
+        if self._do_credentials:
+            return self._do_credentials
+
+        do_token_manager = DoTokenManager(self.get_api_key_auth_client())
+        self._do_credentials = do_token_manager.get()
+        return self._do_credentials
 
     def _norm_credentials(self):
         """Standardize credentials"""

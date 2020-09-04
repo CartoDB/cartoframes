@@ -15,7 +15,7 @@ def display_existing_subscription_message(entity_id, entity_type):
 
 def display_subscription_form(entity_id, entity_type, credentials):
     info = fetch_subscription_info(entity_id, entity_type, credentials)
-    instant_licensing = credentials.get_do_credentials().instant_licensing
+    instant_licensing = credentials.is_instant_licensing_active()
 
     if is_ipython_notebook():
         _display_subscription_form_notebook(entity_id, entity_type, info, instant_licensing, credentials)
