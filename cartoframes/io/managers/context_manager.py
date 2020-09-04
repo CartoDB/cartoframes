@@ -50,7 +50,7 @@ def not_found(func):
 
         except CartoException as e:
             if hasattr(e, 'args') and isinstance(e.args, (list, tuple)) and type(e.args[0]) == NotFoundException:
-                raise NotFoundException('User and/or table do not exist') from None
+                raise Exception('Resource not found') from None
 
             else:
                 raise e
