@@ -1,5 +1,4 @@
 """Functions to interact with the CARTO platform"""
-import functools
 import math
 
 from pandas import DataFrame
@@ -22,22 +21,7 @@ SAMPLE_ROWS_NUMBER = 100
 CSV_TO_CARTO_RATIO = 1.4
 
 
-def not_found():
-    def decorator_func(func):
-        @functools.wraps(func)
-        def wrapper_func(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-
-            except CartoException:
-                log.error('User and/or table do not exist')
-
-        return wrapper_func
-    return decorator_func
-
-
 @send_metrics('data_downloaded')
-@not_found()
 def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None, index_col=None, decode_geom=True,
                null_geom_value=None):
     """Read a table or a SQL query from the CARTO account.
@@ -90,7 +74,6 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 
 @send_metrics('data_uploaded')
-@not_found()
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
              cartodbfy=True, log_enabled=True, retry_times=3, max_upload_size=MAX_UPLOAD_SIZE_BYTES,
              skip_quota_warning=False):
@@ -189,7 +172,6 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
     return table_name
 
 
-@not_found()
 def list_tables(credentials=None):
     """List all of the tables in the CARTO account.
 
@@ -207,7 +189,6 @@ def list_tables(credentials=None):
     return context_manager.list_tables()
 
 
-@not_found()
 def has_table(table_name, credentials=None, schema=None):
     """Check if the table exists in the CARTO account.
 
@@ -232,7 +213,6 @@ def has_table(table_name, credentials=None, schema=None):
     return context_manager.has_table(table_name, schema)
 
 
-@not_found()
 def delete_table(table_name, credentials=None, log_enabled=True):
     """Delete the table from the CARTO account.
 
@@ -258,7 +238,6 @@ def delete_table(table_name, credentials=None, log_enabled=True):
             log.info('Table "{}" does not exist'.format(table_name))
 
 
-@not_found()
 def rename_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
     """Rename a table in the CARTO account.
 
@@ -291,7 +270,6 @@ def rename_table(table_name, new_table_name, credentials=None, if_exists='fail',
         log.info('Success! Table "{0}" renamed to table "{1}" correctly'.format(table_name, new_table_name))
 
 
-@not_found()
 def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
     """Copy a table into a new table in the CARTO account.
 
@@ -325,7 +303,6 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
         log.info('Success! Table "{0}" copied to table "{1}" correctly'.format(table_name, new_table_name))
 
 
-@not_found()
 def create_table_from_query(query, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
     """Create a new table from an SQL query in the CARTO account.
 
@@ -357,7 +334,6 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
         log.info('Success! Table "{0}" created correctly'.format(new_table_name))
 
 
-@not_found()
 def describe_table(table_name, credentials=None, schema=None):
     """Describe the table in the CARTO account.
 
@@ -396,7 +372,6 @@ def describe_table(table_name, credentials=None, schema=None):
     }
 
 
-@not_found()
 def update_privacy_table(table_name, privacy, credentials=None, log_enabled=True):
     """Update the table information in the CARTO account.
 

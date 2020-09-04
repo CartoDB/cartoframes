@@ -1,3 +1,4 @@
+import functools
 import time
 
 import pandas as pd
@@ -8,16 +9,16 @@ from carto.auth import APIKeyAuthClient
 from carto.datasets import DatasetManager
 from carto.exceptions import CartoException, CartoRateLimitException
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
+from pyrestcli.exceptions import NotFoundException
 
 from ..dataset_info import DatasetInfo
 from ... import __version__
 from ...auth.defaults import get_default_credentials
 from ...utils.logger import log
 from ...utils.geom_utils import encode_geometry_ewkb
-from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL, \
-                           double_quote
-from ...utils.columns import get_dataframe_columns_info, get_query_columns_info, obtain_converters, \
-                             date_columns_names, normalize_name
+from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL, double_quote
+from ...utils.columns import (get_dataframe_columns_info, get_query_columns_info, obtain_converters, date_columns_names,
+                              normalize_name)
 
 DEFAULT_RETRY_TIMES = 3
 
@@ -43,6 +44,24 @@ def retry_copy(func):
     return wrapper
 
 
+def not_found():
+    def decorator_func(func):
+        @functools.wraps(func)
+        def wrapper_func(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+
+            except CartoException as e:
+                if hasattr(e, 'args') and isinstance(e.args, (list, tuple)) and type(e.args[0]) == NotFoundException:
+                    raise NotFoundException('User and/or table do not exist') from None
+
+                else:
+                    raise e
+
+        return wrapper_func
+    return decorator_func
+
+
 class ContextManager:
 
     def __init__(self, credentials):
@@ -54,9 +73,11 @@ class ContextManager:
         self.copy_client = CopySQLClient(self.auth_client)
         self.batch_sql_client = BatchSQLClient(self.auth_client)
 
+    @not_found()
     def execute_query(self, query, parse_json=True, do_post=True, format=None, **request_args):
         return self.sql_client.send(query.strip(), parse_json, do_post, format, **request_args)
 
+    @not_found()
     def execute_long_running_query(self, query):
         return self.batch_sql_client.create_and_wait_for_completion(query.strip())
 
