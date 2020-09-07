@@ -262,10 +262,10 @@ class Credentials:
         do_credentials = self._get_do_credentials()
         return do_credentials.instant_licensing
 
-    def get_gcloud_auth_info(self):
+    def get_gcp_auth_info(self):
         """Returns the Data Observatory v2 Google Cloud token and project"""
         do_credentials = self._get_do_credentials()
-        return do_credentials.access_token, do_credentials.bq_project
+        return do_credentials.bq_project, do_credentials.access_token
 
     def get_api_key_auth_client(self):
         if not self._api_key_auth_client:
