@@ -258,12 +258,21 @@ class Credentials:
             log.warning('No credential file found at {}.'.format(path_to_remove))
 
     def is_instant_licensing_active(self):
-        """Returns if the user has instant licensing activated for the Data Observatory v2"""
+        """Returns if the user has instant licensing activated for the Data Observatory v2."""
         do_credentials = self._get_do_credentials()
         return do_credentials.instant_licensing
 
     def get_gcp_auth_info(self):
-        """Returns the Data Observatory v2 Google Cloud token and project"""
+        """Returns the Data Observatory v2 Google Cloud Platform project and token.
+
+        Example:
+            >>> from cartoframes.auth import Credentials
+            >>> from google.oauth2.credentials import Credentials as GCPCredentials
+            >>> creds = Credentials(username='johnsmith', api_key='abcdefg')
+            >>> gcp_project, gcp_token = creds.get_gcp_auth_info()
+            >>> gcp_credentials = GCPCredentials(gcp_token)
+
+        """
         do_credentials = self._get_do_credentials()
         return do_credentials.bq_project, do_credentials.access_token
 
