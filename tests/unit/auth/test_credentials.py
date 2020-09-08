@@ -121,7 +121,7 @@ class TestCredentials:
         mocker.patch('carto.do_token.DoTokenManager.get', return_value=DOCredentials())
 
         credentials = Credentials(self.username, self.api_key)
-        access_token_from_do, project_from_do = credentials.get_gcp_auth_info()
+        project_from_do, access_token_from_do = credentials.get_gcp_auth_info()
         instant_licensing_from_do = credentials.is_instant_licensing_active()
 
         assert access_token_from_do == access_token
