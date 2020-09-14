@@ -585,7 +585,7 @@ var init = (function () {
           .setLngLat([event.coordinates.lng, event.coordinates.lat])
           .setHTML(`<div class="popup-content">${popupHTML}</div>`);
 
-      if (!popup.isOpen()) {
+      if (popupHTML.length > 0 && !popup.isOpen()) {
         popup.addTo(map);
       }
     } else {
