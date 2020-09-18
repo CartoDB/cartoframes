@@ -581,14 +581,15 @@ var init = (function () {
         }
       }
 
-      popup
-          .setLngLat([event.coordinates.lng, event.coordinates.lat])
-          .setHTML(`<div class="popup-content">${popupHTML}</div>`);
+      if (popupHTML) {
+        popup
+            .setLngLat([event.coordinates.lng, event.coordinates.lat])
+            .setHTML(`<div class="popup-content">${popupHTML}</div>`);
 
-      if (!popup.isOpen()) {
-        popup.addTo(map);
-      }
-      if (!popupHTML) {
+        if (!popup.isOpen()) {
+          popup.addTo(map);
+        }
+      } else {
         popup.remove();
       }
     } else {
