@@ -47,12 +47,16 @@ export function updatePopup(map, popup, event, attrs) {
       }
     }
 
-    popup
-        .setLngLat([event.coordinates.lng, event.coordinates.lat])
-        .setHTML(`<div class="popup-content">${popupHTML}</div>`);
+    if (popupHTML) {
+      popup
+          .setLngLat([event.coordinates.lng, event.coordinates.lat])
+          .setHTML(`<div class="popup-content">${popupHTML}</div>`);
 
-    if (popupHTML.length > 0 && !popup.isOpen()) {
-      popup.addTo(map);
+      if (!popup.isOpen()) {
+        popup.addTo(map);
+      }
+    } else {
+      popup.remove();
     }
   } else {
     popup.remove();
