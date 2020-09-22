@@ -95,7 +95,7 @@ class Source:
             self.gdf = self.gdf[~self.gdf.geometry.is_empty]
 
             # Checking the uniqueness of the geometry type
-            geometry_types = set(self.gdf.geom_type.unique())
+            geometry_types = set(self.gdf.geom_type.unique()).difference({None})
             if geometry_types not in VALID_GEOMETRY_TYPES:
                 raise ValueError('No valid geometry column types ({}), it has '.format(geometry_types) +
                                  'to be one of the next type sets: {}.'.format(VALID_GEOMETRY_TYPES))
