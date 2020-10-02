@@ -4,6 +4,7 @@ from geopandas import GeoDataFrame
 from carto.do_dataset import DODataset
 
 from ...observatory import Variable
+from ...observatory.utils.placekey import compute_placekey_geom
 from ....auth import get_default_credentials
 from ....exceptions import EnrichmentError
 from ....utils.geom_utils import set_geometry, has_geometry
@@ -23,10 +24,11 @@ class EnrichmentService(object):
         self.auth_client = _create_auth_client(credentials or get_default_credentials())
 
     @timelogger
-    def _enrich(self, geom_type, dataframe, variables, geom_col=None, filters=None, aggregation=AGGREGATION_DEFAULT):
+    def _enrich(self, geom_type, dataframe, variables, geom_col=None, filters=None,
+                aggregation=AGGREGATION_DEFAULT, placekey_col=None):
         filters = filters or {}
         variable_ids = self._prepare_variables(variables)
-        geodataframe = self._prepare_data(dataframe, geom_col)
+        geodataframe = self._prepare_data(dataframe, geom_col, placekey_col)
         temp_table_name = self._get_temp_table_name()
         uploaded_dataset = self._upload_data(temp_table_name, geodataframe)
         enriched_dataframe = self._execute_enrichment(uploaded_dataset,
@@ -50,10 +52,12 @@ class EnrichmentService(object):
         return _variables
 
     @timelogger
-    def _prepare_data(self, dataframe, geom_col):
+    def _prepare_data(self, dataframe, geom_col=None, placekey_col=None):
         geodataframe = GeoDataFrame(dataframe, copy=True)
 
-        if geom_col in geodataframe:
+        if placekey_col:
+            geodataframe = compute_placekey_geom(geodataframe, placekey_col=placekey_col)
+        elif geom_col in geodataframe:
             set_geometry(geodataframe, geom_col, inplace=True)
         elif has_geometry(dataframe):
             geodataframe.set_geometry(dataframe.geometry.name, inplace=True)

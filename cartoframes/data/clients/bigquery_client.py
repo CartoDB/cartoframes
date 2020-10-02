@@ -33,7 +33,7 @@ def refresh_clients(func):
 
 class BigQueryClient:
 
-    def __init__(self, credentials):
+    def __init__(self, credentials=None):
         self._credentials = credentials or get_default_credentials()
         self.bq_client = None
         self.gcs_client = None
