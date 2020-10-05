@@ -91,6 +91,9 @@ class Source:
                 raise ValueError('No valid geometry found. Please provide an input source with ' +
                                  'a valid geometry or specify the "geom_col" param with a geometry column.')
 
+            # Remove nan geometries
+            self.gdf.dropna(subset=[self.gdf.geometry.name], inplace=True)
+
             # Remove empty geometries
             self.gdf = self.gdf[~self.gdf.geometry.is_empty]
 

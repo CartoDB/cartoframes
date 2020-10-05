@@ -167,6 +167,7 @@ class TestSource(object):
         gdf = gpd.GeoDataFrame.from_features(geojson)
         source = Source(gdf)
 
+        assert len(source.gdf) == len(features)
         assert source.gdf.equals(gdf)
 
     @pytest.mark.parametrize('features', [
@@ -187,7 +188,7 @@ class TestSource(object):
         gdf = gpd.GeoDataFrame.from_features(geojson)
         source = Source(gdf)
 
-        assert source.gdf.equals(gdf)
+        assert len(source.gdf) == len(features) - 1
 
     @pytest.mark.parametrize('features', [
         [POINT, LINESTRING],
@@ -216,5 +217,14 @@ class TestSource(object):
         }
         gdf = gpd.GeoDataFrame.from_features(geojson)
         source = Source(gdf)
+
+        assert len(source.gdf) == 2
+
+    def test_nan_geometries(self):
+        df = pd.DataFrame({
+            'geom': ['POINT(0 0)', np.nan, np.nan, 'POINT(0 0)', None]
+        })
+
+        source = Source(df, geom_col='geom')
 
         assert len(source.gdf) == 2

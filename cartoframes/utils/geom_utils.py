@@ -49,9 +49,9 @@ def set_geometry(gdf, col, drop=False, inplace=False, crs=None):
     if isinstance(col, str):
         if col not in frame:
             raise Exception('Column "{0}" does not exist.'.format(col))
-        frame[col] = decode_geometry(frame[col])
+        frame[col] = decode_geometry(frame[col].dropna())
     else:
-        col = decode_geometry(col)
+        col = decode_geometry(col.dropna())
 
     # Call set_geometry with decoded column
     frame.set_geometry(col, drop=drop, inplace=True, crs=crs)
