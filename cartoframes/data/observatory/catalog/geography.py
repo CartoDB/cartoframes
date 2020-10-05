@@ -201,8 +201,9 @@ class Geography(CatalogEntity):
 
         """
         _credentials = get_credentials(credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials, GEOGRAPHY_TYPE)
 
-        if not self._is_subscribed(_credentials):
+        if self.id not in _subscribed_ids:
             raise DOError('You are not subscribed to this Geography yet. '
                           'Please, use the subscribe method first.')
 
@@ -236,8 +237,9 @@ class Geography(CatalogEntity):
 
         """
         _credentials = get_credentials(credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials, GEOGRAPHY_TYPE)
 
-        if not self._is_subscribed(_credentials):
+        if self.id not in _subscribed_ids:
             raise DOError('You are not subscribed to this Geography yet. '
                           'Please, use the subscribe method first.')
 
@@ -304,14 +306,6 @@ class Geography(CatalogEntity):
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))
-
-    def _is_subscribed(self, credentials):
-        if self.is_public_data:
-            return True
-
-        geographies = Geography.get_all({}, credentials)
-
-        return geographies is not None and self in geographies
 
     def __str__(self):
         return "<Geography.get('{}')>".format(self._get_print_id())

@@ -399,8 +399,9 @@ class Dataset(CatalogEntity):
 
         """
         _credentials = get_credentials(credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials, DATASET_TYPE)
 
-        if not self._is_subscribed(_credentials):
+        if self.id not in _subscribed_ids:
             raise DOError('You are not subscribed to this Dataset yet. '
                           'Please, use the subscribe method first.')
 
@@ -436,8 +437,9 @@ class Dataset(CatalogEntity):
 
         """
         _credentials = get_credentials(credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials, DATASET_TYPE)
 
-        if not self._is_subscribed(_credentials):
+        if self.id not in _subscribed_ids:
             raise DOError('You are not subscribed to this Dataset yet. '
                           'Please, use the subscribe method first.')
 
@@ -505,14 +507,6 @@ class Dataset(CatalogEntity):
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, DATASET_TYPE, _credentials))
-
-    def _is_subscribed(self, credentials):
-        if self.is_public_data:
-            return True
-
-        datasets = Dataset.get_all({}, credentials)
-
-        return datasets is not None and self in datasets
 
     def _get_summary_data(self):
         data = self.data.get('summary_json')
