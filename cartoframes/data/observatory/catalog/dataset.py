@@ -399,11 +399,12 @@ class Dataset(CatalogEntity):
 
         """
         _credentials = get_credentials(credentials)
-        _subscribed_ids = subscriptions.get_subscription_ids(_credentials, DATASET_TYPE)
 
-        if self.id not in _subscribed_ids:
-            raise DOError('You are not subscribed to this Dataset yet. '
-                          'Please, use the subscribe method first.')
+        if not self.is_public_data:
+            _subscribed_ids = subscriptions.get_subscription_ids(_credentials, DATASET_TYPE)
+            if self.id not in _subscribed_ids:
+                raise DOError('You are not subscribed to this Dataset yet. '
+                              'Please, use the subscribe method first.')
 
         self._download(_credentials, file_path, limit=limit, order_by=order_by, sql_query=sql_query, add_geom=add_geom)
 
@@ -437,11 +438,12 @@ class Dataset(CatalogEntity):
 
         """
         _credentials = get_credentials(credentials)
-        _subscribed_ids = subscriptions.get_subscription_ids(_credentials, DATASET_TYPE)
 
-        if self.id not in _subscribed_ids:
-            raise DOError('You are not subscribed to this Dataset yet. '
-                          'Please, use the subscribe method first.')
+        if not self.is_public_data:
+            _subscribed_ids = subscriptions.get_subscription_ids(_credentials, DATASET_TYPE)
+            if self.id not in _subscribed_ids:
+                raise DOError('You are not subscribed to this Dataset yet. '
+                              'Please, use the subscribe method first.')
 
         return self._download(_credentials, limit=limit, order_by=order_by, sql_query=sql_query, add_geom=add_geom)
 
