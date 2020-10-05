@@ -84,6 +84,8 @@ class Source:
             self.set_datetime_columns()
 
             if geom_col in self.gdf:
+                # Remove nan raw geometries
+                self.gdf = self.gdf.dropna(subset=[geom_col])
                 set_geometry(self.gdf, geom_col, inplace=True)
             elif has_geometry(source):
                 self.gdf.set_geometry(source.geometry.name, inplace=True)
