@@ -167,6 +167,7 @@ class TestSource(object):
         gdf = gpd.GeoDataFrame.from_features(geojson)
         source = Source(gdf)
 
+        assert len(source.gdf) == len(features)
         assert source.gdf.equals(gdf)
 
     @pytest.mark.parametrize('features', [
@@ -187,7 +188,7 @@ class TestSource(object):
         gdf = gpd.GeoDataFrame.from_features(geojson)
         source = Source(gdf)
 
-        assert source.gdf.equals(gdf)
+        assert len(source.gdf) == len(features) - 1
 
     @pytest.mark.parametrize('features', [
         [POINT, LINESTRING],
