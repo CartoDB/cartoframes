@@ -150,6 +150,11 @@ Before releasing to production we need to test everything in staging. In order t
 There is a set of internal functions to configure the default DO credentials used by the DO Catalog.
 
 .. code::
+    from cartoframes.auth import set_default_credentials
+
+    set_default_credentials('https://USER.carto-staging.com', 'API_KEY')
+
+.. code::
     from cartoframes.auth.defaults import set_default_do_credentials
 
     set_default_do_credentials(username='USER', base_url='https://ORG.carto-staging.com')
