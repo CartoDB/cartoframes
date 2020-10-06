@@ -43,7 +43,7 @@ class Subscriptions:
 
 def get_subscription_ids(credentials, stype=None):
     subs = fetch_subscriptions(credentials)
-    return [s.id for s in subs if stype is None or stype == s.type]
+    return [s.id for s in subs if (stype is None or stype == s.type) and s.status == 'active']
 
 
 def fetch_subscriptions(credentials):

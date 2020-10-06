@@ -17,6 +17,11 @@ from ....utils.logger import log
 from ....utils.utils import get_credentials, check_credentials, check_do_enabled
 from ....exceptions import DOError
 
+DATASET_SUBSCRIPTION_ERROR = (
+    'You are not subscribed to this Dataset yet. '
+    'Please, use the subscribe method first.'
+)
+
 
 class Dataset(CatalogEntity):
     """A Dataset represents the metadata of a particular dataset in the catalog.
@@ -400,9 +405,8 @@ class Dataset(CatalogEntity):
         """
         _credentials = get_credentials(credentials)
 
-        if not self._is_subscribed(_credentials):
-            raise DOError('You are not subscribed to this Dataset yet. '
-                          'Please, use the subscribe method first.')
+        if not self.is_subscribed(_credentials, DATASET_TYPE):
+            raise DOError(DATASET_SUBSCRIPTION_ERROR)
 
         self._download(_credentials, file_path, limit=limit, order_by=order_by, sql_query=sql_query, add_geom=add_geom)
 
@@ -437,9 +441,8 @@ class Dataset(CatalogEntity):
         """
         _credentials = get_credentials(credentials)
 
-        if not self._is_subscribed(_credentials):
-            raise DOError('You are not subscribed to this Dataset yet. '
-                          'Please, use the subscribe method first.')
+        if not self.is_subscribed(_credentials, DATASET_TYPE):
+            raise DOError(DATASET_SUBSCRIPTION_ERROR)
 
         return self._download(_credentials, limit=limit, order_by=order_by, sql_query=sql_query, add_geom=add_geom)
 
@@ -505,14 +508,6 @@ class Dataset(CatalogEntity):
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, DATASET_TYPE, _credentials))
-
-    def _is_subscribed(self, credentials):
-        if self.is_public_data:
-            return True
-
-        datasets = Dataset.get_all({}, credentials)
-
-        return datasets is not None and self in datasets
 
     def _get_summary_data(self):
         data = self.data.get('summary_json')
