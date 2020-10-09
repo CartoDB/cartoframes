@@ -6,7 +6,6 @@
     "categories": [{
         "title": "Data management",
         "desc": "Explore working with data both locally and with a CARTO account",
-        "file": "data_management.md",
         "hide_sidebar_samples": true,
         "samples": [{
             "title": "Load a CSV file",
@@ -57,7 +56,6 @@
     }, {
         "title": "Data visualization",
         "desc": "Explore the building blocks for creating web-based, dynamic, and interactive map visualizations",
-        "file": "data_visualization.md",
         "hide_sidebar_samples": true,
         "samples": [{
             "title": "Single layer",
@@ -327,7 +325,6 @@
     }, {
         "title": "Data services",
         "desc": "Learn how to combine your data and CARTO's Location Data Services for geospatial analyses",
-        "file": "data_services.md",
         "hide_sidebar_samples": true,
         "samples": [{
             "title": "Geocoding",
@@ -353,7 +350,6 @@
     }, {
         "title": "Data Observatory",
         "desc": "Learn how to discover third party datasets and enrich your data through CARTO's Data Observatory",
-        "file": "data_observatory.md",
         "hide_sidebar_samples": true,
         "samples": [{
             "title": "Discover a dataset",
@@ -384,7 +380,6 @@
     }, {
         "title": "Publish and share",
         "desc": "Learn how to publish and share interactive visualizations for others to explore",
-        "file": "publish_share.md",
         "hide_sidebar_samples": true,
         "samples": [{
             "title": "Publish Public Table Visualization",
@@ -410,7 +405,6 @@
     }, {
         "title": "Use cases",
         "desc": "Explore a variety of ways to use CARTOframes in your workflows",
-        "file": "use_cases.md",
         "hide_sidebar_samples": true,
         "samples": [{
             "title": "Visualize temperatures",
