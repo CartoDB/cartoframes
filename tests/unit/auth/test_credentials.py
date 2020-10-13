@@ -107,19 +107,26 @@ class TestCredentials:
         credentials.get_api_key_auth_client()
         assert credentials._api_key_auth_client is not None
 
-    def test_get_do_credentials(self, mocker):
+    def test_do_credentials(self, mocker):
         access_token = '1234'
+        project = 'project'
+        instant_licensing = True
 
-        class Token:
+        class DOCredentials:
             def __init__(self):
                 self.access_token = access_token
+                self.bq_project = project
+                self.instant_licensing = instant_licensing
 
-        mocker.patch('carto.do_token.DoTokenManager.get', return_value=Token())
+        mocker.patch('carto.do_token.DoTokenManager.get', return_value=DOCredentials())
 
         credentials = Credentials(self.username, self.api_key)
-        do_credentials = credentials.get_do_credentials()
+        project_from_do, access_token_from_do = credentials.get_gcp_auth_info()
+        instant_licensing_from_do = credentials.is_instant_licensing_active()
 
-        assert do_credentials.access_token == access_token
+        assert access_token_from_do == access_token
+        assert project_from_do == project
+        assert instant_licensing_from_do == instant_licensing
 
 
 class TestCredentialsFromFile:

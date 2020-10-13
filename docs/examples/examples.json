@@ -376,6 +376,11 @@
             "desc": "Basic steps to subscribe to a premium dataset in the Data Observatory to start enriching your data",
             "file": "enrichment_subscription_workflow",
             "path": "data_observatory"
+        }, {
+            "title": "Google Cloud Platform credentials",
+            "desc": "Get and use your Data Observatory's Google Cloud Platform credentials",
+            "file": "google_cloud_platform_credentials",
+            "path": "data_observatory"
         }]
     }, {
         "title": "Publish and share",
