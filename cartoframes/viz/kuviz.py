@@ -6,6 +6,7 @@ from carto.kuvizs import KuvizManager
 from ..data.clients.auth_api_client import AuthAPIClient
 from ..exceptions import PublishError
 from ..utils.logger import log
+from ..utils.utils import get_credentials
 
 filterwarnings('ignore', category=FutureWarning, module='carto')
 
@@ -18,13 +19,6 @@ class KuvizPublisher:
         self._layers = []
         self._auth_client = _create_auth_client(credentials)
         self._auth_api_client = _create_auth_api_client(credentials)
-
-    @staticmethod
-    def all(credentials=None):
-        auth_client = _create_auth_client(credentials)
-        kmanager = _get_kuviz_manager(auth_client)
-        kuvizs = kmanager.all()
-        return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
 
     def get_layers(self):
         return self._layers
@@ -135,3 +129,45 @@ def manage_kuviz_exception(error, name):
                            "Upgrade your account or delete some of your previous maps to be able to create new ones.")
 
     raise error
+
+
+def all_publications(credentials=None):
+    """Get all map visualizations published by the current user.
+
+    Args:
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            A Credentials instance. If not provided, the credentials will be automatically
+            obtained from the default credentials if available.
+
+    """
+    _credentials = get_credentials(credentials)
+    auth_client = _create_auth_client(_credentials)
+    kmanager = _get_kuviz_manager(auth_client)
+    kuvizs = kmanager.all()
+    return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
+
+
+def delete_publication(name, credentials=None):
+    """Delete a map visualization published by id.
+
+    Args:
+        name (str): name of the publication to be deleted.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            A Credentials instance. If not provided, the credentials will be automatically
+            obtained from the default credentials if available.
+
+    """
+    _credentials = get_credentials(credentials)
+    auth_client = _create_auth_client(_credentials)
+    kmanager = _get_kuviz_manager(auth_client)
+    kuvizs = kmanager.all()
+    kuviz = next((kuviz for kuviz in kuvizs if kuviz.name == name), None)
+
+    if kuviz is None:
+        raise PublishError('Publication "{}" not found.'.format(name))
+
+    try:
+        kuviz.delete()
+        log.info('Success! Publication "{0}" deleted'.format(name))
+    except Exception as e:
+        manage_kuviz_exception(e, name)
