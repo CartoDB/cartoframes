@@ -1,4 +1,7 @@
 {% macro createLegend(legend, id) -%}
+  {% if layer_selector %}
+    <input class="as-checkbox-input" type="checkbox" checked id="{{id}}_selector" style="display: inline">
+  {% endif %}
   <as-legend-{{legend.type}} id="{{id}}" slot="legends"></as-legend-{{legend.type}}>
 {%- endmacro %}
 
