@@ -18,6 +18,29 @@ And for an specific Python version
 tox -e py37
 ```
 
+## Executing a single test
+
+Create a virtual environment
+
+```
+virtualenv -p python3 venv
+source venv/bin/activate
+```
+
+Install the required dependencies
+
+```
+pip install -r requirements.txt
+pip install pytest
+pip install pytest-mock
+```
+
+Execute a single test
+
+```
+pytest tests/unit/io/test_carto.py::test_read_carto
+```
+
 ## File structure
 
 ```

@@ -1,6 +1,5 @@
 __all__ = [
     'HASH_COLUMN',
-    'BATCH_SIZE',
     'DEFAULT_STATUS',
     'QUOTA_SERVICE',
     'STATUS_FIELDS',
@@ -11,8 +10,6 @@ __all__ = [
 ]
 
 HASH_COLUMN = 'carto_geocode_hash'
-
-BATCH_SIZE = 200
 
 DEFAULT_STATUS = {'gc_status_rel': 'relevance'}
 

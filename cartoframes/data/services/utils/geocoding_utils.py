@@ -144,16 +144,14 @@ def geocode_query(table, schema, street, city, state, country, status):
             {street},
             {city},
             {state},
-            {country},
-            {batch_size}
+            {country}
         )
     """.format(
         query=query,
         street=column_name(street),
         city=column_name(city),
         state=column_name(state),
-        country=column_name(country),
-        batch_size=geocoding_constants.BATCH_SIZE
+        country=column_name(country)
     )
 
     status_assignment, status_columns = status_assignment_columns(status)

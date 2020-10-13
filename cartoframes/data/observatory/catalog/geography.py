@@ -8,6 +8,11 @@ from . import utils
 from ....utils.utils import get_credentials, check_credentials, check_do_enabled
 from ....exceptions import DOError
 
+GEOGRAPHY_SUBSCRIPTION_ERROR = (
+    'You are not subscribed to this Geography yet. '
+    'Please, use the subscribe method first.'
+)
+
 
 class Geography(CatalogEntity):
     """A Geography represents the metadata of a particular geography dataset in the catalog.
@@ -202,9 +207,8 @@ class Geography(CatalogEntity):
         """
         _credentials = get_credentials(credentials)
 
-        if not self._is_subscribed(_credentials):
-            raise DOError('You are not subscribed to this Geography yet. '
-                          'Please, use the subscribe method first.')
+        if not self.is_subscribed(_credentials, GEOGRAPHY_TYPE):
+            raise DOError(GEOGRAPHY_SUBSCRIPTION_ERROR)
 
         self._download(_credentials, file_path, limit=limit, order_by=order_by, sql_query=sql_query)
 
@@ -237,9 +241,8 @@ class Geography(CatalogEntity):
         """
         _credentials = get_credentials(credentials)
 
-        if not self._is_subscribed(_credentials):
-            raise DOError('You are not subscribed to this Geography yet. '
-                          'Please, use the subscribe method first.')
+        if not self.is_subscribed(_credentials, GEOGRAPHY_TYPE):
+            raise DOError(GEOGRAPHY_SUBSCRIPTION_ERROR)
 
         return self._download(_credentials, limit=limit, order_by=order_by, sql_query=sql_query)
 
@@ -304,14 +307,6 @@ class Geography(CatalogEntity):
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))
-
-    def _is_subscribed(self, credentials):
-        if self.is_public_data:
-            return True
-
-        geographies = Geography.get_all({}, credentials)
-
-        return geographies is not None and self in geographies
 
     def __str__(self):
         return "<Geography.get('{}')>".format(self._get_print_id())

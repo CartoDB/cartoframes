@@ -5,8 +5,10 @@ from .provider import Provider
 from .dataset import Dataset
 from .geography import Geography
 from .subscriptions import Subscriptions
-from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, PUBLIC_FILTER
+from .repository.constants import (COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER, GLOBAL_COUNTRY_FILTER,
+                                   PROVIDER_FILTER, PUBLIC_FILTER)
 
+from ....utils.logger import log
 from ....utils.utils import get_credentials
 
 
@@ -142,6 +144,7 @@ class Catalog:
             CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
+        self._global_message()
         return Category.get_all(self.filters)
 
     @property
@@ -155,6 +158,7 @@ class Catalog:
             CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
+        self._global_message()
         return Provider.get_all(self.filters)
 
     @property
@@ -168,6 +172,7 @@ class Catalog:
             CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
+        self._global_message()
         return Dataset.get_all(self.filters)
 
     @property
@@ -181,6 +186,7 @@ class Catalog:
             CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
+        self._global_message()
         return Geography.get_all(self.filters)
 
     def country(self, country_id):
@@ -295,3 +301,8 @@ class Catalog:
 
         """
         return Dataset.get_datasets_spatial_filtered(filter_dataset)
+
+    def _global_message(self):
+        if self.filters and self.filters.get(COUNTRY_FILTER) != GLOBAL_COUNTRY_FILTER:
+            log.info('You can find more entities with the Global country filter. To apply that filter run:'
+                     "\n\tCatalog().country('glo')")

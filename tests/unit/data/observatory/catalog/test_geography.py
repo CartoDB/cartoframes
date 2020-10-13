@@ -1,3 +1,5 @@
+import os
+
 import pytest
 import pandas as pd
 
@@ -231,6 +233,7 @@ class TestGeography(object):
 
         # Then
         geography.to_csv('fake_path', credentials)
+        os.remove('fake_path')
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
@@ -264,6 +267,7 @@ class TestGeography(object):
         credentials = Credentials('fake_user', '1234')
 
         geography.to_csv('fake_path', credentials)
+        os.remove('fake_path')
 
     @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
