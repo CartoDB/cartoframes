@@ -1,3 +1,5 @@
+import os
+
 import pytest
 import pandas as pd
 
@@ -305,6 +307,7 @@ class TestDataset(object):
 
         # Then
         dataset.to_csv('fake_path', credentials)
+        os.remove('fake_path')
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
@@ -336,6 +339,7 @@ class TestDataset(object):
         credentials = Credentials('fake_user', '1234')
 
         dataset.to_csv('fake_path', credentials)
+        os.remove('fake_path')
 
     @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')

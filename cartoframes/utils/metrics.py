@@ -3,10 +3,11 @@ import uuid
 import requests
 import functools
 
+from urllib.parse import urlparse
+
 from .logger import log
-from .utils import default_config_path, read_from_config, save_in_config, \
-                   is_uuid, get_local_time, silent_fail, get_runtime_env, \
-                   get_credentials, get_parameter_from_decorator
+from .utils import (default_config_path, read_from_config, save_in_config, is_uuid, get_local_time, silent_fail,
+                    get_runtime_env, get_credentials, get_parameter_from_decorator)
 from .. import __version__
 
 EVENT_VERSION = '1'
@@ -15,6 +16,13 @@ EVENT_SOURCE = 'cartoframes'
 UUID_KEY = 'uuid'
 ENABLED_KEY = 'enabled'
 METRICS_FILENAME = 'metrics.json'
+CLOUD_API = 'cloud'
+CUSTOM_API = 'custom'
+
+PROD_DOMAIN_TLD = 'carto.com'
+STAG_DOMAIN_TLD = 'carto-staging.com'
+PROD_METRICS_SERVER = 'https://bmetrics.cartodb.net'
+STAG_METRICS_SERVER = 'https://bmetrics-staging.cartodb.net'
 
 _metrics_config = None
 
@@ -69,7 +77,7 @@ def check_valid_metrics_uuid(metrics_config):
     return metrics_config is not None and is_uuid(metrics_config.get(UUID_KEY))
 
 
-def build_metrics_data(event_name, extra_metrics_data):
+def build_metrics_data(event_name, extra_metrics_data, server_domain_tld):
     metrics_data = {
         'event_version': EVENT_VERSION,
         'event_time': get_local_time(),
@@ -77,7 +85,8 @@ def build_metrics_data(event_name, extra_metrics_data):
         'event_name': event_name,
         'source_version': __version__,
         'installation_id': get_metrics_uuid(),
-        'runtime_env': get_runtime_env()
+        'runtime_env': get_runtime_env(),
+        'api_used': get_api_used(server_domain_tld)
     }
 
     if isinstance(extra_metrics_data, dict):
@@ -87,9 +96,10 @@ def build_metrics_data(event_name, extra_metrics_data):
 
 
 @silent_fail
-def post_metrics(event_name, extra_metrics_data):
-    json_data = build_metrics_data(event_name, extra_metrics_data)
-    result = requests.post('https://bmetrics.cartodb.net', json=json_data, timeout=2)
+def post_metrics(event_name, extra_metrics_data, server_domain_tld):
+    metrics_server = STAG_METRICS_SERVER if server_domain_tld == STAG_DOMAIN_TLD else PROD_METRICS_SERVER
+    json_data = build_metrics_data(event_name, extra_metrics_data, server_domain_tld)
+    result = requests.post(metrics_server, json=json_data, timeout=2)
     log.debug('Metrics sent! {0} {1}'.format(result.status_code, json_data))
 
 
@@ -100,8 +110,8 @@ def send_metrics(event_name):
             result = func(*args, **kwargs)
 
             if get_metrics_enabled():
-                extra_metrics_data = build_extra_metrics_data(func, *args, **kwargs)
-                post_metrics(event_name, extra_metrics_data)
+                extra_metrics_data, server_domain_tld = build_extra_metrics_data(func, *args, **kwargs)
+                post_metrics(event_name, extra_metrics_data, server_domain_tld)
 
             return result
         return wrapper_func
@@ -109,13 +119,30 @@ def send_metrics(event_name):
 
 
 def build_extra_metrics_data(decorated_function, *args, **kwargs):
+    extra_metrics = {}
+    server_domain_tld = PROD_DOMAIN_TLD
+
     try:
-        credentials = get_parameter_from_decorator(
-            'credentials', decorated_function, *args, **kwargs)
+        credentials = get_parameter_from_decorator('credentials', decorated_function, *args, **kwargs)
         credentials = get_credentials(credentials)
-        return {'user_id': credentials.user_id} if credentials and credentials.user_id else {}
+        server_domain_tld = get_server_domain_tld(credentials.base_url)
+
+        if credentials and credentials.user_id:
+            extra_metrics['user_id'] = credentials.user_id
+
+        return extra_metrics, server_domain_tld
+
     except Exception:
-        return {}
+        return extra_metrics, server_domain_tld
+
+
+def get_server_domain_tld(server_url):
+    hostname = urlparse(server_url).hostname
+    return '.'.join(hostname.split('.')[-2:])
+
+
+def get_api_used(server_domain_tld):
+    return CLOUD_API if server_domain_tld in [PROD_DOMAIN_TLD, STAG_DOMAIN_TLD] else CUSTOM_API
 
 
 # Run this once

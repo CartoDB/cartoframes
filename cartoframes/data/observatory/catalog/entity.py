@@ -4,6 +4,7 @@ from abc import ABC
 from geopandas import GeoDataFrame
 
 from carto.do_dataset import DODataset
+from . import subscriptions
 from ....utils.geom_utils import set_geometry
 from ....utils.logger import log
 
@@ -102,6 +103,10 @@ class CatalogEntity(ABC):
     def to_dict(self):
         """Converts the entity instance to a Python dict."""
         return {key: value for key, value in self.data.items() if key not in self.export_excluded_fields}
+
+    def is_subscribed(self, credentials, entity_type):
+        """Check if the entity is subscribed"""
+        return self.is_public_data or self.id in subscriptions.get_subscription_ids(credentials, entity_type)
 
     def __eq__(self, other):
         return self.data == other.data
