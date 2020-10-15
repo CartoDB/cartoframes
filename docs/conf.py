@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = u'cartoframes'
-copyright = u'2019, CARTO'
+copyright = u'2020, CARTO'
 author = u'CARTO'
 
 # The short X.Y version
