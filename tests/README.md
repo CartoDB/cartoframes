@@ -78,7 +78,7 @@ pytest [-s] tests/notebooks/test_notebooks.py
 
 Environment variables:
  - `SCOPE`: (default `all`): Scope of the tests: all, guides, examples (Example: `SCOPE=guides`)
- - `OVERWRITE` (default `TRUE`): Overwrites the notebooks with the result of the execution (Example: `OVERWRITE=false`)
+ - `OVERWRITE` (default `true`): Overwrites the notebooks with the result of the execution (Example: `OVERWRITE=false`)
  - `TIMEOUT` (default `600`): Notebook timeout for each cell (Example: `TIMEOUT=100`)
  - `KERNEL` (default `python3`): Kernel used to execute the notebooks (Example: `KERNEL=python3`)
 

@@ -48,7 +48,7 @@ def find_notebooks():
 
 class TestNotebooks:
     def teardown(self):
-        time.sleep(10)
+        time.sleep(0.1)
 
     def custom_setup(self, path):
         with open('{}/creds.json'.format(path), 'w') as creds_file:
@@ -60,7 +60,7 @@ class TestNotebooks:
     @pytest.mark.parametrize('notebook_filename', find_notebooks())
     def test_docs(self, notebook_filename):
         try:
-            path = '/'.join(notebook_filename.split('/')[:-1])
+            path = os.path.dirname(notebook_filename)
 
             self.custom_setup(path)
             self.execute_notebook(notebook_filename, path)
@@ -69,7 +69,7 @@ class TestNotebooks:
 
     def execute_notebook(self, notebook_filename, path):
         with open(notebook_filename) as f:
-            logging.info('Executing notebook: %s', notebook_filename)
+            logging.info('\nExecuting notebook: %s', notebook_filename)
 
             nb = nbformat.read(f, as_version=4)
             ep = ExecutePreprocessor(timeout=TIMEOUT, kernel_name=KERNEL, allow_errors=OVERWRITE,
