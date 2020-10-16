@@ -5,7 +5,7 @@ import pytest
 import logging
 import nbformat
 import subprocess
-from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
+from nbconvert.preprocessors import ExecutePreprocessor
 
 
 logging.basicConfig(level=logging.INFO)
@@ -37,7 +37,7 @@ CREDS_FILE = f'''
 def find_notebooks():
     return list(set(EXECUTE_NOTEBOOKS) - set(AVOID_NOTEBOOKS)) if EXECUTE_NOTEBOOKS \
         else list(set(glob.glob('docs/examples/**/*.ipynb', recursive=True) +
-                      glob.glob('docs/guides/**/*.ipynb', recursive=True)) - set(AVOID_NOTEBOOKS)) 
+                      glob.glob('docs/guides/**/*.ipynb', recursive=True)) - set(AVOID_NOTEBOOKS))
 
 
 class TestNotebooks:
