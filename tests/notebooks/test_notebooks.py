@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO)
 
 EXECUTE_NOTEBOOKS = []
 AVOID_NOTEBOOKS = [
+    'docs/examples/data_observatory/download_dataset.ipynb',
     'docs/examples/data_management/change_carto_table_privacy.ipynb',
     'docs/examples/publish_and_share/publish_visualization_layout.ipynb',
     'docs/examples/publish_and_share/publish_visualization_private_table.ipynb',
@@ -20,24 +21,25 @@ AVOID_NOTEBOOKS = [
     'docs/examples/_debug/enrichment_big_polygons.ipynb',
 ]
 
-USERNAME = os.environ.get('USERNAME')
-API_KEY = os.environ.get('APIKEY')
-OVERWRITE = os.environ.get('OVERWRITE', 'false').lower() == 'true'
+OVERWRITE = os.environ.get('OVERWRITE', 'true').lower() == 'true'
 TIMEOUT = int(os.environ.get('TIMEOUT', 600))
-KERNEL = os.environ.get('KERNEL', 'python3')
+KERNEL = os.environ.get('KERNEL', 'python3').lower()
+SCOPE = os.environ.get('SCOPE', 'all').lower()
 
-CREDS_FILE = '''
-{{
-    "username": "{username}",
-    "api_key": "{api_key}"
-}}
-'''.format(username=USERNAME, api_key=API_KEY)
+with open('tests/notebooks/creds.json', 'r') as creds_file:
+    CREDS_FILE = creds_file.read()
 
 
 def find_notebooks():
-    return list(set(EXECUTE_NOTEBOOKS) - set(AVOID_NOTEBOOKS)) if EXECUTE_NOTEBOOKS \
-        else list(set(glob.glob('docs/examples/**/*.ipynb', recursive=True) +
-                      glob.glob('docs/guides/**/*.ipynb', recursive=True)) - set(AVOID_NOTEBOOKS))
+    if EXECUTE_NOTEBOOKS:
+        return list(set(EXECUTE_NOTEBOOKS) - set(AVOID_NOTEBOOKS))
+    else:
+        notebooks = []
+        if SCOPE in ['all', 'guides']:
+            notebooks += glob.glob('docs/guides/**/*.ipynb', recursive=True)
+        if SCOPE in ['all', 'examples']:
+            notebooks += glob.glob('docs/examples/**/*.ipynb', recursive=True)
+        return list(set(notebooks) - set(AVOID_NOTEBOOKS))
 
 
 class TestNotebooks:

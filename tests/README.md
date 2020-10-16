@@ -59,16 +59,26 @@ pip install -r requirements.txt
 pip install -r tests/notebooks/requirements.txt
 ```
 
+Set your credentials
+
+Create the file tests/notebooks/creds.json with the following structure:
+
+```
+{
+  "username": "your_username",
+  "api_key": "your_api_key"
+}
+```
+
 Execute the tests
 
 ```
-USERNAME=myusername APIKEY=myapikey pytest [-s] tests/notebooks/test_notebooks.py
+pytest [-s] tests/notebooks/test_notebooks.py
 ```
 
 Environment variables:
- - `USERNAME`: The CARTO username used to set the credentials (Example: `USERNAME=myusername`)
- - `APIKEY`: The CARTO API key used to set the credentials (Example: `APIKEY=myapikey`)
- - `OVERWRITE` (default `FALSE`): Overwrites the notebooks with the result of the execution (Example: `OVERWRITE=true`)
+ - `SCOPE`: (default `all`): Scope of the tests: all, guides, examples (Example: `SCOPE=guides`)
+ - `OVERWRITE` (default `TRUE`): Overwrites the notebooks with the result of the execution (Example: `OVERWRITE=false`)
  - `TIMEOUT` (default `600`): Notebook timeout for each cell (Example: `TIMEOUT=100`)
  - `KERNEL` (default `python3`): Kernel used to execute the notebooks (Example: `KERNEL=python3`)
 
