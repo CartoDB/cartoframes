@@ -81,4 +81,4 @@ class TestNotebooks:
                 _, stderr_jupyter = p_jupyter.communicate()
 
                 if len(stderr_jupyter) > 0:
-                    raise RuntimeError('Error trusting the notebook ({}): {stderr_jupyter}'.format(notebook_filename))
+                    raise RuntimeError('Error trusting the notebook ({}): {}'.format(notebook_filename, stderr_jupyter))
