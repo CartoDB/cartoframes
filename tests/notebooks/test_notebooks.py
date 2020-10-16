@@ -26,12 +26,12 @@ OVERWRITE = os.environ.get('OVERWRITE', 'false').lower() == 'true'
 TIMEOUT = int(os.environ.get('TIMEOUT', 600))
 KERNEL = os.environ.get('KERNEL', 'python3')
 
-CREDS_FILE = f'''
+CREDS_FILE = '''
 {{
-    "username": "{USERNAME}",
-    "api_key": "{API_KEY}"
+    "username": "{username}",
+    "api_key": "{api_key}"
 }}
-'''
+'''.format(username=USERNAME, api_key=API_KEY)
 
 
 def find_notebooks():
@@ -45,11 +45,11 @@ class TestNotebooks:
         time.sleep(10)
 
     def custom_setup(self, path):
-        with open(f'{path}/creds.json', 'w') as creds_file:
+        with open('{}/creds.json'.format(path), 'w') as creds_file:
             creds_file.write(CREDS_FILE)
 
     def custom_teardown(self, path):
-        os.remove(f'{path}/creds.json')
+        os.remove('{}/creds.json'.format(path))
 
     @pytest.mark.parametrize('notebook_filename', find_notebooks())
     def test_docs(self, notebook_filename):
@@ -76,9 +76,9 @@ class TestNotebooks:
                     nbformat.write(nb, fwrite)
 
                 logging.info('Trusting notebook: %s', notebook_filename)
-                p_jupyter = subprocess.Popen(f'jupyter trust {notebook_filename}', shell=True,
+                p_jupyter = subprocess.Popen('jupyter trust {}'.format(notebook_filename), shell=True,
                                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 _, stderr_jupyter = p_jupyter.communicate()
 
                 if len(stderr_jupyter) > 0:
-                    raise RuntimeError(f'Error trusting the notebook ({notebook_filename}): {stderr_jupyter}')
+                    raise RuntimeError('Error trusting the notebook ({}): {stderr_jupyter}'.format(notebook_filename))
