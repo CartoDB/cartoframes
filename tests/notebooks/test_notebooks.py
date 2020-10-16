@@ -31,15 +31,19 @@ with open('tests/notebooks/creds.json', 'r') as creds_file:
 
 
 def find_notebooks():
+    notebooks = []
+
     if EXECUTE_NOTEBOOKS:
-        return list(set(EXECUTE_NOTEBOOKS) - set(AVOID_NOTEBOOKS))
+        notebooks = list(set(EXECUTE_NOTEBOOKS) - set(AVOID_NOTEBOOKS))
     else:
-        notebooks = []
         if SCOPE in ['all', 'guides']:
             notebooks += glob.glob('docs/guides/**/*.ipynb', recursive=True)
         if SCOPE in ['all', 'examples']:
             notebooks += glob.glob('docs/examples/**/*.ipynb', recursive=True)
-        return list(set(notebooks) - set(AVOID_NOTEBOOKS))
+        notebooks = list(set(notebooks) - set(AVOID_NOTEBOOKS))
+
+    notebooks.sort()
+    return notebooks
 
 
 class TestNotebooks:
