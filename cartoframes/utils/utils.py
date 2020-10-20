@@ -11,10 +11,13 @@ import decimal
 import hashlib
 import inspect
 import requests
+import warnings
+import functools
 import geopandas
 import numpy as np
 import pkg_resources
 import semantic_version
+
 
 from functools import wraps
 from datetime import datetime, timezone
@@ -548,3 +551,23 @@ def get_parameter_from_decorator(parameter_name, decorated_function, *args, **kw
             pass
 
     return parameter
+
+
+def deprecated(message=''):
+    def decorator(func):
+
+        @functools.wraps(func)
+        def decorated(*args, **kwargs):
+            warnings.simplefilter('always', DeprecationWarning)
+            warnings.warn(
+                'The {type_} `{name}` is deprecated. {message}'.format(
+                    type_= 'class' if inspect.isclass(func) else 'function',
+                    name=func.__name__, message=message),
+                category=DeprecationWarning, stacklevel=2)
+            warnings.simplefilter('default', DeprecationWarning)
+
+            return func(*args, **kwargs)
+
+        return decorated
+
+    return decorator

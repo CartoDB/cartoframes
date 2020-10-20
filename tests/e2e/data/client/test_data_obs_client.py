@@ -22,6 +22,56 @@ from tests.e2e.helpers import _UserUrlLoader
 warnings.filterwarnings('ignore')
 
 
+class TestDataObsClientDeprecation(unittest.TestCase, _UserUrlLoader):
+    def setUp(self):
+        self.credentials = Credentials(None, None, self.user_url().format(username=None))
+
+    def test_class_deprecation(self):
+        with warnings.catch_warnings(record=True) as w:
+            do = DataObsClient(self.credentials)
+            assert issubclass(w[-1].category, DeprecationWarning)
+            assert 'deprecated' in str(w[-1].message)
+
+    def test_boundaries_deprecation(self):
+        with warnings.catch_warnings(record=True) as w:
+            do = DataObsClient(self.credentials)
+
+        with warnings.catch_warnings(record=True) as w:
+            try:
+                do.boundaries()
+            except:
+                pass
+
+            assert issubclass(w[-1].category, DeprecationWarning)
+            assert 'deprecated' in str(w[-1].message)
+
+    def test_discovery_deprecation(self):
+        with warnings.catch_warnings(record=True) as w:
+            do = DataObsClient(self.credentials)
+
+        with warnings.catch_warnings(record=True) as w:
+            try:
+                do.discovery()
+            except:
+                pass
+
+            assert issubclass(w[-1].category, DeprecationWarning)
+            assert 'deprecated' in str(w[-1].message)
+
+    def test_augment_deprecation(self):
+        with warnings.catch_warnings(record=True) as w:
+            do = DataObsClient(self.credentials)
+
+        with warnings.catch_warnings(record=True) as w:
+            try:
+                do.augment()
+            except:
+                pass
+
+            assert issubclass(w[-1].category, DeprecationWarning)
+            assert 'deprecated' in str(w[-1].message)
+
+
 @pytest.mark.skip()
 class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.client.DataObsClient"""
