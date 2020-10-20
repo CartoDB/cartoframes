@@ -28,7 +28,7 @@ class TestDataObsClientDeprecation(unittest.TestCase, _UserUrlLoader):
 
     def test_class_deprecation(self):
         with warnings.catch_warnings(record=True) as w:
-            do = DataObsClient(self.credentials)
+            _ = DataObsClient(self.credentials)
             assert issubclass(w[-1].category, DeprecationWarning)
             assert 'deprecated' in str(w[-1].message)
 
