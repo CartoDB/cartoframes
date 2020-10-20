@@ -39,7 +39,7 @@ class TestDataObsClientDeprecation(unittest.TestCase, _UserUrlLoader):
         with warnings.catch_warnings(record=True) as w:
             try:
                 do.boundaries()
-            except:
+            except Exception:
                 pass
 
             assert issubclass(w[-1].category, DeprecationWarning)
@@ -52,7 +52,7 @@ class TestDataObsClientDeprecation(unittest.TestCase, _UserUrlLoader):
         with warnings.catch_warnings(record=True) as w:
             try:
                 do.discovery()
-            except:
+            except Exception:
                 pass
 
             assert issubclass(w[-1].category, DeprecationWarning)
@@ -65,7 +65,7 @@ class TestDataObsClientDeprecation(unittest.TestCase, _UserUrlLoader):
         with warnings.catch_warnings(record=True) as w:
             try:
                 do.augment()
-            except:
+            except Exception:
                 pass
 
             assert issubclass(w[-1].category, DeprecationWarning)

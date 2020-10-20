@@ -561,7 +561,7 @@ def deprecated(message=''):
             warnings.simplefilter('always', DeprecationWarning)
             warnings.warn(
                 'The {type_} `{name}` is deprecated. {message}'.format(
-                    type_= 'class' if inspect.isclass(func) else 'function',
+                    type_='class' if inspect.isclass(func) else 'function',
                     name=func.__name__, message=message),
                 category=DeprecationWarning, stacklevel=2)
             warnings.simplefilter('default', DeprecationWarning)
