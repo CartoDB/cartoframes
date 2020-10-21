@@ -2,6 +2,7 @@
 
 """Unit tests for cartoframes.utils"""
 import unittest
+import warnings
 from collections import OrderedDict
 
 import requests
@@ -9,7 +10,7 @@ import numpy as np
 
 from cartoframes.utils.utils import (camel_dictionary, cssify, debug_print, dict_items,
                                      importify_params, snake_to_camel, dtypes2pg, pg2dtypes,
-                                     encode_row, extract_viz_columns, remove_comments)
+                                     encode_row, extract_viz_columns, remove_comments, deprecated)
 
 
 class TestUtils(unittest.TestCase):
@@ -222,3 +223,27 @@ class TestUtils(unittest.TestCase):
            multiline comment */
         """
         assert remove_comments(viz) == 'color: blue'
+
+    def test_deprecated_decorator_class(self):
+        @deprecated(message='my message')
+        class MyClass:
+            pass
+
+        with warnings.catch_warnings(record=True) as w:
+            _ = MyClass()
+            assert issubclass(w[-1].category, DeprecationWarning)
+            assert 'deprecated' in str(w[-1].message)
+            assert 'my message' in str(w[-1].message)
+            assert 'class' in str(w[-1].message)
+
+    def test_deprecated_decorator_function(self):
+        @deprecated(message='my message')
+        def my_function():
+            pass
+
+        with warnings.catch_warnings(record=True) as w:
+            my_function()
+            assert issubclass(w[-1].category, DeprecationWarning)
+            assert 'deprecated' in str(w[-1].message)
+            assert 'my message' in str(w[-1].message)
+            assert 'function' in str(w[-1].message)
