@@ -22,7 +22,7 @@ class Credentials:
     """Credentials class is used for managing and storing user CARTO credentials. The
     arguments are listed in order of precedence: :obj:`Credentials` instances
     are first, `key` and `base_url`/`username` are taken next, and
-    `config_file` (if given) is taken last. The config file is `cartocreds.json`
+    `config_file` (if given) is taken last. The config file is `creds.json`
     by default. If no arguments are passed, then there will be an attempt to
     retrieve credentials from a previously saved session.
     One of the above scenarios needs to be met to successfully
@@ -205,7 +205,7 @@ class Credentials:
         Args:
             config_file (str, optional): Location where credentials are to be
                 stored. If no argument is provided, it will be send to the
-                default location.
+                default location (`creds.json`).
 
         Example:
             >>> credentials = Credentials(username='johnsmith', api_key='abcdefg')
@@ -233,7 +233,7 @@ class Credentials:
     def delete(cls, config_file=None):
         """Deletes the credentials file specified in `config_file`. If no
         file is specified, it deletes the default user credential file
-        (`cartocreds.json`)
+        (`creds.json`)
 
         Args:
             config_file (str): Path to configuration file. Defaults to delete

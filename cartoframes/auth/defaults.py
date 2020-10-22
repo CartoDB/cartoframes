@@ -15,6 +15,8 @@ def set_default_credentials(
         credentials (:py:class:`Credentials <cartoframes.credentials.Credentials>`, optional):
           A :py:class:`Credentials <cartoframes.auth.Credentials>`
           instance can be used in place of a `username | base_url`/`api_key` combination.
+        filepath (str, optional): Location where credentials are stored as a JSON file.
+        username (str, optional): CARTO user name of the account.
         base_url (str, optional): Base URL of CARTO user account. Cloud-based accounts
           should use the form ``https://{username}.carto.com`` (e.g.,
           https://johnsmith.carto.com for user ``johnsmith``) whether on
@@ -22,12 +24,12 @@ def set_default_credentials(
           should ask their admin.
         api_key (str, optional): CARTO API key. Depending on the application,
           this can be a project API key or the account master API key.
-        username (str, optional): CARTO user name of the account.
-        filepath (str, optional): Location where credentials are stored as a JSON file.
         session (requests.Session, optional): requests session. See `requests
           documentation
           <https://2.python-requests.org/en/master/user/advanced/#session-objects>`__
           for more information.
+        allow_non_secure (bool, optional): Allow non secure http connections.
+            By default is not allowed.
 
     .. note::
 
