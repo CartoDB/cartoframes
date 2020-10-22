@@ -50,46 +50,6 @@ class DataObsClient:
         to analyze how median income has changed in a region (see examples
         section for more).
 
-        Examples:
-            Find all boundaries available for Australia. The columns
-            `geom_name` gives us the name of the boundary and `geom_id`
-            is what we need for the `boundary` argument.
-
-            >>> do = DataObsClient(credentials)
-            >>> au_boundaries = do.boundaries(region='Australia')
-            >>> au_boundaries[['geom_name', 'geom_id']]
-
-            Get the boundaries for Australian Postal Areas and map them.
-
-            >>> au_postal_areas = do.boundaries(boundary='au.geo.POA')
-            >>> Map(Layer(au_postal_areas))
-
-            Get census tracts around Idaho Falls, Idaho, USA, and add median
-            income from the US census. Without limiting the metadata, we get
-            median income measures for each census in the
-            Data Observatory v1 (deprecated).
-
-            >>> # Note: default credentials will be supported in a future release
-            >>> do = DataObsClient(credentials)
-            >>> # will return GeoDataFrame with columns `the_geom` and `geom_ref`
-            >>> tracts = do.boundaries(
-            ...     boundary='us.census.tiger.census_tract',
-            ...     region=[-112.096642,43.429932,-111.974213,43.553539])
-            >>> # write geometries to a CARTO table
-            >>> tracts.upload('idaho_falls_tracts')
-            >>> # gather metadata needed to look up median income
-            >>> median_income_meta = do.discovery(
-            ...     'idaho_falls_tracts',
-            ...     keywords='median income',
-            ...     boundaries='us.census.tiger.census_tract')
-            >>> # get median income data and original table as new GeoDataFrame
-            >>> idaho_falls_income = do.augment(
-            ...     'idaho_falls_tracts',
-            ...     median_income_meta,
-            ...     how='geom_refs')
-            >>> # overwrite existing table with newly-enriched GeoDataFrame
-            >>> idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')
-
         Args:
             boundary (str, optional):
                 Boundary identifier for the boundaries
@@ -133,6 +93,47 @@ class DataObsClient:
                 if `region` is ``None`` or not specified) are returned. If
                 `boundary` is not specified, then a GeoDataFrame of all available
                 boundaries in `region` (or the world if `region` is ``None``).
+
+        Examples:
+            Find all boundaries available for Australia. The columns
+            `geom_name` gives us the name of the boundary and `geom_id`
+            is what we need for the `boundary` argument.
+
+            >>> do = DataObsClient(credentials)
+            >>> au_boundaries = do.boundaries(region='Australia')
+            >>> au_boundaries[['geom_name', 'geom_id']]
+
+            Get the boundaries for Australian Postal Areas and map them.
+
+            >>> au_postal_areas = do.boundaries(boundary='au.geo.POA')
+            >>> Map(Layer(au_postal_areas))
+
+            Get census tracts around Idaho Falls, Idaho, USA, and add median
+            income from the US census. Without limiting the metadata, we get
+            median income measures for each census in the
+            Data Observatory v1 (deprecated).
+
+            >>> # Note: default credentials will be supported in a future release
+            >>> do = DataObsClient(credentials)
+            >>> # will return GeoDataFrame with columns `the_geom` and `geom_ref`
+            >>> tracts = do.boundaries(
+            ...     boundary='us.census.tiger.census_tract',
+            ...     region=[-112.096642,43.429932,-111.974213,43.553539])
+            >>> # write geometries to a CARTO table
+            >>> tracts.upload('idaho_falls_tracts')
+            >>> # gather metadata needed to look up median income
+            >>> median_income_meta = do.discovery(
+            ...     'idaho_falls_tracts',
+            ...     keywords='median income',
+            ...     boundaries='us.census.tiger.census_tract')
+            >>> # get median income data and original table as new GeoDataFrame
+            >>> idaho_falls_income = do.augment(
+            ...     'idaho_falls_tracts',
+            ...     median_income_meta,
+            ...     how='geom_refs')
+            >>> # overwrite existing table with newly-enriched GeoDataFrame
+            >>> idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')
+
         """
         # TODO: create a function out of this?
         if isinstance(region, str):
@@ -251,14 +252,6 @@ class DataObsClient:
             For example, setting the region to be United States counties with
             no filter values set will result in many thousands of measures.
 
-        Examples:
-            Get all European Union measures that mention ``freight``.
-
-            >>> freight_meta = do.discovery('European Union',
-            ...                        keywords='freight',
-            ...                        time='2010')
-            >>> freight_meta['numer_name'].head()
-
         Args:
             region (str or list of float):
                 Information about the region of interest.
@@ -301,6 +294,8 @@ class DataObsClient:
                 case insensitive operator ``~*``. See `PostgreSQL docs
                 <https://www.postgresql.org/docs/9.5/static/functions-matching.html>`__
                 for more information.
+            time (str or list of str, optional):
+                Timespan or list of timespans to filter thje result.
             boundaries (str or list of str, optional):
                 Boundary or list of boundaries that specify the measure resolution. See the
                 boundaries section for each region in the `Data Observatory v1
@@ -320,6 +315,15 @@ class DataObsClient:
             ValueError: If `region` is a :obj:`list` and does not consist of
               four elements, or if `region` is not an acceptable region
             CartoException: If `region` is not a table in user account
+
+        Examples:
+            Get all European Union measures that mention ``freight``.
+
+            >>> freight_meta = do.discovery('European Union',
+            ...                        keywords='freight',
+            ...                        time='2010')
+            >>> freight_meta['numer_name'].head()
+
         """
         if isinstance(region, str):
             try:
@@ -474,27 +478,6 @@ class DataObsClient:
         <https://cartodb.github.io/bigmetadata/index.html>`__. Optionally
         persist the data as a new table.
 
-        Example:
-            Get a DataFrame with Data Observatory v1 measures (deprecated) based
-            on the geometries in a CARTO table.
-
-            >>> do = DataObsClient(credentials)
-            >>> median_income = do.discovery(
-            ...     'transaction_events',
-            ...     regex='.*median income.*',
-            ...     time='2011 - 2015')
-            >>> ds = do.augment('transaction_events', median_income)
-
-            Pass in cherry-picked measures from the Data Observatory v1 catalog (deprecated).
-            The rest of the metadata will be filled in, but it's important to
-            specify the geographic level as this will not show up in the column
-            name.
-
-            >>> median_income = [{'numer_id': 'us.census.acs.B19013001',
-            ...                   'geom_id': 'us.census.tiger.block_group',
-            ...                   'numer_timespan': '2011 - 2015'}]
-            >>> ds = do.augment('transaction_events', median_income)
-
         Args:
             table_name (str):
                 Name of table on CARTO account that Data Observatory v1 measures (deprecated)
@@ -532,6 +515,28 @@ class DataObsClient:
                 requested measures exceeds 50.
             CartoException:
                 If user account consumes all of Data Observatory v1 (deprecated) quota
+
+        Example:
+            Get a DataFrame with Data Observatory v1 measures (deprecated) based
+            on the geometries in a CARTO table.
+
+            >>> do = DataObsClient(credentials)
+            >>> median_income = do.discovery(
+            ...     'transaction_events',
+            ...     regex='.*median income.*',
+            ...     time='2011 - 2015')
+            >>> ds = do.augment('transaction_events', median_income)
+
+            Pass in cherry-picked measures from the Data Observatory v1 catalog (deprecated).
+            The rest of the metadata will be filled in, but it's important to
+            specify the geographic level as this will not show up in the column
+            name.
+
+            >>> median_income = [{'numer_id': 'us.census.acs.B19013001',
+            ...                   'geom_id': 'us.census.tiger.block_group',
+            ...                   'numer_timespan': '2011 - 2015'}]
+            >>> ds = do.augment('transaction_events', median_income)
+
         """
 
         if isinstance(metadata, DataFrame):
