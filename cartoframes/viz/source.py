@@ -29,16 +29,14 @@ class Source:
     """Source
 
     Args:
-        data (str, pandas.DataFrame, geopandas.GeoDataFrame): a table name,
+        source (str, pandas.DataFrame, geopandas.GeoDataFrame): a table name,
             SQL query, DataFrame, GeoDataFrame instance.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             A Credentials instance. If not provided, the credentials will be automatically
             obtained from the default credentials if available.
-        bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
-            keys, or an array of floats in the following structure: [[west,
-            south], [east, north]]. If not provided the bounds will be automatically
-            calculated to fit all features.
         geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
+        encode_data (bool, optional): Indicates whether the data needs to be encoded.
+            Default is True.
 
     Example:
 
