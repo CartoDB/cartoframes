@@ -12,8 +12,8 @@ class Layout:
     Args:
         maps (list of :py:class:`Map <cartoframes.viz.Map>`): List of
             maps. Zero or more of :py:class:`Map <cartoframes.viz.Map>`.
-        N_SIZE (number, optional): Number of columns of the layout
-        M_SIZE (number, optional): Number of rows of the layout
+        n_size (number, optional): Number of columns of the layout
+        m_size (number, optional): Number of rows of the layout
         viewport (dict, optional): Properties for display of the maps viewport.
             Keys can be `bearing` or `pitch`.
         is_static (boolean, optional): By default is False. All the maps in each visualization

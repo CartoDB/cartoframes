@@ -24,7 +24,7 @@ DATASET_SUBSCRIPTION_ERROR = (
 
 
 class Dataset(CatalogEntity):
-    """A Dataset represents the metadata of a particular dataset in the catalog.
+    """A Dataset represents the metadata of a particular dataset in the catalog.
 
     If you have Data Observatory enabled in your CARTO account you can:
 
@@ -108,7 +108,7 @@ class Dataset(CatalogEntity):
 
     @property
     def provider(self):
-        """Id of the :py:class:`Provider` of this dataset."""
+        """ID of the :py:class:`Provider` of this dataset."""
         return self.data['provider_id']
 
     @property
@@ -128,7 +128,7 @@ class Dataset(CatalogEntity):
 
     @property
     def data_source(self):
-        """Id of the data source of this dataset."""
+        """ID of the data source of this dataset."""
         return self.data['data_source_id']
 
     @property
@@ -329,7 +329,6 @@ class Dataset(CatalogEntity):
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 credentials of CARTO user account. If provided, only datasets granted for those credentials are
                 returned.
-
             filters (dict, optional):
                 Dict containing pairs of dataset properties and its value to be used as filters to query the available
                 datasets. If none is provided, no filters will be applied to the query.
@@ -391,6 +390,9 @@ class Dataset(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+            limit (int, optional):
+                The number of rows to download. Default is to download all rows.
+            order_by (str, optional): Field(s) used to order the rows to download. Default is unordered.
             sql_query (str, optional): a query to select, filter or aggregate the content of the dataset.
                 For instance, to download just one row: `select * from $dataset$ limit 1`. The placeholder
                 `$dataset$` is mandatory and it will be replaced by the actual dataset before running the query.
@@ -423,6 +425,9 @@ class Dataset(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+            limit (int, optional):
+                The number of rows to download. Default is to download all rows.
+            order_by (str, optional): Field(s) used to order the rows to download. Default is unordered.
             sql_query (str, optional): a query to select, filter or aggregate the content of the dataset.
                 For instance, to download just one row: `select * from $dataset$ limit 1`. The placeholder
                 `$dataset$` is mandatory and it will be replaced by the actual dataset before running the query.

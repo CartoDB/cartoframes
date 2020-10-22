@@ -18,7 +18,6 @@ def color_continuous_style(value, size=None, range_min=None, range_max=None, pal
         palette (str, optional): Palette that can be a named cartocolor palette
             or other valid color palette. Use `help(cartoframes.viz.palettes)` to
             get more information. Default is "bluyl".
-        size (int, optional): Size of point or line features.
         opacity (float, optional): Opacity value. Default is 1 for points and lines and
             0.9 for polygons.
         stroke_color (str, optional): Color of the stroke on point features.

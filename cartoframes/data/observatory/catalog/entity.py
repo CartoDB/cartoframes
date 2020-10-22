@@ -88,7 +88,7 @@ class CatalogEntity(ABC):
 
         Args:
             id_list (list):
-                List of sD or slugs of entities in the catalog to retrieve instances.
+                List of ID or slugs of entities in the catalog to retrieve instances.
 
         Raises:
             CatalogError: if there's a problem when connecting to the catalog or no entities are found.

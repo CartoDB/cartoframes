@@ -7,8 +7,10 @@ from .styles.utils import prop
 class PopupList:
     """PopupList
 
-     Args:
+    Args:
         popups (dict, PopupElement): List of popups for a layer classified by interactivity event
+        default_popup_hover (PopupElement, optional): The default popup for the hover.
+        default_click_hover (PopupElement, optional): The default popup for the click.
 
     Example:
         >>> popupList = PopupList({

@@ -6,7 +6,7 @@ from ..popups import popup_element
 
 
 def size_continuous_style(value, size_range=None, range_min=None, range_max=None, color=None, opacity=None,
-                          stroke_color=None, stroke_width=None, animate=None, credentials=None):
+                          stroke_color=None, stroke_width=None, animate=None):
     """Helper function for quickly creating a size continuous style.
 
     Args:
