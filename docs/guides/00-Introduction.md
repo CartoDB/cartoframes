@@ -1,6 +1,6 @@
 ## Introduction
 
-Use these guides to learn about integrating CARTOframes into your data science workflows. Working inside of a Jupyter Notebook, the guides walk through installation, authentication, visualization, and all the data features provided in the library.
+Use these guides to learn about integrating CARTOframes into your data science workflows. Working inside of a Jupyter Notebook, the guides walk you through installation, authentication, visualization, and all the data features provided in the library.
 
 If you are looking for more detailed use cases, [check our examples](/developers/cartoframes/examples).
 
