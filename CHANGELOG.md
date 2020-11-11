@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Allow to set a value for null geometries in the `read_carto` and `Geocoding.geocode` methods (#1667)
 
+### Fixed
+- Generate carto_geocode_hash with NULL values (#1702)
+
 ## [1.0.4] - 2020-07-06
 
 ### Added
