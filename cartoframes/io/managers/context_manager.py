@@ -83,7 +83,8 @@ class ContextManager:
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
-    def copy_from(self, gdf, table_name, if_exists='fail', cartodbfy=True, retry_times=DEFAULT_RETRY_TIMES):
+    def copy_from(self, gdf, table_name, if_exists='fail', cartodbfy=True, regenerate=False,
+                  retry_times=DEFAULT_RETRY_TIMES):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
         df_columns = get_dataframe_columns_info(gdf)
@@ -95,10 +96,11 @@ class ContextManager:
 
                 if self._compare_columns(df_columns, table_columns):
                     # Equal columns: truncate table
-                    self._truncate_table(table_name, schema, cartodbfy)
+                    self._truncate_table(table_name, schema, cartodbfy, regenerate)
                 else:
                     # Diff columns: truncate table and drop + add columns
-                    self._truncate_and_drop_add_columns(table_name, schema, df_columns, table_columns, cartodbfy)
+                    self._truncate_and_drop_add_columns(
+                        table_name, schema, df_columns, table_columns, cartodbfy, regenerate=True)
 
             elif if_exists == 'fail':
                 raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
@@ -190,7 +192,9 @@ class ContextManager:
         """Get user schema from current credentials"""
         query = 'SELECT current_schema()'
         result = self.execute_query(query, do_post=False)
-        return result['rows'][0]['current_schema']
+        schema = result['rows'][0]['current_schema']
+        log.debug('schema: {}'.format(schema))
+        return schema
 
     def get_geom_type(self, query):
         """Fetch geom type of a remote table or query"""
@@ -281,18 +285,20 @@ class ContextManager:
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
         self.execute_long_running_query(query)
 
-    def _truncate_table(self, table_name, schema, cartodbfy):
+    def _truncate_table(self, table_name, schema, cartodbfy, regenerate):
         log.debug('TRUNCATE table "{}"'.format(table_name))
-        query = 'BEGIN; {truncate}; {cartodbfy}; COMMIT;'.format(
+        query = 'BEGIN; {truncate}; {regenerate}; {cartodbfy}; COMMIT;'.format(
             truncate=_truncate_table_query(table_name),
+            regenerate=_regenerate_table_query(table_name, schema) if regenerate else '',
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
         self.execute_long_running_query(query)
 
-    def _truncate_and_drop_add_columns(self, table_name, schema, df_columns, table_columns, cartodbfy):
+    def _truncate_and_drop_add_columns(self, table_name, schema, df_columns, table_columns, cartodbfy, regenerate):
         log.debug('TRUNCATE AND DROP + ADD columns table "{}"'.format(table_name))
-        query = 'BEGIN; {truncate}; {drop_columns}; {add_columns}; {cartodbfy}; COMMIT;'.format(
+        query = 'BEGIN; {truncate}; {drop_columns}; {regenerate}; {add_columns}; {cartodbfy}; COMMIT;'.format(
             truncate=_truncate_table_query(table_name),
             drop_columns=_drop_columns_query(table_name, table_columns),
+            regenerate=_regenerate_table_query(table_name, schema) if regenerate else '',
             add_columns=_add_columns_query(table_name, df_columns),
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
         self.execute_long_running_query(query)
@@ -425,6 +431,11 @@ def _create_table_from_query_query(table_name, query):
 
 def _cartodbfy_query(table_name, schema):
     return 'SELECT CDB_CartodbfyTable(\'{schema}\', \'{table_name}\')'.format(
+        schema=schema, table_name=table_name)
+
+
+def _regenerate_table_query(table_name, schema):
+    return 'SELECT CDB_RegenerateTable(\'{schema}.{table_name}\'::regclass)'.format(
         schema=schema, table_name=table_name)
 
 

@@ -10,6 +10,7 @@ credentials.json
 __pycache__
 .*.sw[nop]
 .vscode
+_debug
 
 # OS
 .DS_Store
@@ -61,6 +62,7 @@ htmlcov
 test_*.json
 .pytest_cache
 tmp_file.csv
+my_dataset.csv
 fake_path
 
 # Sphinx documentation
