@@ -294,28 +294,28 @@ class TestDataset(object):
         assert isinstance(sliced_dataset, pd.Series)
         assert sliced_dataset.equals(expected_dataset_df)
 
-    @patch.object(DatasetRepository, 'get_all')
+    @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch.object(DODataset, 'download_stream')
-    def test_dataset_download(self, download_stream_mock, get_by_id_mock, get_all_mock):
+    def test_dataset_download(self, mock_download_stream, mock_get_by_id, mock_subscription_ids):
         # Given
-        get_by_id_mock.return_value = test_dataset1
+        mock_get_by_id.return_value = test_dataset1
         dataset = Dataset.get(test_dataset1.id)
-        get_all_mock.return_value = [dataset]
-        download_stream_mock.return_value = []
+        mock_download_stream.return_value = []
+        mock_subscription_ids.return_value = [test_dataset1.id]
         credentials = Credentials('fake_user', '1234')
 
         # Then
         dataset.to_csv('fake_path', credentials)
         os.remove('fake_path')
 
-    @patch.object(DatasetRepository, 'get_all')
+    @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
     @patch.object(DatasetRepository, 'get_by_id')
-    def test_dataset_not_subscribed_download_fails(self, get_by_id_mock, get_all_mock):
-        # mock dataset
-        get_by_id_mock.return_value = test_dataset2  # is private
+    def test_dataset_not_subscribed_download_not_subscribed(self, mock_get_by_id, mock_subscription_ids):
+        # Given
+        mock_get_by_id.return_value = test_dataset2  # is private
         dataset = Dataset.get(test_dataset2.id)
-        get_all_mock.return_value = []
+        mock_subscription_ids.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         # When
@@ -327,32 +327,28 @@ class TestDataset(object):
             'You are not subscribed to this Dataset yet. '
             'Please, use the subscribe method first.')
 
-    @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch.object(DODataset, 'download_stream')
-    def test_dataset_download_not_subscribed_but_public(self, download_stream_mock, get_by_id_mock, get_all_mock):
+    def test_dataset_download_not_subscribed_but_public(self, mock_download_stream, mock_get_by_id):
         # Given
-        get_by_id_mock.return_value = test_dataset1  # is public
+        mock_get_by_id.return_value = test_dataset1  # is public
         dataset = Dataset.get(test_dataset1.id)
-        get_all_mock.return_value = []
-        download_stream_mock.return_value = []
+        mock_download_stream.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         dataset.to_csv('fake_path', credentials)
         os.remove('fake_path')
 
-    @patch.object(DatasetRepository, 'get_all')
     @patch.object(DatasetRepository, 'get_by_id')
     @patch.object(DODataset, 'download_stream')
-    def test_dataset_download_without_do_enabled(self, download_stream_mock, get_by_id_mock, get_all_mock):
+    def test_dataset_download_without_do_enabled(self, mock_download_stream, mock_get_by_id):
         # Given
-        get_by_id_mock.return_value = test_dataset1
+        mock_get_by_id.return_value = test_dataset1
         dataset = Dataset.get(test_dataset1.id)
-        get_all_mock.return_value = []
 
         def raise_exception(limit=None, order_by=None, sql_query=None, add_geom=None, is_geography=None):
             raise ServerErrorException(['The user does not have Data Observatory enabled'])
-        download_stream_mock.side_effect = raise_exception
+        mock_download_stream.side_effect = raise_exception
         credentials = Credentials('fake_user', '1234')
 
         # When
@@ -406,10 +402,10 @@ class TestDataset(object):
     @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
     @patch('cartoframes.data.observatory.catalog.utils.display_subscription_form')
     @patch('cartoframes.auth.defaults.get_default_credentials')
-    def test_dataset_subscribe_default_credentials(self, mocked_credentials, mock_display_form, mock_subscription_ids):
+    def test_dataset_subscribe_default_credentials(self, mock_credentials, mock_display_form, mock_subscription_ids):
         # Given
         expected_credentials = Credentials('fake_user', '1234')
-        mocked_credentials.return_value = expected_credentials
+        mock_credentials.return_value = expected_credentials
         dataset = Dataset(db_dataset1)
 
         # When
@@ -480,10 +476,10 @@ class TestDataset(object):
 
     @patch('cartoframes.data.observatory.catalog.subscription_info.fetch_subscription_info')
     @patch('cartoframes.auth.defaults.get_default_credentials')
-    def test_dataset_subscription_info_default_credentials(self, mocked_credentials, mock_fetch):
+    def test_dataset_subscription_info_default_credentials(self, mock_credentials, mock_fetch):
         # Given
         expected_credentials = Credentials('fake_user', '1234')
-        mocked_credentials.return_value = expected_credentials
+        mock_credentials.return_value = expected_credentials
         dataset = Dataset(db_dataset1)
 
         # When
