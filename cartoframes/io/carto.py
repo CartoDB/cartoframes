@@ -75,7 +75,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 @send_metrics('data_uploaded')
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
-             cartodbfy=True, regenerate=False, log_enabled=True, retry_times=3, max_upload_size=MAX_UPLOAD_SIZE_BYTES,
+             cartodbfy=True, regenerate=None, log_enabled=True, retry_times=3, max_upload_size=MAX_UPLOAD_SIZE_BYTES,
              skip_quota_warning=False):
     """Upload a DataFrame to CARTO. The geometry's CRS must be WGS 84 (EPSG:4326) so you can use it on CARTO.
 
@@ -91,8 +91,8 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             uses the name of the index from the dataframe.
         cartodbfy (bool, optional): convert the table to CARTO format. Default True. More info
             `here <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
-        regenerate (bool, optional): regenerate the table keeping dependencies. Default False
-            except when the table column changes, in which case it always applies.
+        regenerate (bool, optional): regenerate the table keeping dependencies. It occurs
+            when the table columns changes or if it is set to True.
         log_enabled (bool, optional): enable the logging mechanism. Default is True.
         retry_times (int, optional):
             Number of time to retry the upload in case it fails. Default is 3.

@@ -83,7 +83,7 @@ class ContextManager:
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
-    def copy_from(self, gdf, table_name, if_exists='fail', cartodbfy=True, regenerate=False,
+    def copy_from(self, gdf, table_name, if_exists='fail', cartodbfy=True, regenerate=None,
                   retry_times=DEFAULT_RETRY_TIMES):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
@@ -96,7 +96,7 @@ class ContextManager:
 
                 if self._compare_columns(df_columns, table_columns):
                     # Equal columns: truncate table
-                    self._truncate_table(table_name, schema, cartodbfy, regenerate)
+                    self._truncate_table(table_name, schema, cartodbfy, regenerate or False)
                 else:
                     # Diff columns: truncate table and drop + add columns
                     self._truncate_and_drop_add_columns(
@@ -287,18 +287,20 @@ class ContextManager:
 
     def _truncate_table(self, table_name, schema, cartodbfy, regenerate):
         log.debug('TRUNCATE table "{}"'.format(table_name))
-        query = 'BEGIN; {truncate}; {regenerate}; {cartodbfy}; COMMIT;'.format(
+        regExists = self._check_regenerate_table_exists()
+        query = '{regenerate}; BEGIN; {truncate}; {cartodbfy}; COMMIT;'.format(
+            regenerate=_regenerate_table_query(table_name, schema) if regenerate and regExists else '',
             truncate=_truncate_table_query(table_name),
-            regenerate=_regenerate_table_query(table_name, schema) if regenerate else '',
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
         self.execute_long_running_query(query)
 
     def _truncate_and_drop_add_columns(self, table_name, schema, df_columns, table_columns, cartodbfy, regenerate):
         log.debug('TRUNCATE AND DROP + ADD columns table "{}"'.format(table_name))
-        query = 'BEGIN; {truncate}; {drop_columns}; {regenerate}; {add_columns}; {cartodbfy}; COMMIT;'.format(
+        regExists = self._check_regenerate_table_exists()
+        query = '{regenerate}; BEGIN; {truncate}; {drop_columns}; {add_columns}; {cartodbfy}; COMMIT;'.format(
+            regenerate=_regenerate_table_query(table_name, schema) if regenerate and regExists else '',
             truncate=_truncate_table_query(table_name),
             drop_columns=_drop_columns_query(table_name, table_columns),
-            regenerate=_regenerate_table_query(table_name, schema) if regenerate else '',
             add_columns=_add_columns_query(table_name, df_columns),
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
         self.execute_long_running_query(query)
@@ -322,6 +324,16 @@ class ContextManager:
             return True
         except CartoException:
             return False
+
+    def _check_regenerate_table_exists(self):
+        query = '''
+            SELECT 1
+            FROM pg_catalog.pg_proc p
+            LEFT JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+            WHERE p.proname = 'cdb_regeneratetable' AND n.nspname = 'cartodb';
+        '''
+        result = self.execute_query(query)
+        return len(result['rows']) > 0
 
     def _get_query_columns_info(self, query):
         query = 'SELECT * FROM ({}) _q LIMIT 0'.format(query)
@@ -394,6 +406,11 @@ def _drop_table_query(table_name, if_exists=True):
 
 def _truncate_table_query(table_name):
     return 'TRUNCATE TABLE {table_name}'.format(
+        table_name=table_name)
+
+
+def _delete_table_query(table_name):
+    return 'DELETE FROM {table_name}'.format(
         table_name=table_name)
 
 
