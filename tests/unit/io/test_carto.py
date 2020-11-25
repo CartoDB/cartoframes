@@ -260,7 +260,7 @@ def test_to_carto_non_4326_epsg_without_reprojection(mocker):
 
     # Then
     with pytest.raises(ValueError):
-        norm_table_name = to_carto(df, table_name, CREDENTIALS, skip_quota_warning=True)
+        _ = to_carto(df, table_name, CREDENTIALS, skip_quota_warning=True)
 
 
 def test_to_carto_non_4326_epsg_with_reprojection(mocker):
