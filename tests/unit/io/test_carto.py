@@ -250,6 +250,37 @@ def test_to_carto(mocker):
     assert norm_table_name == table_name
 
 
+def test_to_carto_non_4326_epsg_without_reprojection(mocker):
+    # Given
+    table_name = '__table_name__'
+    cm_mock = mocker.patch.object(ContextManager, 'copy_from')
+    cm_mock.return_value = table_name
+    df = GeoDataFrame({'geometry': [Point([0, 0])]})
+    df.crs = 'epsg:4269'
+
+    # Then
+    with pytest.raises(ValueError):
+        norm_table_name = to_carto(df, table_name, CREDENTIALS, skip_quota_warning=True)
+
+
+def test_to_carto_non_4326_epsg_with_reprojection(mocker):
+    # Given
+    table_name = '__table_name__'
+    cm_mock = mocker.patch.object(ContextManager, 'copy_from')
+    cm_mock.return_value = table_name
+    df = GeoDataFrame({'geometry': [Point([0, 0])]})
+    df.crs = 'epsg:4269'
+
+    # When
+    norm_table_name = to_carto(df, table_name, CREDENTIALS, skip_quota_warning=True, reproject=True)
+
+    # Then
+    assert cm_mock.call_args[0][1] == table_name
+    assert cm_mock.call_args[0][2] == 'fail'
+    assert cm_mock.call_args[0][3] is True
+    assert norm_table_name == table_name
+
+
 def test_to_carto_quota_warning(mocker):
     class NoQuotaCredentials(Credentials):
         @property
