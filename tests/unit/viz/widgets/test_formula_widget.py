@@ -16,13 +16,13 @@ class TestFormulaWidget(object):
 
     def test_count_formula_viewport(self):
         "should create a formula widget to count viewport features"
-        widget = widgets.formula_widget('count')
+        widget = widgets.formula_widget('value', operation='count')
         widget_info = widget.get_info()
         assert widget_info.get('value') == 'viewportCount()'
 
     def test_count_formula_global(self):
         "should create a formula widget to count global features"
-        widget = widgets.formula_widget('count', is_global=True)
+        widget = widgets.formula_widget('value', operation='count', is_global=True)
         widget_info = widget.get_info()
         assert widget_info.get('value') == 'globalCount()'
 
