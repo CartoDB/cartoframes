@@ -22,7 +22,7 @@ def test_wrong_crs_layer(crs):
 
 @pytest.mark.parametrize('crs', ['epsg:2263', 'epsg:3395'])
 def test_wrong_crs_to_carto(mocker, crs):
-    cm_mock = mocker.patch.object(ContextManager, 'copy_from')
+    _ = mocker.patch.object(ContextManager, 'copy_from')
 
     # Given
     gdf = GeoDataFrame({'geometry': [Point([0, 0])]}, crs=crs)
