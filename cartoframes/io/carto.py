@@ -7,7 +7,7 @@ from geopandas import GeoDataFrame
 from carto.exceptions import CartoException
 
 from .managers.context_manager import ContextManager, _compute_copy_data, get_dataframe_columns_info
-from ..utils.geom_utils import is_reprojection_needed, has_geometry, set_geometry
+from ..utils.geom_utils import is_reprojection_needed, reproject, has_geometry, set_geometry
 from ..utils.logger import log
 from ..utils.utils import is_valid_str, is_sql_query
 from ..utils.metrics import send_metrics
@@ -112,7 +112,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
 
     if isinstance(dataframe, GeoDataFrame):
         if is_reprojection_needed(dataframe):
-            dataframe.to_crs(epsg=4326)
+            dataframe = reproject(dataframe)
 
     if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')

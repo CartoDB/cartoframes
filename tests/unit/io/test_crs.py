@@ -11,36 +11,12 @@ from cartoframes.viz import Layer
 CREDENTIALS = Credentials('fake_user', 'fake_api_key')
 
 
-def test_wrong_crs_layer():
-    # Given
-    gdf = GeoDataFrame({'geometry': [Point([0, 0])]}, crs='epsg:2263')
-
-    # When
-    with pytest.raises(ValueError) as e:
-        Layer(gdf)
-
-    # Then
-    assert str(e.value) == 'No valid geometry CRS "epsg:2263", it must be "epsg:4326".'
-
-
 def test_transform_crs_layer():
     # Given
     gdf = GeoDataFrame({'geometry': [Point([0, 0])]}, crs='epsg:4326')
 
     # When
     Layer(gdf)  # No error!
-
-
-def test_wrong_crs_to_carto():
-    # Given
-    gdf = GeoDataFrame({'geometry': [Point([0, 0])]}, crs='epsg:2263')
-
-    # When
-    with pytest.raises(ValueError) as e:
-        to_carto(gdf, 'table_name', skip_quota_warning=True)
-
-    # Then
-    assert str(e.value) == 'No valid geometry CRS "epsg:2263", it must be "epsg:4326".'
 
 
 def test_transform_crs_to_carto(mocker):

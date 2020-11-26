@@ -264,6 +264,10 @@ def is_reprojection_needed(gdf):
     return True
 
 
+def reproject(gdf, epsg=4326):
+    return gdf.to_crs(epsg=epsg)
+
+
 def get_crs(gdf):
     if gdf.crs is None:
         return None
