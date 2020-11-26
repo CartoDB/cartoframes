@@ -11,8 +11,8 @@ from cartoframes.viz import Layer
 CREDENTIALS = Credentials('fake_user', 'fake_api_key')
 
 
-@pytest.mark.parametrize('crs', ['epsg:2263', 'epsg:3395'])
-def test_wrong_crs_layer(crs):
+@pytest.mark.parametrize('crs', ['epsg:4326', 'epsg:2263', 'epsg:3395'])
+def test_transform_crs_layer(crs):
     # Given
     gdf = GeoDataFrame({'geometry': [Point([0, 0])]}, crs=crs)
 
@@ -20,30 +20,12 @@ def test_wrong_crs_layer(crs):
     Layer(gdf)  # No error!
 
 
-@pytest.mark.parametrize('crs', ['epsg:2263', 'epsg:3395'])
-def test_wrong_crs_to_carto(mocker, crs):
-    _ = mocker.patch.object(ContextManager, 'copy_from')
-
-    # Given
-    gdf = GeoDataFrame({'geometry': [Point([0, 0])]}, crs=crs)
-
-    # When
-    to_carto(gdf, 'table_name', CREDENTIALS, skip_quota_warning=True)  # No error!
-
-
-def test_transform_crs_layer():
-    # Given
-    gdf = GeoDataFrame({'geometry': [Point([0, 0])]}, crs='epsg:4326')
-
-    # When
-    Layer(gdf)  # No error!
-
-
-def test_transform_crs_to_carto(mocker):
+@pytest.mark.parametrize('crs', ['epsg:4326', 'epsg:2263', 'epsg:3395'])
+def test_transform_crs_to_carto(mocker, crs):
     cm_mock = mocker.patch.object(ContextManager, 'copy_from')
 
     # Given
-    gdf = GeoDataFrame({'geometry': [Point([0, 0])]}, crs='epsg:4326')
+    gdf = GeoDataFrame({'geometry': [Point([0, 0])]}, crs=crs)
 
     # When
     to_carto(gdf, 'table_name', CREDENTIALS, skip_quota_warning=True)
