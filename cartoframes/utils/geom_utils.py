@@ -256,12 +256,7 @@ def to_geojson(geom, buffer_simplify=True):
 
 
 def is_reprojection_needed(gdf):
-    crs = get_crs(gdf)
-
-    if crs is None or crs == 'epsg:4326':
-        return False
-
-    return True
+    return get_crs(gdf) == 'epsg:4326'
 
 
 def reproject(gdf, epsg=4326):
