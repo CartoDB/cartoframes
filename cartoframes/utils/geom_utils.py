@@ -255,8 +255,13 @@ def to_geojson(geom, buffer_simplify=True):
             return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)
 
 
-def is_crs_4326(gdf):
-    return get_crs(gdf) == 'epsg:4326'
+def is_reprojection_needed(gdf):
+    crs = get_crs(gdf)
+
+    if crs is None or crs == 'epsg:4326':
+        return False
+
+    return True
 
 
 def get_crs(gdf):

@@ -2,7 +2,7 @@ from pandas import DataFrame
 from geopandas import GeoDataFrame
 
 from ..io.managers.context_manager import ContextManager
-from ..utils.geom_utils import is_crs_4326, has_geometry, set_geometry
+from ..utils.geom_utils import is_reprojection_needed, has_geometry, set_geometry
 from ..utils.utils import get_geodataframe_data, get_geodataframe_bounds, \
                           get_geodataframe_geom_type, get_datetime_column_names
 
@@ -74,7 +74,7 @@ class Source:
             self.credentials = self.manager.credentials
         elif isinstance(source, DataFrame):
             if isinstance(source, GeoDataFrame):
-                if not is_crs_4326(source):
+                if is_reprojection_needed(source):
                     source.to_crs(epsg=4326)
 
             # DataFrame, GeoDataFrame
