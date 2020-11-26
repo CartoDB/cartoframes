@@ -7,7 +7,7 @@ from geopandas import GeoDataFrame
 from carto.exceptions import CartoException
 
 from .managers.context_manager import ContextManager, _compute_copy_data, get_dataframe_columns_info
-from ..utils.geom_utils import check_crs, has_geometry, set_geometry
+from ..utils.geom_utils import is_crs_4326, has_geometry, set_geometry
 from ..utils.logger import log
 from ..utils.utils import is_valid_str, is_sql_query
 from ..utils.metrics import send_metrics
@@ -76,7 +76,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 @send_metrics('data_uploaded')
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col=None, index=False, index_label=None,
              cartodbfy=True, log_enabled=True, retry_times=3, max_upload_size=MAX_UPLOAD_SIZE_BYTES,
-             skip_quota_warning=False, reproject=False):
+             skip_quota_warning=False):
     """Upload a DataFrame to CARTO. The geometry's CRS must be WGS 84 (EPSG:4326) so you can use it on CARTO.
 
     Args:
@@ -99,7 +99,6 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         skip_quota_warning (bool, optional): skip the quota exceeded check and force the upload.
             (The upload will still fail if the size of the dataset exceeds the remaining DB quota).
             Default is False.
-        reproject (bool, optional): allows the reprojection of the dataframe to 4326 if needed.
 
     Returns:
         string: the table name normalized.
@@ -112,13 +111,8 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         raise ValueError('Wrong dataframe. You should provide a valid DataFrame instance.')
 
     if isinstance(dataframe, GeoDataFrame):
-        try:
-            check_crs(dataframe)
-        except ValueError as e:
-            if reproject:
-                dataframe.to_crs(epsg=4326)
-            else:
-                raise e
+        if not is_crs_4326(dataframe):
+            dataframe.to_crs(epsg=4326)
 
     if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')

@@ -250,20 +250,7 @@ def test_to_carto(mocker):
     assert norm_table_name == table_name
 
 
-def test_to_carto_non_4326_epsg_without_reprojection(mocker):
-    # Given
-    table_name = '__table_name__'
-    cm_mock = mocker.patch.object(ContextManager, 'copy_from')
-    cm_mock.return_value = table_name
-    df = GeoDataFrame({'geometry': [Point([0, 0])]})
-    df.crs = 'epsg:4269'
-
-    # Then
-    with pytest.raises(ValueError):
-        _ = to_carto(df, table_name, CREDENTIALS, skip_quota_warning=True)
-
-
-def test_to_carto_non_4326_epsg_with_reprojection(mocker):
+def test_to_carto_non_4326(mocker):
     # Given
     table_name = '__table_name__'
     cm_mock = mocker.patch.object(ContextManager, 'copy_from')
@@ -272,7 +259,7 @@ def test_to_carto_non_4326_epsg_with_reprojection(mocker):
     df.crs = 'epsg:4269'
 
     # When
-    norm_table_name = to_carto(df, table_name, CREDENTIALS, skip_quota_warning=True, reproject=True)
+    norm_table_name = to_carto(df, table_name, CREDENTIALS, skip_quota_warning=True)
 
     # Then
     assert cm_mock.call_args[0][1] == table_name
