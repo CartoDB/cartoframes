@@ -20,6 +20,12 @@
                     "path": ""
                 },
                 {
+                    "title": "Quickstart",
+                    "desc": "Complete a real project that walks through the library step by step",
+                    "file": "quickstart",
+                    "path": ""
+                },
+                {
                     "title": "Data Management",
                     "desc": "Work with data both locally and with a CARTO account",
                     "file": "data_management",

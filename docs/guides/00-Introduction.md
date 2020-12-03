@@ -22,25 +22,35 @@ If you are looking for more detailed use cases, [check our examples](/developers
 <div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
+      <a href="/developers/cartoframes/guides/Quickstart/">Quickstart</a>
+    </span>
+    <p class="doc-guides__description">Complete a real project that walks through the library step by step</p>
+  </div>
+  <div class="doc-guides__cartoframes-block">
+    <span class="doc-guides__title">
       <a href="/developers/cartoframes/guides/Data-Management/">Data Management</a>
     </span>
     <p class="doc-guides__description">Work with data both locally and with a CARTO account</p>
   </div>
+</div>
+
+
+<div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
       <a href="/developers/cartoframes/guides/Data-Visualization/">Data Visualization</a>
     </span>
     <p class="doc-guides__description">Explore and visualize your spatial data with interactive maps</p>
   </div>
-</div>
-
-<div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
       <a href="/developers/cartoframes/guides/Data-Services/">Data Services</a>
     </span>
     <p class="doc-guides__description">Geocode and discover areas of influence with Isolines</p>
   </div>
+</div>
+
+<div class="doc-guides__cartoframes-row">
   <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
       <a href="/developers/cartoframes/guides/Data-Observatory/">Data Observatory</a>
