@@ -100,7 +100,7 @@ class Geography(CatalogEntity):
 
     @property
     def provider(self):
-        """Id of the Provider of this geography."""
+        """ID of the Provider of this geography."""
         return self.data['provider_id']
 
     @property
@@ -194,6 +194,9 @@ class Geography(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+            limit (int, optional):
+                The number of rows to download. Default is to download all rows.
+            order_by (str, optional): Field(s) used to order the rows to download. Default is unordered.
             sql_query (str, optional): a query to select, filter or aggregate the content of the geography dataset.
                 For instance, to download just one row: `select * from $geography$ limit 1`. The placeholder
                 `$geography$` is mandatory and it will be replaced by the actual geography dataset before running
@@ -225,6 +228,9 @@ class Geography(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+            limit (int, optional):
+                The number of rows to download. Default is to download all rows.
+            order_by (str, optional): Field(s) used to order the rows to download. Default is unordered.
             sql_query (str, optional): a query to select, filter or aggregate the content of the geography dataset.
                 For instance, to download just one row: `select * from $geography$ limit 1`. The placeholder
                 `$geography$` is mandatory and it will be replaced by the actual geography dataset before running

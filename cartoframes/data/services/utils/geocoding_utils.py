@@ -55,8 +55,8 @@ def prefixed_column_or_value(attr, prefix):
 
 def hash_expr(street, city, state, country, table_prefix=None):
     street, city, state, country = (prefixed_column_or_value(v, table_prefix) for v in (street, city, state, country))
-    hashed_expr = " || '<>' || ".join([street, city or "''", state or "''", country or "''"])
-    return "md5({hashed_expr})".format(hashed_expr=hashed_expr)
+    hashed_cols = ", '<>' , ".join([street, city or "''", state or "''", country or "''"])
+    return "md5(concat({hashed_cols}))".format(hashed_cols=hashed_cols)
 
 
 def needs_geocoding_expr(hash_expr):

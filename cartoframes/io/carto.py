@@ -7,7 +7,7 @@ from geopandas import GeoDataFrame
 from carto.exceptions import CartoException
 
 from .managers.context_manager import ContextManager, _compute_copy_data, get_dataframe_columns_info
-from ..utils.geom_utils import check_crs, has_geometry, set_geometry
+from ..utils.geom_utils import is_reprojection_needed, reproject, has_geometry, set_geometry
 from ..utils.logger import log
 from ..utils.utils import is_valid_str, is_sql_query
 from ..utils.metrics import send_metrics
@@ -91,11 +91,14 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
             uses the name of the index from the dataframe.
         cartodbfy (bool, optional): convert the table to CARTO format. Default True. More info
             `here <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
+        log_enabled (bool, optional): enable the logging mechanism. Default is True.
+        retry_times (int, optional):
+            Number of time to retry the upload in case it fails. Default is 3.
+        max_upload_size (int, optional): defines the maximum size of the dataframe to be uploaded.
+            Default is 2GB.
         skip_quota_warning (bool, optional): skip the quota exceeded check and force the upload.
             (The upload will still fail if the size of the dataset exceeds the remaining DB quota).
             Default is False.
-        retry_times (int, optional):
-            Number of time to retry the upload in case it fails. Default is 3.
 
     Returns:
         string: the table name normalized.
@@ -108,7 +111,8 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail', geom_col
         raise ValueError('Wrong dataframe. You should provide a valid DataFrame instance.')
 
     if isinstance(dataframe, GeoDataFrame):
-        check_crs(dataframe)
+        if is_reprojection_needed(dataframe):
+            dataframe = reproject(dataframe)
 
     if not is_valid_str(table_name):
         raise ValueError('Wrong table name. You should provide a valid table name.')
@@ -178,11 +182,9 @@ def list_tables(credentials=None):
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
-        schema (str, optional): prefix of the table. By default, it gets the
-            `current_schema()` using the credentials.
 
     Returns:
-        DataFrame: A DataFrame with all the table names for the given credentials and schema.
+        DataFrame: A DataFrame with all the table names for the given credentials.
 
     """
     context_manager = ContextManager(credentials)
@@ -220,6 +222,7 @@ def delete_table(table_name, credentials=None, log_enabled=True):
         table_name (str): name of the table.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
+        log_enabled (bool, optional): enable the logging mechanism. Default is True.
 
     Raises:
         ValueError: if the table name is not a valid table name.
@@ -247,6 +250,7 @@ def rename_table(table_name, new_table_name, credentials=None, if_exists='fail',
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
         if_exists (str, optional): 'fail', 'replace'. Default is 'fail'.
+        log_enabled (bool, optional): enable the logging mechanism. Default is True.
 
     Raises:
         ValueError: if the table names provided are wrong or the if_exists param is not valid.
@@ -279,6 +283,7 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
         if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
+        log_enabled (bool, optional): enable the logging mechanism. Default is True.
 
     Raises:
         ValueError: if the table names provided are wrong or the if_exists param is not valid.
@@ -312,6 +317,7 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
         if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
+        log_enabled (bool, optional): enable the logging mechanism. Default is True.
 
     Raises:
         ValueError: if the query or table name provided is wrong or the if_exists param is not valid.
@@ -380,6 +386,7 @@ def update_privacy_table(table_name, privacy, credentials=None, log_enabled=True
         privacy (str): privacy of the table: 'private', 'public', 'link'.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
+        log_enabled (bool, optional): enable the logging mechanism. Default is True.
 
     Raises:
         ValueError: if the table name is wrong or the privacy name

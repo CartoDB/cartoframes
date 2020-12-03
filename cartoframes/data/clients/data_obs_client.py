@@ -9,14 +9,16 @@ from carto.exceptions import CartoException
 
 from ...io.carto import read_carto, to_carto
 from ...utils import utils
+from ...utils.utils import deprecated
 from ...io.managers.context_manager import ContextManager
 
 
+@deprecated(message='The Data Observatory v1 is being deprecated. Use the `data.observatory` package instead')
 class DataObsClient:
-    """Data Observatory v1 class. `Data Observatory documentation
+    """Data Observatory v1 class (deprecated). `Data Observatory v1 documentation (deprecated)
     <https://carto.com/developers/data-observatory/>`__.
 
-    This class provides the following methods to interact with Data Observatory:
+    This class provides the following methods to interact with Data Observatory v1 (deprecated):
         - boundaries: returns a geopandas.GeoDataFrame with
             the geographic boundaries (geometries) or their metadata.
         - discovery: returns a pandas.DataFrame with the measures found.
@@ -33,6 +35,7 @@ class DataObsClient:
         self._credentials = credentials
         self._manager = ContextManager(credentials)
 
+    @deprecated(message='The Data Observatory v1 is being deprecated. Use the `data.observatory` package instead')
     def boundaries(self, boundary=None, region=None, decode_geom=False,
                    timespan=None, include_nonclipped=False):
         """
@@ -46,6 +49,50 @@ class DataObsClient:
         geometries and the corresponding raw measures. For example, if you want
         to analyze how median income has changed in a region (see examples
         section for more).
+
+        Args:
+            boundary (str, optional):
+                Boundary identifier for the boundaries
+                that are of interest. For example, US census tracts have a
+                boundary ID of ``us.census.tiger.census_tract``, and Brazilian
+                Municipios have an ID of ``br.geo.municipios``. Find IDs by
+                running :py:meth:`DataObsClient.boundaries
+                <cartoframes.client.DataObsClient.boundaries>`
+                without any arguments, or by looking in the `Data Observatory v1 catalog (deprecated)
+                <http://cartodb.github.io/bigmetadata/>`__.
+            region (str, optional):
+                Region where boundary information or,
+                if `boundary` is specified, boundary polygons are of interest.
+                `region` can be one of the following:
+
+                    - table name (str):
+                        Name of a table in user's CARTO account
+                    - bounding box (list of float):
+                        List of four values (two lng/lat pairs) in the following order:
+                        western longitude, southern latitude, eastern longitude,
+                        and northern latitude.
+                        For example, Switzerland fits in
+                        ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+            timespan (str, optional):
+                Specific timespan to get geometries from.
+                Defaults to use the most recent. See the Data Observatory v1 catalog (deprecated)
+                for more information.
+            decode_geom (bool, optional):
+                Whether to return the geometries as
+                Shapely objects or keep them encoded as EWKB strings. Defaults
+                to False.
+            include_nonclipped (bool, optional):
+                Optionally include non-shoreline-clipped boundaries.
+                These boundaries are the raw boundaries provided by, for example,
+                US Census Tiger.
+
+        Returns:
+            geopandas.GeoDataFrame:
+                If `boundary` is specified, then all available
+                boundaries and accompanying `geom_refs` in `region` (or the world
+                if `region` is ``None`` or not specified) are returned. If
+                `boundary` is not specified, then a GeoDataFrame of all available
+                boundaries in `region` (or the world if `region` is ``None``).
 
         Examples:
             Find all boundaries available for Australia. The columns
@@ -63,7 +110,8 @@ class DataObsClient:
 
             Get census tracts around Idaho Falls, Idaho, USA, and add median
             income from the US census. Without limiting the metadata, we get
-            median income measures for each census in the Data Observatory.
+            median income measures for each census in the
+            Data Observatory v1 (deprecated).
 
             >>> # Note: default credentials will be supported in a future release
             >>> do = DataObsClient(credentials)
@@ -86,49 +134,6 @@ class DataObsClient:
             >>> # overwrite existing table with newly-enriched GeoDataFrame
             >>> idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')
 
-        Args:
-            boundary (str, optional):
-                Boundary identifier for the boundaries
-                that are of interest. For example, US census tracts have a
-                boundary ID of ``us.census.tiger.census_tract``, and Brazilian
-                Municipios have an ID of ``br.geo.municipios``. Find IDs by
-                running :py:meth:`DataObsClient.boundaries
-                <cartoframes.client.DataObsClient.boundaries>`
-                without any arguments, or by looking in the `Data Observatory
-                catalog <http://cartodb.github.io/bigmetadata/>`__.
-            region (str, optional):
-                Region where boundary information or,
-                if `boundary` is specified, boundary polygons are of interest.
-                `region` can be one of the following:
-
-                    - table name (str):
-                        Name of a table in user's CARTO account
-                    - bounding box (list of float):
-                        List of four values (two lng/lat pairs) in the following order:
-                        western longitude, southern latitude, eastern longitude,
-                        and northern latitude.
-                        For example, Switzerland fits in
-                        ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
-            timespan (str, optional):
-                Specific timespan to get geometries from.
-                Defaults to use the most recent. See the Data Observatory catalog
-                for more information.
-            decode_geom (bool, optional):
-                Whether to return the geometries as
-                Shapely objects or keep them encoded as EWKB strings. Defaults
-                to False.
-            include_nonclipped (bool, optional):
-                Optionally include non-shoreline-clipped boundaries.
-                These boundaries are the raw boundaries provided by, for example,
-                US Census Tiger.
-
-        Returns:
-            geopandas.GeoDataFrame:
-                If `boundary` is specified, then all available
-                boundaries and accompanying `geom_refs` in `region` (or the world
-                if `region` is ``None`` or not specified) are returned. If
-                `boundary` is not specified, then a GeoDataFrame of all available
-                boundaries in `region` (or the world if `region` is ``None``).
         """
         # TODO: create a function out of this?
         if isinstance(region, str):
@@ -193,14 +198,15 @@ class DataObsClient:
                 time=utils.pgquote(timespan))
         return self._fetch(query, decode_geom=decode_geom)
 
+    @deprecated(message='The Data Observatory v1 is being deprecated. Use the `data.observatory` package instead')
     def discovery(self, region, keywords=None, regex=None, time=None,
                   boundaries=None, include_quantiles=False):
-        """Discover Data Observatory measures. This method returns the full
-        Data Observatory metadata model for each measure or measures that
+        """Discover Data Observatory v1 measures (deprecated). This method returns the full
+        Data Observatory v1 metadata model (deprecated) for each measure or measures that
         match the conditions from the inputs. The full metadata in each row
         uniquely defines a measure based on the timespan, geographic
         resolution, and normalization (if any). Read more about the metadata
-        response in `Data Observatory
+        response in `Data Observatory v1 (deprecated)
         <https://carto.com/developers/data-observatory/reference/#discovery-functions>`__
         documentation.
 
@@ -223,13 +229,13 @@ class DataObsClient:
 
             To remove the guesswork in how geographical resolutions are
             selected, specify one or more boundaries in `boundaries`. See
-            the boundaries section for each region in the `Data Observatory
+            the boundaries section for each region in the `Data Observatory v1 (deprecated)
             catalog <http://cartodb.github.io/bigmetadata/>`__.
 
         The metadata returned from this method can then be used to create raw
         tables or for augmenting an existing table from these measures using
         :py:meth:`DataObsClient.augment <cartoframes.client.DataObsClient.augment>`.
-        For the full Data Observatory catalog, visit
+        For the full Data Observatory v1 catalog (deprecated), visit
         https://cartodb.github.io/bigmetadata/. When working with the metadata
         DataFrame returned from this method, be careful to only remove rows not
         columns as `DataObsClient.augment <cartoframes.client.DataObsClient.augment>`
@@ -246,14 +252,6 @@ class DataObsClient:
             For example, setting the region to be United States counties with
             no filter values set will result in many thousands of measures.
 
-        Examples:
-            Get all European Union measures that mention ``freight``.
-
-            >>> freight_meta = do.discovery('European Union',
-            ...                        keywords='freight',
-            ...                        time='2010')
-            >>> freight_meta['numer_name'].head()
-
         Args:
             region (str or list of float):
                 Information about the region of interest.
@@ -269,8 +267,8 @@ class DataObsClient:
                         with geometries. The region will be the bounding box of
                         the table.
 
-                  .. Note:: If a table name is also a valid Data Observatory
-                      region name, the Data Observatory name will be chosen
+                  .. Note:: If a table name is also a valid Data Observatory v1 (deprecated)
+                      region name, the Data Observatory v1 (deprecated) name will be chosen
                       over the table.
 
                 - bounding box (list of float):
@@ -296,10 +294,12 @@ class DataObsClient:
                 case insensitive operator ``~*``. See `PostgreSQL docs
                 <https://www.postgresql.org/docs/9.5/static/functions-matching.html>`__
                 for more information.
+            time (str or list of str, optional):
+                Timespan or list of timespans to filter thje result.
             boundaries (str or list of str, optional):
                 Boundary or list of boundaries that specify the measure resolution. See the
-                boundaries section for each region in the `Data Observatory
-                catalog <http://cartodb.github.io/bigmetadata/>`__.
+                boundaries section for each region in the `Data Observatory v1
+                catalog (deprecated) <http://cartodb.github.io/bigmetadata/>`__.
             include_quantiles (bool, optional):
                 Include quantiles calculations which are a calculation
                 of how a measure compares to all measures in the full GeoDataFrame.
@@ -315,6 +315,15 @@ class DataObsClient:
             ValueError: If `region` is a :obj:`list` and does not consist of
               four elements, or if `region` is not an acceptable region
             CartoException: If `region` is not a table in user account
+
+        Examples:
+            Get all European Union measures that mention ``freight``.
+
+            >>> freight_meta = do.discovery('European Union',
+            ...                        keywords='freight',
+            ...                        time='2010')
+            >>> freight_meta['numer_name'].head()
+
         """
         if isinstance(region, str):
             try:
@@ -459,39 +468,19 @@ class DataObsClient:
         utils.debug_print(self._verbose, query=query)
         return DataFrame(self._fetch(query, decode_geom=True))
 
+    @deprecated(message='The Data Observatory v1 is being deprecated. Use the `data.observatory` package instead')
     def augment(self, table_name, metadata, persist_as=None, how='the_geom'):
-        """Get an augmented CARTO dataset with `Data Observatory
+        """Get an augmented CARTO dataset with `Data Observatory v1 (deprecated)
         <https://carto.com/data-observatory>`__ measures. Use
         `DataObsClient.discovery
         <#DataObsClient.discovery>`__ to search for available
-        measures, or see the full `Data Observatory catalog
+        measures, or see the full `Data Observatory v1 catalog (deprecated)
         <https://cartodb.github.io/bigmetadata/index.html>`__. Optionally
         persist the data as a new table.
 
-        Example:
-            Get a DataFrame with Data Observatory measures based on the
-            geometries in a CARTO table.
-
-            >>> do = DataObsClient(credentials)
-            >>> median_income = do.discovery(
-            ...     'transaction_events',
-            ...     regex='.*median income.*',
-            ...     time='2011 - 2015')
-            >>> ds = do.augment('transaction_events', median_income)
-
-            Pass in cherry-picked measures from the Data Observatory catalog.
-            The rest of the metadata will be filled in, but it's important to
-            specify the geographic level as this will not show up in the column
-            name.
-
-            >>> median_income = [{'numer_id': 'us.census.acs.B19013001',
-            ...                   'geom_id': 'us.census.tiger.block_group',
-            ...                   'numer_timespan': '2011 - 2015'}]
-            >>> ds = do.augment('transaction_events', median_income)
-
         Args:
             table_name (str):
-                Name of table on CARTO account that Data Observatory measures
+                Name of table on CARTO account that Data Observatory v1 measures (deprecated)
                 are to be added to.
             metadata (pandas.DataFrame):
                 List of all measures to add to
@@ -525,7 +514,29 @@ class DataObsClient:
                 If metadata object is invalid or empty, or if the number of
                 requested measures exceeds 50.
             CartoException:
-                If user account consumes all of Data Observatory quota
+                If user account consumes all of Data Observatory v1 (deprecated) quota
+
+        Example:
+            Get a DataFrame with Data Observatory v1 measures (deprecated) based
+            on the geometries in a CARTO table.
+
+            >>> do = DataObsClient(credentials)
+            >>> median_income = do.discovery(
+            ...     'transaction_events',
+            ...     regex='.*median income.*',
+            ...     time='2011 - 2015')
+            >>> ds = do.augment('transaction_events', median_income)
+
+            Pass in cherry-picked measures from the Data Observatory v1 catalog (deprecated).
+            The rest of the metadata will be filled in, but it's important to
+            specify the geographic level as this will not show up in the column
+            name.
+
+            >>> median_income = [{'numer_id': 'us.census.acs.B19013001',
+            ...                   'geom_id': 'us.census.tiger.block_group',
+            ...                   'numer_timespan': '2011 - 2015'}]
+            >>> ds = do.augment('transaction_events', median_income)
+
         """
 
         if isinstance(metadata, DataFrame):

@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove None from geometry_types to check validity (#1691)
 - Remove nan raw geometries for visualization (#1694)
 
+### Fixed
+- Generate carto_geocode_hash with NULL values (#1702)
+
 ## [1.0.4] - 2020-07-06
 
 ### Added

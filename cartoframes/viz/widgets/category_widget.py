@@ -11,6 +11,7 @@ def category_widget(value, title=None, description=None, footer=None, read_only=
         footer (str, optional): Footer text placed on the widget bottom.
         read_only (boolean, optional): Interactively filter a category by selecting it in the widget.
           Set to "False" by default.
+        weight (int, optional): Weight of the category widget. Default value is 1.
 
     Returns:
         cartoframes.viz.widget.Widget

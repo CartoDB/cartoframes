@@ -2,7 +2,7 @@ from pandas import DataFrame
 from geopandas import GeoDataFrame
 
 from ..io.managers.context_manager import ContextManager
-from ..utils.geom_utils import check_crs, has_geometry, set_geometry
+from ..utils.geom_utils import is_reprojection_needed, reproject, has_geometry, set_geometry
 from ..utils.utils import get_geodataframe_data, get_geodataframe_bounds, \
                           get_geodataframe_geom_type, get_datetime_column_names
 
@@ -29,16 +29,14 @@ class Source:
     """Source
 
     Args:
-        data (str, pandas.DataFrame, geopandas.GeoDataFrame): a table name,
+        source (str, pandas.DataFrame, geopandas.GeoDataFrame): a table name,
             SQL query, DataFrame, GeoDataFrame instance.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             A Credentials instance. If not provided, the credentials will be automatically
             obtained from the default credentials if available.
-        bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
-            keys, or an array of floats in the following structure: [[west,
-            south], [east, north]]. If not provided the bounds will be automatically
-            calculated to fit all features.
         geom_col (str, optional): string indicating the geometry column name in the source `DataFrame`.
+        encode_data (bool, optional): Indicates whether the data needs to be encoded.
+            Default is True.
 
     Example:
 
@@ -76,7 +74,8 @@ class Source:
             self.credentials = self.manager.credentials
         elif isinstance(source, DataFrame):
             if isinstance(source, GeoDataFrame):
-                check_crs(source)
+                if is_reprojection_needed(source):
+                    source = reproject(source)
 
             # DataFrame, GeoDataFrame
             self.type = SourceType.GEOJSON
