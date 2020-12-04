@@ -59,13 +59,13 @@
                     "path": "templates"
                 },
                 {
-                    "title": "Data Access - public data",
+                    "title": "Access public data",
                     "desc": "Manage DO public data",
                     "file": "do_access_public_data",
                     "path": "templates"
                 },
                 {
-                    "title": "Data Access - premium data",
+                    "title": "Access premium data",
                     "desc": "Manage DO premium data",
                     "file": "do_access_premium_data",
                     "path": "templates"
@@ -519,9 +519,9 @@
                     "path": "data_observatory"
                 },
                 {
-                    "title": "Download a dataset",
-                    "desc": "Download a dataset applying filters",
-                    "file": "download_dataset",
+                    "title": "Access a dataset",
+                    "desc": "Access a dataset applying filters",
+                    "file": "access_dataset",
                     "path": "data_observatory"
                 },
                 {
@@ -537,8 +537,8 @@
                     "path": "data_observatory"
                 },
                 {
-                    "title": "Subscribe to a premium dataset",
-                    "desc": "Basic steps to subscribe to a premium dataset in the Data Observatory to start enriching your data",
+                    "title": "Request premium dataset subscription",
+                    "desc": "Basic steps to request a premium dataset subscription in the Data Observatory",
                     "file": "enrichment_subscription_workflow",
                     "path": "data_observatory"
                 },

@@ -26,7 +26,7 @@ AVOID_NOTEBOOKS = [
     'docs/examples/templates/do_dataset_notebook_template.ipynb',
     'docs/examples/templates/do_geography_notebook_template.ipynb',
 
-    'docs/examples/data_observatory/download_dataset.ipynb',
+    'docs/examples/data_observatory/access_dataset.ipynb',
     'docs/examples/data_management/change_carto_table_privacy.ipynb',
     'docs/examples/publish_and_share/publish_visualization_layout.ipynb',
     'docs/examples/publish_and_share/publish_visualization_private_table.ipynb',
