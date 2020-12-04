@@ -294,9 +294,8 @@ class ContextManager:
 
     def _truncate_and_drop_add_columns(self, table_name, schema, df_columns, table_columns, cartodbfy):
         log.debug('TRUNCATE AND DROP + ADD columns table "{}"'.format(table_name))
-        regExists = self._check_regenerate_table_exists()
         query = '{regenerate}; BEGIN; {truncate}; {drop_columns}; {add_columns}; {cartodbfy}; COMMIT;'.format(
-            regenerate=_regenerate_table_query(table_name, schema) if regExists else '',
+            regenerate=_regenerate_table_query(table_name, schema) if self._check_regenerate_table_exists() else '',
             truncate=_truncate_table_query(table_name),
             drop_columns=_drop_columns_query(table_name, table_columns),
             add_columns=_add_columns_query(table_name, df_columns),
@@ -359,7 +358,7 @@ class ContextManager:
     @retry_copy
     def _copy_to(self, query, columns, retry_times=DEFAULT_RETRY_TIMES):
         log.debug('COPY TO')
-        copy_query = 'COPY ({0}) TO stdout WITH (FORMAT csv, HEADER true, NULL \'{1}\')'.format(query, PG_NULL)
+        copy_query = "COPY ({0}) TO stdout WITH (FORMAT csv, HEADER true, NULL '{1}')".format(query, PG_NULL)
 
         raw_result = self.copy_client.copyto_stream(copy_query)
 
@@ -407,11 +406,6 @@ def _truncate_table_query(table_name):
         table_name=table_name)
 
 
-def _delete_table_query(table_name):
-    return 'DELETE FROM {table_name}'.format(
-        table_name=table_name)
-
-
 def _drop_columns_query(table_name, columns):
     columns = ['DROP COLUMN {name}'.format(name=double_quote(c.dbname))
                for c in columns if _not_reserved(c.dbname)]
@@ -445,12 +439,12 @@ def _create_table_from_query_query(table_name, query):
 
 
 def _cartodbfy_query(table_name, schema):
-    return 'SELECT CDB_CartodbfyTable(\'{schema}\', \'{table_name}\')'.format(
+    return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')".format(
         schema=schema, table_name=table_name)
 
 
 def _regenerate_table_query(table_name, schema):
-    return 'SELECT CDB_RegenerateTable(\'{schema}.{table_name}\'::regclass)'.format(
+    return "SELECT CDB_RegenerateTable('{schema}.{table_name}'::regclass)".format(
         schema=schema, table_name=table_name)
 
 
