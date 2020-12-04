@@ -463,7 +463,7 @@ def _create_auth_client(credentials, public=False):
 
 
 def _compute_copy_data(df, columns):
-    for index, _ in df.iterrows():
+    for index in df.index:
         row_data = []
         for column in columns:
             val = df.at[index, column.name]

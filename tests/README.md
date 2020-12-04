@@ -73,7 +73,7 @@ Create the file tests/notebooks/creds.json with the following structure:
 Execute the tests
 
 ```
-pytest [-s] tests/notebooks/test_notebooks.py
+pytest [-s] tests/notebooks
 ```
 
 Environment variables:
