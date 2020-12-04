@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove unused BigQueryClient code (#1602)
 - Repo clean-up. Refactor docs (#1682)
 - Add tests for notebook execution (#1696)
+- Use regenerate table in replace strategy (#1707)
 
 ### Fixed
 - Remove the batch_size parameter in the call to bulk_geocode (#1666)

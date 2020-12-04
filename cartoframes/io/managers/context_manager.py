@@ -83,7 +83,8 @@ class ContextManager:
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
-    def copy_from(self, gdf, table_name, if_exists='fail', cartodbfy=True, retry_times=DEFAULT_RETRY_TIMES):
+    def copy_from(self, gdf, table_name, if_exists='fail', cartodbfy=True,
+                  retry_times=DEFAULT_RETRY_TIMES):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
         df_columns = get_dataframe_columns_info(gdf)
@@ -98,7 +99,8 @@ class ContextManager:
                     self._truncate_table(table_name, schema, cartodbfy)
                 else:
                     # Diff columns: truncate table and drop + add columns
-                    self._truncate_and_drop_add_columns(table_name, schema, df_columns, table_columns, cartodbfy)
+                    self._truncate_and_drop_add_columns(
+                        table_name, schema, df_columns, table_columns, cartodbfy)
 
             elif if_exists == 'fail':
                 raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
@@ -190,7 +192,9 @@ class ContextManager:
         """Get user schema from current credentials"""
         query = 'SELECT current_schema()'
         result = self.execute_query(query, do_post=False)
-        return result['rows'][0]['current_schema']
+        schema = result['rows'][0]['current_schema']
+        log.debug('schema: {}'.format(schema))
+        return schema
 
     def get_geom_type(self, query):
         """Fetch geom type of a remote table or query"""
@@ -290,7 +294,8 @@ class ContextManager:
 
     def _truncate_and_drop_add_columns(self, table_name, schema, df_columns, table_columns, cartodbfy):
         log.debug('TRUNCATE AND DROP + ADD columns table "{}"'.format(table_name))
-        query = 'BEGIN; {truncate}; {drop_columns}; {add_columns}; {cartodbfy}; COMMIT;'.format(
+        query = '{regenerate}; BEGIN; {truncate}; {drop_columns}; {add_columns}; {cartodbfy}; COMMIT;'.format(
+            regenerate=_regenerate_table_query(table_name, schema) if self._check_regenerate_table_exists() else '',
             truncate=_truncate_table_query(table_name),
             drop_columns=_drop_columns_query(table_name, table_columns),
             add_columns=_add_columns_query(table_name, df_columns),
@@ -316,6 +321,16 @@ class ContextManager:
             return True
         except CartoException:
             return False
+
+    def _check_regenerate_table_exists(self):
+        query = '''
+            SELECT 1
+            FROM pg_catalog.pg_proc p
+            LEFT JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+            WHERE p.proname = 'cdb_regeneratetable' AND n.nspname = 'cartodb';
+        '''
+        result = self.execute_query(query)
+        return len(result['rows']) > 0
 
     def _get_query_columns_info(self, query):
         query = 'SELECT * FROM ({}) _q LIMIT 0'.format(query)
@@ -343,7 +358,7 @@ class ContextManager:
     @retry_copy
     def _copy_to(self, query, columns, retry_times=DEFAULT_RETRY_TIMES):
         log.debug('COPY TO')
-        copy_query = 'COPY ({0}) TO stdout WITH (FORMAT csv, HEADER true, NULL \'{1}\')'.format(query, PG_NULL)
+        copy_query = "COPY ({0}) TO stdout WITH (FORMAT csv, HEADER true, NULL '{1}')".format(query, PG_NULL)
 
         raw_result = self.copy_client.copyto_stream(copy_query)
 
@@ -424,7 +439,12 @@ def _create_table_from_query_query(table_name, query):
 
 
 def _cartodbfy_query(table_name, schema):
-    return 'SELECT CDB_CartodbfyTable(\'{schema}\', \'{table_name}\')'.format(
+    return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')".format(
+        schema=schema, table_name=table_name)
+
+
+def _regenerate_table_query(table_name, schema):
+    return "SELECT CDB_RegenerateTable('{schema}.{table_name}'::regclass)".format(
         schema=schema, table_name=table_name)
 
 

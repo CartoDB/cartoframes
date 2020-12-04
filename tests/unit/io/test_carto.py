@@ -325,7 +325,7 @@ def test_to_carto_two_geom_columns(mocker):
                        'the_geom': '010100000000000000000000000000000000000000'})
 
     # When
-    norm_table_name = to_carto(df, table_name, CREDENTIALS)
+    norm_table_name = to_carto(df, table_name, CREDENTIALS, skip_quota_warning=True)
 
     # Then
     assert cm_mock.call_args[0][1] == table_name
@@ -343,7 +343,7 @@ def test_to_carto_two_geom_columns_and_geom_col(mocker):
                        'the_geom': '010100000000000000000000000000000000000000'})
 
     # When
-    norm_table_name = to_carto(df, table_name, CREDENTIALS, geom_col='geometry')
+    norm_table_name = to_carto(df, table_name, CREDENTIALS, geom_col='geometry', skip_quota_warning=True)
 
     # Then
     assert cm_mock.call_args[0][1] == table_name
