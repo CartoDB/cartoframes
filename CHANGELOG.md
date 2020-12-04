@@ -26,7 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove unused BigQueryClient code (#1602)
 - Repo clean-up. Refactor docs (#1682)
 - Add tests for notebook execution (#1696)
-- Use regenerate table in replace strategy (#1707)
+- Mark DataObsClient as deprecated (#1697)
+- Review reference (#1699)
+- Improve documentation: guides and examples (#1698, #1700, #1704)
+- Change iterrows method for index attribute in row data generation (#1706)
+- Automatic reprojection in to_carto and Layer (#1708)
+- Use regenerate table in replace strategy in to_carto (#1707)
 
 ### Fixed
 - Remove the batch_size parameter in the call to bulk_geocode (#1666)
@@ -38,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove None from geometry_types to check validity (#1691)
 - Remove nan raw geometries for visualization (#1694)
 - Generate carto_geocode_hash with NULL values (#1702)
+- Fix formula widget count operation (#1703)
 
 ## [1.0.4] - 2020-07-06
 
