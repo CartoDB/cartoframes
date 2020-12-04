@@ -7,10 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Pending]
 
+### Added
+- Add new API to delete map publications (#1497)
+- Provide Google (Data Observatory) credentials (#1688)
+
 ### Changed
-- Allow to set a value for null geometries in the `read_carto` and `Geocoding.geocode` methods (#1667)
+- Allow to set a value for null geometries (#1667)
+- Add documentation for executing a single test (#1668)
+- Add global datasets message in catalog functions (#1670)
+- Remove sort by data_range when retrieving isolines (#1673)
+- Switch from Travis to Github Actions (#1672)
+- Upload table using to_carto in chunks (#1676)
+- Check account disk quotas before writing using to_carto (#1674)
+- Return GeoDataFrame in the to_dataframe function (#1681)
+- Improve metrics for on-prem and staging (#1685)
+- Optimize datasets/geographies download (#1693)
+- Check geom_coverage and print a message if None (#1695)
+- Remove unused BigQueryClient code (#1602)
+- Repo clean-up. Refactor docs (#1682)
+- Add tests for notebook execution (#1696)
 
 ### Fixed
+- Remove the batch_size parameter in the call to bulk_geocode (#1666)
+- Fix credentials link for set_default_credentials (#1665)
+- Fix identifier quoting for columns (#1675, #1678)
+- Fix uploading extra the_geom column (#1677)
+- Fix wrong username error (#1687)
+- Fix empty popups (#1689, #1690)
+- Remove None from geometry_types to check validity (#1691)
+- Remove nan raw geometries for visualization (#1694)
 - Generate carto_geocode_hash with NULL values (#1702)
 
 ## [1.0.4] - 2020-07-06

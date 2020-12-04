@@ -262,15 +262,15 @@ class Credentials:
         do_credentials = self._get_do_credentials()
         return do_credentials.instant_licensing
 
-    def get_gcp_auth_info(self):
+    def get_gcloud_credentials(self):
         """Returns the Data Observatory v2 Google Cloud Platform project and token.
 
         Example:
             >>> from cartoframes.auth import Credentials
-            >>> from google.oauth2.credentials import Credentials as GCPCredentials
+            >>> from google.oauth2.credentials import Credentials as GoogleCredentials
             >>> creds = Credentials(username='johnsmith', api_key='abcdefg')
-            >>> gcp_project, gcp_token = creds.get_gcp_auth_info()
-            >>> gcp_credentials = GCPCredentials(gcp_token)
+            >>> gcloud_project, gcloud_token = creds.get_gcloud_credentials()
+            >>> gcloud_credentials = GoogleCredentials(gcloud_token)
 
         """
         do_credentials = self._get_do_credentials()

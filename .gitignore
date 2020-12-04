@@ -6,6 +6,7 @@ sandbox/
 # Misc
 creds.json
 credentials.json
+docs/guides/*.csv
 
 __pycache__
 .*.sw[nop]
@@ -50,6 +51,7 @@ CARTOCREDS.json
 SITEKEY.txt
 secret.json
 examples/scratch/*
+_debug
 
 # JavaScript
 node_modules
