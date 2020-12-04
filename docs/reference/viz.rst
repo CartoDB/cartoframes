@@ -89,3 +89,11 @@ Popups
     :noindex:
     :members: popup_element,
               default_popup_element
+
+Publications
+^^^^^^^^^^^^
+
+.. automodule:: cartoframes.viz
+    :noindex:
+    :members: all_publications,
+              delete_publication

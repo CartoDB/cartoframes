@@ -6,7 +6,7 @@
     "categories": [
         {
             "title": "Use Cases",
-            "desc": "Explore a variety of ways to use CARTOframes in your workflows",
+            "desc": "Explore how to make the most of your Spatial Analysis with CARTOframes",
             "hide_sidebar_samples": true,
             "samples": [
                 {
@@ -49,7 +49,7 @@
         },
         {
             "title": "Templates",
-            "desc": "Explore a variety of ways to use CARTOframes in your workflows",
+            "desc": "Incorporate CARTOframes in your workflows easily with functionality templates",
             "hide_sidebar_samples": true,
             "samples": [
                 {
