@@ -6,3 +6,4 @@ ipykernel==5.3.4
 ipywidgets==7.5.1
 matplotlib==3.3.2
 xlrd==1.2.0
+seaborn==0.11.0

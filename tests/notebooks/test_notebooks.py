@@ -14,23 +14,15 @@ EXECUTE_NOTEBOOKS = []
 AVOID_NOTEBOOKS = [
     'docs/examples/use_cases/building_a_dashboard.ipynb',
     'docs/examples/use_cases/combining_two_datasets.ipynb',
-    'docs/examples/use_cases/geocoding_london_stations.ipynb',
-    'docs/examples/use_cases/paris_remarkable_trees.ipynb',
-    'docs/examples/use_cases/paris_wifi_services.ipynb',
-    'docs/examples/use_cases/visualize_temperatures.ipynb',
-
     'docs/examples/templates/do_access_premium_data.ipynb',
-    'docs/examples/templates/do_access_public_data.ipynb',
-    'docs/examples/templates/do_data_discovery.ipynb',
     'docs/examples/templates/do_data_enrichment.ipynb',
     'docs/examples/templates/do_dataset_notebook_template.ipynb',
     'docs/examples/templates/do_geography_notebook_template.ipynb',
-
-    'docs/examples/data_observatory/access_dataset.ipynb',
     'docs/examples/data_management/change_carto_table_privacy.ipynb',
-    'docs/examples/publish_and_share/publish_visualization_layout.ipynb',
-    'docs/examples/publish_and_share/publish_visualization_private_table.ipynb',
-    'docs/examples/publish_and_share/publish_visualization_public_table.ipynb'
+    'docs/examples/data_visualization/publish_and_share/publish_visualization_gdf.ipynb',
+    'docs/examples/data_visualization/publish_and_share/publish_visualization_layout.ipynb',
+    'docs/examples/data_visualization/publish_and_share/publish_visualization_private_table.ipynb',
+    'docs/examples/data_visualization/publish_and_share/publish_visualization_public_table.ipynb',
 ]
 
 OVERWRITE = os.environ.get('OVERWRITE', 'true').lower() == 'true'

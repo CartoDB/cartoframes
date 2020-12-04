@@ -155,10 +155,6 @@ class Layout:
         html = self._get_publication_html()
         return self._publisher.publish(html, name, password, if_exists)
 
-    def delete_publication(self):
-        """Delete the published layout visualization."""
-        return self._publisher.delete()
-
     def update_publication(self, name, password, if_exists='fail'):
         """Update the published layout visualization.
 
@@ -175,20 +171,6 @@ class Layout:
         """
         html = self._get_publication_html()
         return self._publisher.update(html, name, password, if_exists)
-
-    @staticmethod
-    def all_publications(credentials=None):
-        """Get all map visualization published by the current user.
-
-        Args:
-            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-                A Credentials instance. If not provided, the credentials will be automatically
-                obtained from the default credentials if available.
-
-        """
-        _credentials = get_credentials(credentials)
-
-        return KuvizPublisher.all(_credentials)
 
     def _get_publication_html(self):
         if not self._publisher:
