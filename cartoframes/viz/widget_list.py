@@ -7,6 +7,7 @@ class WidgetList:
 
     Args:
         widgets (list, Widget): The list of widgets for a layer.
+        default_widget (Widget, optional): The widget to be used by default.
 
     """
     def __init__(self, widgets=None, default_widget=None):

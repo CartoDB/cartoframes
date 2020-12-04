@@ -49,9 +49,9 @@ def set_geometry(gdf, col, drop=False, inplace=False, crs=None):
     if isinstance(col, str):
         if col not in frame:
             raise Exception('Column "{0}" does not exist.'.format(col))
-        frame[col] = decode_geometry(frame[col])
+        frame[col] = decode_geometry(frame[col].dropna())
     else:
-        col = decode_geometry(col)
+        col = decode_geometry(col.dropna())
 
     # Call set_geometry with decoded column
     frame.set_geometry(col, drop=drop, inplace=True, crs=crs)
@@ -255,11 +255,13 @@ def to_geojson(geom, buffer_simplify=True):
             return json.dumps(shapely.geometry.mapping(geom), sort_keys=True)
 
 
-def check_crs(gdf):
-    current_crs = get_crs(gdf)
-    expected_crs = 'epsg:4326'
-    if current_crs is not None and current_crs != expected_crs:
-        raise ValueError('No valid geometry CRS "{}", it must be "{}".'.format(current_crs, expected_crs))
+def is_reprojection_needed(gdf):
+    crs = get_crs(gdf)
+    return crs is not None and crs != 'epsg:4326'
+
+
+def reproject(gdf, epsg=4326):
+    return gdf.to_crs(epsg=epsg)
 
 
 def get_crs(gdf):

@@ -1,0 +1,55 @@
+{
+    "main": {
+        "title": "Introduction",
+        "file": "introduction.md"
+    },
+    "categories": [
+        {
+            "title": "Guides",
+            "samples": [
+                {
+                    "title": "Installation",
+                    "desc": "Install the library and set up your environment",
+                    "file": "installation",
+                    "path": ""
+                },
+                {
+                    "title": "Authentication",
+                    "desc": "Login into CARTO to unlock the power of spatial analysis",
+                    "file": "authentication",
+                    "path": ""
+                },
+                {
+                    "title": "Quickstart",
+                    "desc": "Complete a real project that walks through the library step by step",
+                    "file": "quickstart",
+                    "path": ""
+                },
+                {
+                    "title": "Data Management",
+                    "desc": "Work with data both locally and with a CARTO account",
+                    "file": "data_management",
+                    "path": ""
+                },
+                {
+                    "title": "Data Visualization",
+                    "desc": "Explore and visualize your spatial data with interactive maps",
+                    "file": "data_visualization",
+                    "path": ""
+                },
+                {
+                    "title": "Data Services",
+                    "desc": "Geocode and discover areas of influence with Isolines",
+                    "file": "data_services",
+                    "path": ""
+                },
+                {
+                    "title": "Data Observatory",
+                    "desc": "Discover and enrich your data with the Data Observatory",
+                    "file": "data_observatory",
+                    "path": ""
+                }
+            ]
+        }
+    ]
+}

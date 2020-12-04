@@ -17,6 +17,7 @@ def time_series_widget(value, title=None, description=None, footer=None, read_on
         read_only (boolean, optional): Interactively filter a range of numeric values by selecting them in the widget.
           Set to "False" by default.
         buckets (number, optional): Number of histogram buckets. Set to 20 by default.
+        weight (int, optional): Weight of the category widget. Default value is 1.
 
     Returns:
         cartoframes.viz.widget.Widget

@@ -4,6 +4,7 @@ import geopandas as gpd
 from shapely import wkb
 
 from ....utils.utils import check_package
+from ....utils.logger import log
 
 
 def variable_describe(data):
@@ -101,10 +102,13 @@ def geom_coverage(geography_id):
     from ....viz import Map, Layer
 
     geography = Geography.get(geography_id)
-    geom_coverage = wkb.loads(geography.geom_coverage, hex=True)
-    geom_coverage_gdf = gpd.GeoDataFrame({'geometry': [geom_coverage]}, geometry='geometry')
 
-    return Map(Layer(geom_coverage_gdf))
+    if geography.geom_coverage:
+        geom_coverage = wkb.loads(geography.geom_coverage, hex=True)
+        geom_coverage_gdf = gpd.GeoDataFrame({'geometry': [geom_coverage]}, geometry='geometry')
+        return Map(Layer(geom_coverage_gdf))
+    else:
+        log.info('Geometry coverage not available')
 
 
 def histogram(data):

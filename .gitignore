@@ -6,10 +6,12 @@ sandbox/
 # Misc
 creds.json
 credentials.json
+docs/guides/*.csv
 
 __pycache__
 .*.sw[nop]
 .vscode
+_debug
 
 # OS
 .DS_Store
@@ -50,6 +52,7 @@ CARTOCREDS.json
 SITEKEY.txt
 secret.json
 examples/scratch/*
+_debug
 
 # JavaScript
 node_modules
@@ -61,6 +64,7 @@ htmlcov
 test_*.json
 .pytest_cache
 tmp_file.csv
+my_dataset.csv
 fake_path
 
 # Sphinx documentation

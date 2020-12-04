@@ -6,6 +6,8 @@ class LegendList:
     """LegendList
         Args:
             legends (list, Legend): List of legends for a layer.
+            default_legend (Legend, optional): Default legend for a layer.
+            geom_type (str, optional): The type of the geometry.
 
     """
 

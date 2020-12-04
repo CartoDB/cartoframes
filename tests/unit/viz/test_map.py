@@ -317,17 +317,6 @@ width: ramp(linear(zoom(),0,18),[2,10])
         kuviz_dict = map.publish(name, '1234', credentials=self.credentials)
         self.assert_kuviz_dict(kuviz_dict, name, 'password')
 
-    def test_map_publish_deletion(self, mocker):
-        setup_mocks(mocker)
-
-        map = Map(Layer(Source('fake_table', credentials=self.credentials)))
-
-        name = 'cf_publish'
-        map.publish(name, None, credentials=self.credentials)
-        response = map.delete_publication()
-
-        assert response is True
-
     def test_map_publish_update_name(self, mocker):
         setup_mocks(mocker)
 

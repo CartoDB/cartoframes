@@ -5,8 +5,10 @@ from .provider import Provider
 from .dataset import Dataset
 from .geography import Geography
 from .subscriptions import Subscriptions
-from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, PUBLIC_FILTER
+from .repository.constants import (COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER, GLOBAL_COUNTRY_FILTER,
+                                   PROVIDER_FILTER, PUBLIC_FILTER)
 
+from ....utils.logger import log
 from ....utils.utils import get_credentials
 
 
@@ -126,7 +128,7 @@ class Catalog:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         Raises:
-            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
+            CatalogError: if there's a problem when connecting to the catalog or no countries are found.
 
         """
         return Country.get_all(self.filters)
@@ -139,9 +141,10 @@ class Catalog:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         Raises:
-            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
+            CatalogError: if there's a problem when connecting to the catalog or no categories are found.
 
         """
+        self._global_message()
         return Category.get_all(self.filters)
 
     @property
@@ -152,9 +155,10 @@ class Catalog:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         Raises:
-            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
+            CatalogError: if there's a problem when connecting to the catalog or no providers are found.
 
         """
+        self._global_message()
         return Provider.get_all(self.filters)
 
     @property
@@ -168,6 +172,7 @@ class Catalog:
             CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
+        self._global_message()
         return Dataset.get_all(self.filters)
 
     @property
@@ -178,9 +183,10 @@ class Catalog:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         Raises:
-            CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
+            CatalogError: if there's a problem when connecting to the catalog or no geographies are found.
 
         """
+        self._global_message()
         return Geography.get_all(self.filters)
 
     def country(self, country_id):
@@ -188,7 +194,7 @@ class Catalog:
 
         Args:
             country_id (str):
-              Id value of the country to be used for filtering the Catalog.
+              ID of the country to be used for filtering the Catalog.
 
         Returns:
             :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
@@ -202,7 +208,7 @@ class Catalog:
 
         Args:
             category_id (str):
-              Id value of the category to be used for filtering the Catalog.
+              ID of the category to be used for filtering the Catalog.
 
         Returns:
             :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
@@ -216,7 +222,7 @@ class Catalog:
 
         Args:
             geography_id (str):
-              Id or slug value of the geography to be used for filtering the Catalog
+              ID or slug of the geography to be used for filtering the Catalog
 
         Returns:
             :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
@@ -236,7 +242,7 @@ class Catalog:
 
         Args:
             provider_id (str):
-              Id value of the provider to be used for filtering the Catalog.
+              ID of the provider to be used for filtering the Catalog.
 
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
@@ -295,3 +301,8 @@ class Catalog:
 
         """
         return Dataset.get_datasets_spatial_filtered(filter_dataset)
+
+    def _global_message(self):
+        if self.filters and self.filters.get(COUNTRY_FILTER) != GLOBAL_COUNTRY_FILTER:
+            log.info('You can find more entities with the Global country filter. To apply that filter run:'
+                     "\n\tCatalog().country('glo')")

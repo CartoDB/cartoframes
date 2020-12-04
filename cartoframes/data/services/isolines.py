@@ -202,8 +202,7 @@ class Isolines(Service):
         # Execute and download the query to generate the isolines
         gdf = read_carto(sql, self._credentials)
 
-        # Sorting by `data_range` column and recalculating `cartodb_id`
-        gdf.sort_values(by=[DATA_RANGE_KEY], ascending=ascending, inplace=True)
+        # Recalculating `cartodb_id`
         gdf.reset_index(drop=True, inplace=True)
         if CARTO_INDEX_KEY in gdf.columns:
             gdf[CARTO_INDEX_KEY] = gdf.index + 1

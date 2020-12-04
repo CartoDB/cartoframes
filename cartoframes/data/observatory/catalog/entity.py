@@ -1,8 +1,11 @@
 import pandas as pd
 
 from abc import ABC
+from geopandas import GeoDataFrame
 
 from carto.do_dataset import DODataset
+from . import subscriptions
+from ....utils.geom_utils import set_geometry
 from ....utils.logger import log
 
 _DATASET_READ_MSG = '''To load it as a DataFrame you can do:
@@ -17,6 +20,8 @@ _GEOGRAPHY_READ_MSG = '''To load it as a GeoDataFrame you can do:
     df = pandas.read_csv('{}')
     gdf = GeoDataFrame(df, geometry=decode_geometry(df['geom']))
 '''
+
+GEOM_COL = 'geom'
 
 
 class CatalogEntity(ABC):
@@ -83,7 +88,7 @@ class CatalogEntity(ABC):
 
         Args:
             id_list (list):
-                List of sD or slugs of entities in the catalog to retrieve instances.
+                List of ID or slugs of entities in the catalog to retrieve instances.
 
         Raises:
             CatalogError: if there's a problem when connecting to the catalog or no entities are found.
@@ -98,6 +103,10 @@ class CatalogEntity(ABC):
     def to_dict(self):
         """Converts the entity instance to a Python dict."""
         return {key: value for key, value in self.data.items() if key not in self.export_excluded_fields}
+
+    def is_subscribed(self, credentials, entity_type):
+        """Check if the entity is subscribed"""
+        return self.is_public_data or self.id in subscriptions.get_subscription_ids(credentials, entity_type)
 
     def __eq__(self, other):
         return self.data == other.data
@@ -142,7 +151,12 @@ class CatalogEntity(ABC):
                 log.info(_GEOGRAPHY_READ_MSG.format(file_path))
         else:
             dataframe = pd.read_csv(rows)
-            return dataframe
+            gdf = GeoDataFrame(dataframe)
+
+            if GEOM_COL in gdf:
+                set_geometry(gdf, GEOM_COL, inplace=True)
+
+            return gdf
 
     def _get_remote_full_table_name(self, user_project, user_dataset, public_project):
         project, dataset, table = self.id.split('.')

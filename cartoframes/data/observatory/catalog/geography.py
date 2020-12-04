@@ -8,6 +8,11 @@ from . import utils
 from ....utils.utils import get_credentials, check_credentials, check_do_enabled
 from ....exceptions import DOError
 
+GEOGRAPHY_SUBSCRIPTION_ERROR = (
+    'You are not subscribed to this Geography yet. '
+    'Please, use the subscribe method first.'
+)
+
 
 class Geography(CatalogEntity):
     """A Geography represents the metadata of a particular geography dataset in the catalog.
@@ -95,7 +100,7 @@ class Geography(CatalogEntity):
 
     @property
     def provider(self):
-        """Id of the Provider of this geography."""
+        """ID of the Provider of this geography."""
         return self.data['provider_id']
 
     @property
@@ -189,6 +194,9 @@ class Geography(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+            limit (int, optional):
+                The number of rows to download. Default is to download all rows.
+            order_by (str, optional): Field(s) used to order the rows to download. Default is unordered.
             sql_query (str, optional): a query to select, filter or aggregate the content of the geography dataset.
                 For instance, to download just one row: `select * from $geography$ limit 1`. The placeholder
                 `$geography$` is mandatory and it will be replaced by the actual geography dataset before running
@@ -202,9 +210,8 @@ class Geography(CatalogEntity):
         """
         _credentials = get_credentials(credentials)
 
-        if not self._is_subscribed(_credentials):
-            raise DOError('You are not subscribed to this Geography yet. '
-                          'Please, use the subscribe method first.')
+        if not self.is_subscribed(_credentials, GEOGRAPHY_TYPE):
+            raise DOError(GEOGRAPHY_SUBSCRIPTION_ERROR)
 
         self._download(_credentials, file_path, limit=limit, order_by=order_by, sql_query=sql_query)
 
@@ -221,6 +228,9 @@ class Geography(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+            limit (int, optional):
+                The number of rows to download. Default is to download all rows.
+            order_by (str, optional): Field(s) used to order the rows to download. Default is unordered.
             sql_query (str, optional): a query to select, filter or aggregate the content of the geography dataset.
                 For instance, to download just one row: `select * from $geography$ limit 1`. The placeholder
                 `$geography$` is mandatory and it will be replaced by the actual geography dataset before running
@@ -237,9 +247,8 @@ class Geography(CatalogEntity):
         """
         _credentials = get_credentials(credentials)
 
-        if not self._is_subscribed(_credentials):
-            raise DOError('You are not subscribed to this Geography yet. '
-                          'Please, use the subscribe method first.')
+        if not self.is_subscribed(_credentials, GEOGRAPHY_TYPE):
+            raise DOError(GEOGRAPHY_SUBSCRIPTION_ERROR)
 
         return self._download(_credentials, limit=limit, order_by=order_by, sql_query=sql_query)
 
@@ -304,14 +313,6 @@ class Geography(CatalogEntity):
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))
-
-    def _is_subscribed(self, credentials):
-        if self.is_public_data:
-            return True
-
-        geographies = Geography.get_all({}, credentials)
-
-        return geographies is not None and self in geographies
 
     def __str__(self):
         return "<Geography.get('{}')>".format(self._get_print_id())

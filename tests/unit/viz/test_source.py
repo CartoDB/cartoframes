@@ -7,6 +7,7 @@ from cartoframes.auth import Credentials
 from cartoframes.viz.source import Source
 from cartoframes.io.managers.context_manager import ContextManager
 
+
 POINT = {
     "type": "Feature",
     "geometry": {
@@ -77,9 +78,17 @@ EMPTY = {
     "type": "Feature",
     "geometry": {
         "type": "GeometryCollection",
-        "coordinates": None
+        "geometries": []
     },
     "properties": {}
+}
+
+NONE_GEOMETRY = {
+    "type": "Feature",
+    "geometry": None,
+    "properties": {
+        "prop0": "value0"
+    }
 }
 
 
@@ -158,7 +167,28 @@ class TestSource(object):
         gdf = gpd.GeoDataFrame.from_features(geojson)
         source = Source(gdf)
 
+        assert len(source.gdf) == len(features)
         assert source.gdf.equals(gdf)
+
+    @pytest.mark.parametrize('features', [
+        [POINT, NONE_GEOMETRY],
+        [MULTIPOINT, NONE_GEOMETRY],
+        [LINESTRING, NONE_GEOMETRY],
+        [MULTILINESTRING, NONE_GEOMETRY],
+        [LINESTRING, MULTILINESTRING, NONE_GEOMETRY],
+        [POLYGON, NONE_GEOMETRY],
+        [MULTIPOLYGON, NONE_GEOMETRY],
+        [POLYGON, MULTIPOLYGON, NONE_GEOMETRY]
+    ])
+    def test_different_geometry_types_source_plus_none(self, features):
+        geojson = {
+            "type": "FeatureCollection",
+            "features": features
+        }
+        gdf = gpd.GeoDataFrame.from_features(geojson)
+        source = Source(gdf)
+
+        assert len(source.gdf) == len(features) - 1
 
     @pytest.mark.parametrize('features', [
         [POINT, LINESTRING],
@@ -187,5 +217,14 @@ class TestSource(object):
         }
         gdf = gpd.GeoDataFrame.from_features(geojson)
         source = Source(gdf)
+
+        assert len(source.gdf) == 2
+
+    def test_nan_geometries(self):
+        df = pd.DataFrame({
+            'geom': ['POINT(0 0)', np.nan, np.nan, 'POINT(0 0)', None]
+        })
+
+        source = Source(df, geom_col='geom')
 
         assert len(source.gdf) == 2

@@ -38,6 +38,8 @@ from .widgets import default_widget
 from .popups import popup_element
 from .popups import default_popup_element
 
+from .kuviz import all_publications
+from .kuviz import delete_publication
 
 __all__ = [
     'Map',
@@ -77,5 +79,8 @@ __all__ = [
     'default_widget',
 
     'popup_element',
-    'default_popup_element'
+    'default_popup_element',
+
+    'all_publications',
+    'delete_publication'
 ]

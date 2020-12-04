@@ -17,9 +17,14 @@ from ....utils.logger import log
 from ....utils.utils import get_credentials, check_credentials, check_do_enabled
 from ....exceptions import DOError
 
+DATASET_SUBSCRIPTION_ERROR = (
+    'You are not subscribed to this Dataset yet. '
+    'Please, use the subscribe method first.'
+)
+
 
 class Dataset(CatalogEntity):
-    """A Dataset represents the metadata of a particular dataset in the catalog.
+    """A Dataset represents the metadata of a particular dataset in the catalog.
 
     If you have Data Observatory enabled in your CARTO account you can:
 
@@ -103,7 +108,7 @@ class Dataset(CatalogEntity):
 
     @property
     def provider(self):
-        """Id of the :py:class:`Provider` of this dataset."""
+        """ID of the :py:class:`Provider` of this dataset."""
         return self.data['provider_id']
 
     @property
@@ -123,7 +128,7 @@ class Dataset(CatalogEntity):
 
     @property
     def data_source(self):
-        """Id of the data source of this dataset."""
+        """ID of the data source of this dataset."""
         return self.data['data_source_id']
 
     @property
@@ -324,7 +329,6 @@ class Dataset(CatalogEntity):
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 credentials of CARTO user account. If provided, only datasets granted for those credentials are
                 returned.
-
             filters (dict, optional):
                 Dict containing pairs of dataset properties and its value to be used as filters to query the available
                 datasets. If none is provided, no filters will be applied to the query.
@@ -386,6 +390,9 @@ class Dataset(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+            limit (int, optional):
+                The number of rows to download. Default is to download all rows.
+            order_by (str, optional): Field(s) used to order the rows to download. Default is unordered.
             sql_query (str, optional): a query to select, filter or aggregate the content of the dataset.
                 For instance, to download just one row: `select * from $dataset$ limit 1`. The placeholder
                 `$dataset$` is mandatory and it will be replaced by the actual dataset before running the query.
@@ -400,15 +407,14 @@ class Dataset(CatalogEntity):
         """
         _credentials = get_credentials(credentials)
 
-        if not self._is_subscribed(_credentials):
-            raise DOError('You are not subscribed to this Dataset yet. '
-                          'Please, use the subscribe method first.')
+        if not self.is_subscribed(_credentials, DATASET_TYPE):
+            raise DOError(DATASET_SUBSCRIPTION_ERROR)
 
         self._download(_credentials, file_path, limit=limit, order_by=order_by, sql_query=sql_query, add_geom=add_geom)
 
     @check_do_enabled
     def to_dataframe(self, credentials=None, limit=None, order_by=None, sql_query=None, add_geom=None):
-        """Download dataset data as a pandas.DataFrame. You need Data Observatory enabled in your CARTO
+        """Download dataset data as a geopandas.GeoDataFrame. You need Data Observatory enabled in your CARTO
         account, please contact us at support@carto.com for more information.
 
         For premium datasets (those with `is_public_data` set to False), you need a subscription to the dataset.
@@ -419,6 +425,9 @@ class Dataset(CatalogEntity):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+            limit (int, optional):
+                The number of rows to download. Default is to download all rows.
+            order_by (str, optional): Field(s) used to order the rows to download. Default is unordered.
             sql_query (str, optional): a query to select, filter or aggregate the content of the dataset.
                 For instance, to download just one row: `select * from $dataset$ limit 1`. The placeholder
                 `$dataset$` is mandatory and it will be replaced by the actual dataset before running the query.
@@ -427,7 +436,7 @@ class Dataset(CatalogEntity):
 
 
         Returns:
-            pandas.DataFrame
+            geopandas.GeoDataFrame
 
         Raises:
             DOError: if you have not a valid license for the dataset being downloaded,
@@ -437,9 +446,8 @@ class Dataset(CatalogEntity):
         """
         _credentials = get_credentials(credentials)
 
-        if not self._is_subscribed(_credentials):
-            raise DOError('You are not subscribed to this Dataset yet. '
-                          'Please, use the subscribe method first.')
+        if not self.is_subscribed(_credentials, DATASET_TYPE):
+            raise DOError(DATASET_SUBSCRIPTION_ERROR)
 
         return self._download(_credentials, limit=limit, order_by=order_by, sql_query=sql_query, add_geom=add_geom)
 
@@ -505,14 +513,6 @@ class Dataset(CatalogEntity):
 
         return subscription_info.SubscriptionInfo(
             subscription_info.fetch_subscription_info(self.id, DATASET_TYPE, _credentials))
-
-    def _is_subscribed(self, credentials):
-        if self.is_public_data:
-            return True
-
-        datasets = Dataset.get_all({}, credentials)
-
-        return datasets is not None and self in datasets
 
     def _get_summary_data(self):
         data = self.data.get('summary_json')

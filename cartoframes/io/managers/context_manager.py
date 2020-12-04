@@ -8,17 +8,54 @@ from carto.auth import APIKeyAuthClient
 from carto.datasets import DatasetManager
 from carto.exceptions import CartoException, CartoRateLimitException
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
+from pyrestcli.exceptions import NotFoundException
 
 from ..dataset_info import DatasetInfo
 from ... import __version__
 from ...auth.defaults import get_default_credentials
 from ...utils.logger import log
 from ...utils.geom_utils import encode_geometry_ewkb
-from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
-from ...utils.columns import get_dataframe_columns_info, get_query_columns_info, obtain_converters, \
-                      date_columns_names, normalize_name
+from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL, double_quote
+from ...utils.columns import (get_dataframe_columns_info, get_query_columns_info, obtain_converters, date_columns_names,
+                              normalize_name)
 
 DEFAULT_RETRY_TIMES = 3
+
+
+def retry_copy(func):
+    def wrapper(*args, **kwargs):
+        m_retry_times = kwargs.get('retry_times', DEFAULT_RETRY_TIMES)
+        while m_retry_times >= 1:
+            try:
+                return func(*args, **kwargs)
+            except CartoRateLimitException as err:
+                m_retry_times -= 1
+
+                if m_retry_times <= 0:
+                    warn(('Read call was rate-limited. '
+                          'This usually happens when there are multiple queries being read at the same time.'))
+                    raise err
+
+                warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
+                time.sleep(err.retry_after)
+                warn('Retrying...')
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def not_found(func):
+    def decorator_func(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+
+        except CartoException as e:
+            if hasattr(e, 'args') and isinstance(e.args, (list, tuple)) and type(e.args[0]) == NotFoundException:
+                raise Exception('Resource not found') from None
+
+            else:
+                raise e
+
+    return decorator_func
 
 
 class ContextManager:
@@ -32,19 +69,22 @@ class ContextManager:
         self.copy_client = CopySQLClient(self.auth_client)
         self.batch_sql_client = BatchSQLClient(self.auth_client)
 
+    @not_found
     def execute_query(self, query, parse_json=True, do_post=True, format=None, **request_args):
         return self.sql_client.send(query.strip(), parse_json, do_post, format, **request_args)
 
+    @not_found
     def execute_long_running_query(self, query):
         return self.batch_sql_client.create_and_wait_for_completion(query.strip())
 
-    def copy_to(self, source, schema, limit=None, retry_times=DEFAULT_RETRY_TIMES):
+    def copy_to(self, source, schema=None, limit=None, retry_times=DEFAULT_RETRY_TIMES):
         query = self.compute_query(source, schema)
         columns = self._get_query_columns_info(query)
         copy_query = self._get_copy_query(query, columns, limit)
         return self._copy_to(copy_query, columns, retry_times)
 
-    def copy_from(self, gdf, table_name, if_exists='fail', cartodbfy=True):
+    def copy_from(self, gdf, table_name, if_exists='fail', cartodbfy=True,
+                  retry_times=DEFAULT_RETRY_TIMES):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
         df_columns = get_dataframe_columns_info(gdf)
@@ -59,7 +99,8 @@ class ContextManager:
                     self._truncate_table(table_name, schema, cartodbfy)
                 else:
                     # Diff columns: truncate table and drop + add columns
-                    self._truncate_and_drop_add_columns(table_name, schema, df_columns, table_columns, cartodbfy)
+                    self._truncate_and_drop_add_columns(
+                        table_name, schema, df_columns, table_columns, cartodbfy)
 
             elif if_exists == 'fail':
                 raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
@@ -71,7 +112,7 @@ class ContextManager:
         else:
             self._create_table_from_columns(table_name, schema, df_columns, cartodbfy)
 
-        self._copy_from(gdf, table_name, df_columns)
+        self._copy_from(gdf, table_name, df_columns, retry_times)
         return table_name
 
     def create_table_from_query(self, query, table_name, if_exists, cartodbfy=True):
@@ -151,7 +192,9 @@ class ContextManager:
         """Get user schema from current credentials"""
         query = 'SELECT current_schema()'
         result = self.execute_query(query, do_post=False)
-        return result['rows'][0]['current_schema']
+        schema = result['rows'][0]['current_schema']
+        log.debug('schema: {}'.format(schema))
+        return schema
 
     def get_geom_type(self, query):
         """Fetch geom type of a remote table or query"""
@@ -169,7 +212,7 @@ class ContextManager:
 
     def get_num_rows(self, query):
         """Get the number of rows in the query"""
-        result = self.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=query))
+        result = self.execute_query('SELECT COUNT(*) FROM ({query}) _query'.format(query=query))
         return result.get('rows')[0].get('count')
 
     def get_bounds(self, query):
@@ -251,7 +294,8 @@ class ContextManager:
 
     def _truncate_and_drop_add_columns(self, table_name, schema, df_columns, table_columns, cartodbfy):
         log.debug('TRUNCATE AND DROP + ADD columns table "{}"'.format(table_name))
-        query = 'BEGIN; {truncate}; {drop_columns}; {add_columns}; {cartodbfy}; COMMIT;'.format(
+        query = '{regenerate}; BEGIN; {truncate}; {drop_columns}; {add_columns}; {cartodbfy}; COMMIT;'.format(
+            regenerate=_regenerate_table_query(table_name, schema) if self._check_regenerate_table_exists() else '',
             truncate=_truncate_table_query(table_name),
             drop_columns=_drop_columns_query(table_name, table_columns),
             add_columns=_add_columns_query(table_name, df_columns),
@@ -278,6 +322,16 @@ class ContextManager:
         except CartoException:
             return False
 
+    def _check_regenerate_table_exists(self):
+        query = '''
+            SELECT 1
+            FROM pg_catalog.pg_proc p
+            LEFT JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+            WHERE p.proname = 'cdb_regeneratetable' AND n.nspname = 'cartodb';
+        '''
+        result = self.execute_query(query)
+        return len(result['rows']) > 0
+
     def _get_query_columns_info(self, query):
         query = 'SELECT * FROM ({}) _q LIMIT 0'.format(query)
         table_info = self.execute_query(query)
@@ -285,7 +339,9 @@ class ContextManager:
 
     def _get_copy_query(self, query, columns, limit):
         query_columns = [
-            column.name for column in columns if (column.name != 'the_geom_webmercator')]
+            double_quote(column.name) for column in columns
+            if (column.name != 'the_geom_webmercator')
+        ]
 
         query = 'SELECT {columns} FROM ({query}) _q'.format(
             query=query,
@@ -299,23 +355,12 @@ class ContextManager:
 
         return query
 
-    def _copy_to(self, query, columns, retry_times):
+    @retry_copy
+    def _copy_to(self, query, columns, retry_times=DEFAULT_RETRY_TIMES):
         log.debug('COPY TO')
-        copy_query = 'COPY ({0}) TO stdout WITH (FORMAT csv, HEADER true, NULL \'{1}\')'.format(query, PG_NULL)
+        copy_query = "COPY ({0}) TO stdout WITH (FORMAT csv, HEADER true, NULL '{1}')".format(query, PG_NULL)
 
-        try:
-            raw_result = self.copy_client.copyto_stream(copy_query)
-        except CartoRateLimitException as err:
-            if retry_times > 0:
-                retry_times -= 1
-                warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
-                time.sleep(err.retry_after)
-                warn('Retrying...')
-                return self._copy_to(query, columns, retry_times)
-            else:
-                warn(('Read call was rate-limited. '
-                      'This usually happens when there are multiple queries being read at the same time.'))
-                raise err
+        raw_result = self.copy_client.copyto_stream(copy_query)
 
         converters = obtain_converters(columns)
         parse_dates = date_columns_names(columns)
@@ -327,14 +372,16 @@ class ContextManager:
 
         return df
 
-    def _copy_from(self, dataframe, table_name, columns):
+    @retry_copy
+    def _copy_from(self, dataframe, table_name, columns, retry_times=DEFAULT_RETRY_TIMES):
         log.debug('COPY FROM')
         query = """
             COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '{null}');
         """.format(
             table_name=table_name, null=PG_NULL,
-            columns=','.join(column.dbname for column in columns)).strip()
+            columns=','.join(double_quote(column.dbname) for column in columns)).strip()
         data = _compute_copy_data(dataframe, columns)
+
         self.copy_client.copyfrom(query, data)
 
     def _rename_table(self, table_name, new_table_name):
@@ -360,17 +407,19 @@ def _truncate_table_query(table_name):
 
 
 def _drop_columns_query(table_name, columns):
-    columns = ['DROP COLUMN {0}'.format(c.dbname) for c in columns if _not_reserved(c.dbname)]
+    columns = ['DROP COLUMN {name}'.format(name=double_quote(c.dbname))
+               for c in columns if _not_reserved(c.dbname)]
     return 'ALTER TABLE {table_name} {drop_columns}'.format(
         table_name=table_name,
-        drop_columns=', '.join(columns))
+        drop_columns=','.join(columns))
 
 
 def _add_columns_query(table_name, columns):
-    columns = ['ADD COLUMN {0} {1}'.format(c.dbname, c.dbtype) for c in columns if _not_reserved(c.dbname)]
+    columns = ['ADD COLUMN {name} {type}'.format(name=double_quote(c.dbname), type=c.dbtype)
+               for c in columns if _not_reserved(c.dbname)]
     return 'ALTER TABLE {table_name} {add_columns}'.format(
         table_name=table_name,
-        add_columns=', '.join(columns))
+        add_columns=','.join(columns))
 
 
 def _not_reserved(column):
@@ -379,10 +428,10 @@ def _not_reserved(column):
 
 
 def _create_table_from_columns_query(table_name, columns):
-    columns = ['{name} {type}'.format(name=c.dbname, type=c.dbtype) for c in columns]
+    columns = ['{name} {type}'.format(name=double_quote(c.dbname), type=c.dbtype) for c in columns]
     return 'CREATE TABLE {table_name} ({columns})'.format(
         table_name=table_name,
-        columns=', '.join(columns))
+        columns=','.join(columns))
 
 
 def _create_table_from_query_query(table_name, query):
@@ -391,6 +440,11 @@ def _create_table_from_query_query(table_name, query):
 
 def _cartodbfy_query(table_name, schema):
     return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')".format(
+        schema=schema, table_name=table_name)
+
+
+def _regenerate_table_query(table_name, schema):
+    return "SELECT CDB_RegenerateTable('{schema}.{table_name}'::regclass)".format(
         schema=schema, table_name=table_name)
 
 
@@ -409,7 +463,7 @@ def _create_auth_client(credentials, public=False):
 
 
 def _compute_copy_data(df, columns):
-    for index, _ in df.iterrows():
+    for index in df.index:
         row_data = []
         for column in columns:
             val = df.at[index, column.name]

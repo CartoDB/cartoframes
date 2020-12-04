@@ -84,8 +84,6 @@ The final step is to deploy the Developer Center to production with the new rele
 - Point to the release branch in `config.js`, in the `'cartoframes'` section:
   - Remove the release branch: `branch: '',`
   - Add the tag attribute: `tag: 'vM.m.u',`
-  - Update the guides_releases attribute: `guides_releases: ['vM.m.u'],`
-  - Update the autodoc_releases attribute: `autodoc_releases: ['vM.m.u', ...`
   - Update the releases attribute: `releases: ['vM.m.u', ...`
 - Merge the PR to master (this will deploys the Developer Center in a "production" environment)
 

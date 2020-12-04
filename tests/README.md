@@ -18,6 +18,74 @@ And for an specific Python version
 tox -e py37
 ```
 
+## Executing a single test
+
+Create a virtual environment
+
+```
+virtualenv -p python3 venv
+source venv/bin/activate
+```
+
+Install the required dependencies
+
+```
+pip install -r requirements.txt
+pip install pytest
+pip install pytest-mock
+```
+
+Execute a single test
+
+```
+pytest tests/unit/io/test_carto.py::test_read_carto
+```
+
+## Executing Jupyter Notebooks tests
+
+These tests execute all the Jupyter Notebooks contained in the `docs/examples` and `docs/guides` directories and overwrite the notebook with the executed versions (if the `OVERWRITE` parameter is set to `true`).
+
+Create a virtual environment
+
+```
+virtualenv -p python3 venv
+source venv/bin/activate
+```
+
+Install the required dependencies
+
+```
+pip install -r requirements.txt
+pip install -r tests/notebooks/requirements.txt
+```
+
+Set your credentials
+
+Create the file tests/notebooks/creds.json with the following structure:
+
+```
+{
+  "username": "your_username",
+  "api_key": "your_api_key"
+}
+```
+
+Execute the tests
+
+```
+pytest [-s] tests/notebooks
+```
+
+Environment variables:
+ - `SCOPE`: (default `all`): Scope of the tests: all, guides, examples (Example: `SCOPE=guides`)
+ - `OVERWRITE` (default `true`): Overwrites the notebooks with the result of the execution (Example: `OVERWRITE=false`)
+ - `TIMEOUT` (default `600`): Notebook timeout for each cell (Example: `TIMEOUT=100`)
+ - `KERNEL` (default `python3`): Kernel used to execute the notebooks (Example: `KERNEL=python3`)
+
+Notes:
+ - You can select the notebooks to be executed by overriding the value of the `EXECUTE_NOTEBOOKS` variable in `test_notebooks.py` (if not set, all the notebooks in the `docs/examples` and `docs/guides` directories will be executed)
+ - You can also select the notebooks to be avoided by overriding the value of the `AVOID_NOTEBOOKS` variable in `test_notebooks.py`
+
 ## File structure
 
 ```
@@ -136,4 +204,3 @@ pip install pre-commit
 ```
 pre-commit install
 ```
-

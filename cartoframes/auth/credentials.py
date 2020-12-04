@@ -3,13 +3,13 @@
 import os
 
 from urllib.parse import urlparse
+
 from carto.auth import APIKeyAuthClient
 from carto.do_token import DoTokenManager
 
 from .. import __version__
 from ..utils.logger import log
-from ..utils.utils import is_valid_str, check_do_enabled, save_in_config, \
-                          read_from_config, default_config_path
+from ..utils.utils import is_valid_str, check_do_enabled, save_in_config, read_from_config, default_config_path
 
 from warnings import filterwarnings
 filterwarnings('ignore', category=FutureWarning, module='carto')
@@ -22,7 +22,7 @@ class Credentials:
     """Credentials class is used for managing and storing user CARTO credentials. The
     arguments are listed in order of precedence: :obj:`Credentials` instances
     are first, `key` and `base_url`/`username` are taken next, and
-    `config_file` (if given) is taken last. The config file is `cartocreds.json`
+    `config_file` (if given) is taken last. The config file is `creds.json`
     by default. If no arguments are passed, then there will be an attempt to
     retrieve credentials from a previously saved session.
     One of the above scenarios needs to be met to successfully
@@ -64,6 +64,7 @@ class Credentials:
         self._user_id = None
         self._api_key_auth_client = None
         self._allow_non_secure = allow_non_secure
+        self._do_credentials = None
 
         self._norm_credentials()
 
@@ -110,14 +111,24 @@ class Credentials:
         self._session = session
 
     @property
+    def me_data(self):
+        me_data = {}
+
+        try:
+            me_data = self.get_api_key_auth_client().send(ME_SERVICE, 'get').json()
+        except Exception:
+            pass
+
+        return me_data
+
+    @property
     def user_id(self):
         """Credentials user ID"""
         if not self._user_id:
             log.debug('Getting `user_id` for {}'.format(self._username))
-            api_key_auth_client = self.get_api_key_auth_client()
 
             try:
-                user_me = api_key_auth_client.send(ME_SERVICE, 'get').json()
+                user_me = self.me_data()
                 user_data = user_me.get('user_data')
                 if user_data:
                     self._user_id = user_data.get('id')
@@ -194,7 +205,7 @@ class Credentials:
         Args:
             config_file (str, optional): Location where credentials are to be
                 stored. If no argument is provided, it will be send to the
-                default location.
+                default location (`creds.json`).
 
         Example:
             >>> credentials = Credentials(username='johnsmith', api_key='abcdefg')
@@ -222,7 +233,7 @@ class Credentials:
     def delete(cls, config_file=None):
         """Deletes the credentials file specified in `config_file`. If no
         file is specified, it deletes the default user credential file
-        (`cartocreds.json`)
+        (`creds.json`)
 
         Args:
             config_file (str): Path to configuration file. Defaults to delete
@@ -246,11 +257,24 @@ class Credentials:
         except OSError:
             log.warning('No credential file found at {}.'.format(path_to_remove))
 
-    @check_do_enabled
-    def get_do_credentials(self):
-        """Returns the Data Observatory v2 credentials"""
-        do_token_manager = DoTokenManager(self.get_api_key_auth_client())
-        return do_token_manager.get()
+    def is_instant_licensing_active(self):
+        """Returns if the user has instant licensing activated for the Data Observatory v2."""
+        do_credentials = self._get_do_credentials()
+        return do_credentials.instant_licensing
+
+    def get_gcloud_credentials(self):
+        """Returns the Data Observatory v2 Google Cloud Platform project and token.
+
+        Example:
+            >>> from cartoframes.auth import Credentials
+            >>> from google.oauth2.credentials import Credentials as GoogleCredentials
+            >>> creds = Credentials(username='johnsmith', api_key='abcdefg')
+            >>> gcloud_project, gcloud_token = creds.get_gcloud_credentials()
+            >>> gcloud_credentials = GoogleCredentials(gcloud_token)
+
+        """
+        do_credentials = self._get_do_credentials()
+        return do_credentials.bq_project, do_credentials.access_token
 
     def get_api_key_auth_client(self):
         if not self._api_key_auth_client:
@@ -263,6 +287,16 @@ class Credentials:
             )
 
         return self._api_key_auth_client
+
+    @check_do_enabled
+    def _get_do_credentials(self):
+        """Returns the Data Observatory v2 credentials"""
+        if self._do_credentials:
+            return self._do_credentials
+
+        do_token_manager = DoTokenManager(self.get_api_key_auth_client())
+        self._do_credentials = do_token_manager.get()
+        return self._do_credentials
 
     def _norm_credentials(self):
         """Standardize credentials"""

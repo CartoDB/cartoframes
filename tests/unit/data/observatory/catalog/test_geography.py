@@ -1,3 +1,5 @@
+import os
+
 import pytest
 import pandas as pd
 
@@ -218,30 +220,28 @@ class TestGeography(object):
         assert isinstance(sliced_geography, pd.Series)
         assert sliced_geography.equals(expected_geography_df)
 
-    @patch.object(GeographyRepository, 'get_all')
+    @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch.object(DODataset, 'download_stream')
-    def test_geography_download(self, download_stream_mock, get_by_id_mock, get_all_mock):
+    def test_geography_download(self, mock_download_stream, mock_get_by_id, mock_subscription_ids):
         # Given
-        get_by_id_mock.return_value = test_geography1
+        mock_get_by_id.return_value = test_geography1
         geography = Geography.get(test_geography1.id)
-        get_all_mock.return_value = [geography]
-        download_stream_mock.return_value = []
+        mock_download_stream.return_value = []
+        mock_subscription_ids.return_value = [test_geography1.id]
         credentials = Credentials('fake_user', '1234')
 
         # Then
         geography.to_csv('fake_path', credentials)
+        os.remove('fake_path')
 
-    @patch.object(GeographyRepository, 'get_all')
+    @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch.object(DODataset, 'download_stream')
-    def test_geography_download_not_subscribed(self, download_stream_mock, get_by_id_mock, get_all_mock):
+    def test_geography_download_not_subscribed(self, mock_get_by_id, mock_subscription_ids):
         # Given
-        get_by_id_mock.return_value = test_geography2  # is private
-        get_by_id_mock.return_value = test_geography2
+        mock_get_by_id.return_value = test_geography2  # is private
         geography = Geography.get(test_geography2.id)
-        get_all_mock.return_value = []
-        download_stream_mock.return_value = []
+        mock_subscription_ids.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         with pytest.raises(Exception) as e:
@@ -252,31 +252,28 @@ class TestGeography(object):
             'You are not subscribed to this Geography yet. '
             'Please, use the subscribe method first.')
 
-    @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch.object(DODataset, 'download_stream')
-    def test_geography_download_not_subscribed_but_public(self, download_stream_mock, get_by_id_mock, get_all_mock):
+    def test_geography_download_not_subscribed_but_public(self, mock_download_stream, mock_get_by_id):
         # Given
-        get_by_id_mock.return_value = test_geography1  # is public
+        mock_get_by_id.return_value = test_geography1  # is public
         geography = Geography.get(test_geography1.id)
-        get_all_mock.return_value = []
-        download_stream_mock.return_value = []
+        mock_download_stream.return_value = []
         credentials = Credentials('fake_user', '1234')
 
         geography.to_csv('fake_path', credentials)
+        os.remove('fake_path')
 
-    @patch.object(GeographyRepository, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     @patch.object(DODataset, 'download_stream')
-    def test_geography_download_without_do_enabled(self, download_stream_mock, get_by_id_mock, get_all_mock):
+    def test_geography_download_without_do_enabled(self, mock_download_stream, mock_get_by_id):
         # Given
-        get_by_id_mock.return_value = test_geography1
+        mock_get_by_id.return_value = test_geography1
         geography = Geography.get(test_geography1.id)
-        get_all_mock.return_value = []
 
         def raise_exception(limit=None, order_by=None, sql_query=None, add_geom=None, is_geography=None):
             raise ServerErrorException(['The user does not have Data Observatory enabled'])
-        download_stream_mock.side_effect = raise_exception
+        mock_download_stream.side_effect = raise_exception
         credentials = Credentials('fake_user', '1234')
 
         # When
