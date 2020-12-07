@@ -31,4 +31,4 @@ Enterprise Plan customers have additional support options beyond general communi
 
 In order to speed up the resolution of your issue, provide as much information as possible (even if it is a link from community support). This allows our engineers to investigate your problem as soon as possible.
 
-If you are not yet CARTO customer, browse our [plans &amp; pricing](https://carto.com/pricing/) and find the right plan for you.
+If you are not yet a CARTO customer, browse our [plans &amp; pricing](https://carto.com/pricing/) and find the right plan for you.
