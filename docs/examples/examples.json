@@ -321,13 +321,6 @@
                     "group": "Legends"
                 },
                 {
-                    "title": "Legend by geometry",
-                    "desc": "Specify the geometry type in a legend helper",
-                    "file": "legend_line_geometry",
-                    "path": "data_visualization/legends",
-                    "group": "Legends"
-                },
-                {
                     "title": "Default widget",
                     "desc": "Set the default widget needed for the style helper",
                     "file": "default_widget",
