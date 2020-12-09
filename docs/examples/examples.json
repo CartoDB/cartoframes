@@ -6,19 +6,13 @@
     "categories": [
         {
             "title": "Use Cases",
-            "desc": "Learn to solve real-world use cases in CARTOframes with these examples created by our Spatial Data Scientists",
+            "desc": "Check basic use cases in CARTOframes",
             "hide_sidebar_samples": true,
             "samples": [
                 {
-                    "title": "Building a dashboard to create a marketing plan",
-                    "desc": "Learn how to build a dashboard to plan a marketing campaign leveraging CARTO's Data Observatory",
-                    "file": "building_a_dashboard",
-                    "path": "use_cases"
-                },
-                {
-                    "title": "Combining multiple datasets to understand retail performance",
-                    "desc": "Learn how to use geosocial and financial data to understand retail performance",
-                    "file": "combining_two_datasets",
+                    "title": "Geocode London stations",
+                    "desc": "Geocode a dataset in XLS format",
+                    "file": "geocoding_london_stations",
                     "path": "use_cases"
                 },
                 {
@@ -38,12 +32,25 @@
                     "desc": "Transform and visualize data from a JSON file",
                     "file": "paris_remarkable_trees",
                     "path": "use_cases"
+                }
+            ]
+        },
+        {
+            "title": "Advanced Use Cases",
+            "desc": "Learn to solve real-world use cases in CARTOframes with these examples created by our Spatial Data Scientists",
+            "hide_sidebar_samples": true,
+            "samples": [
+                {
+                    "title": "Building a dashboard to create a marketing plan",
+                    "desc": "Learn how to build a dashboard to plan a marketing campaign leveraging CARTO's Data Observatory",
+                    "file": "building_a_dashboard",
+                    "path": "advanced_use_cases"
                 },
                 {
-                    "title": "Geocode London stations",
-                    "desc": "Geocode a dataset in XLS format",
-                    "file": "geocoding_london_stations",
-                    "path": "use_cases"
+                    "title": "Combining multiple datasets to understand retail performance",
+                    "desc": "Learn how to use geosocial and financial data to understand retail performance",
+                    "file": "combining_two_datasets",
+                    "path": "advanced_use_cases"
                 }
             ]
         },
