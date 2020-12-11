@@ -6,24 +6,18 @@
     "categories": [
         {
             "title": "Use Cases",
-            "desc": "Explore how to make the most of your Spatial Analysis with CARTOframes",
+            "desc": "Check basic use cases in CARTOframes",
             "hide_sidebar_samples": true,
             "samples": [
                 {
-                    "title": "Building a dashboard",
-                    "desc": "Building a dashboard to plan a marketing campaign leveraging CARTO Data Observatory",
-                    "file": "building_a_dashboard",
-                    "path": "use_cases"
-                },
-                {
-                    "title": "Combining two datasets",
-                    "desc": "Using geosocial media data to understand retail performance",
-                    "file": "combining_two_datasets",
+                    "title": "Geocode London stations",
+                    "desc": "Geocode a dataset in XLS format",
+                    "file": "geocoding_london_stations",
                     "path": "use_cases"
                 },
                 {
                     "title": "Visualize temperatures",
-                    "desc": "Visualize warm temperatures",
+                    "desc": "Learn how to use the timeseries widget to visualize temperatures",
                     "file": "visualize_temperatures",
                     "path": "use_cases"
                 },
@@ -38,41 +32,54 @@
                     "desc": "Transform and visualize data from a JSON file",
                     "file": "paris_remarkable_trees",
                     "path": "use_cases"
+                }
+            ]
+        },
+        {
+            "title": "Advanced Use Cases",
+            "desc": "Learn to solve real-world use cases in CARTOframes with these examples created by our Spatial Data Scientists",
+            "hide_sidebar_samples": true,
+            "samples": [
+                {
+                    "title": "Building a dashboard to create a marketing plan",
+                    "desc": "Learn how to build a dashboard to plan a marketing campaign leveraging CARTO's Data Observatory",
+                    "file": "building_a_dashboard",
+                    "path": "advanced_use_cases"
                 },
                 {
-                    "title": "Geocode London stations",
-                    "desc": "Geocode a dataset in XLS format",
-                    "file": "geocoding_london_stations",
-                    "path": "use_cases"
+                    "title": "Combining multiple datasets to understand retail performance",
+                    "desc": "Learn how to use geosocial and financial data to understand retail performance",
+                    "file": "combining_two_datasets",
+                    "path": "advanced_use_cases"
                 }
             ]
         },
         {
             "title": "Templates",
-            "desc": "Incorporate CARTOframes in your workflows easily with functionality templates",
+            "desc": "Incorporate CARTOframes in your workflows easily with these functionality templates",
             "hide_sidebar_samples": true,
             "samples": [
                 {
-                    "title": "Data Discovery",
-                    "desc": "How to explore the data catalog",
+                    "title": "Data Discovery in the Data Observatory",
+                    "desc": "How to explore the Data Observatory catalog to find the data that best fits your needs",
                     "file": "do_data_discovery",
                     "path": "templates"
                 },
                 {
-                    "title": "Access public data",
-                    "desc": "Manage DO public data",
+                    "title": "Access public data from the Data Observatory",
+                    "desc": "Access and manage public data from the Data Observatory",
                     "file": "do_access_public_data",
                     "path": "templates"
                 },
                 {
-                    "title": "Access premium data",
-                    "desc": "Manage DO premium data",
+                    "title": "Access premium data from the Data Observatory",
+                    "desc": "Access and manange premium data from the Data Observatory",
                     "file": "do_access_premium_data",
                     "path": "templates"
                 },
                 {
-                    "title": "Data Enrichment",
-                    "desc": "Enrich your data",
+                    "title": "Data Enrichment using the Data Observatory",
+                    "desc": "Enrich your data with any of the thousands of datasets available in the Data Observatory",
                     "file": "do_data_enrichment",
                     "path": "templates"
                 }
@@ -80,7 +87,7 @@
         },
         {
             "title": "Data Management",
-            "desc": "Explore working with data both locally and with a CARTO account",
+            "desc": "Explore working with data both locally and using a CARTO account",
             "hide_sidebar_samples": true,
             "samples": [
                 {
@@ -265,7 +272,7 @@
                     "group": "Legends"
                 },
                 {
-                    "title": "Color category cegend",
+                    "title": "Color category legend",
                     "desc": "Use the color_category_legend method to represent categorical values by color",
                     "file": "color_category_legend",
                     "path": "data_visualization/legends",
@@ -310,13 +317,6 @@
                     "title": "Add multiple legends",
                     "desc": "Combine different legends in the same visualization",
                     "file": "multiple_legends",
-                    "path": "data_visualization/legends",
-                    "group": "Legends"
-                },
-                {
-                    "title": "Legend by geometry",
-                    "desc": "Specify the geometry type in a legend helper",
-                    "file": "legend_line_geometry",
                     "path": "data_visualization/legends",
                     "group": "Legends"
                 },
@@ -447,28 +447,28 @@
                     "group": "Grid layout"
                 },
                 {
-                    "title": "Publish Public Table Visualization",
+                    "title": "Publish a public table Visualization",
                     "desc": "Publish a visualization from a public table",
                     "file": "publish_visualization_public_table",
                     "path": "data_visualization/publish_and_share",
                     "group": "Publish and share"
                 },
                 {
-                    "title": "Publish Private Table Visualization",
+                    "title": "Publish a private table visualization",
                     "desc": "Publish a visualization from a private table",
                     "file": "publish_visualization_private_table",
                     "path": "data_visualization/publish_and_share",
                     "group": "Publish and share"
                 },
                 {
-                    "title": "Publish GeoDataFrame Visualization",
+                    "title": "Publish a GeoDataFrame visualization",
                     "desc": "Publish a visualization from a GeoDataFrame",
                     "file": "publish_visualization_gdf",
                     "path": "data_visualization/publish_and_share",
                     "group": "Publish and share"
                 },
                 {
-                    "title": "Publish Layout Visualization",
+                    "title": "Publish a layout visualization",
                     "desc": "Publish a visualization of a layout",
                     "file": "publish_visualization_layout",
                     "path": "data_visualization/publish_and_share",
