@@ -5,7 +5,7 @@
     },
     "categories": [
         {
-            "title": "Use Cases",
+            "title": "Basic Use Cases",
             "desc": "Check basic use cases in CARTOframes",
             "hide_sidebar_samples": true,
             "samples": [
@@ -51,37 +51,6 @@
                     "desc": "Learn how to use geosocial and financial data to understand retail performance",
                     "file": "combining_two_datasets",
                     "path": "advanced_use_cases"
-                }
-            ]
-        },
-        {
-            "title": "Templates",
-            "desc": "Incorporate CARTOframes in your workflows easily with these functionality templates",
-            "hide_sidebar_samples": true,
-            "samples": [
-                {
-                    "title": "Data Discovery in the Data Observatory",
-                    "desc": "How to explore the Data Observatory catalog to find the data that best fits your needs",
-                    "file": "do_data_discovery",
-                    "path": "templates"
-                },
-                {
-                    "title": "Access public data from the Data Observatory",
-                    "desc": "Access and manage public data from the Data Observatory",
-                    "file": "do_access_public_data",
-                    "path": "templates"
-                },
-                {
-                    "title": "Access premium data from the Data Observatory",
-                    "desc": "Access and manange premium data from the Data Observatory",
-                    "file": "do_access_premium_data",
-                    "path": "templates"
-                },
-                {
-                    "title": "Data Enrichment using the Data Observatory",
-                    "desc": "Enrich your data with any of the thousands of datasets available in the Data Observatory",
-                    "file": "do_data_enrichment",
-                    "path": "templates"
                 }
             ]
         },
@@ -513,15 +482,21 @@
             "hide_sidebar_samples": true,
             "samples": [
                 {
-                    "title": "Discover a dataset",
-                    "desc": "Basic steps to discover a Dataset in the Data Observatory",
-                    "file": "discover_dataset",
+                    "title": "Data Discovery in the Data Observatory",
+                    "desc": "How to explore the Data Observatory catalog to find the data that best fits your needs",
+                    "file": "do_data_discovery",
                     "path": "data_observatory"
                 },
                 {
-                    "title": "Access a dataset",
-                    "desc": "Access a dataset applying filters",
-                    "file": "access_dataset",
+                    "title": "Access Public Data from the Data Observatory",
+                    "desc": "Access and manage public data from the Data Observatory",
+                    "file": "do_access_public_data",
+                    "path": "data_observatory"
+                },
+                {
+                    "title": "Access Premium Data from the Data Observatory",
+                    "desc": "Access and manange premium data from the Data Observatory",
+                    "file": "do_access_premium_data",
                     "path": "data_observatory"
                 },
                 {
@@ -531,9 +506,15 @@
                     "path": "data_observatory"
                 },
                 {
-                    "title": "Enrich polygons",
+                    "title": "Basic Polygon Enrichment",
                     "desc": "Use the enrichment to enrich polygons for a dataset",
                     "file": "polygons_enrichment_dataset",
+                    "path": "data_observatory"
+                },
+                {
+                    "title": "Advanced Polygon Enrichment",
+                    "desc": "Incorporate the enrichment in your workflows for advanced use cases",
+                    "file": "do_data_enrichment",
                     "path": "data_observatory"
                 },
                 {
@@ -543,7 +524,7 @@
                     "path": "data_observatory"
                 },
                 {
-                    "title": "Google Cloud credentials",
+                    "title": "Access Public Data from BigQuery",
                     "desc": "Get and use your Data Observatory's Google Cloud credentials",
                     "file": "google_cloud_credentials",
                     "path": "data_observatory"
