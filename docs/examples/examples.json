@@ -51,6 +51,24 @@
                     "desc": "Learn how to use geosocial and financial data to understand retail performance",
                     "file": "combining_two_datasets",
                     "path": "advanced_use_cases"
+                },
+                {
+                    "title": "Revenue prediction for site selection",
+                    "desc": "Learn how to incorporate CARTOframes data services and enrichment capabilities into your modeling workflows",
+                    "file": "revenue_prediction",
+                    "path": "advanced_use_cases"
+                },
+                {
+                    "title": "Single-layer Territory Management",
+                    "desc": "Learn how to use advanced spatial data science techniques on Data Observatory data to optimize sales territories",
+                    "file": "territory_management_1layer",
+                    "path": "advanced_use_cases"
+                },
+                {
+                    "title": "Two-layer Territory Management",
+                    "desc": "Learn how to use advanced spatial data science techniques on Data Observatory data to optimize sales territories",
+                    "file": "territory_management_2layers",
+                    "path": "advanced_use_cases"
                 }
             ]
         },
@@ -500,7 +518,7 @@
                     "path": "data_observatory"
                 },
                 {
-                    "title": "Enrich points",
+                    "title": "Point Enrichment",
                     "desc": "Use the enrichment to enrich points for a dataset",
                     "file": "points_enrichment_dataset",
                     "path": "data_observatory"
@@ -527,6 +545,12 @@
                     "title": "Access Public Data from BigQuery",
                     "desc": "Get and use your Data Observatory's Google Cloud credentials",
                     "file": "google_cloud_credentials",
+                    "path": "data_observatory"
+                },
+                {
+                    "title": "Filter a Dataset using a Geography",
+                    "desc": "Learn how to filter a Data Observatory Dataset using a Data Observatory Geography",
+                    "file": "wof_to_filter_do_data",
                     "path": "data_observatory"
                 }
             ]
