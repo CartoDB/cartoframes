@@ -174,7 +174,7 @@ class Geocoding(Service):
             if not table_name:
                 raise ValueError('There is no "table_name" to cache the data')
             return self._cached_geocode(source, table_name, street, city=city, state=state, country=country,
-                                        dry_run=dry_run)
+                                        dry_run=dry_run, status=status)
 
         city, state, country = [
             geocoding_utils.column_or_value_arg(arg, self.columns) for arg in [city, state, country]
@@ -201,7 +201,7 @@ class Geocoding(Service):
 
         return result
 
-    def _cached_geocode(self, source, table_name, street, city, state, country, dry_run):
+    def _cached_geocode(self, source, table_name, street, city, state, country, status, dry_run):
         """Geocode a dataframe caching results into a table.
         If the same dataframe if geocoded repeatedly no credits will be spent.
         But note there is a time overhead related to uploading the dataframe to a
@@ -209,6 +209,7 @@ class Geocoding(Service):
 
         """
         has_cache = has_table(table_name, self._credentials)
+        cache_columns = []
 
         if has_cache:
             cache_source_manager = SourceManager(table_name, self._credentials)
@@ -218,7 +219,7 @@ class Geocoding(Service):
 
         if geocoding_constants.HASH_COLUMN in self.columns or not has_cache:
             return self.geocode(
-                source, street=street, city=city, state=state,
+                source, street=street, city=city, state=state, status=status,
                 country=country, table_name=table_name, dry_run=dry_run, if_exists='replace')
 
         tmp_table_name = self._new_temporary_table_name()
@@ -227,22 +228,33 @@ class Geocoding(Service):
 
         to_carto(source, tmp_table_name, self._credentials, log_enabled=False)
 
-        self._execute_query(
-            """
-            ALTER TABLE {tmp_table} ADD COLUMN IF NOT EXISTS {hash} text
-            """.format(tmp_table=tmp_table_name, hash=geocoding_constants.HASH_COLUMN))
+        _, status_columns = geocoding_utils.status_assignment_columns(status)
+        add_columns = [c for c in status_columns if c[0] in cache_columns]
+        add_columns += [(geocoding_constants.HASH_COLUMN, 'text')]
+
+        log.debug("Adding columns %s if needed", ', '.join([c[0] for c in add_columns]))
+        alter_sql = "ALTER TABLE {tmp_table} {add_columns};".format(
+            tmp_table=tmp_table_name,
+            add_columns=','.join([
+                'ADD COLUMN IF NOT EXISTS {} {}'.format(name, type) for name, type in add_columns]))
+        self._execute_query(alter_sql)
 
         hcity, hstate, hcountry = [
             geocoding_utils.column_or_value_arg(arg, self.columns) for arg in [city, state, country]
         ]
 
         hash_expr = geocoding_utils.hash_expr(street, hcity, hstate, hcountry, table_prefix=tmp_table_name)
+        columns_to_update = [c[0] for c in add_columns]
+        columns_to_update.append('the_geom')
+        columns_expr = ','.join(["""{c} = {t}.{c} """.format(t=table_name, c=c) for c in columns_to_update])
         self._execute_query(
             """
-            UPDATE {tmp_table} SET {hash}={table}.{hash}, the_geom={table}.the_geom
+            UPDATE {tmp_table}
+            SET {columns_to_update}
             FROM {table} WHERE {hash_expr}={table}.{hash}
             """.format(
                 tmp_table=tmp_table_name,
+                columns_to_update=columns_expr,
                 table=table_name,
                 hash=geocoding_constants.HASH_COLUMN,
                 hash_expr=hash_expr
@@ -260,7 +272,7 @@ class Geocoding(Service):
         # TODO: refactor to share code with geocode() and call self._geocode() here instead
         # actually to keep hashing knowledge encapsulated (AFW) this should be handled by
         # _geocode using an additional parameter for an input table
-        gdf, metadata = self.geocode(table_name, street=street, city=city,
+        gdf, metadata = self.geocode(table_name, street=street, city=city, status=status,
                                      state=state, country=country, dry_run=dry_run)
         return self.result(data=gdf, metadata=metadata)
 
