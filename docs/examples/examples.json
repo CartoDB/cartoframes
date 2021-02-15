@@ -5,25 +5,19 @@
     },
     "categories": [
         {
-            "title": "Use Cases",
-            "desc": "Explore how to make the most of your Spatial Analysis with CARTOframes",
+            "title": "Basic Use Cases",
+            "desc": "Check basic use cases in CARTOframes",
             "hide_sidebar_samples": true,
             "samples": [
                 {
-                    "title": "Building a dashboard",
-                    "desc": "Building a dashboard to plan a marketing campaign leveraging CARTO Data Observatory",
-                    "file": "building_a_dashboard",
-                    "path": "use_cases"
-                },
-                {
-                    "title": "Combining two datasets",
-                    "desc": "Using geosocial media data to understand retail performance",
-                    "file": "combining_two_datasets",
+                    "title": "Geocode London stations",
+                    "desc": "Geocode a dataset in XLS format",
+                    "file": "geocoding_london_stations",
                     "path": "use_cases"
                 },
                 {
                     "title": "Visualize temperatures",
-                    "desc": "Visualize warm temperatures",
+                    "desc": "Learn how to use the timeseries widget to visualize temperatures",
                     "file": "visualize_temperatures",
                     "path": "use_cases"
                 },
@@ -38,49 +32,49 @@
                     "desc": "Transform and visualize data from a JSON file",
                     "file": "paris_remarkable_trees",
                     "path": "use_cases"
-                },
-                {
-                    "title": "Geocode London stations",
-                    "desc": "Geocode a dataset in XLS format",
-                    "file": "geocoding_london_stations",
-                    "path": "use_cases"
                 }
             ]
         },
         {
-            "title": "Templates",
-            "desc": "Incorporate CARTOframes in your workflows easily with functionality templates",
+            "title": "Advanced Use Cases",
+            "desc": "Learn to solve real-world use cases in CARTOframes with these examples created by our Spatial Data Scientists",
             "hide_sidebar_samples": true,
             "samples": [
                 {
-                    "title": "Data Discovery",
-                    "desc": "How to explore the data catalog",
-                    "file": "do_data_discovery",
-                    "path": "templates"
+                    "title": "Building a dashboard to create a marketing plan",
+                    "desc": "Learn how to build a dashboard to plan a marketing campaign leveraging CARTO's Data Observatory",
+                    "file": "building_a_dashboard",
+                    "path": "advanced_use_cases"
                 },
                 {
-                    "title": "Access public data",
-                    "desc": "Manage DO public data",
-                    "file": "do_access_public_data",
-                    "path": "templates"
+                    "title": "Combining multiple datasets to understand retail performance",
+                    "desc": "Learn how to use geosocial and financial data to understand retail performance",
+                    "file": "combining_two_datasets",
+                    "path": "advanced_use_cases"
                 },
                 {
-                    "title": "Access premium data",
-                    "desc": "Manage DO premium data",
-                    "file": "do_access_premium_data",
-                    "path": "templates"
+                    "title": "Revenue prediction for site selection",
+                    "desc": "Learn how to incorporate CARTOframes data services and enrichment capabilities into your modeling workflows",
+                    "file": "revenue_prediction",
+                    "path": "advanced_use_cases"
                 },
                 {
-                    "title": "Data Enrichment",
-                    "desc": "Enrich your data",
-                    "file": "do_data_enrichment",
-                    "path": "templates"
+                    "title": "Single-layer Territory Management",
+                    "desc": "Learn how to use advanced spatial data science techniques on Data Observatory data to optimize sales territories",
+                    "file": "territory_management_1layer",
+                    "path": "advanced_use_cases"
+                },
+                {
+                    "title": "Two-layer Territory Management",
+                    "desc": "Learn how to use advanced spatial data science techniques on Data Observatory data to optimize sales territories",
+                    "file": "territory_management_2layers",
+                    "path": "advanced_use_cases"
                 }
             ]
         },
         {
             "title": "Data Management",
-            "desc": "Explore working with data both locally and with a CARTO account",
+            "desc": "Explore working with data both locally and using a CARTO account",
             "hide_sidebar_samples": true,
             "samples": [
                 {
@@ -265,7 +259,7 @@
                     "group": "Legends"
                 },
                 {
-                    "title": "Color category cegend",
+                    "title": "Color category legend",
                     "desc": "Use the color_category_legend method to represent categorical values by color",
                     "file": "color_category_legend",
                     "path": "data_visualization/legends",
@@ -310,13 +304,6 @@
                     "title": "Add multiple legends",
                     "desc": "Combine different legends in the same visualization",
                     "file": "multiple_legends",
-                    "path": "data_visualization/legends",
-                    "group": "Legends"
-                },
-                {
-                    "title": "Legend by geometry",
-                    "desc": "Specify the geometry type in a legend helper",
-                    "file": "legend_line_geometry",
                     "path": "data_visualization/legends",
                     "group": "Legends"
                 },
@@ -447,28 +434,28 @@
                     "group": "Grid layout"
                 },
                 {
-                    "title": "Publish Public Table Visualization",
+                    "title": "Publish a public table Visualization",
                     "desc": "Publish a visualization from a public table",
                     "file": "publish_visualization_public_table",
                     "path": "data_visualization/publish_and_share",
                     "group": "Publish and share"
                 },
                 {
-                    "title": "Publish Private Table Visualization",
+                    "title": "Publish a private table visualization",
                     "desc": "Publish a visualization from a private table",
                     "file": "publish_visualization_private_table",
                     "path": "data_visualization/publish_and_share",
                     "group": "Publish and share"
                 },
                 {
-                    "title": "Publish GeoDataFrame Visualization",
+                    "title": "Publish a GeoDataFrame visualization",
                     "desc": "Publish a visualization from a GeoDataFrame",
                     "file": "publish_visualization_gdf",
                     "path": "data_visualization/publish_and_share",
                     "group": "Publish and share"
                 },
                 {
-                    "title": "Publish Layout Visualization",
+                    "title": "Publish a layout visualization",
                     "desc": "Publish a visualization of a layout",
                     "file": "publish_visualization_layout",
                     "path": "data_visualization/publish_and_share",
@@ -513,27 +500,39 @@
             "hide_sidebar_samples": true,
             "samples": [
                 {
-                    "title": "Discover a dataset",
-                    "desc": "Basic steps to discover a Dataset in the Data Observatory",
-                    "file": "discover_dataset",
+                    "title": "Data Discovery in the Data Observatory",
+                    "desc": "How to explore the Data Observatory catalog to find the data that best fits your needs",
+                    "file": "do_data_discovery",
                     "path": "data_observatory"
                 },
                 {
-                    "title": "Access a dataset",
-                    "desc": "Access a dataset applying filters",
-                    "file": "access_dataset",
+                    "title": "Access Public Data from the Data Observatory",
+                    "desc": "Access and manage public data from the Data Observatory",
+                    "file": "do_access_public_data",
                     "path": "data_observatory"
                 },
                 {
-                    "title": "Enrich points",
+                    "title": "Access Premium Data from the Data Observatory",
+                    "desc": "Access and manange premium data from the Data Observatory",
+                    "file": "do_access_premium_data",
+                    "path": "data_observatory"
+                },
+                {
+                    "title": "Point Enrichment",
                     "desc": "Use the enrichment to enrich points for a dataset",
                     "file": "points_enrichment_dataset",
                     "path": "data_observatory"
                 },
                 {
-                    "title": "Enrich polygons",
+                    "title": "Basic Polygon Enrichment",
                     "desc": "Use the enrichment to enrich polygons for a dataset",
                     "file": "polygons_enrichment_dataset",
+                    "path": "data_observatory"
+                },
+                {
+                    "title": "Advanced Polygon Enrichment",
+                    "desc": "Incorporate the enrichment in your workflows for advanced use cases",
+                    "file": "do_data_enrichment",
                     "path": "data_observatory"
                 },
                 {
@@ -543,9 +542,15 @@
                     "path": "data_observatory"
                 },
                 {
-                    "title": "Google Cloud credentials",
+                    "title": "Access Public Data from BigQuery",
                     "desc": "Get and use your Data Observatory's Google Cloud credentials",
                     "file": "google_cloud_credentials",
+                    "path": "data_observatory"
+                },
+                {
+                    "title": "Filter a Dataset using a Geography",
+                    "desc": "Learn how to filter a Data Observatory Dataset using a Data Observatory Geography",
+                    "file": "wof_to_filter_do_data",
                     "path": "data_observatory"
                 }
             ]

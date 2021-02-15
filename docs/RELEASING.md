@@ -75,6 +75,9 @@ Then, a docs branch must be created. This is used by the Developer Center, and i
 ```
 git checkout -b docs/vM.m.u
 git push origin docs/vM.m.u
+
+git checkout -b docs-vM.m.u
+git push origin docs-vM.m.u
 ```
 
 ## The developer center "party" (production)
