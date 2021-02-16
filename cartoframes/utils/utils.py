@@ -147,7 +147,7 @@ def pg2dtypes(pgtype):
         'boolean': 'bool', 'bool': 'bool',
         'date': 'datetime64[D]',
         'timestamp': 'datetime64[ns]', 'timestamp without time zone': 'datetime64[ns]',
-        'timestampz': 'datetime64[ns]', 'timestamp with time zone': 'datetime64[ns]',
+        'timestamptz': 'datetime64[ns]', 'timestamp with time zone': 'datetime64[ns]',
         'USER-DEFINED': 'object',
     }
     return mapping.get(str(pgtype), 'object')
