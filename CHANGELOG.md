@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [NEXT] - 2021-X-X
 
 ### Removed
-- Remove DataObsClient (#)
+- Remove DataObsClient (#1721)
 
 ## [1.1.1] - 2021-02-12
 
