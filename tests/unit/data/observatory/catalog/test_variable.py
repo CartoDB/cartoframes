@@ -176,7 +176,7 @@ class TestVariable(object):
         assert isinstance(variable_df, pd.DataFrame)
         assert isinstance(sliced_variable, pd.Series)
         assert sliced_variable.equals(expected_variable_df)
-    
+
     @patch.object(pd, 'get_option')
     @patch.object(pd, 'set_option')
     @patch.object(VariableRepository, 'get_all')
@@ -186,7 +186,7 @@ class TestVariable(object):
         variable = test_variables[0]
 
         # When
-        summary = variable.describe()
+        variable.describe()
 
         # Then
         mocked_get.assert_called_once_with('display.float_format')
@@ -202,7 +202,7 @@ class TestVariable(object):
         variable = test_variables[0]
 
         # When
-        summary = variable.describe(autoformat=False)
+        variable.describe(autoformat=False)
 
         # Then
         mocked_set.assert_not_called()
