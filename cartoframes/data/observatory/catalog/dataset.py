@@ -293,10 +293,13 @@ class Dataset(CatalogEntity):
         """
         return geom_coverage(self.geography)
 
-    def describe(self):
+    def describe(self, autoformat=True):
         """Shows a summary of the actual stats of the variables (columns) of the dataset.
         Some of the stats provided per variable are: avg, max, min, sum, range,
         stdev, q1, q3, median and interquartile_range
+
+        Args:
+            autoformat (boolean): set automatic format for values. Default is True.
 
         Returns:
             pandas.DataFrame
@@ -317,7 +320,19 @@ class Dataset(CatalogEntity):
                 # interquartile_range
 
         """
-        return dataset_describe(self.variables)
+
+        FLOAT_FORMAT = 'display.float_format'
+
+        if autoformat:
+            current_format = pd.get_option(FLOAT_FORMAT)
+            pd.set_option(FLOAT_FORMAT, lambda x: '%.3f' % x)
+
+        output = dataset_describe(self.variables)
+
+        if autoformat:
+            pd.set_option(FLOAT_FORMAT, current_format)
+
+        return output
 
     @classmethod
     @check_do_enabled
