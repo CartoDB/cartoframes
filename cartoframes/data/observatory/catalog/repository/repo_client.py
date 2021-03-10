@@ -73,6 +73,13 @@ class RepoClient:
             entity = 'datasets/{0}/variables_groups'.format(filters.pop('dataset'))
             return self._fetch_entity(entity, filters)
 
+    def get_entities_filters(self, filters=None):
+        self.set_external_credentials()
+        if filters is not None:
+            filters['filter_catalog'] = False
+        entities = self._fetch_entity('entities', filters)
+        return {'id': [result['id'] for result in entities['results']]}
+
     def _get_filter_id(self, filters, use_slug=False):
         if isinstance(filters, dict):
             filter_id = filters.get('id')
