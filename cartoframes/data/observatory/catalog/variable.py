@@ -1,3 +1,5 @@
+import pandas as pd
+
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
@@ -101,10 +103,13 @@ class Variable(CatalogEntity):
         _, _, dataset, _ = self.id.split('.')
         return dataset
 
-    def describe(self):
+    def describe(self, autoformat=True):
         """Shows a summary of the actual stats of the variable (column) of the dataset.
         Some of the stats provided per variable are: avg, max, min, sum, range,
         stdev, q1, q3, median and interquartile_range
+
+        Args:
+            autoformat (boolean): set automatic format for values. Default is True.
 
         Example:
 
@@ -122,8 +127,19 @@ class Variable(CatalogEntity):
                 # interquartile_range
 
         """
+        FLOAT_FORMAT = 'display.float_format'
+
+        if autoformat:
+            current_format = pd.get_option(FLOAT_FORMAT)
+            pd.set_option(FLOAT_FORMAT, lambda x: '%.3f' % x)
+
         data = self.data['summary_json']
-        return variable_describe(data)
+        output = variable_describe(data)
+
+        if autoformat:
+            pd.set_option(FLOAT_FORMAT, current_format)
+
+        return output
 
     def head(self):
         """Returns a sample of the 10 first values of the variable data.

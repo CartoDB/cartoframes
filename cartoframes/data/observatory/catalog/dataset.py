@@ -320,7 +320,6 @@ class Dataset(CatalogEntity):
                 # interquartile_range
 
         """
-
         FLOAT_FORMAT = 'display.float_format'
 
         if autoformat:
