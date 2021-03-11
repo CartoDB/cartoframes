@@ -128,7 +128,7 @@ class TestSQLClient(object):
     def test_bounds(self, mocker):
         """client.SQLClient.bounds"""
         mock = mocker.patch.object(ContextManager, 'execute_query', return_value=SQL_BOUNDS_RESPONSE)
-        output = SQLClient(self.credentials).bounds('query')
+        output = SQLClient(self.credentials).bounds('table_name')
 
         assert output == [
             [-16.2500006525, 28.0999760122],
@@ -140,7 +140,7 @@ class TestSQLClient(object):
                 ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
             ] bounds FROM (
                 SELECT ST_Extent(the_geom) geom_env
-                FROM (query) q
+                FROM (SELECT the_geom FROM table_name) q
             ) q;
         '''.strip())
 
@@ -187,7 +187,7 @@ class TestSQLClient(object):
         mocker.patch.object(ContextManager, 'get_schema')
         mock = mocker.patch.object(ContextManager, 'execute_long_running_query')
         SQLClient(self.credentials).create_table(
-            'table_name', [('id', 'INT'), ('name', 'TEXT')], cartodbfy=False)
+            'table_name', ['id', 'name'], ['INT', 'TEXT'], cartodbfy=False)
 
         mock.assert_called_once_with('''
             BEGIN;
@@ -202,7 +202,7 @@ class TestSQLClient(object):
         mocker.patch.object(ContextManager, 'get_schema', return_value='user_name')
         mock = mocker.patch.object(ContextManager, 'execute_long_running_query')
         SQLClient(self.credentials).create_table(
-            'table_name', [('id', 'INT'), ('name', 'TEXT')])
+            'table_name', ['id', 'name'], ['INT', 'TEXT'])
 
         mock.assert_called_once_with('''
             BEGIN;
@@ -217,7 +217,7 @@ class TestSQLClient(object):
         mocker.patch.object(ContextManager, 'get_schema', return_value='public')
         mock = mocker.patch.object(ContextManager, 'execute_long_running_query')
         SQLClient(self.credentials).create_table(
-            'table_name', [('id', 'INT'), ('name', 'TEXT')])
+            'table_name', ['id', 'name'], ['INT', 'TEXT'])
 
         mock.assert_called_once_with('''
             BEGIN;
@@ -230,10 +230,10 @@ class TestSQLClient(object):
     def test_insert_table(self, mocker):
         """client.SQLClient.insert_table"""
         mock = mocker.patch.object(ContextManager, 'execute_long_running_query')
-        SQLClient(self.credentials).insert_table('table_name', ['id', 'name'], [0, 'a'])
+        SQLClient(self.credentials).insert_table('table_name', ['id', 'name'], [(0, 'a'), (1, 'b')])
 
         mock.assert_called_once_with('''
-            INSERT INTO table_name (id,name) VALUES(0,'a');
+            INSERT INTO table_name (id,name) VALUES (0,'a'),(1,'b');
         '''.strip())
 
     def test_update_table(self, mocker):
