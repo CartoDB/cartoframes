@@ -271,7 +271,7 @@ def _get_bounds(bounds, layers):
 def _init_layers(layers, parent_map):
     if layers is None:
         return []
-    if not isinstance(layers, collections.Iterable):
+    if not isinstance(layers, collections.abc.Iterable):
         layers.reset_ui(parent_map)
         return [layers]
     else:

@@ -55,7 +55,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
     df = context_manager.copy_to(source, schema, limit, retry_times)
 
-    gdf = GeoDataFrame(df, crs='epsg:4326')
+    gdf = GeoDataFrame(df)
 
     if index_col:
         if index_col in gdf:
@@ -65,7 +65,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
     if decode_geom and GEOM_COLUMN_NAME in gdf:
         # Decode geometry column
-        set_geometry(gdf, GEOM_COLUMN_NAME, inplace=True)
+        set_geometry(gdf, GEOM_COLUMN_NAME, inplace=True, crs='epsg:4326')
 
         if null_geom_value is not None:
             gdf[GEOM_COLUMN_NAME].fillna(null_geom_value, inplace=True)
