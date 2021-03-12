@@ -3,7 +3,7 @@ import os
 import pytest
 import pandas as pd
 
-from unittest.mock import patch, call, ANY
+from unittest.mock import patch, ANY
 from pyrestcli.exceptions import ServerErrorException
 
 from cartoframes.auth import Credentials
@@ -199,12 +199,10 @@ class TestDataset(object):
         # Then
         assert isinstance(summary, pd.Series)
 
-    @patch.object(pd, 'get_option')
     @patch.object(pd, 'set_option')
     @patch.object(VariableRepository, 'get_all')
-    def test_summary_describe(self, mocked_repo, mocked_set, mocked_get):
+    def test_summary_describe(self, mocked_repo, mocked_set):
         # Given
-        mocked_get.return_value = 'current_format'
         dataset = Dataset(db_dataset2)
 
         # When
@@ -212,11 +210,7 @@ class TestDataset(object):
 
         # Then
         assert isinstance(summary, pd.DataFrame)
-        mocked_get.assert_called_once_with('display.float_format')
-        mocked_set.assert_has_calls([
-            call('display.float_format', ANY),
-            call('display.float_format', 'current_format')
-        ])
+        mocked_set.assert_called_once_with('display.float_format', ANY)
 
     @patch.object(pd, 'set_option')
     @patch.object(VariableRepository, 'get_all')

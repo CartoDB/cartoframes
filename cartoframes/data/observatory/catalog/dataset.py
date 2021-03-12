@@ -323,15 +323,9 @@ class Dataset(CatalogEntity):
         FLOAT_FORMAT = 'display.float_format'
 
         if autoformat:
-            current_format = pd.get_option(FLOAT_FORMAT)
             pd.set_option(FLOAT_FORMAT, lambda x: '%.3f' % x)
 
-        output = dataset_describe(self.variables)
-
-        if autoformat:
-            pd.set_option(FLOAT_FORMAT, current_format)
-
-        return output
+        return dataset_describe(self.variables)
 
     @classmethod
     @check_do_enabled

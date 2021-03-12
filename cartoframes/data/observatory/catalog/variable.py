@@ -130,16 +130,10 @@ class Variable(CatalogEntity):
         FLOAT_FORMAT = 'display.float_format'
 
         if autoformat:
-            current_format = pd.get_option(FLOAT_FORMAT)
             pd.set_option(FLOAT_FORMAT, lambda x: '%.3f' % x)
 
         data = self.data['summary_json']
-        output = variable_describe(data)
-
-        if autoformat:
-            pd.set_option(FLOAT_FORMAT, current_format)
-
-        return output
+        return variable_describe(data)
 
     def head(self):
         """Returns a sample of the 10 first values of the variable data.
