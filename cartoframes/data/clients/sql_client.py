@@ -1,5 +1,7 @@
 from ...io.managers.context_manager import ContextManager
 
+COLLISION_STRATEGIES = ['fail', 'replace']
+
 
 class SQLClient:
     """SQLClient class is a client to run SQL queries in a CARTO account.
@@ -133,7 +135,7 @@ class SQLClient:
         query = 'SELECT * FROM {0} LIMIT 0;'.format(table_name)
         output = self.query(query, verbose=True)
         fields = output.get('fields')
-        if raw:
+        if raw is True:
             return {key: fields[key]['type'] for key in fields}
         else:
             columns = ['Column name', 'Column type']
@@ -151,7 +153,7 @@ class SQLClient:
             column_name (str): name of the column.
 
         Example:
-            >>> sql.schema('table_name', 'column_name')
+            >>> sql.describe('table_name', 'column_name')
             count     1.00e+03
             avg       2.00e+01
             min       0.00e+00
@@ -175,22 +177,29 @@ class SQLClient:
         self._print_table(rows, padding=[5, 10])
         print('type: {}'.format(column_type))
 
-    def create_table(self, table_name, column_names, column_types, cartodbfy=True):
+    def create_table(self, table_name, columns_types, if_exists='fail', cartodbfy=True):
         """Create a table with a specific table name and columns.
 
         Args:
             table_name (str): name of the table.
-            column_names (list of str): names of the columns.
-            column_types (list of str): types of the columns.
+            column_types (dict): dictionary with the column names and types.
+            if_exists (str, optional): collision strategy if the table already exists in CARTO.
+                Options are 'fail' or 'replace'. Default 'fail'.
             cartodbfy (bool, optional): convert the table to CARTO format.
                 Default True. More info `here
                 <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
 
         Example:
-            >>> sql.create_table('table_name', ['column1', 'column2'], ['text', 'integer'])
+            >>> sql.create_table('table_name', {'column1': 'text', 'column2': 'integer'})
 
         """
-        columns = [' '.join([name, column_types[i]]) for i, name in enumerate(column_names)]
+        if not isinstance(columns_types, dict):
+            raise ValueError('The columns_types parameter should be a dictionary of column names and types.')
+
+        if if_exists not in COLLISION_STRATEGIES:
+            raise ValueError('Please provide a valid if_exists value among {}'.format(', '.join(COLLISION_STRATEGIES)))
+
+        columns = ['{0} {1}'.format(cname, ctype) for cname, ctype in columns_types.items()]
         schema = self._context_manager.get_schema()
         query = '''
             BEGIN;
@@ -199,29 +208,28 @@ class SQLClient:
             {cartodbfy};
             COMMIT;
         '''.format(
-            drop='DROP TABLE IF EXISTS {}'.format(table_name),
+            drop='DROP TABLE IF EXISTS {}'.format(table_name) if if_exists == 'replace' else '',
             create='CREATE TABLE {0} ({1})'.format(table_name, ','.join(columns)),
             cartodbfy='SELECT CDB_CartoDBFyTable(\'{0}\', \'{1}\')'.format(
                 schema, table_name) if cartodbfy else ''
         )
         self.execute(query)
 
-    def insert_table(self, table_name, column_names, column_values):
+    def insert_table(self, table_name, columns_values):
         """Insert a row to the table.
 
         Args:
             table_name (str): name of the table.
-            column_names (list of str): names of the columns.
-            column_values (list of tuple): values of the columns.
-
+            columns_values (dict): dictionary with the column names and values.
         Example:
-            >>> sql.insert_table('table_name', ['column1', 'column2'], [('value1', 1), ('value2', 2)])
+            >>> sql.insert_table('table_name', {'column1': ['value1', 'value2'], 'column2': [1, 2]})
 
         """
-        sql_values = [self._row_values_format(row_values) for row_values in column_values]
+        cnames = columns_values.keys()
+        cvalues = [self._row_values_format(v) for v in zip(*columns_values.values())]
         query = '''
             INSERT INTO {0} ({1}) VALUES {2};
-        '''.format(table_name, ','.join(column_names), ','.join(sql_values))
+        '''.format(table_name, ','.join(cnames), ','.join(cvalues))
         self.execute(query)
 
     def update_table(self, table_name, column_name, column_value, condition):
