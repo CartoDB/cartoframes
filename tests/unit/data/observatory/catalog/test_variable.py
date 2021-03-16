@@ -1,6 +1,6 @@
 import pandas as pd
 
-from unittest.mock import patch
+from unittest.mock import patch, ANY
 
 from cartoframes.data.observatory.catalog.entity import CatalogList
 from cartoframes.data.observatory.catalog.variable import Variable
@@ -176,3 +176,27 @@ class TestVariable(object):
         assert isinstance(variable_df, pd.DataFrame)
         assert isinstance(sliced_variable, pd.Series)
         assert sliced_variable.equals(expected_variable_df)
+
+    @patch.object(pd, 'set_option')
+    @patch.object(VariableRepository, 'get_all')
+    def test_summary_describe(self, mocked_repo, mocked_set):
+        # Given
+        variable = test_variables[0]
+
+        # When
+        variable.describe()
+
+        # Then
+        mocked_set.assert_called_once_with('display.float_format', ANY)
+
+    @patch.object(pd, 'set_option')
+    @patch.object(VariableRepository, 'get_all')
+    def test_summary_describe_custom_format(self, mocked_repo, mocked_set):
+        # Given
+        variable = test_variables[0]
+
+        # When
+        variable.describe(autoformat=False)
+
+        # Then
+        mocked_set.assert_not_called()

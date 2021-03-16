@@ -147,7 +147,7 @@ db_variable2 = {
     'dataset_id': 'dataset1',
     'agg_method': '',
     'variable_group_id': 'vargroup1',
-    'summary_json': [{'key': 'value'}]
+    'summary_json': {'key': 'value', 'stats': {'v': 1.23456789}, 'quantiles': {}}
 }
 test_variable1 = Variable(db_variable1)
 test_variable2 = Variable(db_variable2)

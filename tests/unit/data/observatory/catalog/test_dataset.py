@@ -3,7 +3,7 @@ import os
 import pytest
 import pandas as pd
 
-from unittest.mock import patch
+from unittest.mock import patch, ANY
 from pyrestcli.exceptions import ServerErrorException
 
 from cartoframes.auth import Credentials
@@ -198,6 +198,32 @@ class TestDataset(object):
 
         # Then
         assert isinstance(summary, pd.Series)
+
+    @patch.object(pd, 'set_option')
+    @patch.object(VariableRepository, 'get_all')
+    def test_summary_describe(self, mocked_repo, mocked_set):
+        # Given
+        dataset = Dataset(db_dataset2)
+
+        # When
+        summary = dataset.describe()
+
+        # Then
+        assert isinstance(summary, pd.DataFrame)
+        mocked_set.assert_called_once_with('display.float_format', ANY)
+
+    @patch.object(pd, 'set_option')
+    @patch.object(VariableRepository, 'get_all')
+    def test_summary_describe_custom_format(self, mocked_repo, mocked_set):
+        # Given
+        dataset = Dataset(db_dataset2)
+
+        # When
+        summary = dataset.describe(autoformat=False)
+
+        # Then
+        assert isinstance(summary, pd.DataFrame)
+        mocked_set.assert_not_called()
 
     @patch.object(DatasetRepository, 'get_all')
     def test_get_all_datasets(self, mocked_repo):
