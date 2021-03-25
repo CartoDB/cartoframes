@@ -128,8 +128,7 @@ class Credentials:
             log.debug('Getting `user_id` for {}'.format(self._username))
 
             try:
-                user_me = self.me_data()
-                user_data = user_me.get('user_data')
+                user_data = self.me_data.get('user_data')
                 if user_data:
                     self._user_id = user_data.get('id')
 
