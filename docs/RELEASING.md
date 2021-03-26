@@ -73,9 +73,6 @@ twine upload dist/*
 Then, a docs branch must be created. This is used by the Developer Center, and it allows us to release specific versions of the documentation especially for hotfixes.
 
 ```
-git checkout -b docs/vM.m.u
-git push origin docs/vM.m.u
-
 git checkout -b docs-vM.m.u
 git push origin docs-vM.m.u
 ```

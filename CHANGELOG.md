@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [NEXT] - 2021-X-X
+## [1.2.0] - 2021-03-26
+
+### Changed
+- Filter only product entities in subscriptions (#1723)
+- Dataset describe not in scientific notation (#1722)
+- Review and improve SQLClient utilities (#1725)
+
+### Fixed
+- Fix timestamptz read carto (#1720)
+- Avoid renaming geometry if geometry name is already GEOM_COLUMN_NAME (#1726)
+- Fix user_id in metrics (#1727)
 
 ### Removed
 - Remove DataObsClient (#1721)
