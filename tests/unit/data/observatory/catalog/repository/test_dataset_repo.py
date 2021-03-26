@@ -18,10 +18,9 @@ from ..examples import test_dataset1, test_datasets, db_dataset1, db_dataset2
 class TestDatasetRepo(object):
 
     @patch.object(RepoClient, 'get_datasets')
-    def test_get_all(self, mocked_filters, mocked_repo):
+    def test_get_all(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_dataset1, db_dataset2]
-        mocked_filters.side_effect = lambda f: f
         repo = DatasetRepository()
 
         # When
@@ -34,10 +33,9 @@ class TestDatasetRepo(object):
 
     @patch.object(RepoClient, 'get_datasets')
     @patch('cartoframes.data.observatory.catalog.repository.entity_repo.get_subscription_ids')
-    def test_get_all_credentials(self, mocked_get_subscription_ids, mocked_filters, mocked_get_datasets):
+    def test_get_all_credentials(self, mocked_get_subscription_ids, mocked_get_datasets):
         # Given
         mocked_get_subscription_ids.return_value = [db_dataset1['id'], db_dataset2['id']]
-        mocked_filters.side_effect = lambda f: f
         mocked_get_datasets.return_value = [db_dataset1, db_dataset2]
         credentials = Credentials('user', '1234')
         repo = DatasetRepository()
@@ -51,10 +49,9 @@ class TestDatasetRepo(object):
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
-    def test_get_all_when_empty(self, mocked_filters, mocked_repo):
+    def test_get_all_when_empty(self, mocked_repo):
         # Given
         mocked_repo.return_value = []
-        mocked_filters.side_effect = lambda f: f
         repo = DatasetRepository()
 
         # When
@@ -65,10 +62,9 @@ class TestDatasetRepo(object):
         assert datasets == []
 
     @patch.object(RepoClient, 'get_datasets')
-    def test_get_all_only_uses_allowed_filters(self, mocked_filters, mocked_repo):
+    def test_get_all_only_uses_allowed_filters(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_dataset1, db_dataset2]
-        mocked_filters.side_effect = lambda f: f
         repo = DatasetRepository()
         filters = {
             COUNTRY_FILTER: 'usa',
@@ -94,10 +90,9 @@ class TestDatasetRepo(object):
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
-    def test_get_by_id(self, mocked_filters, mocked_repo):
+    def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_dataset1]
-        mocked_filters.side_effect = lambda f: f
         requested_id = db_dataset1['id']
         repo = DatasetRepository()
 
@@ -109,10 +104,9 @@ class TestDatasetRepo(object):
         assert dataset == test_dataset1
 
     @patch.object(RepoClient, 'get_datasets')
-    def test_get_by_id_unknown_fails(self, mocked_filters, mocked_repo):
+    def test_get_by_id_unknown_fails(self, mocked_repo):
         # Given
         mocked_repo.return_value = []
-        mocked_filters.side_effect = lambda f: f
         requested_id = 'unknown_id'
         repo = DatasetRepository()
 
@@ -121,10 +115,9 @@ class TestDatasetRepo(object):
             repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_datasets')
-    def test_get_by_slug(self, mocked_filters, mocked_repo):
+    def test_get_by_slug(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_dataset1]
-        mocked_filters.side_effect = lambda f: f
         requested_slug = db_dataset1['slug']
         repo = DatasetRepository()
 
@@ -136,10 +129,9 @@ class TestDatasetRepo(object):
         assert dataset == test_dataset1
 
     @patch.object(RepoClient, 'get_datasets')
-    def test_get_by_id_list(self, mocked_filters, mocked_repo):
+    def test_get_by_id_list(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_dataset1, db_dataset2]
-        mocked_filters.side_effect = lambda f: f
         repo = DatasetRepository()
 
         # When
@@ -151,10 +143,9 @@ class TestDatasetRepo(object):
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
-    def test_get_by_slug_list(self, mocked_filters, mocked_repo):
+    def test_get_by_slug_list(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_dataset1, db_dataset2]
-        mocked_filters.side_effect = lambda f: f
         repo = DatasetRepository()
 
         # When
@@ -166,10 +157,9 @@ class TestDatasetRepo(object):
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
-    def test_get_by_slug_and_id_list(self, mocked_filters, mocked_repo):
+    def test_get_by_slug_and_id_list(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_dataset1, db_dataset2]
-        mocked_filters.side_effect = lambda f: f
         repo = DatasetRepository()
 
         # When
@@ -181,10 +171,9 @@ class TestDatasetRepo(object):
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
-    def test_missing_fields_are_mapped_as_None(self, mocked_filters, mocked_repo):
+    def test_missing_fields_are_mapped_as_None(self, mocked_repo):
         # Given
         mocked_repo.return_value = [{'id': 'dataset1'}]
-        mocked_filters.side_effect = lambda f: f
         repo = DatasetRepository()
 
         expected_datasets = CatalogList([Dataset({

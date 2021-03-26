@@ -95,6 +95,6 @@ class RepoClient:
 
     def _fetch_entity(self, entity, filters=None):
         filters = filters or {}
-        filters['only_products'] = True  # Used in dataset/geography endpoints
+        filters['only_products'] = True
         do_dataset = self._user_do_dataset or self._external_do_dataset or self._default_do_dataset
         return do_dataset.metadata(entity, filters)
