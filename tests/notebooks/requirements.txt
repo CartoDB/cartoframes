@@ -7,3 +7,6 @@ ipywidgets==7.5.1
 matplotlib==3.3.2
 xlrd==1.2.0
 seaborn==0.11.0
+google-auth-oauthlib==0.4.3
+google-cloud-storage==1.37.0
+google-cloud-bigquery==2.13.1

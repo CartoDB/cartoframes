@@ -235,11 +235,11 @@ class TestCatalog(object):
         subscriptions = catalog.subscriptions(credentials)
 
         # Then
-        mocked_datasets.assert_called_once_with({}, credentials)
-        mocked_geographies.assert_called_once_with({}, credentials)
         assert isinstance(subscriptions, Subscriptions)
         assert subscriptions.datasets == expected_datasets
         assert subscriptions.geographies == expected_geographies
+        mocked_datasets.assert_called_once_with({'only_products': True}, credentials)
+        mocked_geographies.assert_called_once_with({'only_products': True}, credentials)
 
     @patch.object(Dataset, 'get_all')
     @patch.object(Geography, 'get_all')
@@ -258,11 +258,11 @@ class TestCatalog(object):
         subscriptions = catalog.subscriptions()
 
         # Then
-        mocked_datasets.assert_called_once_with({}, expected_credentials)
-        mocked_geographies.assert_called_once_with({}, expected_credentials)
         assert isinstance(subscriptions, Subscriptions)
         assert subscriptions.datasets == expected_datasets
         assert subscriptions.geographies == expected_geographies
+        mocked_datasets.assert_called_once_with({'only_products': True}, expected_credentials)
+        mocked_geographies.assert_called_once_with({'only_products': True}, expected_credentials)
 
     @patch.object(Dataset, 'get_all')
     @patch.object(Geography, 'get_all')

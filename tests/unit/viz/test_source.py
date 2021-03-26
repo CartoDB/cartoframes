@@ -147,7 +147,7 @@ class TestSource(object):
         source = Source(gdf)
 
         assert source.datetime_column_names == ['date_column']
-        assert source.gdf.dtypes['date_column'] == np.object
+        assert source.gdf.dtypes['date_column'] == object
 
     @pytest.mark.parametrize('features', [
         [POINT],

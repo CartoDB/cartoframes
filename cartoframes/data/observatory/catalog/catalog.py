@@ -286,13 +286,9 @@ class Catalog:
             CatalogError: if there's a problem when connecting to the catalog or no datasets are found.
 
         """
-        _no_filters = {}
         _credentials = get_credentials(credentials)
 
-        return Subscriptions(
-            Dataset.get_all(_no_filters, _credentials),
-            Geography.get_all(_no_filters, _credentials)
-        )
+        return Subscriptions(_credentials)
 
     def datasets_filter(self, filter_dataset):
         """Get all the datasets in the Catalog filtered
