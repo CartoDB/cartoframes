@@ -94,7 +94,5 @@ class RepoClient:
             return self._fetch_entity('{0}/{1}'.format(entity, filter_id))
 
     def _fetch_entity(self, entity, filters=None):
-        filters = filters or {}
-        filters['only_products'] = True
         do_dataset = self._user_do_dataset or self._external_do_dataset or self._default_do_dataset
         return do_dataset.metadata(entity, filters)

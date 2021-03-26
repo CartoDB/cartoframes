@@ -12,7 +12,6 @@ logging.basicConfig(level=logging.INFO)
 
 EXECUTE_NOTEBOOKS = []
 AVOID_NOTEBOOKS = [
-    'docs/guides/07-Data-Observatory.ipynb',
     'docs/examples/advanced_use_cases/building_a_dashboard.ipynb',
     'docs/examples/advanced_use_cases/combining_two_datasets.ipynb',
     'docs/examples/advanced_use_cases/revenue_prediction.ipynb',

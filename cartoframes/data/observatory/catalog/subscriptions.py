@@ -12,7 +12,7 @@ class Subscriptions:
     """
     def __init__(self, credentials):
         self._credentials = credentials
-        self._no_filters = {}
+        self._filters = {'only_products': True}
         self._datasets = None
         self._geographies = None
 
@@ -32,7 +32,7 @@ class Subscriptions:
         """
         if self._datasets is None:
             from .dataset import Dataset
-            self._datasets = Dataset.get_all(self._no_filters, self._credentials)
+            self._datasets = Dataset.get_all(self._filters, self._credentials)
         return self._datasets
 
     @property
@@ -45,7 +45,7 @@ class Subscriptions:
         """
         if self._geographies is None:
             from .geography import Geography
-            self._geographies = Geography.get_all(self._no_filters, self._credentials)
+            self._geographies = Geography.get_all(self._filters, self._credentials)
         return self._geographies
 
 
