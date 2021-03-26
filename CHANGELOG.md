@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2021-03-26
 
 ### Changed
-- Filter only product entities in subscriptions (#1723)
+- Filter only product entities in subscriptions (#1723, #1728)
 - Dataset describe not in scientific notation (#1722)
 - Review and improve SQLClient utilities (#1725)
 

@@ -70,6 +70,8 @@ Create the file tests/notebooks/creds.json with the following structure:
 }
 ```
 
+NOTE: we usually use the `cartoframes` user.
+
 Execute the tests
 
 ```

@@ -13,13 +13,16 @@ logging.basicConfig(level=logging.INFO)
 EXECUTE_NOTEBOOKS = []
 AVOID_NOTEBOOKS = [
     'docs/guides/07-Data-Observatory.ipynb',
-    'docs/examples/use_cases/building_a_dashboard.ipynb',
-    'docs/examples/use_cases/combining_two_datasets.ipynb',
-    'docs/examples/templates/do_access_premium_data.ipynb',
-    'docs/examples/templates/do_data_enrichment.ipynb',
-    'docs/examples/templates/do_dataset_notebook_template.ipynb',
-    'docs/examples/templates/do_geography_notebook_template.ipynb',
+    'docs/examples/advanced_use_cases/building_a_dashboard.ipynb',
+    'docs/examples/advanced_use_cases/combining_two_datasets.ipynb',
+    'docs/examples/advanced_use_cases/revenue_prediction.ipynb',
+    'docs/examples/advanced_use_cases/territory_management_1layer.ipynb',
+    'docs/examples/advanced_use_cases/territory_management_2layers.ipynb',
     'docs/examples/data_management/change_carto_table_privacy.ipynb',
+    'docs/examples/data_observatory/do_access_premium_data.ipynb',
+    'docs/examples/data_observatory/do_data_enrichment.ipynb',
+    'docs/examples/data_observatory/do_dataset_notebook_template.ipynb',
+    'docs/examples/data_observatory/do_geography_notebook_template.ipynb',
     'docs/examples/data_visualization/publish_and_share/publish_visualization_gdf.ipynb',
     'docs/examples/data_visualization/publish_and_share/publish_visualization_layout.ipynb',
     'docs/examples/data_visualization/publish_and_share/publish_visualization_private_table.ipynb',
@@ -78,7 +81,7 @@ class TestNotebooks:
 
             nb = nbformat.read(f, as_version=4)
             ep = ExecutePreprocessor(timeout=TIMEOUT, kernel_name=KERNEL, allow_errors=OVERWRITE,
-                                     store_widget_state=OVERWRITE)
+                                     store_widget_state=OVERWRITE, record_timing=False)
             ep.preprocess(nb, {'metadata': {'path': path}})
 
             if OVERWRITE:
