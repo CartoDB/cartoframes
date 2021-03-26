@@ -25,7 +25,6 @@ class DatasetRepository(EntityRepository):
 
         # Using user credentials to fetch entities
         self.client.set_user_credentials(credentials)
-        filters = self.client.get_entities_filters(filters)
         entities = self._get_filtered_entities(filters)
         self.client.reset_user_credentials()
         return entities

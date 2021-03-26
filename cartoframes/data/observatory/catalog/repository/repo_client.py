@@ -73,13 +73,6 @@ class RepoClient:
             entity = 'datasets/{0}/variables_groups'.format(filters.pop('dataset'))
             return self._fetch_entity(entity, filters)
 
-    def get_entities_filters(self, filters=None):
-        self.set_external_credentials()
-        if filters is not None:
-            filters['filter_catalog'] = False
-        entities = self._fetch_entity('entities', filters)
-        return {'id': [result['id'] for result in entities['results']]}
-
     def _get_filter_id(self, filters, use_slug=False):
         if isinstance(filters, dict):
             filter_id = filters.get('id')
@@ -101,5 +94,7 @@ class RepoClient:
             return self._fetch_entity('{0}/{1}'.format(entity, filter_id))
 
     def _fetch_entity(self, entity, filters=None):
+        filters = filters or {}
+        filters['only_products'] = True  # Used in dataset/geography endpoints
         do_dataset = self._user_do_dataset or self._external_do_dataset or self._default_do_dataset
         return do_dataset.metadata(entity, filters)

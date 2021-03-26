@@ -10,14 +10,16 @@ class Subscriptions:
     require a subscription.
 
     """
-    def __init__(self, datasets, geographies):
-        self._subscriptions_datasets = datasets
-        self._subscriptions_geographies = geographies
+    def __init__(self, credentials):
+        self._credentials = credentials
+        self._no_filters = {}
+        self._datasets = None
+        self._geographies = None
 
     def __repr__(self):
         return 'Datasets: {0}\nGeographies: {1}'.format(
-            self._subscriptions_datasets,
-            self._subscriptions_geographies
+            self.datasets,
+            self.geographies
         )
 
     @property
@@ -28,7 +30,10 @@ class Subscriptions:
             CatalogError: if there's a problem when connecting to the catalog.
 
         """
-        return self._subscriptions_datasets
+        if self._datasets is None:
+            from .dataset import Dataset
+            self._datasets = Dataset.get_all(self._no_filters, self._credentials)
+        return self._datasets
 
     @property
     def geographies(self):
@@ -38,7 +43,10 @@ class Subscriptions:
             CatalogError: if there's a problem when connecting to the catalog.
 
         """
-        return self._subscriptions_geographies
+        if self._geographies is None:
+            from .geography import Geography
+            self._geographies = Geography.get_all(self._no_filters, self._credentials)
+        return self._geographies
 
 
 def get_subscription_ids(credentials, stype=None):

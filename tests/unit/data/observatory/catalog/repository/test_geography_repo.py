@@ -18,7 +18,6 @@ from ..examples import test_geography1, test_geographies, db_geography1, db_geog
 class TestGeographyRepo(object):
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'get_entities_filters')
     def test_get_all(self, mocked_filters, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1, db_geography2]
@@ -34,7 +33,6 @@ class TestGeographyRepo(object):
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'get_entities_filters')
     @patch('cartoframes.data.observatory.catalog.repository.entity_repo.get_subscription_ids')
     def test_get_all_credentials(self, mocked_get_subscription_ids, mocked_filters, mocked_get_geographies):
         # Given
@@ -53,7 +51,6 @@ class TestGeographyRepo(object):
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'get_entities_filters')
     def test_get_all_when_empty(self, mocked_filters, mocked_repo):
         # Given
         mocked_repo.return_value = []
@@ -68,7 +65,6 @@ class TestGeographyRepo(object):
         assert geographies == []
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'get_entities_filters')
     def test_get_all_only_uses_allowed_filters(self, mocked_filters, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1, db_geography2]
@@ -97,7 +93,6 @@ class TestGeographyRepo(object):
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'get_entities_filters')
     def test_get_by_id(self, mocked_filters, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1]
@@ -114,7 +109,6 @@ class TestGeographyRepo(object):
         assert geography == test_geography1
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'get_entities_filters')
     def test_get_by_id_unknown_fails(self, mocked_filters, mocked_repo):
         # Given
         mocked_repo.return_value = []
@@ -127,7 +121,6 @@ class TestGeographyRepo(object):
             repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'get_entities_filters')
     def test_get_by_slug(self, mocked_filters, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1]
@@ -143,7 +136,6 @@ class TestGeographyRepo(object):
         assert geography == test_geography1
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'get_entities_filters')
     def test_get_by_id_list(self, mocked_filters, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1, db_geography2]
@@ -159,7 +151,6 @@ class TestGeographyRepo(object):
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'get_entities_filters')
     def test_get_by_slug_list(self, mocked_filters, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1, db_geography2]
@@ -175,7 +166,6 @@ class TestGeographyRepo(object):
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'get_entities_filters')
     def test_get_by_slug_and_id_list(self, mocked_filters, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1, db_geography2]
@@ -191,7 +181,6 @@ class TestGeographyRepo(object):
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'get_entities_filters')
     def test_get_all_with_join_filters(self, mocked_filters, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1, db_geography2]
@@ -207,7 +196,6 @@ class TestGeographyRepo(object):
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
-    @patch.object(RepoClient, 'get_entities_filters')
     def test_missing_fields_are_mapped_as_None(self, mocked_filters, mocked_repo):
         # Given
         mocked_repo.return_value = [{'id': 'geography1'}]
