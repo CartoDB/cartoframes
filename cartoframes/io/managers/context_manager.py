@@ -283,7 +283,7 @@ class ContextManager:
         query = 'BEGIN; {create}; {cartodbfy}; COMMIT;'.format(
             create=_create_table_from_columns_query(table_name, columns),
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
-        self.execute_long_running_query(query)
+        self.execute_query(query)
 
     def _truncate_table(self, table_name, schema, cartodbfy):
         log.debug('TRUNCATE table "{}"'.format(table_name))
