@@ -62,7 +62,7 @@ class TestContextManager(object):
         mocker.patch('cartoframes.io.managers.context_manager._create_auth_client')
         mocker.patch.object(ContextManager, 'has_table', return_value=False)
         mocker.patch.object(ContextManager, 'get_schema', return_value='schema')
-        mock_create_table = mocker.patch.object(ContextManager, 'execute_long_running_query')
+        mock_create_table = mocker.patch.object(ContextManager, 'execute_query')
         mock = mocker.patch.object(ContextManager, '_copy_from')
         df = DataFrame({'A': [1]})
         columns = [ColumnInfo('A', 'a', 'bigint', False)]
