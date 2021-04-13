@@ -283,14 +283,14 @@ class ContextManager:
         query = 'BEGIN; {create}; {cartodbfy}; COMMIT;'.format(
             create=_create_table_from_columns_query(table_name, columns),
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
-        self.execute_long_running_query(query)
+        self.execute_query(query)
 
     def _truncate_table(self, table_name, schema, cartodbfy):
         log.debug('TRUNCATE table "{}"'.format(table_name))
         query = 'BEGIN; {truncate}; {cartodbfy}; COMMIT;'.format(
             truncate=_truncate_table_query(table_name),
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
-        self.execute_long_running_query(query)
+        self.execute_query(query)
 
     def _truncate_and_drop_add_columns(self, table_name, schema, df_columns, table_columns, cartodbfy):
         log.debug('TRUNCATE AND DROP + ADD columns table "{}"'.format(table_name))
