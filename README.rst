@@ -4,8 +4,8 @@ CARTOframes
 
 .. image:: https://travis-ci.org/CartoDB/cartoframes.svg?branch=develop
     :target: https://travis-ci.org/CartoDB/cartoframes
-.. image:: https://img.shields.io/badge/pypi-v1.2.0-orange
-    :target: https://pypi.org/project/cartoframes/1.2.0
+.. image:: https://img.shields.io/badge/pypi-v1.2.1-orange
+    :target: https://pypi.org/project/cartoframes/1.2.1
 
 A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
 
@@ -14,11 +14,11 @@ Python data analysis workflows often rely on the de facto standards `pandas <htt
 Try it Out
 ==========
 
-* Stable (1.2.0): |stable|
+* Stable (1.2.1): |stable|
 * Latest (develop branch): |develop|
 
 .. |stable| image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.2.0?filepath=examples
+    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.2.1?filepath=examples
 
 .. |develop| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/develop?filepath=examples

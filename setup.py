@@ -95,7 +95,7 @@ setup(
     include_package_data=True,
 
     install_requires=REQUIRES,
-    extras_requires={
+    extras_require={
         'tests': EXTRAS_REQUIRES_TESTS
     },
     python_requires='>=3.5'
