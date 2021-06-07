@@ -15,7 +15,8 @@ from ... import __version__
 from ...auth.defaults import get_default_credentials
 from ...utils.logger import log
 from ...utils.geom_utils import encode_geometry_ewkb
-from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL, double_quote
+from ...utils.utils import (is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL, double_quote,
+                            create_tmp_name)
 from ...utils.columns import (get_dataframe_columns_info, get_query_columns_info, obtain_converters, date_columns_names,
                               normalize_name)
 
@@ -159,6 +160,21 @@ class ContextManager:
         output = self.execute_query(query)
         return not('notices' in output and 'does not exist' in output['notices'][0])
 
+    def _delete_function(self, function_name):
+        query = _drop_function_query(function_name)
+        self.execute_query(query)
+        return function_name
+
+    def _create_function(self, schema, statement, function_name=None, language='plpgsql'):
+        function_name = function_name or create_tmp_name(base='tmp_func')
+        query = _create_function_query(
+            schema=schema,
+            function_name=function_name,
+            statement=statement,
+            language=language)
+        self.execute_query(query)
+        return '{schema}.{function_name}'.format(schema=schema, function_name=function_name)
+
     def rename_table(self, table_name, new_table_name, if_exists='fail'):
         new_table_name = self.normalize_table_name(new_table_name)
 
@@ -294,13 +310,22 @@ class ContextManager:
 
     def _truncate_and_drop_add_columns(self, table_name, schema, df_columns, table_columns, cartodbfy):
         log.debug('TRUNCATE AND DROP + ADD columns table "{}"'.format(table_name))
-        query = '{regenerate}; BEGIN; {truncate}; {drop_columns}; {add_columns}; {cartodbfy}; COMMIT;'.format(
+        drop_columns = _drop_columns_query(table_name, table_columns)
+        add_columns = _add_columns_query(table_name, df_columns)
+
+        drop_add_columns = 'ALTER TABLE {table_name} {drop_columns},{add_columns};'.format(
+            table_name=table_name, drop_columns=drop_columns, add_columns=add_columns)
+
+        qualified_func_name = self._create_function(schema=schema, statement=drop_add_columns)
+        drop_add_func_sql = 'SELECT {qualified_func_name}()'.format(qualified_func_name=qualified_func_name)
+
+        query = '{regenerate}; BEGIN; {truncate}; {drop_add_func_sql}; {cartodbfy}; COMMIT;'.format(
             regenerate=_regenerate_table_query(table_name, schema) if self._check_regenerate_table_exists() else '',
             truncate=_truncate_table_query(table_name),
-            drop_columns=_drop_columns_query(table_name, table_columns),
-            add_columns=_add_columns_query(table_name, df_columns),
+            drop_add_func_sql=drop_add_func_sql,
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
         self.execute_long_running_query(query)
+        self._delete_function(qualified_func_name)
 
     def compute_query(self, source, schema=None):
         if is_sql_query(source):
@@ -400,26 +425,40 @@ def _drop_table_query(table_name, if_exists=True):
         table_name=table_name,
         if_exists='IF EXISTS' if if_exists else '')
 
+def _drop_function_query(function_name, params_dtypes=None, if_exists=True):
+    return 'DROP FUNCTION {if_exists} {function_name}({params_dtypes})'.format(
+        function_name=function_name,
+        if_exists='IF EXISTS' if if_exists else '',
+        params_dtypes=params_dtypes or '')
 
 def _truncate_table_query(table_name):
     return 'TRUNCATE TABLE {table_name}'.format(
         table_name=table_name)
 
+def _create_function_query(schema, function_name, statement, language):
+    function_query = '''
+        CREATE FUNCTION {schema}.{function_name}()
+        RETURNS VOID AS $$
+        BEGIN
+        {statement}
+        END;
+        $$ LANGUAGE {language}
+    '''.format(schema=schema,
+               function_name=function_name,
+               statement=statement,
+               language=language)
+    return function_query
 
 def _drop_columns_query(table_name, columns):
     columns = ['DROP COLUMN {name}'.format(name=double_quote(c.dbname))
                for c in columns if _not_reserved(c.dbname)]
-    return 'ALTER TABLE {table_name} {drop_columns}'.format(
-        table_name=table_name,
-        drop_columns=','.join(columns))
+    return ','.join(columns)
 
 
 def _add_columns_query(table_name, columns):
     columns = ['ADD COLUMN {name} {type}'.format(name=double_quote(c.dbname), type=c.dbtype)
                for c in columns if _not_reserved(c.dbname)]
-    return 'ALTER TABLE {table_name} {add_columns}'.format(
-        table_name=table_name,
-        add_columns=','.join(columns))
+    return ','.join(columns)
 
 
 def _not_reserved(column):
