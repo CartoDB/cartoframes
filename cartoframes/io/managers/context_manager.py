@@ -420,6 +420,7 @@ class ContextManager:
             log.debug('Table name normalized: "{}"'.format(norm_table_name))
         return norm_table_name
 
+
 def _drop_table_query(table_name, if_exists=True):
     return 'DROP TABLE {if_exists} {table_name}'.format(
         table_name=table_name,
