@@ -437,7 +437,7 @@ def _drop_function_query(function_name, columns_types=None, if_exists=True):
     return 'DROP FUNCTION {if_exists} {function_name}{columns_str_call}'.format(
         function_name=function_name,
         if_exists='IF EXISTS' if if_exists else '',
-        columns_str_call='({columns_str})' if columns else '')
+        columns_str_call='({columns_str})'.format(columns_str=columns_str) if columns else '')
 
 
 def _truncate_table_query(table_name):
