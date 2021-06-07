@@ -420,11 +420,11 @@ class ContextManager:
             log.debug('Table name normalized: "{}"'.format(norm_table_name))
         return norm_table_name
 
-
 def _drop_table_query(table_name, if_exists=True):
     return 'DROP TABLE {if_exists} {table_name}'.format(
         table_name=table_name,
         if_exists='IF EXISTS' if if_exists else '')
+
 
 def _drop_function_query(function_name, params_dtypes=None, if_exists=True):
     return 'DROP FUNCTION {if_exists} {function_name}({params_dtypes})'.format(
@@ -432,9 +432,11 @@ def _drop_function_query(function_name, params_dtypes=None, if_exists=True):
         if_exists='IF EXISTS' if if_exists else '',
         params_dtypes=params_dtypes or '')
 
+
 def _truncate_table_query(table_name):
     return 'TRUNCATE TABLE {table_name}'.format(
         table_name=table_name)
+
 
 def _create_function_query(schema, function_name, statement, language):
     function_query = '''
@@ -449,6 +451,7 @@ def _create_function_query(schema, function_name, statement, language):
                statement=statement,
                language=language)
     return function_query
+
 
 def _drop_columns_query(table_name, columns):
     columns = ['DROP COLUMN {name}'.format(name=double_quote(c.dbname))
