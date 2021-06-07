@@ -430,7 +430,7 @@ def _drop_table_query(table_name, if_exists=True):
 
 def _drop_function_query(function_name, columns_types=None, if_exists=True):
     if columns_types and not isinstance(columns_types, dict):
-            raise ValueError('The columns_types parameter should be a dictionary of column names and types.')
+        raise ValueError('The columns_types parameter should be a dictionary of column names and types.')
     columns_types = columns_types or {}
     columns = ['{0} {1}'.format(cname, ctype) for cname, ctype in columns_types.items()]
     columns_str = ','.join(columns)
