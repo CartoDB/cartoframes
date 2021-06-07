@@ -1,4 +1,3 @@
-import uuid
 from collections import namedtuple
 
 from ...io.managers.context_manager import ContextManager
