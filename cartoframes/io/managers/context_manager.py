@@ -167,13 +167,14 @@ class ContextManager:
 
     def _create_function(self, schema, statement, function_name=None, language='plpgsql'):
         function_name = function_name or create_tmp_name(base='tmp_func')
+        safe_schema = '"{schema}"'.format(schema=schema)
         query = _create_function_query(
-            schema=schema,
+            schema=safe_schema,
             function_name=function_name,
             statement=statement,
             language=language)
         self.execute_query(query)
-        return '{schema}.{function_name}'.format(schema=schema, function_name=function_name)
+        return '{safe_schema}.{function_name}'.format(safe_schema=safe_schema, function_name=function_name)
 
     def rename_table(self, table_name, new_table_name, if_exists='fail'):
         new_table_name = self.normalize_table_name(new_table_name)
