@@ -165,16 +165,17 @@ class ContextManager:
         self.execute_query(query)
         return function_name
 
-    def _create_function(self, schema, statement, function_name=None, language='plpgsql'):
+    def _create_function(self, schema, statement, function_name=None, columns_types=None, language='plpgsql'):
         function_name = function_name or create_tmp_name(base='tmp_func')
         safe_schema = '"{schema}"'.format(schema=schema)
-        query = _create_function_query(
+        query, qualified_func_name = _create_function_query(
             schema=safe_schema,
             function_name=function_name,
             statement=statement,
+            columns_types=columns_types or '',
             language=language)
         self.execute_query(query)
-        return '{safe_schema}.{function_name}'.format(safe_schema=safe_schema, function_name=function_name)
+        return qualified_func_name
 
     def rename_table(self, table_name, new_table_name, if_exists='fail'):
         new_table_name = self.normalize_table_name(new_table_name)
@@ -318,7 +319,7 @@ class ContextManager:
             table_name=table_name, drop_columns=drop_columns, add_columns=add_columns)
 
         qualified_func_name = self._create_function(schema=schema, statement=drop_add_columns)
-        drop_add_func_sql = 'SELECT {qualified_func_name}()'.format(qualified_func_name=qualified_func_name)
+        drop_add_func_sql = 'SELECT {qualified_func_name}'.format(qualified_func_name=qualified_func_name)
 
         query = '{regenerate}; BEGIN; {truncate}; {drop_add_func_sql}; {cartodbfy}; COMMIT;'.format(
             regenerate=_regenerate_table_query(table_name, schema) if self._check_regenerate_table_exists() else '',
@@ -427,11 +428,16 @@ def _drop_table_query(table_name, if_exists=True):
         if_exists='IF EXISTS' if if_exists else '')
 
 
-def _drop_function_query(function_name, params_dtypes=None, if_exists=True):
-    return 'DROP FUNCTION {if_exists} {function_name}({params_dtypes})'.format(
+def _drop_function_query(function_name, columns_types=None, if_exists=True):
+    if columns_types and not isinstance(columns_types, dict):
+            raise ValueError('The columns_types parameter should be a dictionary of column names and types.')
+    columns_types = columns_types or {}
+    columns = ['{0} {1}'.format(cname, ctype) for cname, ctype in columns_types.items()]
+    columns_str = ','.join(columns)
+    return 'DROP FUNCTION {if_exists} {function_name}{columns_str_call}'.format(
         function_name=function_name,
         if_exists='IF EXISTS' if if_exists else '',
-        params_dtypes=params_dtypes or '')
+        columns_str_call='({columns_str})' if columns else '')
 
 
 def _truncate_table_query(table_name):
@@ -439,9 +445,14 @@ def _truncate_table_query(table_name):
         table_name=table_name)
 
 
-def _create_function_query(schema, function_name, statement, language):
+def _create_function_query(schema, function_name, statement, columns_types, language):
+    if columns_types and not isinstance(columns_types, dict):
+        raise ValueError('The columns_types parameter should be a dictionary of column names and types.')
+    columns_types = columns_types or {}
+    columns = ['{0} {1}'.format(cname, ctype) for cname, ctype in columns_types.items()]
+    columns_str = ','.join(columns) if columns else ''
     function_query = '''
-        CREATE FUNCTION {schema}.{function_name}()
+        CREATE FUNCTION {schema}.{function_name}({columns_str})
         RETURNS VOID AS $$
         BEGIN
         {statement}
@@ -450,8 +461,11 @@ def _create_function_query(schema, function_name, statement, language):
     '''.format(schema=schema,
                function_name=function_name,
                statement=statement,
+               columns_str=columns_str,
                language=language)
-    return function_query
+    qualified_func_name = '{schema}.{function_name}({columns_str})'.format(
+            schema=schema, function_name=function_name, columns_str=columns_str)
+    return function_query, qualified_func_name
 
 
 def _drop_columns_query(table_name, columns):
