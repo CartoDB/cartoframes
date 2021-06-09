@@ -166,7 +166,8 @@ class ContextManager:
         self.execute_query(query)
         return function_name
 
-    def _create_function(self, schema, statement, function_name=None, columns_types=None, return_value='VOID', language='plpgsql'):
+    def _create_function(self, schema, statement,
+        function_name=None, columns_types=None, return_value='VOID', language='plpgsql'):
         function_name = function_name or create_tmp_name(base='tmp_func')
         safe_schema = double_quote(schema)
         query, qualified_func_name = _create_function_query(
