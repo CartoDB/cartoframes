@@ -21,6 +21,7 @@ from ...utils.columns import (get_dataframe_columns_info, get_query_columns_info
                               normalize_name)
 
 DEFAULT_RETRY_TIMES = 3
+BATCH_API_PAYLOAD_THRESHOLD = 12000
 
 
 def retry_copy(func):
@@ -167,7 +168,7 @@ class ContextManager:
 
     def _create_function(self, schema, statement, function_name=None, columns_types=None, language='plpgsql'):
         function_name = function_name or create_tmp_name(base='tmp_func')
-        safe_schema = '"{schema}"'.format(schema=schema)
+        safe_schema = double_quote(schema)
         query, qualified_func_name = _create_function_query(
             schema=safe_schema,
             function_name=function_name,
@@ -318,16 +319,33 @@ class ContextManager:
         drop_add_columns = 'ALTER TABLE {table_name} {drop_columns},{add_columns};'.format(
             table_name=table_name, drop_columns=drop_columns, add_columns=add_columns)
 
-        qualified_func_name = self._create_function(schema=schema, statement=drop_add_columns)
-        drop_add_func_sql = 'SELECT {qualified_func_name}'.format(qualified_func_name=qualified_func_name)
-
-        query = '{regenerate}; BEGIN; {truncate}; {drop_add_func_sql}; {cartodbfy}; COMMIT;'.format(
+        query = '{regenerate}; BEGIN; {truncate}; {drop_add_columns}; {cartodbfy}; COMMIT;'.format(
             regenerate=_regenerate_table_query(table_name, schema) if self._check_regenerate_table_exists() else '',
             truncate=_truncate_table_query(table_name),
-            drop_add_func_sql=drop_add_func_sql,
+            drop_add_columns=drop_add_columns,
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
+
+        if len(query) > BATCH_API_PAYLOAD_THRESHOLD:
+            qualified_func_name = self._create_function(
+                schema=schema, statement=drop_add_columns)
+            drop_add_func_sql = 'SELECT {}'.format(qualified_func_name)
+            query = '''
+                {regenerate};
+                BEGIN;
+                {truncate};
+                {drop_add_func_sql};
+                {cartodbfy};
+                {drop_function_query};
+                COMMIT;'''.format(
+                regenerate=_regenerate_table_query(
+                    table_name, schema) if self._check_regenerate_table_exists() else '',
+                truncate=_truncate_table_query(table_name),
+                drop_add_func_sql=drop_add_func_sql,
+                cartodbfy=_cartodbfy_query(
+                    table_name, schema) if cartodbfy else '',
+                drop_function_query=_drop_function_query(qualified_func_name))
+
         self.execute_long_running_query(query)
-        self._delete_function(qualified_func_name)
 
     def compute_query(self, source, schema=None):
         if is_sql_query(source):
