@@ -166,7 +166,7 @@ class ContextManager:
         self.execute_query(query)
         return function_name
 
-    def _create_function(self, schema, statement, function_name=None, columns_types=None, language='plpgsql'):
+    def _create_function(self, schema, statement, function_name=None, columns_types=None, return_value='VOID', language='plpgsql'):
         function_name = function_name or create_tmp_name(base='tmp_func')
         safe_schema = double_quote(schema)
         query, qualified_func_name = _create_function_query(
@@ -174,6 +174,7 @@ class ContextManager:
             function_name=function_name,
             statement=statement,
             columns_types=columns_types or '',
+            return_value=return_value,
             language=language)
         self.execute_query(query)
         return qualified_func_name
@@ -463,7 +464,7 @@ def _truncate_table_query(table_name):
         table_name=table_name)
 
 
-def _create_function_query(schema, function_name, statement, columns_types, language):
+def _create_function_query(schema, function_name, statement, columns_types, return_value, language):
     if columns_types and not isinstance(columns_types, dict):
         raise ValueError('The columns_types parameter should be a dictionary of column names and types.')
     columns_types = columns_types or {}
@@ -471,7 +472,7 @@ def _create_function_query(schema, function_name, statement, columns_types, lang
     columns_str = ','.join(columns) if columns else ''
     function_query = '''
         CREATE FUNCTION {schema}.{function_name}({columns_str})
-        RETURNS VOID AS $$
+        RETURNS {return_value} AS $$
         BEGIN
         {statement}
         END;
@@ -480,6 +481,7 @@ def _create_function_query(schema, function_name, statement, columns_types, lang
                function_name=function_name,
                statement=statement,
                columns_str=columns_str,
+               return_value=return_value,
                language=language)
     qualified_func_name = '{schema}.{function_name}({columns_str})'.format(
             schema=schema, function_name=function_name, columns_str=columns_str)
