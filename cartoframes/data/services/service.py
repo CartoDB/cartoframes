@@ -1,7 +1,7 @@
-import uuid
 from collections import namedtuple
 
 from ...io.managers.context_manager import ContextManager
+from ...utils.utils import create_tmp_name
 
 SERVICE_KEYS = ('hires_geocoder', 'isolines')
 QUOTA_INFO_KEYS = ('monthly_quota', 'used_quota', 'soft_limit', 'provider')
@@ -48,7 +48,7 @@ class Service:
         return self._context_manager.get_schema()
 
     def _new_temporary_table_name(self, base=None):
-        return (base or 'table') + '_' + uuid.uuid4().hex[:10]
+        return create_tmp_name(base=base or 'table')
 
     def _execute_query(self, query):
         return self._context_manager.execute_query(query)
