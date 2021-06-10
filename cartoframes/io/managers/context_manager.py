@@ -327,7 +327,9 @@ class ContextManager:
             drop_add_columns=drop_add_columns,
             cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
 
-        if len(query) > BATCH_API_PAYLOAD_THRESHOLD:
+        query_length_over_threshold = len(query) > BATCH_API_PAYLOAD_THRESHOLD
+
+        if query_length_over_threshold:
             qualified_func_name = self._create_function(
                 schema=schema, statement=drop_add_columns)
             drop_add_func_sql = 'SELECT {}'.format(qualified_func_name)
@@ -337,17 +339,18 @@ class ContextManager:
                 {truncate};
                 {drop_add_func_sql};
                 {cartodbfy};
-                {drop_function_query};
                 COMMIT;'''.format(
                 regenerate=_regenerate_table_query(
                     table_name, schema) if self._check_regenerate_table_exists() else '',
                 truncate=_truncate_table_query(table_name),
                 drop_add_func_sql=drop_add_func_sql,
                 cartodbfy=_cartodbfy_query(
-                    table_name, schema) if cartodbfy else '',
-                drop_function_query=_drop_function_query(qualified_func_name))
-
-        self.execute_long_running_query(query)
+                    table_name, schema) if cartodbfy else '')
+        try:
+            self.execute_long_running_query(query)
+        finally:
+            if query_length_over_threshold:
+                self._delete_function(qualified_func_name)
 
     def compute_query(self, source, schema=None):
         if is_sql_query(source):
