@@ -73,7 +73,7 @@ class TestContextManager(object):
 
         # Then
         mock_create_table.assert_called_once_with('''
-            BEGIN; CREATE TABLE table_name ("a" bigint); SELECT CDB_CartodbfyTable(\'schema\', \'table_name\'); COMMIT;
+            BEGIN; CREATE TABLE table_name ("a" bigint); COMMIT;
         '''.strip())
         mock.assert_called_once_with(df, 'table_name', columns, DEFAULT_RETRY_TIMES)
 
