@@ -73,7 +73,7 @@ class TestContextManager(object):
 
         # Then
         mock_create_table.assert_called_once_with('''
-            BEGIN; CREATE TABLE table_name ("a" bigint); SELECT CDB_CartodbfyTable(\'schema\', \'table_name\'); COMMIT;
+            BEGIN; CREATE TABLE table_name ("a" bigint); COMMIT;
         '''.strip())
         mock.assert_called_once_with(df, 'table_name', columns, DEFAULT_RETRY_TIMES)
 
@@ -108,7 +108,7 @@ class TestContextManager(object):
         cm.copy_from(df, 'TABLE NAME', 'replace')
 
         # Then
-        mock.assert_called_once_with('table_name', 'schema', columns, [], True)
+        mock.assert_called_once_with('table_name', 'schema', columns, [])
 
     def test_copy_from_exists_replace_truncate(self, mocker):
         # Given
@@ -124,7 +124,7 @@ class TestContextManager(object):
         cm.copy_from(df, 'TABLE NAME', 'replace')
 
         # Then
-        mock.assert_called_once_with('table_name', 'schema', True)
+        mock.assert_called_once_with('table_name', 'schema')
 
     def test_internal_copy_from(self, mocker):
         # Given
