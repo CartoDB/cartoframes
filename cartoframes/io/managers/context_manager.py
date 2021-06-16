@@ -15,11 +15,13 @@ from ... import __version__
 from ...auth.defaults import get_default_credentials
 from ...utils.logger import log
 from ...utils.geom_utils import encode_geometry_ewkb
-from ...utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL, double_quote
+from ...utils.utils import (is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL, double_quote,
+                            create_tmp_name)
 from ...utils.columns import (get_dataframe_columns_info, get_query_columns_info, obtain_converters, date_columns_names,
                               normalize_name)
 
 DEFAULT_RETRY_TIMES = 3
+BATCH_API_PAYLOAD_THRESHOLD = 12000
 
 
 def retry_copy(func):
@@ -96,11 +98,11 @@ class ContextManager:
 
                 if self._compare_columns(df_columns, table_columns):
                     # Equal columns: truncate table
-                    self._truncate_table(table_name, schema, cartodbfy)
+                    self._truncate_table(table_name, schema)
                 else:
                     # Diff columns: truncate table and drop + add columns
                     self._truncate_and_drop_add_columns(
-                        table_name, schema, df_columns, table_columns, cartodbfy)
+                        table_name, schema, df_columns, table_columns)
 
             elif if_exists == 'fail':
                 raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
@@ -108,21 +110,26 @@ class ContextManager:
                                 'if_exists="replace" to overwrite it.'.format(
                                     table_name=table_name, schema=schema))
             else:  # 'append'
-                pass
+                cartodbfy = False
         else:
-            self._create_table_from_columns(table_name, schema, df_columns, cartodbfy)
+            self._create_table_from_columns(table_name, schema, df_columns)
 
         self._copy_from(gdf, table_name, df_columns, retry_times)
+
+        if cartodbfy is True:
+            cartodbfy_query = _cartodbfy_query(table_name, schema)
+            self.execute_long_running_query(cartodbfy_query)
+
         return table_name
 
-    def create_table_from_query(self, query, table_name, if_exists, cartodbfy=True):
+    def create_table_from_query(self, query, table_name, if_exists):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
 
         if self.has_table(table_name, schema):
             if if_exists == 'replace':
                 # TODO: review logic copy_from
-                self._drop_create_table_from_query(table_name, schema, query, cartodbfy)
+                self._drop_create_table_from_query(table_name, schema, query)
             elif if_exists == 'fail':
                 raise Exception('Table "{schema}.{table_name}" already exists in your CARTO account. '
                                 'Please choose a different `table_name` or use '
@@ -131,7 +138,7 @@ class ContextManager:
             else:  # 'append'
                 pass
         else:
-            self._drop_create_table_from_query(table_name, schema, query, cartodbfy)
+            self._drop_create_table_from_query(table_name, schema, query)
 
         return table_name
 
@@ -158,6 +165,25 @@ class ContextManager:
         query = _drop_table_query(table_name)
         output = self.execute_query(query)
         return not('notices' in output and 'does not exist' in output['notices'][0])
+
+    def _delete_function(self, function_name):
+        query = _drop_function_query(function_name)
+        self.execute_query(query)
+        return function_name
+
+    def _create_function(self, schema, statement,
+                         function_name=None, columns_types=None, return_value='VOID', language='plpgsql'):
+        function_name = function_name or create_tmp_name(base='tmp_func')
+        safe_schema = double_quote(schema)
+        query, qualified_func_name = _create_function_query(
+            schema=safe_schema,
+            function_name=function_name,
+            statement=statement,
+            columns_types=columns_types or '',
+            return_value=return_value,
+            language=language)
+        self.execute_query(query)
+        return qualified_func_name
 
     def rename_table(self, table_name, new_table_name, if_exists='fail'):
         new_table_name = self.normalize_table_name(new_table_name)
@@ -270,37 +296,59 @@ class ContextManager:
 
         return a_copy == b_copy
 
-    def _drop_create_table_from_query(self, table_name, schema, query, cartodbfy):
+    def _drop_create_table_from_query(self, table_name, schema, query):
         log.debug('DROP + CREATE table "{}"'.format(table_name))
-        query = 'BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'.format(
+        query = 'BEGIN; {drop}; {create}; COMMIT;'.format(
             drop=_drop_table_query(table_name),
-            create=_create_table_from_query_query(table_name, query),
-            cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
+            create=_create_table_from_query_query(table_name, query))
         self.execute_long_running_query(query)
 
-    def _create_table_from_columns(self, table_name, schema, columns, cartodbfy):
+    def _create_table_from_columns(self, table_name, schema, columns):
         log.debug('CREATE table "{}"'.format(table_name))
-        query = 'BEGIN; {create}; {cartodbfy}; COMMIT;'.format(
-            create=_create_table_from_columns_query(table_name, columns),
-            cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
+        query = 'BEGIN; {create}; COMMIT;'.format(
+            create=_create_table_from_columns_query(table_name, columns))
         self.execute_query(query)
 
-    def _truncate_table(self, table_name, schema, cartodbfy):
+    def _truncate_table(self, table_name, schema):
         log.debug('TRUNCATE table "{}"'.format(table_name))
-        query = 'BEGIN; {truncate}; {cartodbfy}; COMMIT;'.format(
-            truncate=_truncate_table_query(table_name),
-            cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
+        query = 'BEGIN; {truncate}; COMMIT;'.format(
+            truncate=_truncate_table_query(table_name))
         self.execute_query(query)
 
-    def _truncate_and_drop_add_columns(self, table_name, schema, df_columns, table_columns, cartodbfy):
+    def _truncate_and_drop_add_columns(self, table_name, schema, df_columns, table_columns):
         log.debug('TRUNCATE AND DROP + ADD columns table "{}"'.format(table_name))
-        query = '{regenerate}; BEGIN; {truncate}; {drop_columns}; {add_columns}; {cartodbfy}; COMMIT;'.format(
+        drop_columns = _drop_columns_query(table_name, table_columns)
+        add_columns = _add_columns_query(table_name, df_columns)
+
+        drop_add_columns = 'ALTER TABLE {table_name} {drop_columns},{add_columns};'.format(
+            table_name=table_name, drop_columns=drop_columns, add_columns=add_columns)
+
+        query = '{regenerate}; BEGIN; {truncate}; {drop_add_columns}; COMMIT;'.format(
             regenerate=_regenerate_table_query(table_name, schema) if self._check_regenerate_table_exists() else '',
             truncate=_truncate_table_query(table_name),
-            drop_columns=_drop_columns_query(table_name, table_columns),
-            add_columns=_add_columns_query(table_name, df_columns),
-            cartodbfy=_cartodbfy_query(table_name, schema) if cartodbfy else '')
-        self.execute_long_running_query(query)
+            drop_add_columns=drop_add_columns)
+
+        query_length_over_threshold = len(query) > BATCH_API_PAYLOAD_THRESHOLD
+
+        if query_length_over_threshold:
+            qualified_func_name = self._create_function(
+                schema=schema, statement=drop_add_columns)
+            drop_add_func_sql = 'SELECT {}'.format(qualified_func_name)
+            query = '''
+                {regenerate};
+                BEGIN;
+                {truncate};
+                {drop_add_func_sql};
+                COMMIT;'''.format(
+                regenerate=_regenerate_table_query(
+                    table_name, schema) if self._check_regenerate_table_exists() else '',
+                truncate=_truncate_table_query(table_name),
+                drop_add_func_sql=drop_add_func_sql)
+        try:
+            self.execute_long_running_query(query)
+        finally:
+            if query_length_over_threshold:
+                self._delete_function(qualified_func_name)
 
     def compute_query(self, source, schema=None):
         if is_sql_query(source):
@@ -401,25 +449,57 @@ def _drop_table_query(table_name, if_exists=True):
         if_exists='IF EXISTS' if if_exists else '')
 
 
+def _drop_function_query(function_name, columns_types=None, if_exists=True):
+    if columns_types and not isinstance(columns_types, dict):
+        raise ValueError('The columns_types parameter should be a dictionary of column names and types.')
+    columns_types = columns_types or {}
+    columns = ['{0} {1}'.format(cname, ctype) for cname, ctype in columns_types.items()]
+    columns_str = ','.join(columns)
+    return 'DROP FUNCTION {if_exists} {function_name}{columns_str_call}'.format(
+        function_name=function_name,
+        if_exists='IF EXISTS' if if_exists else '',
+        columns_str_call='({columns_str})'.format(columns_str=columns_str) if columns else '')
+
+
 def _truncate_table_query(table_name):
     return 'TRUNCATE TABLE {table_name}'.format(
         table_name=table_name)
 
 
+def _create_function_query(schema, function_name, statement, columns_types, return_value, language):
+    if columns_types and not isinstance(columns_types, dict):
+        raise ValueError('The columns_types parameter should be a dictionary of column names and types.')
+    columns_types = columns_types or {}
+    columns = ['{0} {1}'.format(cname, ctype) for cname, ctype in columns_types.items()]
+    columns_str = ','.join(columns) if columns else ''
+    function_query = '''
+        CREATE FUNCTION {schema}.{function_name}({columns_str})
+        RETURNS {return_value} AS $$
+        BEGIN
+        {statement}
+        END;
+        $$ LANGUAGE {language}
+    '''.format(schema=schema,
+               function_name=function_name,
+               statement=statement,
+               columns_str=columns_str,
+               return_value=return_value,
+               language=language)
+    qualified_func_name = '{schema}.{function_name}({columns_str})'.format(
+            schema=schema, function_name=function_name, columns_str=columns_str)
+    return function_query, qualified_func_name
+
+
 def _drop_columns_query(table_name, columns):
     columns = ['DROP COLUMN {name}'.format(name=double_quote(c.dbname))
                for c in columns if _not_reserved(c.dbname)]
-    return 'ALTER TABLE {table_name} {drop_columns}'.format(
-        table_name=table_name,
-        drop_columns=','.join(columns))
+    return ','.join(columns)
 
 
 def _add_columns_query(table_name, columns):
     columns = ['ADD COLUMN {name} {type}'.format(name=double_quote(c.dbname), type=c.dbtype)
                for c in columns if _not_reserved(c.dbname)]
-    return 'ALTER TABLE {table_name} {add_columns}'.format(
-        table_name=table_name,
-        add_columns=','.join(columns))
+    return ','.join(columns)
 
 
 def _not_reserved(column):

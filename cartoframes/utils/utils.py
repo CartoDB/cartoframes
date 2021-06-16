@@ -401,6 +401,12 @@ def create_hash(value):
     return hashlib.md5(str(value).encode()).hexdigest()
 
 
+def create_tmp_name(base=None):
+    """Create temporary name using uuid"""
+    from uuid import uuid4
+    return (base + '_' if base else '') + uuid4().hex[:10]
+
+
 def extract_viz_columns(viz):
     """Extract columns prop('name') in viz"""
     columns = []
