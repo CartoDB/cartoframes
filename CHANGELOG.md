@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2021-06-16
+
+### Changed
+
+- Perform cartodbfication step after COPY from for performance improvement (#1735)
+- Use UDF strategy on drop-add columns to avoid Batch API payload limit (#1734)
+
 ## [1.2.1] - 2021-04-28
 
 ### Changed
