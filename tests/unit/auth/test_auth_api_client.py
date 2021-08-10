@@ -17,6 +17,7 @@ def setup_mocks(mocker):
     mocker.patch.object(ContextManager, 'get_schema')
     mocker.patch.object(ContextManager, 'get_table_names')
 
+
 def setup_mocks_failure(mocker):
     mocker.patch(
         'cartoframes.data.clients.auth_api_client._get_api_key_manager',
@@ -62,8 +63,8 @@ class TestAuthAPIClient(object):
     def test_create_api_key_name_repeated(self, mocker):
         setup_mocks_failure(mocker)
 
-        source = Source('test_table', credentials=Credentials('fakeuser'))
-        api_key_name = 'cartoframes_{}'.format(create_hash(['test_table']))
+        source = Source('fake_table', credentials=Credentials('fakeuser'))
+        api_key_name = 'cartoframes_{}'.format(create_hash(['fake_table']))
 
         auth_api_client = AuthAPIClient()
         name, token, tables = auth_api_client.create_api_key([source], name=api_key_name)

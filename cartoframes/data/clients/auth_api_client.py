@@ -17,6 +17,7 @@ class AuthAPIClient:
             will attempted to be used.
 
     """
+
     def __init__(self, credentials=None):
         credentials = credentials or get_default_credentials()
         self._api_key_manager = _get_api_key_manager(credentials)

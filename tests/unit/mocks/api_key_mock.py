@@ -1,5 +1,4 @@
 from cartoframes.utils.utils import create_hash
-from pandas.core.dtypes import api
 
 
 class APIKeyMock():
@@ -35,7 +34,7 @@ class APIKeyManagerFailureMock():
         self.token = token
 
     def create(self, name, apis, tables):
-        if(name == 'cartoframes_{}'.format(create_hash(['test_table']))):
+        if(name == 'cartoframes_{}'.format(create_hash(['fake_table']))):
             raise Exception('Validation failed: Name has already been taken')
         else:
             return APIKeyMock(name, self.token)
