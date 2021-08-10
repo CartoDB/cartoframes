@@ -1,3 +1,5 @@
+import datetime
+
 from carto.api_keys import APIKeyManager
 
 from ...auth import get_default_credentials
@@ -38,6 +40,19 @@ class AuthAPIClient:
         except Exception as e:
             if str(e) == 'Validation failed: Name has already been taken':
                 api_key = self._api_key_manager.get(name)
+                generate_new_key = False
+                granted_tables = map(lambda x: x.name, api_key.grants.tables)
+                if name == 'cartoframes_{}'.format(create_hash(tables_names)):
+                    for table_name in table_names:
+                        if generate_new_key:
+                            continue
+                        if len(api_key.grants.tables) == 0 or any(table not in granted_tables for table in table_names):
+                            generate_new_key = True
+                if(generate_new_key):
+                    new_hash_seed = table_names.copy()
+                    new_hash_seed.append(datetime.datetime.now().timestamp)
+                    name = 'cartoframes_{}'.format(create_hash(new_hash_seed))
+                    api_key = self._api_key_manager.create(name, apis, tables)
             else:
                 raise e
 
