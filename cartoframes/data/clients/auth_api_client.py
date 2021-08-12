@@ -38,6 +38,11 @@ class AuthAPIClient:
         except Exception as e:
             if str(e) == 'Validation failed: Name has already been taken':
                 api_key = self._api_key_manager.get(name)
+                granted_tables = list(map(lambda x: x.name, api_key.grants.tables))
+                if name == 'cartoframes_{}'.format(create_hash(tables_names)):
+                    if len(granted_tables) == 0 or any(table not in granted_tables for table in tables_names):
+                        api_key.delete()
+                        api_key = self._api_key_manager.create(name, apis, tables)
             else:
                 raise e
 
