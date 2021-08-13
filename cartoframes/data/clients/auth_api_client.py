@@ -30,18 +30,25 @@ class AuthAPIClient:
                 tables.append(_get_table_dict(source.schema(), table_name, permissions))
                 tables_names.append(table_name)
 
+        tables_names.sort()
+        gen_name = 'cartoframes_{}'.format(create_hash(tables_names))
+
         if name is None:
-            tables_names.sort()
-            name = 'cartoframes_{}'.format(create_hash(tables_names))
+            name = gen_name
 
         try:
+            # Try to create the API key
             api_key = self._api_key_manager.create(name, apis, tables)
         except Exception as e:
             if str(e) == 'Validation failed: Name has already been taken':
+                # If the API key already exists, use it
                 api_key = self._api_key_manager.get(name)
-                granted_tables = list(map(lambda x: x.name, api_key.grants.tables))
-                if name == 'cartoframes_{}'.format(create_hash(tables_names)):
+                if name == gen_name:
+                    # For auto-generated API key, check its grants for the tables
+                    granted_tables = list(map(lambda x: x.name, api_key.grants.tables))
                     if not granted_tables or any(table not in granted_tables for table in tables_names):
+                        # If the API key does not grant all the tables (broken API key),
+                        # delete it and create a new one with the same name
                         api_key.delete()
                         api_key = self._api_key_manager.create(name, apis, tables)
             else:
