@@ -304,12 +304,7 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
     query = 'SELECT * FROM {}'.format(table_name)
 
     context_manager = ContextManager(credentials)
-    new_table_name = context_manager.create_table_from_query(query, new_table_name, if_exists)
-
-    if cartodbfy is True:
-        schema = context_manager.get_schema()
-        cartodbfy_query = _cartodbfy_query(new_table_name, schema)
-        context_manager.execute_long_running_query(cartodbfy_query)
+    new_table_name = context_manager.create_table_from_query(query, new_table_name, if_exists, cartodbfy)
 
     if log_enabled:
         log.info('Success! Table "{0}" copied to table "{1}" correctly'.format(table_name, new_table_name))
@@ -348,12 +343,7 @@ def create_table_from_query(
             ', '.join(IF_EXISTS_OPTIONS)))
 
     context_manager = ContextManager(credentials)
-    new_table_name = context_manager.create_table_from_query(query, new_table_name, if_exists)
-
-    if cartodbfy is True:
-        schema = context_manager.get_schema()
-        cartodbfy_query = _cartodbfy_query(new_table_name, schema)
-        context_manager.execute_long_running_query(cartodbfy_query)
+    new_table_name = context_manager.create_table_from_query(query, new_table_name, if_exists, cartodbfy)
 
     if log_enabled:
         log.info('Success! Table "{0}" created correctly'.format(new_table_name))

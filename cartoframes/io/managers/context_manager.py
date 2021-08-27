@@ -122,7 +122,7 @@ class ContextManager:
 
         return table_name
 
-    def create_table_from_query(self, query, table_name, if_exists):
+    def create_table_from_query(self, query, table_name, if_exists, cartodbfy=True):
         schema = self.get_schema()
         table_name = self.normalize_table_name(table_name)
 
@@ -139,6 +139,10 @@ class ContextManager:
                 pass
         else:
             self._drop_create_table_from_query(table_name, schema, query)
+
+        if cartodbfy is True:
+            cartodbfy_query = _cartodbfy_query(table_name, schema)
+            self.execute_long_running_query(cartodbfy_query)
 
         return table_name
 
