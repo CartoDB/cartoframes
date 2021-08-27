@@ -6,7 +6,7 @@ from geopandas import GeoDataFrame
 
 from carto.exceptions import CartoException
 
-from .managers.context_manager import ContextManager, _compute_copy_data, get_dataframe_columns_info
+from .managers.context_manager import ContextManager, _compute_copy_data, get_dataframe_columns_info, _cartodbfy_query
 from ..utils.geom_utils import is_reprojection_needed, reproject, has_geometry, set_geometry
 from ..utils.logger import log
 from ..utils.utils import is_valid_str, is_sql_query
@@ -275,7 +275,7 @@ def rename_table(table_name, new_table_name, credentials=None, if_exists='fail',
         log.info('Success! Table "{0}" renamed to table "{1}" correctly'.format(table_name, new_table_name))
 
 
-def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
+def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', log_enabled=True, cartodbfy=True):
     """Copy a table into a new table in the CARTO account.
 
     Args:
@@ -285,7 +285,8 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
             instance of Credentials (username, api_key, etc).
         if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
         log_enabled (bool, optional): enable the logging mechanism. Default is True.
-
+        cartodbfy (bool, optional): convert the table to CARTO format. Default True. More info
+            `here <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
     Raises:
         ValueError: if the table names provided are wrong or the if_exists param is not valid.
 
@@ -305,11 +306,22 @@ def copy_table(table_name, new_table_name, credentials=None, if_exists='fail', l
     context_manager = ContextManager(credentials)
     new_table_name = context_manager.create_table_from_query(query, new_table_name, if_exists)
 
+    if cartodbfy is True:
+        schema = context_manager.get_schema()
+        cartodbfy_query = _cartodbfy_query(new_table_name, schema)
+        context_manager.execute_long_running_query(cartodbfy_query)
+
     if log_enabled:
         log.info('Success! Table "{0}" copied to table "{1}" correctly'.format(table_name, new_table_name))
 
 
-def create_table_from_query(query, new_table_name, credentials=None, if_exists='fail', log_enabled=True):
+def create_table_from_query(
+        query,
+        new_table_name,
+        credentials=None,
+        if_exists='fail',
+        log_enabled=True,
+        cartodbfy=True):
     """Create a new table from an SQL query in the CARTO account.
 
     Args:
@@ -319,7 +331,8 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
             instance of Credentials (username, api_key, etc).
         if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
         log_enabled (bool, optional): enable the logging mechanism. Default is True.
-
+        cartodbfy (bool, optional): convert the table to CARTO format. Default True. More info
+            `here <https://carto.com/developers/sql-api/guides/creating-tables/#create-tables>`.
     Raises:
         ValueError: if the query or table name provided is wrong or the if_exists param is not valid.
 
@@ -336,6 +349,11 @@ def create_table_from_query(query, new_table_name, credentials=None, if_exists='
 
     context_manager = ContextManager(credentials)
     new_table_name = context_manager.create_table_from_query(query, new_table_name, if_exists)
+
+    if cartodbfy is True:
+        schema = context_manager.get_schema()
+        cartodbfy_query = _cartodbfy_query(new_table_name, schema)
+        context_manager.execute_long_running_query(cartodbfy_query)
 
     if log_enabled:
         log.info('Success! Table "{0}" created correctly'.format(new_table_name))
