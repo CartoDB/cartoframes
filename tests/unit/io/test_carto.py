@@ -521,6 +521,7 @@ def test_copy_table_cartodbfy(mocker):
     # Then
     assert cm_mock.call_args[0][3] is True
 
+
 def test_create_table_from_query_wrong_query(mocker):
     # When
     with pytest.raises(ValueError) as e:
