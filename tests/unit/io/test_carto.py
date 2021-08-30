@@ -522,6 +522,17 @@ def test_copy_table_cartodbfy(mocker):
     assert cm_mock.call_args[0][3] is True
 
 
+def test_copy_table_cartodbfy_default(mocker):
+    # Given
+    cm_mock = mocker.patch.object(ContextManager, 'create_table_from_query')
+
+    # When
+    copy_table('__table_name__', '__new_table_name__', CREDENTIALS)
+
+    # Then
+    assert cm_mock.call_args[0][3] is True
+
+
 def test_create_table_from_query_wrong_query(mocker):
     # When
     with pytest.raises(ValueError) as e:
@@ -576,6 +587,17 @@ def test_create_table_from_query_cartodbfy(mocker):
 
     # When
     create_table_from_query('SELECT * FROM table', '__new_table_name__', CREDENTIALS, cartodbfy=True)
+
+    # Then
+    assert cm_mock.call_args[0][3] is True
+
+
+def test_create_table_from_query_cartodbfy_default(mocker):
+    # Given
+    cm_mock = mocker.patch.object(ContextManager, 'create_table_from_query')
+
+    # When
+    create_table_from_query('SELECT * FROM table', '__new_table_name__', CREDENTIALS)
 
     # Then
     assert cm_mock.call_args[0][3] is True

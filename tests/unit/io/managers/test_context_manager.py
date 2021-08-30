@@ -291,3 +291,16 @@ class TestContextManager(object):
 
         # Then
         mock.assert_called_with("SELECT CDB_CartodbfyTable('schema', '__new_table_name__')")
+
+    def test_create_table_from_query_cartodbfy_default(self, mocker):
+        # Given
+        mocker.patch.object(ContextManager, 'has_table', return_value=False)
+        mocker.patch.object(ContextManager, 'get_schema', return_value='schema')
+        mock = mocker.patch.object(ContextManager, 'execute_long_running_query')
+
+        # When
+        cm = ContextManager(self.credentials)
+        cm.create_table_from_query('SELECT * FROM table_name', '__new_table_name__', if_exists='fail')
+
+        # Then
+        mock.assert_called_with("SELECT CDB_CartodbfyTable('schema', '__new_table_name__')")
