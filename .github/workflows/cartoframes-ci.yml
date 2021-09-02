@@ -1,4 +1,4 @@
-name: Run CARTOFrames tests
+name: CI
 
 on:
   push:
