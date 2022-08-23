@@ -1,7 +1,7 @@
 notebook==6.4.1
 pytest==6.1.1
 pytest-mock==3.3.1
-nbconvert==6.0.7
+nbconvert==6.5.1
 ipykernel==5.3.4
 ipywidgets==7.5.1
 matplotlib==3.3.2
