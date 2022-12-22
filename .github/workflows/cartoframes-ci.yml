@@ -26,16 +26,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - run: echo "Installing dependencies"
-    - name: Install dependencies (pip)
-      run: python -m pip install --upgrade pip
-    - name: Install dependencies (pandas)
-      run: pip install pandas
-    - name: Install dependencies (tox)
-      run: pip install tox
-    - name: Install dependencies (tox-gh-actions)
-      run: pip install tox-gh-actions
-    - run: echo "Dependencies installed"
+    - name: Install dependencies
+      run: |
+          python -m pip install --upgrade pip
+          pip install tox
+          pip install tox-gh-actions
+
     - name: Test with tox
       run: |
         tox

@@ -500,8 +500,9 @@ class Dataset(CatalogEntity):
 
     @check_do_enabled
     def subscription_info(self, credentials=None):
-        """Get the subscription information of a Dataset, which includes the license, Terms of Service, rights, price, and
-        estimated time of delivery, among other metadata of interest during the :py:attr:`Dataset.subscription` process.
+        """Get the subscription information of a Dataset, which includes the license, Terms of Service, rights, price,
+        and estimated time of delivery, among other metadata of interest during the :py:attr:`Dataset.subscription`
+        process.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
