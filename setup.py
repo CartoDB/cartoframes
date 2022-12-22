@@ -27,9 +27,9 @@ REQUIRES = [
     'appdirs>=1.4.3,<2.0',
     'carto>=1.11.3,<2.0',
     'jinja2>=2.10.1,<3.0',
-    'pandas>=0.25.0,<=1.3.2',
-    'shapely>=1.7,<=1.8.4',
-    'geopandas>=0.6.0,<=0.9.0',
+    'pandas>=0.25.0',
+    'shapely>=1.7,<=1.7.1',
+    'geopandas>=0.6.0,<1.0',
     'unidecode>=1.1.0,<2.0',
     'semantic_version>=2.8.0,<3'
 ]
