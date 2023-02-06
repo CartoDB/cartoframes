@@ -1,5 +1,5 @@
 init:
-	pip install -e .
+	pip install -e .[tests]
 
 test:
 	pytest tests/unit/
