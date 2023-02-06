@@ -29,7 +29,6 @@ REQUIRES = [
     'markupsafe<=2.0.1',
     'jinja2>=2.10.1,<3.0',
     'pandas>=0.25.0',
-    'shapely>=1.7,<2.0',
     'geopandas>=0.6.0,<1.0',
     'unidecode>=1.1.0,<2.0',
     'semantic_version>=2.8.0,<3'

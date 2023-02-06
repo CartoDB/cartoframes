@@ -1,5 +1,9 @@
 init:
+	pip install -U pip
 	pip install -e .[tests]
+
+lint:
+	flake8 cartoframes tests
 
 test:
 	pytest tests/unit/
