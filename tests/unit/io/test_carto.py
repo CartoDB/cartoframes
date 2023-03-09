@@ -5,7 +5,6 @@ import random
 from pandas import Index
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
-from shapely.geometry.base import BaseGeometry
 from shapely import wkt
 
 from carto.exceptions import CartoException
@@ -83,17 +82,18 @@ def test_read_carto_basegeometry_as_null_geom_value(mocker):
     })
 
     # When
-    gdf = read_carto('__source__', CREDENTIALS, null_geom_value=BaseGeometry())
+    gdf = read_carto('__source__', CREDENTIALS, null_geom_value=None)
 
     # Then
     expected = GeoDataFrame({
         'cartodb_id': [1],
         'the_geom': [
-            BaseGeometry()
+            None
         ]
     }, geometry='the_geom')
 
     cm_mock.assert_called_once_with('__source__', None, None, 3)
+    print(expected, gdf)
     assert expected.equals(gdf)
     assert gdf.crs == 'epsg:4326'
 

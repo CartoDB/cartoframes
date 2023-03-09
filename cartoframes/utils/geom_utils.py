@@ -218,7 +218,7 @@ def _load_ewkt(egeom):
     srid, geom = _extract_srid(egeom)
     ogeom = _load_wkt(geom)
     if srid:
-        shapely.geos.lgeos.GEOSSetSRID(ogeom._geom, int(srid))
+        ogeom = set_srid(ogeom, int(srid))
     return ogeom
 
 
@@ -241,7 +241,7 @@ def encode_geometry_ewkt(geom, srid=4326):
 
 def encode_geometry_ewkb(geom, srid=4326):
     if isinstance(geom, shapely.geometry.base.BaseGeometry):
-        shapely.geos.lgeos.GEOSSetSRID(geom._geom, srid)
+        geom = set_srid(geom, srid)
         return shapely.wkb.dumps(geom, hex=True, include_srid=True)
 
 
@@ -272,3 +272,18 @@ def get_crs(gdf):
         return gdf.crs['init']
     else:
         return str(gdf.crs)
+
+
+def get_srid(geom):
+    if shapely.__version__ < '2.0':
+        return shapely.geos.lgeos.GEOSGetSRID(geom._geom)
+    else:
+        return shapely.get_srid(geom)
+
+
+def set_srid(geom, srid):
+    if shapely.__version__ < '2.0':
+        shapely.geos.lgeos.GEOSSetSRID(geom._geom, int(srid))
+        return geom
+    else:
+        return shapely.set_srid(geom, int(srid))

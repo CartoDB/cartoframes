@@ -168,7 +168,7 @@ class ContextManager:
     def delete_table(self, table_name):
         query = _drop_table_query(table_name)
         output = self.execute_query(query)
-        return not('notices' in output and 'does not exist' in output['notices'][0])
+        return not ('notices' in output and 'does not exist' in output['notices'][0])
 
     def _delete_function(self, function_name):
         query = _drop_function_query(function_name)
