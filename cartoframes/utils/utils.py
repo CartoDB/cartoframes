@@ -549,7 +549,7 @@ def get_parameter_from_decorator(parameter_name, decorated_function, *args, **kw
         parameter = kwargs[parameter_name]
     except KeyError:
         try:
-            parameter_args = inspect.getargspec(decorated_function).args
+            parameter_args = inspect.getfullargspec(decorated_function).args
             if parameter_name in parameter_args:
                 parameter_arg_index = parameter_args.index(parameter_name)
                 parameter = args[parameter_arg_index]
