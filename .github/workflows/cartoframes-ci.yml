@@ -13,9 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-24.04
             python-version: 3.5
-          - os: ubuntu-20.04
+          - os: ubuntu-24.04
             python-version: 3.6
           - os: ubuntu-latest
             python-version: 3.7
